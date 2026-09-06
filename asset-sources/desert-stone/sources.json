@@ -1,0 +1,56 @@
+[
+  {
+    "asset": "sandstone_cracks",
+    "source": "https://polyhaven.com/a/sandstone_cracks",
+    "license": "CC0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandstone_cracks/sandstone_cracks_diff_2k.jpg",
+    "file": "public/assets/textures/sandstone-color.jpg",
+    "bytes": 2870078,
+    "sha256": "6d3f99604c85a818277150db784ac66e67a4d91ddc255dabf61b3e956564090d"
+  },
+  {
+    "asset": "sandstone_cracks",
+    "source": "https://polyhaven.com/a/sandstone_cracks",
+    "license": "CC0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandstone_cracks/sandstone_cracks_nor_gl_2k.jpg",
+    "file": "public/assets/textures/sandstone-normal.jpg",
+    "bytes": 4545235,
+    "sha256": "904e852268e1fb1bd5c0d035382f6a0e64c98dceea784fe957b1983d98b0231a"
+  },
+  {
+    "asset": "sandstone_cracks",
+    "source": "https://polyhaven.com/a/sandstone_cracks",
+    "license": "CC0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandstone_cracks/sandstone_cracks_rough_2k.jpg",
+    "file": "public/assets/textures/sandstone-roughness.jpg",
+    "bytes": 1569280,
+    "sha256": "45347870225f1f1b223968e8fc0ac2125374c0b1e0907cda7ad93b1c5dda39f4"
+  },
+  {
+    "asset": "sandstone_blocks_08",
+    "source": "https://polyhaven.com/a/sandstone_blocks_08",
+    "license": "CC0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandstone_blocks_08/sandstone_blocks_08_diff_2k.jpg",
+    "file": "public/assets/textures/sandstone-wall-color.jpg",
+    "bytes": 1129500,
+    "sha256": "da2f453c7c3683f5b01ca8b365ccf81ebce488afab7661adecd83208fc9aec97"
+  },
+  {
+    "asset": "sandstone_blocks_08",
+    "source": "https://polyhaven.com/a/sandstone_blocks_08",
+    "license": "CC0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandstone_blocks_08/sandstone_blocks_08_nor_gl_2k.jpg",
+    "file": "public/assets/textures/sandstone-wall-normal.jpg",
+    "bytes": 954422,
+    "sha256": "735f205de2d44f2e7edddf22d6b7dca5cd2ace000f3f637546302508dd9616c2"
+  },
+  {
+    "asset": "sandstone_blocks_08",
+    "source": "https://polyhaven.com/a/sandstone_blocks_08",
+    "license": "CC0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandstone_blocks_08/sandstone_blocks_08_rough_2k.jpg",
+    "file": "public/assets/textures/sandstone-wall-roughness.jpg",
+    "bytes": 877815,
+    "sha256": "676d9f00b54f303dc19856123312110be3859066661b224dececc3bc857c8f21"
+  }
+]

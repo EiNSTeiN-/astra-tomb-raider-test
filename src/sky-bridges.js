@@ -1,0 +1,396 @@
+import * as THREE from "three";
+import { pbrMaterial, mergeArchitecture } from "./visuals.js";
+import {
+  bridgeDeployed,
+  bridgeDeckY,
+  bridgeHasGap,
+  spanCoordinates,
+  skyDeckAt,
+} from "./sky-bridge-rules.js";
+
+export function buildSkyBridges(game) {
+  game.skyBridges = [];
+  game.skyBridgeSources = [];
+  game.skyTether = null;
+  if (game.level.biome !== "sky") return;
+  const wood = pbrMaterial("monastery-wood", 0xb8a286),
+    rope = pbrMaterial("bark", 0xaca085);
+  wood.normalScale.set(0.42, 0.42);
+  rope.normalScale.set(0.35, 0.35);
+  const stone = game.stoneMat,
+    trim = game.goldMat;
+  for (const plan of game.terrainProfile.bridges) {
+    const c = spanCoordinates(plan, plan.bx, plan.bz),
+      yaw = Math.atan2(c.ux, c.uz);
+    const root = new THREE.Group(),
+      detail = new THREE.Group();
+    root.name = plan.id;
+    root.position.set(plan.ax, plan.ay, plan.az);
+    root.rotation.y = yaw;
+    detail.position.copy(root.position);
+    detail.rotation.y = yaw;
+    game.world.add(root, detail);
+    const bridge = {
+      ...plan,
+      root,
+      detail,
+      open: Number(bridgeDeployed(game.progress, plan)),
+      halves: [],
+      lastBank: "a",
+    };
+    const add = (
+      geometry,
+      material,
+      x,
+      y,
+      z,
+      parent = root,
+      capture = false,
+    ) => {
+      const m = new THREE.Mesh(geometry, material);
+      m.position.set(x, y, z);
+      m.castShadow = m.receiveShadow = true;
+      parent.add(m);
+      if (capture) game.cameraSurfaces?.capture(m);
+      return m;
+    };
+    const box = (w, h, d, material, x, y, z, parent = root, capture = false) =>
+      add(new THREE.BoxGeometry(w, h, d), material, x, y, z, parent, capture);
+    for (const [end, sign] of [
+      [0, 1],
+      [c.length, -1],
+    ]) {
+      const bankY = end ? plan.by - plan.ay : 0;
+      for (const side of [-1, 1]) {
+        const x = side * 3.05,
+          z = end - sign * 1.5;
+        const worldX = plan.ax + c.uz * x + c.ux * z,
+          worldZ = plan.az - c.ux * x + c.uz * z;
+        const low = game.groundHeight(worldX, worldZ) - plan.ay;
+        box(
+          1.4,
+          bankY + 6 - low,
+          1.8,
+          stone,
+          x,
+          (low + bankY + 6) / 2,
+          z,
+          root,
+          true,
+        );
+        box(1.7, 0.3, 2.1, trim, x, bankY + 6, z, detail);
+        const drum = add(
+          new THREE.CylinderGeometry(0.62, 0.62, 0.8, 16),
+          wood,
+          x,
+          bankY + 4.8,
+          z + sign * 0.7,
+          detail,
+        );
+        drum.rotation.z = Math.PI / 2;
+        game.obstacles.push({
+          x: worldX,
+          z: worldZ,
+          w: 0.8,
+          d: 1,
+          h: bankY + 6 - low,
+          skyAnchor: true,
+        });
+      }
+      box(7.5, 0.5, 0.7, stone, 0, bankY + 6, end - sign * 1.5, root, true);
+    }
+    // Each half folds up from a bank. A pair of anchored suspension cables
+    // remains visible above the lowered boards once the associated winch is set.
+    for (const side of [-1, 1]) {
+      const curve = new THREE.CatmullRomCurve3(
+        Array.from({ length: 33 }, (_, i) => {
+          const s = (i / 32) * c.length;
+          return new THREE.Vector3(
+            side * 2.55,
+            bridgeDeckY(bridge, s) -
+              plan.ay +
+              1.5 +
+              4.2 * Math.pow(Math.abs(i / 16 - 1), 2),
+            s,
+          );
+        }),
+      );
+      add(new THREE.TubeGeometry(curve, 64, 0.065, 6, false), rope, 0, 0, 0);
+      const handlinePoints = [
+        new THREE.Vector3(side * 2.55, 1.5, -1.5),
+        ...Array.from(
+          { length: 33 },
+          (_, i) =>
+            new THREE.Vector3(
+              side * 2.55,
+              bridgeDeckY(bridge, (i / 32) * c.length) - plan.ay + 1.5,
+              (i / 32) * c.length,
+            ),
+        ),
+        new THREE.Vector3(side * 2.55, plan.by - plan.ay + 1.5, c.length + 1.5),
+      ];
+      add(
+        new THREE.TubeGeometry(
+          new THREE.CatmullRomCurve3(handlinePoints),
+          64,
+          0.04,
+          5,
+          false,
+        ),
+        rope,
+        0,
+        0,
+        0,
+      );
+      for (let s = 1.5; s < c.length; s += 2.8) {
+        const floor = bridgeDeckY(bridge, s) - plan.ay,
+          top =
+            floor + 1.5 + 4.2 * Math.pow(Math.abs((s / c.length) * 2 - 1), 2);
+        add(
+          new THREE.CylinderGeometry(0.027, 0.027, top - floor, 5),
+          rope,
+          side * 2.55,
+          (floor + top) / 2,
+          s,
+          detail,
+        );
+      }
+    }
+    for (let half = 0; half < 2; half++) {
+      const pivot = new THREE.Group();
+      pivot.userData.cameraDynamic = true;
+      pivot.rotation.order = "YXZ";
+      pivot.position.set(0, half ? plan.by - plan.ay : 0, half ? c.length : 0);
+      pivot.rotation.y = half ? Math.PI : 0;
+      root.add(pivot);
+      bridge.halves.push(pivot);
+      const count = Math.ceil(c.length / 0.8),
+        step = c.length / count;
+      for (let index = 0; index < count; index++) {
+        const s = (index + 0.5) * step;
+        if (Number(s >= c.length / 2) !== half || bridgeHasGap(bridge, s))
+          continue;
+        const local = half ? c.length - s : s,
+          y = bridgeDeckY(bridge, s) - (half ? plan.by : plan.ay);
+        const plank = box(
+          plan.width,
+          0.19,
+          step * 0.95,
+          wood,
+          0,
+          y - 0.095,
+          local,
+          pivot,
+        );
+        const slope =
+          (bridgeDeckY(bridge, s + 0.05) - bridgeDeckY(bridge, s - 0.05)) / 0.1;
+        plank.rotation.x = (half ? 1 : -1) * Math.atan(slope);
+        game.cameraSurfaces?.capture(plank);
+        // Bleached end caps make intentional missing sections legible in motion.
+        if (
+          bridge.gaps.some(
+            (g) =>
+              Math.abs(s - g.start) < step * 1.5 ||
+              Math.abs(s - g.end) < step * 1.5,
+          )
+        )
+          box(plan.width, 0.025, 0.07, trim, 0, y + 0.017, local, pivot);
+      }
+      mergeArchitecture(pivot);
+    }
+    mergeArchitecture(root);
+    mergeArchitecture(detail);
+    const middle = c.length / 2;
+    game.skyBridgeSources.push({
+      id: `${plan.id}-wind`,
+      kind: "wind",
+      x: (plan.ax + plan.bx) / 2,
+      y: bridgeDeckY(bridge, middle) + 2,
+      z: (plan.az + plan.bz) / 2,
+      gain: 0.32,
+      range: 55,
+      near: 3,
+    });
+    game.skyBridgeSources.push({
+      id: `${plan.id}-rope`,
+      kind: "rope",
+      x: (plan.ax + plan.bx) / 2,
+      y: bridgeDeckY(bridge, middle) + 1,
+      z: (plan.az + plan.bz) / 2,
+      gain: 0.18,
+      range: 25,
+      near: 3,
+      skyBridge: plan.id,
+      activity: bridge.open,
+    });
+    game.skyBridges.push(bridge);
+    poseBridge(bridge);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(new Float32Array(33 * 3), 3),
+  );
+  const tether = new THREE.Line(
+    geometry,
+    new THREE.LineBasicMaterial({
+      color: 0xc8b481,
+      transparent: true,
+      opacity: 0.85,
+    }),
+  );
+  tether.frustumCulled = false;
+  tether.visible = false;
+  game.world.add(tether);
+  game.skyTether = tether;
+}
+
+function poseBridge(bridge) {
+  for (const pivot of bridge.halves)
+    pivot.rotation.x = -(1 - bridge.open) * Math.PI * 0.47;
+}
+
+export function updateSkyBridges(game, dt) {
+  if (!game.skyBridges?.length) return;
+  let tether = null;
+  for (const bridge of game.skyBridges) {
+    const target = Number(bridgeDeployed(game.progress, bridge));
+    bridge.open = THREE.MathUtils.damp(bridge.open, target, 1.7, dt);
+    if (Math.abs(bridge.open - target) < 0.001) bridge.open = target;
+    poseBridge(bridge);
+    const p = spanCoordinates(
+      bridge,
+      game.player.position.x,
+      game.player.position.z,
+    );
+    bridge.activity =
+      0.18 +
+      0.18 * (0.5 + 0.5 * Math.sin(game.elapsed * 0.8 + bridge.stage)) +
+      (bridge.open > 0 && bridge.open < 1 ? 0.6 : 0) +
+      (p.along >= 0 &&
+      p.along <= p.length &&
+      Math.abs(p.across) < bridge.width / 2
+        ? 0.5
+        : 0);
+    bridge.detail.visible = Math.hypot(p.along - p.length / 2, p.across) < 85;
+    if (Math.abs(p.across) < 5 && p.along >= -3 && p.along <= p.length + 3) {
+      if (p.along < 1.5 && game.grounded) bridge.lastBank = "a";
+      if (p.along > p.length - 1.5 && game.grounded) bridge.lastBank = "b";
+      if (
+        p.along >= 0 &&
+        p.along <= p.length &&
+        game.player.position.y > bridgeDeckY(bridge, p.along) - 6
+      )
+        tether = bridge;
+    }
+  }
+  game.skyTether.visible = !!tether;
+  if (tether) {
+    const end = tether.lastBank === "b",
+      p = spanCoordinates(tether, tether.bx, tether.bz);
+    const a = new THREE.Vector3(
+      end ? tether.bx : tether.ax,
+      (end ? tether.by : tether.ay) + 1.5,
+      end ? tether.bz : tether.az,
+    );
+    a.x += p.uz * 2.55;
+    a.z -= p.ux * 2.55;
+    const b = game.player.position.clone().add(new THREE.Vector3(0, 1, 0));
+    const points = game.skyTether.geometry.attributes.position;
+    for (let i = 0; i < points.count; i++) {
+      const t = i / (points.count - 1),
+        v = a.clone().lerp(b, t);
+      v.y -= Math.sin(Math.PI * t) * 0.65;
+      points.setXYZ(i, v.x, v.y, v.z);
+    }
+    points.needsUpdate = true;
+  }
+}
+
+export function recoverSkyBridgeFall(game) {
+  for (const bridge of game.skyBridges || []) {
+    const p = spanCoordinates(
+      bridge,
+      game.player.position.x,
+      game.player.position.z,
+    );
+    if (
+      p.along < 0 ||
+      p.along > p.length ||
+      Math.abs(p.across) > 7 ||
+      game.player.position.y >= bridgeDeckY(bridge, p.along) - 5.5
+    )
+      continue;
+    const end = bridge.lastBank === "b",
+      sign = end ? 1 : -1;
+    const x = (end ? bridge.bx : bridge.ax) + p.ux * sign * 3,
+      z = (end ? bridge.bz : bridge.az) + p.uz * sign * 3;
+    game.player.position.set(x, game.groundHeight(x, z), z);
+    game.jumpY = 0;
+    game.velocityY = 0;
+    game.grounded = true;
+    game.airVelocity = null;
+    game.fallPeak = game.player.position.y;
+    game.motionLanding = null;
+    game.stamina = Math.max(25, game.stamina - 12);
+    game.audio.noiseHit?.(0.025, 0.3, 750, game.player.position);
+    game.cb.toast?.(
+      "Your safety tether caught you. Resume from the last bridge anchor.",
+      4000,
+    );
+    return true;
+  }
+  return false;
+}
+
+export function restoreSkyBridgeArrival(game) {
+  const player = game.player.position;
+  for (const bridge of game.skyBridges || []) {
+    const p = spanCoordinates(bridge, player.x, player.z);
+    if (p.along < 0 || p.along > p.length || Math.abs(p.across) > 4.5) continue;
+    bridge.lastBank = p.along > p.length / 2 ? "b" : "a";
+    const floor = skyDeckAt(game, player.x, player.z);
+    if (floor && Math.abs(player.y - floor.height) < 0.25) return;
+    // A save made during a jump or a fall resumes at a secure bank; never load
+    // below the deck, or place a player in midair above missing boards.
+    const end = bridge.lastBank === "b",
+      sign = end ? 1 : -1;
+    const x = (end ? bridge.bx : bridge.ax) + p.ux * sign * 3,
+      z = (end ? bridge.bz : bridge.az) + p.uz * sign * 3;
+    player.set(x, game.groundHeight(x, z), z);
+    game.jumpY = 0;
+    game.velocityY = 0;
+    game.grounded = true;
+    game.fallPeak = player.y;
+    return;
+  }
+}
+
+export function skyBridgeHint(game) {
+  for (const bridge of game.skyBridges || []) {
+    const p = spanCoordinates(
+      bridge,
+      game.player.position.x,
+      game.player.position.z,
+    );
+    if (Math.abs(p.across) > 4 || p.along < -3 || p.along > p.length + 3)
+      continue;
+    if (bridge.open < 0.995)
+      return {
+        key: "",
+        label: bridgeDeployed(game.progress, bridge)
+          ? "The crossing is unfolding"
+          : "Restore the marked anchor to lower this crossing",
+      };
+    const gap = bridge.gaps.find(
+      (g) =>
+        Math.min(Math.abs(p.along - g.start), Math.abs(p.along - g.end)) < 4,
+    );
+    if (gap)
+      return {
+        key: "Space",
+        label: "Jump the missing boards · your safety tether is attached",
+      };
+  }
+  return null;
+}

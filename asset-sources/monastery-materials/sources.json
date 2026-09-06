@@ -1,0 +1,92 @@
+[
+  {
+    "asset": "wood_planks",
+    "source": "https://polyhaven.com/a/wood_planks",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_planks/wood_planks_diff_2k.jpg",
+    "file": "public/assets/textures/monastery-wood-color.jpg",
+    "bytes": 2387732,
+    "sha256": "caa1e71809521050fe0753ee7c17aa2faf32055fe53aff013415bc459dd23ea7"
+  },
+  {
+    "asset": "wood_planks",
+    "source": "https://polyhaven.com/a/wood_planks",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_planks/wood_planks_nor_gl_2k.jpg",
+    "file": "public/assets/textures/monastery-wood-normal.jpg",
+    "bytes": 2906326,
+    "sha256": "908d0fe05d5abd963f2e518776bbff0db9617d3ccbb09e5e8503290572caaf27"
+  },
+  {
+    "asset": "wood_planks",
+    "source": "https://polyhaven.com/a/wood_planks",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_planks/wood_planks_rough_2k.jpg",
+    "file": "public/assets/textures/monastery-wood-roughness.jpg",
+    "bytes": 1151798,
+    "sha256": "56e3bafda8dfbeb8730b10d59c7541e983cff43b5b74f58d6d2c437f2b9455a1"
+  },
+  {
+    "asset": "white_plaster_02",
+    "source": "https://polyhaven.com/a/white_plaster_02",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_plaster_02/white_plaster_02_diff_2k.jpg",
+    "file": "public/assets/textures/monastery-plaster-color.jpg",
+    "bytes": 2568315,
+    "sha256": "0ca5245ba70777d3e41ff4566c9f8d363855461891802c55cb7dc0f6f85f084e"
+  },
+  {
+    "asset": "white_plaster_02",
+    "source": "https://polyhaven.com/a/white_plaster_02",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_plaster_02/white_plaster_02_nor_gl_2k.jpg",
+    "file": "public/assets/textures/monastery-plaster-normal.jpg",
+    "bytes": 3379814,
+    "sha256": "083579b03a8f31ec1886512e5972f3b893610bf26a2098f97910e0f46745cdc9"
+  },
+  {
+    "asset": "white_plaster_02",
+    "source": "https://polyhaven.com/a/white_plaster_02",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_plaster_02/white_plaster_02_rough_2k.jpg",
+    "file": "public/assets/textures/monastery-plaster-roughness.jpg",
+    "bytes": 1604444,
+    "sha256": "a3dc1911f6e25d88fdb0031fe0cfb602eec5496084c508774c60691bed087417"
+  },
+  {
+    "asset": "roof_slates_02",
+    "source": "https://polyhaven.com/a/roof_slates_02",
+    "license": "CC0",
+    "resolution": "1k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_02/roof_slates_02_diff_1k.jpg",
+    "file": "public/assets/textures/monastery-roof-color.jpg",
+    "bytes": 515626,
+    "sha256": "de3d2729ab385c5f7dd7106d3b435c737f6d2c3ea8883cea37de53cec2a34867"
+  },
+  {
+    "asset": "roof_slates_02",
+    "source": "https://polyhaven.com/a/roof_slates_02",
+    "license": "CC0",
+    "resolution": "1k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_02/roof_slates_02_nor_gl_1k.jpg",
+    "file": "public/assets/textures/monastery-roof-normal.jpg",
+    "bytes": 763206,
+    "sha256": "32be0c0ba1565856156a315dc98a773d72f1a03415930657b8a8ad62bf60c1bf"
+  },
+  {
+    "asset": "roof_slates_02",
+    "source": "https://polyhaven.com/a/roof_slates_02",
+    "license": "CC0",
+    "resolution": "1k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_02/roof_slates_02_rough_1k.jpg",
+    "file": "public/assets/textures/monastery-roof-roughness.jpg",
+    "bytes": 307076,
+    "sha256": "737f95fdbb09e49670cbce09a78fe75c18bbaed597524db832f0227df0dce2cd"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "asset": "rock_face_03",
+    "source": "https://polyhaven.com/a/rock_face_03",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_diff_2k.jpg",
+    "file": "public/assets/textures/forge-rock-color.jpg",
+    "bytes": 3814362,
+    "sha256": "644ee79df7ffbf5f6afc330b64dd3f33794bab8820915fe61ffe0c88ecfd7ece"
+  },
+  {
+    "asset": "rock_face_03",
+    "source": "https://polyhaven.com/a/rock_face_03",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_nor_gl_2k.jpg",
+    "file": "public/assets/textures/forge-rock-normal.jpg",
+    "bytes": 4473242,
+    "sha256": "a498cef4ba6191f6959b6d03fb835263c77271948264a289af24497ab7111dec"
+  },
+  {
+    "asset": "rock_face_03",
+    "source": "https://polyhaven.com/a/rock_face_03",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_rough_2k.jpg",
+    "file": "public/assets/textures/forge-rock-roughness.jpg",
+    "bytes": 2601552,
+    "sha256": "9ca3e9e196685f702328f24d66f039b72f5330fc35cf2a2c265cfa50a7916301"
+  },
+  {
+    "asset": "rusty_metal_04",
+    "source": "https://polyhaven.com/a/rusty_metal_04",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rusty_metal_04/rusty_metal_04_diff_2k.jpg",
+    "file": "public/assets/textures/forge-metal-color.jpg",
+    "bytes": 3463347,
+    "sha256": "dc17baa7c113af0a8db59a7166dbebd1d8bc842e69b1f07b89d9e90531ebbd22"
+  },
+  {
+    "asset": "rusty_metal_04",
+    "source": "https://polyhaven.com/a/rusty_metal_04",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rusty_metal_04/rusty_metal_04_nor_gl_2k.jpg",
+    "file": "public/assets/textures/forge-metal-normal.jpg",
+    "bytes": 3582694,
+    "sha256": "b230568d198778afbf3d104d2951e2e2306ddb276bc1ed2f441b9040c58af537"
+  },
+  {
+    "asset": "rusty_metal_04",
+    "source": "https://polyhaven.com/a/rusty_metal_04",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rusty_metal_04/rusty_metal_04_rough_2k.jpg",
+    "file": "public/assets/textures/forge-metal-roughness.jpg",
+    "bytes": 2548882,
+    "sha256": "b59cb33b478c70404b14294e39979c7a12db25e8f7fac3688cf665fcb0fdd19d"
+  },
+  {
+    "asset": "volcanic_rock_tiles",
+    "source": "https://polyhaven.com/a/volcanic_rock_tiles",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/volcanic_rock_tiles/volcanic_rock_tiles_diff_2k.jpg",
+    "file": "public/assets/textures/forge-paving-color.jpg",
+    "bytes": 3088952,
+    "sha256": "947ae421c776517c7356565f2de05b6fe6f662bd5e2a331388b11e6943b97fb4"
+  },
+  {
+    "asset": "volcanic_rock_tiles",
+    "source": "https://polyhaven.com/a/volcanic_rock_tiles",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/volcanic_rock_tiles/volcanic_rock_tiles_nor_gl_2k.jpg",
+    "file": "public/assets/textures/forge-paving-normal.jpg",
+    "bytes": 4350260,
+    "sha256": "52f5f0f19edb6f3fb6d64ded415407a89ae408c96e76d11e8362f11f312e82d8"
+  },
+  {
+    "asset": "volcanic_rock_tiles",
+    "source": "https://polyhaven.com/a/volcanic_rock_tiles",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/volcanic_rock_tiles/volcanic_rock_tiles_rough_2k.jpg",
+    "file": "public/assets/textures/forge-paving-roughness.jpg",
+    "bytes": 781911,
+    "sha256": "7ff201ddbddf1543221d9475dc4af3826f6355ada507372c5b82fe973636e117"
+  },
+  {
+    "asset": "rusty_metal_04",
+    "source": "https://polyhaven.com/a/rusty_metal_04",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rusty_metal_04/rusty_metal_04_metal_2k.jpg",
+    "file": "public/assets/textures/forge-metal-metalness.jpg",
+    "bytes": 3278371,
+    "sha256": "9085f395c40ce3860353d77c2a55a4e9b5b370abc5756784330ed3e890654097"
+  }
+]

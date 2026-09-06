@@ -1,0 +1,164 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import * as THREE from "three";
+import { LEVELS, createMap } from "../src/campaign.js";
+import { createTerrainProfile, buildTerrainSurface } from "../src/terrain.js";
+import { coastalLayout } from "../src/coastal-layout.js";
+import {
+  coastalUniforms,
+  updateCoastalWater,
+} from "../src/coastal-material.js";
+import {
+  buildWaterSurfaces,
+  updateWaterSurfaces,
+} from "../src/water-surface.js";
+
+const level = LEVELS[3],
+  map = createMap(level),
+  profile = createTerrainProfile(map, level);
+
+test("coastal paving covers the ten arcade floors and actual causeway turns without extending the playable land", () => {
+  const plan = coastalLayout(map);
+  for (const room of map.rooms) {
+    for (const [dx, dz] of [
+      [0, -16],
+      [14, 14],
+      [-14, -14],
+      [0, 19],
+      [19, 0],
+    ])
+      assert.ok(
+        plan.coverage(room.x * 7 + dx, room.z * 7 + dz) > 0.95,
+        `court ${room.index}: ${dx}/${dz}`,
+      );
+    assert.equal(plan.nearest(room.x * 7, room.z * 7).index, room.index);
+  }
+  for (const path of map.paths)
+    for (const p of path)
+      assert.equal(
+        plan.coverage(p.x * 7, p.z * 7),
+        1,
+        "route centers remain connected",
+      );
+  for (let z = 0; z < map.size; z++)
+    for (let x = 0; x < map.size; x++) {
+      const value = plan.coverage(x * 7, z * 7);
+      assert.ok(Number.isFinite(value) && value >= 0 && value <= 1);
+      if (!map.grid[z][x]) assert.equal(value, 0);
+    }
+});
+
+test("material route coordinates do not change terrain, reservoirs or saved foundation heights", () => {
+  const withoutRoutes = createTerrainProfile({ ...map, paths: [] }, level);
+  assert.deepEqual(profile.heights, withoutRoutes.heights);
+  assert.deepEqual(profile.waters, withoutRoutes.waters);
+  assert.ok(
+    profile.courts.some((v, i) => v !== withoutRoutes.courts[i]),
+    "route plan affects visible paving",
+  );
+  for (const f of map.features)
+    assert.equal(
+      profile.foundationHeight(f.x * 7, f.z * 7),
+      withoutRoutes.foundationHeight(f.x * 7, f.z * 7),
+    );
+  assert.equal(
+    createTerrainProfile(createMap(LEVELS[2]), LEVELS[2]).coastal,
+    null,
+  );
+});
+
+function fixture(t) {
+  t.mock.method(THREE.TextureLoader.prototype, "load", function (url, onLoad) {
+    const texture = new THREE.Texture();
+    queueMicrotask(() => onLoad?.(texture));
+    return texture;
+  });
+  const game = {
+    level,
+    map,
+    terrainProfile: profile,
+    world: new THREE.Group(),
+    waterMeshes: [],
+    groundHeight: profile.height,
+    elapsed: 0,
+    progress: { stage: 0, field: [], completed: false },
+  };
+  buildTerrainSurface(game);
+  buildWaterSurfaces(game);
+  t.after(() => {
+    const materials = new Set();
+    game.world.traverse((o) => {
+      o.geometry?.dispose();
+      if (o.material) materials.add(o.material);
+    });
+    for (const m of materials) {
+      for (const v of Object.values(m)) if (v?.isTexture) v.dispose();
+      m.userData.additionalTextures?.forEach((t) => t.dispose());
+      m.dispose();
+    }
+  });
+  return game;
+}
+
+test("chunk borders share material coordinates, terrain normals and ground contact", async (t) => {
+  const game = fixture(t);
+  await game.terrainTexturesReady;
+  const seen = new Map();
+  let duplicates = 0;
+  for (const mesh of game.terrainMeshes) {
+    const p = mesh.geometry.attributes.position,
+      c = mesh.geometry.attributes.coast,
+      n = mesh.geometry.attributes.normal;
+    assert.equal(c.count, p.count);
+    assert.ok(c.array.every(Number.isFinite));
+    for (let i = 0; i < p.count; i++) {
+      const key = `${p.getX(i)},${p.getZ(i)}`,
+        value = [
+          p.getY(i),
+          c.getX(i),
+          c.getY(i),
+          c.getZ(i),
+          n.getX(i),
+          n.getY(i),
+          n.getZ(i),
+        ];
+      assert.ok(
+        Math.abs(p.getY(i) - profile.height(p.getX(i), p.getZ(i))) < 0.000001,
+      );
+      if (seen.has(key)) {
+        assert.deepEqual(value, seen.get(key));
+        duplicates++;
+      } else seen.set(key, value);
+    }
+  }
+  assert.ok(duplicates > 1000);
+  assert.equal(game.terrainMeshes[0].material.defines.TERRAIN_COASTAL, 1);
+});
+
+test("damp terrain follows actual draining water, including waterfall basins sharing a reservoir", async (t) => {
+  const game = fixture(t);
+  await game.terrainTexturesReady;
+  const h =
+    game.terrainMeshes[0].material.userData.terrainUniforms.coastalWaterHeight
+      .value;
+  assert.equal(h.length, 8);
+  const original = Array.from(h);
+  game.progress.stage = 3;
+  updateWaterSurfaces(game, 100);
+  assert.ok(Math.abs(h[0] - (original[0] - 1.8)) < 0.000001);
+  assert.ok(Math.abs(h[1] - (original[1] - 1.8)) < 0.000001);
+  assert.equal(h[6], h[1], "the contained waterfall uses its reservoir level");
+  assert.equal(h[7], h[4]);
+  assert.equal(
+    h[5],
+    original[5],
+    "independent first waterfall retains its water level",
+  );
+  assert.equal(h[2], original[2], "locked reservoir is not drained");
+  const saved = Array.from(h);
+  updateWaterSurfaces(game, 0);
+  assert.deepEqual(Array.from(h), saved);
+  assert.doesNotThrow(() => updateCoastalWater({ terrainMeshes: [] }));
+  const fresh = coastalUniforms(game);
+  assert.notEqual(fresh.coastalWaterHeight.value, h);
+});

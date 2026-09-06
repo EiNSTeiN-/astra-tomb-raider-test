@@ -1,0 +1,92 @@
+[
+  {
+    "asset": "marble_rock_02",
+    "source": "https://polyhaven.com/a/marble_rock_02",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_rock_02/marble_rock_02_diff_2k.jpg",
+    "file": "public/assets/textures/palace-stone-color.jpg",
+    "bytes": 2786292,
+    "sha256": "8c3d7103368ac77ec1b94bc2079c9d6ca3480759ed5cf46993d0b657b0b4c98e"
+  },
+  {
+    "asset": "marble_rock_02",
+    "source": "https://polyhaven.com/a/marble_rock_02",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_rock_02/marble_rock_02_nor_gl_2k.jpg",
+    "file": "public/assets/textures/palace-stone-normal.jpg",
+    "bytes": 3006687,
+    "sha256": "6e11308d187988f8c33aa7bab1268a69d4c47ba658350b56d842d8972496bdf6"
+  },
+  {
+    "asset": "marble_rock_02",
+    "source": "https://polyhaven.com/a/marble_rock_02",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_rock_02/marble_rock_02_rough_2k.jpg",
+    "file": "public/assets/textures/palace-stone-roughness.jpg",
+    "bytes": 1305344,
+    "sha256": "58086f5c910d3db8005ce8d3da6d191822b2a3796fa3aa1fd05fea8567721242"
+  },
+  {
+    "asset": "blue_plaster_weathered",
+    "source": "https://polyhaven.com/a/blue_plaster_weathered",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/blue_plaster_weathered/blue_plaster_weathered_diff_2k.jpg",
+    "file": "public/assets/textures/palace-plaster-color.jpg",
+    "bytes": 2736265,
+    "sha256": "eed0bd3b1484730adb8e79ee767ba9119beeb14ea80d348e4f4ac35e0c530ed9"
+  },
+  {
+    "asset": "blue_plaster_weathered",
+    "source": "https://polyhaven.com/a/blue_plaster_weathered",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/blue_plaster_weathered/blue_plaster_weathered_nor_gl_2k.jpg",
+    "file": "public/assets/textures/palace-plaster-normal.jpg",
+    "bytes": 2984372,
+    "sha256": "3865f6257ca1b74ad0a83e5e3be6a20d135003fa93abad5e7a730270a1f835cf"
+  },
+  {
+    "asset": "blue_plaster_weathered",
+    "source": "https://polyhaven.com/a/blue_plaster_weathered",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/blue_plaster_weathered/blue_plaster_weathered_rough_2k.jpg",
+    "file": "public/assets/textures/palace-plaster-roughness.jpg",
+    "bytes": 1083651,
+    "sha256": "7a126bd5b8edb2d8ef3f053cbb184bc924c9f2b208a2e6dd31d9faa4870c65f2"
+  },
+  {
+    "asset": "marble_mosaic_tiles",
+    "source": "https://polyhaven.com/a/marble_mosaic_tiles",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_mosaic_tiles/marble_mosaic_tiles_diff_2k.jpg",
+    "file": "public/assets/textures/palace-mosaic-color.jpg",
+    "bytes": 3786941,
+    "sha256": "d853a543e869e38c257f270acb2ad7f181e6fd05bcd25b1ae57f9ca5f2840dac"
+  },
+  {
+    "asset": "marble_mosaic_tiles",
+    "source": "https://polyhaven.com/a/marble_mosaic_tiles",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_mosaic_tiles/marble_mosaic_tiles_nor_gl_2k.jpg",
+    "file": "public/assets/textures/palace-mosaic-normal.jpg",
+    "bytes": 3448989,
+    "sha256": "c64bbabdfc0e14b519f8a4c6882751f2b31f01c1cdb71c30969f2f605eeca29a"
+  },
+  {
+    "asset": "marble_mosaic_tiles",
+    "source": "https://polyhaven.com/a/marble_mosaic_tiles",
+    "license": "CC0",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_mosaic_tiles/marble_mosaic_tiles_rough_2k.jpg",
+    "file": "public/assets/textures/palace-mosaic-roughness.jpg",
+    "bytes": 3337755,
+    "sha256": "fd7aaa733a510cadf27c0c0b347a50970a88f30d4aa4999c7df67cf766590798"
+  }
+]

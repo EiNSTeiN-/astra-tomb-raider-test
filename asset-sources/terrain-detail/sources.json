@@ -1,0 +1,25 @@
+[
+  {
+    "path": "public/assets/textures/verdure-color.jpg",
+    "url": "https://ambientcg.com/get?file=Ground037_2K-JPG.zip",
+    "member": "Ground037_2K-JPG_Color.jpg",
+    "sha256": "86af35a54593548543a291a54bddfd3568fd90268f8f65d0f8e743b37d714782",
+    "license": "CC0-1.0",
+    "source": "https://ambientcg.com/view?id=Ground037"
+  },
+  {
+    "path": "public/assets/textures/verdure-normal.jpg",
+    "url": "https://ambientcg.com/get?file=Ground037_2K-JPG.zip",
+    "member": "Ground037_2K-JPG_NormalGL.jpg",
+    "sha256": "99743f03f5f818d4a0ee3dca289d5c6f125b1e05f1e624a541455e2f7fb29eec",
+    "license": "CC0-1.0",
+    "source": "https://ambientcg.com/view?id=Ground037"
+  },
+  {
+    "path": "public/assets/textures/moss-height.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_cobblestone/mossy_cobblestone_disp_1k.jpg",
+    "sha256": "263895ce6f099d1ccaf557e9ca1c443c8e49600a7e0ee8bbfa992a3363bee828",
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/mossy_cobblestone"
+  }
+]

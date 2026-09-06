@@ -1,0 +1,84 @@
+{
+  "core": {
+    "base.obj": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj",
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c"
+    },
+    "female-young.target": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/targets/macrodetails/caucasian-female-young.target",
+      "sha256": "118379f6e8ba9266247fdb8788a20e1df40a239f97ced0b9905bcbcc74f6e820"
+    },
+    "female-athletic.target": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/targets/macrodetails/universal-female-young-maxmuscle-averageweight.target",
+      "sha256": "2e56b09b44a8497b927585447fdaac5ea7293521d1f3a3df1059495873c53f4e"
+    },
+    "rig.json": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/mpfb2/437dd513888a92399d1d3200d2e80859fae55abc/src/mpfb/data/rigs/standard/rig.mixamo_unity.json",
+      "sha256": "c991d9e61090c6d94a8fd4605ca5285b1b087aa73177a6374169b9b034643ea8"
+    },
+    "weights.json": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/mpfb2/437dd513888a92399d1d3200d2e80859fae55abc/src/mpfb/data/rigs/standard/weights.mixamo_unity.json",
+      "sha256": "0cfa562682fe27dab69cd3abd287cc971fbe576e03297d702798ac85813fb102"
+    },
+    "tpose.json": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/mpfb2/437dd513888a92399d1d3200d2e80859fae55abc/src/mpfb/data/poses/mixamo_unity_fk/t-pose.json",
+      "sha256": "a1b77c14b3e82bf0c83931f452e30ef5887ec87c4442e9561f2a43963bd192f0"
+    },
+    "LICENSE.md": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/LICENSE.md",
+      "sha256": "edd99571ca62698f78c943fd4fffb159a413c315fa0d4819d3cec5cadaf8b4f1"
+    },
+    "LICENSE.ASSETS.md": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/LICENSE.ASSETS.md",
+      "sha256": "f6089cba01cb570a24712b41ab8a586ccd3cc5ef53dc266ca50b95c288956d2c"
+    },
+    "LICENSE.CODE.md": {
+      "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/LICENSE.CODE.md",
+      "sha256": "32a0a7381bbcb97b043b34595a1f440557d5cfe904f4d91770b0abb465e8db25"
+    }
+  },
+  "systemZip": "https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+  "systemFiles": {
+    "eyes/materials/brown.mhmat": "4abad93ce50541c08127721e77bce035640c9f16bed16cd0f5524b1cd5908465",
+    "eyes/materials/brown_eye.png": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b",
+    "eyes/high-poly/high-poly.obj": "da2493215b708a344c33dc72f2a9a5b8fa985dcc5a70ad3b208995cf871da8e1",
+    "eyes/high-poly/high-poly.thumb": "97730eb579e1a81a63f38f53125ad8d375556f222882704fbec7dd83d4f24916",
+    "eyes/high-poly/high-poly.mhclo": "b183cfe37120ab726f9b3f2ea6cd3a64c44ce7b4bd91a77c841cf70c04f83a0d",
+    "hair/ponytail01/ponytail01_diffuse.png": "dcb364300cac06ce8bef91b2f7c0970baf310898bbdd06b0c6b884ee9306eb97",
+    "hair/ponytail01/ponytail01.thumb": "1dd14d9ce1c7bb7368f49757e3299a961190ea374c8dc140ff964b5f437d3383",
+    "hair/ponytail01/ponytail01.mhmat": "b145f5a7c9606859ad523f5113482a1cf989cf0e26dccc2ea95c377cb1c2557f",
+    "hair/ponytail01/ponytail01.obj": "d9f5fe96fbedbc8006220d87aad0e4a33d15286eb6b21f5929661cdc490ebf5a",
+    "hair/ponytail01/ponytail01.mhclo": "97fc50b12bcb3b1c7b33edddd8d427a2604ffb06fe79b31132bf47f82d7afbac",
+    "skins/young_caucasian_female/young_lightskinned_female_diffuse.png": "b2a6ac8cd4f9febdb447368e29c76cd68410bb66e46d9dcfa2d5f75126eea8fc",
+    "skins/young_caucasian_female/young_caucasian_female.thumb": "4bacaa13c1f58321221822e6f9ce1b222eb0e328e5015d9518c8a7184fb34b34",
+    "skins/young_caucasian_female/young_caucasian_female.mhmat": "0bdea7786201f0b1132a24088336a97496ccdc54e9984db65d253a6a6d66f24f",
+    "eyebrows/eyebrow001/eyebrow001.mhmat": "976e5f4f1d3922d7a11c6e2db233f8b4584b068d00619d5749687e81c92d61fc",
+    "eyebrows/eyebrow001/eyebrow001.thumb": "98b68eccf50977ff00242a33eb1dc6e3eaf4cc262e1f6c4ceca5c1c564f6c745",
+    "eyebrows/eyebrow001/eyebrow001.png": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b",
+    "eyebrows/eyebrow001/eyebrow001.obj": "88b13146395133f3901715e11706cdfd293e5d6087ad7c5e01efe1485a26b513",
+    "eyebrows/eyebrow001/eyebrow001.mhclo": "54c8892c2ba577f4152d779ce1f20f7cd323beb8cbd9cb701796165c221b4f5b",
+    "clothes/shoes04/shoes04_diffuse.png": "dc3d3c294ba5bf4a47a7840172154ce7ab587ff0737ace0712c4cc310089c232",
+    "clothes/shoes04/shoes04.mhclo": "88223bf0c6168e85fd118015e4ca61612c6b35f42a79d7ce5df1864f1a6f715e",
+    "clothes/shoes04/shoes04.mhw": "02ef7fcd42d6063f3a8b4d22a79bceb02ab9a67e23ee9f2252a63ec3e53e0f27",
+    "clothes/shoes04/shoes04.obj": "eac355a842a8eb8ae2f09fac8dd18a877a24ef2521ed2d6bf38559b42ce4b49a",
+    "clothes/shoes04/shoes04.thumb": "f6f6f0d30733ac1491072a453a82d105619c2af99228ec51d251cbf4776b8b7c",
+    "clothes/shoes04/shoes04_normal.png": "a9bfd7223e98b8f93100e89596135e3a94e6044f9db11b4d23cec625c37a4599",
+    "clothes/shoes04/shoes04.mhmat": "dafb73d722453798f4d501f2bf2d668ba41c34fc252cd76d0716ea23baef8753",
+    "clothes/female_casualsuit01/female_casualsuit01.mhclo": "8a17e4edceeb22ef30ce102ed05fb3463ca0eeb61addc7811f4867fde5963fa4",
+    "clothes/female_casualsuit01/female_casualsuit01_ao.png": "f97a31fb02b5f36802a08bfe22bffb1961240d4ecb20059540eec6516d753424",
+    "clothes/female_casualsuit01/female_casualsuit01.thumb": "138a4bfb756f0cdfc8116d3f0ebcc14e1e20472bb225ead986b0cc3a8b291212",
+    "clothes/female_casualsuit01/female_casualsuit01.obj": "b6cfaf08b291fe10ea312d37e98d5e328eced5828bdb6f96ecac6bf4ababe652",
+    "clothes/female_casualsuit01/female_casualsuit01_normal.png": "7bff7afbbc3f068e06f69abcddc8c2c9ce667ec181e0f2a918f8af78eba12610",
+    "clothes/female_casualsuit01/female_casualsuit01_diffuse.png": "414d46afa55fba09ad0913484d57df2ba6b597dc8193595a13a12436137dc21b",
+    "clothes/female_casualsuit01/female_casualsuit01.mhmat": "7bef35aade88daf9f4597f3b3c9a45be51cc51caf44012d12ac4e005c8087689",
+    "eyelashes/eyelashes01/eyelashes01.thumb": "34ab06601745c2b74fcfa6f63a374fcea58cb4501e728a3c6935a3a1ed794aa3",
+    "eyelashes/eyelashes01/eyelashes01.mhclo": "5a86b29c15649273d723084954b7fa7bf199112571d4f58539b46734d397ee6b",
+    "eyelashes/eyelashes01/eyelashes01.obj": "f78f5b93fea1946fcae103d32c4f082dd9612a1ec2e7e2f90b03ebe59b0baf20",
+    "eyelashes/eyelashes01/eyelashes01.png": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35",
+    "eyelashes/eyelashes01/eyelashes01.mhmat": "8029c99d94f3d87a1e81825fad6b90eec773ae6955a5b2592222ef237377e190"
+  },
+  "locomotion": {
+    "url": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/models/gltf/Soldier.glb",
+    "sha256": "dfb230fc1f942f259dd00281a1186953ad602fc5d69067ce63e24b2aa439736b"
+  }
+}

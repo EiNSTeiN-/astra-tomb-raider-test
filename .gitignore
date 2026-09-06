@@ -1,0 +1,75 @@
+# Installable dependencies and generated build/cache output
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.cache/
+.parcel-cache/
+.turbo/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local configuration, credentials, and personal working data
+.env
+.env.*
+!.env.example
+!.env.*.example
+.npmrc
+.netrc
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+*.sqlite*
+*.db
+/private/
+/local/
+/saves/
+/backups/
+vesper-save*.json
+vesper-expedition*.json
+
+# Agent state, browser profiles, recordings, and test artifacts
+.agents/
+.codex/
+.playwright-mcp/
+playwright/.auth/
+test-results/
+playwright-report/
+blob-report/
+browser-profile*/
+storage-state*.json
+storageState*.json
+*.har
+*.log
+*.log.*
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# Downloaded source assets and conversion intermediates. Runtime assets under
+# public/assets/ are intentionally tracked so a clone is immediately playable.
+# Keep provenance, licenses, and original edited character source artwork.
+/asset-sources/**
+!/asset-sources/**/
+!/asset-sources/**/sources.json
+!/asset-sources/**/LICENSE*.md
+!/asset-sources/characters/makehuman/vesper-outfit-color.png
+!/asset-sources/characters/makehuman/vesper-outfit-padded.png
+
+# Editor and OS metadata
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
