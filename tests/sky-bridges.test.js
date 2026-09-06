@@ -9,6 +9,13 @@ import { advanceCharacter, supportAt } from "../src/character-motion.js";
 import { restoreTraversal } from "../src/traversal.js";
 import { normalizeSave } from "../src/storage.js";
 import { migrateSkyRoute } from "../src/sky-layout.js";
+import { updateSoundSources } from "../src/sound-landmarks.js";
+import { distanceGain } from "../src/audio.js";
+import {
+  bridgeBoardGeometry,
+  bridgeRopeGeometry,
+  bridgeAnchorGeometry,
+} from "../src/sky-bridge-art.js";
 import {
   buildSkyBridges,
   updateSkyBridges,
@@ -77,7 +84,7 @@ test("sky spans cross real ravines, join their banks exactly, and retain every o
       assert.ok(gap.end - gap.start > 1.5 && gap.end - gap.start < 1.61);
     assert.equal(
       game.skyBridgeSources.filter((s) => s.id.startsWith(b.id)).length,
-      2,
+      6,
     );
     if (b.requires)
       assert.ok(game.map.features.some((f) => f.id === b.requires));
@@ -227,6 +234,22 @@ test("winch progress unfolds only its linked span and changes the actual moving 
   updateSkyBridges(game, 1);
   assert.ok(b.open > 0 && b.open < 0.995);
   assert.ok(b.halves[0].rotation.x < 0);
+  assert.ok(b.drums.every(({ rotor }) => Math.abs(rotor.rotation.x) > 0));
+  const sources = game.skyBridgeSources.filter((s) => s.skyBridgeDrum === b.id);
+  assert.equal(sources.length, 4);
+  game.soundSources = sources.map((s) => ({ ...s }));
+  updateSoundSources(game);
+  assert.ok(game.soundSources.every((s) => s.activity > 0));
+  for (const [i, s] of sources.entries()) {
+    const { rotor, sign } = b.drums[i];
+    const front = rotor.position.clone();
+    front.z += sign * 0.4;
+    b.detail.localToWorld(front);
+    assert.ok(front.distanceTo(new THREE.Vector3(s.x, s.y, s.z)) < 1e-7);
+    assert.equal(distanceGain(2, s.near, s.range), 1);
+    assert.equal(distanceGain(12, s.near, s.range), 0.5);
+    assert.equal(distanceGain(22, s.near, s.range), 0);
+  }
   assert.equal(
     game.skyBridges.find((q) => q.stage === 2 && q.section === 2).open,
     0,
@@ -235,6 +258,11 @@ test("winch progress unfolds only its linked span and changes the actual moving 
   game.world.updateMatrixWorld(true);
   assert.equal(b.open, 1);
   assert.ok(Math.abs(b.halves[0].rotation.x) < 1e-8);
+  assert.ok(
+    b.drums.every(
+      ({ rotor }) => Math.abs(Math.abs(rotor.rotation.x) - Math.PI * 6) < 1e-8,
+    ),
+  );
   assert.equal(
     game.canMove(
       start.x,
@@ -253,7 +281,138 @@ test("winch progress unfolds only its linked span and changes the actual moving 
       new THREE.Vector3(x, y - 2, z),
     ) < 1,
   );
-  assert.ok(game.skyBridgeSources.length <= 36);
+  updateSoundSources(game);
+  assert.ok(
+    game.soundSources.every((s) => s.activity === 0),
+    "bank drums become silent when deployment settles",
+  );
+  assert.ok(game.skyBridgeSources.length <= 108);
+});
+
+test("weathered boards remain closed solids with flat walking faces and varied finishes", () => {
+  const shades = new Set();
+  for (let seed = 1; seed <= 16; seed++) {
+    const g = bridgeBoardGeometry(4.6, 0.75, seed);
+    const p = g.attributes.position,
+      n = g.attributes.normal;
+    const edges = new Map();
+    const key = (i) =>
+      [p.getX(i), p.getY(i), p.getZ(i)].map((v) => v.toFixed(6)).join(",");
+    let volume = 0;
+    const a = new THREE.Vector3(),
+      b = new THREE.Vector3(),
+      c = new THREE.Vector3();
+    for (let i = 0; i < p.count; i += 3) {
+      a.fromBufferAttribute(p, i);
+      b.fromBufferAttribute(p, i + 1);
+      c.fromBufferAttribute(p, i + 2);
+      volume += a.dot(b.clone().cross(c)) / 6;
+      for (let j = 0; j < 3; j++) {
+        const edge = [key(i + j), key(i + ((j + 1) % 3))].sort().join("/");
+        edges.set(edge, (edges.get(edge) || 0) + 1);
+        assert.ok(
+          Number.isFinite(n.getX(i + j)) &&
+            Number.isFinite(n.getY(i + j)) &&
+            Number.isFinite(n.getZ(i + j)),
+        );
+        if (n.getY(i + j) > 0.999)
+          assert.ok(Math.abs(p.getY(i + j) - 0.095) < 1e-6);
+      }
+    }
+    assert.ok(
+      volume > 0.55 && volume < 0.67,
+      "outward-facing closed plank volume",
+    );
+    assert.ok(
+      [...edges.values()].every((count) => count === 2),
+      "every bevel edge is sealed",
+    );
+    shades.add(g.attributes.color.getX(0));
+    assert.equal(g.attributes.bridgeWoodCoord.count, p.count);
+    g.dispose();
+  }
+  assert.ok(shades.size > 12, "boards have distinct weathering values");
+});
+
+test("rope twist coordinates retain physical scale for unequal cable lengths", () => {
+  const geometries = [3, 6].map((length) =>
+    bridgeRopeGeometry(
+      new THREE.LineCurve3(
+        new THREE.Vector3(),
+        new THREE.Vector3(0, length, 0),
+      ),
+      0.05,
+      8,
+    ),
+  );
+  const maxima = geometries.map((g) => {
+    const uv = g.attributes.uv;
+    const max = Math.max(
+      ...Array.from({ length: uv.count }, (_, i) => uv.getX(i)),
+    );
+    g.dispose();
+    return max;
+  });
+  assert.ok(Math.abs(maxima[1] / maxima[0] - 2) < 1e-6);
+});
+
+test("narrow anchor piers retain packed backing through side-view masonry joints", () => {
+  const material = new THREE.MeshBasicMaterial();
+  const ray = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3());
+  for (let seed = 1; seed <= 4; seed++) {
+    const geometry = bridgeAnchorGeometry(0, 5.9, seed);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.updateMatrixWorld(true);
+    for (const side of [-1, 1])
+      for (let i = 1; i < 59; i++) {
+        ray.ray.origin.set(side * 2, i / 10, 0.83);
+        ray.ray.direction.set(-side, 0, 0);
+        const hit = ray.intersectObject(mesh)[0];
+        assert.ok(
+          hit && hit.distance < 1.5,
+          `pier ${seed}, height ${i / 10}, side ${side}`,
+        );
+      }
+    geometry.dispose();
+  }
+  material.dispose();
+});
+
+test("bridge art keeps its GPU attributes after batching and has bounded detail groups", (t) => {
+  const game = fixture(t);
+  let meshes = 0,
+    triangles = 0;
+  for (const b of game.skyBridges) {
+    assert.equal(b.drums.length, 4);
+    assert.equal(b.deckDetails.length, 2);
+    for (const group of [b.root, b.detail])
+      group.traverse((o) => {
+        if (!o.isMesh) return;
+        meshes++;
+        const g = o.geometry,
+          count = g.attributes.position.count;
+        triangles += (g.index?.count || count) / 3;
+        assert.equal(g.attributes.normal.count, count);
+        assert.equal(g.attributes.uv.count, count);
+        if (o.material.name === "Weathered bridge timber") {
+          assert.equal(g.attributes.bridgeWoodCoord.count, count);
+          assert.equal(g.attributes.color.count, count);
+        }
+        if (o.material.userData.windMetal) {
+          assert.equal(g.attributes.windCoord.count, count);
+          assert.equal(g.attributes.windCavity.count, count);
+        }
+      });
+  }
+  assert.ok(meshes < 650, `bridge mesh budget: ${meshes}`);
+  assert.ok(triangles < 700000, `bridge triangle budget: ${triangles}`);
+  game.player.position.set(-1000, 0, -1000);
+  updateSkyBridges(game, 0);
+  assert.ok(
+    game.skyBridges.every(
+      (b) => !b.detail.visible && b.deckDetails.every((d) => !d.visible),
+    ),
+  );
 });
 
 test("visible plank tops agree with support heights along both sagging bridge halves", (t) => {

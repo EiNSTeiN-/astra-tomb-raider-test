@@ -1,5 +1,7 @@
 # Cloud-city crossings and responsive sound
 
+The subsequent [bridge construction pass](sky-bridge-art.md) replaces the original primitive anchors and decking, adds rope fittings and rotating bank drums, and gives those drums localized sound. Its source counts and rendered costs supersede the historical measurements below.
+
 Where Eagles Sleep now has an authored route between ten alternating cliff courts, with twenty-seven ordered field stations and eighteen physical suspension bridges. The crossings replace the previous decorative terraces. Each pair of spans connects three stations between successive courts; solid causeways connect the shared banks to the sanctuaries. Existing mechanism, discovery, camp, guardian, and field-action identifiers remain intact.
 
 The bridges span approximately 41–42 metres over ravines cut 24 metres below their sagging decks. Their bank joins retain the original foundation height. Paired plank decks fold up from the anchors until the linked winch or route anchor is restored. Cargo and survey crossings are already deployed. Completing the sector's three stations still opens its sanctuary gate.

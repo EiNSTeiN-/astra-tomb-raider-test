@@ -1,5 +1,15 @@
 import * as THREE from "three";
-import { pbrMaterial, mergeArchitecture } from "./visuals.js";
+import { mergeArchitecture } from "./visuals.js";
+import { stoneBlockGeometry } from "./temple-architecture.js";
+import {
+  bridgeArtMaterials,
+  bridgeBoardGeometry,
+  bridgeRopeGeometry,
+  bridgeRope,
+  bridgeLashingGeometry,
+  buildBridgeAnchor,
+  prepareBridgeGeometry,
+} from "./sky-bridge-art.js";
 import {
   bridgeDeployed,
   bridgeDeckY,
@@ -13,12 +23,8 @@ export function buildSkyBridges(game) {
   game.skyBridgeSources = [];
   game.skyTether = null;
   if (game.level.biome !== "sky") return;
-  const wood = pbrMaterial("monastery-wood", 0xb8a286),
-    rope = pbrMaterial("bark", 0xaca085);
-  wood.normalScale.set(0.42, 0.42);
-  rope.normalScale.set(0.35, 0.35);
-  const stone = game.stoneMat,
-    trim = game.goldMat;
+  const materials = bridgeArtMaterials();
+  const { wood, rope } = materials;
   for (const plan of game.terrainProfile.bridges) {
     const c = spanCoordinates(plan, plan.bx, plan.bz),
       yaw = Math.atan2(c.ux, c.uz);
@@ -36,6 +42,9 @@ export function buildSkyBridges(game) {
       detail,
       open: Number(bridgeDeployed(game.progress, plan)),
       halves: [],
+      deckDetails: [],
+      drums: [],
+      driveActivity: 0,
       lastBank: "a",
     };
     const add = (
@@ -47,7 +56,10 @@ export function buildSkyBridges(game) {
       parent = root,
       capture = false,
     ) => {
-      const m = new THREE.Mesh(geometry, material);
+      const m = new THREE.Mesh(
+        prepareBridgeGeometry(geometry, material, materials),
+        material,
+      );
       m.position.set(x, y, z);
       m.castShadow = m.receiveShadow = true;
       parent.add(m);
@@ -55,55 +67,27 @@ export function buildSkyBridges(game) {
       return m;
     };
     const box = (w, h, d, material, x, y, z, parent = root, capture = false) =>
-      add(new THREE.BoxGeometry(w, h, d), material, x, y, z, parent, capture);
+      add(
+        stoneBlockGeometry(w, h, d, plan.stage * 37 + x * 9 + z),
+        material,
+        x,
+        y,
+        z,
+        parent,
+        capture,
+      );
     for (const [end, sign] of [
       [0, 1],
       [c.length, -1],
     ]) {
-      const bankY = end ? plan.by - plan.ay : 0;
-      for (const side of [-1, 1]) {
-        const x = side * 3.05,
-          z = end - sign * 1.5;
-        const worldX = plan.ax + c.uz * x + c.ux * z,
-          worldZ = plan.az - c.ux * x + c.uz * z;
-        const low = game.groundHeight(worldX, worldZ) - plan.ay;
-        box(
-          1.4,
-          bankY + 6 - low,
-          1.8,
-          stone,
-          x,
-          (low + bankY + 6) / 2,
-          z,
-          root,
-          true,
-        );
-        box(1.7, 0.3, 2.1, trim, x, bankY + 6, z, detail);
-        const drum = add(
-          new THREE.CylinderGeometry(0.62, 0.62, 0.8, 16),
-          wood,
-          x,
-          bankY + 4.8,
-          z + sign * 0.7,
-          detail,
-        );
-        drum.rotation.z = Math.PI / 2;
-        game.obstacles.push({
-          x: worldX,
-          z: worldZ,
-          w: 0.8,
-          d: 1,
-          h: bankY + 6 - low,
-          skyAnchor: true,
-        });
-      }
-      box(7.5, 0.5, 0.7, stone, 0, bankY + 6, end - sign * 1.5, root, true);
+      buildBridgeAnchor({ bridge, c, end, sign, game, m: materials, add, box });
     }
     // Each half folds up from a bank. A pair of anchored suspension cables
     // remains visible above the lowered boards once the associated winch is set.
     for (const side of [-1, 1]) {
-      const curve = new THREE.CatmullRomCurve3(
-        Array.from({ length: 33 }, (_, i) => {
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(side * 2.55, 5.7, -0.49),
+        ...Array.from({ length: 33 }, (_, i) => {
           const s = (i / 32) * c.length;
           return new THREE.Vector3(
             side * 2.55,
@@ -114,10 +98,15 @@ export function buildSkyBridges(game) {
             s,
           );
         }),
-      );
-      add(new THREE.TubeGeometry(curve, 64, 0.065, 6, false), rope, 0, 0, 0);
+        new THREE.Vector3(
+          side * 2.55,
+          plan.by - plan.ay + 5.7,
+          c.length + 0.49,
+        ),
+      ]);
+      add(bridgeRopeGeometry(curve, 0.085, 96), rope, 0, 0, 0);
       const handlinePoints = [
-        new THREE.Vector3(side * 2.55, 1.5, -1.5),
+        new THREE.Vector3(side * 2.55, 1.5, -0.49),
         ...Array.from(
           { length: 33 },
           (_, i) =>
@@ -127,15 +116,34 @@ export function buildSkyBridges(game) {
               (i / 32) * c.length,
             ),
         ),
-        new THREE.Vector3(side * 2.55, plan.by - plan.ay + 1.5, c.length + 1.5),
+        new THREE.Vector3(
+          side * 2.55,
+          plan.by - plan.ay + 1.5,
+          c.length + 0.49,
+        ),
       ];
       add(
-        new THREE.TubeGeometry(
+        bridgeRopeGeometry(
           new THREE.CatmullRomCurve3(handlinePoints),
-          64,
-          0.04,
-          5,
-          false,
+          0.05,
+          48,
+          6,
+        ),
+        rope,
+        0,
+        0,
+        0,
+      );
+      // A permanent rope cradle stays under the independently folding boards.
+      add(
+        bridgeRope(
+          Array.from({ length: 33 }, (_, i) => {
+            const s = (i / 32) * c.length;
+            return [side * 2.55, bridgeDeckY(bridge, s) - plan.ay - 0.23, s];
+          }),
+          0.07,
+          48,
+          6,
         ),
         rope,
         0,
@@ -147,13 +155,30 @@ export function buildSkyBridges(game) {
           top =
             floor + 1.5 + 4.2 * Math.pow(Math.abs((s / c.length) * 2 - 1), 2);
         add(
-          new THREE.CylinderGeometry(0.027, 0.027, top - floor, 5),
+          bridgeRope(
+            [
+              [side * 2.55, floor - 0.23, s],
+              [side * 2.55, top, s],
+            ],
+            0.032,
+            2,
+          ),
           rope,
-          side * 2.55,
-          (floor + top) / 2,
-          s,
+          0,
+          0,
+          0,
           detail,
         );
+        for (const y of [floor - 0.23, floor + 1.5, top]) {
+          const tie = add(
+            new THREE.TorusGeometry(0.093, 0.025, 4, 8),
+            rope,
+            side * 2.55,
+            y,
+            s,
+            detail,
+          );
+        }
       }
     }
     for (let half = 0; half < 2; half++) {
@@ -164,6 +189,9 @@ export function buildSkyBridges(game) {
       pivot.rotation.y = half ? Math.PI : 0;
       root.add(pivot);
       bridge.halves.push(pivot);
+      const deckDetail = new THREE.Group();
+      pivot.add(deckDetail);
+      bridge.deckDetails.push(deckDetail);
       const count = Math.ceil(c.length / 0.8),
         step = c.length / count;
       for (let index = 0; index < count; index++) {
@@ -172,10 +200,18 @@ export function buildSkyBridges(game) {
           continue;
         const local = half ? c.length - s : s,
           y = bridgeDeckY(bridge, s) - (half ? plan.by : plan.ay);
-        const plank = box(
-          plan.width,
-          0.19,
-          step * 0.95,
+        const warning = bridge.gaps.some(
+          (g) =>
+            Math.abs(s - g.start) < step * 1.5 ||
+            Math.abs(s - g.end) < step * 1.5,
+        );
+        const plank = add(
+          bridgeBoardGeometry(
+            plan.width,
+            step * 0.95,
+            game.level.seed + plan.stage * 101 + index,
+            warning,
+          ),
           wood,
           0,
           y - 0.095,
@@ -186,18 +222,51 @@ export function buildSkyBridges(game) {
           (bridgeDeckY(bridge, s + 0.05) - bridgeDeckY(bridge, s - 0.05)) / 0.1;
         plank.rotation.x = (half ? 1 : -1) * Math.atan(slope);
         game.cameraSurfaces?.capture(plank);
-        // Bleached end caps make intentional missing sections legible in motion.
-        if (
-          bridge.gaps.some(
-            (g) =>
-              Math.abs(s - g.start) < step * 1.5 ||
-              Math.abs(s - g.end) < step * 1.5,
-          )
-        )
-          box(plan.width, 0.025, 0.07, trim, 0, y + 0.017, local, pivot);
+        const pairPrevious =
+          index % 2 === 1 &&
+          Number(s - step >= c.length / 2) === half &&
+          !bridgeHasGap(bridge, s - step);
+        if (!pairPrevious) {
+          const pairNext =
+            index % 2 === 0 &&
+            s + step < c.length &&
+            Number(s + step >= c.length / 2) === half &&
+            !bridgeHasGap(bridge, s + step);
+          const tieS = s + (pairNext ? step / 2 : 0);
+          const tieY = bridgeDeckY(bridge, tieS) - (half ? plan.by : plan.ay);
+          for (const side of [-1, 1]) {
+            const lashing = add(
+              bridgeLashingGeometry(step * (pairNext ? 1.95 : 0.95), index),
+              rope,
+              side * 2.13,
+              tieY - 0.095,
+              half ? c.length - tieS : tieS,
+              deckDetail,
+            );
+            lashing.rotation.x = plank.rotation.x;
+          }
+        }
+        if (index % 4 === 0) {
+          const bearer = box(5.2, 0.12, 0.18, wood, 0, y - 0.23, local, pivot);
+          bearer.rotation.x = plank.rotation.x;
+        }
       }
+      for (const side of [-1, 1]) {
+        const points = Array.from({ length: 25 }, (_, i) => {
+          const local = ((i / 24) * c.length) / 2;
+          const s = half ? c.length - local : local;
+          return [
+            side * 2.13,
+            bridgeDeckY(bridge, s) - (half ? plan.by : plan.ay) - 0.23,
+            local,
+          ];
+        });
+        add(bridgeRope(points, 0.045, 48), rope, 0, 0, 0, deckDetail);
+      }
+      mergeArchitecture(deckDetail);
       mergeArchitecture(pivot);
     }
+    for (const { rotor } of bridge.drums) mergeArchitecture(rotor);
     mergeArchitecture(root);
     mergeArchitecture(detail);
     const middle = c.length / 2;
@@ -223,6 +292,23 @@ export function buildSkyBridges(game) {
       skyBridge: plan.id,
       activity: bridge.open,
     });
+    for (const [i, { rotor, sign }] of bridge.drums.entries()) {
+      const position = rotor.position.clone();
+      position.z += sign * 0.4;
+      detail.localToWorld(position);
+      game.skyBridgeSources.push({
+        id: `${plan.id}-drum-${i}`,
+        kind: "rope",
+        x: position.x,
+        y: position.y,
+        z: position.z,
+        gain: 0.14,
+        near: 2,
+        range: 22,
+        skyBridgeDrum: plan.id,
+        activity: 0,
+      });
+    }
     game.skyBridges.push(bridge);
     poseBridge(bridge);
   }
@@ -248,6 +334,8 @@ export function buildSkyBridges(game) {
 function poseBridge(bridge) {
   for (const pivot of bridge.halves)
     pivot.rotation.x = -(1 - bridge.open) * Math.PI * 0.47;
+  for (const { rotor, side, sign } of bridge.drums)
+    rotor.rotation.x = bridge.open * Math.PI * 6 * side * sign;
 }
 
 export function updateSkyBridges(game, dt) {
@@ -257,6 +345,10 @@ export function updateSkyBridges(game, dt) {
     const target = Number(bridgeDeployed(game.progress, bridge));
     bridge.open = THREE.MathUtils.damp(bridge.open, target, 1.7, dt);
     if (Math.abs(bridge.open - target) < 0.001) bridge.open = target;
+    bridge.driveActivity =
+      bridge.open > 0 && bridge.open < 1
+        ? Math.min(1, Math.abs(target - bridge.open) * 3 + 0.15)
+        : 0;
     poseBridge(bridge);
     const p = spanCoordinates(
       bridge,
@@ -273,6 +365,8 @@ export function updateSkyBridges(game, dt) {
         ? 0.5
         : 0);
     bridge.detail.visible = Math.hypot(p.along - p.length / 2, p.across) < 85;
+    for (const detail of bridge.deckDetails)
+      detail.visible = Math.hypot(p.along - p.length / 2, p.across) < 48;
     if (Math.abs(p.across) < 5 && p.along >= -3 && p.along <= p.length + 3) {
       if (p.along < 1.5 && game.grounded) bridge.lastBank = "a";
       if (p.along > p.length - 1.5 && game.grounded) bridge.lastBank = "b";
