@@ -1,4 +1,5 @@
 import { normalizeWind } from "./wind-rules.js";
+import { normalizeCipher } from "./cipher-rules.js";
 import { normalizeHydraulics } from "./hydraulic-rules.js";
 import { normalizeResonance } from "./resonance-rules.js";
 import { normalizeThermal } from "./thermal-rules.js";
@@ -92,6 +93,7 @@ export function normalizeSave(value) {
         ? Math.max(0, v.routeVersion)
         : 0,
       counterweights: normalizeWeights(key, v.counterweights),
+      cipher: key === "verdant" ? normalizeCipher(v.cipher) : {},
       alignments: key === "eclipse" ? normalizeAlignments(v.alignments) : {},
       solar: key === "sands" ? normalizeSolar(v.solar) : {},
       bells: key === "frost" ? normalizeBells(v.bells) : {},
@@ -167,6 +169,7 @@ export class SaveStore {
       completed: false,
       routeVersion: 0,
       counterweights: normalizeWeights(id, null),
+      cipher: {},
       alignments: {},
       solar: {},
       bells: {},

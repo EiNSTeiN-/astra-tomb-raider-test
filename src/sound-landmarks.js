@@ -91,6 +91,7 @@ export function buildSoundLandmarks(game) {
   }
   game.soundSources.push(...(game.forgeSources || []).map((s) => ({ ...s })));
   game.soundSources.push(...(game.windSources || []).map((s) => ({ ...s })));
+  game.soundSources.push(...(game.cipherSources || []).map((s) => ({ ...s })));
   game.soundSources.push(...(game.thermalSources || []).map((s) => ({ ...s })));
   game.soundSources.push(
     ...(game.resonanceSources || []).map((s) => ({ ...s })),
@@ -169,6 +170,10 @@ export function updateSoundSources(game) {
       source.activity = live?.activity || 0;
       if (live) source.rate = live.rate;
     }
+    if (source.cipherStage !== undefined)
+      source.activity =
+        game.cipherSites?.[source.cipherStage]?.nodes[source.cipherIndex]?.sound
+          .activity || 0;
     if (source.thermalStage !== undefined) {
       const node =
         game.thermalSites?.[source.thermalStage]?.nodes[source.thermalIndex];

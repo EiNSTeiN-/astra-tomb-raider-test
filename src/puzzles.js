@@ -1,4 +1,12 @@
 import {
+  CIPHER_TRIALS,
+  cipherLayout,
+  cipherInput,
+  cipherClue,
+  cipherName,
+  normalizeCipher,
+} from "./cipher-rules.js";
+import {
   WIND_TRIALS,
   windLayout,
   windInput,
@@ -92,12 +100,7 @@ export function createPuzzle(level, stage) {
     type = PUZZLE_TYPES[level.biome],
     state = { type, stage, moves: 0, seed: level.seed + stage * 1987 };
   if (type === "cipher") {
-    state.target = Array.from({ length: 4 }, () => Math.floor(rng() * 4));
-    if (state.target.every((v) => !v)) state.target[0] = 1;
-    state.values = [0, 0, 0, 0];
-    state.relations = state.target.map(
-      (v, i) => (v - (i ? state.target[i - 1] : 0) + 4) % 4,
-    );
+    Object.assign(state, cipherLayout(stage));
   }
   if (type === "mirrors") {
     Object.assign(state, solarLayout(stage));
@@ -139,6 +142,8 @@ export function isSolved(s) {
   return equal(s.values, s.target);
 }
 export function applyMove(s, action) {
+  if (s.type === "cipher")
+    return cipherInput(s, action.index, action.delta ?? 1);
   if (s.type === "sluices") return hydraulicInput(s, action.index);
   if (s.type === "forge") return thermalInput(s, action.index);
   if (s.type === "resonance")
@@ -146,7 +151,6 @@ export function applyMove(s, action) {
   if (s.type === "bridges") return windInput(s, action.index);
   s.moves++;
   const i = action.index;
-  if (s.type === "cipher") s.values[i] = (s.values[i] + 1) % 4;
   if (s.type === "mirrors") s.values[i] = 1 - s.values[i];
   if (s.type === "echo" && !s.playing) {
     if (s.values.length < s.target.length) s.values.push(i);
@@ -160,8 +164,12 @@ export function applyMove(s, action) {
 export function hint(s, l) {
   const symbol = (n) => l.symbols[n];
   switch (s.type) {
-    case "cipher":
-      return `The first ring is ${symbol(s.target[0])}. Each remaining ring advances from the previous one through this cycle: ${l.symbols.join(" → ")} → ${l.symbols[0]}.`;
+    case "cipher": {
+      const i = s.values.findIndex((v, i) => v !== s.target[i]);
+      return i < 0
+        ? "Every line of the covenant agrees. Activate the sun gate."
+        : `The inscriptions together place ${symbol(s.target[i])} on drum ${cipherName(i)}. Follow the cycle ${l.symbols.join(" → ")} → ${l.symbols[0]}.`;
+    }
     case "mirrors": {
       const i = s.values.findIndex((v, i) => v !== s.target[i]);
       return i < 0
@@ -223,6 +231,10 @@ export function hint(s, l) {
 
 export function restorePuzzle(level, stage, saved) {
   const state = createPuzzle(level, stage);
+  if (state.type === "cipher") {
+    const value = normalizeCipher({ [stage]: saved })[stage];
+    if (value) Object.assign(state, value);
+  }
   if (state.type === "forge") {
     const value = normalizeThermal({ [stage]: saved })[stage];
     if (value)
@@ -290,8 +302,7 @@ export function mountPuzzle(
     render();
   };
   const describe = {
-    cipher:
-      "The first sign is named. Each subsequent ring advances through the cycle by its engraved count.",
+    cipher: CIPHER_TRIALS[stage]?.instruction,
     mirrors:
       "Rotate the mirrors to guide sunlight from the left emitter to the right receiver.",
     echo: BELL_LESSONS[stage]?.instruction,
@@ -314,6 +325,10 @@ export function mountPuzzle(
       return;
     const event = applyMove(state, { index, delta });
     options.onChange?.(state, event);
+    if (type === "cipher" && event.kind === "changed") {
+      feedback.classList.remove("incorrect");
+      feedback.textContent = `Drum ${cipherName(index)} now bears ${level.symbols[state.values[index]]}. Compare the covenant's inscriptions.`;
+    }
     if (type === "sluices") {
       feedback.classList.remove("incorrect");
       feedback.textContent = hydraulicMessage(event);
@@ -328,7 +343,9 @@ export function mountPuzzle(
     if (type === "echo") {
       if (options.onStrike) options.onStrike(index);
       else audio.note?.([261.63, 329.63, 392, 523.25][index]);
-    } else if (!["sluices", "forge", "resonance", "bridges"].includes(type))
+    } else if (
+      !["cipher", "sluices", "forge", "resonance", "bridges"].includes(type)
+    )
       audio.tone();
     render();
   };
@@ -336,12 +353,7 @@ export function mountPuzzle(
     if (disposed) return;
     let html = `<p class="mechanism-instructions">${describe[type]}</p>`;
     if (type === "cipher") {
-      html += `<div class="rune-cycle">${level.symbols.map((name, i) => `<span>${sym(i)} <small>${name}</small></span>`).join("<b>→</b>")}</div><div class="cipher-clue">First: <b>${level.symbols[state.target[0]]}</b><span>Then advance: ${state.relations
-        .slice(1)
-        .map((n) => `+${n}`)
-        .join(
-          " / ",
-        )}</span></div><div class="cipher-rings">${state.values.map((v, i) => `<button class="cipher-ring" data-move="${i}" aria-label="Rotate ring ${i + 1}: ${level.symbols[v]}"><span class="ring-number">${String(i + 1).padStart(2, "0")}</span><b>${sym(v)}</b><span>${level.symbols[v]}</span><span>↻</span></button>`).join("")}</div>`;
+      html += `<div class="rune-cycle">${level.symbols.map((name, i) => `<span>${sym(i)} <small>${name}</small></span>`).join("<b>→</b>")}</div><div class="covenant-clues">${CIPHER_TRIALS[stage].clues.map((c) => `<p>${cipherClue(c)}</p>`).join("")}</div><div class="covenant-drums">${state.values.map((v, i) => `<article><span class="eyebrow">DRUM ${cipherName(i)}</span><b>${sym(v)}</b><span>${level.symbols[v]}</span><div><button data-move="${i}" data-delta="-1" aria-label="Turn drum ${cipherName(i)} backward">↶</button><button data-move="${i}" data-delta="1" aria-label="Turn drum ${cipherName(i)} forward">↷</button></div></article>`).join("")}</div><p class="small-copy">Every turn saves. All inscriptions must agree.</p>`;
     }
     if (type === "mirrors") {
       const beam = beamPath(state),

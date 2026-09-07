@@ -1,4 +1,5 @@
 import { random } from "./campaign.js";
+import { inCipherCourt } from "./cipher-rules.js";
 
 // Placement is computed independently of asset loading so detail tiers and
 // reloads share the same silhouettes. Trunks stay off the navigable grid.
@@ -39,6 +40,7 @@ export function woodlandLayout(map, level, height) {
         gx = Math.round(px / 7),
         gz = Math.round(pz / 7);
       if (map.grid[gz]?.[gx]) continue;
+      if (inCipherCourt(map, px, pz, 2)) continue;
       // Tree bases cannot intrude into a path even when a canopy overhangs it.
       if (
         [
@@ -161,6 +163,7 @@ export function understoryLayout(map, level, profile, trees) {
   const rng = random(level.seed + 5137),
     plants = [];
   const add = (x, z, kind) => {
+    if (inCipherCourt(map, x, z, 1)) return;
     if (profile.trail(x, z) > 0.48 || profile.court(x, z) > 0.6) return;
     if (map.features.some((f) => Math.hypot(f.x * 7 - x, f.z * 7 - z) < 4.5))
       return;

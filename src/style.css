@@ -3543,3 +3543,28 @@ body:has(.wind-focus) #game-screen > :not(#game-canvas) { visibility: hidden; }
   .resonance-controls .resonator > small { display: none; }
   .resonance-stone > b { font-size: 16px; }
 }
+
+.covenant-clues { border-left: 2px solid #b9a36c; padding: 2px 0 2px 14px; margin: 16px 0; }
+.covenant-clues p { margin: 5px 0; color: #d9d4c6; font: 14px/1.5 Georgia, serif; }
+.covenant-drums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.covenant-drums article { display: grid; grid-template-columns: 30px 1fr; align-items: center; gap: 3px 6px; padding: 8px; border: 1px solid #aaa58438; background: #9092780b; text-align: center; }
+.covenant-drums article > .eyebrow { grid-column: 1 / -1; margin: 0; font-size: 8px; line-height: 1.3; }
+.covenant-drums article > b { grid-row: 2 / 4; font-size: 29px; line-height: 1; color: #d8c28d; }
+.covenant-drums article > span:not(.eyebrow) { font-size: 9px; line-height: 1.2; letter-spacing: .12em; color: #d9d4c6; }
+.covenant-drums article > div { display: flex; justify-content: center; gap: 5px; }
+.covenant-drums button { width: 40px; height: 36px; border: 1px solid #b1ab8755; background: #b4aa7115; color: #ebe4cd; font-size: 22px; cursor: pointer; }
+.covenant-drums button:hover, .covenant-drums button:focus-visible { background: #b4aa7144; outline: 1px solid #d8c28d; }
+.cipher-focus .modal { width: 430px; }
+.cipher-focus .rune-cycle { gap: 5px; margin: 8px 0; padding: 10px 5px; }
+.cipher-focus .rune-cycle > span { min-width: 45px; }
+body:has(.cipher-focus) #game-screen > :not(#game-canvas) { visibility: hidden; }
+@media (max-width: 600px) and (min-height: 561px) {
+  .cipher-focus .modal { width: 100%; max-height: 55vh; }
+  .cipher-focus .covenant-drums { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-height: 560px) {
+  .cipher-focus .modal { width: 340px; padding: 12px; }
+  .cipher-focus .modal h2 { font-size: 21px; }
+  .cipher-focus .covenant-clues p { font-size: 12px; margin: 3px 0; }
+  .cipher-focus .covenant-drums article { padding: 7px 3px; }
+}

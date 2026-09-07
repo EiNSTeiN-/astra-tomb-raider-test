@@ -1,4 +1,5 @@
 import { inWindCourt } from "./wind-rules.js";
+import { inCipherCourt } from "./cipher-rules.js";
 import { inHydraulicCourt } from "./hydraulic-rules.js";
 import { inResonanceCourt } from "./resonance-rules.js";
 import { inThermalCourt } from "./thermal-rules.js";
@@ -219,6 +220,9 @@ export async function loadNature(game) {
     const rock = asset.name.startsWith("rock"),
       fern = asset.name.startsWith("fern");
     const scattered = locations
+      .filter(
+        (p) => biome !== "jungle" || !inCipherCourt(game.map, p.x, p.z, 1),
+      )
       .filter(
         (p) =>
           biome !== "sky" ||

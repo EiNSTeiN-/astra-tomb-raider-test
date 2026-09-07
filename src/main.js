@@ -1,6 +1,7 @@
 import { WIND_TRIALS, windName } from "./wind-rules.js";
 import { HYDRAULIC_TRIALS } from "./hydraulic-rules.js";
 import { RESONANCE_TRIALS, resonanceClue } from "./resonance-rules.js";
+import { CIPHER_TRIALS, cipherClue, cipherName } from "./cipher-rules.js";
 import { THERMAL_TRIALS } from "./thermal-rules.js";
 import {
   createIcons,
@@ -533,6 +534,7 @@ function updateHUD(s) {
       "thermal",
       "resonator",
       "wind",
+      "cipher",
     ].includes(s.nearest.type)
       ? s.nearest.label
       : {
@@ -701,6 +703,7 @@ function modal(
     game.thermalFocus = null;
     game.resonanceFocus = null;
     game.windFocus = null;
+    game.cipherFocus = null;
   }
   if (inGame) {
     game.setPaused(true);
@@ -743,6 +746,11 @@ function closeModal(resume = true) {
   mountedPuzzle = null;
   document.querySelector("#modal-root").innerHTML = "";
   currentModal = null;
+  if (game?.cipherFocus != null) {
+    game.cipherFocus = null;
+    game.presentationRemaining = 0;
+    game.updateCamera(1);
+  }
   if (game?.windFocus != null) {
     game.windFocus = null;
     game.presentationRemaining = 0;
@@ -1191,8 +1199,34 @@ function showWindGuide(f, l) {
         "Air has not reached the receiver. Follow the silver stream to its first break.";
   };
 }
+function showCipherGuide(f, l) {
+  const trial = CIPHER_TRIALS[f.stage],
+    state = restorePuzzle(l, f.stage, game.progress.cipher?.[f.stage]);
+  modal(
+    trial.title,
+    `<div class="note-paper"><p>${trial.instruction}</p></div><p class="small-copy">Read the sign facing the handwheel. Press <kbd>E</kbd> (Use on touch) to turn a drum forward. Hold Shift with E to turn backward. The cycle is SUN → ROOT → RAIN → MOON → SUN.</p><div class="covenant-clues">${trial.clues.map((c) => `<p>${cipherClue(c)}</p>`).join("")}</div><p class="small-copy">${state.values.map((v, i) => `${cipherName(i)}: ${l.symbols[v]}`).join(" · ")}<br>Every turn saves.</p><div class="pause-buttons"><button class="primary-button full-width" id="cipher-activate">Activate the sun gate ${icon("ArrowRight")}</button><button class="secondary-button" id="cipher-diagram">Inspect the carved drums</button><button class="secondary-button" data-close>Return to the court</button><button class="text-button" id="cipher-reset">Reset the drums</button></div><p id="cipher-feedback" class="puzzle-feedback" role="status"></p>`,
+    "puzzle",
+    `KEEPER'S COVENANT · ${number(f.stage + 1)} / ${number(l.mechanisms)}`,
+  );
+  document.querySelector("#cipher-diagram").onclick = () =>
+    showPuzzle(f, l, true);
+  document.querySelector("#cipher-reset").onclick = () => {
+    game.setCipherValues(f.stage, createPuzzle(l, f.stage));
+    showCipherGuide(f, l);
+  };
+  document.querySelector("#cipher-activate").onclick = () => {
+    if (isSolved(restorePuzzle(l, f.stage, game.progress.cipher?.[f.stage]))) {
+      closeModal(false);
+      game.solve(f);
+    } else
+      document.querySelector("#cipher-feedback").textContent =
+        "The signs do not yet satisfy every line of the covenant. Compare the drum numbers and the complete inscriptions.";
+  };
+}
 function showPuzzle(f, l, diagram = false) {
   const type = PUZZLE_TYPES[l.biome];
+  if (type === "cipher" && !diagram && game.cipherSites?.length)
+    return showCipherGuide(f, l);
   if (type === "bridges" && !diagram && game.windSites?.length)
     return showWindGuide(f, l);
   if (type === "resonance" && !diagram && game.resonanceSites?.length)
@@ -1206,13 +1240,15 @@ function showPuzzle(f, l, diagram = false) {
   if (type === "echo" && !diagram && game.bellSites?.length)
     return showBellGuide(f, l);
   modal(
-    type === "bridges"
-      ? WIND_TRIALS[f.stage].title
-      : type === "resonance"
-        ? RESONANCE_TRIALS[f.stage].title
-        : type === "forge"
-          ? THERMAL_TRIALS[f.stage].title
-          : PUZZLE_TITLES[type],
+    type === "cipher"
+      ? CIPHER_TRIALS[f.stage].title
+      : type === "bridges"
+        ? WIND_TRIALS[f.stage].title
+        : type === "resonance"
+          ? RESONANCE_TRIALS[f.stage].title
+          : type === "forge"
+            ? THERMAL_TRIALS[f.stage].title
+            : PUZZLE_TITLES[type],
     `<p class="modal-description">${l.objectiveNames[f.stage]}</p><div id="puzzle-board"></div><p id="puzzle-feedback" class="puzzle-feedback" role="status">Study the mechanism. Every movement tells you something.</p><div class="puzzle-actions"><button class="text-button" id="puzzle-reset">${icon("RotateCcw")} Reset</button><button class="text-button" id="puzzle-hint">${icon("BookOpen")} Field hint</button><button class="primary-button" id="puzzle-submit">Activate ${icon("ArrowRight")}</button></div>`,
     "puzzle",
     `ANCIENT MECHANISM · ${number(f.stage + 1)} / ${number(l.mechanisms)}`,
@@ -1231,62 +1267,77 @@ function showPuzzle(f, l, diagram = false) {
       closeModal(false);
       game.solve(f);
     },
-    type === "bridges"
+    type === "cipher"
       ? {
-          resume: game.progress.wind?.[f.stage],
-          onChange: (state, event) => game.setWindValues(f.stage, state, event),
+          resume: game.progress.cipher?.[f.stage],
+          onChange: (state, event) =>
+            game.setCipherValues(f.stage, state, event),
         }
-      : type === "resonance"
+      : type === "bridges"
         ? {
-            resume: game.progress.resonance?.[f.stage],
+            resume: game.progress.wind?.[f.stage],
             onChange: (state, event) =>
-              game.setResonanceValues(f.stage, state, event),
+              game.setWindValues(f.stage, state, event),
           }
-        : type === "forge"
+        : type === "resonance"
           ? {
-              resume: game.progress.thermal?.[f.stage],
+              resume: game.progress.resonance?.[f.stage],
               onChange: (state, event) =>
-                game.setThermalValues(f.stage, state, event),
+                game.setResonanceValues(f.stage, state, event),
             }
-          : type === "orrery"
+          : type === "forge"
             ? {
-                resume: game.progress.alignments?.[f.stage],
-                onChange: (state) => {
-                  game.progress.alignments ||= {};
-                  game.progress.alignments[f.stage] = {
-                    values: [...state.values],
-                    moves: state.moves,
-                  };
-                  // Animate the instrument briefly while field simulation stays paused.
-                  game.presentationRemaining = 1.2;
-                  game.renderOnce = true;
-                  game.save();
-                },
+                resume: game.progress.thermal?.[f.stage],
+                onChange: (state, event) =>
+                  game.setThermalValues(f.stage, state, event),
               }
-            : type === "sluices"
+            : type === "orrery"
               ? {
-                  resume: game.progress.hydraulics?.[f.stage],
-                  onChange: (state, event) =>
-                    game.setHydraulicValues(f.stage, state, event),
-                  canMove: () => !game.hydraulicSites?.[f.stage]?.flow,
+                  resume: game.progress.alignments?.[f.stage],
+                  onChange: (state) => {
+                    game.progress.alignments ||= {};
+                    game.progress.alignments[f.stage] = {
+                      values: [...state.values],
+                      moves: state.moves,
+                    };
+                    // Animate the instrument briefly while field simulation stays paused.
+                    game.presentationRemaining = 1.2;
+                    game.renderOnce = true;
+                    game.save();
+                  },
                 }
-              : type === "mirrors"
+              : type === "sluices"
                 ? {
-                    resume: game.progress.solar?.[f.stage],
-                    onChange: (state) => game.setSolarValues(f.stage, state),
+                    resume: game.progress.hydraulics?.[f.stage],
+                    onChange: (state, event) =>
+                      game.setHydraulicValues(f.stage, state, event),
+                    canMove: () => !game.hydraulicSites?.[f.stage]?.flow,
                   }
-                : type === "echo"
+                : type === "mirrors"
                   ? {
-                      resume: game.progress.bells?.[f.stage],
-                      onChange: (state) => game.setBellValues(f.stage, state),
-                      onStrike: (note) => game.strikeBell(f.stage, note),
-                      onPlayback: () => {
-                        game.playBellPhrase(f.stage, { presentation: true });
-                        return () => game.stopBellPhrase();
-                      },
+                      resume: game.progress.solar?.[f.stage],
+                      onChange: (state) => game.setSolarValues(f.stage, state),
                     }
-                  : {},
+                  : type === "echo"
+                    ? {
+                        resume: game.progress.bells?.[f.stage],
+                        onChange: (state) => game.setBellValues(f.stage, state),
+                        onStrike: (note) => game.strikeBell(f.stage, note),
+                        onPlayback: () => {
+                          game.playBellPhrase(f.stage, { presentation: true });
+                          return () => game.stopBellPhrase();
+                        },
+                      }
+                    : {},
   );
+  if (type === "cipher") {
+    document
+      .querySelector(".modal-backdrop")
+      .classList.add("orrery-focus", "cipher-focus");
+    game.cipherFocus = f.stage;
+    game.renderOnce = true;
+    game.updateCamera(1);
+  }
   if (type === "bridges") {
     document
       .querySelector(".modal-backdrop")

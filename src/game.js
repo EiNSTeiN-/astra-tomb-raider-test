@@ -1,5 +1,15 @@
 import { disposeInstanceBuffers } from "./instance-lod.js";
 import {
+  buildCipherCourts,
+  updateCipherCourts,
+  cipherReady,
+  cipherInteract,
+  cipherTarget,
+  saveCipherState,
+  settleCipher,
+  focusCipher,
+} from "./cipher-courts.js";
+import {
   buildWindCourts,
   updateWindCourts,
   windReady,
@@ -584,6 +594,7 @@ export class Adventure {
     buildThermalCourts(this);
     buildResonanceCourts(this);
     buildWindCourts(this);
+    buildCipherCourts(this);
     buildHazards(this);
     buildSoundLandmarks(this);
     this.cameraSurfaces.rebuild();
@@ -1327,6 +1338,9 @@ export class Adventure {
         (f.type === "resonator" &&
           (!resonanceReady(this, this.resonanceSites[f.stage]) ||
             Math.abs(p.y - f.group.position.y) > 0.8)) ||
+        (f.type === "cipher" &&
+          (!cipherReady(this, this.cipherSites[f.stage]) ||
+            Math.abs(p.y - f.group.position.y) > 0.8)) ||
         (f.type === "thermal" &&
           (!thermalReady(this, this.thermalSites[f.stage]) ||
             Math.abs(this.player.position.y - f.group.position.y) > 0.8)) ||
@@ -1350,7 +1364,13 @@ export class Adventure {
             ? 2.6
             : f.type === "solar"
               ? 2.25
-              : ["hydraulic", "thermal", "resonator", "wind"].includes(f.type)
+              : [
+                    "hydraulic",
+                    "thermal",
+                    "resonator",
+                    "wind",
+                    "cipher",
+                  ].includes(f.type)
                 ? 1.6
                 : f.type === "bell"
                   ? 1.35
@@ -1445,6 +1465,7 @@ export class Adventure {
     if (
       this.resonanceFocus == null &&
       this.windFocus == null &&
+      this.cipherFocus == null &&
       (this.camera.fov !== 58 || this.camera.filmOffset !== 0)
     ) {
       this.camera.fov = 58;
@@ -1457,7 +1478,8 @@ export class Adventure {
       focusHydraulics(this) ||
       focusThermal(this) ||
       focusResonance(this) ||
-      focusWind(this)
+      focusWind(this) ||
+      focusCipher(this)
     ) {
       updateAtmosphere(this, this.player.position);
       return;
@@ -1539,6 +1561,7 @@ export class Adventure {
           "thermal",
           "resonator",
           "wind",
+          "cipher",
         ].includes(f.type)
       ) {
         f.core.rotation.y = this.elapsed * 0.6;
@@ -1560,6 +1583,7 @@ export class Adventure {
     updateThermalCourts(this, solarDt);
     updateResonanceCourts(this, solarDt);
     updateWindCourts(this, solarDt);
+    updateCipherCourts(this, solarDt);
     updateWaterSurfaces(this, dt);
     updateSoundLandmarks(this);
     this.flames.forEach((f, i) => {
@@ -1581,6 +1605,7 @@ export class Adventure {
     p.needsUpdate = true;
   }
   interact() {
+    if (cipherInteract(this)) return;
     if (hydraulicInteract(this)) return;
     if (thermalInteract(this)) return;
     if (resonanceInteract(this)) return;
@@ -1667,6 +1692,9 @@ export class Adventure {
   }
   setHydraulicValues(stage, state, event) {
     return saveHydraulicState(this, stage, state, event);
+  }
+  setCipherValues(stage, state, event) {
+    return saveCipherState(this, stage, state, event);
   }
   setWindValues(stage, state, event) {
     return saveWindState(this, stage, state, event);
@@ -1844,7 +1872,8 @@ export class Adventure {
       hydraulicTarget(this) ||
       thermalTarget(this) ||
       resonanceTarget(this) ||
-      windTarget(this);
+      windTarget(this) ||
+      cipherTarget(this);
     const objectiveTarget = this.progress.completed
       ? null
       : this.items.find((f) => f.id === task?.id) ||
@@ -1875,19 +1904,21 @@ export class Adventure {
             ? `Restore the counterweights · ${this.counterweights.trial.title}`
             : null) ||
           (opticalTarget
-            ? opticalTarget.type === "wind"
-              ? "Guide the wind to the engine’s receiver"
-              : opticalTarget.type === "resonator"
-                ? "Tune the array and recover its memory"
-                : opticalTarget.type === "thermal"
-                  ? "Match the regulator’s firing record"
-                  : opticalTarget.type === "hydraulic"
-                    ? "Match the royal measure in the hydraulic court"
-                    : opticalTarget.type === "bell"
-                      ? "Learn and answer the bellkeeper's lesson"
-                      : opticalTarget.kind === "receiver"
-                        ? "Activate the illuminated receiver"
-                        : "Follow and redirect the sunlight"
+            ? opticalTarget.type === "cipher"
+              ? "Read the covenant and align its carved drums"
+              : opticalTarget.type === "wind"
+                ? "Guide the wind to the engine’s receiver"
+                : opticalTarget.type === "resonator"
+                  ? "Tune the array and recover its memory"
+                  : opticalTarget.type === "thermal"
+                    ? "Match the regulator’s firing record"
+                    : opticalTarget.type === "hydraulic"
+                      ? "Match the royal measure in the hydraulic court"
+                      : opticalTarget.type === "bell"
+                        ? "Learn and answer the bellkeeper's lesson"
+                        : opticalTarget.kind === "receiver"
+                          ? "Activate the illuminated receiver"
+                          : "Follow and redirect the sunlight"
             : null) ||
           this.level.objectiveNames[this.progress.stage] ||
           `Recover ${this.level.artifact}`,
@@ -1937,7 +1968,7 @@ export class Adventure {
               this.thermalSites?.[this.progress.stage]?.moving ||
               this.windSites?.[this.progress.stage]?.moving
             ? "valve"
-            : this.blockGrip
+            : this.blockGrip || this.cipherSites?.[this.progress.stage]?.moving
               ? "lift"
               : this.ropeRide || this.zipRide
                 ? "climb"
@@ -1994,6 +2025,7 @@ export class Adventure {
       settleThermal(this);
       settleResonance(this);
       settleWind(this);
+      settleCipher(this);
     }
     this.paused = value;
     this.presentationRemaining = 0;

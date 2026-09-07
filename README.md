@@ -51,6 +51,12 @@ Desert mirrors use **E / Use** at each numbered handwheel. Follow the reflected 
 
 Mountain bells use **E / Use** at each named pull rope. Read the bellkeeper's tablet, listen to its phrase, and answer according to its repeat, reverse, or shifted-sign rule. The tablet offers replay, reset, activation, and focused controls. Replaying preserves your partial answer.
 
+Jungle glyph drums use **E / Use** to advance through SUN, ROOT, RAIN and MOON;
+**Shift + E** turns backward. Read each court's covenant and satisfy every
+inscription before activating its sun gate. Counts, matching pairs, exclusions and
+different-sign groups replace the former repeated dialog-only sequence. Focused
+controls offer both directions and share the same saved unfinished turns.
+
 ## Campaign
 
 All chapters can be selected from the expedition screen and maintain independent progress.
@@ -83,6 +89,12 @@ Liquid pools have excavated beds and shallow banks. Vesper automatically swims i
 Vesper now uses a human mesh with textured skin and hair, weathered olive clothing, and fitted expedition equipment. Retargeted locomotion keeps the shoes grounded; arm and leg poses support swimming, jumping, mantling, ropes and cables. Firing draws a visible sidearm with a two-hand grip. The character remains an adapted base model with procedural pose overlays; see [character art notes](docs/character-art.md).
 
 The jungle sanctuaries now have supported stone arcades, recessed botanical carvings, weathered blocks, broken roof sections, and varied side galleries. Fine relief detail has a shorter draw distance than the structural masonry. Older saves made inside a newly added support recover on nearby clear ground.
+
+Eight authored glyph covenants occupy these sanctuaries' forecourts, with 42
+four-faced stone drums, working handwheels, relief signs and shared inscription
+tablets. Four- to six-drum deductions progress from following a cycle to combining
+counts, matching pairs and exclusions. Stone sounds follow each turning drive,
+and unfinished work saves after every turn. See [covenant court notes](docs/cipher-courts.md).
 
 The jungle has denser woodland along route edges, two scanned broadleaf tree forms, fern and shrub clusters, and roots with climbing leaves on ruin piers. A moss-and-leaf-litter material blends into worn trails and stone courts. Its daylight sky shares a sun direction with scene lighting. Trees, shrubs, ferns, and rocks use per-instance distance selection. Three tree tiers preserve near detail, with short dithered transitions and matching wind in leaf shadows. [Rendering workload notes](docs/rendering-budget.md) record a 69% reduction in submitted triangles at the low-quality jungle spawn. These additions improve environmental dressing; they do not establish AAA visual quality or a supported hardware frame rate.
 
