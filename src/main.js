@@ -1,4 +1,6 @@
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
+import { GALLERY_RECORD } from "./sunken-gallery-record.js";
+import { drawGalleryMap } from "./sunken-gallery-map.js";
 import { WIND_TRIALS, windName } from "./wind-rules.js";
 import { HYDRAULIC_TRIALS } from "./hydraulic-rules.js";
 import { RESONANCE_TRIALS, resonanceClue } from "./resonance-rules.js";
@@ -532,7 +534,7 @@ function updateHUD(s) {
             ["W A S D", "Swim"],
             ["X", "Descend"],
             ["SPACE", "Rise"],
-            ["E", "Recover"],
+            ["E", "Use / recover"],
             ["J", "Journal"],
             ["ESC", "Pause"],
           ]
@@ -551,9 +553,11 @@ function updateHUD(s) {
   }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent = s.diving
-    ? `${number(s.archive)} / 05`
-    : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.gallery
+    ? `${number(s.galleryStage)} / 02`
+    : s.diving
+      ? `${number(s.archive)} / 05`
+      : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
   document.querySelector("#objective-distance").textContent = s.target
     ? `${s.distance} m away`
@@ -561,7 +565,10 @@ function updateHUD(s) {
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
-  if (s.diving)
+  if (s.gallery)
+    document.querySelector("#objective-detail").textContent =
+      "Optional exploration · Memorial gallery · Bronze air bells replenish your breath";
+  else if (s.diving)
     document.querySelector("#objective-detail").textContent =
       "Optional exploration · Five sounding wells · Pause → Field journal";
   else if (s.archive !== null)
@@ -647,6 +654,7 @@ function updateWaypoint(s) {
 }
 function drawMap(canvas, full = false, s = game?.state()) {
   if (!game || !s) return;
+  if (s.gallery) return drawGalleryMap(canvas, game, full);
   const c = canvas.getContext("2d"),
     w = canvas.width,
     h = canvas.height;
@@ -888,10 +896,11 @@ function showPause() {
 }
 function showMap() {
   if (!inGame) return;
+  const state = game.state();
   modal(
     "Follow the forgotten paths.",
-    `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${game.state().objective}</p>${
-      game.state().mission
+    `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${state.objective}</p>${
+      !state.gallery && state.mission
         ? `<p class="small-copy">${game.state().mission.briefing}</p><ol class="field-checklist">${game
             .state()
             .mission.tasks.map(
@@ -900,7 +909,7 @@ function showMap() {
             )
             .join("")}</ol>`
         : ""
-    }<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p><button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
+    } ${state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
     "map",
     "EXPEDITION CARTOGRAPHY",
     true,
@@ -910,7 +919,7 @@ function showMap() {
 function showGuide() {
   modal(
     "Leave no story buried.",
-    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. Reloading a dive brings you safely to the surface with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Fire with F or a mouse click. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
+    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. A passage in the western bank of the first sounding well leads beneath the harbor court. Bronze air bells refill your breath; dive below their skirts to leave. Find the emergency wheel beyond the collapsed colonnade to open the memorial and its return passage. Reloading in the gallery returns you to your last air bell; other dives return to the surface, with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Fire with F or a mouse click. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
       ["W A S D / ↑ ↓ ← →", "Move"],
       ["MOUSE / Z C", "Look around"],
       ["SHIFT", "Sprint"],
@@ -935,6 +944,10 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const gallery = store.data.levels.tides?.gallery;
+  const gallerySection = gallery?.visited?.length
+    ? `<section class="tide-journal"><span class="eyebrow">THE SUBMERGED MEMORIAL · ${gallery.recovered ? "RECOVERED" : "IN PROGRESS"}</span><h3>${GALLERY_RECORD.title}</h3>${gallery.recovered ? `<p>${GALLERY_RECORD.text}</p><p class="small-copy">${GALLERY_RECORD.note}</p>` : "<p>A passage beneath the harbor well leads to the tidekeepers' memorial. Follow the bronze survey line, use the two air bells to catch your breath, and find the emergency wheel beyond the collapsed colonnade. It opens the memorial and an eastern return passage.</p>"}</section>`
+    : "";
   const archive = TIDE_ARCHIVE.filter((r) =>
     store.data.levels.tides?.archive?.includes(r.id),
   );
@@ -956,7 +969,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${archiveSection}${entries.length || memories.length || archive.length ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,

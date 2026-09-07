@@ -122,11 +122,41 @@ test("chunk borders share material coordinates, terrain normals and ground conta
           n.getY(i),
           n.getZ(i),
         ];
-      assert.ok(
-        Math.abs(p.getY(i) - profile.height(p.getX(i), p.getZ(i))) < 0.000001,
-      );
+      const fx = p.getX(i) / profile.step,
+        fz = p.getZ(i) / profile.step;
+      const original =
+        Math.abs(fx - Math.round(fx)) < 1e-7 &&
+        Math.abs(fz - Math.round(fz)) < 1e-7;
+      if (original)
+        assert.ok(
+          Math.abs(p.getY(i) - profile.height(p.getX(i), p.getZ(i))) < 0.000001,
+        );
+      else {
+        // A bank cut interpolates the original rendered triangle. Bilinear
+        // terrain sampling agrees at grid vertices, but differs inside a cell.
+        const x = Math.floor(fx) * profile.step,
+          z = Math.floor(fz) * profile.step,
+          tx = fx - Math.floor(fx),
+          tz = fz - Math.floor(fz);
+        const a = profile.height(x, z),
+          b = profile.height(x + profile.step, z),
+          d = profile.height(x, z + profile.step),
+          e = profile.height(x + profile.step, z + profile.step);
+        const triangle =
+          tx + tz <= 1
+            ? a + (b - a) * tx + (d - a) * tz
+            : e + (d - e) * (1 - tx) + (b - e) * (1 - tz);
+        assert.ok(
+          Math.abs(p.getY(i) - triangle) < 0.0001,
+          "cut vertices stay on their source triangle",
+        );
+      }
       if (seen.has(key)) {
-        assert.deepEqual(value, seen.get(key));
+        if (original) assert.deepEqual(value, seen.get(key));
+        else
+          value.forEach((number, index) =>
+            assert.ok(Math.abs(number - seen.get(key)[index]) < 0.00003),
+          );
         duplicates++;
       } else seen.set(key, value);
     }

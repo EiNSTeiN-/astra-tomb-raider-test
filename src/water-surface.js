@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { cutTerrainGeometry } from "./terrain-cut.js";
 import { EXPEDITIONS, fieldComplete } from "./expeditions.js";
 import { waterAt } from "./hydrology.js";
 import { moltenMaterial } from "./forge-effects.js";
@@ -124,7 +125,20 @@ export function createWaterSurface(game, site) {
   if (site.kind === "lava")
     material = moltenMaterial({ value: game.elapsed || 0 }, { value: 1 }, true);
   else material = waterMaterial(game, site);
-  const mesh = new THREE.Mesh(geometry, material);
+  let surfaceGeometry = geometry;
+  if (site.sea && game.terrainProfile.gallery) {
+    const world = geometry
+      .clone()
+      .rotateX(-Math.PI / 2)
+      .translate(site.x, site.baseY, site.z);
+    const cut = cutTerrainGeometry(world, game.terrainProfile.gallery.volumes);
+    surfaceGeometry = cut
+      .translate(-site.x, -site.baseY, -site.z)
+      .rotateX(Math.PI / 2);
+    if (cut !== world) world.dispose();
+    geometry.dispose();
+  }
+  const mesh = new THREE.Mesh(surfaceGeometry, material);
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.set(site.x, site.baseY, site.z);
   mesh.receiveShadow = true;
@@ -207,9 +221,9 @@ export function updateWaterSurfaces(game, dt) {
   updateCoastalWater(game);
 }
 export function waterSplash(game, position, strength = 1) {
-  const sample = waterAt(game, position.x, position.z);
+  const sample = waterAt(game, position.x, position.z, position.y);
   if (!sample) return;
-  const u = sample.water.material.userData.waterUniforms;
+  const u = sample.water?.material.userData.waterUniforms;
   if (u) {
     u.splashCenter.value.copy(position);
     u.splashTime.value = game.elapsed;

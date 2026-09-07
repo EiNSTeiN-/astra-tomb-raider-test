@@ -104,6 +104,13 @@ story; reloading a dive returns you safely to the water surface. Underwater soun
 is muffled and the chapter score becomes more sparse. Touch players have Dive,
 Rise and a journal link in the pause menu. See [diving and archive notes](docs/diving-archive.md).
 
+A submerged memorial gallery now extends west from the first sounding well.
+Follow its bronze survey line, breathe in two air bells, swim through a collapsed
+colonnade, and open the emergency gates to recover a copper evacuation record.
+The gallery has its own exploration map, positioned drips and moving gate sounds,
+and reloads return to the last bell where you breathed. See
+[memorial gallery notes](docs/sunken-gallery.md).
+
 Guardians route around cover, investigate the player's last visible position, and return to their encounter area after losing contact. Their route searches run in small frame slices. The follow camera retracts before captured ruin walls, pillars, overhead beams, and moving gates, then extends smoothly when the view clears.
 
 Guardians now have carved masks, layered stone armor, articulated limbs, and distinct maces, forearm blades, staffs, and shields. Foot placement follows the terrain, and their poses show each attack and recovery window. Eight regional material palettes weather their stone and metal. Nearby models use about 20–22 thousand triangles, while distant models retain the silhouette at roughly 30% of that geometry; each guardian uses three character draw calls. Staff bolts and shot tracers now align with the visible lens, shield, and chest core. See [guardian art notes](docs/guardian-art.md) for verification and remaining limits.

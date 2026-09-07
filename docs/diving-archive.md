@@ -11,8 +11,10 @@ from 5.8 to 9 metres. Their existing pressure circuits still lower the water by
 1.8 metres. The cases remain submerged after drainage, with open vertical escape
 paths. This adds vertical exploration and a chapter-specific discovery thread;
 it does not establish approximately one hour of play or a finished underwater
-level. Enclosed passages, currents and more elaborate submerged traversal remain
-further work.
+level. The later [memorial gallery](sunken-gallery.md) adds an enclosed route with air
+bells beneath the first well. Currents and further submerged traversal remain
+future work. The surface-recovery behavior below describes the five open wells;
+the gallery uses its own saved breathing anchors.
 
 ## Playing
 

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { waterAt } from "./hydrology.js";
+import { galleryAt, galleryFloor } from "./sunken-gallery-layout.js";
 
 export const DIVE_AIR = 32;
 
@@ -32,7 +33,8 @@ export function advanceDiving(game, input, dt, water, rise) {
   game.velocityY = 0;
   game.airVelocity = null;
   game.jumpBuffer = game.coyote = 0;
-  const vertical = rise || game.diveRecovery ? 1 : down ? -1 : 0;
+  const interior = galleryAt(game, p.x, p.y, p.z);
+  const vertical = rise || (game.diveRecovery && !interior) ? 1 : down ? -1 : 0;
   // Normalize all three axes so diagonal swimming cannot exceed the swim speed.
   const magnitude = Math.max(1, Math.hypot(input.x, input.z, vertical));
   const speed = 3.1 / magnitude;
@@ -42,24 +44,24 @@ export function advanceDiving(game, input, dt, water, rise) {
     for (const axis of ["x", "z"]) {
       const x = p.x + (axis === "x" ? input.x * speed * step : 0);
       const z = p.z + (axis === "z" ? input.z * speed * step : 0);
-      const ground = game.groundHeight(x, z);
-      const next = waterAt(game, x, z);
+      const ground = galleryFloor(game, x, z, p.y);
+      const next = waterAt(game, x, z, p.y);
       if (
         next &&
         p.y >= ground + 0.35 &&
-        game.canMove(x, z, p.y - ground, 0.8)
+        game.canMove(x, z, p.y - game.groundHeight(x, z), 0.8)
       ) {
         p.x = x;
         p.z = z;
       }
     }
-    const current = waterAt(game, p.x, p.z) || water;
-    const ground = game.groundHeight(p.x, p.z);
+    const current = waterAt(game, p.x, p.z, p.y) || water;
+    const ground = galleryFloor(game, p.x, p.z, p.y);
     const y = Math.max(
       ground + 0.4,
       Math.min(current.y - 0.38, p.y + vertical * speed * step),
     );
-    if (game.canMove(p.x, p.z, y - ground, 0.8)) p.y = y;
+    if (game.canMove(p.x, p.z, y - game.groundHeight(p.x, p.z), 0.8)) p.y = y;
     if (current.depth < 1.1 || (vertical > 0 && p.y >= current.y - 0.4)) {
       p.y = Math.max(ground, current.y - 0.38);
       game.diving = false;
@@ -74,7 +76,12 @@ export function advanceDiving(game, input, dt, water, rise) {
     game.diveAir = Math.max(0, game.diveAir - dt);
     if (game.diveAir < 10 && !game.diveWarned) {
       game.diveWarned = true;
-      game.cb.toast?.("Air running low · hold Space / Rise to surface.", 3500);
+      game.cb.toast?.(
+        interior
+          ? "Air running low · swim beneath a bronze air bell and rise inside."
+          : "Air running low · hold Space / Rise to surface.",
+        3500,
+      );
     }
     if (game.diveAir === 0) {
       game.diveRecovery = true;
@@ -111,7 +118,12 @@ export function divingHint(game) {
 // Restore the exact chapter fog/background as soon as the lens leaves the water.
 export function updateDiveView(game) {
   if (game.level.biome !== "water") return;
-  const water = waterAt(game, game.camera.position.x, game.camera.position.z);
+  const water = waterAt(
+    game,
+    game.camera.position.x,
+    game.camera.position.z,
+    game.camera.position.y,
+  );
   const depth = water ? water.y - game.camera.position.y : 0;
   if (depth > 0.08) {
     game.diveView ??= {

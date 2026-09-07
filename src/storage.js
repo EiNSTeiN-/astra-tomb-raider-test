@@ -7,6 +7,7 @@ import { normalizeWeights } from "./counterweight-rules.js";
 import { normalizeAlignments } from "./observatory-state.js";
 import { normalizeSolar } from "./solar-rules.js";
 import { normalizeBells } from "./bell-rules.js";
+import { normalizeGallery } from "./sunken-gallery-record.js";
 export const SAVE_KEY = "vesper-expedition-v1";
 export const defaults = () => ({
   version: 1,
@@ -109,6 +110,7 @@ export function normalizeSave(value) {
               ),
             ]
           : [],
+      gallery: key === "tides" ? normalizeGallery(v.gallery) : null,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
       medkits: Math.max(0, Math.min(20, Number(v.medkits) || 0)),
@@ -186,6 +188,7 @@ export class SaveStore {
       resonance: {},
       wind: {},
       archive: [],
+      gallery: id === "tides" ? normalizeGallery(null) : null,
       time: 0,
       health: 100,
       medkits: 3,

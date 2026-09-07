@@ -118,7 +118,7 @@ export function buildSoundLandmarks(game) {
   );
   for (const [i, water] of game.waterMeshes.entries()) {
     if (
-      water.geometry.parameters.width > 30 ||
+      water.userData.width > 30 ||
       (water.userData.fall !== undefined && water.userData.stage === undefined)
     )
       continue;

@@ -1,3 +1,5 @@
+import { galleryWaterAt } from "./sunken-gallery-layout.js";
+
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -83,7 +85,9 @@ export function protectedGround(map, x, z, biome) {
   }
   return keep;
 }
-export function waterAt(game, x, z) {
+export function waterAt(game, x, z, y = Infinity) {
+  const interior = galleryWaterAt(game, x, z, y);
+  if (interior) return interior;
   let result = null;
   for (const water of game.waterMeshes || []) {
     const data = water.userData;

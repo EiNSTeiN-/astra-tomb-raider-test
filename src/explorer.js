@@ -5,6 +5,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
 import { groundExplorer } from "./explorer-grounding.js";
+import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
 
 function equipmentSurface(material) {
   const canvas = /canvas|bottle/.test(material.name);
@@ -188,9 +189,25 @@ export function animateExplorer(game, dt, moving, sprinting) {
     new THREE.Vector3(x, y, z)
       .applyQuaternion(rotation)
       .add(game.player.position);
+  if (!game.swimming) rig.bellFloat = undefined;
   if (game.swimming) {
-    rig.model.rotation.x = 1.25;
-    const offset = new THREE.Vector3(0, 0, -0.65).applyQuaternion(rotation);
+    const p = game.player.position;
+    const floating =
+      !game.diving &&
+      galleryAt(game, p.x, p.y, p.z) &&
+      galleryBellAt(game, p.x, p.z);
+    rig.bellFloat = THREE.MathUtils.damp(
+      rig.bellFloat ?? (floating ? 1 : 0),
+      floating ? 1 : 0,
+      6,
+      dt,
+    );
+    const float = rig.bellFloat;
+    rig.model.rotation.x = 1.25 - 1.13 * float;
+    game.avatar.position.y -= 1.05 * float;
+    const offset = new THREE.Vector3(0, 0, -0.65 * (1 - float)).applyQuaternion(
+      rotation,
+    );
     game.avatar.position.x = offset.x;
     game.avatar.position.z = offset.z;
     poseHands(
@@ -199,8 +216,12 @@ export function animateExplorer(game, dt, moving, sprinting) {
         const phase = game.elapsed * 4 + i * Math.PI;
         return point(
           side * (0.38 + 0.18 * Math.cos(phase)),
-          0.27 + 0.13 * Math.sin(phase),
-          0.6 + 0.48 * Math.sin(phase),
+          THREE.MathUtils.lerp(
+            0.27 + 0.13 * Math.sin(phase),
+            0.05 + 0.025 * Math.sin(phase),
+            float,
+          ),
+          THREE.MathUtils.lerp(0.6 + 0.48 * Math.sin(phase), 0.12, float),
         );
       }),
     );
@@ -209,8 +230,8 @@ export function animateExplorer(game, dt, moving, sprinting) {
       [1, -1].map((side, i) =>
         point(
           side * 0.12,
-          -0.15 + 0.09 * Math.sin(game.elapsed * 7 + i * Math.PI),
-          -0.7,
+          -0.15 - float + 0.09 * Math.sin(game.elapsed * 7 + i * Math.PI),
+          THREE.MathUtils.lerp(-0.7, 0.1, float),
         ),
       ),
     );

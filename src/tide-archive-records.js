@@ -4,7 +4,7 @@ export const TIDE_ARCHIVE = [
     title: "The harbor sounding",
     well: "Harbor well",
     text: "The harbor was not lost in a single wave. The tidekeeper measured a finger's rise every morning, then ordered the lower doors opened. Someone had chosen to let the sea in.",
-    clue: "The next record lies in the western pump court, beneath the third palace's water.",
+    clue: "A bronze survey line enters this well's western bank and leads to the memorial beneath the palace. Two air bells shelter the route. The next sounding record lies in the western pump court, beneath the third palace's water.",
   },
   {
     id: "tide-1",

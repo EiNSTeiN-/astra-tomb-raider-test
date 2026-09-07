@@ -8,6 +8,8 @@ import { terrainMaterial } from "./terrain-material.js";
 import { trailSampler } from "./habitat.js";
 import { coastalLayout } from "./coastal-layout.js";
 import { refineSkyTerrain } from "./sky-geology.js";
+import { createSunkenGallery } from "./sunken-gallery-layout.js";
+import { cutTerrainGeometry } from "./terrain-cut.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -184,6 +186,7 @@ export function createTerrainProfile(map, level) {
     height: (x, z) => sample(heights, x, z),
     court: (x, z) => sample(courts, x, z),
   };
+  profile.gallery = createSunkenGallery(profile, biome);
   return upperHeights
     ? refineSkyTerrain(
         profile,
@@ -257,7 +260,9 @@ export function buildTerrainSurface(game) {
         normals.setXYZ(i, n.x, n.y, n.z);
       }
       geometry.computeBoundingSphere();
-      const mesh = new THREE.Mesh(geometry, material);
+      const cut = cutTerrainGeometry(geometry, profile.gallery?.volumes);
+      if (cut !== geometry) geometry.dispose();
+      const mesh = new THREE.Mesh(cut, material);
       mesh.receiveShadow = true;
       mesh.castShadow = true;
       mesh.userData.animated = true;

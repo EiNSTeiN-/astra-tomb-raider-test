@@ -78,6 +78,16 @@ import {
 } from "./observatory.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
+import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
+import {
+  buildSunkenGallery,
+  updateSunkenGallery,
+  galleryHint,
+  galleryInteract,
+  galleryObjective,
+  restoreGalleryArrival,
+  captureGallery,
+} from "./sunken-gallery.js";
 import { migrateSkyRoute } from "./sky-layout.js";
 import { buildSkyArchitecture } from "./sky-architecture.js";
 import {
@@ -611,6 +621,7 @@ export class Adventure {
     buildHazards(this);
     buildSoundLandmarks(this);
     buildTideArchive(this);
+    buildSunkenGallery(this);
     this.cameraSurfaces.rebuild();
     this.templeCaptureGeometry?.forEach((g) => g.dispose());
     this.templeCaptureGeometry = [];
@@ -662,6 +673,7 @@ export class Adventure {
       this.courseAnchor = null;
     }
     restoreWaterArrival(this);
+    restoreGalleryArrival(this);
     const next =
       this.items.find(
         (f) => f.id === currentFieldTask(level, this.progress)?.id,
@@ -1127,6 +1139,9 @@ export class Adventure {
     return !!this.map.grid[gz]?.[gx];
   }
   canMove(x, z, height = this.jumpY, clearance = 1.8) {
+    const worldY = this.groundHeight(x, z) + height;
+    if (galleryAt(this, x, worldY, z))
+      return galleryClear(this, x, worldY, z, clearance);
     if (!cavernClear(this, x, this.groundHeight(x, z) + height, z, clearance))
       return false;
     if (skyBridgeBlocked(this, x, z, this.groundHeight(x, z) + height))
@@ -1166,11 +1181,19 @@ export class Adventure {
         return false;
     }
     const dist = a.distanceTo(b),
-      steps = Math.ceil(dist / 2);
+      interior =
+        galleryAt(this, from.x, from.y, from.z) ||
+        galleryAt(this, to.x, to.y, to.z),
+      steps = Math.ceil(dist / (interior ? 0.2 : 2));
     for (let i = 1; i < steps; i++) {
       const t = i / steps;
       const x = a.x + (b.x - a.x) * t;
       const z = a.z + (b.z - a.z) * t;
+      const y = a.y + (b.y - a.y) * t + 1.4;
+      if (galleryAt(this, x, y, z)) {
+        if (!galleryClear(this, x, y, z, 0.05, 0.02)) return false;
+        continue;
+      }
       const height = a.y + (b.y - a.y) * t + 1.4 - this.groundHeight(x, z);
       if (height < 0.15 || !this.canMove(x, z, height, 0)) return false;
     }
@@ -1516,15 +1539,17 @@ export class Adventure {
         dt,
         this.cameraSurfaces,
         (p) =>
-          this.walkable(p.x, p.z) &&
-          cavernClear(this, p.x, p.y, p.z, 0.28) &&
-          p.y >=
-            Math.max(
-              this.groundHeight(p.x, p.z) + 0.28,
-              this.swimming && !this.diving
-                ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
-                : -Infinity,
-            ),
+          galleryAt(this, p.x, p.y, p.z)
+            ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
+            : this.walkable(p.x, p.z) &&
+              cavernClear(this, p.x, p.y, p.z, 0.28) &&
+              p.y >=
+                Math.max(
+                  this.groundHeight(p.x, p.z) + 0.28,
+                  this.swimming && !this.diving
+                    ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
+                    : -Infinity,
+                ),
       ),
     );
     this.avatar.visible = this.camera.position.distanceTo(target) > 0.85;
@@ -1601,6 +1626,7 @@ export class Adventure {
     updateCipherCourts(this, solarDt);
     updateWaterSurfaces(this, dt);
     updateTideArchive(this);
+    updateSunkenGallery(this, dt);
     updateSoundLandmarks(this);
     this.flames.forEach((f, i) => {
       f.scale.y = 1.5 + Math.sin(this.elapsed * 12 + i) * 0.3;
@@ -1621,6 +1647,7 @@ export class Adventure {
     p.needsUpdate = true;
   }
   interact() {
+    if (galleryInteract(this)) return;
     if (archiveInteract(this)) return;
     if (this.diving) return;
     if (cipherInteract(this)) return;
@@ -1908,7 +1935,9 @@ export class Adventure {
       counterweightsReady(this, objectiveTarget)
         ? { ...objectiveTarget, z: objectiveTarget.z - 5 / CELL }
         : objectiveTarget;
-    const target = this.diving ? null : traversalTarget(this, aimedTarget);
+    const gallery = galleryObjective(this);
+    const target =
+      this.diving || gallery ? null : traversalTarget(this, aimedTarget);
     return {
       health: this.health,
       stamina: this.stamina,
@@ -1917,38 +1946,46 @@ export class Adventure {
       diveAir: this.diveAir ?? DIVE_AIR,
       archive:
         this.level.biome === "water" ? archiveProgress(this).length : null,
+      gallery: !!gallery,
+      galleryStage: this.progress.gallery?.recovered
+        ? 2
+        : this.progress.gallery?.opened
+          ? 1
+          : 0,
       medkits: this.progress.medkits,
       stage: this.progress.stage,
       total: this.level.mechanisms,
-      objective: this.diving
-        ? "Explore the tidekeeper’s submerged archive"
-        : this.progress.completed
-          ? "Expedition complete · Find the remaining discoveries"
-          : task?.label ||
-            (this.progress.stage === 0 &&
-            this.counterweights &&
-            !this.counterweights.saved.solved
-              ? `Restore the counterweights · ${this.counterweights.trial.title}`
-              : null) ||
-            (opticalTarget
-              ? opticalTarget.type === "cipher"
-                ? "Read the covenant and align its carved drums"
-                : opticalTarget.type === "wind"
-                  ? "Guide the wind to the engine’s receiver"
-                  : opticalTarget.type === "resonator"
-                    ? "Tune the array and recover its memory"
-                    : opticalTarget.type === "thermal"
-                      ? "Match the regulator’s firing record"
-                      : opticalTarget.type === "hydraulic"
-                        ? "Match the royal measure in the hydraulic court"
-                        : opticalTarget.type === "bell"
-                          ? "Learn and answer the bellkeeper's lesson"
-                          : opticalTarget.kind === "receiver"
-                            ? "Activate the illuminated receiver"
-                            : "Follow and redirect the sunlight"
-              : null) ||
-            this.level.objectiveNames[this.progress.stage] ||
-            `Recover ${this.level.artifact}`,
+      objective:
+        gallery ||
+        (this.diving
+          ? "Explore the tidekeeper’s submerged archive"
+          : this.progress.completed
+            ? "Expedition complete · Find the remaining discoveries"
+            : task?.label ||
+              (this.progress.stage === 0 &&
+              this.counterweights &&
+              !this.counterweights.saved.solved
+                ? `Restore the counterweights · ${this.counterweights.trial.title}`
+                : null) ||
+              (opticalTarget
+                ? opticalTarget.type === "cipher"
+                  ? "Read the covenant and align its carved drums"
+                  : opticalTarget.type === "wind"
+                    ? "Guide the wind to the engine’s receiver"
+                    : opticalTarget.type === "resonator"
+                      ? "Tune the array and recover its memory"
+                      : opticalTarget.type === "thermal"
+                        ? "Match the regulator’s firing record"
+                        : opticalTarget.type === "hydraulic"
+                          ? "Match the royal measure in the hydraulic court"
+                          : opticalTarget.type === "bell"
+                            ? "Learn and answer the bellkeeper's lesson"
+                            : opticalTarget.kind === "receiver"
+                              ? "Activate the illuminated receiver"
+                              : "Follow and redirect the sunlight"
+                : null) ||
+              this.level.objectiveNames[this.progress.stage] ||
+              `Recover ${this.level.artifact}`),
       mission,
       fieldTask: task,
       carrying: carryingComponent(this.level, this.progress),
@@ -1972,7 +2009,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : counterweightHint(this) ||
+        : galleryHint(this) ||
+          counterweightHint(this) ||
           traversalHint(this) ||
           skyBridgeHint(this) ||
           archiveHint(this) ||
@@ -1993,21 +2031,24 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : 1.6,
-      task: this.diving
-        ? "dive"
-        : (this.nearest?.type === "resonator" || this.resonanceFocus != null) &&
-            resonanceReady(this, this.resonanceSites?.[this.progress.stage])
-          ? "tuning"
-          : this.hydraulicSites?.[this.progress.stage]?.flow ||
-              this.thermalSites?.[this.progress.stage]?.moving ||
-              this.windSites?.[this.progress.stage]?.moving
-            ? "valve"
-            : this.blockGrip || this.cipherSites?.[this.progress.stage]?.moving
-              ? "lift"
-              : this.ropeRide || this.zipRide
-                ? "climb"
-                : currentFieldTask(this.level, this.progress)?.kind ||
-                  "mechanism",
+      task:
+        this.diving || galleryObjective(this)
+          ? "dive"
+          : (this.nearest?.type === "resonator" ||
+                this.resonanceFocus != null) &&
+              resonanceReady(this, this.resonanceSites?.[this.progress.stage])
+            ? "tuning"
+            : this.hydraulicSites?.[this.progress.stage]?.flow ||
+                this.thermalSites?.[this.progress.stage]?.moving ||
+                this.windSites?.[this.progress.stage]?.moving
+              ? "valve"
+              : this.blockGrip ||
+                  this.cipherSites?.[this.progress.stage]?.moving
+                ? "lift"
+                : this.ropeRide || this.zipRide
+                  ? "climb"
+                  : currentFieldTask(this.level, this.progress)?.kind ||
+                    "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2029,7 +2070,9 @@ export class Adventure {
             : !source.mechanism || source.stage <= this.progress.stage,
       occluded: (source) =>
         !this.lineOfSight(
-          this.player.position,
+          this.swimming
+            ? this.player.position.clone().add(new THREE.Vector3(0, -1.1, 0))
+            : this.player.position,
           new THREE.Vector3(source.x, source.y - 1.4, source.z),
         ),
     });
@@ -2048,6 +2091,7 @@ export class Adventure {
     };
     this.progress.traversal = captureTraversal(this);
     this.progress.checkpoint = this.checkpoint;
+    captureGallery(this);
     this.progress.lastPlayed = Date.now();
     this.store.save();
     this.cb.saved?.();

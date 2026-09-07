@@ -1,11 +1,12 @@
 import { waterAt } from "./hydrology.js";
 import { waterSplash } from "./water-surface.js";
 import { advanceDiving, resetDiving } from "./diving.js";
+import { galleryFloor } from "./sunken-gallery-layout.js";
 
 export function restoreWaterArrival(game) {
   resetDiving(game);
   const p = game.player.position,
-    water = waterAt(game, p.x, p.z);
+    water = waterAt(game, p.x, p.z, p.y);
   game.swimming = false;
   game.nextSwimStroke = 0;
   if (water?.depth > 1.15 && p.y < water.y - 0.35) {
@@ -18,7 +19,7 @@ export function restoreWaterArrival(game) {
 }
 export function advanceSwimming(game, input, dt, jump) {
   const p = game.player.position,
-    water = waterAt(game, p.x, p.z);
+    water = waterAt(game, p.x, p.z, p.y);
   if (!water || water.depth < 1.1 || p.y > water.y + 0.15) {
     game.swimming = false;
     game.diving = false;
@@ -44,17 +45,17 @@ export function advanceSwimming(game, input, dt, jump) {
   for (const axis of ["x", "z"]) {
     const x = p.x + (axis === "x" ? input.x * speed * dt : 0),
       z = p.z + (axis === "z" ? input.z * speed * dt : 0);
-    const ground = game.groundHeight(x, z),
-      nextWater = waterAt(game, x, z);
+    const ground = galleryFloor(game, x, z, p.y),
+      nextWater = waterAt(game, x, z, p.y);
     const y = Math.max(ground, nextWater ? nextWater.y - 0.38 : p.y);
-    if (y <= p.y + 0.5 && game.canMove(x, z, y - ground)) {
+    if (y <= p.y + 0.5 && game.canMove(x, z, y - game.groundHeight(x, z))) {
       p.x = x;
       p.z = z;
       p.y = y;
     }
   }
-  const current = waterAt(game, p.x, p.z),
-    ground = game.groundHeight(p.x, p.z);
+  const current = waterAt(game, p.x, p.z, p.y),
+    ground = galleryFloor(game, p.x, p.z, p.y);
   if (!current || current.depth < 1.1) {
     game.swimming = false;
     p.y = Math.max(ground, p.y);
@@ -88,6 +89,6 @@ export function advanceSwimming(game, input, dt, jump) {
 }
 export function wadingDepth(game) {
   const p = game.player.position,
-    water = waterAt(game, p.x, p.z);
+    water = waterAt(game, p.x, p.z, p.y);
   return water ? Math.max(0, water.y - p.y) : 0;
 }
