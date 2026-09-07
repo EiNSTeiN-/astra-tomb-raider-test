@@ -68,45 +68,4 @@ export function cavernRock() {
   return material;
 }
 
-export function mineralMaterial(color, restoration) {
-  const material = new THREE.MeshPhysicalMaterial({
-    name: "Faceted luminous quartz",
-    color,
-    emissive: color,
-    emissiveIntensity: 0.45,
-    roughness: 0.24,
-    metalness: 0.08,
-    clearcoat: 1,
-    clearcoatRoughness: 0.15,
-    flatShading: true,
-  });
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.restoration = restoration;
-    shader.vertexShader = shader.vertexShader
-      .replace(
-        "#include <common>",
-        "#include <common>\nvarying vec3 mineralPosition;",
-      )
-      .replace(
-        "#include <begin_vertex>",
-        "#include <begin_vertex>\nmineralPosition=position;",
-      );
-    shader.fragmentShader = shader.fragmentShader
-      .replace(
-        "#include <common>",
-        "#include <common>\nuniform float restoration; varying vec3 mineralPosition;",
-      )
-      .replace(
-        "#include <emissivemap_fragment>",
-        /* glsl */ `
-        float band=sin(mineralPosition.y*6.+sin(mineralPosition.x*11.)*.7);
-        float inclusions=smoothstep(.4,.9,band)*.08;
-        float rim=pow(1.-abs(dot(normal,normalize(vViewPosition))),2.);
-        totalEmissiveRadiance*= (.24+rim*.7+inclusions)*(.55+restoration*.85);
-        diffuseColor.rgb*=mix(.94,1.,smoothstep(-.8,.6,band));
-      `,
-      );
-  };
-  material.customProgramCacheKey = () => "cavern-mineral-v1";
-  return material;
-}
+export { mineralMaterial } from "./mineral-art.js";

@@ -1,5 +1,7 @@
 # The Night Below: enclosed caverns and resonance
 
+The crystal geometry and materials in this original environment milestone have since been refined. See [quartz art notes](mineral-art.md) for the current facets, optical material, rendering costs and verification.
+
 The crystal chapter now takes place beneath a continuous rock enclosure. Vaults rise over its nine main chambers, narrow into connecting tunnels, and close against the existing terrain beyond the routes. This replaces the open-air temple frames, distant mountains, and freestanding cone crystals. The map's objective identifiers, route topology, discoveries, and progress schema remain unchanged.
 
 The interior roof has **97,238 triangles in 102 spatial chunks**. Its triangle-height sampler also constrains the explorer's headroom, camera, and sight checks. Shared boundary vertices agree between chunks. The roof seals at all four map boundaries; a first-render opening there was caught and corrected. Sampled route clearance ranges from **14.88 to 40.32 metres**. Separate vaults clear the climbing stations' tall rope anchors and crossbeams as well as the player.

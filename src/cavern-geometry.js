@@ -55,35 +55,7 @@ export function cavernChunks(profile, chunk = 24) {
   return geometries;
 }
 
-// Six-sided prism with an offset termination; separate faces retain hard facets.
-export function quartzGeometry(radius, height, phase = 0) {
-  const vertices = [],
-    uv = [];
-  const point = (i, y, r) => [
-    Math.cos((i * Math.PI) / 3 + phase) * r,
-    y,
-    Math.sin((i * Math.PI) / 3 + phase) * r,
-  ];
-  const tip = [radius * 0.2, height, -radius * 0.13];
-  const push = (...points) => {
-    for (const p of points) {
-      vertices.push(...p);
-      uv.push(p[0], p[1] / height);
-    }
-  };
-  for (let i = 0; i < 6; i++) {
-    const a = point(i, 0, radius),
-      b = point(i + 1, 0, radius);
-    const c = point(i, height * 0.77, radius * 0.88),
-      d = point(i + 1, height * 0.77, radius * 0.88);
-    push(a, c, b, b, c, d, c, tip, d, [0, 0, 0], a, b);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-  g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
-  g.computeVertexNormals();
-  return g;
-}
+export { quartzGeometry } from "./mineral-art.js";
 
 export function stalactiteGeometry(radius, height, seed) {
   const points = Array.from({ length: 13 }, (_, i) => {

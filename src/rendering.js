@@ -7,8 +7,9 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
+import { disposeMineralTransmission } from "./mineral-art.js";
 
-class SolidContactPass extends GTAOPass {
+export class SolidContactPass extends GTAOPass {
   _overrideVisibility() {
     super._overrideVisibility();
     // A normal override cannot reproduce cutout leaves or translucent water.
@@ -21,7 +22,11 @@ class SolidContactPass extends GTAOPass {
       if (
         object.userData.excludeContact ||
         materials.some(
-          (m) => m.transparent || m.alphaTest > 0 || m.isShaderMaterial,
+          (m) =>
+            m.transparent ||
+            m.transmission > 0 ||
+            m.alphaTest > 0 ||
+            m.isShaderMaterial,
         )
       ) {
         object.visible = false;
@@ -41,6 +46,7 @@ export class CinematicRenderer {
   configure() {
     const { game } = this,
       quality = game.store.data.settings.quality;
+    game.renderer.transmissionResolutionScale = quality === "high" ? 0.75 : 0.5;
     this.enabled = quality !== "low";
     if (!this.enabled) return;
     if (!this.composer) {
@@ -103,6 +109,7 @@ export class CinematicRenderer {
     else this.game.renderer.render(this.game.scene, this.game.camera);
   }
   dispose() {
+    disposeMineralTransmission(this.game.scene);
     this.waterReflection.dispose();
     this.composer?.passes.forEach((pass) => pass.dispose?.());
     this.composer?.dispose();
