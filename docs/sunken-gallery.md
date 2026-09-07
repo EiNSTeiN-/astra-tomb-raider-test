@@ -64,9 +64,9 @@ licenses and provenance remain in [asset credits](asset-credits.md).
 Visible condensation in each bell has a positioned drip voice. It uses HRTF
 panning and linear falloff between 1.2 and 18 metres. Bronze skirts obstruct and
 filter the sound above their rims; the low opening remains acoustically clear.
-Each moving gate has a drive voice at its moving center, with falloff between
-1.5 and 20 metres. Gate voices become inactive at rest and on pause. These sources
-share the existing twelve-voice environmental budget.
+Each moving gate has a drive voice at its fixed pinion, with falloff between
+1.5 and 20 metres. Activity follows the eased gate motion and becomes zero at rest
+and on pause. These sources share the existing twelve-voice environmental budget.
 
 The water chapter's sparse diving arrangement continues throughout the gallery,
 including breathing inside the bells. Immersion filtering follows whether the
@@ -76,7 +76,7 @@ subjective listening and mix evaluation remain open.
 
 ## Verification
 
-The full automated suite passes **298 tests**, and the production build passes
+The initial gallery release passed **298 tests**, and its production build passed
 with the existing large Three.js chunk advisory. New regressions cover the
 complete route, both gates, breath recovery, ceiling and skirt collision,
 underwater descent with exhausted air, safe reload anchors, strict save
@@ -112,8 +112,9 @@ These are desktop Chromium touch emulation checks, not physical phone tests.
 Same-buffer offline renders through the actual drip voice produced RMS
 0.0014453316 at 1.2 m, 0.0007226657 at 9.6 m, and zero at 18 m. The live first-bell
 mix selected two environmental voices, including the unobstructed drip at gain
-0.2, and reported the water biome's `dive` task. Both gate sources followed their
-animated centers and had zero activity on pause and after reaching their stops.
+0.2, and reported the water biome's `dive` task. At that release, both gate sources
+followed their animated centers and had zero activity on pause and after reaching
+their stops.
 
 The browser used Chromium 148 with ANGLE Vulkan on the Radeon 780M. All linked
 programs in the four final High views passed their link checks. The scenes still
@@ -144,3 +145,9 @@ remaining content, art, device and listening work remain in
 A later [gallery rendering pass](gallery-rendering.md) culls the hidden exterior
 while retaining the full shadow casters and original images. Its measurements
 supersede the rendering counts above; route behavior and art remain the same.
+
+The subsequent [gate machinery revision](gallery-machinery.md) retracts the
+gates below their floors so they no longer protrude through the courtyard above.
+It adds fixed guides, rack-and-pinion drives, connected pressure lines and
+stationary drive emitters. That report contains the latest route, reload and
+automated verification for the revised machinery.

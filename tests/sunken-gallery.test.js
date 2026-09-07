@@ -20,7 +20,7 @@ import { normalizeSave, defaults } from "../src/storage.js";
 import { createWaterSurface } from "../src/water-surface.js";
 import { buildSoundLandmarks } from "../src/sound-landmarks.js";
 
-export function galleryGame() {
+export function galleryGame(savedGallery = null) {
   const level = LEVELS[3],
     map = createMap(level),
     terrainProfile = createTerrainProfile(map, level);
@@ -42,7 +42,7 @@ export function galleryGame() {
     yaw: 0,
     health: 100,
     paused: false,
-    progress: { gallery: normalizeGallery(null) },
+    progress: { gallery: normalizeGallery(savedGallery) },
     audio: { tone() {}, noiseHit() {} },
     cb: { toast() {}, update() {} },
     save() {
@@ -327,8 +327,10 @@ test("air-bell skirts obstruct sound above the rim, and gate drives follow motio
   g.progress.gallery.opened = true;
   updateSunkenGallery(g, 0.5, false);
   for (const gate of g.sunkenGallery.gates) {
-    assert.equal(gate.source.activity, 1);
-    assert.equal(gate.source.y, gate.group.position.y + gate.site.height / 2);
+    assert(gate.source.activity > 0 && gate.source.activity <= 1);
+    assert.equal(gate.source.y, gate.pinions[1].group.position.y);
+    assert.equal(gate.source.x, gate.pinions[1].group.position.x);
+    assert.equal(gate.source.z, gate.pinions[1].group.position.z);
   }
   g.paused = true;
   updateSunkenGallery(g, 0, false);
@@ -336,6 +338,55 @@ test("air-bell skirts obstruct sound above the rim, and gate drives follow motio
   g.paused = false;
   updateSunkenGallery(g, 3, false);
   assert(g.sunkenGallery.gates.every((gate) => gate.source.activity === 0));
+});
+
+test("gallery gates retract below their floors, preserve passage clearance and reload at their stops", () => {
+  const g = galleryGame();
+  const inspect = (opened) => {
+    g.sunkenGallery.root.updateMatrixWorld(true);
+    for (const gate of g.sunkenGallery.gates) {
+      const { site } = gate,
+        bounds = new THREE.Box3().setFromObject(gate.group);
+      assert(
+        bounds.max.y <= site.y + site.height + 0.01,
+        "bars never rise through the roof",
+      );
+      if (opened) {
+        assert(bounds.max.y < site.y - 0.6, "bars stow beneath the threshold");
+        assert(gate.box.max.y < site.y, "collision stows with the gate");
+      }
+      for (let y = site.y + 0.4; y < site.y + site.height - 0.85; y += 0.35)
+        assert.equal(
+          galleryClear(g, site.x, y, site.z),
+          opened,
+          `${site.id} at ${y}`,
+        );
+    }
+  };
+  inspect(false);
+  const bearings = g.sunkenGallery.gates.map((gate) =>
+    gate.pinions.map((p) => p.group.position.clone()),
+  );
+  g.progress.gallery.opened = true;
+  for (let i = 0; i < 120; i++) {
+    updateSunkenGallery(g, 1 / 60, false);
+    for (const [index, gate] of g.sunkenGallery.gates.entries()) {
+      assert(gate.box.max.y <= gate.site.y + gate.site.height);
+      for (const [side, pinion] of gate.pinions.entries())
+        assert(
+          pinion.group.position.equals(bearings[index][side]),
+          "drive bearings stay seated",
+        );
+    }
+  }
+  inspect(true);
+  const resumed = galleryGame({ opened: true });
+  for (const [i, gate] of resumed.sunkenGallery.gates.entries()) {
+    assert(gate.group.position.equals(g.sunkenGallery.gates[i].group.position));
+    assert.deepEqual(gate.box, g.sunkenGallery.gates[i].box);
+    assert.equal(gate.group.visible, false);
+    assert.equal(gate.source.activity, 0);
+  }
 });
 
 test("exhausted air retains descent control beneath a ceiling and first-entry reload returns to open water", () => {

@@ -4,6 +4,10 @@ import { mergeArchitecture } from "./visuals.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { softParticleMaterial } from "./effects.js";
 import {
+  buildGalleryMachinery,
+  updateGalleryMachinery,
+} from "./gallery-machinery.js";
+import {
   galleryAt,
   gallerySection,
   galleryBellAt,
@@ -368,84 +372,7 @@ export function buildSunkenGallery(game) {
     for (const side of [-1, 1])
       block(bell.x + side * 2.1, o.y - 5.4, bell.z, 0.22, 0.5, 0.22, trim);
   }
-  for (const site of profile.gates) {
-    const group = new THREE.Group();
-    group.position.set(site.x, site.y, site.z);
-    root.add(group);
-    const bars = Math.floor(site.width / 0.45);
-    for (let i = 0; i <= bars; i++)
-      block(
-        (i / bars - 0.5) * (site.width - 0.3),
-        site.height / 2,
-        0,
-        0.14,
-        site.height,
-        0.24,
-        bronze,
-        false,
-        group,
-      );
-    for (const y of [0.18, site.height / 2, site.height - 0.18])
-      block(0, y, 0, site.width, 0.28, 0.34, bronze, false, group);
-    const box = {
-      min: { x: site.x - site.width / 2, y: site.y, z: site.z - 0.22 },
-      max: {
-        x: site.x + site.width / 2,
-        y: site.y + site.height,
-        z: site.z + 0.22,
-      },
-    };
-    gallery.solids.push(box);
-    const source = {
-      id: `gallery-gate-${site.id}`,
-      kind: "machine",
-      x: site.x,
-      y: site.y + site.height / 2,
-      z: site.z,
-      near: 1.5,
-      range: 20,
-      gain: 0.14,
-      activity: 0,
-    };
-    gallery.sources.push(source);
-    game.soundSources.push(source);
-    gallery.gates.push({ site, group, box, source });
-  }
-  const wheel = new THREE.Group();
-  wheel.position.copy(profile.wheel);
-  root.add(wheel);
-  gallery.wheel = wheel;
-  const ring = add(
-    new THREE.TorusGeometry(0.65, 0.065, 8, 32),
-    trim,
-    0,
-    0,
-    0,
-    wheel,
-  );
-  ring.name = "Archive emergency wheel";
-  add(
-    new THREE.CylinderGeometry(0.14, 0.14, 0.35, 12),
-    bronze,
-    0,
-    0,
-    0,
-    wheel,
-  ).rotation.x = Math.PI / 2;
-  for (let i = 0; i < 3; i++) {
-    const spoke = block(0, 0, 0, 0.09, 1.25, 0.1, trim, false, wheel);
-    spoke.rotation.z = (i * Math.PI) / 3;
-  }
-  block(
-    profile.wheel.x,
-    profile.wheel.y - 0.8,
-    profile.wheel.z + 0.35,
-    0.7,
-    1.6,
-    0.55,
-    game.stoneMat,
-    true,
-  );
+  buildGalleryMachinery(game, { add, block, bronze, trim });
   const record = new THREE.Group();
   record.position.copy(profile.record);
   root.add(record);
@@ -506,18 +433,7 @@ export function buildSunkenGallery(game) {
 export function updateSunkenGallery(game, dt, observePlayer = true) {
   const gallery = game.sunkenGallery;
   if (!gallery) return;
-  const target = game.progress.gallery.opened ? 1 : 0;
-  gallery.lift = Math.min(target, gallery.lift + dt * 0.65);
-  for (const gate of gallery.gates) {
-    const offset = gallery.lift * (gate.site.height + 0.65);
-    gate.group.position.y = gate.site.y + offset;
-    gate.box.min.y = gate.site.y + offset;
-    gate.box.max.y = gate.site.y + offset + gate.site.height;
-    gate.source.y = gate.site.y + offset + gate.site.height / 2;
-    gate.source.activity =
-      !game.paused && Math.abs(gallery.lift - target) > 0.001 ? 1 : 0;
-  }
-  gallery.wheel.rotation.z = -gallery.lift * Math.PI * 2;
+  updateGalleryMachinery(game, dt);
   gallery.record.visible = !game.progress.gallery.recovered;
   for (const { mesh, bell } of gallery.outsideWater) {
     mesh.position.y = gallery.well.position.y;
