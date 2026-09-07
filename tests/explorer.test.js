@@ -7,6 +7,14 @@ import * as THREE from "three";
 import { animateExplorer, explorerGait } from "../src/explorer.js";
 import { resetTraversal } from "../src/traversal.js";
 import { supportAt } from "../src/character-motion.js";
+import { LEVELS, createMap } from "../src/campaign.js";
+import { createTerrainProfile } from "../src/terrain.js";
+import { coursePlan, hasTraversalCourse } from "../src/traversal-courses.js";
+import {
+  buildReturnCable,
+  updateReturnCable,
+  cableHands,
+} from "../src/return-cable.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -51,6 +59,75 @@ async function groundedActor() {
     },
   };
 }
+
+test("both delivered hands remain on the vertical trolley grips over every return-cable slope and heading", async () => {
+  const game = await groundedActor(),
+    materials = {
+      stone: new THREE.MeshStandardMaterial(),
+      timber: new THREE.MeshStandardMaterial(),
+      metal: new THREE.MeshStandardMaterial(),
+    };
+  game.world = new THREE.Group();
+  game.world.add(game.player);
+  let samples = 0;
+  for (const level of LEVELS) {
+    game.level = level;
+    const map = createMap(level),
+      terrain = createTerrainProfile(map, level);
+    game.groundHeight = terrain.height;
+    for (const f of map.features.filter(
+      (f) => f.type === "field" && hasTraversalCourse(level, f),
+    )) {
+      const plan = coursePlan(level, f),
+        base = terrain.height(f.x * 7, f.z * 7),
+        course = {
+          ...plan,
+          root: new THREE.Group(),
+          zip: new THREE.Mesh(),
+          launch: new THREE.Vector3(
+            plan.launchPoint.x,
+            base + 8.4,
+            plan.launchPoint.z,
+          ),
+          exit: new THREE.Vector3(
+            plan.exitPoint.x,
+            terrain.height(plan.exitPoint.x, plan.exitPoint.z),
+            plan.exitPoint.z,
+          ),
+        };
+      game.world.add(course.root);
+      buildReturnCable(game, course, materials);
+      game.zipRide = { course, approach: false };
+      game.grounded = false;
+      game.avatar.rotation.y = Math.atan2(
+        course.exit.x - course.launch.x,
+        course.exit.z - course.launch.z,
+      );
+      for (const travel of [0.1, 0.5, 0.9]) {
+        game.player.position.copy(course.launch).lerp(course.exit, travel);
+        updateReturnCable(game, course, 0);
+        for (let i = 0; i < 24; i++) {
+          animateExplorer(game, 1 / 60, false, false);
+          const targets = cableHands(game);
+          for (const [side, chain] of game.rig.arms.entries()) {
+            const error = chain[2]
+              .getWorldPosition(new THREE.Vector3())
+              .distanceTo(targets[side]);
+            assert.ok(
+              error < 0.012,
+              `${level.id}/${f.id}/${travel}/${side}: ${error}m`,
+            );
+            samples++;
+          }
+        }
+      }
+      game.world.remove(course.root);
+      course.root.traverse((o) => o.geometry?.dispose());
+    }
+  }
+  assert.equal(samples, 3168);
+  Object.values(materials).forEach((m) => m.dispose());
+});
 // Independent of the runtime's reduced probes: inspect every outsole vertex.
 function soleClearances(game) {
   const shoe = game.rig.model.getObjectByName("shoes04"),

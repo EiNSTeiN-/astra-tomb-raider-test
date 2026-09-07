@@ -95,6 +95,11 @@ export function buildSoundLandmarks(game) {
   game.soundSources.push(
     ...(game.traversalCourses || []).map((c) => ({ ...c.sound })),
   );
+  game.soundSources.push(
+    ...(game.traversalCourses || []).flatMap((c) =>
+      (c.zipRig?.sources || []).map((s) => ({ ...s })),
+    ),
+  );
   game.soundSources.push(...(game.thermalSources || []).map((s) => ({ ...s })));
   game.soundSources.push(
     ...(game.resonanceSources || []).map((s) => ({ ...s })),
@@ -154,6 +159,16 @@ export function buildSoundLandmarks(game) {
 
 export function updateSoundSources(game) {
   for (const source of game.soundSources) {
+    if (source.cableId !== undefined) {
+      const live = game.traversalCourses?.find((c) => c.id === source.cableId)
+        ?.zipRig?.sources[source.cableIndex];
+      source.activity = live?.activity || 0;
+      if (live) {
+        source.x = live.x;
+        source.y = live.y;
+        source.z = live.z;
+      }
+    }
     if (source.courseId !== undefined)
       source.activity =
         game.traversalCourses?.find((c) => c.id === source.courseId)?.sound

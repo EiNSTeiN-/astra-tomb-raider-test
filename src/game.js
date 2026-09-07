@@ -1,4 +1,5 @@
 import { disposeInstanceBuffers } from "./instance-lod.js";
+import { silenceCableMotion } from "./return-cable.js";
 import {
   buildCipherCourts,
   updateCipherCourts,
@@ -2029,6 +2030,7 @@ export class Adventure {
       settleCipher(this);
     }
     this.paused = value;
+    if (value) silenceCableMotion(this);
     this.presentationRemaining = 0;
     this.audio.setMode(value ? "pause" : "explore");
     this.renderOnce = true;

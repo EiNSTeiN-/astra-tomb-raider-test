@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { updateReturnCable } from "./return-cable.js";
 import { supportAt } from "./character-motion.js";
 import { ropeGrip, updateCourseVisual } from "./traversal-courses.js";
 
@@ -178,6 +179,7 @@ function zipCandidate(game) {
   return game.traversalCourses.find(
     (c) =>
       done(game, c) &&
+      (!c.zipRig || c.zipRig.travel < 0.02) &&
       game.grounded &&
       game.player.position.distanceTo(
         new THREE.Vector3(c.ledges[4].x, c.ledges[4].y, c.ledges[4].z),
@@ -298,6 +300,7 @@ export function updateTraversal(game, dt, input) {
     }
     c.zip.visible = done(game, c);
     updateCourseVisual(c);
+    updateReturnCable(game, c, dt);
     if (
       game.ropeRide === c &&
       Math.abs(c.omega) > 0.35 &&
@@ -322,6 +325,7 @@ export function updateTraversal(game, dt, input) {
       ride.approach ? ride.course.launch : ride.course.exit,
       ease,
     );
+    updateReturnCable(game, ride.course, 0);
     if (!ride.approach && (ride.nextRoll || 0) <= ride.time) {
       game.audio.noiseHit?.(0.009, 0.34, 2100, game.player.position);
       ride.nextRoll = ride.time + 0.28;
@@ -340,6 +344,10 @@ export function updateTraversal(game, dt, input) {
       return true;
     }
     if (t >= 1) {
+      if (ride.course.zipRig) {
+        ride.course.zipRig.travel = 1;
+        ride.course.zipRig.returning = true;
+      }
       game.zipRide = null;
       game.grounded = true;
       game.velocityY = 0;

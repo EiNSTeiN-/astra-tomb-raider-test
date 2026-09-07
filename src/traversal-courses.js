@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { buildReturnCable, RETURN_CABLE_HEIGHT } from "./return-cable.js";
 import { pbrMaterial } from "./visuals.js";
 import {
   climbingMaterials,
@@ -207,6 +208,7 @@ export function buildTraversalCourse(game, feature, station) {
   };
   game.traversalCourses ||= [];
   game.traversalCourses.push(course);
+  buildReturnCable(game, course, game.climbingMaterials);
   feature.yOffset = 8.4;
   station.position.y = base + 8.4;
   updateCourseVisual(course);
@@ -233,7 +235,9 @@ export function updateCourseVisual(course) {
   const grip = ropeGrip(course);
   span(course.rope, course.anchor, grip);
   course.grip.position.copy(grip);
-  const from = course.launch.clone().add(new THREE.Vector3(0, 2.15, 0)),
-    to = course.exit.clone().add(new THREE.Vector3(0, 2.15, 0));
+  const from = course.launch
+      .clone()
+      .add(new THREE.Vector3(0, RETURN_CABLE_HEIGHT, 0)),
+    to = course.exit.clone().add(new THREE.Vector3(0, RETURN_CABLE_HEIGHT, 0));
   span(course.zip, from, to);
 }

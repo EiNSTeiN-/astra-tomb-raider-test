@@ -86,6 +86,13 @@ ropes, with local friction sounds that fade with distance and become silent at
 rest. The same jump and landing locations retain saved traversal progress.
 See [climbing construction notes](docs/climbing-construction.md).
 
+Return cables have braced departure and arrival terminals, grooved roller
+carriages, separate hand grips and a departure winch. After dismounting, the
+carriage returns automatically for reuse. Rolling friction follows the carriage;
+the winch sounds at its own position during the return. Both fade with distance
+and stop at rest or on pause. Reloading an interrupted ride restores the secure
+summit. See [return cable notes](docs/return-cables.md).
+
 Guardians route around cover, investigate the player's last visible position, and return to their encounter area after losing contact. Their route searches run in small frame slices. The follow camera retracts before captured ruin walls, pillars, overhead beams, and moving gates, then extends smoothly when the view clears.
 
 Guardians now have carved masks, layered stone armor, articulated limbs, and distinct maces, forearm blades, staffs, and shields. Foot placement follows the terrain, and their poses show each attack and recovery window. Eight regional material palettes weather their stone and metal. Nearby models use about 20–22 thousand triangles, while distant models retain the silhouette at roughly 30% of that geometry; each guardian uses three character draw calls. Staff bolts and shot tracers now align with the visible lens, shield, and chest core. See [guardian art notes](docs/guardian-art.md) for verification and remaining limits.
