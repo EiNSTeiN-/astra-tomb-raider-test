@@ -101,6 +101,14 @@ export function normalizeSave(value) {
       thermal: key === "embers" ? normalizeThermal(v.thermal) : {},
       wind: key === "sky" ? normalizeWind(v.wind) : {},
       resonance: key === "crystal" ? normalizeResonance(v.resonance) : {},
+      archive:
+        key === "tides"
+          ? [
+              ...new Set(
+                strings(v.archive).filter((id) => /^tide-[0-4]$/.test(id)),
+              ),
+            ]
+          : [],
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
       medkits: Math.max(0, Math.min(20, Number(v.medkits) || 0)),
@@ -177,6 +185,7 @@ export class SaveStore {
       thermal: {},
       resonance: {},
       wind: {},
+      archive: [],
       time: 0,
       health: 100,
       medkits: 3,

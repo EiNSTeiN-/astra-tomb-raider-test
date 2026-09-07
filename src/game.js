@@ -129,6 +129,14 @@ import {
   wadingDepth,
 } from "./water-motion.js";
 import { waterAt } from "./hydrology.js";
+import { resetDiving, divingHint, updateDiveView, DIVE_AIR } from "./diving.js";
+import {
+  buildTideArchive,
+  updateTideArchive,
+  archiveInteract,
+  archiveHint,
+  archiveProgress,
+} from "./tide-archive.js";
 import {
   buildTempleArchitecture,
   updateTempleArchitecture,
@@ -436,6 +444,9 @@ export class Adventure {
     this.dodgeCooldown = 0;
     this.grounded = true;
     this.swimming = false;
+    resetDiving(this);
+    this.diveView = null;
+    this.tideArchive = [];
     this.aimUntil = 0;
     this.items = [];
     this.detailPatches = [];
@@ -599,6 +610,7 @@ export class Adventure {
     buildCipherCourts(this);
     buildHazards(this);
     buildSoundLandmarks(this);
+    buildTideArchive(this);
     this.cameraSurfaces.rebuild();
     this.templeCaptureGeometry?.forEach((g) => g.dispose());
     this.templeCaptureGeometry = [];
@@ -1270,7 +1282,7 @@ export class Adventure {
       Math.min(100, this.stamina + (sprint ? -15 : 10) * dt),
     );
     const jump = this.keys.has("Space");
-    this.keys.delete("Space");
+    if (!this.diving) this.keys.delete("Space");
     if (jump && this.grounded && moving && this.tryClimb(x, z)) return;
     const p = this.player.position,
       oldX = p.x,
@@ -1488,8 +1500,8 @@ export class Adventure {
     }
     const target = this.player.position
         .clone()
-        .add(new THREE.Vector3(0, 1.3, 0)),
-      distance = 5.3;
+        .add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
+      distance = this.diving ? 3.4 : 5.3;
     const offset = new THREE.Vector3(
       Math.sin(this.yaw) * Math.cos(this.pitch) * distance,
       Math.sin(this.pitch) * distance + 0.2,
@@ -1509,7 +1521,7 @@ export class Adventure {
           p.y >=
             Math.max(
               this.groundHeight(p.x, p.z) + 0.28,
-              this.swimming
+              this.swimming && !this.diving
                 ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
                 : -Infinity,
             ),
@@ -1518,6 +1530,7 @@ export class Adventure {
     this.avatar.visible = this.camera.position.distanceTo(target) > 0.85;
     this.camera.lookAt(target);
     updateAtmosphere(this, target);
+    updateDiveView(this);
   }
   updateDecorations(dt, observatoryDt = dt, solarDt = dt) {
     updateObservatory(this, observatoryDt);
@@ -1587,6 +1600,7 @@ export class Adventure {
     updateWindCourts(this, solarDt);
     updateCipherCourts(this, solarDt);
     updateWaterSurfaces(this, dt);
+    updateTideArchive(this);
     updateSoundLandmarks(this);
     this.flames.forEach((f, i) => {
       f.scale.y = 1.5 + Math.sin(this.elapsed * 12 + i) * 0.3;
@@ -1607,6 +1621,8 @@ export class Adventure {
     p.needsUpdate = true;
   }
   interact() {
+    if (archiveInteract(this)) return;
+    if (this.diving) return;
     if (cipherInteract(this)) return;
     if (hydraulicInteract(this)) return;
     if (thermalInteract(this)) return;
@@ -1815,6 +1831,7 @@ export class Adventure {
       this.health = 100;
       resetTraversal(this);
       this.swimming = false;
+      resetDiving(this);
       this.grounded = true;
       this.hitTimer = 2.5;
       this.avatar.rotation.x = 0;
@@ -1837,6 +1854,7 @@ export class Adventure {
   returnToCheckpoint() {
     resetTraversal(this);
     this.swimming = false;
+    resetDiving(this);
     this.grounded = true;
     this.jumpY = 0;
     this.player.position.set(
@@ -1890,40 +1908,47 @@ export class Adventure {
       counterweightsReady(this, objectiveTarget)
         ? { ...objectiveTarget, z: objectiveTarget.z - 5 / CELL }
         : objectiveTarget;
-    const target = traversalTarget(this, aimedTarget);
+    const target = this.diving ? null : traversalTarget(this, aimedTarget);
     return {
       health: this.health,
       stamina: this.stamina,
+      swimming: this.swimming,
+      diving: this.diving,
+      diveAir: this.diveAir ?? DIVE_AIR,
+      archive:
+        this.level.biome === "water" ? archiveProgress(this).length : null,
       medkits: this.progress.medkits,
       stage: this.progress.stage,
       total: this.level.mechanisms,
-      objective: this.progress.completed
-        ? "Expedition complete · Find the remaining discoveries"
-        : task?.label ||
-          (this.progress.stage === 0 &&
-          this.counterweights &&
-          !this.counterweights.saved.solved
-            ? `Restore the counterweights · ${this.counterweights.trial.title}`
-            : null) ||
-          (opticalTarget
-            ? opticalTarget.type === "cipher"
-              ? "Read the covenant and align its carved drums"
-              : opticalTarget.type === "wind"
-                ? "Guide the wind to the engine’s receiver"
-                : opticalTarget.type === "resonator"
-                  ? "Tune the array and recover its memory"
-                  : opticalTarget.type === "thermal"
-                    ? "Match the regulator’s firing record"
-                    : opticalTarget.type === "hydraulic"
-                      ? "Match the royal measure in the hydraulic court"
-                      : opticalTarget.type === "bell"
-                        ? "Learn and answer the bellkeeper's lesson"
-                        : opticalTarget.kind === "receiver"
-                          ? "Activate the illuminated receiver"
-                          : "Follow and redirect the sunlight"
-            : null) ||
-          this.level.objectiveNames[this.progress.stage] ||
-          `Recover ${this.level.artifact}`,
+      objective: this.diving
+        ? "Explore the tidekeeper’s submerged archive"
+        : this.progress.completed
+          ? "Expedition complete · Find the remaining discoveries"
+          : task?.label ||
+            (this.progress.stage === 0 &&
+            this.counterweights &&
+            !this.counterweights.saved.solved
+              ? `Restore the counterweights · ${this.counterweights.trial.title}`
+              : null) ||
+            (opticalTarget
+              ? opticalTarget.type === "cipher"
+                ? "Read the covenant and align its carved drums"
+                : opticalTarget.type === "wind"
+                  ? "Guide the wind to the engine’s receiver"
+                  : opticalTarget.type === "resonator"
+                    ? "Tune the array and recover its memory"
+                    : opticalTarget.type === "thermal"
+                      ? "Match the regulator’s firing record"
+                      : opticalTarget.type === "hydraulic"
+                        ? "Match the royal measure in the hydraulic court"
+                        : opticalTarget.type === "bell"
+                          ? "Learn and answer the bellkeeper's lesson"
+                          : opticalTarget.kind === "receiver"
+                            ? "Activate the illuminated receiver"
+                            : "Follow and redirect the sunlight"
+              : null) ||
+            this.level.objectiveNames[this.progress.stage] ||
+            `Recover ${this.level.artifact}`,
       mission,
       fieldTask: task,
       carrying: carryingComponent(this.level, this.progress),
@@ -1947,7 +1972,11 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : counterweightHint(this) || traversalHint(this) || skyBridgeHint(this),
+        : counterweightHint(this) ||
+          traversalHint(this) ||
+          skyBridgeHint(this) ||
+          archiveHint(this) ||
+          divingHint(this),
       position: this.player.position,
       yaw: this.yaw,
       time: this.progress.time,
@@ -1962,9 +1991,12 @@ export class Adventure {
     updateSoundSources(this);
     this.audio.update(this.player.position, this.yaw, {
       stage: this.progress.stage,
-      task:
-        (this.nearest?.type === "resonator" || this.resonanceFocus != null) &&
-        resonanceReady(this, this.resonanceSites?.[this.progress.stage])
+      underwater: this.diving,
+      listenerHeight: this.swimming ? 0.3 : 1.6,
+      task: this.diving
+        ? "dive"
+        : (this.nearest?.type === "resonator" || this.resonanceFocus != null) &&
+            resonanceReady(this, this.resonanceSites?.[this.progress.stage])
           ? "tuning"
           : this.hydraulicSites?.[this.progress.stage]?.flow ||
               this.thermalSites?.[this.progress.stage]?.moving ||

@@ -19,7 +19,12 @@ export function waterSites(map, level) {
         z: (room.z + 1.4) * 7,
         width: 15,
         length: 15,
-        depth: kind === "water" ? (level.biome === "water" ? 2.65 : 1.65) : 0,
+        depth:
+          kind === "water"
+            ? level.biome === "water"
+              ? [5.8, 7.2, 6.4, 8, 9][Math.floor(i / 2)]
+              : 1.65
+            : 0,
         room,
         stage: i - 1,
       });

@@ -22,6 +22,9 @@ export function waterMaterial(game, site) {
     ior: 1.333,
     reflectivity: 0.35,
     clearcoat: ice ? 0.45 : 0,
+    side:
+      !ice && game.level.biome === "water" ? THREE.DoubleSide : THREE.FrontSide,
+    forceSinglePass: true,
   });
   const uniforms = {
     waterTime: { value: 0 },
@@ -83,7 +86,7 @@ export function waterMaterial(game, site) {
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <opaque_fragment>",
       `
-      vec3 waterN=normalize(vec3(-slope.x,1.0,-slope.y));
+      vec3 waterN=normalize(vec3(-slope.x,1.0,-slope.y))*(gl_FrontFacing?1.0:-1.0);
       vec3 waterV=normalize(cameraPosition-vWaterWorld);
       float fresnel=.025+.62*pow(1.0-max(0.0,dot(waterN,waterV)),5.0);
       vec4 mirrorUv=waterMirrorMatrix*vec4(vWaterWorld,1.0);

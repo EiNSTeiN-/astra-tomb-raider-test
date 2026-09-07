@@ -1,7 +1,9 @@
 import { waterAt } from "./hydrology.js";
 import { waterSplash } from "./water-surface.js";
+import { advanceDiving, resetDiving } from "./diving.js";
 
 export function restoreWaterArrival(game) {
+  resetDiving(game);
   const p = game.player.position,
     water = waterAt(game, p.x, p.z);
   game.swimming = false;
@@ -19,8 +21,10 @@ export function advanceSwimming(game, input, dt, jump) {
     water = waterAt(game, p.x, p.z);
   if (!water || water.depth < 1.1 || p.y > water.y + 0.15) {
     game.swimming = false;
+    game.diving = false;
     return false;
   }
+  if (advanceDiving(game, input, dt, water, jump)) return true;
   if (!game.swimming && p.y > water.y - 0.3) return false;
   if (!game.swimming) {
     waterSplash(game, p, 1.6);

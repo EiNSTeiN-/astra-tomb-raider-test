@@ -1,3 +1,4 @@
+import { TIDE_ARCHIVE } from "./tide-archive-records.js";
 import { WIND_TRIALS, windName } from "./wind-rules.js";
 import { HYDRAULIC_TRIALS } from "./hydraulic-rules.js";
 import { RESONANCE_TRIALS, resonanceClue } from "./resonance-rules.js";
@@ -168,8 +169,8 @@ function init() {
       <div class="hud-objective"><div class="objective-diamond">◇</div><div><span class="eyebrow">CURRENT OBJECTIVE <span id="objective-progress"></span></span><p id="objective-text"></p><small id="objective-detail"></small><span id="objective-distance"></span></div></div>
       <div class="crosshair"><span></span><span></span></div><div class="sense-label hidden" id="sense-label">${icon("Eye")} EXPLORER’S INSTINCT</div><div id="waypoint" class="waypoint">◇<span></span></div>
       <div class="interaction-prompt hidden" id="interaction-prompt"><kbd>E</kbd><span></span></div>
-      <div class="hud-bottom"><div class="vitals"><div class="vital-label">${icon("Heart")}<span>VESPER VALE</span><span id="health-value">100</span></div><div class="health-track"><div id="health-bar"></div></div><div class="stamina-track"><div id="stamina-bar"></div></div><div class="supplies"><kbd>H</kbd>${icon("Plus")}<span id="medkit-count">3</span><span class="hud-divider"></span>${icon("Gem")}<span id="treasure-count">0 / 6</span></div></div><div class="hud-controls"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump / climb</span><span><kbd>E</kbd> Interact</span><span><kbd>F</kbd> Fire</span><span><kbd>R</kbd> Dodge</span><span><kbd>Q</kbd> Instinct</span><span><kbd>M</kbd> Map</span></div><div class="minimap-wrap"><canvas id="minimap" width="170" height="170"></canvas><span>N</span></div></div>
-      <div class="touch-controls"><div class="touch-pad"><button data-touch="up" aria-label="Move forward">↑</button><button data-touch="left" aria-label="Move left">←</button><button data-touch="down" aria-label="Move backward">↓</button><button data-touch="right" aria-label="Move right">→</button></div><div class="touch-actions"><button data-touch="turn-left" aria-label="Turn camera left">↶</button><button data-touch="turn-right" aria-label="Turn camera right">↷</button><button data-touch="jump">Jump</button><button data-touch="interact">Use</button><button data-touch="fire">Fire</button><button data-touch="dodge">Dodge</button></div></div>
+      <div class="hud-bottom"><div class="vitals"><div class="vital-label">${icon("Heart")}<span>VESPER VALE</span><span id="health-value">100</span></div><div class="health-track"><div id="health-bar"></div></div><div class="stamina-track"><div id="stamina-bar"></div></div><div id="dive-vitals" class="hidden"><div class="dive-air-label"><span>AIR</span><span id="dive-air-value">32 s</span></div><div class="dive-air-track" role="meter" aria-label="Breath remaining" aria-valuemin="0" aria-valuemax="32"><div id="dive-air-bar"></div></div></div><div class="supplies"><kbd>H</kbd>${icon("Plus")}<span id="medkit-count">3</span><span class="hud-divider"></span>${icon("Gem")}<span id="treasure-count">0 / 6</span></div></div><div class="hud-controls"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump / climb</span><span><kbd>E</kbd> Interact</span><span><kbd>F</kbd> Fire</span><span><kbd>R</kbd> Dodge</span><span><kbd>Q</kbd> Instinct</span><span><kbd>M</kbd> Map</span></div><div class="minimap-wrap"><canvas id="minimap" width="170" height="170"></canvas><span>N</span></div></div>
+      <div class="touch-controls"><div class="touch-pad"><button data-touch="up" aria-label="Move forward">↑</button><button data-touch="left" aria-label="Move left">←</button><button data-touch="down" aria-label="Move backward">↓</button><button data-touch="right" aria-label="Move right">→</button></div><div class="touch-actions"><button data-touch="turn-left" aria-label="Turn camera left">↶</button><button data-touch="turn-right" aria-label="Turn camera right">↷</button><button data-touch="jump">Jump</button><button data-touch="interact">Use</button><button data-touch="fire">Fire</button><button data-touch="dodge">Dodge</button><button data-touch="dive" class="hidden" aria-label="Dive down">Dive</button></div></div>
     </section>
     <div id="modal-root"></div><div class="toast hidden" id="toast" role="status"></div><div class="loading-screen hidden" id="loading" role="dialog" aria-modal="true" aria-labelledby="loading-title"><div class="loading-brand">${sigil}<span>VESPER</span></div><span class="eyebrow">ENTERING THE UNKNOWN</span><h2 id="loading-title"></h2><div class="loading-line" aria-hidden="true"><span></span></div><div id="loading-status" role="status" aria-live="polite">Preparing your expedition…</div><p>“Take the time to look. The way forward is rarely<br>the only thing worth finding.”</p><button class="text-button" id="cancel-loading">Back to expeditions</button></div>`;
   icons();
@@ -266,6 +267,7 @@ function bind() {
       ["turn-left", "KeyZ"],
       ["turn-right", "KeyC"],
       ["interact", "KeyE"],
+      ["dive", "KeyX"],
     ]) {
       if (held.includes(control)) game.keys.add(key);
       else game.keys.delete(key);
@@ -501,22 +503,79 @@ function updateHUD(s) {
   document.querySelector("#health-bar").style.width = `${s.health}%`;
   document.querySelector("#health-value").textContent = Math.ceil(s.health);
   document.querySelector("#stamina-bar").style.width = `${s.stamina}%`;
+  const diveVitals = document.querySelector("#dive-vitals");
+  const inWater = s.archive !== null && s.swimming;
+  diveVitals.classList.toggle("hidden", !inWater);
+  diveVitals.classList.toggle("low-air", s.diveAir < 10);
+  document.querySelector("#dive-air-value").textContent =
+    `${Math.ceil(s.diveAir)} s`;
+  document.querySelector("#dive-air-bar").style.width =
+    `${(s.diveAir / 32) * 100}%`;
+  diveVitals
+    .querySelector("[role=meter]")
+    .setAttribute("aria-valuenow", Math.ceil(s.diveAir));
+  document
+    .querySelector('[data-touch="dive"]')
+    .classList.toggle("hidden", !inWater);
+  document
+    .querySelector('[data-touch="fire"]')
+    .classList.toggle("hidden", inWater);
+  document.querySelector('[data-touch="jump"]').textContent = s.diving
+    ? "Rise"
+    : "Jump";
+  const controls = document.querySelector(".hud-controls");
+  if (controls.dataset.diving !== String(s.diving)) {
+    controls.dataset.diving = String(s.diving);
+    controls.innerHTML = (
+      s.diving
+        ? [
+            ["W A S D", "Swim"],
+            ["X", "Descend"],
+            ["SPACE", "Rise"],
+            ["E", "Recover"],
+            ["J", "Journal"],
+            ["ESC", "Pause"],
+          ]
+        : [
+            ["W A S D", "Move"],
+            ["SPACE", "Jump / climb"],
+            ["E", "Interact"],
+            ["F", "Fire"],
+            ["R", "Dodge"],
+            ["Q", "Instinct"],
+            ["M", "Map"],
+          ]
+    )
+      .map(([key, label]) => `<span><kbd>${key}</kbd> ${label}</span>`)
+      .join("");
+  }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent =
-    `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.diving
+    ? `${number(s.archive)} / 05`
+    : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
-  document.querySelector("#objective-distance").textContent =
-    `${s.distance} m away`;
+  document.querySelector("#objective-distance").textContent = s.target
+    ? `${s.distance} m away`
+    : "";
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
+  if (s.diving)
+    document.querySelector("#objective-detail").textContent =
+      "Optional exploration · Five sounding wells · Pause → Field journal";
+  else if (s.archive !== null)
+    document.querySelector("#objective-detail").textContent +=
+      ` · Tidekeeper's atlas ${s.archive} / 5 · J to read`;
   const prompt = document.querySelector("#interaction-prompt");
   prompt.classList.toggle("hidden", !s.nearest && !s.traversalHint);
   const touchLabels = matchMedia("(pointer:coarse)").matches;
   const controlLabel = (text) =>
     touchLabels
-      ? text.replace(/\bSpace\b/g, "Jump").replace(/\bE\b/g, "Use")
+      ? text
+          .replace(/\bSpace\b/g, s.diving ? "Rise" : "Jump")
+          .replace(/\bE\b/g, "Use")
+          .replace(/\bX\b/g, "Dive")
       : text;
   prompt.querySelector("kbd").textContent = controlLabel(
     s.traversalHint?.key ?? "E",
@@ -797,11 +856,12 @@ function showPause() {
   if (!inGame) return;
   modal(
     "A moment to breathe.",
-    `<p class="modal-description">${game.level.title} · ${formatTime(game.progress.time)} in the field</p><div class="pause-stats"><div><strong>${game.progress.stage}<small> / ${game.level.mechanisms}</small></strong><span>Mechanisms restored</span></div><div><strong>${game.state().notes}<small> / 12</small></strong><span>Journal pages found</span></div></div><div class="pause-buttons"><button class="primary-button full-width" data-close>Continue the expedition ${icon("ArrowRight")}</button><button class="secondary-button" id="pause-map">${icon("Compass")} Expedition map</button><button class="secondary-button" id="pause-guide">${icon("BookOpen")} Field guide</button><button class="secondary-button" id="pause-settings">${icon("Settings2")} Settings</button><button class="text-button" id="return-camp">${icon("RotateCcw")} Return to last checkpoint</button><button class="text-button" id="quit-game">${icon("ArrowLeft")} Save & return to expedition</button></div><p class="save-copy">${icon("ShieldCheck")} Your latest progress has been saved${store.available ? "." : " in memory. Browser storage is unavailable."}</p>`,
+    `<p class="modal-description">${game.level.title} · ${formatTime(game.progress.time)} in the field</p><div class="pause-stats"><div><strong>${game.progress.stage}<small> / ${game.level.mechanisms}</small></strong><span>Mechanisms restored</span></div><div><strong>${game.state().notes}<small> / 12</small></strong><span>Journal pages found</span></div></div><div class="pause-buttons"><button class="primary-button full-width" data-close>Continue the expedition ${icon("ArrowRight")}</button><button class="secondary-button" id="pause-map">${icon("Compass")} Expedition map</button><button class="secondary-button" id="pause-journal">${icon("BookOpen")} Field journal</button><button class="secondary-button" id="pause-guide">${icon("BookOpen")} Field guide</button><button class="secondary-button" id="pause-settings">${icon("Settings2")} Settings</button><button class="text-button" id="return-camp">${icon("RotateCcw")} Return to last checkpoint</button><button class="text-button" id="quit-game">${icon("ArrowLeft")} Save & return to expedition</button></div><p class="save-copy">${icon("ShieldCheck")} Your latest progress has been saved${store.available ? "." : " in memory. Browser storage is unavailable."}</p>`,
     "pause",
     "EXPEDITION PAUSED",
   );
   document.querySelector("#pause-map").onclick = showMap;
+  document.querySelector("#pause-journal").onclick = showJournal;
   document.querySelector("#pause-guide").onclick = showGuide;
   document.querySelector("#pause-settings").onclick = showSettings;
   document.querySelector("#return-camp").onclick = () => {
@@ -850,7 +910,7 @@ function showMap() {
 function showGuide() {
   modal(
     "Leave no story buried.",
-    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools; use movement controls to reach a shallow bank, or press Space (Jump on touch) toward a nearby ledge to climb out.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Fire with F or a mouse click. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
+    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. Reloading a dive brings you safely to the surface with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Fire with F or a mouse click. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
       ["W A S D / ↑ ↓ ← →", "Move"],
       ["MOUSE / Z C", "Look around"],
       ["SHIFT", "Sprint"],
@@ -858,6 +918,7 @@ function showGuide() {
       ["E", "Interact"],
       ["F / CLICK", "Fire sidearm"],
       ["R + DIRECTION", "Dodge · uses stamina"],
+      ["X / SPACE", "Dive / rise · Drowned Kingdom"],
       ["Q", "Explorer’s instinct"],
       ["H", "Use medical supply"],
       ["M", "Expedition map"],
@@ -874,6 +935,12 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const archive = TIDE_ARCHIVE.filter((r) =>
+    store.data.levels.tides?.archive?.includes(r.id),
+  );
+  const archiveSection = store.data.levels.tides
+    ? `<section class="tide-journal"><span class="eyebrow">THE TIDEKEEPER’S ATLAS · ${archive.length} / 5</span><h3>A city beneath a city</h3><p>Five bronze floats mark the old sounding wells. Begin beside the harbor sanctuary, follow the bubbles below the water, and recover the sealed survey cases. Each record describes another well. Read safely at the surface, or pause here to review your discoveries.</p>${archive.map((r) => `<article><span class="eyebrow">${r.well}</span><h3>${r.title}</h3><p>${r.text}</p><p class="small-copy">${r.clue}</p></article>`).join("")}${archive.length === 5 ? '<p class="atlas-complete">ATLAS COMPLETE · The drowned kingdom’s evacuation is remembered.</p>' : ""}</section>`
+    : "";
   const memories = RESONANCE_TRIALS.slice(
     0,
     Math.min(8, store.data.levels.crystal?.stage || 0),
@@ -889,7 +956,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${entries.length || memories.length ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${archiveSection}${entries.length || memories.length || archive.length ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,

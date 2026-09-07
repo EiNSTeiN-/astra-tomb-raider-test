@@ -22,6 +22,7 @@ export const AUDIO_SOURCES = {
   crystal: { range: 34, near: 3, gain: 0.6, filter: 10000 },
   resonator: { range: 16, near: 1.2, gain: 0.14, filter: 7000 },
   lava: { range: 45, near: 4, gain: 0.9, filter: 4500 },
+  bubbles: { range: 16, near: 1, gain: 0.2, filter: 2800 },
 };
 
 export const SCORES = {
@@ -105,6 +106,27 @@ export function distanceGain(distance, near = 3, range = 40) {
 const midi = (n) => 440 * 2 ** ((n - 69) / 12);
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
+export function createImmersionFilter(context) {
+  const filter = context.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = Math.min(20000, context.sampleRate * 0.48);
+  filter.Q.value = 0.5;
+  return filter;
+}
+
+export function setImmersion(buses, underwater, time) {
+  for (const [name, bus] of Object.entries(buses || {})) {
+    const filter = bus.immersion;
+    if (!filter) continue;
+    const clear = Math.min(20000, filter.context.sampleRate * 0.48);
+    filter.frequency.setTargetAtTime(
+      underwater ? (name === "music" ? 950 : 700) : clear,
+      time,
+      0.18,
+    );
+  }
+}
+
 // Four phrases, with deliberate rests. Objective index changes voicing and motif
 // placement while keeping the chapter's tonal center stable across transitions.
 export function scoreBar(biome, stage, bar, mode = "explore", task = "survey") {
@@ -136,7 +158,8 @@ export function scoreBar(biome, stage, bar, mode = "explore", task = "survey") {
     bar % 8 < 6 &&
     mode !== "puzzle" &&
     mode !== "reading" &&
-    task !== "tuning"
+    task !== "tuning" &&
+    task !== "dive"
   ) {
     const sparse = ["snow", "crystal", "eclipse"].includes(biome);
     const beats = sparse ? [0.6, 2.6] : [0.5, 1.8, 3.1];
@@ -152,7 +175,10 @@ export function scoreBar(biome, stage, bar, mode = "explore", task = "survey") {
       });
     });
   }
-  if (mode === "danger" || (task === "lift" && bar % 2 === 0))
+  if (
+    (mode === "danger" && task !== "dive") ||
+    (task === "lift" && bar % 2 === 0)
+  )
     [0, 2].forEach((beat) =>
       events.push({
         beat,
@@ -228,10 +254,12 @@ export class Soundscape {
     this.buses = {};
     for (const name of ["music", "ambience", "effects"]) {
       const input = this.ctx.createGain(),
-        output = this.ctx.createGain();
+        output = this.ctx.createGain(),
+        immersion = createImmersionFilter(this.ctx);
       input.connect(output);
-      output.connect(this.sceneBus);
-      this.buses[name] = { input, output };
+      output.connect(immersion);
+      immersion.connect(this.sceneBus);
+      this.buses[name] = { input, output, immersion };
     }
     this.addReverb(
       "music",
@@ -371,30 +399,35 @@ export class Soundscape {
       pressureHigh += (noise - pressureHigh) * pressureHighStep;
       const air = brown * (0.4 + 0.3 * Math.sin(t * 0.47) ** 2);
       data[i] =
-        kind === "resonator"
-          ? (Math.sin(t * 2 * Math.PI * 200) +
-              0.12 * Math.sin(t * 2 * Math.PI * 400)) *
-            0.1
-          : kind === "rope" || kind === "hoist"
-            ? (Math.sin(t * 2 * Math.PI * 91 + Math.sin(t * 0.81) * 7) * 0.05 +
-                Math.sin(t * 2 * Math.PI * 143 + Math.sin(t * 0.7) * 3) *
-                  0.015 +
-                (pressureHigh - pressureLow) * 0.08) *
-              (kind === "hoist"
-                ? 0.3 + 0.7 * Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6)
-                : Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6))
-            : kind === "steam"
-              ? (pressureHigh - pressureLow) *
-                (0.32 + Math.sin(t * 0.73) ** 2 * 0.08)
-              : kind === "crystal"
-                ? (Math.sin(t * 2 * Math.PI * 330) +
-                    0.35 * Math.sin(t * 2 * Math.PI * 495)) *
-                  (0.018 + Math.sin(t * 0.7) ** 8 * 0.025)
-                : kind === "machine" || kind === "lava"
-                  ? air * 0.6 +
-                    Math.sin(t * Math.PI * 2 * 48) *
-                      (0.03 + 0.01 * Math.sin(t * 4))
-                  : air;
+        kind === "bubbles"
+          ? (Math.sin(t * 2 * Math.PI * (210 + 60 * Math.sin(t * 3.1))) * 0.12 +
+              brown * 0.2) *
+            Math.pow(Math.max(0, Math.sin(t * 11 + Math.sin(t * 2.3))), 12)
+          : kind === "resonator"
+            ? (Math.sin(t * 2 * Math.PI * 200) +
+                0.12 * Math.sin(t * 2 * Math.PI * 400)) *
+              0.1
+            : kind === "rope" || kind === "hoist"
+              ? (Math.sin(t * 2 * Math.PI * 91 + Math.sin(t * 0.81) * 7) *
+                  0.05 +
+                  Math.sin(t * 2 * Math.PI * 143 + Math.sin(t * 0.7) * 3) *
+                    0.015 +
+                  (pressureHigh - pressureLow) * 0.08) *
+                (kind === "hoist"
+                  ? 0.3 + 0.7 * Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6)
+                  : Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6))
+              : kind === "steam"
+                ? (pressureHigh - pressureLow) *
+                  (0.32 + Math.sin(t * 0.73) ** 2 * 0.08)
+                : kind === "crystal"
+                  ? (Math.sin(t * 2 * Math.PI * 330) +
+                      0.35 * Math.sin(t * 2 * Math.PI * 495)) *
+                    (0.018 + Math.sin(t * 0.7) ** 8 * 0.025)
+                  : kind === "machine" || kind === "lava"
+                    ? air * 0.6 +
+                      Math.sin(t * Math.PI * 2 * 48) *
+                        (0.03 + 0.01 * Math.sin(t * 4))
+                    : air;
     }
     return this.loopBuffer(buffer);
   }
@@ -461,20 +494,30 @@ export class Soundscape {
   update(
     position,
     yaw,
-    { stage = 0, task = "survey", danger = false, occluded, sourceActive } = {},
+    {
+      stage = 0,
+      task = "survey",
+      danger = false,
+      occluded,
+      sourceActive,
+      underwater = false,
+      listenerHeight = 1.6,
+    } = {},
   ) {
     if (!this.ctx || !this.sceneBus) return;
     const t = this.ctx.currentTime,
       listener = this.ctx.listener;
     this.stage = stage;
     this.task = task;
+    this.underwater = underwater;
+    setImmersion(this.buses, underwater, t);
     if (danger) this.dangerUntil = t + 4;
     if (["explore", "danger"].includes(this.mode))
       this.setMode((this.dangerUntil || 0) > t ? "danger" : "explore");
     const set = (param, value) => param.setTargetAtTime(value, t, 0.045);
     if (listener.positionX) {
       set(listener.positionX, position.x);
-      set(listener.positionY, position.y + 1.6);
+      set(listener.positionY, position.y + listenerHeight);
       set(listener.positionZ, position.z);
       set(listener.forwardX, -Math.sin(yaw));
       set(listener.forwardY, 0);
@@ -483,7 +526,7 @@ export class Soundscape {
       set(listener.upY, 1);
       set(listener.upZ, 0);
     } else {
-      listener.setPosition(position.x, position.y + 1.6, position.z);
+      listener.setPosition(position.x, position.y + listenerHeight, position.z);
       listener.setOrientation(-Math.sin(yaw), 0, -Math.cos(yaw), 0, 1, 0);
     }
     if (t - this.lastSpatial < 0.1) return;
@@ -493,7 +536,7 @@ export class Soundscape {
         const config = AUDIO_SOURCES[source.kind];
         const distance = Math.hypot(
           source.x - position.x,
-          source.y - position.y - 1.6,
+          source.y - position.y - listenerHeight,
           source.z - position.z,
         );
         const gain =
@@ -840,6 +883,7 @@ export class Soundscape {
       Object.values(oldBuses || {}).forEach((bus) => {
         bus.input.disconnect();
         bus.output.disconnect();
+        bus.immersion?.disconnect();
         bus.reverb?.forEach((n) => n.disconnect());
       });
     }, 500);

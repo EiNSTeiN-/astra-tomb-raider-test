@@ -97,6 +97,13 @@ The explorer's palms, fingers and thumbs now fit the cable grips, with support
 struts placed outside the hands. The grip releases back to the base animation
 after dismounting. See [hand-grip views and verification](docs/hand-grips.md).
 
+The Drowned Kingdom now includes free diving and five sunken tidekeeper records.
+Follow bronze floats and bubble trails, hold X to descend and Space to rise,
+watch your air, and recover records with E. The journal preserves the recovered
+story; reloading a dive returns you safely to the water surface. Underwater sound
+is muffled and the chapter score becomes more sparse. Touch players have Dive,
+Rise and a journal link in the pause menu. See [diving and archive notes](docs/diving-archive.md).
+
 Guardians route around cover, investigate the player's last visible position, and return to their encounter area after losing contact. Their route searches run in small frame slices. The follow camera retracts before captured ruin walls, pillars, overhead beams, and moving gates, then extends smoothly when the view clears.
 
 Guardians now have carved masks, layered stone armor, articulated limbs, and distinct maces, forearm blades, staffs, and shields. Foot placement follows the terrain, and their poses show each attack and recovery window. Eight regional material palettes weather their stone and metal. Nearby models use about 20–22 thousand triangles, while distant models retain the silhouette at roughly 30% of that geometry; each guardian uses three character draw calls. Staff bolts and shot tracers now align with the visible lens, shield, and chest core. See [guardian art notes](docs/guardian-art.md) for verification and remaining limits.
