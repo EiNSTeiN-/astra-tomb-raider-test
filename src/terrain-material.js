@@ -6,6 +6,15 @@ import {
   coastalNormal,
   coastalUniforms,
 } from "./coastal-material.js";
+import {
+  skyTerrainDeclarations,
+  skyCliffCoordinates,
+  skyTerrainColor,
+  skyTerrainAlbedo,
+  skyTerrainNormal,
+  skyGroundNormal,
+  skyTerrainRoughness,
+} from "./sky-terrain-material.js";
 
 const declarations = /* glsl */ `
 uniform sampler2D pavingMap, pavingNormal, pavingRoughness;
@@ -30,6 +39,7 @@ float terrainNoise(vec2 p) {
     mix(terrainHash(cell + vec2(0, 1)), terrainHash(cell + vec2(1, 1)), f.x), f.y);
 }
 ${coastalDeclarations}
+${skyTerrainDeclarations}
 `;
 
 const colorLayer = /* glsl */ `
@@ -39,6 +49,7 @@ vec2 pavingUv = vTerrainPosition.xz / 5.0;
 vec2 cliffUvX = vTerrainPosition.zy / 5.0;
 vec2 cliffUvY = vTerrainPosition.xz / 5.0;
 vec2 cliffUvZ = vTerrainPosition.xy / 5.0;
+${skyCliffCoordinates}
 float terrainMacro = terrainNoise(vTerrainPosition.xz * .065);
 float earthBlend = smoothstep(.2, .8, terrainMacro) * .65;
 vec3 earthColor = mix(texture2D(map, earthUv).rgb,
@@ -80,6 +91,7 @@ float growthWeight = 0.0;
   growthWeight *= mix(.12, 1.0, smoothstep(.004, .05, mossSample.g - mossSample.r));
 #endif
 ${coastalColor}
+${skyTerrainColor}
 vec3 terrainAlbedo = mix(earthColor, pavingColor, pavingWeight);
 terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 #ifdef TERRAIN_JUNGLE
@@ -88,6 +100,7 @@ terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
   terrainAlbedo *= mix(1.0, .73, terrainDamp);
 #endif
 ${coastalAlbedo}
+${skyTerrainAlbedo}
 diffuseColor.rgb *= terrainAlbedo * mix(.87, 1.04, terrainNoise(vTerrainPosition.xz * .013));
 `;
 
@@ -104,6 +117,7 @@ terrainRough=mix(terrainRough,mix(texture2D(cliffRoughness,vTerrainPosition.xz/2
 float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
   + texture2D(cliffRoughness, cliffUvY).g * terrainWeights.y
   + texture2D(cliffRoughness, cliffUvZ).g * terrainWeights.z;
+${skyTerrainRoughness}
 terrainRough = mix(terrainRough, rockRough, terrainSlope);
 terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
@@ -132,12 +146,14 @@ vec3 cliffN = normalize(
   + terrainSurfaceNormal(texture2D(cliffNormal, cliffUvY).xyz, cliffUvY, normal, .9) * terrainWeights.y
   + terrainSurfaceNormal(texture2D(cliffNormal, cliffUvZ).xyz, cliffUvZ, normal, .9) * terrainWeights.z);
 ${coastalNormal}
+${skyTerrainNormal}
 vec3 terrainN = normalize(mix(earthN, pavingN, pavingWeight));
 terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
 #ifdef TERRAIN_JUNGLE
   terrainN = normalize(mix(terrainN,
     terrainSurfaceNormal(texture2D(verdureNormal, verdureUv).xyz, verdureUv, normal, .38), growthWeight));
 #endif
+${skyGroundNormal}
 normal = terrainN;
 `;
 
@@ -146,7 +162,7 @@ export function terrainMaterial(game) {
   const natural =
     {
       jungle: "forest",
-      sky: "forest",
+      sky: "ground",
       desert: "sand",
       snow: "snow",
       water: "sand",
@@ -199,7 +215,7 @@ export function terrainMaterial(game) {
       ? "palace-stone"
       : biome === "desert"
         ? "sandstone"
-        : biome === "volcano"
+        : ["volcano", "sky"].includes(biome)
           ? "forge-rock"
           : "rock";
   const uniforms = {
@@ -217,7 +233,7 @@ export function terrainMaterial(game) {
           snow: 0xd4e1e7,
           water: 0xa8b9b0,
           volcano: 0x747c87,
-          sky: 0xb9b7a4,
+          sky: 0xe0e4df,
           crystal: 0x737386,
           eclipse: 0x9d9991,
         }[biome],
@@ -235,6 +251,13 @@ export function terrainMaterial(game) {
     },
   };
   if (biome === "volcano") material.defines = { TERRAIN_FORGE: 1 };
+  if (biome === "sky") {
+    material.defines = { TERRAIN_SKY: 1 };
+    Object.assign(uniforms, {
+      skyMossMap: { value: load("verdure", "color") },
+      skyMossNormal: { value: load("verdure", "normal") },
+    });
+  }
   if (biome === "water") {
     material.defines = { TERRAIN_COASTAL: 1 };
     Object.assign(uniforms, coastalUniforms(game));
@@ -256,11 +279,11 @@ export function terrainMaterial(game) {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader.replace(
       "#include <common>",
-      "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif",
+      "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif\n#ifdef TERRAIN_SKY\nattribute float skyDepth; varying float vSkyDepth;\n#endif",
     );
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
-      "#include <begin_vertex>\nvCourt=court; vTrail=trail; vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz; vTerrainNormal=normalize(mat3(modelMatrix)*normal);\n#ifdef TERRAIN_COASTAL\nvCoastal=coast;\n#endif",
+      "#include <begin_vertex>\nvCourt=court; vTrail=trail; vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz; vTerrainNormal=normalize(mat3(modelMatrix)*normal);\n#ifdef TERRAIN_COASTAL\nvCoastal=coast;\n#endif\n#ifdef TERRAIN_SKY\nvSkyDepth=skyDepth;\n#endif",
     );
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\n" + declarations)
@@ -272,6 +295,6 @@ export function terrainMaterial(game) {
       )
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
-  material.customProgramCacheKey = () => `vesper-terrain-${biome}-6`;
+  material.customProgramCacheKey = () => `vesper-terrain-${biome}-7`;
   return material;
 }

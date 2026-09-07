@@ -19,7 +19,12 @@ test("sky machinery clears its grass footprint without moving surrounding plants
       fieldSites: [],
       features,
     },
-    terrainProfile: { extent: 70, court: () => 0 },
+    terrainProfile: {
+      extent: 70,
+      court: () => 0,
+      height: () => 0,
+      geology: { depth: () => 0 },
+    },
     groundHeight: () => 0,
   });
   const before = make([]),

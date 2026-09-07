@@ -7,6 +7,7 @@ import { waterSites, basinDepression, protectedGround } from "./hydrology.js";
 import { terrainMaterial } from "./terrain-material.js";
 import { trailSampler } from "./habitat.js";
 import { coastalLayout } from "./coastal-layout.js";
+import { refineSkyTerrain } from "./sky-geology.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -24,8 +25,9 @@ export function createTerrainProfile(map, level) {
   const heights = new Float32Array(width * width),
     courts = new Float32Array(width * width);
   const biome = level.biome;
+  const upperHeights = biome === "sky" ? new Float32Array(width * width) : null;
   const coastal = biome === "water" ? coastalLayout(map) : null;
-  const trail = biome === "jungle" ? trailSampler(map) : () => 0;
+  const trail = ["jungle", "sky"].includes(biome) ? trailSampler(map) : () => 0;
   const raw = (x, z) => {
     const radius = Math.hypot(x - extent / 2, z - extent / 2);
     switch (biome) {
@@ -87,6 +89,7 @@ export function createTerrainProfile(map, level) {
           1 - smooth(inner, inner + 8, distance + organicEdge),
         );
       }
+      if (upperHeights) upperHeights[iz * width + ix] = height;
       if (!map.grid[gz]?.[gx]) {
         let distance = 36;
         for (let dz = -4; dz <= 4; dz++)
@@ -166,7 +169,7 @@ export function createTerrainProfile(map, level) {
         );
       }
     }
-  return {
+  const profile = {
     extent,
     waters,
     bridges,
@@ -177,15 +180,23 @@ export function createTerrainProfile(map, level) {
     courts,
     trail,
     coastal,
+    geology: null,
     height: (x, z) => sample(heights, x, z),
     court: (x, z) => sample(courts, x, z),
   };
+  return upperHeights
+    ? refineSkyTerrain(
+        profile,
+        (x, z) => sample(upperHeights, x, z),
+        level.seed,
+      )
+    : profile;
 }
 
 export function buildTerrainSurface(game) {
   const profile = game.terrainProfile,
     material = terrainMaterial(game),
-    chunkCells = 28;
+    chunkCells = Math.round(49 / profile.step);
   game.terrainMeshes = [];
   for (let z = 0; z < profile.width - 1; z += chunkCells)
     for (let x = 0; x < profile.width - 1; x += chunkCells) {
@@ -207,6 +218,7 @@ export function buildTerrainSurface(game) {
         uv = geometry.attributes.uv,
         court = new Float32Array(position.count),
         trail = new Float32Array(position.count),
+        skyDepth = profile.geology ? new Float32Array(position.count) : null,
         coast = profile.coastal ? new Float32Array(position.count * 3) : null;
       for (let i = 0; i < position.count; i++) {
         const px = position.getX(i),
@@ -215,6 +227,7 @@ export function buildTerrainSurface(game) {
         uv.setXY(i, px / 4, pz / 4);
         court[i] = profile.court(px, pz);
         trail[i] = profile.trail(px, pz);
+        if (skyDepth) skyDepth[i] = profile.geology.depth(px, pz);
         if (coast) {
           const room = profile.coastal.nearest(px, pz);
           coast.set([px - room.x, pz - room.z, room.index], i * 3);
@@ -222,6 +235,11 @@ export function buildTerrainSurface(game) {
       }
       geometry.setAttribute("court", new THREE.BufferAttribute(court, 1));
       geometry.setAttribute("trail", new THREE.BufferAttribute(trail, 1));
+      if (skyDepth)
+        geometry.setAttribute(
+          "skyDepth",
+          new THREE.BufferAttribute(skyDepth, 1),
+        );
       if (coast)
         geometry.setAttribute("coast", new THREE.BufferAttribute(coast, 3));
       geometry.computeVertexNormals();

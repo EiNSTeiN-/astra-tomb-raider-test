@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { random } from "./campaign.js";
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
 import { inWindCourt } from "./wind-rules.js";
+import { skyGroundSupported } from "./sky-geology.js";
 
 export const GRASS_RANGES = {
   high: [24, 48, 85],
@@ -174,7 +175,12 @@ export function buildGroundCover(game) {
       );
       // Consume the same random samples first, preserving grass everywhere
       // else. The wind courts' working lanes and foundations stay clear.
-      if (game.level.biome === "sky" && inWindCourt(game.map, px, pz)) continue;
+      if (
+        game.level.biome === "sky" &&
+        (inWindCourt(game.map, px, pz) ||
+          !skyGroundSupported(game.terrainProfile, px, pz))
+      )
+        continue;
       const key = `${Math.floor(px / 32)},${Math.floor(pz / 32)}`;
       if (!chunks.has(key)) chunks.set(key, []);
       chunks

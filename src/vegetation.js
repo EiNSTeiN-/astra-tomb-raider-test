@@ -13,6 +13,7 @@ import {
   coastalPlantAllowed,
 } from "./habitat.js";
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
+import { skyGroundSupported } from "./sky-geology.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -42,13 +43,11 @@ function forestWind(material, uniform) {
 export async function loadForest(game) {
   const loader = new GLTFLoader(game.assetBatch?.manager);
   game.woodland = [];
-  if (!["jungle", "sky", "snow"].includes(game.level.biome)) return;
+  if (!["jungle", "snow"].includes(game.level.biome)) return;
   const names =
     game.level.biome === "snow"
       ? ["fir_tree_01"]
-      : game.level.biome === "jungle"
-        ? ["island_tree_01", "island_tree_02"]
-        : ["island_tree_01"];
+      : ["island_tree_01", "island_tree_02"];
   const world = game.world;
   const layout = woodlandLayout(game.map, game.level, (x, z) =>
     game.groundHeight(x, z),
@@ -220,7 +219,12 @@ export async function loadNature(game) {
     const rock = asset.name.startsWith("rock"),
       fern = asset.name.startsWith("fern");
     const scattered = locations
-      .filter((p) => biome !== "sky" || !inWindCourt(game.map, p.x, p.z))
+      .filter(
+        (p) =>
+          biome !== "sky" ||
+          (!inWindCourt(game.map, p.x, p.z) &&
+            skyGroundSupported(game.terrainProfile, p.x, p.z, rock)),
+      )
       .filter((p) => biome !== "desert" || !inSolarCourt(game.map, p.x, p.z))
       .filter((p) => biome !== "water" || !inHydraulicCourt(game.map, p.x, p.z))
       .filter((p) => biome !== "volcano" || !inThermalCourt(game.map, p.x, p.z))

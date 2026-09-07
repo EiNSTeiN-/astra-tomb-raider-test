@@ -3,8 +3,9 @@ import { random } from "./campaign.js";
 // Placement is computed independently of asset loading so detail tiers and
 // reloads share the same silhouettes. Trunks stay off the navigable grid.
 export function woodlandLayout(map, level, height) {
-  // These exposed islands have shoreline scrub, not a forest rooted in the sea.
-  if (level.biome === "water") return [];
+  // Exposed coastal islands and cloud-city terraces carry low scrub. Random
+  // off-grid trees would otherwise be rooted in the sea or sheer ravine walls.
+  if (["water", "sky"].includes(level.biome)) return [];
   const rng = random(level.seed + 1961),
     trees = [];
   if (level.biome !== "jungle") {
