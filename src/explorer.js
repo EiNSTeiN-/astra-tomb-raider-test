@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { cableHands } from "./return-cable.js";
+import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
@@ -148,6 +149,7 @@ export function explorerGait(game, moving, sprinting) {
 export function animateExplorer(game, dt, moving, sprinting) {
   const rig = game.rig;
   if (!rig) return;
+  restoreCableGrip(game);
   const gait = explorerGait(game, moving, sprinting);
   if (gait.name !== rig.state) {
     const action = rig.actions[gait.name];
@@ -213,11 +215,13 @@ export function animateExplorer(game, dt, moving, sprinting) {
       ),
     );
   } else if (game.ropeRide || (game.zipRide && !game.zipRide.approach)) {
-    poseHands(
-      game,
-      cableHands(game) ||
-        game.player.position.clone().add(new THREE.Vector3(0, 2.15, 0)),
-    );
+    const handles = cableHands(game);
+    if (!poseCableGrip(game, handles))
+      poseHands(
+        game,
+        handles ||
+          game.player.position.clone().add(new THREE.Vector3(0, 2.15, 0)),
+      );
     poseFeet(game, [point(0.12, 0.16, 0.02), point(-0.12, 0.28, 0.05)]);
   } else if (game.climb) {
     const c = game.climb,

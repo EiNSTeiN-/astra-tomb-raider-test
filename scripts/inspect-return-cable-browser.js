@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { animateExplorer } from "../src/explorer.js";
-import { updateReturnCable, cableHands } from "../src/return-cable.js";
+import { updateReturnCable } from "../src/return-cable.js";
 import { Soundscape } from "../src/audio.js";
+import { handGeometry } from "./inspect-hand-geometry.js";
 
 export function returnCableView(
   game,
@@ -48,15 +49,16 @@ export function returnCableView(
   game.camera.lookAt(center);
   game.updateDecorations(0, 1, 1);
   game.renderScene(0);
-  const targets = cableHands(game),
-    errors = game.rig.arms.map((chain, i) =>
-      chain[2].getWorldPosition(new THREE.Vector3()).distanceTo(targets[i]),
-    ),
+  const contacts = handGeometry(game).map(({ side, fingers }) => ({
+      side,
+      minimum: Math.min(...Object.values(fingers).map((f) => f.minimum)),
+      maximumContact: Math.max(...Object.values(fingers).map((f) => f.minimum)),
+    })),
     gl = game.renderer.getContext();
   return {
     chapter: game.level.id,
     view,
-    handErrors: errors,
+    handContacts: contacts,
     calls: game.renderer.info.render.calls,
     triangles: game.renderer.info.render.triangles,
     linked: game.renderer.info.programs.every((p) =>

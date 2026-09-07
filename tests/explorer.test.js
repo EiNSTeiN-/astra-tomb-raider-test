@@ -7,14 +7,11 @@ import * as THREE from "three";
 import { animateExplorer, explorerGait } from "../src/explorer.js";
 import { resetTraversal } from "../src/traversal.js";
 import { supportAt } from "../src/character-motion.js";
+import { handGeometry } from "../scripts/inspect-hand-geometry.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { coursePlan, hasTraversalCourse } from "../src/traversal-courses.js";
-import {
-  buildReturnCable,
-  updateReturnCable,
-  cableHands,
-} from "../src/return-cable.js";
+import { buildReturnCable, updateReturnCable } from "../src/return-cable.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -60,7 +57,7 @@ async function groundedActor() {
   };
 }
 
-test("both delivered hands remain on the vertical trolley grips over every return-cable slope and heading", async () => {
+test("delivered palms and fingers fit every cable grip without stretching bones or entering the handle struts", async (t) => {
   const game = await groundedActor(),
     materials = {
       stone: new THREE.MeshStandardMaterial(),
@@ -69,7 +66,20 @@ test("both delivered hands remain on the vertical trolley grips over every retur
     };
   game.world = new THREE.Group();
   game.world.add(game.player);
-  let samples = 0;
+  let samples = 0,
+    minimum = Infinity,
+    maximumContact = 0,
+    vertices = 0,
+    strutClearance = Infinity;
+  const bones = [];
+  game.rig.model.traverse((bone) => {
+    if (bone.isBone && /(?:Arm|ForeArm|Hand.*)$/.test(bone.name))
+      bones.push({
+        bone,
+        position: bone.position.clone(),
+        scale: bone.scale.clone(),
+      });
+  });
   for (const level of LEVELS) {
     game.level = level;
     const map = createMap(level),
@@ -108,15 +118,48 @@ test("both delivered hands remain on the vertical trolley grips over every retur
         updateReturnCable(game, course, 0);
         for (let i = 0; i < 24; i++) {
           animateExplorer(game, 1 / 60, false, false);
-          const targets = cableHands(game);
-          for (const [side, chain] of game.rig.arms.entries()) {
-            const error = chain[2]
-              .getWorldPosition(new THREE.Vector3())
-              .distanceTo(targets[side]);
+          for (const { bone, position, scale } of bones) {
+            assert.ok(bone.position.distanceTo(position) < 1e-7, bone.name);
+            assert.ok(bone.scale.distanceTo(scale) < 1e-7, bone.name);
             assert.ok(
-              error < 0.012,
-              `${level.id}/${f.id}/${travel}/${side}: ${error}m`,
+              bone.quaternion.toArray().every(Number.isFinite),
+              bone.name,
             );
+          }
+          if (![0, 12, 23].includes(i)) continue;
+          for (const hand of handGeometry(game)) {
+            for (const [finger, measurement] of Object.entries(hand.fingers)) {
+              const label = `${level.id}/${f.id}/${travel}/${i}/${hand.side}/${finger}`;
+              assert.ok(measurement.vertices > 200, label);
+              assert.ok(
+                measurement.minimum >= -0.0005,
+                `${label}: enters grip by ${-measurement.minimum} m`,
+              );
+              assert.ok(
+                measurement.minimum < 0.004,
+                `${label}: misses grip by ${measurement.minimum} m`,
+              );
+              minimum = Math.min(minimum, measurement.minimum);
+              maximumContact = Math.max(maximumContact, measurement.minimum);
+            }
+            for (const { point } of hand.vertices) {
+              const local = course.zipRig.hanger.worldToLocal(point.clone());
+              for (const sign of [-1, 1]) {
+                const segment = new THREE.Line3(
+                  new THREE.Vector3(sign * 0.205, 0, 0),
+                  new THREE.Vector3(sign * 0.365, -0.43, 0),
+                );
+                const distance = segment
+                  .closestPointToPoint(local, true, new THREE.Vector3())
+                  .distanceTo(local);
+                assert.ok(
+                  distance > 0.041,
+                  `${level.id}/${f.id}: hand enters strut envelope`,
+                );
+                strutClearance = Math.min(strutClearance, distance - 0.041);
+              }
+            }
+            vertices += hand.vertices.length;
             samples++;
           }
         }
@@ -125,8 +168,75 @@ test("both delivered hands remain on the vertical trolley grips over every retur
       course.root.traverse((o) => o.geometry?.dispose());
     }
   }
-  assert.equal(samples, 3168);
+  assert.equal(samples, 396);
+  t.diagnostic(
+    JSON.stringify({
+      samples,
+      vertices,
+      minimum,
+      maximumContact,
+      strutClearance,
+    }),
+  );
   Object.values(materials).forEach((m) => m.dispose());
+});
+
+test("dismounting restores the base hand animation without retaining finger or wrist rotations", async () => {
+  const game = await groundedActor(),
+    reference = await groundedActor();
+  game.world = new THREE.Group();
+  game.world.add(game.player);
+  const course = {
+    id: "release",
+    stage: 0,
+    root: new THREE.Group(),
+    zip: new THREE.Mesh(),
+    launch: new THREE.Vector3(0, 8.4, 0),
+    exit: new THREE.Vector3(0, 0, 22),
+  };
+  game.world.add(course.root);
+  buildReturnCable(game, course, {
+    stone: new THREE.MeshStandardMaterial(),
+    timber: new THREE.MeshStandardMaterial(),
+    metal: new THREE.MeshStandardMaterial(),
+  });
+  game.player.position.copy(course.launch).lerp(course.exit, 0.4);
+  reference.player.position.copy(game.player.position);
+  game.zipRide = { course, approach: false };
+  game.grounded = reference.grounded = false;
+  updateReturnCable(game, course, 0);
+  for (let i = 0; i < 30; i++) {
+    animateExplorer(game, 1 / 60, false, false);
+    animateExplorer(reference, 1 / 60, false, false);
+  }
+  const closed = [];
+  game.rig.model.traverse((bone) => {
+    if (bone.isBone && /Hand.*[123]$/.test(bone.name))
+      closed.push({ bone, rotation: bone.quaternion.clone() });
+  });
+  game.zipRide = null;
+  for (let i = 0; i < 90; i++) {
+    animateExplorer(game, 1 / 60, false, false);
+    animateExplorer(reference, 1 / 60, false, false);
+    game.rig.model.traverse((bone) => {
+      if (!bone.isBone || !/Hand/.test(bone.name)) return;
+      const expected = reference.rig.model.getObjectByName(bone.name);
+      assert.ok(
+        bone.quaternion
+          .toArray()
+          .every(
+            (q, i) => Math.abs(q - expected.quaternion.toArray()[i]) < 1e-6,
+          ),
+        bone.name,
+      );
+    });
+  }
+  assert.ok(
+    closed.some(
+      ({ bone, rotation }) => rotation.angleTo(bone.quaternion) > 0.5,
+    ),
+  );
+  assert.ok(game.rig.hangLift < 0.00001);
 });
 // Independent of the runtime's reduced probes: inspect every outsole vertex.
 function soleClearances(game) {

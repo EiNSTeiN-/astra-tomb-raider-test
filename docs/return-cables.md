@@ -1,5 +1,10 @@
 # Return cable terminals and carriage
 
+The subsequent [hand-grip milestone](hand-grips.md) adds finger articulation,
+moves the handle struts clear of the hands, and completes all eight chapters'
+browser route checks and the audio measurements described as pending below.
+The remaining sections record the original return-cable milestone's evidence.
+
 All 22 elevated routes now have departure and arrival frames, terrain-fitted
 footplates, crossheads, diagonal stays and bronze cable anchors. A two-sheave
 carriage carries a hinged handle with separate left and right grips. Its roller

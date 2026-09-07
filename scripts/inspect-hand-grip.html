@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Explorer grip inspection</title>
+    <style>
+      body {
+        margin: 0;
+        background: #18232b;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "three";
+      import { loadExplorer, animateExplorer } from "../src/explorer.js";
+      import { CABLE_GRIP } from "../src/hand-grip.js";
+      import {
+        buildReturnCable,
+        updateReturnCable,
+        cableHands,
+      } from "../src/return-cable.js";
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x18232b);
+      const world = new THREE.Group(),
+        player = new THREE.Group(),
+        avatar = new THREE.Group();
+      scene.add(world);
+      world.add(player);
+      player.add(avatar);
+      scene.add(new THREE.HemisphereLight(0xd8eafa, 0x8d7968, 2.5));
+      const light = new THREE.DirectionalLight(0xffebd2, 3);
+      light.position.set(4, 9, 6);
+      scene.add(light);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1;
+      document.body.append(renderer.domElement);
+      const game = {
+        world,
+        player,
+        avatar,
+        obstacles: [],
+        groundHeight: () => 0,
+        level: { seed: 24, biome: "jungle" },
+        grounded: false,
+        elapsed: 1,
+        renderer,
+        moveVelocity: { x: 0, z: 0 },
+      };
+      const course = {
+        id: "grip-review",
+        stage: 0,
+        launch: new THREE.Vector3(0, 8.4, 0),
+        exit: new THREE.Vector3(0, 0, 22),
+        root: new THREE.Group(),
+        zip: new THREE.Mesh(),
+      };
+      world.add(course.root);
+      const materials = {
+        stone: new THREE.MeshStandardMaterial({ color: 0x727568 }),
+        timber: new THREE.MeshStandardMaterial({ color: 0x564533 }),
+        metal: new THREE.MeshStandardMaterial({
+          color: 0x9c8962,
+          metalness: 0.6,
+          roughness: 0.5,
+        }),
+      };
+      buildReturnCable(game, course, materials);
+      game.traversalCourses = [course];
+      game.zipRide = { course, approach: false };
+      player.position.copy(course.launch).lerp(course.exit, 0.4);
+      updateReturnCable(game, course, 0);
+      await loadExplorer(game);
+      const camera = new THREE.PerspectiveCamera(
+        40,
+        innerWidth / innerHeight,
+        0.01,
+        100,
+      );
+      function render(view = "front") {
+        for (let i = 0; i < 24; i++)
+          animateExplorer(game, 1 / 60, false, false);
+        const target = cableHands(game)[0]
+          .clone()
+          .add(new THREE.Vector3(0, -0.025, 0));
+        const offset =
+          view === "side"
+            ? new THREE.Vector3(0.55, 0.12, 0.05)
+            : view === "body"
+              ? new THREE.Vector3(2, -0.6, 3)
+              : new THREE.Vector3(0.18, 0.06, 0.55);
+        if (view === "body") target.y -= 0.65;
+        camera.position.copy(target).add(offset);
+        camera.lookAt(target);
+        renderer.render(scene, camera);
+        return {
+          triangles: renderer.info.render.triangles,
+          calls: renderer.info.render.calls,
+        };
+      }
+      window.handReview = {
+        game,
+        course,
+        render,
+        scene,
+        camera,
+        fit: CABLE_GRIP,
+      };
+      render();
+      document.documentElement.dataset.ready = "true";
+    </script>
+  </body>
+</html>

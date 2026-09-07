@@ -167,7 +167,7 @@ export function buildReturnCable(game, course, materials) {
     block(0.05, 0.33, 0.79, carriage, x, 0.01, 0);
     beam(
       new THREE.Vector3(x, 0, 0),
-      new THREE.Vector3(x, -0.43, 0),
+      new THREE.Vector3(Math.sign(x) * 0.365, -0.43, 0),
       0.055,
       0.06,
       hanger,
