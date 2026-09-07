@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
+import { groundExplorer } from "./explorer-grounding.js";
 
 function equipmentSurface(material) {
   const canvas = /canvas|bottle/.test(material.name);
@@ -162,6 +163,23 @@ export function animateExplorer(game, dt, moving, sprinting) {
   game.avatar.position.z = 0;
   rig.model.rotation.x = 0;
   rig.weapon.group.visible = false;
+  if (game.blockGrip) {
+    rig.model.rotation.x = 0.14;
+    game.avatar.rotation.y = Math.atan2(
+      game.blockGrip.axis[0],
+      game.blockGrip.axis[1],
+    );
+  } else if (
+    game.grounded &&
+    !game.swimming &&
+    !game.climb &&
+    !hanging &&
+    game.aimUntil > game.elapsed &&
+    !game.carrying &&
+    !game.dodge
+  )
+    game.avatar.rotation.y = (game.aimYaw ?? game.yaw) + Math.PI;
+  groundExplorer(game, dt, moving, sprinting);
   const rotation = game.avatar.getWorldQuaternion(new THREE.Quaternion());
   const point = (x, y, z) =>
     new THREE.Vector3(x, y, z)

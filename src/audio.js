@@ -714,12 +714,19 @@ export class Soundscape {
     source.stop(t + length + 0.03);
     this.track(source, [filter, envelope, ...(spatial ? [spatial] : [])]);
   }
-  footstep(surface, sprint = false) {
+  footstep(surface, sprint = false, position) {
     if (!this.ctx || !this.buses) return;
     this.noiseHit(
       sprint ? 0.11 : 0.075,
       surface === "snow" ? 0.21 : 0.11,
-      surface === "snow" ? 4000 : surface === "desert" ? 1800 : 950,
+      surface === "snow"
+        ? 4000
+        : surface === "desert"
+          ? 1800
+          : surface === "wood"
+            ? 600
+            : 950,
+      position,
     );
   }
   note(frequency) {

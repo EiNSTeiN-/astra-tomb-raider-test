@@ -1270,11 +1270,6 @@ export class Adventure {
     trackTraversalSupport(this);
     this.stepDistance =
       (this.stepDistance || 0) + Math.hypot(p.x - oldX, p.z - oldZ);
-    if (this.grounded && moving && this.stepDistance > (sprint ? 2.5 : 1.8)) {
-      if (depth > 0.12) waterSplash(this, p, 0.6);
-      else this.audio.footstep(this.level.biome, sprint);
-      this.stepDistance = 0;
-    }
     if (this.motionLanding?.drop > 1)
       this.audio.noiseHit?.(0.012, 0.18, 800, p);
     if (moving) {
@@ -1290,6 +1285,12 @@ export class Adventure {
     } else
       this.limbs.forEach((l) => (l.rotation.x *= Math.max(0, 1 - dt * 10)));
     animateExplorer(this, dt, moving && !this.swimming, sprint);
+    if (this.grounded && moving && this.stepDistance > (sprint ? 2.5 : 1.8)) {
+      if (depth > 0.12) waterSplash(this, p, 0.6);
+      else if (!this.rig?.grounding?.active)
+        this.audio.footstep(this.level.biome, sprint, p);
+      this.stepDistance = 0;
+    }
     if (this.level.biome === "volcano" && this.jumpY < 0.3) {
       for (const w of this.waterMeshes)
         if (

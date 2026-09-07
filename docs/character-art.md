@@ -8,6 +8,10 @@ Idle, walking and running come from the existing Mixamo Vanguard locomotion in T
 
 `src/explorer.js` selects the locomotion gait and adds arm/leg poses for swimming, jumping, mantling, ropes and cables. A short visual lift keeps the shorter human rig's hands on the existing rope grips and decays after release. A two-hand firing pose places the visible sidearm and tracer origin together. Recovery clears weapon visibility and visual offsets.
 
+Grounded animation now also fits the visible boots to terrain and deck supports,
+with footfalls tied to moving sole contacts. [Footing notes](explorer-footing.md)
+describe the runtime fitting, rendered comparison and verification limits.
+
 Reproduce the source validation and mesh build:
 
 ```sh

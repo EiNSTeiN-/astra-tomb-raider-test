@@ -6,6 +6,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { animateExplorer, explorerGait } from "../src/explorer.js";
 import { resetTraversal } from "../src/traversal.js";
+import { supportAt } from "../src/character-motion.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -21,6 +22,222 @@ async function actor() {
     "",
   );
 }
+
+async function groundedActor() {
+  const { scene, animations } = await actor(),
+    player = new THREE.Group(),
+    avatar = new THREE.Group();
+  player.add(avatar);
+  avatar.add(scene);
+  const mixer = new THREE.AnimationMixer(scene),
+    actions = {};
+  for (const clip of animations) actions[clip.name] = mixer.clipAction(clip);
+  actions.Idle.play();
+  return {
+    player,
+    avatar,
+    obstacles: [],
+    groundHeight: () => 0,
+    grounded: true,
+    level: { biome: "snow" },
+    elapsed: 0,
+    moveVelocity: { x: 0, z: 2.4 },
+    rig: {
+      model: scene,
+      mixer,
+      actions,
+      state: "Idle",
+      weapon: { group: new THREE.Group() },
+    },
+  };
+}
+// Independent of the runtime's reduced probes: inspect every outsole vertex.
+function soleClearances(game) {
+  const shoe = game.rig.model.getObjectByName("shoes04"),
+    { position, skinWeight, skinIndex } = shoe.geometry.attributes,
+    result = [Infinity, Infinity],
+    point = new THREE.Vector3();
+  game.avatar.updateWorldMatrix(true, false);
+  game.rig.model.updateMatrixWorld(true);
+  for (let i = 0; i < position.count; i++) {
+    if (position.getY(i) > 0.035) continue;
+    let dominant = 0;
+    for (let j = 1; j < 4; j++)
+      if (skinWeight.getComponent(i, j) > skinWeight.getComponent(i, dominant))
+        dominant = j;
+    const side = shoe.skeleton.bones[
+      skinIndex.getComponent(i, dominant)
+    ].name.includes("Left")
+      ? 0
+      : 1;
+    shoe.getVertexPosition(i, point).applyMatrix4(shoe.matrixWorld);
+    result[side] = Math.min(
+      result[side],
+      point.y -
+        supportAt(game, point.x, point.z, game.player.position.y + 0.45).height,
+    );
+  }
+  return result;
+}
+
+test("boots fit slopes in either direction while retaining swing clearance and the physical root", async () => {
+  const game = await groundedActor();
+  for (const grade of [-0.38, 0, 0.38]) {
+    game.groundHeight = (x, z) => x * grade + z * 0.06;
+    game.player.position.set(4, game.groundHeight(4, 6), 6);
+    for (const yaw of [0, Math.PI / 2, Math.PI]) {
+      game.avatar.rotation.y = yaw;
+      for (const name of ["Idle", "Walk", "Run"]) {
+        game.rig.mixer.stopAllAction();
+        game.rig.actions[name].reset().play();
+        game.rig.state = name;
+        game.moveVelocity.z = name === "Run" ? 6 : 2.4;
+        game.rig.grounding = undefined;
+        for (let i = 0; i < 30; i++) {
+          const root = game.player.position.clone();
+          animateExplorer(game, 1 / 30, name !== "Idle", false);
+          const soles = soleClearances(game),
+            contacts = game.rig.grounding.contacts;
+          assert.ok(
+            game.player.position.equals(root),
+            "visual IK moved the capsule",
+          );
+          for (let foot = 0; foot < 2; foot++) {
+            assert.ok(
+              soles[foot] > -0.012,
+              `${grade}/${yaw}/${name}/${i}: sole ${foot} penetrates ${soles[foot]}`,
+            );
+            assert.ok(
+              Math.abs(soles[foot] - contacts[foot].lift) < 0.045,
+              `${grade}/${yaw}/${name}/${i}: sole ${foot} gap ${soles[foot]} vs animation ${contacts[foot].lift}`,
+            );
+          }
+        }
+      }
+    }
+  }
+});
+
+test("visible contact drives positioned footsteps and stays quiet without travel or on water", async () => {
+  const game = await groundedActor(),
+    sounds = [];
+  game.audio = {
+    footstep: (surface, sprint, point) =>
+      sounds.push({
+        surface,
+        sprint,
+        point: point.clone(),
+        time: game.elapsed,
+      }),
+  };
+  const run = (frames, travel, moving = true) => {
+    for (let i = 0; i < frames; i++) {
+      game.player.position.z += travel;
+      game.elapsed += 1 / 60;
+      animateExplorer(game, 1 / 60, moving, false);
+    }
+  };
+  run(180, 0.04);
+  assert.ok(
+    sounds.length >= 4 && sounds.length <= 10,
+    `walking produced ${sounds.length} contacts`,
+  );
+  for (const sound of sounds) {
+    assert.equal(sound.surface, "snow");
+    assert.ok(sound.point.y > -0.012 && sound.point.y < 0.045);
+  }
+  const count = sounds.length;
+  run(120, 0); // Input against a wall must not generate steps.
+  run(120, 0, false);
+  game.paused = true;
+  run(120, 0.04);
+  game.paused = false;
+  game.waterMeshes = [
+    {
+      position: new THREE.Vector3(0, 0.4, game.player.position.z),
+      userData: { kind: "water", width: 100, length: 100 },
+    },
+  ];
+  run(120, 0.04);
+  game.waterMeshes = [];
+  for (let i = 0; i < 60; i++) run(1, 10); // Teleports are not footfalls.
+  assert.equal(sounds.length, count);
+  game.grounded = false;
+  run(120, 0.04);
+  assert.equal(game.rig.grounding.active, false);
+  assert.equal(sounds.length, count);
+  game.grounded = true;
+  game.moveVelocity.z = 6;
+  const startJog = sounds.length;
+  run(180, 0.1);
+  const jogContacts = sounds.length - startJog;
+  assert.ok(jogContacts >= 6, "jogging lost its foot contacts");
+  const startSprint = sounds.length;
+  for (let i = 0; i < 180; i++) {
+    game.player.position.z += 10 / 60;
+    game.elapsed += 1 / 60;
+    animateExplorer(game, 1 / 60, true, true);
+  }
+  assert.ok(
+    sounds.length - startSprint > jogContacts,
+    "sprinting should contact more often than jogging",
+  );
+  assert.ok(sounds.slice(startSprint).every((s) => s.sprint));
+});
+
+test("ground fitting uses platform tops and leaves unsupported feet above a deep drop", async () => {
+  const game = await groundedActor();
+  game.obstacles = [{ x: 0, z: 0, w: 2, d: 2, h: 2, climbable: true }];
+  game.player.position.y = 2;
+  animateExplorer(game, 0.1, false, false);
+  assert.ok(
+    soleClearances(game).every((gap) => gap > -0.012 && gap < 0.045),
+    JSON.stringify({
+      soles: soleClearances(game),
+      contacts: game.rig.grounding.contacts,
+    }),
+  );
+  game.obstacles = [];
+  game.groundHeight = () => -20;
+  animateExplorer(game, 0.1, false, false);
+  assert.ok(game.rig.grounding.contacts.every((c) => !c.supported));
+  assert.ok(
+    Math.abs(game.avatar.position.y) < 0.05,
+    "IK pulled the body into the ravine",
+  );
+  assert.equal(game.player.position.y, 2);
+});
+test("sagging bridge boards support the boots and produce timber contacts", async () => {
+  const game = await groundedActor(),
+    surfaces = [];
+  game.groundHeight = () => -20;
+  game.skyBridges = [
+    {
+      id: "test-span",
+      ax: 0,
+      az: 0,
+      bx: 0,
+      bz: 10,
+      ay: 2,
+      by: 2,
+      width: 2,
+      open: 1,
+      gaps: [],
+    },
+  ];
+  game.audio = { footstep: (surface) => surfaces.push(surface) };
+  game.player.position.z = 1;
+  for (let i = 0; i < 180; i++) {
+    game.player.position.z += 0.04;
+    game.player.position.y = supportAt(game, 0, game.player.position.z).height;
+    animateExplorer(game, 1 / 60, true, false);
+    const gaps = soleClearances(game);
+    assert.ok(gaps.every((gap) => gap > -0.012));
+    assert.ok(Math.min(...gaps) < 0.045);
+  }
+  assert.ok(surfaces.length >= 4);
+  assert.ok(surfaces.every((surface) => surface === "wood"));
+});
 test("the delivered explorer has normalized skin weights, finite normals, a complete rig, and three locomotion clips", async () => {
   const { scene, animations } = await actor();
   assert.deepEqual(animations.map((a) => a.name).sort(), [
@@ -187,6 +404,8 @@ test("both hands stay on a counterweight handle through push and pull cycles", a
     avatar,
     grounded: true,
     elapsed: 0,
+    groundHeight: () => 0,
+    obstacles: [],
     rig: {
       model: scene,
       mixer,
