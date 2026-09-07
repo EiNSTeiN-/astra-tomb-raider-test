@@ -2,6 +2,74 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { Adventure } from "../src/game.js";
+import { SolidContactPass } from "../src/rendering.js";
+
+test("contact depth draws suppress duplicate shadows and preserve pending updates, including failures", () => {
+  for (const enabled of [false, true])
+    for (const autoUpdate of [false, true])
+      for (const needsUpdate of [false, true])
+        for (const fail of [false, true]) {
+          const scene = new THREE.Scene();
+          const pass = Object.assign(
+            Object.create(SolidContactPass.prototype),
+            {
+              scene,
+              camera: new THREE.PerspectiveCamera(),
+              _originalClearColor: new THREE.Color(),
+            },
+          );
+          const normal = new THREE.MeshNormalMaterial();
+          const target = {};
+          let draws = 0;
+          const renderer = {
+            shadowMap: { enabled, autoUpdate, needsUpdate },
+            autoClear: true,
+            getClearColor(color) {
+              return color.set(0);
+            },
+            getClearAlpha() {
+              return 1;
+            },
+            setClearColor() {},
+            setClearAlpha() {},
+            clear() {},
+            setRenderTarget(value) {
+              assert.equal(value, target);
+            },
+            render(value, camera) {
+              draws++;
+              assert.equal(value, scene);
+              assert.equal(camera, pass.camera);
+              assert.equal(scene.overrideMaterial, normal);
+              assert.equal(
+                this.shadowMap.enabled,
+                enabled,
+                "retain shader variants",
+              );
+              assert.equal(
+                this.shadowMap.autoUpdate || this.shadowMap.needsUpdate,
+                false,
+              );
+              if (fail) throw new Error("lost context");
+            },
+          };
+          const draw = () =>
+            pass._renderOverride(renderer, normal, target, 0x7777ff, 1);
+          if (fail) assert.throws(draw, /lost context/);
+          else {
+            draw();
+            assert.equal(scene.overrideMaterial, null);
+            assert.equal(renderer.autoClear, true);
+          }
+          assert.equal(draws, 1, "normals and depth still render");
+          assert.deepEqual(renderer.shadowMap, {
+            enabled,
+            autoUpdate,
+            needsUpdate,
+          });
+          normal.dispose();
+        }
+});
 
 test("quality switches refresh shadow receivers once, including hidden and shared materials", (t) => {
   const descriptor = Object.getOwnPropertyDescriptor(

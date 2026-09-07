@@ -10,6 +10,22 @@ import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
 import { disposeMineralTransmission } from "./mineral-art.js";
 
 export class SolidContactPass extends GTAOPass {
+  _renderOverride(renderer, ...args) {
+    // The preceding color pass already rendered the directional shadows.
+    // Normals/depth do not sample them, and this pass hides cutout foliage, so
+    // rebuilding here wastes a second shadow pass with incomplete casters.
+    // Preserve a pending explicit update for the next color pass as well.
+    const { autoUpdate, needsUpdate } = renderer.shadowMap;
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = false;
+    try {
+      return super._renderOverride(renderer, ...args);
+    } finally {
+      renderer.shadowMap.autoUpdate = autoUpdate;
+      renderer.shadowMap.needsUpdate = needsUpdate;
+    }
+  }
+
   _overrideVisibility() {
     super._overrideVisibility();
     // A normal override cannot reproduce cutout leaves or translucent water.
