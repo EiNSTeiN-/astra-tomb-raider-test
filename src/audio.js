@@ -17,6 +17,7 @@ export const AUDIO_SOURCES = {
   wind: { range: 65, near: 4, gain: 0.7, filter: 6000 },
   steam: { range: 22, near: 2, gain: 0.16, filter: 7500 },
   rope: { range: 25, near: 3, gain: 0.18, filter: 4600 },
+  hoist: { range: 28, near: 2, gain: 0.055, filter: 4600 },
   machine: { range: 32, near: 3, gain: 0.7, filter: 4000 },
   crystal: { range: 34, near: 3, gain: 0.6, filter: 10000 },
   resonator: { range: 16, near: 1.2, gain: 0.14, filter: 7000 },
@@ -374,12 +375,14 @@ export class Soundscape {
           ? (Math.sin(t * 2 * Math.PI * 200) +
               0.12 * Math.sin(t * 2 * Math.PI * 400)) *
             0.1
-          : kind === "rope"
+          : kind === "rope" || kind === "hoist"
             ? (Math.sin(t * 2 * Math.PI * 91 + Math.sin(t * 0.81) * 7) * 0.05 +
                 Math.sin(t * 2 * Math.PI * 143 + Math.sin(t * 0.7) * 3) *
                   0.015 +
                 (pressureHigh - pressureLow) * 0.08) *
-              Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6)
+              (kind === "hoist"
+                ? 0.3 + 0.7 * Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6)
+                : Math.pow(0.5 + 0.5 * Math.sin(t * 1.07), 6))
             : kind === "steam"
               ? (pressureHigh - pressureLow) *
                 (0.32 + Math.sin(t * 0.73) ** 2 * 0.08)

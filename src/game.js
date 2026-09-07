@@ -454,6 +454,7 @@ export class Adventure {
     resetTraversal(this);
     this.counterweights = null;
     this.traversalCourses = [];
+    this.climbingMaterials = null;
     this.keys.clear();
     if (this.scene) {
       disposeInstanceBuffers(this.scene);

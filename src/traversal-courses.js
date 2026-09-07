@@ -1,5 +1,10 @@
 import * as THREE from "three";
-import { mergeArchitecture, pbrMaterial } from "./visuals.js";
+import { pbrMaterial } from "./visuals.js";
+import {
+  climbingMaterials,
+  buildClimbingArt,
+  updateClimbingArt,
+} from "./traversal-art.js";
 
 export const COURSE_THEMES = {
   jungle: {
@@ -87,6 +92,8 @@ export function coursePlan(level, feature) {
   }));
   return {
     id: feature.id,
+    stage: feature.stage,
+    pivotLocalZ: farZ,
     theme,
     angle,
     transform,
@@ -105,47 +112,12 @@ export function buildTraversalCourse(game, feature, station) {
     base = game.groundHeight(feature.x * 7, feature.z * 7),
     root = new THREE.Group();
   game.world.add(root);
-  const stone = game.stoneMat,
-    dark = game.darkMat,
-    gold = game.goldMat;
+  const gold = game.goldMat;
   const ropeMaterial = pbrMaterial("bark", plan.theme.rope, 1);
-  const trim = game.material(plan.theme.color, {
-    metalness: 0.45,
-    roughness: 0.55,
-  });
+  game.climbingMaterials ||= climbingMaterials(game);
+  const art = buildClimbingArt(game, plan, base, root, game.climbingMaterials);
   for (const ledge of plan.ledges) {
     const h = base + ledge.h - game.groundHeight(ledge.x, ledge.z);
-    game.box(
-      ledge.w * 2,
-      h,
-      ledge.d * 2,
-      stone,
-      ledge.x,
-      base + ledge.h - h / 2,
-      ledge.z,
-      root,
-    );
-    game.box(
-      ledge.w * 2 + 0.2,
-      0.2,
-      ledge.d * 2 + 0.2,
-      dark,
-      ledge.x,
-      base + ledge.h - 0.1,
-      ledge.z,
-      root,
-    );
-    for (const side of [-1, 1])
-      game.box(
-        0.09,
-        0.09,
-        ledge.d * 2 - 0.3,
-        trim,
-        ledge.x + side * (ledge.w - 0.15),
-        base + ledge.h + 0.035,
-        ledge.z,
-        root,
-      );
     const obstacle = {
       x: ledge.x,
       z: ledge.z,
@@ -160,51 +132,16 @@ export function buildTraversalCourse(game, feature, station) {
     ledge.obstacle = obstacle;
     ledge.y = base + ledge.h;
   }
-  // Two tall supports carry the rope anchor, leaving the landing surfaces clear.
   for (const localX of [-12.8, 7.8]) {
-    const p = plan.transform(localX, feature.stage % 2 ? -9 : -8),
-      h = plan.pivot.h + 0.9;
-    game.box(0.7, h, 0.7, dark, p.x, base + h / 2, p.z, root);
+    const p = plan.transform(localX, plan.pivotLocalZ - 3);
     game.obstacles.push({
       x: p.x,
       z: p.z,
       w: 0.5,
       d: 0.5,
-      h: base + h - game.groundHeight(p.x, p.z),
+      h: base + plan.pivot.h + 2.85 - game.groundHeight(p.x, p.z),
     });
-    for (let band = 0; band < 5; band++)
-      game.box(0.92, 0.18, 0.92, trim, p.x, base + 2 + band * 3.4, p.z, root);
   }
-  const beamCenter = plan.transform(-2.5, feature.stage % 2 ? -9 : -8);
-  const beam = game.box(
-    22,
-    0.6,
-    0.7,
-    dark,
-    beamCenter.x,
-    base + plan.pivot.h + 0.6,
-    beamCenter.z,
-    root,
-  );
-  beam.rotation.y = -plan.angle;
-  const bracket = game.box(
-    0.6,
-    0.55,
-    4,
-    gold,
-    plan.pivot.x,
-    base + plan.pivot.h + 0.5,
-    plan.pivot.z,
-    root,
-  );
-  bracket.rotation.y = -plan.angle;
-  const pulley = new THREE.Mesh(
-    new THREE.TorusGeometry(0.5, 0.12, 8, 24),
-    trim,
-  );
-  pulley.position.set(plan.pivot.x, base + plan.pivot.h + 0.15, plan.pivot.z);
-  pulley.rotation.y = plan.angle;
-  root.add(pulley);
   const anchor = new THREE.Vector3(
     plan.pivot.x,
     base + plan.pivot.h,
@@ -232,8 +169,8 @@ export function buildTraversalCourse(game, feature, station) {
     grip.userData.animated =
     zip.userData.animated =
       true;
-  mergeArchitecture(root);
   const course = {
+    art,
     ...plan,
     base,
     root,
@@ -243,6 +180,19 @@ export function buildTraversalCourse(game, feature, station) {
     anchor,
     angle: 0,
     omega: 0,
+    sound: {
+      id: `climbing-${feature.id}`,
+      kind: "hoist",
+      courseId: feature.id,
+      x: anchor.x,
+      y: anchor.y,
+      z: anchor.z,
+      near: 2,
+      range: 28,
+      gain: 0.055,
+      activity: 0,
+      rate: 0.8,
+    },
     stage: feature.stage,
     launch: new THREE.Vector3(
       plan.launchPoint.x,
@@ -279,6 +229,7 @@ function span(mesh, a, b) {
   );
 }
 export function updateCourseVisual(course) {
+  updateClimbingArt(course);
   const grip = ropeGrip(course);
   span(course.rope, course.anchor, grip);
   course.grip.position.copy(grip);
