@@ -47,9 +47,9 @@ export class WaterReflection {
     });
     this.reflector.rotation.x = -Math.PI / 2;
   }
-  render() {
+  render(exteriorOccluded = false) {
     const game = this.game,
-      selected = reflectionCandidate(game),
+      selected = exteriorOccluded ? null : reflectionCandidate(game),
       changed = selected !== this.selected;
     this.selected = selected;
     for (const water of game.waterMeshes || []) {

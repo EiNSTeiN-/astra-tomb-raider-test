@@ -140,3 +140,7 @@ and view helpers are in [verify-gallery-browser.js](../scripts/verify-gallery-br
 Run them only with disposable test progress. Full acceptance requirements and
 remaining content, art, device and listening work remain in
 [production status](production-status.md).
+
+A later [gallery rendering pass](gallery-rendering.md) culls the hidden exterior
+while retaining the full shadow casters and original images. Its measurements
+supersede the rendering counts above; route behavior and art remain the same.

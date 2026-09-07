@@ -111,6 +111,11 @@ The gallery has its own exploration map, positioned drips and moving gate sounds
 and reloads return to the last bell where you breathed. See
 [memorial gallery notes](docs/sunken-gallery.md).
 
+Enclosed gallery views now skip hidden exterior surfaces while keeping the full
+palace shadow casters and the visible entrance. Matched High and Performance
+views retain identical pixels with substantially fewer draw calls. See
+[gallery rendering measurements](docs/gallery-rendering.md).
+
 Guardians route around cover, investigate the player's last visible position, and return to their encounter area after losing contact. Their route searches run in small frame slices. The follow camera retracts before captured ruin walls, pillars, overhead beams, and moving gates, then extends smoothly when the view clears.
 
 Guardians now have carved masks, layered stone armor, articulated limbs, and distinct maces, forearm blades, staffs, and shields. Foot placement follows the terrain, and their poses show each attack and recovery window. Eight regional material palettes weather their stone and metal. Nearby models use about 20–22 thousand triangles, while distant models retain the silhouette at roughly 30% of that geometry; each guardian uses three character draw calls. Staff bolts and shot tracers now align with the visible lens, shield, and chest core. See [guardian art notes](docs/guardian-art.md) for verification and remaining limits.

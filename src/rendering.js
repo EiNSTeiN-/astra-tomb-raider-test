@@ -8,6 +8,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
 import { disposeMineralTransmission } from "./mineral-art.js";
+import { GalleryVisibility } from "./gallery-visibility.js";
 
 export class SolidContactPass extends GTAOPass {
   _renderOverride(renderer, ...args) {
@@ -56,6 +57,9 @@ export class CinematicRenderer {
   constructor(game) {
     this.game = game;
     this.waterReflection = new WaterReflection(game);
+    this.galleryVisibility = game.sunkenGallery
+      ? new GalleryVisibility(game)
+      : null;
     game.renderer.info.autoReset = false;
     this.configure();
   }
@@ -119,8 +123,13 @@ export class CinematicRenderer {
     );
   }
   render(dt) {
+    if (this.galleryVisibility)
+      return this.galleryVisibility.render(() => this.renderVisible(dt));
+    return this.renderVisible(dt);
+  }
+  renderVisible(dt) {
     this.game.renderer.info.reset();
-    this.waterReflection.render();
+    this.waterReflection.render(this.galleryVisibility?.culled);
     if (this.enabled && this.composer) this.composer.render(dt);
     else this.game.renderer.render(this.game.scene, this.game.camera);
   }
