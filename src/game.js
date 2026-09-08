@@ -1,3 +1,15 @@
+import {
+  buildBellHoist,
+  updateBellHoist,
+  bellHoistInteract,
+  bellHoistHint,
+  bellHoistObjective,
+} from "./bell-hoist.js";
+import {
+  hoistBlocked,
+  hoistSavePosition,
+  hoistOccludes,
+} from "./bell-hoist-rules.js";
 import { disposeInstanceBuffers } from "./instance-lod.js";
 import {
   canAim,
@@ -697,6 +709,7 @@ export class Adventure {
     buildWindCourts(this);
     buildCipherCourts(this);
     buildFireVault(this);
+    buildBellHoist(this);
     buildHazards(this);
     buildSoundLandmarks(this);
     buildTideArchive(this);
@@ -1229,6 +1242,7 @@ export class Adventure {
     if (skyBridgeBlocked(this, x, z, this.groundHeight(x, z) + height))
       return false;
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
+    if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     for (const dx of [-0.45, 0.45])
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
@@ -1246,6 +1260,7 @@ export class Adventure {
   lineOfSight(a, b) {
     const from = { x: a.x, y: a.y + 1.4, z: a.z },
       to = { x: b.x, y: b.y + 1.4, z: b.z };
+    if (hoistOccludes(this, from, to)) return false;
     for (const o of this.obstacles || []) {
       if (o.h <= 0.2) continue;
       const base = this.groundHeight(o.x, o.z);
@@ -1328,6 +1343,7 @@ export class Adventure {
     else this.renderer.render(this.scene, this.camera);
   }
   updatePlayer(dt) {
+    updateBellHoist(this, dt);
     this.dodgeCooldown = Math.max(0, (this.dodgeCooldown || 0) - dt);
     let x =
       (this.keys.has("KeyD") || this.keys.has("ArrowRight") ? 1 : 0) -
@@ -1793,6 +1809,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (bellHoistInteract(this)) return;
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
     if (archiveInteract(this)) return;
@@ -2099,9 +2116,11 @@ export class Adventure {
         : objectiveTarget;
     const gallery = galleryObjective(this);
     const vault = fireVaultObjective(this);
-    const target =
-      vault?.target ||
-      (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
+    const hoist = bellHoistObjective(this);
+    const target = hoist
+      ? null
+      : vault?.target ||
+        (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
     return {
       health: this.health,
       stamina: this.stamina,
@@ -2114,6 +2133,7 @@ export class Adventure {
         this.level.biome === "water" ? archiveProgress(this).length : null,
       gallery: !!gallery,
       fireVault: vault,
+      bellHoist: hoist,
       galleryStage: this.progress.gallery?.recovered
         ? 2
         : this.progress.gallery?.opened
@@ -2123,6 +2143,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        hoist?.text ||
         vault?.text ||
         gallery ||
         (this.diving
@@ -2177,7 +2198,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : fireVaultHint(this) ||
+        : bellHoistHint(this) ||
+          fireVaultHint(this) ||
           torchHint(this) ||
           galleryHint(this) ||
           counterweightHint(this) ||
@@ -2201,27 +2223,31 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : 1.6,
-      task: fireVaultObjective(this)
-        ? this.fireVault.operation
+      task: bellHoistObjective(this)
+        ? this.bellHoist.motion
           ? "lift"
-          : "brazier"
-        : this.diving || galleryObjective(this)
-          ? "dive"
-          : (this.nearest?.type === "resonator" ||
-                this.resonanceFocus != null) &&
-              resonanceReady(this, this.resonanceSites?.[this.progress.stage])
-            ? "tuning"
-            : this.hydraulicSites?.[this.progress.stage]?.flow ||
-                this.thermalSites?.[this.progress.stage]?.moving ||
-                this.windSites?.[this.progress.stage]?.moving
-              ? "valve"
-              : this.blockGrip ||
-                  this.cipherSites?.[this.progress.stage]?.moving
-                ? "lift"
-                : this.ropeRide || this.zipRide
-                  ? "climb"
-                  : currentFieldTask(this.level, this.progress)?.kind ||
-                    "mechanism",
+          : "resonance"
+        : fireVaultObjective(this)
+          ? this.fireVault.operation
+            ? "lift"
+            : "brazier"
+          : this.diving || galleryObjective(this)
+            ? "dive"
+            : (this.nearest?.type === "resonator" ||
+                  this.resonanceFocus != null) &&
+                resonanceReady(this, this.resonanceSites?.[this.progress.stage])
+              ? "tuning"
+              : this.hydraulicSites?.[this.progress.stage]?.flow ||
+                  this.thermalSites?.[this.progress.stage]?.moving ||
+                  this.windSites?.[this.progress.stage]?.moving
+                ? "valve"
+                : this.blockGrip ||
+                    this.cipherSites?.[this.progress.stage]?.moving
+                  ? "lift"
+                  : this.ropeRide || this.zipRide
+                    ? "climb"
+                    : currentFieldTask(this.level, this.progress)?.kind ||
+                      "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2258,12 +2284,17 @@ export class Adventure {
     if (!this.progress || !this.player) return;
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
+    const hoistPosition = hoistSavePosition(this);
     const settledPosition =
-      this.blockGrip?.move?.playerFrom || this.player.position;
+      hoistPosition || this.blockGrip?.move?.playerFrom || this.player.position;
     this.progress.position = {
       x: settledPosition.x,
       z: settledPosition.z,
-      height: this.grounded ? this.jumpY : 0,
+      height: hoistPosition
+        ? hoistPosition.y - this.groundHeight(hoistPosition.x, hoistPosition.z)
+        : this.grounded
+          ? this.jumpY
+          : 0,
     };
     this.progress.traversal = captureTraversal(this);
     this.progress.checkpoint = this.checkpoint;
@@ -2286,6 +2317,7 @@ export class Adventure {
     }
     this.paused = value;
     updateFireVault(this, 0);
+    updateBellHoist(this, 0);
     if (value) silenceCableMotion(this);
     updateTorch(this);
     this.presentationRemaining = 0;

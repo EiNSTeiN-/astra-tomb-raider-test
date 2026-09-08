@@ -124,6 +124,15 @@ The unused Michelle reference remains under `asset-sources/characters/` for deve
 
 ## Field recordings and original music
 
+The bellkeepers’ hoist, paired lift controls, gallery layout, folding upper
+crossing, refuge archive, floor maps and register are original project geometry,
+code and writing in `src/bell-hoist*.js`. Its surfaces reuse the credited local
+monastery stone, timber and snow maps, and its bell reuses the original monastery
+bell geometry. Drive, wind and bell sounds use existing original Web Audio
+synthesis; the mountain score uses its existing objective arrangements. No new
+external assets, recordings or music were added. See the
+[hoist verification notes](bellkeepers-hoist.md).
+
 The Rainkeeper's causeway, its turning bronze channels, folding stone crossings,
 six handwheels, sanctuary lamps, archive grille, rain drain, local map and keeper's
 record are original project geometry, code and writing in `src/fire-vault*.js`.

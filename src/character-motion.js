@@ -1,3 +1,4 @@
+import { hoistDeckAt } from "./bell-hoist-rules.js";
 import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
 
@@ -19,6 +20,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
   if (deck && deck.height > height) return deck;
   const vaultDeck = vaultDeckAt(game, x, z, maxY);
   if (vaultDeck && vaultDeck.height > height) return vaultDeck;
+  const hoistDeck = hoistDeckAt(game, x, z, maxY);
+  if (hoistDeck && hoistDeck.height > height) return hoistDeck;
   return { height, surface };
 }
 

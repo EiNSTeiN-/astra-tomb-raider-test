@@ -94,6 +94,7 @@ export function bellGeometry() {
 export function buildMonasteryArchitecture(game) {
   game.monasteryPatches = [];
   game.monasteryWindSources = {};
+  game.monasteryMaterials = null;
   game.monasteryTime = null;
   if (game.level.biome !== "snow") return false;
   game.monasteryTime = { value: 0 };
@@ -115,6 +116,7 @@ export function buildMonasteryArchitecture(game) {
     metalness: 0.76,
     roughness: 0.4,
   });
+  game.monasteryMaterials = { stone, wood, plaster, roof, snow, bronze };
   for (const m of [stone, wood, plaster, roof, snow, red])
     m.vertexColors = true;
   wood.normalScale.set(0.38, 0.38);

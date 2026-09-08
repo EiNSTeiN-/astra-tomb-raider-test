@@ -1,3 +1,4 @@
+import { normalizeBellHoist } from "./bell-hoist-rules.js";
 import { normalizeWind } from "./wind-rules.js";
 import { normalizeCipher } from "./cipher-rules.js";
 import { normalizeHydraulics } from "./hydraulic-rules.js";
@@ -113,6 +114,7 @@ export function normalizeSave(value) {
           : [],
       gallery: key === "tides" ? normalizeGallery(v.gallery) : null,
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
+      bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
       torch: key === "verdant" && v.torch === true,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
@@ -193,6 +195,7 @@ export class SaveStore {
       archive: [],
       gallery: id === "tides" ? normalizeGallery(null) : null,
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
+      bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
       torch: false,
       time: 0,
       health: 100,

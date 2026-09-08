@@ -1,4 +1,6 @@
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
+import { HOIST_RECORD } from "./bell-hoist-rules.js";
+import { drawBellHoistMap } from "./bell-hoist-map.js";
 import { GALLERY_RECORD } from "./sunken-gallery-record.js";
 import { VAULT_RECORD } from "./fire-vault-rules.js";
 import { drawFireVaultMap } from "./fire-vault-map.js";
@@ -434,6 +436,13 @@ async function runStartup(request) {
           puzzle: showPuzzle,
           counterweights: showCounterweightGuide,
           fireVault: showFireVaultGuide,
+          bellHoist: showBellHoistGuide,
+          bellHoistRecord: () =>
+            modal(
+              HOIST_RECORD.title,
+              `<div class="note-paper"><p>${HOIST_RECORD.text}</p><p>${HOIST_RECORD.note}</p></div><button class="primary-button" data-close>Return to the refuge</button>`,
+              "note",
+            ),
           note: showNote,
           complete: showComplete,
           saved: () => {
@@ -587,13 +596,15 @@ function updateHUD(s) {
   }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent = s.fireVault
-    ? `${number(s.fireVault.lit)} / 03`
-    : s.gallery
-      ? `${number(s.galleryStage)} / 02`
-      : s.diving
-        ? `${number(s.archive)} / 05`
-        : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.bellHoist
+    ? `${number(s.bellHoist.step)} / 03`
+    : s.fireVault
+      ? `${number(s.fireVault.lit)} / 03`
+      : s.gallery
+        ? `${number(s.galleryStage)} / 02`
+        : s.diving
+          ? `${number(s.archive)} / 05`
+          : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
   document.querySelector("#objective-distance").textContent = s.target
     ? `${s.distance} m away`
@@ -601,7 +612,10 @@ function updateHUD(s) {
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
-  if (s.fireVault)
+  if (s.bellHoist)
+    document.querySelector("#objective-detail").textContent =
+      "Optional tomb · The bellkeepers’ hoist · M shows all three floors";
+  else if (s.fireVault)
     document.querySelector("#objective-detail").textContent =
       "Optional tomb · The Rainkeeper’s causeway · M shows connected crossings";
   else if (s.gallery)
@@ -693,6 +707,7 @@ function updateWaypoint(s) {
 }
 function drawMap(canvas, full = false, s = game?.state()) {
   if (!game || !s) return;
+  if (s.bellHoist) return drawBellHoistMap(canvas, game, full);
   if (s.fireVault) return drawFireVaultMap(canvas, game, full);
   if (s.gallery) return drawGalleryMap(canvas, game, full);
   const c = canvas.getContext("2d"),
@@ -940,7 +955,7 @@ function showMap() {
   modal(
     "Follow the forgotten paths.",
     `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${state.objective}</p>${
-      !state.gallery && !state.fireVault && state.mission
+      !state.gallery && !state.fireVault && !state.bellHoist && state.mission
         ? `<p class="small-copy">${game.state().mission.briefing}</p><ol class="field-checklist">${game
             .state()
             .mission.tasks.map(
@@ -949,7 +964,7 @@ function showMap() {
             )
             .join("")}</ol>`
         : ""
-    } ${state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
+    } ${state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
     "map",
     "EXPEDITION CARTOGRAPHY",
     true,
@@ -987,6 +1002,10 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const hoist = store.data.levels.frost?.bellHoist;
+  const hoistSection = hoist?.visited
+    ? `<section class="tide-journal"><span class="eyebrow">THE BELLKEEPERS’ HOIST · ${hoist.recovered ? "RECOVERED" : "IN PROGRESS"}</span><h3>${HOIST_RECORD.title}</h3><p>${hoist.recovered ? HOIST_RECORD.text : "A path east of the western library trail reaches the old cargo hoist. Two platforms share one counterweight. Find the bell’s bronze tongue in the middle gallery, carry it to the upper east bell, and reopen the refuge."}</p>${hoist.recovered ? `<p class="small-copy">${HOIST_RECORD.note}</p>` : ""}</section>`
+    : "";
   const vault = store.data.levels.verdant?.fireVault;
   const vaultSection = vault?.visited
     ? `<section class="tide-journal"><span class="eyebrow">THE RAINKEEPER’S CAUSEWAY · ${vault.recovered ? "RECOVERED" : `${vault.lit.length} / 3 FIRES`}</span><h3>${VAULT_RECORD.title}</h3><p>${vault.recovered ? VAULT_RECORD.text : "A flooded hall south of the jungle’s entrance camp contains six turning crossings. Read the tablet beside its entrance fire, connect the carved arms, then carry fire to the three sanctuary lamps. Their flames release the archive on the far bank."}</p>${vault.recovered ? `<p class="small-copy">${VAULT_RECORD.note}</p>` : ""}</section>`
@@ -1016,7 +1035,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${hoistSection}${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,
@@ -1160,6 +1179,13 @@ function showNote(f, l) {
     `<div class="note-paper"><span class="note-number">FIELD NOTE ${number(f.note + 1)}</span><p>“${note[1]}”</p><span class="note-signature">From the journals of Elara Vale</span></div><p class="small-copy">Added to your field journal. Press J to read your discoveries.</p><button class="primary-button full-width" data-close>Carry her words with you ${icon("ArrowRight")}</button>`,
     "note",
     l.title.toUpperCase(),
+  );
+}
+function showBellHoistGuide() {
+  modal(
+    "The bellkeepers’ hoist",
+    `<p class="modal-description">Two cargo platforms, three floors, one shared counterweight.</p><div class="note-paper"><p>Board either platform and use its lever with <kbd>E</kbd> (Use on touch). It rises to the next landing, then returns to the ground after the upper floor. Its partner travels in the opposite direction.</p><p>Controls beside each landing call a platform to that floor. Step clear while it arrives, then board. Both platforms meet at the middle gallery. Jump the broken southern crossing and look for the small bronze bell tongue among the keeper’s belongings.</p><p>The upper east bell waits for its tongue. Its voice opens the archive door and unfolds the upper crossing. Open <kbd>M</kbd> to see all three floors. Lift stops and discoveries save; reloading during a ride restores your platform’s last completed stop.</p></div><button class="primary-button" data-close>Return to the hoist</button>`,
+    "guide",
   );
 }
 function showFireVaultGuide(recovered = false) {

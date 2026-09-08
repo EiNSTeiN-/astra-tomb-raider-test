@@ -54,6 +54,13 @@ Desert mirrors use **E / Use** at each numbered handwheel. Follow the reflected 
 
 Mountain bells use **E / Use** at each named pull rope. Read the bellkeeper's tablet, listen to its phrase, and answer according to its repeat, reverse, or shifted-sign rule. The tablet offers replay, reset, activation, and focused controls. Replaying preserves your partial answer.
 
+East of the mountain’s western library trail, **the bellkeepers’ hoist** adds an
+optional tomb with two counterweighted lifts, three floors and a broken gallery
+jump. Recover a bronze tongue, restore the upper bell and cross to a refuge
+archive. **E / Use** operates onboard and landing levers; **M** shows all three
+floors. Lift stops and discoveries persist. See the
+[tomb and verification notes](docs/bellkeepers-hoist.md).
+
 Jungle glyph drums use **E / Use** to advance through SUN, ROOT, RAIN and MOON;
 **Shift + E** turns backward. Read each court's covenant and satisfy every
 inscription before activating its sun gate. Counts, matching pairs, exclusions and
