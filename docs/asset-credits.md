@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The base-camp fire ring, timber, charcoal, supply chest, rolled bedding, straps,
+stitching, kettle and fire/particle shaders are original project geometry and code
+in `src/camp-*.js` and `src/camps.js`. They reuse the already bundled Wood Planks,
+Bark Brown 01 and Rock Boulder Dry maps credited below. The campfire retains the
+existing local fire recording and positional-audio path; no new external images,
+models or audio were added. See [camp artwork notes](camp-art.md).
+
 The Surveyor’s Cleft, its masonry facade, bronze handholds, stone foot supports,
 belay anchors, inclined return line, measuring reliefs and survey desk are
 original procedural geometry in `src/cleft-art.js`. They reuse the existing

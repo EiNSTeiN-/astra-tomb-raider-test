@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- All 28 base camps now have fitted stone fire rings, charred timber, coals,
+  detailed supply chests, rolled bedding and expedition equipment. A camp flame
+  shader, sparks and smoke retain the existing positioned fire recording. All
+  380 tests and the build pass. The browser checked 112 approach positions,
+  native rest in all eight chapters, jungle torch lighting, fire-voice falloff,
+  pause and exact camp resource disposal on chapter changes. Matched jungle and
+  desert views show the added detail and geometry cost. High-quality production
+  torch/rest controls and exact save/reload passed without failed assets or
+  console warnings/errors. [Camp artwork notes](camp-art.md) contain comparisons
+  and limits; AAA graphics, subjective audio quality and hour-long human chapter
+  pacing remain open.
+
 - Blocked movement now settles the explorer into idle, and the retargeted running
   animation retains its source airborne phase. The asset change is confined to
   20 vertical Run hip values. A production reload check also found and fixed a

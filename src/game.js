@@ -1,3 +1,4 @@
+import { buildCamp, updateCamps } from "./camps.js";
 import { buildSurveyorsCleft, updateCleftArt } from "./cleft-art.js";
 import { cleftBlocked, cleftOccludes } from "./cleft-rules.js";
 import {
@@ -581,6 +582,10 @@ export class Adventure {
     this.lastSurvey = null;
     this.waterMeshes = [];
     this.flames = [];
+    this.camps = [];
+    this.campMaterials = null;
+    this.campEffects = null;
+    this.campTime = null;
     this.obstacles = [];
     this.navigationStats = { plans: 0, expanded: 0, maxExpanded: 0 };
     this.elapsed = 0;
@@ -1121,30 +1126,7 @@ export class Adventure {
           f.core = core;
         }
       } else if (f.type === "camp") {
-        this.box(1, 0.25, 1, this.darkMat, 0, 0.15, 0, group);
-        for (let i = 0; i < 5; i++) {
-          const log = this.box(
-            1.8,
-            0.18,
-            0.2,
-            this.material(0x614934),
-            0,
-            0.35,
-            0,
-            group,
-          );
-          log.rotation.y = i * 1.25;
-        }
-        const fire = new THREE.Mesh(
-          new THREE.ConeGeometry(0.32, 1.1, 7),
-          new THREE.MeshBasicMaterial({ color: 0xffb660, toneMapped: false }),
-        );
-        fire.position.y = 0.75;
-        fire.scale.y = 1.5;
-        group.add(fire);
-        this.flames.push(fire);
-        f.fire = fire;
-        this.box(1.2, 0.6, 0.8, this.material(0x6d6b4b), 2, 0.3, 1, group);
+        buildCamp(this, f, group);
       } else {
         const mat = f.type === "relic" ? this.glowMat : this.goldMat;
         const geo =
@@ -1843,9 +1825,11 @@ export class Adventure {
     updateSunkenGallery(this, dt);
     updateSoundLandmarks(this);
     this.flames.forEach((f, i) => {
-      f.scale.y = 1.5 + Math.sin(this.elapsed * 12 + i) * 0.3;
+      if (!f.userData.campFire)
+        f.scale.y = 1.5 + Math.sin(this.elapsed * 12 + i) * 0.3;
     });
     updateTorch(this);
+    updateCamps(this);
     updateFireEffects(this);
     this.particles.position.set(
       this.player.position.x,
