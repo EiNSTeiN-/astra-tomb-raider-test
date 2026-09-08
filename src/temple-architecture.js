@@ -1,13 +1,14 @@
 import * as THREE from "three";
 import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
+import { addPierFacings, templeGrowthMaterials } from "./temple-facings.js";
 
 // Chamfered blocks use flat faces and narrow bevels, rather than six subdivided
 // grids. The disconnected faces retain sharp masonry edges after batching.
-export function stoneBlockGeometry(w, h, d, seed = 1) {
+export function stoneBlockGeometry(w, h, d, seed = 1, bevelLimit = 0.055) {
   const rng = random(seed),
     half = [w / 2, h / 2, d / 2],
-    bevel = Math.min(0.055, w * 0.07, h * 0.13, d * 0.07),
+    bevel = Math.min(bevelLimit, w * 0.07, h * 0.13, d * 0.07),
     positions = [],
     normals = [],
     uv = [];
@@ -225,12 +226,20 @@ function weatherStone(material) {
       float macro=ruinNoise(vRuinPosition*.39),grain=ruinNoise(vRuinPosition*3.7);
       float damp=(1.0-smoothstep(.1,3.4,vRuinHeight))*(.35+.65*macro);
       float moss=smoothstep(.56,.72,macro*.75+grain*.25)*(0.27+.6*max(0.0,vRuinNormal.y)+.35*damp);
-      diffuseColor.rgb*=mix(.8,1.14,macro)*(1.0-damp*.32);
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.12,.17,.075),moss*.57);
+      float streak=ruinNoise(vec3(vRuinPosition.x*4.2,vRuinPosition.y*.19,vRuinPosition.z*4.2));
+      float runnels=smoothstep(.56,.76,streak)*(1.0-abs(vRuinNormal.y))*.32;
+      float crust=smoothstep(.66,.8,ruinNoise(vRuinPosition*2.1+vec3(21.0)))*(.3+.7*macro);
+      diffuseColor.rgb*=mix(.78,1.12,macro)*(1.0-damp*.32-runnels);
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.24,.28,.15),crust*.36);
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.095,.15,.047),moss*.65);
     `,
     );
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <roughnessmap_fragment>",
+      "#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+(moss+crust)*.16-damp*.13,.56,1.0);",
+    );
   };
-  material.customProgramCacheKey = () => "vesper-weathered-temple-1";
+  material.customProgramCacheKey = () => "vesper-weathered-temple-2";
 }
 
 export function buildTempleArchitecture(game) {
@@ -244,6 +253,8 @@ export function buildTempleArchitecture(game) {
   weatherStone(material);
   game.templeMaterial = material;
   const detailMaterial = material.clone();
+  const growth = templeGrowthMaterials();
+  game.templeWind = growth.wind;
   weatherStone(detailMaterial);
   detailMaterial.normalScale.set(0.23, 0.23);
   const rng = random(game.level.seed + 8127),
@@ -262,7 +273,7 @@ export function buildTempleArchitecture(game) {
     let blocks = 0,
       triangles = 0;
     const block = (w, h, d, px, py, pz, tint = 1, rotation = 0) => {
-      const g = stoneBlockGeometry(w, h, d, ++serial + game.level.seed),
+      const g = stoneBlockGeometry(w, h, d, ++serial + game.level.seed, 0.029),
         m = new THREE.Mesh(g, material);
       const positions = g.attributes.position,
         colors = new Float32Array(positions.count * 3);
@@ -321,7 +332,8 @@ export function buildTempleArchitecture(game) {
         );
       }
     };
-    for (const pier of plan.piers) {
+    let rootedPiers = 0;
+    for (const [pierIndex, pier] of plan.piers.entries()) {
       const py = game.groundHeight(x + pier.x, z + pier.z) - base,
         w = pier.width;
       // The broad base sits inside its navigation footprint, and the capital stays
@@ -353,10 +365,11 @@ export function buildTempleArchitecture(game) {
               (w * 0.82 * taper - 0.035) / 2,
               h,
               w * 0.82 * taper,
-              pier.x + (side * w * 0.82 * taper) / 4,
+              pier.x + (row % 4 === 0 ? (side * w * 0.82 * taper) / 4 : 0),
               yy,
-              pier.z,
+              pier.z + (row % 4 === 0 ? 0 : (side * w * 0.82 * taper) / 4),
               0.98,
+              row % 4 === 0 ? 0 : Math.PI / 2,
             );
         else
           block(
@@ -377,13 +390,16 @@ export function buildTempleArchitecture(game) {
         [w * 1.13, 0.38, 8.77],
       ])
         block(width, height, width, pier.x, py + y, pier.z, 0.87);
-      const panel = new THREE.Mesh(
-        carvedPanelGeometry(w * 0.58, 3.4, room.index),
+      const facings = addPierFacings(
+        detail,
+        pier,
+        py,
+        room,
+        pierIndex,
         detailMaterial,
+        growth,
       );
-      panel.position.set(pier.x, py + 2.2, pier.z + w * 0.42 + 0.015);
-      panel.receiveShadow = true;
-      detail.add(panel);
+      if (facings.rooted) rootedPiers++;
       // A shallow lintel above each panel protects the carving and catches light.
       block(w * 0.67, 0.16, 0.22, pier.x, py + 5.75, pier.z + w * 0.44, 0.87);
     }
@@ -509,6 +525,12 @@ export function buildTempleArchitecture(game) {
       }
     mergeArchitecture(root);
     mergeArchitecture(detail);
+    for (const mesh of detail.children)
+      if (mesh.material === growth.leaves) {
+        mesh.customDepthMaterial = growth.leafDepth;
+        mesh.geometry.computeBoundingSphere();
+        mesh.geometry.boundingSphere.radius += 0.04;
+      }
     game.templePatches.push({
       root,
       detail,
@@ -516,6 +538,8 @@ export function buildTempleArchitecture(game) {
       blocks,
       triangles,
       plan,
+      rootedPiers,
+      facings: plan.piers.length * 4,
       detailBounds: new THREE.Box3()
         .setFromObject(detail)
         .getBoundingSphere(new THREE.Sphere()),
@@ -525,6 +549,7 @@ export function buildTempleArchitecture(game) {
 }
 
 export function updateTempleArchitecture(game) {
+  if (game.templeWind) game.templeWind.value = game.elapsed || 0;
   for (const patch of game.templePatches || []) {
     // Structure stays visible for skyline and shadows; fine carvings retire only
     // once they occupy a few pixels, independently of navigation and camera bounds.

@@ -866,6 +866,7 @@ export class Adventure {
   }
   buildArchitecture() {
     this.templePatches = [];
+    this.templeWind = null;
     const hasDesert = buildDesertArchitecture(this);
     const hasMonastery = buildMonasteryArchitecture(this);
     const hasPalace = buildPalaceArchitecture(this);
