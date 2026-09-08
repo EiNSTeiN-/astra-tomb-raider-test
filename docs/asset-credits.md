@@ -14,6 +14,8 @@ The coastal floor layouts, braided mosaics, floral medallions, slab shading and 
 
 ## Generated artwork
 
+The submerged memorial’s evacuation-boat relief is original generated artwork, created with the built-in image generation tool and converted into shallow geometry by `scripts/build-memorial-relief.mjs`. Its runtime asset is `public/assets/memorial/evacuation-relief.glb`; [the exact prompt](art-prompts.md#memorial-relief) and `asset-sources/memorial/sources.json` retain provenance. The surrounding vaulted masonry, frame, offerings, altar and suspended lamp are original geometry in `src/memorial-art.js`, reusing the credited palace stone maps and original bronze materials. No new audio assets were added. See [memorial art notes](memorial-art.md).
+
 The generated campaign artwork is original to this project. It was created using the built-in image generation tool. Final local paths and generation prompts are in [art-prompts.md](art-prompts.md).
 
 - `public/assets/verdant-temple.png` — cinematic expedition-screen key art.

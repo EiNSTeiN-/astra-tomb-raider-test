@@ -76,6 +76,7 @@ import {
   updateObservatory,
   focusObservatory,
 } from "./observatory.js";
+import { loadMemorialArt } from "./memorial-art.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
@@ -637,6 +638,7 @@ export class Adventure {
       loadExplorer(this),
       loadNature(this),
       loadForest(this),
+      loadMemorialArt(this),
     ]).then((results) => {
       batch.seal(results);
       if (this.assetBatch === batch) this.renderOnce = true;

@@ -1,0 +1,20 @@
+{
+  "asset": "Evacuation boats memorial relief",
+  "provenance": "Original project artwork generated with the built-in image_gen tool, then converted to shallow geometry.",
+  "prompt": "docs/art-prompts.md#memorial-relief",
+  "source": {
+    "file": "evacuation-relief-generated.png",
+    "width": 1774,
+    "height": 887,
+    "sha256": "8f3ffd209b9ff95048697d7ea8211b012e6c68d391d79d45ac010072e44a8661"
+  },
+  "delivery": {
+    "file": "public/assets/memorial/evacuation-relief.glb",
+    "sha256": "17848fbd044f9cf9624e1764f2f269bb472f1b5e7edaf560a3abdc41ac841ea5",
+    "bytes": 4148352,
+    "vertices": 74305,
+    "triangles": 147456
+  },
+  "conversion": "node scripts/build-memorial-relief.mjs asset-sources/memorial/evacuation-relief-generated.png",
+  "limitations": "Generated luminance is a stylized depth interpretation, not calibrated scan data. The runtime face is fitted to a closed code-authored backing slab and uses existing credited palace stone maps."
+}

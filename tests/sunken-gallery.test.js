@@ -114,6 +114,58 @@ export function swimTo(game, x, y, z) {
   );
 }
 
+test("the memorial vault blocks ascent at its visible surface and leaves room to swim below", () => {
+  const g = galleryGame({ opened: true }),
+    o = g.terrainProfile.gallery.origin;
+  g.world.updateMatrixWorld(true);
+  const ray = new THREE.Raycaster();
+  for (const z of [44.7, 46.8, 49])
+    for (const x of [-5, -3.5, -1.5, 0, 1.5, 3.5, 5]) {
+      ray.set(
+        new THREE.Vector3(o.x - 8 + x, o.y - 7.9, o.z + z),
+        new THREE.Vector3(0, 1, 0),
+      );
+      const hit = ray.intersectObject(g.world, true)[0];
+      assert(hit, `missing roof at ${x},${z}`);
+      assert(
+        hit.point.y < o.y - 3.25 && hit.point.y > o.y - 4.5,
+        "vault stays beneath the courtyard",
+      );
+      assert.equal(
+        galleryClear(
+          g,
+          hit.point.x,
+          hit.point.y - 0.06,
+          hit.point.z,
+          0.1,
+          0.02,
+        ),
+        false,
+        `ascent must meet the visible stone at ${x},${z}`,
+      );
+      assert.equal(
+        galleryClear(g, hit.point.x, hit.point.y - 0.6, hit.point.z, 0.1, 0.02),
+        true,
+        `clear water below the stone at ${x},${z}`,
+      );
+    }
+  assert.equal(
+    galleryClear(g, o.x - 8, o.y - 4.8, o.z + 49.65),
+    false,
+    "lamp has collision",
+  );
+  assert.equal(
+    galleryClear(g, o.x - 8, o.y - 7.2, o.z + 48.5),
+    true,
+    "record approach remains clear",
+  );
+  assert.equal(
+    galleryClear(g, o.x - 8, o.y - 5.8, o.z + 52.1),
+    false,
+    "carving has collision",
+  );
+});
+
 test("terrain subtraction opens bank triangles, keeps the upper surface, and interpolates attributes", () => {
   const plane = new THREE.PlaneGeometry(6, 6, 1, 1),
     box = { min: { x: -1, y: -1, z: -1 }, max: { x: 1, y: 1, z: 1 } };

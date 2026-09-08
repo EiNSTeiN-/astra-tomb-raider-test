@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { buildMemorialArt } from "./memorial-art.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
 import { windMetal, windSurface } from "./wind-art.js";
@@ -378,16 +379,6 @@ export function buildSunkenGallery(game) {
   record.position.copy(profile.record);
   root.add(record);
   gallery.record = record;
-  block(
-    profile.record.x,
-    profile.record.y - 0.6,
-    profile.record.z,
-    2.2,
-    1.1,
-    1.2,
-    game.stoneMat,
-    true,
-  );
   add(
     new THREE.CylinderGeometry(0.17, 0.17, 1.25, 20),
     trim,
@@ -405,28 +396,7 @@ export function buildSunkenGallery(game) {
       0,
       record,
     ).rotation.y = Math.PI / 2;
-  // A fan of votive plaques surrounds the preserved copper roll.
-  for (let i = 0; i < 9; i++)
-    block(
-      o.x - 13 + i * 1.25,
-      o.y - 5.8,
-      o.z + 52.65,
-      0.92,
-      2.1,
-      0.12,
-      game.stoneMat,
-    );
-  const memorialLight = new THREE.PointLight(0x88baba, 24, 14, 2);
-  memorialLight.position.set(o.x - 8, o.y - 3.1, o.z + 49);
-  root.add(memorialLight);
-  gallery.lights.push(memorialLight);
-  add(
-    new THREE.SphereGeometry(0.22, 12, 8),
-    glass,
-    o.x - 8,
-    o.y - 2.8,
-    o.z + 49,
-  );
+  buildMemorialArt(game, { add, block, bronze, trim, glass });
   mergeArchitecture(root);
   updateSunkenGallery(game, 0, false);
 }
