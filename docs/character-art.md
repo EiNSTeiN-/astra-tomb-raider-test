@@ -4,7 +4,7 @@ Vesper uses a fitted MakeHuman human mesh, core hair/eyes/clothing, and a Mixamo
 
 The 1.74 m delivery model contains 46,312 triangles and is approximately 8.08 MB. It includes original procedural pack, straps, rope coil, belt pouch, carabiner, canteen, and gaiters. Body helpers are excluded; covered geometry and the shoes' intersecting upper socks are removed. Normals are averaged across UV seams. Skin color uses a 2K map, while clothing normals and hair cards use 1K delivery textures. Alpha cards remain alpha-tested.
 
-Idle, walking and running come from the existing Mixamo Vanguard locomotion in Three.js r180's Soldier asset. The offline converter transfers world bone orientations onto the fitted skeleton, bakes local glTF tracks, removes horizontal root motion, and corrects vertical placement against the skinned shoes. The donor model is retained outside `public/` and is no longer delivered as the player character.
+Idle, walking and running come from the existing Mixamo Vanguard locomotion in Three.js r180's Soldier asset. The offline converter transfers world bone orientations onto the fitted skeleton, bakes local glTF tracks, removes horizontal root motion, and corrects vertical placement against the skinned shoes while preserving the donor’s running flight phase. [Locomotion notes](explorer-locomotion.md) describe that correction and collision-aware gait selection. The donor model is retained outside `public/` and is no longer delivered as the player character.
 
 `src/explorer.js` selects the locomotion gait and adds arm/leg poses for swimming, jumping, mantling, ropes and cables. A short visual lift keeps the shorter human rig's hands on the existing rope grips and decays after release. A two-hand firing pose places the visible sidearm and tracer origin together. Recovery clears weapon visibility and visual offsets.
 
@@ -41,7 +41,7 @@ Padding prompt:
 
 ## Evidence and limits
 
-Tests inspect the actual delivery GLB: finite normals, normalized skin weights, required bones/clips, grounded shoes throughout all three animation cycles, no horizontal root translation, swimming offset direction, rope and sidearm hand alignment, and recovery cleanup. Browser-assisted traversal checks loaded the new rig and completed all 22 routes, including the return cables, while verifying hand placement at rope catches.
+Tests inspect the actual delivery GLB: finite normals, normalized skin weights, required bones/clips, grounded walking/idle shoes and a bounded running flight phase, no horizontal root translation, swimming offset direction, rope and sidearm hand alignment, and recovery cleanup. Browser-assisted traversal checks loaded the new rig and completed all 22 routes, including the return cables, while verifying hand placement at rope catches.
 
 Counterweight movement adds a forward body lean and two hand targets at the stone handles. Pulling reverses the walking clip. An additional delivery-asset test samples push and pull cycles in all four cardinal directions and keeps both hands within 5 cm of their targets. This catches the stance/handle mismatch seen in the initial browser view; the final stance and handle height are shared by the runtime and the test.
 

@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Blocked movement now settles the explorer into idle, and the retargeted running
+  animation retains its source airborne phase. The asset change is confined to
+  20 vertical Run hip values. A production reload check also found and fixed a
+  reset of the expedition creation timestamp. All 377 tests and the build pass;
+  native movement, an assisted wall fixture, jump/landing and High-quality
+  production save/reload passed without console errors or warnings. The release
+  restored exact gameplay records, settings and creation time and delivered the
+  expected character asset bytes/hash. [Locomotion notes](explorer-locomotion.md)
+  retain measurements and limits. Horizontal sliding, AAA quality and human
+  chapter pacing remain open.
+
 - The desert now has the optional Surveyor’s Cleft: 37 directional handholds,
   a branch around a broken span, jump/catch transfers, three upper rest terraces,
   belay recovery, a saved summit record and an inclined return descent. All 364

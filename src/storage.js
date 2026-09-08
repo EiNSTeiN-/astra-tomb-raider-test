@@ -38,6 +38,8 @@ export function normalizeSave(value) {
     !value.levels
   )
     return base;
+  if (Number.isFinite(value.createdAt) && value.createdAt > 0)
+    base.createdAt = value.createdAt;
   base.currentLevel = Number.isInteger(value.currentLevel)
     ? Math.max(0, Math.min(7, value.currentLevel))
     : 0;

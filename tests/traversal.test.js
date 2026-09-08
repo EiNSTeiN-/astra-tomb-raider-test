@@ -71,6 +71,24 @@ const tick = (g, v, seconds, jump = false) => {
   for (let i = 0; i < Math.ceil(seconds * 60); i++)
     advanceCharacter(g, v, 1 / 60, jump && i === 0);
 };
+test("movement reports collision-resolved travel while retaining the requested velocity", () => {
+  const game = motionGame(() => 0, [{ x: 2, z: 0, w: 0.5, d: 10, h: 4 }]);
+  frame(game, { x: 1, z: 0 }, 0.1);
+  assert.ok(Math.abs(game.actualMoveSpeed - 6) < 1e-8);
+  frame(game, { x: 1, z: 0 }, 1);
+  assert.equal(game.moveVelocity.x, 6);
+  assert.equal(game.actualMoveSpeed, 0);
+  const stopped = game.player.position.clone();
+  frame(game, { x: 1, z: 0 }, 0.5, ["ShiftLeft"]);
+  assert.equal(game.moveVelocity.x, 10);
+  assert.equal(game.actualMoveSpeed, 0);
+  assert.ok(game.player.position.equals(stopped));
+  frame(game, { x: 0, z: 1 }, 0.1);
+  assert.ok(Math.abs(game.actualMoveSpeed - 6) < 1e-8);
+  assert.ok(game.player.position.z > stopped.z);
+  frame(game, { x: 0, z: 0 }, 0.1);
+  assert.equal(game.actualMoveSpeed, 0);
+});
 test("walking off a platform loses support, falls to ground, and cannot jump after coyote time", () => {
   const g = motionGame(
     () => 0,

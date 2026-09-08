@@ -1,5 +1,7 @@
 # Explorer footing and contact sounds
 
+The later [locomotion correction](explorer-locomotion.md) preserves the running clip’s airborne phase and uses collision-resolved travel to settle blocked input into idle. The measurements below record the earlier terrain-fitting milestone.
+
 The explorer now adapts the boots to sloping terrain, climbable platform tops and
 sagging bridge decks. `src/explorer-grounding.js` samples 27 points around each
 animated outsole, fits the ankle angle to walkable slopes, adjusts the visual

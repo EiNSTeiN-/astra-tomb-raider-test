@@ -831,7 +831,7 @@ test("the delivered explorer has normalized skin weights, finite normals, a comp
       assert.ok(scene.getObjectByName(`mixamorig${side}${part}`));
   assert.equal(scene.getObjectByName("helper-tights"), undefined);
 });
-test("retargeted walking, running and idle keep a shoe on the ground without root translation", async () => {
+test("retargeted locomotion preserves running flight and grounded walk/idle without horizontal root motion", async () => {
   const { scene, animations } = await actor(),
     mixer = new THREE.AnimationMixer(scene),
     shoe = scene.getObjectByName("shoes04"),
@@ -840,8 +840,9 @@ test("retargeted walking, running and idle keep a shoe on the ground without roo
     mixer.stopAllAction();
     const action = mixer.clipAction(clip).play();
     let first;
-    for (let frame = 0; frame <= 20; frame++) {
-      mixer.setTime((clip.duration * frame) / 20);
+    const heights = [];
+    for (let frame = 0; frame < 120; frame++) {
+      mixer.setTime((clip.duration * frame) / 120);
       scene.updateMatrixWorld(true);
       shoe.skeleton.update();
       let lowest = Infinity;
@@ -851,16 +852,22 @@ test("retargeted walking, running and idle keep a shoe on the ground without roo
           .applyMatrix4(shoe.matrixWorld);
         lowest = Math.min(lowest, p.y);
       }
-      assert.ok(
-        Math.abs(lowest) < 0.025,
-        `${clip.name}: floating/sunken shoe at ${lowest}`,
-      );
+      heights.push(lowest);
+      assert.ok(lowest > -0.012, `${clip.name}: sunken shoe at ${lowest}`);
       const p = hips.getWorldPosition(new THREE.Vector3());
       first ??= p;
       assert.ok(
         Math.abs(p.x - first.x) < 0.00001 && Math.abs(p.z - first.z) < 0.00001,
       );
     }
+    const peak = Math.max(...heights);
+    if (clip.name === "Run") {
+      assert.ok(peak > 0.05 && peak < 0.1, `running flight peak: ${peak}`);
+      assert.ok(
+        heights.filter((h) => h < 0.01).length > 30,
+        "running lost ground contact",
+      );
+    } else assert.ok(peak < 0.025, `${clip.name}: floating shoe at ${peak}`);
     action.stop();
   }
 });
@@ -980,6 +987,39 @@ test("locomotion selects a jog at travel speed, a faster sprint, and a quiet pos
   assert.deepEqual(explorerGait(g, true, false), { name: "Walk", rate: 1 });
   g.swimming = true;
   assert.deepEqual(explorerGait(g, true, true), { name: "Idle", rate: 1 });
+});
+
+test("blocked input settles the delivered explorer into idle and movement restarts the stride", async () => {
+  const game = await groundedActor();
+  game.moveVelocity.z = 6;
+  game.actualMoveSpeed = 6;
+  for (let frame = 0; frame < 30; frame++) {
+    game.player.position.z += 0.1;
+    animateExplorer(game, 1 / 60, true, false);
+  }
+  assert.equal(game.rig.state, "Run");
+  game.actualMoveSpeed = 0;
+  const position = game.player.position.clone();
+  for (let frame = 0; frame < 30; frame++)
+    animateExplorer(game, 1 / 60, true, true);
+  assert.equal(game.rig.state, "Idle");
+  assert.ok(game.rig.actions.Idle.getEffectiveWeight() > 0.99);
+  assert.ok(game.player.position.equals(position));
+  assert.ok(soleClearances(game).every((gap) => gap > -0.012 && gap < 0.045));
+  game.actualMoveSpeed = 2.4;
+  animateExplorer(game, 1 / 60, true, false);
+  assert.equal(game.rig.state, "Walk");
+  game.actualMoveSpeed = 10;
+  animateExplorer(game, 1 / 60, true, true);
+  assert.equal(game.rig.state, "Run");
+  assert.equal(game.rig.actions.Run.getEffectiveTimeScale(), 1.5);
+  game.actualMoveSpeed = 0;
+  game.blockGrip = { move: { pull: true } };
+  game.moveVelocity.z = 1.8;
+  assert.deepEqual(explorerGait(game, true, false), {
+    name: "Walk",
+    rate: -0.75,
+  });
 });
 
 test("both hands stay on a counterweight handle through push and pull cycles", async () => {

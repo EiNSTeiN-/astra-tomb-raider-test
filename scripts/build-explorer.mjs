@@ -133,6 +133,53 @@ const sourceRest = new Map(
     },
   ]),
 );
+// Preserve the donor's brief running flight phase when adapting sole height.
+// Grounding every frame erased that phase and made both stance windows too long.
+const sourceSoles = [];
+for (const [node, object] of sourceNodes) {
+  const skin = node.getSkin();
+  if (!skin || !node.getMesh()) continue;
+  const joints = skin.listJoints().map((n) => sourceNodes.get(n)),
+    inverse = skin.getInverseBindMatrices().getArray();
+  for (const primitive of node.getMesh().listPrimitives()) {
+    const p = primitive.getAttribute("POSITION"),
+      weights = primitive.getAttribute("WEIGHTS_0"),
+      indices = primitive.getAttribute("JOINTS_0");
+    const points = [];
+    for (let i = 0; i < p.getCount(); i++) {
+      const point = new T.Vector3().fromArray(p.getArray(), i * 3);
+      if (point.clone().applyMatrix4(object.matrixWorld).y > 0.12) continue;
+      points.push({
+        point,
+        weights: Array.from(weights.getArray().slice(i * 4, i * 4 + 4)),
+        indices: Array.from(indices.getArray().slice(i * 4, i * 4 + 4)),
+      });
+    }
+    sourceSoles.push({ joints, inverse, points });
+  }
+}
+function sourceFlightHeight() {
+  let lowest = Infinity;
+  for (const sole of sourceSoles) {
+    const matrices = sole.joints.map((joint, i) =>
+      joint.matrixWorld
+        .clone()
+        .multiply(new T.Matrix4().fromArray(sole.inverse, i * 16)),
+    );
+    for (const { point, weights, indices } of sole.points) {
+      const result = new T.Vector3();
+      for (let i = 0; i < 4; i++)
+        if (weights[i])
+          result.addScaledVector(
+            point.clone().applyMatrix4(matrices[indices[i]]),
+            weights[i],
+          );
+      lowest = Math.min(lowest, result.y);
+    }
+  }
+  if (!Number.isFinite(lowest)) throw new Error("Missing donor sole samples");
+  return Math.max(0, lowest);
+}
 const bones = new Map(),
   targetRoot = new T.Group();
 function makeBone(name) {
@@ -710,7 +757,8 @@ for (const clip of donor
       lowest = Math.min(lowest, p.y);
     }
     const hips = bones.get("mixamorig:Hips");
-    hips.position.y -= lowest;
+    hips.position.y +=
+      (clip.getName() === "Run" ? sourceFlightHeight() * hipScale : 0) - lowest;
     positions.push(...hips.position.toArray());
   }
   const output = document.createAnimation(clip.getName()),

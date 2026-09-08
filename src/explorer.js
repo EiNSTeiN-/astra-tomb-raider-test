@@ -135,10 +135,14 @@ export function explorerGait(game, moving, sprinting) {
     !game.grounded
   )
     return { name: "Idle", rate: 1 };
-  const speed = Math.hypot(
+  const requestedSpeed = Math.hypot(
     game.moveVelocity?.x || 0,
     game.moveVelocity?.z || 0,
   );
+  const speed = game.blockGrip
+    ? requestedSpeed
+    : (game.actualMoveSpeed ?? requestedSpeed);
+  if (!game.blockGrip && speed < 0.12) return { name: "Idle", rate: 1 };
   if (game.blockGrip)
     return {
       name: "Walk",

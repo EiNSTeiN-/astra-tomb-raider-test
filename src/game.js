@@ -302,6 +302,7 @@ export class Adventure {
     this.lastSave = 0;
     this.stamina = 100;
     this.velocityY = 0;
+    this.actualMoveSpeed = 0;
     this.jumpY = 0;
     this.grounded = true;
     this.attackCooldown = 0;
@@ -1371,6 +1372,9 @@ export class Adventure {
     else this.renderer.render(this.scene, this.camera);
   }
   updatePlayer(dt) {
+    // Scripted traversal supplies its own motion. Only the regular collision
+    // controller below reports measured travel for locomotion selection.
+    this.actualMoveSpeed = null;
     updateBellHoist(this, dt);
     this.dodgeCooldown = Math.max(0, (this.dodgeCooldown || 0) - dt);
     let x =
@@ -1480,6 +1484,7 @@ export class Adventure {
     trackTraversalSupport(this);
     this.stepDistance =
       (this.stepDistance || 0) + Math.hypot(p.x - oldX, p.z - oldZ);
+    this.actualMoveSpeed = dt > 0 ? Math.hypot(p.x - oldX, p.z - oldZ) / dt : 0;
     if (this.motionLanding?.drop > 1) {
       this.audio.noiseHit?.(0.012, 0.18, 800, p);
       playerNoise(this, 16, "landing");

@@ -89,12 +89,14 @@ test("local saves survive a new store and preserve all independent chapter progr
     });
   }
   a.data.currentLevel = 3;
+  a.data.createdAt = 1700000000000;
   a.data.settings.volume = 0;
   assert.equal(a.save(), true);
   const b = new SaveStore(storage);
   assert.deepEqual(b.data.levels, a.data.levels);
   assert.equal(b.data.currentLevel, 3);
   assert.equal(b.data.settings.volume, 0);
+  assert.equal(b.data.createdAt, a.data.createdAt);
   assert.equal(b.total().notes, 8);
   assert.equal(b.total().treasures, 8);
   assert.equal(b.total().completed, 1);
@@ -133,10 +135,28 @@ test("save export and import round trip, rejecting unrelated JSON", () => {
   const storage = { getItem: () => null, setItem: () => {} };
   const a = new SaveStore(storage);
   a.level("snow").stage = 5;
+  a.data.createdAt = 1700000000000;
   const b = new SaveStore(storage);
   b.import(a.export());
   assert.equal(b.level("snow").stage, 5);
+  assert.equal(b.data.createdAt, a.data.createdAt);
   assert.throws(() => b.import('{"hello":"world"}'));
+});
+
+test("older or malformed expedition creation times receive a valid default", () => {
+  for (const createdAt of [
+    undefined,
+    null,
+    "1700000000000",
+    0,
+    -1,
+    NaN,
+    Infinity,
+  ]) {
+    const before = Date.now(),
+      save = normalizeSave({ version: 1, levels: {}, createdAt });
+    assert.ok(save.createdAt >= before && save.createdAt <= Date.now());
+  }
 });
 
 test("import validates structure and rejects invalid discovery identifiers", () => {
