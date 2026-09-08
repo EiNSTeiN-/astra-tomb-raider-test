@@ -1,4 +1,16 @@
 import { disposeInstanceBuffers } from "./instance-lod.js";
+import {
+  canAim,
+  aimShoulder,
+  clearAim,
+  setAim,
+  updateAim,
+  sightline,
+  aimedShot,
+  aimState,
+  addShotTrace,
+  updateShotTraces,
+} from "./aiming.js";
 import { silenceCableMotion } from "./return-cable.js";
 import {
   buildCipherCourts,
@@ -197,7 +209,12 @@ import {
 import { buildHazards, updateHazards } from "./hazards.js";
 import { buildRuinGrowth, updateRuinGrowth } from "./ruin-growth.js";
 import { buildAtmosphere, updateAtmosphere } from "./atmosphere.js";
-import { CameraSurfaces, followCamera, boxEntry } from "./camera-collision.js";
+import {
+  CameraSurfaces,
+  followCamera,
+  constrainCamera,
+  boxEntry,
+} from "./camera-collision.js";
 import {
   EXPEDITIONS,
   currentFieldTask,
@@ -314,6 +331,8 @@ export class Adventure {
         return;
       }
       if (this.paused) return;
+      if (e.code === "KeyV")
+        setAim(this, "toggle", !this.aimSources?.has("toggle"));
       if (e.code === "KeyE") this.interact();
       if (e.code === "KeyT") this.useTorch();
       if (e.code === "KeyF") this.attack();
@@ -337,19 +356,28 @@ export class Adventure {
         document.pointerLockElement === this.renderer.domElement ||
         this.dragging
       ) {
+        const precision = this.aiming ? 0.55 : 1;
         this.yaw -=
-          (e.movementX * 0.003 * this.store.data.settings.sensitivity) / 50;
+          (e.movementX *
+            0.003 *
+            precision *
+            this.store.data.settings.sensitivity) /
+          50;
         this.pitch = Math.max(
-          -0.12,
+          this.aiming ? -0.65 : -0.12,
           Math.min(
             1.05,
             this.pitch +
-              e.movementY * 0.002 * (this.store.data.settings.invertY ? -1 : 1),
+              e.movementY *
+                0.002 *
+                precision *
+                (this.store.data.settings.invertY ? -1 : 1),
           ),
         );
       }
     };
-    this.renderer.domElement.addEventListener("click", () => {
+    this.renderer.domElement.addEventListener("click", (e) => {
+      if (e.pointerType === "touch") return;
       if (!this.paused && this.active) {
         if (document.pointerLockElement === this.renderer.domElement)
           this.attack();
@@ -360,13 +388,42 @@ export class Adventure {
       e.preventDefault(),
     );
     this.renderer.domElement.addEventListener("pointerdown", (e) => {
-      if (e.button === 2) this.dragging = true;
+      if (this.paused || !this.active) return;
+      if (e.button === 2) {
+        this.dragging = true;
+        setAim(this, "mouse", true);
+      }
+      if (e.pointerType === "touch") {
+        this.lookTouch = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        this.renderer.domElement.setPointerCapture(e.pointerId);
+      }
     });
-    this.onPointerUp = () => (this.dragging = false);
+    this.renderer.domElement.addEventListener("pointermove", (e) => {
+      if (this.paused || this.lookTouch?.id !== e.pointerId) return;
+      const dx = e.clientX - this.lookTouch.x,
+        dy = e.clientY - this.lookTouch.y;
+      const scale = this.aiming ? 0.002 : 0.004;
+      this.yaw -= (dx * scale * this.store.data.settings.sensitivity) / 50;
+      this.pitch = THREE.MathUtils.clamp(
+        this.pitch + dy * scale * (this.store.data.settings.invertY ? -1 : 1),
+        this.aiming ? -0.65 : -0.12,
+        1.05,
+      );
+      this.lookTouch.x = e.clientX;
+      this.lookTouch.y = e.clientY;
+    });
+    this.onPointerUp = (e) => {
+      if (e.button === 2 || e.type === "pointercancel") {
+        this.dragging = false;
+        setAim(this, "mouse", false);
+      }
+      if (this.lookTouch?.id === e.pointerId) this.lookTouch = null;
+    };
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
     window.addEventListener("mousemove", this.onMouse);
     window.addEventListener("pointerup", this.onPointerUp);
+    window.addEventListener("pointercancel", this.onPointerUp);
     window.addEventListener("blur", this.onBlur);
     this.resize = () => {
       this.camera.aspect = container.clientWidth / container.clientHeight;
@@ -476,6 +533,9 @@ export class Adventure {
     this.diveView = null;
     this.tideArchive = [];
     this.aimUntil = 0;
+    clearAim(this);
+    this.aimBlend = 0;
+    this.shotTraces = [];
     this.items = [];
     this.detailPatches = [];
     this.naturePatches = [];
@@ -1236,6 +1296,7 @@ export class Adventure {
     this.renderOnce = false;
     this.elapsed += dt;
     if (!this.paused) {
+      updateShotTraces(this, dt);
       this.updatePlayer(dt);
       updateHazards(this, dt);
       this.updateEnemies(dt);
@@ -1281,11 +1342,16 @@ export class Adventure {
     z /= length;
     if (this.keys.has("KeyZ")) this.yaw += dt * 1.5;
     if (this.keys.has("KeyC")) this.yaw -= dt * 1.5;
+    if (this.keys.has("KeyI"))
+      this.pitch = Math.max(-0.65, this.pitch - dt * 0.65);
+    if (this.keys.has("KeyK"))
+      this.pitch = Math.min(1.05, this.pitch + dt * 0.65);
     const input = {
       x: x * Math.cos(this.yaw) + z * Math.sin(this.yaw),
       z: -x * Math.sin(this.yaw) + z * Math.cos(this.yaw),
     };
     this.carrying = !!carryingComponent(this.level, this.progress);
+    updateAim(this);
     if (advanceCausewayWheel(this, dt, input)) {
       animateExplorer(
         this,
@@ -1330,9 +1396,18 @@ export class Adventure {
       this.stamina > 3 &&
       !this.carrying &&
       !this.swimming &&
+      !this.aiming &&
       depth < 0.25 &&
       moving;
-    const speed = depth > 0.25 ? 3.8 : this.carrying ? 4.6 : sprint ? 10 : 6;
+    const speed = this.aiming
+      ? 2.6
+      : depth > 0.25
+        ? 3.8
+        : this.carrying
+          ? 4.6
+          : sprint
+            ? 10
+            : 6;
     this.stamina = Math.max(
       0,
       Math.min(100, this.stamina + (sprint ? -15 : 10) * dt),
@@ -1529,16 +1604,29 @@ export class Adventure {
   }
   evade() {
     this.carrying = !!carryingComponent(this.level, this.progress);
-    return startDodge(this);
+    const started = startDodge(this);
+    if (started) clearAim(this);
+    return started;
+  }
+  toggleAim() {
+    setAim(this, "toggle", !this.aimSources?.has("toggle"));
+    this.cb.update?.(this.state());
   }
   updateCamera(dt) {
+    const blend = (this.aimBlend = THREE.MathUtils.damp(
+      this.aimBlend || 0,
+      this.aiming && canAim(this) ? 1 : 0,
+      12,
+      dt,
+    ));
+    const fov = THREE.MathUtils.lerp(58, 46, blend);
     if (
       this.resonanceFocus == null &&
       this.windFocus == null &&
       this.cipherFocus == null &&
-      (this.camera.fov !== 58 || this.camera.filmOffset !== 0)
+      (this.camera.fov !== fov || this.camera.filmOffset !== 0)
     ) {
-      this.camera.fov = 58;
+      this.camera.fov = fov;
       this.camera.filmOffset = 0;
       this.camera.updateProjectionMatrix();
     }
@@ -1556,13 +1644,38 @@ export class Adventure {
     }
     const target = this.player.position
         .clone()
-        .add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
-      distance = this.diving ? 3.4 : 5.3;
+        .add(
+          new THREE.Vector3(
+            Math.cos(this.yaw) * blend * aimShoulder(this.camera),
+            this.diving ? 0.3 : 1.3 + blend * 0.18,
+            -Math.sin(this.yaw) * blend * aimShoulder(this.camera),
+          ),
+        ),
+      distance = this.diving ? 3.4 : THREE.MathUtils.lerp(5.3, 2.7, blend);
     const offset = new THREE.Vector3(
       Math.sin(this.yaw) * Math.cos(this.pitch) * distance,
-      Math.sin(this.pitch) * distance + 0.2,
+      Math.sin(this.pitch) * distance + 0.2 * (1 - blend),
       Math.cos(this.yaw) * Math.cos(this.pitch) * distance,
     );
+    const canOccupy = (p) =>
+      galleryAt(this, p.x, p.y, p.z)
+        ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
+        : this.walkable(p.x, p.z) &&
+          cavernClear(this, p.x, p.y, p.z, 0.28) &&
+          p.y >=
+            Math.max(
+              this.groundHeight(p.x, p.z) + 0.28,
+              this.swimming && !this.diving
+                ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
+                : -Infinity,
+            );
+    // Sweep the lateral shoulder shift as well as the arm behind it.
+    if (blend > 0.001) {
+      const center = this.player.position.clone().setY(target.y);
+      target.copy(
+        constrainCamera(center, target, this.cameraSurfaces, canOccupy),
+      );
+    }
     const desired = target.clone().add(offset);
     this.camera.position.copy(
       followCamera(
@@ -1571,22 +1684,16 @@ export class Adventure {
         desired,
         dt,
         this.cameraSurfaces,
-        (p) =>
-          galleryAt(this, p.x, p.y, p.z)
-            ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
-            : this.walkable(p.x, p.z) &&
-              cavernClear(this, p.x, p.y, p.z, 0.28) &&
-              p.y >=
-                Math.max(
-                  this.groundHeight(p.x, p.z) + 0.28,
-                  this.swimming && !this.diving
-                    ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
-                    : -Infinity,
-                ),
+        canOccupy,
       ),
     );
     this.avatar.visible = this.camera.position.distanceTo(target) > 0.85;
     this.camera.lookAt(target);
+    if (this.aiming)
+      this.aimPoint = this.camera
+        .getWorldDirection(new THREE.Vector3())
+        .multiplyScalar(45)
+        .add(this.camera.position);
     updateAtmosphere(this, target);
     updateDiveView(this);
   }
@@ -1685,6 +1792,7 @@ export class Adventure {
     return useTorch(this);
   }
   interact() {
+    clearAim(this);
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
     if (archiveInteract(this)) return;
@@ -1828,6 +1936,10 @@ export class Adventure {
   }
   attack() {
     if (
+      this.paused ||
+      this.active === false ||
+      this.carrying ||
+      this.fireVault?.operation ||
       this.blockGrip ||
       this.swimming ||
       this.attackCooldown > 0 ||
@@ -1841,8 +1953,24 @@ export class Adventure {
     this.aimUntil = this.elapsed + 1.4;
     this.aimYaw = this.yaw;
     this.lastShot = this.elapsed;
+    if (this.aiming) this.aimPoint = sightline(this).point;
     animateExplorer(this, 0, false, false);
     this.audio.tone("shoot");
+    if (this.aiming) {
+      const shot = aimedShot(this);
+      const hit = shot.target ? hitGuardian(this, shot.target) : null;
+      const kind = hit === null ? "miss" : hit ? "hit" : "shield";
+      addShotTrace(this, shot.muzzle, shot.point, kind);
+      if (hit !== null || shot.cover)
+        this.audio.noiseHit?.(
+          hit === false ? 0.045 : 0.025,
+          0.12,
+          hit === false ? 3200 : 950,
+          shot.point,
+        );
+      this.cb.update?.(this.state());
+      return;
+    }
     const facing = new THREE.Vector3(
       -Math.sin(this.yaw),
       0,
@@ -1870,21 +1998,13 @@ export class Adventure {
         (hit ? target.core : target.shield)?.getWorldPosition(
           new THREE.Vector3(),
         ) || target.group.position.clone().add(new THREE.Vector3(0, 1.5, 0));
-      const points = [
-          this.rig?.weapon?.muzzle.getWorldPosition(new THREE.Vector3()) ||
-            this.player.position.clone().add(new THREE.Vector3(0, 1.5, 0)),
-          impact,
-        ],
-        line = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints(points),
-          new THREE.LineBasicMaterial({ color: 0xffd9a0 }),
-        );
-      this.world.add(line);
-      setTimeout(() => {
-        this.world.remove(line);
-        line.geometry.dispose();
-        line.material.dispose();
-      }, 90);
+      addShotTrace(
+        this,
+        this.rig?.weapon?.muzzle.getWorldPosition(new THREE.Vector3()) ||
+          this.player.position.clone().add(new THREE.Vector3(0, 1.5, 0)),
+        impact,
+        hit ? "hit" : "shield",
+      );
     }
   }
   damage(n) {
@@ -1894,6 +2014,7 @@ export class Adventure {
     this.audio.tone("hurt");
     this.cb.damage?.();
     if (this.health <= 0) {
+      clearAim(this);
       this.health = 100;
       resetTraversal(this);
       this.swimming = false;
@@ -1918,6 +2039,7 @@ export class Adventure {
     }
   }
   returnToCheckpoint() {
+    clearAim(this);
     extinguishTorch(this);
     resetTraversal(this);
     this.swimming = false;
@@ -1983,6 +2105,7 @@ export class Adventure {
     return {
       health: this.health,
       stamina: this.stamina,
+      aim: aimState(this),
       swimming: this.swimming,
       torch: this.torch ? this.progress.torch === true : null,
       diving: this.diving,
@@ -2151,6 +2274,9 @@ export class Adventure {
   }
   setPaused(value) {
     if (value) {
+      clearAim(this);
+      this.dragging = false;
+      this.lookTouch = null;
       cancelBellPlayback(this);
       settleHydraulics(this);
       settleThermal(this);

@@ -878,6 +878,43 @@ test("human swim, rope and aim poses retain hand alignment and clear visual offs
   assert.equal(game.avatar.position.length(), 0);
   assert.equal(game.aimUntil, 0);
 });
+test("shoulder aim follows elevation while preserving arm lengths and the pistol grip", async () => {
+  const game = await groundedActor();
+  game.aiming = true;
+  game.aimUntil = 100;
+  const bones = [];
+  game.rig.model.traverse((b) => {
+    if (b.isBone) bones.push([b, b.position.clone(), b.scale.clone()]);
+  });
+  for (const yaw of [0, Math.PI / 2, Math.PI])
+    for (const pitch of [-0.55, 0, 0.6]) {
+      game.yaw = game.aimYaw = yaw;
+      game.aimPoint = new THREE.Vector3(
+        -Math.sin(yaw) * 30,
+        1.34 + Math.tan(pitch) * 30,
+        -Math.cos(yaw) * 30,
+      );
+      animateExplorer(game, 1 / 60, false, false);
+      const hand = game.rig.model
+        .getObjectByName("mixamorigRightHand")
+        .getWorldPosition(new THREE.Vector3());
+      assert(hand.distanceTo(game.rig.weapon.group.position) < 0.055);
+      const direction = game.rig.weapon.group.getWorldDirection(
+        new THREE.Vector3(),
+      );
+      assert(
+        direction.dot(
+          game.aimPoint.clone().sub(game.rig.weapon.group.position).normalize(),
+        ) > 0.999,
+      );
+      for (const [bone, position, scale] of bones) {
+        if (/Arm|ForeArm|Hand/.test(bone.name))
+          assert(bone.position.distanceTo(position) < 1e-6, bone.name);
+        assert(bone.scale.distanceTo(scale) < 1e-6, bone.name);
+        assert(bone.quaternion.toArray().every(Number.isFinite));
+      }
+    }
+});
 test("locomotion selects a jog at travel speed, a faster sprint, and a quiet pose while swimming", () => {
   const g = { grounded: true, moveVelocity: { x: 6, z: 0 } };
   assert.deepEqual(explorerGait(g, true, false), { name: "Run", rate: 1 });

@@ -184,13 +184,15 @@ test("quartz has closed outward prism faces and stalactites taper to supported t
   s.dispose();
 });
 
-test("mineral clusters leave feature approaches and their visible sound fronts clear", (t) => {
+test("mineral clusters leave feature approaches, guardian spawns and their visible sound fronts clear", (t) => {
   const game = fixture(t);
+  for (const enemy of map.enemies)
+    assert(game.canMove(enemy.x * 7, enemy.z * 7, 0), enemy.id);
   assert.equal(game.cavernPatches.length, 9);
-  assert.equal(game.cavernSources.length, 45);
+  assert.equal(game.cavernSources.length, 42);
   assert.equal(
     game.cavernPatches.reduce((n, p) => n + p.centers.length, 0),
-    36,
+    33,
   );
   for (const patch of game.cavernPatches)
     for (const center of patch.centers)

@@ -64,6 +64,9 @@ export function buildCaverns(game) {
       if (
         game.map.features.some(
           (f) => Math.hypot(f.x * 7 - px, f.z * 7 - pz) < 7,
+        ) ||
+        game.map.enemies?.some(
+          (enemy) => Math.hypot(enemy.x * 7 - px, enemy.z * 7 - pz) < 5.2,
         )
       )
         continue;

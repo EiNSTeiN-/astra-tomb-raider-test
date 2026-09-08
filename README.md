@@ -31,11 +31,12 @@ Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-tes
 | -------------------------- | --------------------------------------------------------------------- |
 | W A S D / arrow keys       | Move / swim relative to the camera                                           |
 | Mouse                      | Look around after clicking the world                                  |
-| Right mouse drag / Z and C | Look without pointer lock                                             |
+| Z / C · I / K             | Look left / right · up / down without pointer lock                                             |
 | Shift                      | Sprint, using regenerating stamina                                    |
 | Space                      | Jump; mantle a nearby marked ledge; release a hanging rope            |
 | E                          | Interact; hold while jumping to catch a rope; ride an unlocked cable  |
-| F / left click when locked | Fire the sidearm with directional aim assistance                      |
+| Right mouse button / V    | Hold / toggle precise shoulder aim                                    |
+| F / left click when locked | Fire; directional assistance when the shoulder aim is released                      |
 | R + movement direction     | Dodge on firm ground, using stamina; backward if no direction is held |
 | Q                          | Explorer's instinct; reveal nearby points of interest                 |
 | H                          | Use a medical supply                                                  |
@@ -43,7 +44,9 @@ Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-tes
 | J                          | Open the field journal                                                |
 | Escape                     | Pause / close a dialog / release the pointer                          |
 
-Small screens and devices with touch input have touch movement, turning, jumping, interaction, firing, and dodge controls. Keyboard and mouse provide the best experience.
+Small screens and devices with touch input have touch movement, turning, jumping, interaction, aiming, firing, and dodge controls. Toggle Aim, then drag the world to adjust your view while moving or firing with another finger. Keyboard and mouse provide the best experience.
+
+Shoulder aiming brings the camera closer and slows movement to a careful strafe. Aimed shots follow the crosshair, hit the guardian’s posed armor, and stop at cover. A blue diamond means a shield blocked the shot; move around the keeper or wait for its recovery. Pause, traversal and interaction release aim. See [aiming and combat verification](docs/shoulder-aiming.md).
 
 Counterweight stones use **E / Use** to grip or release. While gripping, **W / Up** pushes and **S / Down** pulls; release to walk around to another face.
 

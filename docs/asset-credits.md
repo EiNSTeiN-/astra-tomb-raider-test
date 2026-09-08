@@ -1,5 +1,7 @@
 # Asset credits and provenance
 
+The shoulder camera, precise hit queries, reticle, touch look controls and pitched sidearm pose are original code changes. They reuse the existing credited explorer asset, original sidearm and guardian geometry, and original synthesized effects. No new external models, textures, recordings or generated artwork were introduced. See [shoulder aiming notes](shoulder-aiming.md).
+
 The five jungle flame shrines in `src/jungle-shrines.js` are original code-authored geometry: chamfered masonry, botanical reliefs, stepped crowns, open fluted bowls, rings, fuel and sparks. They reuse the original temple geometry and its existing credited material maps; bronze patina and sparks are procedural shaders. The existing credited `fire.ogg` remains their sound source. No new external assets or recordings were introduced. See [shrine art notes](jungle-shrines.md).
 
 The jungle’s carried resin torch, bindings and wrapped head are original code-authored geometry in `src/torch.js`. Its hand pose reuses the calibrated cylinder grip; lighting and flame rendering reuse the original fire shader. Its positioned crackle uses the existing credited `fire.ogg` recording. No new external assets were introduced. See [torch relay notes](torch-relays.md).

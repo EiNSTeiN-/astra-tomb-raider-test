@@ -286,11 +286,37 @@ export function animateExplorer(game, dt, moving, sprinting) {
     rotation.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);
     const recoil =
       Math.max(0, 1 - (game.elapsed - (game.lastShot ?? -1)) / 0.13) * 0.045;
-    const grip = point(-0.16, 1.34 + recoil, 0.46 - recoil);
-    poseHands(game, [point(0.02, 1.34 + recoil, 0.52 - recoil), grip]);
+    const elevation =
+      game.aiming && game.aimPoint
+        ? THREE.MathUtils.clamp(
+            Math.atan2(
+              game.aimPoint.y - game.player.position.y - 1.34,
+              Math.hypot(
+                game.aimPoint.x - game.player.position.x,
+                game.aimPoint.z - game.player.position.z,
+              ),
+            ),
+            -0.9,
+            0.8,
+          )
+        : 0;
+    const grip = point(
+      -0.16,
+      1.34 + Math.sin(elevation) * 0.46 + recoil,
+      Math.cos(elevation) * 0.46 - recoil,
+    );
+    poseHands(game, [
+      point(
+        0.02,
+        1.34 + Math.sin(elevation) * 0.52 + recoil,
+        Math.cos(elevation) * 0.52 - recoil,
+      ),
+      grip,
+    ]);
     rig.weapon.group.visible = true;
     rig.weapon.group.position.copy(grip);
     rig.weapon.group.rotation.set(-recoil * 2, angle, 0);
+    if (game.aiming && game.aimPoint) rig.weapon.group.lookAt(game.aimPoint);
   }
   poseCausewayWheel(game);
   poseTorch(game);
