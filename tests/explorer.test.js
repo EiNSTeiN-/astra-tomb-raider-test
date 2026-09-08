@@ -1,3 +1,4 @@
+import { cleftHandTargets } from "../src/cleft-pose.js";
 import test from "node:test";
 import { poseCounterweight } from "../src/counterweights.js";
 import assert from "node:assert/strict";
@@ -1043,4 +1044,88 @@ test("both hands stay on a counterweight handle through push and pull cycles", a
         }
       }
     }
+});
+
+test("cleft hanging fits the delivered hand surfaces and releases its finger pose without stretching bones", async () => {
+  const game = await groundedActor();
+  game.grounded = false;
+  game.avatar.rotation.y = Math.PI;
+  game.player.position.set(8, 5, 0.87);
+  game.cleft = { nodes: [{ grip: new THREE.Vector3(8, 6.9, 0.32) }] };
+  game.wallGrip = { kind: "hang", node: 0 };
+  const bones = [];
+  game.rig.model.traverse((b) => {
+    if (b.isBone && /Arm|Hand|UpLeg|Leg|Foot/.test(b.name))
+      bones.push({
+        bone: b,
+        position: b.position.clone(),
+        scale: b.scale.clone(),
+      });
+  });
+  for (let i = 0; i < 10; i++) animateExplorer(game, 1 / 60, false, false);
+  const handles = cleftHandTargets(game).map((p) => {
+    const h = new THREE.Object3D();
+    h.position.copy(p);
+    h.rotation.y = Math.PI;
+    return h;
+  });
+  const measured = handGeometry(game, { handles, halfLength: 0.2 });
+  for (const hand of measured)
+    for (const [name, finger] of Object.entries(hand.fingers)) {
+      assert(finger.vertices > 200);
+      assert(
+        finger.minimum >= -0.002,
+        `${hand.side}/${name} penetrates ${finger.minimum}`,
+      );
+      assert(
+        finger.minimum < 0.012,
+        `${hand.side}/${name} misses ${finger.minimum}`,
+      );
+    }
+  for (const { bone, position, scale } of bones) {
+    assert(bone.position.distanceTo(position) < 1e-7);
+    assert(bone.scale.distanceTo(scale) < 1e-7);
+    assert(bone.quaternion.toArray().every(Number.isFinite));
+  }
+  game.wallGrip = null;
+  game.grounded = true;
+  animateExplorer(game, 1 / 60, false, false);
+  assert.equal(game.rig.gripBaseActive, false);
+});
+
+test("cleft return descent keeps both hands on the inclined rope", async () => {
+  const g = await groundedActor();
+  g.grounded = false;
+  g.avatar.rotation.y = Math.PI;
+  g.cleft = {
+    returnLineStart: new THREE.Vector3(13, 19.9, 2.7),
+    returnLineEnd: new THREE.Vector3(13, 0.25, 6.5),
+  };
+  g.wallGrip = { kind: "rappel", time: 1, duration: 7 };
+  const axis = g.cleft.returnLineStart
+    .clone()
+    .sub(g.cleft.returnLineEnd)
+    .normalize();
+  for (const y of [18, 12, 5, 0.18]) {
+    const z = 2.7 + ((19.9 - y - 1.8) * 3.8) / 19.65 + 0.15;
+    g.player.position.set(13, y, z);
+    animateExplorer(g, 1 / 60, false, false);
+    const handles = cleftHandTargets(g).map((p) => {
+      const h = new THREE.Object3D();
+      h.position.copy(p);
+      h.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), axis);
+      return h;
+    });
+    for (const hand of handGeometry(g, { handles, halfLength: 0.14 }))
+      for (const [name, f] of Object.entries(hand.fingers)) {
+        assert(
+          f.minimum >= -0.002,
+          `${y}/${hand.side}/${name} penetrates ${f.minimum}`,
+        );
+        assert(
+          f.minimum < 0.012,
+          `${y}/${hand.side}/${name} misses ${f.minimum}`,
+        );
+      }
+  }
 });

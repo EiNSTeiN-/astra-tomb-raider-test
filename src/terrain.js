@@ -57,13 +57,14 @@ export function createTerrainProfile(map, level) {
     ...(map.fieldSites || []),
     ...(map.fireVault ? [map.fireVault] : []),
     ...(map.bellHoist ? [map.bellHoist] : []),
+    ...(map.cleft ? [map.cleft] : []),
   ].map((r) => ({
     x: r.x * 7,
     z: r.z * 7,
     radius: r.r * 7,
     y: raw(r.x * 7, r.z * 7),
     main: map.rooms.includes(r),
-    flat: !!r.fireVault || !!r.bellHoist,
+    flat: !!r.fireVault || !!r.bellHoist || !!r.cleft,
   }));
   for (let iz = 0; iz < width; iz++)
     for (let ix = 0; ix < width; ix++) {

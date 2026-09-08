@@ -1,0 +1,312 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import * as THREE from "three";
+import { Adventure } from "../src/game.js";
+import { LEVELS, createMap } from "../src/campaign.js";
+import { SaveStore, normalizeSave } from "../src/storage.js";
+import { CameraSurfaces } from "../src/camera-collision.js";
+import {
+  supportAt,
+  safeArrival,
+  advanceCharacter,
+} from "../src/character-motion.js";
+import { restoreTraversal, resetTraversal } from "../src/traversal.js";
+import { createTerrainProfile } from "../src/terrain.js";
+import { buildSurveyorsCleft } from "../src/cleft-art.js";
+import {
+  cleftInteract,
+  updateCleft,
+  cleftSafePoint,
+  cleftSavePosition,
+  cleftObjective,
+} from "../src/cleft.js";
+import {
+  CLEFT_NODES,
+  CLEFT_EDGES,
+  CLEFT_TERRACES,
+  cleftDirection,
+  normalizeCleft,
+} from "../src/cleft-rules.js";
+
+function fixture() {
+  const world = new THREE.Group(),
+    store = new SaveStore({ getItem: () => null, setItem() {} });
+  const g = Object.assign(Object.create(Adventure.prototype), {
+    world,
+    store,
+    progress: store.level("sands"),
+    level: LEVELS[1],
+    map: { cleft: { x: 29, z: 31 } },
+    player: new THREE.Group(),
+    avatar: new THREE.Group(),
+    groundHeight: () => 3,
+    walkable: () => true,
+    stoneMat: new THREE.MeshStandardMaterial(),
+    darkMat: new THREE.MeshStandardMaterial(),
+    cameraSurfaces: new CameraSurfaces(world),
+    obstacles: [],
+    traversalCourses: [],
+    keys: new Set(),
+    elapsed: 0,
+    stamina: 100,
+    health: 100,
+    grounded: true,
+    jumpY: 0.18,
+    velocityY: 0,
+    explored: new Set(),
+    audio: {
+      noiseHit(...args) {
+        g.hits.push(args);
+      },
+      tone() {},
+    },
+    cb: {
+      toast() {},
+      cleftRecord() {
+        g.records++;
+      },
+    },
+    hits: [],
+    records: 0,
+  });
+  buildSurveyorsCleft(g);
+  g.cameraSurfaces.rebuild();
+  g.player.position.copy(cleftSafePoint(g));
+  return g;
+}
+function step(g, n = 1, x = 0, up = 0) {
+  for (let i = 0; i < n; i++) {
+    g.elapsed += 1 / 60;
+    updateCleft(g, 1 / 60, x, up);
+  }
+}
+function grip(g, index = 0) {
+  g.player.position.copy(cleftSafePoint(g, index));
+  g.grounded = true;
+  g.cleftCooldown = 0;
+  assert.equal(cleftInteract(g), true);
+  step(g, 32);
+  assert.equal(g.wallGrip.kind, "hang");
+}
+function move(g, id, catchIt = true) {
+  const from = CLEFT_NODES[g.wallGrip.node],
+    to = CLEFT_NODES[id],
+    x = to.x - from.x,
+    up = to.y - from.y;
+  const direction = cleftDirection(from.id, x, up);
+  assert.equal(direction.id, id);
+  if (direction.leap) g.keys.add("Space");
+  step(g, 1, x, up);
+  if (direction.leap && catchIt) g.keys.add("KeyE");
+  const kind = g.wallGrip.kind;
+  step(g, kind === "leap" ? 58 : 40);
+  g.keys.clear();
+  return kind;
+}
+function mount(g, index) {
+  g.keys.add("Space");
+  step(g);
+  step(g, 52);
+  assert.equal(g.wallGrip, null);
+  assert.equal(g.cleft.anchor, index);
+}
+
+test("cleft graph offers a climbable bypass and directional, bidirectional gap transfers", () => {
+  const reach = new Set([0]);
+  for (let i = 0; i < CLEFT_NODES.length; i++)
+    for (const e of CLEFT_EDGES) {
+      if (e.leap) continue;
+      if (reach.has(e.a)) reach.add(e.b);
+      if (reach.has(e.b)) reach.add(e.a);
+    }
+  assert(reach.has(12));
+  assert(!reach.has(22));
+  assert.equal(CLEFT_EDGES.filter((e) => e.leap).length, 3);
+  for (const e of CLEFT_EDGES)
+    for (const [a, b] of [
+      [e.a, e.b],
+      [e.b, e.a],
+    ]) {
+      const p = CLEFT_NODES[a],
+        q = CLEFT_NODES[b];
+      assert.equal(cleftDirection(a, q.x - p.x, q.y - p.y).id, b);
+      if (!e.leap) assert(Math.hypot(p.x - q.x, p.y - q.y) < 1.7);
+    }
+  assert.equal(cleftDirection(0, 0, 0), null);
+});
+test("cleft save normalization gates the record and leaves other chapters unchanged", () => {
+  assert.deepEqual(normalizeCleft({ terrace: 3, recovered: true }), {
+    visited: false,
+    terrace: 0,
+    recovered: false,
+  });
+  assert.equal(
+    normalizeCleft({ visited: true, terrace: 2, recovered: true }).recovered,
+    false,
+  );
+  assert.equal(normalizeCleft({ visited: true, terrace: Infinity }).terrace, 0);
+  const data = normalizeSave({
+    version: 1,
+    levels: {
+      sands: { cleft: { visited: true, terrace: 3, recovered: true } },
+      frost: { cleft: { visited: true, terrace: 3, recovered: true } },
+    },
+  });
+  assert(data.levels.sands.cleft.recovered);
+  assert.equal(data.levels.frost.cleft, null);
+});
+test("cleft map connects to the western survey path, keeps features clear, and levels the footing", () => {
+  const m = createMap(LEVELS[1]);
+  assert(m.cleft);
+  const path = m.paths.at(-1);
+  assert.deepEqual(path[0], { x: 22, z: 35 });
+  for (const p of path) assert(m.grid[p.z][p.x]);
+  for (const f of m.features)
+    assert(Math.hypot(f.x - 29, f.z - 31) * 7 > 40, f.id);
+  const p = createTerrainProfile(m, LEVELS[1]);
+  for (const t of CLEFT_TERRACES)
+    assert(Math.abs(p.height(203 + t.x, 217 + 2) - p.height(203, 217)) < 0.03);
+  for (const l of LEVELS.filter((l) => l.id !== "sands"))
+    assert.equal(createMap(l).cleft, undefined);
+});
+test("all terraces support safe arrivals; facade, balcony undersides, and sight rays remain solid", () => {
+  const g = fixture();
+  for (let i = 0; i < 4; i++) {
+    const p = cleftSafePoint(g, i);
+    assert(g.canMove(p.x, p.z, p.y - 3));
+    assert.equal(supportAt(g, p.x, p.z, p.y).height, p.y);
+    assert.deepEqual(safeArrival(g, p), { x: p.x, y: p.y, z: p.z });
+    if (i) assert(!g.canMove(p.x, p.z, p.y - 3 - 1));
+  }
+  assert(!g.canMove(g.cleft.x, g.cleft.z - 1, 5));
+  assert(
+    !g.lineOfSight(
+      new THREE.Vector3(203, 8, 215),
+      new THREE.Vector3(203, 8, 219),
+      0,
+      0,
+    ),
+  );
+  g.cleft.root.traverse((m) => {
+    if (m.geometry)
+      for (const a of Object.values(m.geometry.attributes))
+        for (const v of a.array) assert(Number.isFinite(v));
+  });
+});
+test("complete cleft ascent uses both routes, catches gaps, rests, collects once, and descends", () => {
+  const g = fixture();
+  grip(g);
+  for (const id of [1, 2, 3, 4, 33, 34, 35, 36, 7, 8, 9, 10, 11, 12])
+    move(g, id);
+  assert(g.stamina < 100);
+  mount(g, 1);
+  assert.equal(g.progress.cleft.terrace, 1);
+  g.stamina = 100;
+  grip(g, 1);
+  for (let i = 13; i <= 22; i++) move(g, i);
+  mount(g, 2);
+  g.stamina = 100;
+  grip(g, 2);
+  for (let i = 23; i <= 32; i++) move(g, i);
+  mount(g, 3);
+  assert.equal(cleftObjective(g).step, 3);
+  g.player.position.copy(g.cleft.recordPoint).add(new THREE.Vector3(-1, 0, 0));
+  assert(cleftInteract(g));
+  assert(g.progress.cleft.recovered);
+  assert.equal(g.records, 1);
+  cleftInteract(g);
+  assert.equal(g.records, 1);
+  g.player.position.copy(g.cleft.returnStart);
+  assert(cleftInteract(g));
+  assert.equal(g.wallGrip.kind, "rappel-reach");
+  step(g, 465);
+  assert.equal(g.wallGrip, null);
+  assert.equal(g.cleft.anchor, 0);
+  assert(g.grounded);
+  assert(g.player.position.distanceTo(g.cleft.returnEnd) < 1e-6);
+  assert(g.hits.length > 30);
+  assert(g.hits.every((h) => h[3].isVector3));
+});
+test("missed catches and exhaustion recover on belay; pausing freezes motion and saves a supported terrace", () => {
+  const g = fixture();
+  grip(g);
+  for (const id of [1, 2, 3, 4]) move(g, id);
+  step(g, 10, 1, 0);
+  assert.equal(g.wallGrip.kind, "hang");
+  assert.equal(g.wallGrip.node, 4);
+  move(g, 5, false);
+  assert.equal(g.wallGrip.kind, "recover");
+  step(g, 101);
+  assert(g.grounded);
+  assert.equal(g.cleft.anchor, 0);
+  grip(g, 1);
+  move(g, 13);
+  g.stamina = 0.001;
+  step(g);
+  assert.equal(g.wallGrip.kind, "recover");
+  const before = g.player.position.clone(),
+    time = g.wallGrip.time;
+  g.paused = true;
+  step(g, 80);
+  assert.deepEqual(g.player.position, before);
+  assert.equal(g.wallGrip.time, time);
+  const saved = cleftSavePosition(g);
+  assert.equal(supportAt(g, saved.x, saved.z, saved.y).height, saved.y);
+  g.save();
+  assert.equal(g.progress.position.height, 6);
+  g.paused = false;
+  step(g, 101);
+  g.player.position.set(g.progress.position.x, 3, g.progress.position.z);
+  restoreTraversal(g);
+  assert.equal(g.player.position.y, 9);
+  assert.equal(g.wallGrip, null);
+});
+test("standing, attack exclusion, old-save recovery, and reset release all climbing state", () => {
+  const g = fixture();
+  grip(g);
+  g.attack();
+  assert.equal(g.attackCooldown, undefined);
+  resetTraversal(g);
+  assert.equal(g.wallGrip, null);
+  assert.equal(g.cleft.anchor, 0);
+  const arrival = safeArrival(g, new THREE.Vector3(203, 3, 216));
+  assert(arrival);
+  assert(g.canMove(arrival.x, arrival.z, arrival.y - 3));
+  g.player.position.copy(cleftSafePoint(g, 2));
+  g.grounded = true;
+  step(g);
+  assert.equal(g.cleft.anchor, 2);
+  g.player.position.z += 6;
+  g.grounded = false;
+  g.player.position.y -= 2;
+  step(g);
+  assert.equal(g.wallGrip.kind, "recover");
+});
+
+test("every authored transfer clears the wall and terrace undersides; a newly obstructed grip recovers safely", () => {
+  const g = fixture(),
+    c = g.cleft;
+  for (const e of CLEFT_EDGES)
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40,
+        p = c.nodes[e.a].grip.clone().lerp(c.nodes[e.b].grip, t);
+      p.y -= 1.9;
+      if (e.leap) p.y += Math.sin(t * Math.PI) * 0.65;
+      p.z += 0.55;
+      assert(g.canMove(p.x, p.z, p.y - 3), `${e.a}/${e.b}/${t}`);
+    }
+  grip(g);
+  g.cleft.solids.push({
+    x: g.player.position.x,
+    z: g.player.position.z,
+    w: 1,
+    d: 1,
+    bottom: 3.5,
+    top: 6,
+  });
+  step(g, 1, 0, 1);
+  step(g, 2);
+  assert.equal(g.wallGrip.kind, "recover");
+  step(g, 102);
+  assert(g.grounded);
+});

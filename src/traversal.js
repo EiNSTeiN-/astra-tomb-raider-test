@@ -9,6 +9,9 @@ const done = (game, c) =>
   c.stage < game.progress.stage ||
   game.progress.field.includes(c.id);
 export function resetTraversal(game) {
+  game.wallGrip = null;
+  game.cleftCooldown = 0;
+  if (game.cleft) game.cleft.anchor = 0;
   game.blockGrip?.cancel?.();
   game.blockGrip = null;
   game.ropeRide = null;

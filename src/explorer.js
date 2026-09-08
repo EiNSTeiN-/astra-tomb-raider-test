@@ -1,3 +1,4 @@
+import { poseCleft } from "./cleft-pose.js";
 import { CROUCH_DROP } from "./stealth.js";
 import * as THREE from "three";
 import { updateTorch, poseTorch } from "./torch.js";
@@ -180,7 +181,11 @@ export function animateExplorer(game, dt, moving, sprinting) {
   )
     rig.crouchBlend = 0;
   const hanging = !!game.ropeRide || !!(game.zipRide && !game.zipRide.approach);
-  rig.hangLift = hanging ? 0.4 : (rig.hangLift || 0) * Math.exp(-dt * 14);
+  rig.hangLift = hanging
+    ? 0.4
+    : game.wallGrip
+      ? 0.4
+      : (rig.hangLift || 0) * Math.exp(-dt * 14);
   game.avatar.position.y = rig.hangLift;
   game.avatar.position.x = 0;
   game.avatar.position.z = 0;
@@ -262,6 +267,8 @@ export function animateExplorer(game, dt, moving, sprinting) {
       ),
     );
     poseGalleryWheel(game);
+  } else if (game.wallGrip) {
+    poseCleft(game);
   } else if (game.ropeRide || (game.zipRide && !game.zipRide.approach)) {
     const handles = cableHands(game);
     if (!poseCableGrip(game, handles))

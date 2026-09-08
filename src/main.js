@@ -1,3 +1,5 @@
+import { drawCleftMap } from "./cleft-map.js";
+import { CLEFT_RECORD } from "./cleft-rules.js";
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
 import { HOIST_RECORD } from "./bell-hoist-rules.js";
 import { drawBellHoistMap } from "./bell-hoist-map.js";
@@ -437,6 +439,8 @@ async function runStartup(request) {
           puzzle: showPuzzle,
           counterweights: showCounterweightGuide,
           fireVault: showFireVaultGuide,
+          cleftGuide: () => showCleftGuide(),
+          cleftRecord: () => showCleftGuide(true),
           bellHoist: showBellHoistGuide,
           bellHoistRecord: () =>
             modal(
@@ -615,15 +619,17 @@ function updateHUD(s) {
   }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent = s.bellHoist
-    ? `${number(s.bellHoist.step)} / 03`
-    : s.fireVault
-      ? `${number(s.fireVault.lit)} / 03`
-      : s.gallery
-        ? `${number(s.galleryStage)} / 02`
-        : s.diving
-          ? `${number(s.archive)} / 05`
-          : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.cleft
+    ? `${number(s.cleft.step)} / 04`
+    : s.bellHoist
+      ? `${number(s.bellHoist.step)} / 03`
+      : s.fireVault
+        ? `${number(s.fireVault.lit)} / 03`
+        : s.gallery
+          ? `${number(s.galleryStage)} / 02`
+          : s.diving
+            ? `${number(s.archive)} / 05`
+            : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
   document.querySelector("#objective-distance").textContent = s.target
     ? `${s.distance} m away`
@@ -631,7 +637,10 @@ function updateHUD(s) {
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
-  if (s.bellHoist)
+  if (s.cleft)
+    document.querySelector("#objective-detail").textContent =
+      "Optional climb · The Surveyor’s Cleft · M shows the wall elevation";
+  else if (s.bellHoist)
     document.querySelector("#objective-detail").textContent =
       "Optional tomb · The bellkeepers’ hoist · M shows all three floors";
   else if (s.fireVault)
@@ -726,6 +735,7 @@ function updateWaypoint(s) {
 }
 function drawMap(canvas, full = false, s = game?.state()) {
   if (!game || !s) return;
+  if (s.cleft) return drawCleftMap(canvas, game, full);
   if (s.bellHoist) return drawBellHoistMap(canvas, game, full);
   if (s.fireVault) return drawFireVaultMap(canvas, game, full);
   if (s.gallery) return drawGalleryMap(canvas, game, full);
@@ -974,7 +984,11 @@ function showMap() {
   modal(
     "Follow the forgotten paths.",
     `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${state.objective}</p>${
-      !state.gallery && !state.fireVault && !state.bellHoist && state.mission
+      !state.cleft &&
+      !state.gallery &&
+      !state.fireVault &&
+      !state.bellHoist &&
+      state.mission
         ? `<p class="small-copy">${game.state().mission.briefing}</p><ol class="field-checklist">${game
             .state()
             .mission.tasks.map(
@@ -983,7 +997,7 @@ function showMap() {
             )
             .join("")}</ol>`
         : ""
-    } ${state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
+    } ${state.cleft ? `<p class="small-copy">This is a front view of the wall. Bronze marks show handholds; dashed links need a jump and catch. Green terraces are saved rest points. Climbing directions follow the wall: Up climbs, Left and Right traverse, Down descends. Press Jump with a direction at a broken span, then hold Use to catch. Release the direction and press Jump beside a terrace to step off. The line on the right is the return descent.</p>` : state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
     "map",
     "EXPEDITION CARTOGRAPHY",
     true,
@@ -1022,6 +1036,10 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const cleft = store.data.levels.sands?.cleft;
+  const cleftSection = cleft?.visited
+    ? `<section class="tide-journal"><span class="eyebrow">THE SURVEYOR’S CLEFT · ${cleft.recovered ? "RECOVERED" : "IN PROGRESS"}</span><h3>${CLEFT_RECORD.title}</h3><p>${cleft.recovered ? CLEFT_RECORD.text : "A path east of the western survey station leads to the cleft. Follow the bronze handholds across the quarry face, rest on its three terraces, and recover the surveyors’ last bearing from the upper lookout."}</p>${cleft.recovered ? `<p class="small-copy">${CLEFT_RECORD.note}</p>` : ""}</section>`
+    : "";
   const hoist = store.data.levels.frost?.bellHoist;
   const hoistSection = hoist?.visited
     ? `<section class="tide-journal"><span class="eyebrow">THE BELLKEEPERS’ HOIST · ${hoist.recovered ? "RECOVERED" : "IN PROGRESS"}</span><h3>${HOIST_RECORD.title}</h3><p>${hoist.recovered ? HOIST_RECORD.text : "A path east of the western library trail reaches the old cargo hoist. Two platforms share one counterweight. Find the bell’s bronze tongue in the middle gallery, carry it to the upper east bell, and reopen the refuge."}</p>${hoist.recovered ? `<p class="small-copy">${HOIST_RECORD.note}</p>` : ""}</section>`
@@ -1055,7 +1073,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${hoistSection}${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${cleftSection}${hoistSection}${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection || cleftSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,
@@ -1199,6 +1217,15 @@ function showNote(f, l) {
     `<div class="note-paper"><span class="note-number">FIELD NOTE ${number(f.note + 1)}</span><p>“${note[1]}”</p><span class="note-signature">From the journals of Elara Vale</span></div><p class="small-copy">Added to your field journal. Press J to read your discoveries.</p><button class="primary-button full-width" data-close>Carry her words with you ${icon("ArrowRight")}</button>`,
     "note",
     l.title.toUpperCase(),
+  );
+}
+function showCleftGuide(recovered = false) {
+  modal(
+    recovered ? CLEFT_RECORD.title : "The Surveyor’s Cleft",
+    recovered
+      ? `<div class="note-paper"><p>${CLEFT_RECORD.text}</p><p class="small-copy">${CLEFT_RECORD.note}</p></div><p class="small-copy">Added to your field journal. Follow the balcony east to the return line.</p><button class="primary-button" data-close>Return to the lookout</button>`
+      : `<p class="modal-description">“Leave the line for the next climber.”</p><div class="note-paper"><p>Start at the bronze handholds on the western foot of the wall. <kbd>E</kbd> (Use on touch) catches a grip. While hanging, directions follow the wall: <kbd>W</kbd> / Up climbs, Left and Right traverse, and Down descends. Move between the grips; the upper fork avoids the first broken span.</p><p>At a broken span, hold a direction and press <kbd>Space</kbd> (Jump), then hold <kbd>E</kbd> / Use to catch the far side. Open <kbd>M</kbd> for a front view of the wall. Dashed links mark the longer jumps.</p><p>Beside a terrace, release the direction and press Jump to step onto it. Resting restores stamina. Use again while hanging releases you to the belay line; a missed catch or exhaustion also returns you to your last rest terrace. Reloading during a climb restores that terrace.</p><p>The last bearing rests on the summit writing desk. A return line at the eastern end of the upper balcony lowers you to the sand.</p></div><button class="primary-button" data-close>Explore the cleft</button>`,
+    "guide",
   );
 }
 function showBellHoistGuide() {

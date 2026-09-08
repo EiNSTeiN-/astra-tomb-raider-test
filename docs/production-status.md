@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The desert now has the optional Surveyor’s Cleft: 37 directional handholds,
+  a branch around a broken span, jump/catch transfers, three upper rest terraces,
+  belay recovery, a saved summit record and an inclined return descent. All 364
+  tests and the production build pass. Native keyboard events with assisted
+  simulation completed the route at full health; touch jump/catch, collision,
+  pause, distance-sensitive audio, both graphics settings and chapter disposal
+  passed. Production native climbing, mid-climb reload and the journal record
+  passed from a prepared save. [Climb notes](surveyors-cleft.md) include controls,
+  captures and measured evidence. This adds traversal depth; hour-long chapter
+  pacing, subjective sound quality and AAA graphics remain unverified or unmet.
+
 - The jungle's nine sanctuary structures now have 392 carved faces on 98 piers, narrower masonry bevels, alternating split-course directions, rain staining and fifteen piers with original woody climbers and folded leaves. Leaf tips and shadows share their wind motion. All 354 tests and the production build pass. Eight matched High/Performance views retained exact camera and collision records; both assisted torch relays and a live stealth approach completed at full health. Shrine fire positions, pause, chapter cleanup and native production movement/reload passed. [Temple facing notes](temple-facings.md) include before/after images and the increased rendering workload. This improves prototype environmental detail; AAA graphics, subjective mix review and approximately one-hour chapter pacing remain open.
 
 - All eight chapters now support crouched movement, directional guardian sight, player-noise investigation, a suspicion meter and quiet approaches. All 350 tests and the production build pass. Eight assisted 6.6 m approaches with live guardians remained undetected at full health; front approaches raised suspicion and triggered combat. Portrait multi-touch, fixed sound-origin searches, music-state changes, pause/chapter cleanup, actual footstep attenuation and native production movement/reload passed. [Stealth notes](stealth.md) record the rendered pose, sound measurements, final bundles and limits. This adds prototype encounter variety; AAA graphics, subjective mix review and approximately one-hour chapter pacing remain open.

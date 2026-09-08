@@ -55,6 +55,14 @@ Counterweight stones use **E / Use** to grip or release. While gripping, **W / U
 
 Desert mirrors use **E / Use** at each numbered handwheel. Follow the reflected sunlight and activate the receiver when it lights up. The sanctuary tablet also offers diagram controls for the same saved mirrors.
 
+The desert’s **Surveyor’s Cleft** branches east from the western survey path.
+Climb 37 handholds to three rest terraces and a summit record. **E / Use** grips;
+**WASD / arrows** follow the wall. At a broken span, use **Jump + direction**, then
+hold **Use** to catch. Release movement and press Jump to mount a terrace.
+Rest to refill stamina; a missed catch returns you on belay. The summit’s eastern
+return line lowers you to the sand. **M** shows a wall elevation, and **J** keeps
+the recovered bearing. See [climbing and verification notes](docs/surveyors-cleft.md).
+
 Mountain bells use **E / Use** at each named pull rope. Read the bellkeeper's tablet, listen to its phrase, and answer according to its repeat, reverse, or shifted-sign rule. The tablet offers replay, reset, activation, and focused controls. Replaying preserves your partial answer.
 
 East of the mountain’s western library trail, **the bellkeepers’ hoist** adds an

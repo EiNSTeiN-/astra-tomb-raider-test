@@ -1,3 +1,12 @@
+import { buildSurveyorsCleft, updateCleftArt } from "./cleft-art.js";
+import { cleftBlocked, cleftOccludes } from "./cleft-rules.js";
+import {
+  updateCleft,
+  cleftInteract,
+  cleftHint,
+  cleftObjective,
+  cleftSavePosition,
+} from "./cleft.js";
 import {
   buildBellHoist,
   updateBellHoist,
@@ -724,6 +733,7 @@ export class Adventure {
     buildCipherCourts(this);
     buildFireVault(this);
     buildBellHoist(this);
+    buildSurveyorsCleft(this);
     buildHazards(this);
     buildSoundLandmarks(this);
     buildTideArchive(this);
@@ -1258,6 +1268,7 @@ export class Adventure {
       return false;
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
+    if (cleftBlocked(this, x, z, worldY, clearance)) return false;
     for (const dx of [-0.45, 0.45])
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
@@ -1276,6 +1287,7 @@ export class Adventure {
     const from = { x: a.x, y: a.y + fromHeight, z: a.z },
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
+    if (cleftOccludes(this, from, to)) return false;
     for (const o of this.obstacles || []) {
       if (o.h <= 0.2) continue;
       const base = this.groundHeight(o.x, o.z);
@@ -1384,6 +1396,11 @@ export class Adventure {
     this.carrying = !!carryingComponent(this.level, this.progress);
     updateAim(this);
     updateCrouch(this);
+    if (updateCleft(this, dt, x, -z)) {
+      animateExplorer(this, dt, false, false);
+      this.survey();
+      return;
+    }
     if (advanceCausewayWheel(this, dt, input)) {
       animateExplorer(
         this,
@@ -1843,6 +1860,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (cleftInteract(this)) return;
     if (bellHoistInteract(this)) return;
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
@@ -1991,6 +2009,7 @@ export class Adventure {
       this.active === false ||
       this.carrying ||
       this.fireVault?.operation ||
+      this.wallGrip ||
       this.blockGrip ||
       this.swimming ||
       this.attackCooldown > 0 ||
@@ -2157,10 +2176,12 @@ export class Adventure {
     const gallery = galleryObjective(this);
     const vault = fireVaultObjective(this);
     const hoist = bellHoistObjective(this);
-    const target = hoist
-      ? null
-      : vault?.target ||
-        (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
+    const cleft = cleftObjective(this);
+    const target =
+      hoist || cleft
+        ? null
+        : vault?.target ||
+          (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
     return {
       health: this.health,
       stamina: this.stamina,
@@ -2175,6 +2196,7 @@ export class Adventure {
       gallery: !!gallery,
       fireVault: vault,
       bellHoist: hoist,
+      cleft,
       galleryStage: this.progress.gallery?.recovered
         ? 2
         : this.progress.gallery?.opened
@@ -2184,6 +2206,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        cleft?.text ||
         hoist?.text ||
         vault?.text ||
         gallery ||
@@ -2239,7 +2262,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : bellHoistHint(this) ||
+        : cleftHint(this) ||
+          bellHoistHint(this) ||
           fireVaultHint(this) ||
           torchHint(this) ||
           galleryHint(this) ||
@@ -2264,31 +2288,38 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task: bellHoistObjective(this)
-        ? this.bellHoist.motion
-          ? "lift"
-          : "resonance"
-        : fireVaultObjective(this)
-          ? this.fireVault.operation
+      task: cleftObjective(this)
+        ? this.wallGrip
+          ? "climb"
+          : "survey"
+        : bellHoistObjective(this)
+          ? this.bellHoist.motion
             ? "lift"
-            : "brazier"
-          : this.diving || galleryObjective(this)
-            ? "dive"
-            : (this.nearest?.type === "resonator" ||
-                  this.resonanceFocus != null) &&
-                resonanceReady(this, this.resonanceSites?.[this.progress.stage])
-              ? "tuning"
-              : this.hydraulicSites?.[this.progress.stage]?.flow ||
-                  this.thermalSites?.[this.progress.stage]?.moving ||
-                  this.windSites?.[this.progress.stage]?.moving
-                ? "valve"
-                : this.blockGrip ||
-                    this.cipherSites?.[this.progress.stage]?.moving
-                  ? "lift"
-                  : this.ropeRide || this.zipRide
-                    ? "climb"
-                    : currentFieldTask(this.level, this.progress)?.kind ||
-                      "mechanism",
+            : "resonance"
+          : fireVaultObjective(this)
+            ? this.fireVault.operation
+              ? "lift"
+              : "brazier"
+            : this.diving || galleryObjective(this)
+              ? "dive"
+              : (this.nearest?.type === "resonator" ||
+                    this.resonanceFocus != null) &&
+                  resonanceReady(
+                    this,
+                    this.resonanceSites?.[this.progress.stage],
+                  )
+                ? "tuning"
+                : this.hydraulicSites?.[this.progress.stage]?.flow ||
+                    this.thermalSites?.[this.progress.stage]?.moving ||
+                    this.windSites?.[this.progress.stage]?.moving
+                  ? "valve"
+                  : this.blockGrip ||
+                      this.cipherSites?.[this.progress.stage]?.moving
+                    ? "lift"
+                    : this.ropeRide || this.zipRide
+                      ? "climb"
+                      : currentFieldTask(this.level, this.progress)?.kind ||
+                        "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2325,7 +2356,7 @@ export class Adventure {
     if (!this.progress || !this.player) return;
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
-    const hoistPosition = hoistSavePosition(this);
+    const hoistPosition = cleftSavePosition(this) || hoistSavePosition(this);
     const settledPosition =
       hoistPosition || this.blockGrip?.move?.playerFrom || this.player.position;
     this.progress.position = {
@@ -2359,6 +2390,7 @@ export class Adventure {
     this.paused = value;
     updateFireVault(this, 0);
     updateBellHoist(this, 0);
+    updateCleftArt(this);
     if (value) silenceCableMotion(this);
     updateTorch(this);
     this.presentationRemaining = 0;

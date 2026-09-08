@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The Surveyor’s Cleft, its masonry facade, bronze handholds, stone foot supports,
+belay anchors, inclined return line, measuring reliefs and survey desk are
+original procedural geometry in `src/cleft-art.js`. They reuse the existing
+credited desert stone maps and the original carved-panel generator. The route,
+record, elevation map and climbing poses are original code and writing. Its
+positioned draft, rope noise, grip effects and adaptive desert score use the
+existing original synthesized audio. No new external assets or recordings were
+introduced. See [the climb notes](surveyors-cleft.md).
+
 The shoulder camera, precise hit queries, reticle, touch look controls and pitched sidearm pose are original code changes. They reuse the existing credited explorer asset, original sidearm and guardian geometry, and original synthesized effects. No new external models, textures, recordings or generated artwork were introduced. See [shoulder aiming notes](shoulder-aiming.md).
 
 The five jungle flame shrines in `src/jungle-shrines.js` are original code-authored geometry: chamfered masonry, botanical reliefs, stepped crowns, open fluted bowls, rings, fuel and sparks. They reuse the original temple geometry and its existing credited material maps; bronze patina and sparks are procedural shaders. The existing credited `fire.ogg` remains their sound source. No new external assets or recordings were introduced. See [shrine art notes](jungle-shrines.md).

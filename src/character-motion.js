@@ -1,3 +1,4 @@
+import { cleftDeckAt } from "./cleft-rules.js";
 import { hoistDeckAt } from "./bell-hoist-rules.js";
 import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
@@ -22,6 +23,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
   if (vaultDeck && vaultDeck.height > height) return vaultDeck;
   const hoistDeck = hoistDeckAt(game, x, z, maxY);
   if (hoistDeck && hoistDeck.height > height) return hoistDeck;
+  const cleftDeck = cleftDeckAt(game, x, z, maxY);
+  if (cleftDeck && cleftDeck.height > height) return cleftDeck;
   return { height, surface };
 }
 
