@@ -23,7 +23,8 @@ content or modern AAA graphics.
    return to a bell. In enclosed rooms, exhausting air causes damage while
    retaining vertical control, so an automatic ascent cannot pin you to a roof.
 4. Pass above and below the collapsed masonry to reach the second air bell.
-   Find the emergency wheel just outside it and use **E / Use**. Recover the
+   Find the emergency wheel just outside it and use **E / Use**. Allow the short
+   reach and turn to finish; movement or Dive/Rise lets go. Recover the
    copper roll beyond the opened archive gate, breathe again, and use the
    eastern return passage to reach the well.
 5. **M / Map** shows discovered interior rooms and the bronze air bells.
@@ -151,3 +152,8 @@ gates below their floors so they no longer protrude through the courtyard above.
 It adds fixed guides, rack-and-pinion drives, connected pressure lines and
 stationary drive emitters. That report contains the latest route, reload and
 automated verification for the revised machinery.
+
+The [wheel interaction pass](gallery-wheel.md) adds fitted hand contacts and a
+visible reach, turn and release. It also checks the approach for obstructions,
+retains oxygen use, supports movement cancellation and freezes both the action
+and gate travel on pause. Only a completed turn saves the open-gate state.

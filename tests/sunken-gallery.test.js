@@ -19,6 +19,11 @@ import { cutTerrainGeometry } from "../src/terrain-cut.js";
 import { normalizeSave, defaults } from "../src/storage.js";
 import { createWaterSurface } from "../src/water-surface.js";
 import { buildSoundLandmarks } from "../src/sound-landmarks.js";
+import {
+  beginGalleryWheel,
+  canUseGalleryWheel,
+  advanceGalleryWheel,
+} from "../src/gallery-wheel.js";
 
 export function galleryGame(savedGallery = null) {
   const level = LEVELS[3],
@@ -192,9 +197,15 @@ test("the memorial route crosses the bank, breathes in both bells, opens both ga
   ])
     swimTo(g, ...point);
   assert.equal(galleryInteract(g), true);
-  assert.equal(g.progress.gallery.opened, true);
+  assert(g.sunkenGallery.operation);
+  assert.equal(
+    g.progress.gallery.opened,
+    false,
+    "the wheel must finish turning",
+  );
   g.keys.clear();
   galleryStep(g, 2);
+  assert.equal(g.progress.gallery.opened, true);
   assert.equal(galleryClear(g, gate.x, gate.y + 2, gate.z), true);
   for (const point of [
     [-8, -6.3, 36],
@@ -415,4 +426,110 @@ test("exhausted air retains descent control beneath a ceiling and first-entry re
   g.player.position.set(bell.x, bell.y - 0.38, bell.z);
   buildSunkenGallery(g);
   assert.deepEqual(g.progress.gallery, normalizeGallery(null));
+});
+
+test("wheel operation checks its approach, consumes air, freezes on pause and saves only the completed turn", () => {
+  const g = galleryGame(),
+    w = g.sunkenGallery.profile.wheel;
+  g.swimming = g.diving = true;
+  g.player.position.set(w.x, w.y, w.z + 1);
+  assert.equal(
+    canUseGalleryWheel(g),
+    false,
+    "cannot operate through the pedestal back",
+  );
+  g.player.position.set(w.x - 0.95, w.y + 1.2, w.z - 0.6);
+  assert(
+    galleryClear(g, ...g.player.position.toArray()),
+    "approach starts in clear water",
+  );
+  assert.equal(
+    canUseGalleryWheel(g),
+    false,
+    "the skirt blocks the path to the wheel",
+  );
+  g.player.position.set(w.x, w.y, w.z - 2);
+  assert(canUseGalleryWheel(g));
+  g.progress.gallery.rest = "bell-b";
+  let writes = 0;
+  g.save = () => {
+    writes++;
+    captureGallery(g);
+  };
+  assert(beginGalleryWheel(g));
+  for (let i = 0; i < 45; i++) {
+    const before = g.player.position.clone();
+    galleryStep(g, 1 / 60);
+    assert(
+      g.player.position.distanceTo(before) <= 3.1 / 60 + 1e-8,
+      "alignment respects swimming speed",
+    );
+    assert(galleryClear(g, ...g.player.position.toArray()));
+  }
+  assert.equal(g.progress.gallery.opened, false);
+  assert.equal(writes, 0);
+  assert(
+    g.diveAir < 31.3 && g.diveAir > 31.2,
+    "turning consumes the normal air reserve",
+  );
+  captureGallery(g);
+  const interrupted = galleryGame(g.progress.gallery);
+  restoreGalleryArrival(interrupted);
+  assert.equal(interrupted.progress.gallery.opened, false);
+  assert.equal(interrupted.sunkenGallery.operation, undefined);
+  assert.equal(interrupted.diving, false);
+  assert.equal(interrupted.diveAir, 32);
+  g.paused = true;
+  const time = g.sunkenGallery.operation.time,
+    angle = g.sunkenGallery.wheel.rotation.z;
+  advanceGalleryWheel(g, 10, { x: 0, z: 0 }, false);
+  updateSunkenGallery(g, 10, false);
+  assert.equal(g.sunkenGallery.operation.time, time);
+  assert.equal(g.sunkenGallery.wheel.rotation.z, angle);
+  assert.equal(g.sunkenGallery.lift, 0);
+  g.paused = false;
+  galleryStep(g, 1);
+  assert.equal(g.progress.gallery.opened, true);
+  assert.equal(writes, 1);
+  g.paused = true;
+  const lift = g.sunkenGallery.lift;
+  updateSunkenGallery(g, 10, false);
+  assert.equal(g.sunkenGallery.lift, lift, "gate travel also freezes on pause");
+  const completed = galleryGame(g.progress.gallery);
+  assert(
+    completed.sunkenGallery.gates.every((gate) => gate.box.max.y < gate.site.y),
+  );
+  assert.equal(completed.sunkenGallery.operation, undefined);
+});
+
+test("movement and descent release the wheel, and a diving reset discards transient interaction", () => {
+  const g = galleryGame(),
+    w = g.sunkenGallery.profile.wheel;
+  const start = () => {
+    g.swimming = g.diving = true;
+    g.keys.clear();
+    g.player.position.set(w.x, w.y, w.z - 1.3);
+    updateSunkenGallery(g, 10, false);
+    assert(beginGalleryWheel(g));
+    galleryStep(g, 0.65);
+    assert(g.sunkenGallery.operation.turn > 0);
+  };
+  start();
+  const before = g.player.position.clone();
+  galleryStep(g, 1 / 60, { x: 0, z: -1 });
+  assert.equal(g.sunkenGallery.operation, null);
+  assert(
+    g.player.position.z < before.z,
+    "movement responds on the cancellation frame",
+  );
+  assert.equal(g.progress.gallery.opened, false);
+  start();
+  g.keys.add("KeyX");
+  galleryStep(g, 1 / 60);
+  assert.equal(g.sunkenGallery.operation, null);
+  assert.equal(g.progress.gallery.opened, false);
+  start();
+  resetDiving(g);
+  assert.equal(g.sunkenGallery.operation, null);
+  assert.equal(g.progress.gallery.opened, false);
 });

@@ -2,12 +2,16 @@ import * as THREE from "three";
 
 // Measure the delivered skinned surface independently of the finger solver.
 // A negative clearance is inside the visible grip's finite cylinder.
-export function handGeometry(game) {
-  const cable = game.zipRide.course.zipRig;
+export function handGeometry(
+  game,
+  { handles: suppliedHandles, halfLength = 0.095 } = {},
+) {
+  const cable = game.zipRide?.course.zipRig;
   game.avatar.updateWorldMatrix(true, false);
   game.rig.model.updateMatrixWorld(true);
-  cable.hanger.updateWorldMatrix(true, true);
-  const handles = [...cable.handles].reverse();
+  cable?.hanger.updateWorldMatrix(true, true);
+  const handles = suppliedHandles || [...cable.handles].reverse();
+  for (const handle of handles) handle.updateWorldMatrix(true, true);
   return ["Left", "Right"].map((side, index) => {
     const handle = handles[index];
     const center = handle.getWorldPosition(new THREE.Vector3());
@@ -55,7 +59,7 @@ export function handGeometry(game) {
           Math.max(0, offset.lengthSq() - along * along),
         );
         const qx = radial - 0.019,
-          qy = Math.abs(along) - 0.095;
+          qy = Math.abs(along) - halfLength;
         const clearance =
           Math.min(Math.max(qx, qy), 0) +
           Math.hypot(Math.max(qx, 0), Math.max(qy, 0));

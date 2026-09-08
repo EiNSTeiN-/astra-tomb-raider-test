@@ -150,6 +150,7 @@ export function memorialView(game, view) {
   const [x, y, z, yaw] = locations[view],
     o = game.terrainProfile.gallery.origin;
   game.progress.gallery.opened = view === "memorial";
+  game.sunkenGallery.lift = game.progress.gallery.opened ? 1 : 0;
   game.progress.gallery.recovered = false;
   game.player.position.set(o.x + x, o.y + y, o.z + z);
   game.yaw = yaw;

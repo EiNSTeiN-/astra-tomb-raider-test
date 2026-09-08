@@ -175,9 +175,21 @@ function curlFingers(grip, center, axis, distal, palm) {
 // The handle is a palm contact, not a wrist target. Preserve bone lengths and
 // fit each finger's phalanges around the cylinder after the base animation.
 export function poseCableGrip(game, centers) {
-  const rig = game.rig,
-    cable = game.zipRide?.course.zipRig;
-  if (!rig || !cable || !centers) return false;
+  const cable = game.zipRide?.course.zipRig;
+  if (!cable) return false;
+  return poseCylinderGrip(
+    game,
+    centers,
+    new THREE.Vector3(1, 0, 0).applyQuaternion(cable.hanger.quaternion),
+    new THREE.Vector3(0, 1, 0),
+  );
+}
+
+// Reuse the calibrated 38 mm finger contact for a differently oriented handle.
+// Weight blends the reach/release; full weight maintains surface contact.
+export function poseCylinderGrip(game, centers, axis, distal, weight = 1) {
+  const rig = game.rig;
+  if (!rig || !centers || weight <= 0) return false;
   const hands = (rig.gripHands ??= gripHands(rig.model));
   if (hands.some((h) => !h)) return false;
   rig.gripBase ??= hands
@@ -190,11 +202,7 @@ export function poseCableGrip(game, centers) {
     .map((bone) => ({ bone, rotation: new THREE.Quaternion() }));
   for (const { bone, rotation } of rig.gripBase) rotation.copy(bone.quaternion);
   rig.gripBaseActive = true;
-  const axis = new THREE.Vector3(1, 0, 0).applyQuaternion(
-      cable.hanger.quaternion,
-    ),
-    distal = new THREE.Vector3(0, 1, 0),
-    palm = axis.clone().cross(distal).normalize(),
+  const palm = axis.clone().cross(distal).normalize(),
     handDistal = distal
       .clone()
       .multiplyScalar(Math.cos(CABLE_GRIP.palmTilt))
@@ -246,6 +254,11 @@ export function poseCableGrip(game, centers) {
     );
     worldRotation(h.hand, rotations[i]);
     curlFingers(h, centers[i], axis, distal, palm);
+  }
+  if (weight < 1) {
+    for (const { bone, rotation } of rig.gripBase)
+      bone.quaternion.slerp(rotation, 1 - weight);
+    rig.model.updateWorldMatrix(true, true);
   }
   return true;
 }

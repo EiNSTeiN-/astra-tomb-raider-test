@@ -7,6 +7,7 @@ import {
   buildGalleryMachinery,
   updateGalleryMachinery,
 } from "./gallery-machinery.js";
+import { beginGalleryWheel, canUseGalleryWheel } from "./gallery-wheel.js";
 import {
   galleryAt,
   gallerySection,
@@ -433,6 +434,8 @@ export function buildSunkenGallery(game) {
 export function updateSunkenGallery(game, dt, observePlayer = true) {
   const gallery = game.sunkenGallery;
   if (!gallery) return;
+  if (gallery.operation && (!game.diving || game.health <= 0))
+    gallery.operation = null;
   updateGalleryMachinery(game, dt);
   gallery.record.visible = !game.progress.gallery.recovered;
   for (const { mesh, bell } of gallery.outsideWater) {
@@ -494,10 +497,12 @@ export function galleryHint(game) {
   if (!gallery || !p) return null;
   const inside = galleryAt(game, p.x, p.y, p.z);
   if (!inside) return null;
-  if (
-    !game.progress.gallery.opened &&
-    p.distanceTo(new THREE.Vector3().copy(gallery.profile.wheel)) < 2.1
-  )
+  if (gallery.operation)
+    return {
+      key: "WASD / X / Space",
+      label: "Turning the emergency wheel · move to let go",
+    };
+  if (canUseGalleryWheel(game))
     return {
       key: "E",
       label: "Turn the emergency wheel · open the memorial and return passage",
@@ -533,12 +538,8 @@ export function galleryInteract(game) {
   const hint = galleryHint(game);
   if (hint?.key !== "E") return true;
   if (!game.progress.gallery.opened) {
-    game.progress.gallery.opened = true;
-    game.audio.tone("switch");
-    game.cb.toast?.(
-      "The emergency wheel releases both gates. The memorial and the return passage are opening.",
-      5000,
-    );
+    beginGalleryWheel(game);
+    return true;
   } else {
     game.progress.gallery.recovered = true;
     game.audio.tone("solve");

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { cableHands } from "./return-cable.js";
 import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
+import { galleryWheelBrace, poseGalleryWheel } from "./gallery-wheel.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
@@ -189,7 +190,10 @@ export function animateExplorer(game, dt, moving, sprinting) {
     new THREE.Vector3(x, y, z)
       .applyQuaternion(rotation)
       .add(game.player.position);
-  if (!game.swimming) rig.bellFloat = undefined;
+  if (!game.swimming) {
+    rig.bellFloat = undefined;
+    rig.wheelBrace = 0;
+  }
   if (game.swimming) {
     const p = game.player.position;
     const floating =
@@ -202,7 +206,11 @@ export function animateExplorer(game, dt, moving, sprinting) {
       6,
       dt,
     );
-    const float = rig.bellFloat;
+    rig.wheelBrace = Math.max(
+      galleryWheelBrace(game),
+      (rig.wheelBrace || 0) - dt * 5,
+    );
+    const float = Math.max(rig.bellFloat, rig.wheelBrace);
     rig.model.rotation.x = 1.25 - 1.13 * float;
     game.avatar.position.y -= 1.05 * float;
     const offset = new THREE.Vector3(0, 0, -0.65 * (1 - float)).applyQuaternion(
@@ -235,6 +243,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
         ),
       ),
     );
+    poseGalleryWheel(game);
   } else if (game.ropeRide || (game.zipRide && !game.zipRide.approach)) {
     const handles = cableHands(game);
     if (!poseCableGrip(game, handles))

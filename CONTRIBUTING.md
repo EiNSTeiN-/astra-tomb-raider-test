@@ -4,6 +4,12 @@ Use Node.js 22.12 or newer and install the locked dependencies with `npm ci`.
 Run `npm run dev` to play locally, `npm test` for the automated checks, and
 `npm run build` to produce the static site in `dist/`.
 
+Keep temporary scripts, test results, browser profiles, captures and other
+project staging files in `local/staging/` inside this checkout. This directory is
+covered by the `/local/` exclusion in `.gitignore`. Do not use `/tmp` for project
+staging: it may be cleared during a reboot. Keep reusable public verification
+helpers in `scripts/` and intentional documentation images in `docs/images/`.
+
 The public repository is https://github.com/EiNSTeiN-/astra-tomb-raider-test.
 The project owner has requested that every playable milestone be committed and
 pushed here. Finish the relevant checks, record the resulting behavior and any

@@ -12,6 +12,15 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { coursePlan, hasTraversalCourse } from "../src/traversal-courses.js";
 import { buildReturnCable, updateReturnCable } from "../src/return-cable.js";
+import {
+  buildSunkenGallery,
+  updateSunkenGallery,
+} from "../src/sunken-gallery.js";
+import { beginGalleryWheel } from "../src/gallery-wheel.js";
+import { galleryClear } from "../src/sunken-gallery-layout.js";
+import { normalizeGallery } from "../src/sunken-gallery-record.js";
+import { advanceSwimming } from "../src/water-motion.js";
+import { poseCylinderGrip, restoreCableGrip } from "../src/hand-grip.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -56,6 +65,140 @@ async function groundedActor() {
     },
   };
 }
+
+test("delivered hands remain fitted to the underwater wheel through its turn and release without changing bone lengths", async (t) => {
+  const game = await groundedActor();
+  game.level = LEVELS[3];
+  game.map = createMap(game.level);
+  game.terrainProfile = createTerrainProfile(game.map, game.level);
+  game.groundHeight = game.terrainProfile.height;
+  Object.assign(game, {
+    world: new THREE.Group(),
+    stoneMat: new THREE.MeshStandardMaterial(),
+    darkMat: new THREE.MeshStandardMaterial(),
+    soundSources: [],
+    keys: new Set(),
+    health: 100,
+    diveAir: 32,
+    progress: { gallery: normalizeGallery(null) },
+    audio: { tone() {} },
+    cb: {},
+    save() {},
+    state() {
+      return {};
+    },
+  });
+  game.world.add(game.player);
+  game.waterMeshes = game.terrainProfile.waters.map((site) => {
+    const mesh = new THREE.Mesh();
+    mesh.position.set(site.x, site.baseY, site.z);
+    Object.assign(mesh.userData, site);
+    return mesh;
+  });
+  game.canMove = (x, z, height, clearance = 0.8) =>
+    galleryClear(game, x, game.groundHeight(x, z) + height, z, clearance);
+  buildSunkenGallery(game);
+  game.swimming = game.diving = true;
+  game.grounded = false;
+  const w = game.sunkenGallery.profile.wheel;
+  game.player.position.set(w.x + 0.1, w.y, w.z - 1.3);
+  const bones = [];
+  game.rig.model.traverse((bone) => {
+    if (bone.isBone && /(?:Arm|ForeArm|Hand.*)$/.test(bone.name))
+      bones.push({
+        bone,
+        position: bone.position.clone(),
+        scale: bone.scale.clone(),
+      });
+  });
+  assert(beginGalleryWheel(game));
+  let samples = 0,
+    minimum = Infinity,
+    maximumContact = 0,
+    supportClearance = Infinity;
+  for (let i = 0; i < 120; i++) {
+    game.elapsed += 1 / 60;
+    advanceSwimming(game, { x: 0, z: 0 }, 1 / 60, false);
+    animateExplorer(game, 1 / 60, false, false);
+    updateSunkenGallery(game, 1 / 60);
+    const turn = game.sunkenGallery.operation?.turn;
+    if (!(turn > 0 && turn < 1) || i % 3) continue;
+    samples++;
+    for (const { bone, position, scale } of bones) {
+      assert(bone.position.distanceTo(position) < 1e-7, bone.name);
+      assert(bone.scale.distanceTo(scale) < 1e-7, bone.name);
+      assert(bone.quaternion.toArray().every(Number.isFinite), bone.name);
+    }
+    for (const [index, hand] of handGeometry(game, {
+      handles: game.sunkenGallery.handles,
+      halfLength: 0.12,
+    }).entries()) {
+      for (const [name, measurement] of Object.entries(hand.fingers)) {
+        assert(measurement.vertices > 200);
+        assert(
+          measurement.minimum >= -0.0006,
+          `${i}/${hand.side}/${name}: enters grip ${measurement.minimum}`,
+        );
+        assert(
+          measurement.minimum < 0.004,
+          `${i}/${hand.side}/${name}: loses contact ${measurement.minimum}`,
+        );
+        minimum = Math.min(minimum, measurement.minimum);
+        maximumContact = Math.max(maximumContact, measurement.minimum);
+      }
+      const center = game.sunkenGallery.handles[index].position.x;
+      for (const { point } of hand.vertices) {
+        const local = game.sunkenGallery.wheel.worldToLocal(point.clone());
+        for (const end of [-1, 1]) {
+          const x = center + end * 0.135;
+          const segment = new THREE.Line3(
+            new THREE.Vector3(x, 0, 0),
+            new THREE.Vector3(x, 0, -0.16),
+          );
+          const distance = segment
+            .closestPointToPoint(local, true, new THREE.Vector3())
+            .distanceTo(local);
+          assert(distance > 0.026, "hand clears the grip's capped supports");
+          supportClearance = Math.min(supportClearance, distance - 0.026);
+        }
+      }
+    }
+  }
+  assert(samples >= 10);
+  assert.equal(game.progress.gallery.opened, true);
+  assert.equal(game.sunkenGallery.operation, null);
+  assert.equal(game.rig.gripBaseActive, false);
+  assert.equal(game.rig.wheelBrace, 0);
+  const handles = game.sunkenGallery.handles.map((h) =>
+      h.getWorldPosition(new THREE.Vector3()),
+    ),
+    rotation = game.sunkenGallery.wheel.getWorldQuaternion(
+      new THREE.Quaternion(),
+    ),
+    axis = new THREE.Vector3(1, 0, 0).applyQuaternion(rotation),
+    distal = new THREE.Vector3(0, 1, 0).applyQuaternion(rotation);
+  poseCylinderGrip(game, handles, axis, distal);
+  const blended = game.rig.gripBase.map(({ bone, rotation: base }) => ({
+    bone,
+    base: base.clone(),
+    full: bone.quaternion.clone(),
+  }));
+  restoreCableGrip(game);
+  poseCylinderGrip(game, handles, axis, distal, 0.5);
+  for (const { bone, base, full } of blended)
+    assert(
+      bone.quaternion
+        .clone()
+        .normalize()
+        .angleTo(base.clone().slerp(full, 0.5).normalize()) < 1e-6,
+      `${bone.name} blends reach and release`,
+    );
+  assert(blended.some(({ bone, base }) => bone.quaternion.angleTo(base) > 0.1));
+  restoreCableGrip(game);
+  t.diagnostic(
+    JSON.stringify({ samples, minimum, maximumContact, supportClearance }),
+  );
+});
 
 test("delivered palms and fingers fit every cable grip without stretching bones or entering the handle struts", async (t) => {
   const game = await groundedActor(),

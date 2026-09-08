@@ -82,3 +82,8 @@ The verified release bundles are `index-q8B9Nn4a.js`, `game-C94CJIht.js`,
 `three-DhbJ4463.js` and `index-BdgvWVky.css`. See the
 [gallery guide](sunken-gallery.md) for the route and save rules, and
 [production status](production-status.md) for the full acceptance audit.
+
+The later [wheel interaction pass](gallery-wheel.md) replaces the automatic wheel
+spin with a hand-operated 60-degree brake release. It adds fitted grips, approach
+collision, movement cancellation, interrupted-turn recovery and frozen gate
+travel on pause. That report contains the latest verification and release hashes.

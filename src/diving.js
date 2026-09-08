@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { waterAt } from "./hydrology.js";
 import { galleryAt, galleryFloor } from "./sunken-gallery-layout.js";
+import { advanceGalleryWheel } from "./gallery-wheel.js";
 
 export const DIVE_AIR = 32;
 
 export function resetDiving(game) {
+  if (game.sunkenGallery) game.sunkenGallery.operation = null;
   game.diving = false;
   game.diveAir = DIVE_AIR;
   game.diveWarned = false;
@@ -88,6 +90,7 @@ export function advanceDiving(game, input, dt, water, rise) {
       game.damage(8);
     }
   }
+  advanceGalleryWheel(game, dt, input, rise);
   return true;
 }
 

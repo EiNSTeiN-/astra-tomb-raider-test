@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { mergeArchitecture } from "./visuals.js";
+import { GALLERY_WHEEL } from "./gallery-wheel.js";
 
 const PINION_RADIUS = 0.28;
 const PINION_TEETH = 16;
@@ -210,6 +211,9 @@ export function buildGalleryMachinery(game, { add, block, bronze, trim }) {
   const wheel = new THREE.Group();
   wheel.name = "Archive emergency wheel";
   wheel.position.copy(profile.wheel);
+  wheel.rotation.z =
+    GALLERY_WHEEL.startAngle -
+    (game.progress.gallery.opened ? GALLERY_WHEEL.turnAngle : 0);
   root.add(wheel);
   gallery.wheel = wheel;
   add(new THREE.TorusGeometry(0.65, 0.065, 8, 32), trim, 0, 0, 0, wheel);
@@ -217,6 +221,26 @@ export function buildGalleryMachinery(game, { add, block, bronze, trim }) {
   for (let i = 0; i < 3; i++)
     block(0, 0, 0, 0.09, 1.25, 0.1, trim, false, wheel).rotation.z =
       (i * Math.PI) / 3;
+  gallery.handles = [1, -1].map((side) => {
+    const handle = new THREE.Object3D();
+    handle.name = `${side > 0 ? "Left" : "Right"} wheel hand contact`;
+    handle.position.set(side * 0.36, 0, -0.16);
+    wheel.add(handle);
+    add(
+      new THREE.CylinderGeometry(0.019, 0.019, 0.24, 16),
+      trim,
+      handle.position.x,
+      0,
+      -0.16,
+      wheel,
+    ).rotation.z = Math.PI / 2;
+    for (const end of [-1, 1]) {
+      const x = handle.position.x + end * 0.135;
+      cylinder(0.018, 0.16, bronze, x, 0, -0.08, wheel);
+      add(new THREE.SphereGeometry(0.026, 12, 8), bronze, x, 0, -0.16, wheel);
+    }
+    return handle;
+  });
   mergeArchitecture(wheel);
   const w = profile.wheel;
   block(w.x, w.y - 0.8, w.z + 0.35, 0.7, 1.6, 0.55, game.stoneMat, true);
@@ -274,6 +298,7 @@ export function buildGalleryMachinery(game, { add, block, bronze, trim }) {
 export function updateGalleryMachinery(game, dt) {
   const gallery = game.sunkenGallery,
     target = game.progress.gallery.opened ? 1 : 0;
+  if (game.paused) dt = 0;
   gallery.lift = Math.min(target, gallery.lift + dt * 0.65);
   const t = gallery.lift,
     eased = t * t * (3 - 2 * t),
@@ -288,5 +313,10 @@ export function updateGalleryMachinery(game, dt) {
       pinion.group.rotation.z = (-pinion.side * drop) / PINION_RADIUS;
     gate.source.activity = activity;
   }
-  gallery.wheel.rotation.z = -eased * Math.PI * 2;
+  const turn = gallery.operation?.turn ?? target;
+  const angle = GALLERY_WHEEL.startAngle - turn * GALLERY_WHEEL.turnAngle;
+  gallery.wheel.rotation.z =
+    gallery.operation || target
+      ? angle
+      : THREE.MathUtils.damp(gallery.wheel.rotation.z, angle, 12, dt);
 }
