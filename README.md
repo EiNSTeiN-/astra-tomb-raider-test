@@ -57,6 +57,12 @@ inscription before activating its sun gate. Counts, matching pairs, exclusions a
 different-sign groups replace the former repeated dialog-only sequence. Focused
 controls offer both directions and share the same saved unfinished turns.
 
+The jungle's beacon chains now need a carried flame. Press **T** (Torch on touch)
+near a campfire or a burning brazier, then **E** (Use) at the next beacon.
+Swimming or using both hands puts the torch out; completed beacons stay lit and
+can relight it. The carried flame, saved progress and moving crackle follow the
+same world state. See [torch relay notes](docs/torch-relays.md).
+
 ## Campaign
 
 All chapters can be selected from the expedition screen and maintain independent progress.

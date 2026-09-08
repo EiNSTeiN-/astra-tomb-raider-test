@@ -4,7 +4,7 @@ const chapters = {
   verdant: [
     [
       "The listening grove",
-      "The sun gate has lost its fire. The keepers left a trail of inscriptions through the outer grove.",
+      "The sun gate has lost its fire. Read the keeper’s trail, then light your torch at a campfire with T / Torch and carry its flame to both braziers. Swimming puts it out.",
       "Read the keeper’s trail|Light the root shrine|Kindle the sanctuary beacon",
       "Fire travels along the old channels. The outer sanctuary answers.",
     ],
@@ -40,7 +40,7 @@ const chapters = {
     ],
     [
       "A thousand small lights",
-      "The inner sanctum can only be found by its beacon chain. The last flame must be carried through the courtyard.",
+      "Carry a torch flame from a camp or a burning brazier through the inner beacon chain. Keep to dry paths: swimming puts it out. Each lit beacon becomes a place to relight.",
       "Light the outer brazier|Light the raincourt brazier|Light the inner beacon",
       "The courtyard glows. Beyond it, the heart temple is awake.",
     ],

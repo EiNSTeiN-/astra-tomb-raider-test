@@ -3384,9 +3384,13 @@ body:has(.bell-focus) #game-screen > :not(#game-canvas) {
     display: grid;
     grid-template-columns: repeat(3, 42px);
     grid-template-rows: repeat(2, 40px);
+    grid-auto-rows: 40px;
     gap: 4px;
     pointer-events: auto;
     align-self: end;
+  }
+  .has-torch .hud-bottom {
+    bottom: 175px;
   }
   .touch-actions button {
     font-size: 9px;

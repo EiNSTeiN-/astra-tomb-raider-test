@@ -30,6 +30,7 @@ export function poseHands(game, target) {
     );
   });
   for (const [index, chain] of rig.arms.entries()) {
+    if (Array.isArray(target) && !target[index]) continue;
     const [upper, lower, hand] = chain;
     if (!hand || !upper || !lower) continue;
     const shoulder = upper.getWorldPosition(new THREE.Vector3()),

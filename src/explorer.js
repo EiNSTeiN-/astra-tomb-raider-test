@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { updateTorch, poseTorch } from "./torch.js";
 import { cableHands } from "./return-cable.js";
 import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
 import { galleryWheelBrace, poseGalleryWheel } from "./gallery-wheel.js";
@@ -149,6 +150,7 @@ export function explorerGait(game, moving, sprinting) {
       : { name: "Walk", rate: Math.max(0.75, Math.min(1.6, speed / 2.4)) };
 }
 export function animateExplorer(game, dt, moving, sprinting) {
+  updateTorch(game);
   const rig = game.rig;
   if (!rig) return;
   restoreCableGrip(game);
@@ -289,5 +291,6 @@ export function animateExplorer(game, dt, moving, sprinting) {
     rig.weapon.group.position.copy(grip);
     rig.weapon.group.rotation.set(-recoil * 2, angle, 0);
   }
+  poseTorch(game);
   rig.model.updateWorldMatrix(true, true);
 }

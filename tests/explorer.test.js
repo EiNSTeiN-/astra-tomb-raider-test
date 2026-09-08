@@ -21,6 +21,7 @@ import { galleryClear } from "../src/sunken-gallery-layout.js";
 import { normalizeGallery } from "../src/sunken-gallery-record.js";
 import { advanceSwimming } from "../src/water-motion.js";
 import { poseCylinderGrip, restoreCableGrip } from "../src/hand-grip.js";
+import { buildTorch } from "../src/torch.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -65,6 +66,66 @@ async function groundedActor() {
     },
   };
 }
+
+test("the delivered left hand grips the vertical torch while the right arm keeps its base motion", async () => {
+  const game = await groundedActor();
+  Object.assign(game, {
+    level: LEVELS[0],
+    progress: { stage: 0, field: [], torch: true },
+    health: 100,
+    world: new THREE.Group(),
+    flames: [],
+    soundSources: [],
+  });
+  game.world.add(game.player);
+  buildTorch(game);
+  const handle = new THREE.Object3D();
+  handle.rotation.z = Math.PI / 2;
+  game.torch.root.add(handle);
+  const right = [];
+  game.rig.model.traverse((b) => {
+    if (b.isBone && /Right(Arm|ForeArm|Hand)/.test(b.name)) right.push(b);
+  });
+  const lengths = new Map();
+  game.rig.model.traverse((b) => {
+    if (b.isBone) lengths.set(b, b.position.clone());
+  });
+  for (const yaw of [0, Math.PI / 2, Math.PI])
+    for (const moving of [false, true]) {
+      game.avatar.rotation.y = yaw;
+      game.progress.torch = false;
+      animateExplorer(game, 0.1, moving, false);
+      const base = right.map((b) => b.quaternion.clone());
+      for (const [bone, position] of lengths) position.copy(bone.position);
+      game.progress.torch = true;
+      animateExplorer(game, 0, moving, false);
+      for (const [i, b] of right.entries())
+        assert(
+          Math.abs(
+            b.quaternion.clone().normalize().dot(base[i].clone().normalize()),
+          ) >
+            1 - 1e-10,
+          `right arm changed: ${b.name} ${b.quaternion.toArray()} / ${base[i].toArray()}`,
+        );
+      const hand = handGeometry(game, {
+        handles: [handle, handle],
+        halfLength: 0.26,
+      })[0];
+      for (const [name, f] of Object.entries(hand.fingers)) {
+        assert(
+          f.minimum > -0.002,
+          `${name} penetrates the shaft: ${f.minimum}`,
+        );
+        assert(f.minimum < 0.004, `${name} misses its contact: ${f.minimum}`);
+      }
+      for (const [b, p] of lengths)
+        assert(b.position.distanceTo(p) < 1e-9, b.name);
+    }
+  game.progress.torch = false;
+  animateExplorer(game, 0.1, false, false);
+  assert.equal(game.torch.root.visible, false);
+  assert.equal(game.rig.gripBaseActive, false);
+});
 
 test("delivered hands remain fitted to the underwater wheel through its turn and release without changing bone lengths", async (t) => {
   const game = await groundedActor();

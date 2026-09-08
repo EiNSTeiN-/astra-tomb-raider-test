@@ -111,6 +111,7 @@ export function normalizeSave(value) {
             ]
           : [],
       gallery: key === "tides" ? normalizeGallery(v.gallery) : null,
+      torch: key === "verdant" && v.torch === true,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
       medkits: Math.max(0, Math.min(20, Number(v.medkits) || 0)),
@@ -189,6 +190,7 @@ export class SaveStore {
       wind: {},
       archive: [],
       gallery: id === "tides" ? normalizeGallery(null) : null,
+      torch: false,
       time: 0,
       health: 100,
       medkits: 3,

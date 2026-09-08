@@ -215,6 +215,7 @@ export function poseCylinderGrip(game, centers, axis, distal, weight = 1) {
     frame.clone().multiply(h.localFrame.clone().invert()),
   );
   const wrists = hands.map((h, i) => {
+    if (!centers[i]) return null;
     const knuckle = h.fingers[1].bones[0].position
       .clone()
       .applyQuaternion(rotations[i]);
@@ -226,6 +227,7 @@ export function poseCylinderGrip(game, centers, axis, distal, weight = 1) {
   });
   poseHands(game, wrists);
   for (const [i, h] of hands.entries()) {
+    if (!centers[i]) continue;
     // Carry palm rotation through the forearm's axial twist instead of forcing
     // the entire change into the wrist skin. The wrist position stays fixed.
     const forearm = h.hand.parent;

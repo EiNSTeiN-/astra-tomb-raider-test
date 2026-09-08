@@ -12,7 +12,9 @@ export function buildSoundLandmarks(game) {
   game.world.updateMatrixWorld(true);
   for (const [i, flame] of game.flames.entries()) {
     const p = flame.getWorldPosition(new THREE.Vector3());
-    const station = game.items.find((f) => f.fire === flame);
+    const station = game.items.find(
+      (f) => f.type === "field" && f.fire === flame,
+    );
     source(
       `fire-${i}`,
       "fire",

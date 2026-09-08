@@ -76,6 +76,13 @@ import {
   updateObservatory,
   focusObservatory,
 } from "./observatory.js";
+import {
+  buildTorch,
+  useTorch,
+  updateTorch,
+  torchHint,
+  extinguishTorch,
+} from "./torch.js";
 import { loadMemorialArt } from "./memorial-art.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
@@ -299,6 +306,7 @@ export class Adventure {
       }
       if (this.paused) return;
       if (e.code === "KeyE") this.interact();
+      if (e.code === "KeyT") this.useTorch();
       if (e.code === "KeyF") this.attack();
       if (e.code === "KeyR") this.evade();
       if (e.code === "KeyQ") {
@@ -623,6 +631,7 @@ export class Adventure {
     buildSoundLandmarks(this);
     buildTideArchive(this);
     buildSunkenGallery(this);
+    buildTorch(this);
     this.cameraSurfaces.rebuild();
     this.templeCaptureGeometry?.forEach((g) => g.dispose());
     this.templeCaptureGeometry = [];
@@ -1024,6 +1033,7 @@ export class Adventure {
         fire.scale.y = 1.5;
         group.add(fire);
         this.flames.push(fire);
+        f.fire = fire;
         this.box(1.2, 0.6, 0.8, this.material(0x6d6b4b), 2, 0.3, 1, group);
       } else {
         const mat = f.type === "relic" ? this.glowMat : this.goldMat;
@@ -1633,6 +1643,7 @@ export class Adventure {
     this.flames.forEach((f, i) => {
       f.scale.y = 1.5 + Math.sin(this.elapsed * 12 + i) * 0.3;
     });
+    updateTorch(this);
     updateFireEffects(this);
     this.particles.position.set(
       this.player.position.x,
@@ -1647,6 +1658,9 @@ export class Adventure {
       p.setY(i, y);
     }
     p.needsUpdate = true;
+  }
+  useTorch() {
+    return useTorch(this);
   }
   interact() {
     if (galleryInteract(this)) return;
@@ -1881,6 +1895,7 @@ export class Adventure {
     }
   }
   returnToCheckpoint() {
+    extinguishTorch(this);
     resetTraversal(this);
     this.swimming = false;
     resetDiving(this);
@@ -1944,6 +1959,7 @@ export class Adventure {
       health: this.health,
       stamina: this.stamina,
       swimming: this.swimming,
+      torch: this.torch ? this.progress.torch === true : null,
       diving: this.diving,
       diveAir: this.diveAir ?? DIVE_AIR,
       archive:
@@ -2011,7 +2027,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : galleryHint(this) ||
+        : torchHint(this) ||
+          galleryHint(this) ||
           counterweightHint(this) ||
           traversalHint(this) ||
           skyBridgeHint(this) ||
@@ -2109,6 +2126,7 @@ export class Adventure {
     }
     this.paused = value;
     if (value) silenceCableMotion(this);
+    updateTorch(this);
     this.presentationRemaining = 0;
     this.audio.setMode(value ? "pause" : "explore");
     this.renderOnce = true;

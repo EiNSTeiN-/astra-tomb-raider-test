@@ -80,7 +80,7 @@ export function updateFireEffects(game) {
     if (!flame.visible) continue;
     const position = flame.getWorldPosition(new THREE.Vector3());
     const distance = position.distanceTo(game.player.position);
-    if (distance < 32) visible.push({ position, distance });
+    if (distance < 32) visible.push({ position, distance, flame });
   }
   visible.sort((a, b) => a.distance - b.distance);
   game.fireLights.forEach((light, i) => {
@@ -88,10 +88,12 @@ export function updateFireEffects(game) {
     light.visible = !!source;
     if (source) {
       light.position.copy(source.position);
+      light.distance = source.flame.userData.fireRange ?? 15;
       light.intensity =
-        14 +
-        Math.sin(game.elapsed * 11 + i * 3) * 2 +
-        Math.sin(game.elapsed * 17 + i) * 1.3;
+        (source.flame.userData.fireIntensity ?? 14) *
+        (1 +
+          Math.sin(game.elapsed * 11 + i * 3) / 7 +
+          Math.sin(game.elapsed * 17 + i) * (1.3 / 14));
     }
   });
 }

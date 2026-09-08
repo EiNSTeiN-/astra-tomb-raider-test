@@ -1,5 +1,7 @@
 # Asset credits and provenance
 
+The jungle’s carried resin torch, bindings and wrapped head are original code-authored geometry in `src/torch.js`. Its hand pose reuses the calibrated cylinder grip; lighting and flame rendering reuse the original fire shader. Its positioned crackle uses the existing credited `fire.ogg` recording. No new external assets were introduced. See [torch relay notes](torch-relays.md).
+
 The cloud-city gate walls, niche reveals, timber screens, hinge straps, pin barrels and wind crests are original code-authored assets in `src/sky-gate-art.js`. They reuse the existing credited rock, temple and monastery timber maps, the original fitted-stone generator and the wind machinery's bronze shader. No new external assets or recordings were added. See [sky gate art notes](sky-gate-art.md).
 
 The cloud-city citadels, fitted polygonal stone geometry, trapezoidal portals, recessed niches and broken upper walls are original code-authored assets in `src/sky-masonry.js` and `src/sky-architecture.js`. They reuse the credited local rock and temple maps. The new perches reuse the existing bird models and recordings. No new external assets were added. See [citadel notes](sky-citadels.md).

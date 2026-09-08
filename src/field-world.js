@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { needsCarriedFlame, torchHandsBusy } from "./torch.js";
 import {
   hasTraversalCourse,
   buildTraversalCourse,
@@ -115,6 +116,19 @@ export function finishFieldTask(game, f) {
   if (currentFieldTask(game.level, game.progress)?.id !== f.id) {
     game.cb.toast?.(
       "Follow the gold marker. This station belongs to another part of the route.",
+    );
+    return false;
+  }
+  if (
+    needsCarriedFlame(game.level, f) &&
+    (!game.progress.torch ||
+      game.swimming ||
+      game.diving ||
+      torchHandsBusy(game))
+  ) {
+    game.cb.toast?.(
+      "This brazier needs a carried flame. Light your torch at a camp or a burning brazier with T / Torch.",
+      5500,
     );
     return false;
   }

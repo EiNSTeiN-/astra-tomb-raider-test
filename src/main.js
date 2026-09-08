@@ -171,8 +171,8 @@ function init() {
       <div class="hud-objective"><div class="objective-diamond">◇</div><div><span class="eyebrow">CURRENT OBJECTIVE <span id="objective-progress"></span></span><p id="objective-text"></p><small id="objective-detail"></small><span id="objective-distance"></span></div></div>
       <div class="crosshair"><span></span><span></span></div><div class="sense-label hidden" id="sense-label">${icon("Eye")} EXPLORER’S INSTINCT</div><div id="waypoint" class="waypoint">◇<span></span></div>
       <div class="interaction-prompt hidden" id="interaction-prompt"><kbd>E</kbd><span></span></div>
-      <div class="hud-bottom"><div class="vitals"><div class="vital-label">${icon("Heart")}<span>VESPER VALE</span><span id="health-value">100</span></div><div class="health-track"><div id="health-bar"></div></div><div class="stamina-track"><div id="stamina-bar"></div></div><div id="dive-vitals" class="hidden"><div class="dive-air-label"><span>AIR</span><span id="dive-air-value">32 s</span></div><div class="dive-air-track" role="meter" aria-label="Breath remaining" aria-valuemin="0" aria-valuemax="32"><div id="dive-air-bar"></div></div></div><div class="supplies"><kbd>H</kbd>${icon("Plus")}<span id="medkit-count">3</span><span class="hud-divider"></span>${icon("Gem")}<span id="treasure-count">0 / 6</span></div></div><div class="hud-controls"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump / climb</span><span><kbd>E</kbd> Interact</span><span><kbd>F</kbd> Fire</span><span><kbd>R</kbd> Dodge</span><span><kbd>Q</kbd> Instinct</span><span><kbd>M</kbd> Map</span></div><div class="minimap-wrap"><canvas id="minimap" width="170" height="170"></canvas><span>N</span></div></div>
-      <div class="touch-controls"><div class="touch-pad"><button data-touch="up" aria-label="Move forward">↑</button><button data-touch="left" aria-label="Move left">←</button><button data-touch="down" aria-label="Move backward">↓</button><button data-touch="right" aria-label="Move right">→</button></div><div class="touch-actions"><button data-touch="turn-left" aria-label="Turn camera left">↶</button><button data-touch="turn-right" aria-label="Turn camera right">↷</button><button data-touch="jump">Jump</button><button data-touch="interact">Use</button><button data-touch="fire">Fire</button><button data-touch="dodge">Dodge</button><button data-touch="dive" class="hidden" aria-label="Dive down">Dive</button></div></div>
+      <div class="hud-bottom"><div class="vitals"><div class="vital-label">${icon("Heart")}<span>VESPER VALE</span><span id="health-value">100</span></div><div class="health-track"><div id="health-bar"></div></div><div class="stamina-track"><div id="stamina-bar"></div></div><div id="dive-vitals" class="hidden"><div class="dive-air-label"><span>AIR</span><span id="dive-air-value">32 s</span></div><div class="dive-air-track" role="meter" aria-label="Breath remaining" aria-valuemin="0" aria-valuemax="32"><div id="dive-air-bar"></div></div></div><div id="torch-status" class="small-copy hidden" role="status"></div><div class="supplies"><kbd>H</kbd>${icon("Plus")}<span id="medkit-count">3</span><span class="hud-divider"></span>${icon("Gem")}<span id="treasure-count">0 / 6</span></div></div><div class="hud-controls"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump / climb</span><span><kbd>E</kbd> Interact</span><span><kbd>F</kbd> Fire</span><span><kbd>R</kbd> Dodge</span><span><kbd>Q</kbd> Instinct</span><span><kbd>M</kbd> Map</span></div><div class="minimap-wrap"><canvas id="minimap" width="170" height="170"></canvas><span>N</span></div></div>
+      <div class="touch-controls"><div class="touch-pad"><button data-touch="up" aria-label="Move forward">↑</button><button data-touch="left" aria-label="Move left">←</button><button data-touch="down" aria-label="Move backward">↓</button><button data-touch="right" aria-label="Move right">→</button></div><div class="touch-actions"><button data-touch="turn-left" aria-label="Turn camera left">↶</button><button data-touch="turn-right" aria-label="Turn camera right">↷</button><button data-touch="jump">Jump</button><button data-touch="interact">Use</button><button data-touch="fire">Fire</button><button data-touch="dodge">Dodge</button><button data-touch="torch" class="hidden">Torch</button><button data-touch="dive" class="hidden" aria-label="Dive down">Dive</button></div></div>
     </section>
     <div id="modal-root"></div><div class="toast hidden" id="toast" role="status"></div><div class="loading-screen hidden" id="loading" role="dialog" aria-modal="true" aria-labelledby="loading-title"><div class="loading-brand">${sigil}<span>VESPER</span></div><span class="eyebrow">ENTERING THE UNKNOWN</span><h2 id="loading-title"></h2><div class="loading-line" aria-hidden="true"><span></span></div><div id="loading-status" role="status" aria-live="polite">Preparing your expedition…</div><p>“Take the time to look. The way forward is rarely<br>the only thing worth finding.”</p><button class="text-button" id="cancel-loading">Back to expeditions</button></div>`;
   icons();
@@ -290,6 +290,7 @@ function bind() {
       if (k === "jump") game.keys.add("Space");
       if (k === "interact") game.interact();
       if (k === "fire") game.attack();
+      if (k === "torch") game.useTorch();
       if (k === "dodge") game.evade();
     });
     const release = (event) => {
@@ -525,9 +526,23 @@ function updateHUD(s) {
   document.querySelector('[data-touch="jump"]').textContent = s.diving
     ? "Rise"
     : "Jump";
+  const torchButton = document.querySelector('[data-touch="torch"]');
+  document
+    .querySelector("#game-screen")
+    .classList.toggle("has-torch", s.torch != null);
+  torchButton.classList.toggle("hidden", s.torch == null);
+  torchButton.textContent = s.torch ? "Put out" : "Torch";
+  torchButton.setAttribute("aria-pressed", String(s.torch === true));
+  torchButton.setAttribute(
+    "aria-label",
+    s.torch ? "Put out torch" : "Light torch at a fire",
+  );
+  const torchStatus = document.querySelector("#torch-status");
+  torchStatus.classList.toggle("hidden", !s.torch);
+  torchStatus.textContent = s.torch ? "TORCH LIT" : "";
   const controls = document.querySelector(".hud-controls");
-  if (controls.dataset.diving !== String(s.diving)) {
-    controls.dataset.diving = String(s.diving);
+  if (controls.dataset.diving !== `${s.diving}/${s.torch != null}`) {
+    controls.dataset.diving = `${s.diving}/${s.torch != null}`;
     controls.innerHTML = (
       s.diving
         ? [
@@ -544,7 +559,7 @@ function updateHUD(s) {
             ["E", "Interact"],
             ["F", "Fire"],
             ["R", "Dodge"],
-            ["Q", "Instinct"],
+            ...(s.torch != null ? [["T", "Torch"]] : [["Q", "Instinct"]]),
             ["M", "Map"],
           ]
     )
@@ -919,7 +934,7 @@ function showMap() {
 function showGuide() {
   modal(
     "Leave no story buried.",
-    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. A passage in the western bank of the first sounding well leads beneath the harbor court. Bronze air bells refill your breath; dive below their skirts to leave. Find the emergency wheel beyond the collapsed colonnade to open the memorial and its return passage. Reloading in the gallery returns you to your last air bell; other dives return to the surface, with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Fire with F or a mouse click. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
+    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. A passage in the western bank of the first sounding well leads beneath the harbor court. Bronze air bells refill your breath; dive below their skirts to leave. Find the emergency wheel beyond the collapsed colonnade to open the memorial and its return passage. Reloading in the gallery returns you to your last air bell; other dives return to the surface, with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Fire with F or a mouse click. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. In the jungle, press T (Torch on touch) beside a campfire or a burning brazier to light your torch. Carry the flame to unlit braziers and use E. Swimming, combat, and actions needing both hands put it out; completed beacons remain lit. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
       ["W A S D / ↑ ↓ ← →", "Move"],
       ["MOUSE / Z C", "Look around"],
       ["SHIFT", "Sprint"],
@@ -928,6 +943,7 @@ function showGuide() {
       ["F / CLICK", "Fire sidearm"],
       ["R + DIRECTION", "Dodge · uses stamina"],
       ["X / SPACE", "Dive / rise · Drowned Kingdom"],
+      ["T", "Light / put out torch · jungle"],
       ["Q", "Explorer’s instinct"],
       ["H", "Use medical supply"],
       ["M", "Expedition map"],
