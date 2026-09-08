@@ -188,6 +188,12 @@ Off-path erosion preserves the walking surfaces, reservoirs and climbing anchors
 See [desert landscape comparisons](docs/desert-landscape.md) for the rendered
 change, added geometry cost, positional-audio checks and saved-climb recovery.
 
+Desert boulders now sit in the terrain using their sampled undersides and share
+its sandstone material. Small rubble gathers around piers and banks, with larger
+stones kept outside the walking cells. A smaller geometry-only rock asset replaces
+the moss-textured model in this chapter. See [stone placement comparisons](docs/desert-scatter.md)
+for route checks, rendering measurements and production save/reload evidence.
+
 The Himalayan monasteries now have supported timber bell pavilions, whitewashed upper halls, lattice windows, covered galleries, and damaged slate roofs carrying uneven snow. Wind moves the hanging cloth and its shadows; nearby wind audio comes from the banner lines. A cooler daylight sky lights the buildings against ridged alpine peaks. [Monastery art notes](docs/monastery-art.md) include the rendered comparisons, material sources, approach checks, and production save/reload verification.
 
 Eight playable bell racks now occupy the mountain's mechanism courts. Their 32 bronze bells swing above working ropes and pulleys, with brief hand poses when the explorer pulls a grip. Eight composed phrases use four response rules and share saved answers between the world and focused controls. Bell strikes have positional decay, obstruction filtering, and steady audio-clock timing beneath the quiet mountain score. Visual signs and flashes support play without hearing the notes. [Bell lesson notes](docs/bell-courts.md) include browser views, measured audio falloff, control routes, and release evidence.

@@ -1,0 +1,17 @@
+{
+  "source": "https://polyhaven.com/a/rock_moss_set_01",
+  "author": "Kless Gyzen",
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "derivation": "Six existing simplified rock meshes retain their positions, normals, indices and node transforms. Materials, images, UVs and tangents are omitted. Runtime adds sandstone shading and terrain seating.",
+  "input": {
+    "file": "public/assets/models/rock_moss_set_01/optimized.glb",
+    "bytes": 792204,
+    "sha256": "97292956a008966fc3455696973f6cc16cc097f14b818897b27df3fc059cca5e"
+  },
+  "output": {
+    "file": "public/assets/models/desert-stones.glb",
+    "bytes": 267548,
+    "sha256": "7c6e02728a46946fea252935bd6f5c6fc1a77fe6b7340bd0735b2735b73b0dd0"
+  }
+}

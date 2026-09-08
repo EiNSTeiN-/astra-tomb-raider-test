@@ -71,7 +71,7 @@ These assets are published by Poly Haven under [CC0](https://polyhaven.com/licen
 | Fir Tree 01                                           | [Poly Haven](https://polyhaven.com/a/fir_tree_01)           | `models/fir_tree_01/{near,optimized,distant}.glb`    |
 | Fern 02                                               | [Poly Haven](https://polyhaven.com/a/fern_02)               | `models/fern_02/{optimized,distant}.glb`               |
 | Shrub 01                                              | [Poly Haven](https://polyhaven.com/a/shrub_01)              | `models/shrub_01/{optimized,middle,distant}.glb`              |
-| Rock Moss Set 01                                      | [Poly Haven](https://polyhaven.com/a/rock_moss_set_01)      | `models/rock_moss_set_01/optimized.glb`      |
+| Rock Moss Set 01 — Kless Gyzen | [Poly Haven](https://polyhaven.com/a/rock_moss_set_01) | `models/rock_moss_set_01/optimized.glb`; desert geometry derivative `models/desert-stones.glb` |
 
 Local paths above are relative to `public/assets/`. Unmodified model sources are retained under `asset-sources/models/`, outside the website's public directory.
 
@@ -104,6 +104,16 @@ The erosion, sediment shader, dunes and distant escarpment in `src/desert-*.js`
 are original project code. The escarpment reuses the credited Sandstone Cracks
 color map. No new sound recordings or music were added in this landscape pass.
 See [desert landscape notes](desert-landscape.md).
+
+The desert stone derivative retains the six simplified Rock Moss Set 01 meshes
+and their transforms, omitting moss images, materials, UVs and tangents. Runtime
+shading reuses the credited Sandstone Cracks maps. The terrain-seating code,
+small chipped rubble shape and scatter material are original project code in
+`src/desert-scatter*.js`. `node scripts/build-desert-stones.mjs` reproduces the
+267,548-byte delivery GLB from the checked-in original; `asset-sources/desert-stones/`
+retains its input/output hashes, source and CC0 license. No new external model,
+bitmap, recording or music assets were downloaded for this pass.
+See [stone scatter notes](desert-scatter.md).
 
 The flooded palace uses nine unmodified 2K maps from Marble Rock 02, Blue Plaster Weathered, and Marble Mosaic Tiles, totaling 24,476,296 bytes. `python3 scripts/download-palace-materials.py` reproduces them and retains source metadata/hashes in `asset-sources/palace-materials/`. The fluted columns, arch stones, broken vaults, capital scrolls, shell carvings, and weathering shader are original project geometry/code. [Palace art notes](palace-art.md) include rendered evidence and verification.
 

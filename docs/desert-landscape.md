@@ -1,5 +1,9 @@
 # Desert sand, strata and horizon
 
+The subsequent [stone scatter pass](desert-scatter.md) replaces the moss-covered
+rocks visible in these images with seated sandstone boulders and smaller rubble.
+The terrain and horizon milestone below retains its original comparison evidence.
+
 The desert's ground now uses irregular sand ripples with a warmer mineral tint.
 Patchy dust covers parts of the courtyard paving, while exposed slopes carry
 sediment bands, shallow relief and darker weathering. Outside the walkable

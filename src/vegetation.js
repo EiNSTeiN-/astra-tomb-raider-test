@@ -15,6 +15,7 @@ import {
 } from "./habitat.js";
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
 import { skyGroundSupported } from "./sky-geology.js";
+import { buildDesertScatter } from "./desert-scatter.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -165,13 +166,24 @@ export async function loadNature(game) {
             : ["optimized"]
         ).map((tier) =>
           loader
-            .loadAsync(`/assets/models/${name}/${tier}.glb`)
+            .loadAsync(
+              biome === "desert"
+                ? "/assets/models/desert-stones.glb"
+                : `/assets/models/${name}/${tier}.glb`,
+            )
             .then((gltf) => meshSources(gltf.scene)),
         ),
       ),
     })),
   );
   if (game.world !== world) return;
+  game.desertScatter = null;
+  if (biome === "desert") {
+    buildDesertScatter(game, assets[0].tiers[0]);
+    updateNature(game);
+    game.renderOnce = true;
+    return;
+  }
   const planted = understoryLayout(
     game.map,
     game.level,
@@ -313,9 +325,9 @@ export async function loadNature(game) {
 }
 
 const NATURE_RANGES = {
-  high: { rock: [140], fern: [18, 60], shrub: [10, 25, 70] },
-  medium: { rock: [119], fern: [14, 50], shrub: [8, 21, 60] },
-  low: { rock: [91], fern: [10, 40], shrub: [5, 16, 48] },
+  high: { rock: [140], gravel: [48], fern: [18, 60], shrub: [10, 25, 70] },
+  medium: { rock: [119], gravel: [38], fern: [14, 50], shrub: [8, 21, 60] },
+  low: { rock: [91], gravel: [28], fern: [10, 40], shrub: [5, 16, 48] },
 };
 export function updateNature(game, dt = 0) {
   for (const patch of game.naturePatches || [])
