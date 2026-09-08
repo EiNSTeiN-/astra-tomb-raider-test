@@ -8,6 +8,10 @@ families who sheltered here when the mountain pass closed.
 
 ![The paired lifts and their galleries](images/bellkeepers-hoist.png)
 
+The subsequent [machinery and interior art pass](hoist-art.md) adds working
+sheaves and guide rollers, fitted paving, timber cargo decks and refuge
+furnishings. It includes matched before/after views and current verification.
+
 Board a platform and press **E / Use** to visit its next floor: ground, middle,
 upper, then ground again. Raising one platform lowers the other. Landing levers
 call either platform back, including after a fall or a trip across the upper

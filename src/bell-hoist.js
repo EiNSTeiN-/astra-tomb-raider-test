@@ -14,6 +14,11 @@ import {
   carvedPanelGeometry,
 } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
+import {
+  buildHoistArt,
+  updateHoistArt,
+  hoistBronzeMaterial,
+} from "./hoist-art.js";
 
 function label(text) {
   const canvas = document.createElement("canvas");
@@ -72,11 +77,7 @@ export function buildBellHoist(game) {
     open: saved.bell ? 1 : 0,
   });
   const stone = game.monasteryMaterials?.stone || game.stoneMat,
-    bronze = new THREE.MeshStandardMaterial({
-      color: 0x8e7749,
-      metalness: 0.65,
-      roughness: 0.57,
-    }),
+    bronze = hoistBronzeMaterial(),
     wood =
       game.monasteryMaterials?.wood ||
       new THREE.MeshStandardMaterial({ color: 0x594736, roughness: 0.91 }),
@@ -155,7 +156,7 @@ export function buildBellHoist(game) {
     return solid(px, py, pz, w, thick, d);
   };
   const deck = (px, pz, w, d, height, parent = root) => {
-    block(w, 0.38, d, px, height - 0.19, pz, stone, parent);
+    const mesh = block(w, 0.38, d, px, height - 0.19, pz, stone, parent);
     const value = {
       x: x + px,
       z: z + pz,
@@ -163,6 +164,7 @@ export function buildBellHoist(game) {
       d: d / 2,
       y: y + height,
       hoist: true,
+      mesh,
     };
     h.decks.push(value);
     return value;
@@ -187,7 +189,20 @@ export function buildBellHoist(game) {
     }
   };
   const control = (kind, px, py, pz, props = {}, parent = root) => {
-    block(0.4, 0.92, 0.4, px, py + 0.46, pz, bronze, parent, false);
+    block(0.4, 0.16, 0.4, px, py + 0.08, pz, stone, parent, false);
+    block(0.18, 1.42, 0.18, px, py + 0.71, pz, wood, parent, false);
+    block(0.36, 0.24, 0.32, px, py + 0.92, pz, bronze, parent, false);
+    for (const side of [-1, 1]) {
+      const bearing = add(
+        new THREE.CylinderGeometry(0.09, 0.09, 0.055, 12),
+        iron,
+        px,
+        py + 0.97,
+        pz + side * 0.18,
+        parent,
+      );
+      bearing.rotation.x = Math.PI / 2;
+    }
     const handle = add(
       new THREE.CylinderGeometry(0.045, 0.045, 0.55, 10),
       iron,
@@ -197,6 +212,7 @@ export function buildBellHoist(game) {
       parent,
     );
     handle.rotation.z = -0.45;
+    handle.userData.animated = true;
     const sign = label(props.text || kind.toUpperCase());
     sign.position.set(px, py + 1.42, pz);
     block(1.5, 0.4, 0.09, px, py + 1.42, pz, iron, parent, false);
@@ -231,9 +247,9 @@ export function buildBellHoist(game) {
       wall(2.2, 15.5, 2.2, side * 18.8, 7.75, pz);
       block(3.4, 0.7, 3.5, side * 18.8, 15.2, pz);
       const relief = add(
-        carvedPanelGeometry(2.8, 4.1, serial++),
+        carvedPanelGeometry(1.65, 4.1, serial++),
         stone,
-        side * 19.25,
+        side * 17.65,
         7.2,
         pz,
       );
@@ -315,14 +331,7 @@ export function buildBellHoist(game) {
       );
       block(7, 0.45, 0.65, side * 16, height - 0.55, pz, wood);
     }
-  beamBetween([-7, 15.65, -9], [7, 15.65, 9], 0.5, 0.55);
-  const cablePath = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-7, 14.8, -9),
-    new THREE.Vector3(-4, 15.1, -9),
-    new THREE.Vector3(4, 15.1, 9),
-    new THREE.Vector3(7, 14.8, 9),
-  ]);
-  add(new THREE.TubeGeometry(cablePath, 40, 0.035, 7, false), iron, 0, 0, 0);
+  beamBetween([-7, 16.4, -9], [7, 16.4, 9], 0.5, 0.55);
   // The archive door and east-to-west crossing both respond to the repaired bell.
   h.gate = new THREE.Group();
   h.gate.userData.cameraDynamic = true;
@@ -374,18 +383,9 @@ export function buildBellHoist(game) {
       block(0.16, 15, 0.22, px + side * 2.05, 7.5, pz, iron);
       solid(px + side * 2.05, 7.5, pz, 0.16, 15, 0.22);
       block(0.14, 2.65, 0.14, side * 1.72, 1.325, 0, iron, car);
-      block(0.32, 0.45, 0.32, side * 1.72, 0.5, 0, bronze, car, false);
     }
-    block(4.8, 0.6, 1.4, px, 15.2, pz);
+    block(5.1, 0.6, 3.8, px, 15.85, pz + 0.6, wood);
     block(3.7, 0.18, 0.25, 0, 2.65, 0, bronze, car);
-    const sheave = add(
-      new THREE.TorusGeometry(0.58, 0.11, 10, 32),
-      bronze,
-      px,
-      14.8,
-      pz,
-    );
-    sheave.rotation.y = Math.PI / 2;
     const cable = add(
       new THREE.CylinderGeometry(0.028, 0.028, 1, 7),
       iron,
@@ -413,7 +413,7 @@ export function buildBellHoist(game) {
       activity: 0,
     };
     h.sources.push(source);
-    h.cars.push({ root: car, deck: surface, actuator, sheave, cable, source });
+    h.cars.push({ root: car, deck: surface, actuator, cable, source });
     for (const [floor, height] of [HOIST_DECK, mid, upper].entries()) {
       const sx = px + (i ? 3.8 : -3.8),
         sz = pz - 1.65;
@@ -496,6 +496,7 @@ export function buildBellHoist(game) {
     range: 30,
     activity: 0.5,
   });
+  buildHoistArt(game, { add, block, solid, stone, wood, iron, bronze, snow });
   for (const car of h.cars) {
     car.sheave.userData.animated = true;
     car.cable.userData.animated = true;
@@ -552,12 +553,12 @@ export function updateBellHoist(game, dt, initial = false) {
       top: h.y + py + 0.92,
     });
     car.actuator.handle.rotation.z = h.motion ? 0.45 : -0.45;
-    const length = Math.max(0.1, 14.8 - py - 2.65);
-    car.cable.position.y = py + 2.65 + length / 2;
+    const length = Math.max(0.1, 14.8 - py - car.cableAnchor);
+    car.cable.position.y = py + car.cableAnchor + length / 2;
     car.cable.scale.y = length;
-    car.sheave.rotation.x = ((i ? -1 : 1) * py) / 0.58;
     car.source.activity = h.motion && !game.paused ? 1 : 0;
   }
+  updateHoistArt(h);
   h.clapper.visible = !h.saved.clapper;
   h.tongue.visible = h.saved.bell;
   h.record.visible = !h.saved.recovered;

@@ -133,6 +133,13 @@ synthesis; the mountain score uses its existing objective arrangements. No new
 external assets, recordings or music were added. See the
 [hoist verification notes](bellkeepers-hoist.md).
 
+The hoist's revised grooved sheaves, modeled cable route, plank decks, guide
+rollers, braced gantries, floor slabs, bell casting detail, slate canopy and
+refuge furnishings are original geometry in `src/hoist-art.js`. Its procedural
+bronze patina is original shader code. All textured surfaces reuse the local
+monastery maps credited above; no external art, recordings or music were added.
+[The art comparison](hoist-art.md) records rendered evidence and workload limits.
+
 The Rainkeeper's causeway, its turning bronze channels, folding stone crossings,
 six handwheels, sanctuary lamps, archive grille, rain drain, local map and keeper's
 record are original project geometry, code and writing in `src/fire-vault*.js`.
