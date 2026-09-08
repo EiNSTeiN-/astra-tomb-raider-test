@@ -156,6 +156,10 @@ export function createSkyMap(level, rng) {
         kind,
         x: r.x + (slot ? -2 : 2),
         z: r.z + (slot ? 2 : -2),
+        yaw: Math.atan2(
+          rooms[i + 1].x - r.x - (slot ? -2 : 2),
+          rooms[i + 1].z - r.z - (slot ? 2 : -2),
+        ),
         hp: ENEMY_TYPES[kind].hp,
       };
     }),

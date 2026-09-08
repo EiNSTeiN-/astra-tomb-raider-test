@@ -1615,6 +1615,26 @@ kbd {
   text-shadow: 0 1px 4px #000;
   pointer-events: none;
 }
+.stealth-status {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  color: #f0c97e;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  text-align: center;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
+}
+.stealth-bearing { display: block; font-size: 25px; width: 30px; margin: 0 auto 6px; }
+.stealth-track { height: 3px; margin: 9px 20px 0; background: #151d1ccd; box-shadow: 0 0 0 1px #fff2; }
+.stealth-track i { display: block; height: 100%; background: currentColor; transition: width 0.1s linear; }
+.stealth-status[data-state="detected"] { color: #f5a08a; }
+.stealth-status[data-state="quiet"] { color: #c7d9c9; }
+.stealth-status[data-state="quiet"] .stealth-bearing,
+.stealth-status[data-state="quiet"] .stealth-track { display: none; }
 .hud-bottom {
   position: absolute;
   left: 38px;
@@ -3384,6 +3404,7 @@ body:has(.bell-focus) #game-screen > :not(#game-canvas) {
 }
 
 @media (max-width: 550px), (pointer: coarse) {
+  .stealth-status { top: auto; bottom: calc(50% + 50px); }
   .touch-controls {
     display: flex;
     position: absolute;

@@ -579,6 +579,62 @@ function soleClearances(game) {
   return result;
 }
 
+test("crouching lowers the delivered actor with bent legs and grounded soles through travel and release", async () => {
+  const game = await groundedActor();
+  const head = game.rig.model.getObjectByName("mixamorigHead");
+  const bones = [];
+  game.rig.model.traverse((o) => {
+    if (o.isBone) bones.push([o, o.position.length()]);
+  });
+  animateExplorer(game, 0.05, false, false);
+  const standing = head.getWorldPosition(new THREE.Vector3()).y;
+  game.crouching = true;
+  game.moveVelocity.z = 2.2;
+  for (const moving of [false, true]) {
+    for (let i = 0; i < 60; i++) {
+      game.elapsed += 1 / 30;
+      if (moving) game.player.position.z += 2.2 / 30;
+      const root = game.player.position.clone();
+      animateExplorer(game, 1 / 30, moving, false);
+      const soles = soleClearances(game);
+      assert(game.player.position.equals(root));
+      assert(
+        soles.every((gap) => gap > -0.012),
+        `crouched soles: ${soles}`,
+      );
+      for (const [bone, length] of bones) {
+        if (bone.name.endsWith("Hips")) continue;
+        assert(Math.abs(bone.position.length() - length) < 1e-5, bone.name);
+      }
+    }
+    assert(head.getWorldPosition(new THREE.Vector3()).y < standing - 0.28);
+  }
+  game.crouching = false;
+  for (let i = 0; i < 40; i++) animateExplorer(game, 1 / 30, false, false);
+  assert(
+    Math.abs(head.getWorldPosition(new THREE.Vector3()).y - standing) < 0.05,
+  );
+  game.crouching = true;
+  for (let i = 0; i < 30; i++) animateExplorer(game, 1 / 30, false, false);
+  game.crouching = false;
+  game.aimUntil = game.elapsed + 2;
+  game.aiming = true;
+  game.yaw = 0;
+  game.aimPoint = game.player.position
+    .clone()
+    .add(new THREE.Vector3(0, 1.5, -12));
+  for (let i = 0; i < 20; i++) {
+    animateExplorer(game, i ? 1 / 60 : 0, false, false);
+    const hand = game.rig.model
+      .getObjectByName("mixamorigRightHand")
+      .getWorldPosition(new THREE.Vector3());
+    assert(
+      hand.distanceTo(game.rig.weapon.group.position) < 0.055,
+      "pistol leaves the hand while standing",
+    );
+  }
+});
+
 test("boots fit slopes in either direction while retaining swing clearance and the physical root", async () => {
   const game = await groundedActor();
   for (const grade of [-0.38, 0, 0.38]) {

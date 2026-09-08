@@ -114,6 +114,8 @@ Idle/walk/run locomotion comes from the Mixamo Vanguard animation distributed in
 
 The unused Michelle reference remains under `asset-sources/characters/` for development and is not shipped.
 
+Crouched movement uses the existing walk/idle clips with original runtime leg, arm and camera adjustments. Guardian facing, sight/hearing, investigation, suspicion cues and interface are original project code. Their sound cues and quieter footsteps reuse the existing Web Audio synthesis; no external stealth animations or recordings were added. See [stealth notes](stealth.md).
+
 ## Typography, icons, and code dependencies
 
 - Cormorant Garamond and DM Sans are locally served Google Fonts. Their SIL Open Font License files are included in `public/assets/fonts/`.

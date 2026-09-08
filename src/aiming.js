@@ -47,6 +47,7 @@ export function setAim(game, source, enabled) {
   else if (canAim(game)) game.aimSources.add(source);
   game.aiming = canAim(game) && game.aimSources.size > 0;
   if (game.aiming) {
+    game.crouching = false;
     game.aimYaw = game.yaw;
     game.aimUntil = game.elapsed + 0.15;
   }

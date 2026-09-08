@@ -38,15 +38,18 @@ Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-tes
 | Right mouse button / V    | Hold / toggle precise shoulder aim                                    |
 | F / left click when locked | Fire; directional assistance when the shoulder aim is released                      |
 | R + movement direction     | Dodge on firm ground, using stamina; backward if no direction is held |
+| B                          | Toggle crouch for quiet movement and slower visual detection          |
 | Q                          | Explorer's instinct; reveal nearby points of interest                 |
 | H                          | Use a medical supply                                                  |
 | M                          | Open the expedition map                                               |
 | J                          | Open the field journal                                                |
 | Escape                     | Pause / close a dialog / release the pointer                          |
 
-Small screens and devices with touch input have touch movement, turning, jumping, interaction, aiming, firing, and dodge controls. Toggle Aim, then drag the world to adjust your view while moving or firing with another finger. Keyboard and mouse provide the best experience.
+Small screens and devices with touch input have touch movement, turning, jumping, interaction, aiming, firing, dodge, and crouch controls. Toggle Aim, then drag the world to adjust your view while moving or firing with another finger. Keyboard and mouse provide the best experience.
 
 Shoulder aiming brings the camera closer and slows movement to a careful strafe. Aimed shots follow the crosshair, hit the guardian’s posed armor, and stop at cover. A blue diamond means a shield blocked the shot; move around the keeper or wait for its recovery. Pause, traversal and interaction release aim. See [aiming and combat verification](docs/shoulder-aiming.md).
+
+Crouch with **B / Crouch** to move quietly behind guardians. Watch their facing direction, use solid cover, and withdraw when the amber suspicion meter grows. Footsteps and gunfire draw investigation to their source; a lit torch makes you easier to see. Aiming, jumping and dodging return you to standing. See [stealth behavior and verification](docs/stealth.md).
 
 Counterweight stones use **E / Use** to grip or release. While gripping, **W / Up** pushes and **S / Down** pulls; release to walk around to another face.
 
@@ -227,6 +230,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 
 - `src/main.js` — expedition screen, HUD, dialogs, journal, collection, settings, and input UI.
 - `src/game.js` — game loop, movement, collisions, mantling, camera, combat, checkpoints, interactions, and scene generation.
+- `src/stealth.js` — crouching, directional sight, player noise, investigation and awareness feedback.
 - `src/combat.js` and `src/encounters.js` — guardian encounters, attack timing, projectiles, shields, damage, and dodge movement.
 - `src/guardian-art.js` — articulated armor, equipment, weathered materials, shared skinned geometry, distance detail, and terrain-following steps.
 - `src/navigation.js` — bounded, incremental routes around obstacles using the movement collision predicate.

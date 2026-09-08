@@ -760,10 +760,10 @@ export class Soundscape {
     source.stop(t + length + 0.03);
     this.track(source, [filter, envelope, ...(spatial ? [spatial] : [])]);
   }
-  footstep(surface, sprint = false, position) {
+  footstep(surface, sprint = false, position, gain = 1) {
     if (!this.ctx || !this.buses) return;
     this.noiseHit(
-      sprint ? 0.11 : 0.075,
+      (sprint ? 0.11 : 0.075) * gain,
       surface === "snow" ? 0.21 : 0.11,
       surface === "snow"
         ? 4000

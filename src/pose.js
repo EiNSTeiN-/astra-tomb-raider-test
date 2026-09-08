@@ -16,7 +16,7 @@ function pointBone(bone, child, target) {
   bone.quaternion.copy(parent.multiply(world));
   bone.updateWorldMatrix(false, true);
 }
-export function poseHands(game, target) {
+export function poseHands(game, target, elbowPoles) {
   const rig = game.rig;
   if (!rig) return;
   rig.model.updateWorldMatrix(true, true);
@@ -53,9 +53,9 @@ export function poseHands(game, target) {
     direction.normalize();
     const along = (a * a - b * b + distance * distance) / (2 * distance),
       height = Math.sqrt(Math.max(0, a * a - along * along));
-    const pole = new THREE.Vector3(index ? -1 : 1, 0, 0.45).applyQuaternion(
-      game.avatar.getWorldQuaternion(new THREE.Quaternion()),
-    );
+    const pole = (
+      elbowPoles?.[index]?.clone() || new THREE.Vector3(index ? -1 : 1, 0, 0.45)
+    ).applyQuaternion(game.avatar.getWorldQuaternion(new THREE.Quaternion()));
     pole.addScaledVector(direction, -pole.dot(direction)).normalize();
     const bend = shoulder
       .clone()

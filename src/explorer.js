@@ -1,3 +1,4 @@
+import { CROUCH_DROP } from "./stealth.js";
 import * as THREE from "three";
 import { updateTorch, poseTorch } from "./torch.js";
 import { cableHands } from "./return-cable.js";
@@ -164,12 +165,26 @@ export function animateExplorer(game, dt, moving, sprinting) {
   }
   rig.actions[gait.name].setEffectiveTimeScale(gait.rate);
   rig.mixer.update(dt);
+  rig.crouchBlend = THREE.MathUtils.damp(
+    rig.crouchBlend || 0,
+    game.crouching ? 1 : 0,
+    14,
+    dt,
+  );
+  if (
+    !game.grounded ||
+    game.swimming ||
+    game.climb ||
+    game.ropeRide ||
+    game.zipRide
+  )
+    rig.crouchBlend = 0;
   const hanging = !!game.ropeRide || !!(game.zipRide && !game.zipRide.approach);
   rig.hangLift = hanging ? 0.4 : (rig.hangLift || 0) * Math.exp(-dt * 14);
   game.avatar.position.y = rig.hangLift;
   game.avatar.position.x = 0;
   game.avatar.position.z = 0;
-  rig.model.rotation.x = 0;
+  rig.model.rotation.x = rig.crouchBlend * 0.12;
   rig.weapon.group.visible = false;
   if (game.blockGrip) {
     rig.model.rotation.x = 0.14;
@@ -281,6 +296,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
     poseHands(game, [point(0.44, 1.08, 0.12), point(-0.44, 1.17, 0.07)]);
     poseFeet(game, [point(0.12, 0.12, 0.01), point(-0.12, 0.22, 0.02)]);
   } else if (game.aimUntil > game.elapsed && !game.carrying && !game.dodge) {
+    const gripHeight = 1.34 - CROUCH_DROP * rig.crouchBlend;
     const angle = (game.aimYaw ?? game.yaw) + Math.PI;
     game.avatar.rotation.y = angle;
     rotation.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);
@@ -290,7 +306,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
       game.aiming && game.aimPoint
         ? THREE.MathUtils.clamp(
             Math.atan2(
-              game.aimPoint.y - game.player.position.y - 1.34,
+              game.aimPoint.y - game.player.position.y - gripHeight,
               Math.hypot(
                 game.aimPoint.x - game.player.position.x,
                 game.aimPoint.z - game.player.position.z,
@@ -302,13 +318,13 @@ export function animateExplorer(game, dt, moving, sprinting) {
         : 0;
     const grip = point(
       -0.16,
-      1.34 + Math.sin(elevation) * 0.46 + recoil,
+      gripHeight + Math.sin(elevation) * 0.46 + recoil,
       Math.cos(elevation) * 0.46 - recoil,
     );
     poseHands(game, [
       point(
         0.02,
-        1.34 + Math.sin(elevation) * 0.52 + recoil,
+        gripHeight + Math.sin(elevation) * 0.52 + recoil,
         Math.cos(elevation) * 0.52 - recoil,
       ),
       grip,
@@ -317,6 +333,26 @@ export function animateExplorer(game, dt, moving, sprinting) {
     rig.weapon.group.position.copy(grip);
     rig.weapon.group.rotation.set(-recoil * 2, angle, 0);
     if (game.aiming && game.aimPoint) rig.weapon.group.lookAt(game.aimPoint);
+  } else if (
+    rig.crouchBlend > 0.01 &&
+    !game.carrying &&
+    !game.dodge &&
+    !game.blockGrip
+  ) {
+    const b = rig.crouchBlend;
+    poseHands(
+      game,
+      [1, -1].map((side, i) =>
+        point(
+          side * 0.24,
+          0.88 - b * 0.06,
+          0.15 +
+            b * 0.25 +
+            (moving ? Math.sin(game.elapsed * 5 + i * Math.PI) * 0.08 : 0),
+        ),
+      ),
+      [new THREE.Vector3(0.35, -1, -0.5), new THREE.Vector3(-0.35, -1, -0.5)],
+    );
   }
   poseCausewayWheel(game);
   poseTorch(game);

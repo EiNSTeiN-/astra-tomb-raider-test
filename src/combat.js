@@ -3,6 +3,7 @@ import { buildGuardianArt, animateGuardian } from "./guardian-art.js";
 import { clearSegment, searchRoute } from "./navigation.js";
 
 import { ENEMY_TYPES } from "./encounters.js";
+import { perceivePlayer, playerNoise, guardianEngaged } from "./stealth.js";
 export {
   ENEMY_TYPES,
   ENCOUNTER_PALETTES,
@@ -54,6 +55,7 @@ export function buildGuardian(game, spawn) {
     spawn.z * 7,
   );
   game.world.add(group);
+  group.rotation.y = spawn.yaw || 0;
   return {
     ...spawn,
     kind: spawn.kind || "warden",
@@ -71,6 +73,7 @@ export function buildGuardian(game, spawn) {
     bar,
     healthBar: health,
     home: group.position.clone(),
+    homeYaw: group.rotation.y,
     state: "idle",
     timer: 0,
     cooldown: 0.8,
@@ -118,7 +121,7 @@ function recover(enemy) {
   enemy.warning.visible = false;
 }
 
-export function navigateGuardian(game, enemy, target, dt) {
+export function navigateGuardian(game, enemy, target, dt, pace = 1) {
   const p = enemy.group.position;
   enemy.routeCooldown = Math.max(0, (enemy.routeCooldown || 0) - dt);
   if (
@@ -169,7 +172,7 @@ export function navigateGuardian(game, enemy, target, dt) {
   const waypoint = enemy.route[0];
   if (!waypoint) return;
   const direction = new THREE.Vector3(waypoint.x - p.x, 0, waypoint.z - p.z),
-    distance = Math.min(enemy.spec.speed * dt, direction.length());
+    distance = Math.min(enemy.spec.speed * dt * pace, direction.length());
   direction.normalize();
   let moved = move(game, enemy, direction, distance);
   if (moved < distance * 0.3) {
@@ -259,7 +262,11 @@ export function spawnBolt(game, enemy) {
 }
 
 export function updateGuardians(game, dt) {
+  if (game.paused || game.active === false || dt <= 0) return;
   game.navPlansThisFrame = 0;
+  game.playerNoises = (game.playerNoises || []).filter(
+    (n) => game.elapsed - n.time <= 0.6,
+  );
   const player = game.player.position;
   for (const enemy of game.enemies) {
     if (enemy.hp <= 0) continue;
@@ -269,23 +276,26 @@ export function updateGuardians(game, dt) {
     enemy.flash = Math.max(0, enemy.flash - dt);
     enemy.cooldown -= dt;
     enemy.staggerCooldown = Math.max(0, (enemy.staggerCooldown || 0) - dt);
-    const canSee = distance < 29 && game.lineOfSight(p, player);
-    if (canSee) {
-      enemy.lastSeen = game.elapsed;
-      enemy.lastKnown.copy(player);
-    }
-    enemy.awareness = Math.max(
-      0,
-      Math.min(1, enemy.awareness + (canSee ? dt * 1.7 : -dt * 0.3)),
-    );
+    if (enemy.state === "idle")
+      enemy.group.rotation.y =
+        enemy.homeYaw + Math.sin(game.elapsed * 0.35 + enemy.phase) * 0.3;
+    const canSee = perceivePlayer(game, enemy, dt);
     const away = p.distanceTo(enemy.home) > 48;
-    if (enemy.state === "idle" && enemy.awareness > 0.5) enemy.state = "pursue";
     if (enemy.state === "pursue") {
-      if (away || (!canSee && game.elapsed - enemy.lastSeen > 8)) {
+      if (
+        away ||
+        (!canSee &&
+          game.elapsed -
+            Math.max(enemy.lastSeen, enemy.lastHeard ?? -Infinity) >
+            8)
+      ) {
         enemy.state = "return";
         enemy.route = [];
         enemy.routeSearch = null;
         enemy.warning.visible = false;
+      } else if (!canSee && p.distanceTo(enemy.lastKnown) < 1.8) {
+        enemy.state = "search";
+        enemy.searchUntil = game.elapsed + 4;
       } else if (canSee && distance < spec.reach && enemy.cooldown <= 0)
         beginAttack(game, enemy);
       else {
@@ -294,6 +304,28 @@ export function updateGuardians(game, dt) {
           (enemy.kind !== "sentry" || distance > 17 || !canSee)
         )
           navigateGuardian(game, enemy, enemy.lastKnown, dt);
+      }
+    } else if (enemy.state === "investigate") {
+      if (
+        away ||
+        game.elapsed - Math.max(enemy.lastSeen, enemy.lastHeard ?? -Infinity) >
+          10
+      ) {
+        enemy.state = "return";
+        enemy.route = [];
+        enemy.routeSearch = null;
+      } else if (game.elapsed >= (enemy.noticeUntil || 0)) {
+        if (p.distanceTo(enemy.lastKnown) < 1.8) {
+          enemy.state = "search";
+          enemy.searchUntil = game.elapsed + 4;
+        } else navigateGuardian(game, enemy, enemy.lastKnown, dt, 0.65);
+      }
+    } else if (enemy.state === "search") {
+      enemy.group.rotation.y += dt * 1.1;
+      if (game.elapsed >= enemy.searchUntil && !canSee) {
+        enemy.state = "return";
+        enemy.route = [];
+        enemy.routeSearch = null;
       }
     } else if (enemy.state === "windup") {
       enemy.timer -= dt;
@@ -348,17 +380,22 @@ export function updateGuardians(game, dt) {
         enemy.awareness = 0;
         enemy.route = [];
         enemy.routeSearch = null;
-      } else if (canSee && p.distanceTo(enemy.home) < 30) {
-        enemy.state = "pursue";
-        enemy.route = [];
-        enemy.routeSearch = null;
       } else navigateGuardian(game, enemy, enemy.home, dt);
     }
     animateGuardian(game, enemy, dt);
-    enemy.bar.visible = distance < 26 && enemy.state !== "idle" && canSee;
+    const engaged = guardianEngaged(enemy);
+    enemy.bar.visible =
+      distance < 26 &&
+      enemy.state !== "idle" &&
+      enemy.state !== "return" &&
+      game.lineOfSight(player, p);
     if (enemy.bar.visible && game.camera)
       enemy.bar.lookAt(game.camera.position);
-    enemy.healthBar.scale.x = Math.max(0, enemy.hp / enemy.maxHp);
+    enemy.healthBar.material.color.setHex(engaged ? spec.color : 0xf0c97e);
+    enemy.healthBar.scale.x = Math.max(
+      0.02,
+      engaged ? enemy.hp / enemy.maxHp : enemy.awareness,
+    );
     enemy.healthBar.position.x = -(1 - enemy.healthBar.scale.x) * 0.7;
   }
   updateProjectiles(game, dt);
@@ -416,6 +453,7 @@ export function hitGuardian(game, enemy) {
     !["recover", "stagger"].includes(enemy.state) &&
     toPlayer.dot(facing) > 0.15;
   enemy.awareness = 1;
+  if (!guardianEngaged(enemy)) enemy.state = "pursue";
   enemy.flash = 0.15;
   if (blocked) {
     game.cb.toast?.(
@@ -480,6 +518,8 @@ export function startDodge(game) {
     z: -x * Math.sin(game.yaw) + z * Math.cos(game.yaw),
   };
   game.stamina -= 28;
+  game.crouching = false;
+  playerNoise(game, 14, "dodge");
   game.dodgeCooldown = 1.1;
   game.nearest = null;
   game.audio.noiseHit?.(0.025, 0.24, 1400);

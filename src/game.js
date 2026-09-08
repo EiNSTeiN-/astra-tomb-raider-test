@@ -266,6 +266,15 @@ import {
   isEvading,
 } from "./combat.js";
 
+import {
+  CROUCH_DROP,
+  toggleCrouch,
+  updateCrouch,
+  playerNoise,
+  playerFootstep,
+  stealthState,
+  guardianEngaged,
+} from "./stealth.js";
 export const CELL = 7;
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -346,6 +355,7 @@ export class Adventure {
       if (e.code === "KeyV")
         setAim(this, "toggle", !this.aimSources?.has("toggle"));
       if (e.code === "KeyE") this.interact();
+      if (e.code === "KeyB") this.toggleCrouch();
       if (e.code === "KeyT") this.useTorch();
       if (e.code === "KeyF") this.attack();
       if (e.code === "KeyR") this.evade();
@@ -536,6 +546,10 @@ export class Adventure {
     this.store.data.currentLevel = index;
     this.rng = random(level.seed);
     this.enemies = [];
+    this.crouching = false;
+    this.crouchCamera = 0;
+    this.playerNoises = [];
+    this.noiseSerial = 0;
     this.projectiles = [];
     this.dodge = null;
     this.dodgeCooldown = 0;
@@ -1257,9 +1271,9 @@ export class Adventure {
         return false;
     return true;
   }
-  lineOfSight(a, b) {
-    const from = { x: a.x, y: a.y + 1.4, z: a.z },
-      to = { x: b.x, y: b.y + 1.4, z: b.z };
+  lineOfSight(a, b, fromHeight = 1.4, toHeight = 1.4) {
+    const from = { x: a.x, y: a.y + fromHeight, z: a.z },
+      to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
     for (const o of this.obstacles || []) {
       if (o.h <= 0.2) continue;
@@ -1287,12 +1301,12 @@ export class Adventure {
       const t = i / steps;
       const x = a.x + (b.x - a.x) * t;
       const z = a.z + (b.z - a.z) * t;
-      const y = a.y + (b.y - a.y) * t + 1.4;
+      const y = from.y + (to.y - from.y) * t;
       if (galleryAt(this, x, y, z)) {
         if (!galleryClear(this, x, y, z, 0.05, 0.02)) return false;
         continue;
       }
-      const height = a.y + (b.y - a.y) * t + 1.4 - this.groundHeight(x, z);
+      const height = y - this.groundHeight(x, z);
       if (height < 0.15 || !this.canMove(x, z, height, 0)) return false;
     }
     return true;
@@ -1368,6 +1382,7 @@ export class Adventure {
     };
     this.carrying = !!carryingComponent(this.level, this.progress);
     updateAim(this);
+    updateCrouch(this);
     if (advanceCausewayWheel(this, dt, input)) {
       animateExplorer(
         this,
@@ -1413,17 +1428,20 @@ export class Adventure {
       !this.carrying &&
       !this.swimming &&
       !this.aiming &&
+      !this.crouching &&
       depth < 0.25 &&
       moving;
-    const speed = this.aiming
-      ? 2.6
-      : depth > 0.25
-        ? 3.8
-        : this.carrying
-          ? 4.6
-          : sprint
-            ? 10
-            : 6;
+    const speed = this.crouching
+      ? 2.2
+      : this.aiming
+        ? 2.6
+        : depth > 0.25
+          ? 3.8
+          : this.carrying
+            ? 4.6
+            : sprint
+              ? 10
+              : 6;
     this.stamina = Math.max(
       0,
       Math.min(100, this.stamina + (sprint ? -15 : 10) * dt),
@@ -1437,13 +1455,16 @@ export class Adventure {
     this.moveVelocity = { x: input.x * speed, z: input.z * speed };
     if (!advanceSwimming(this, input, dt, jump))
       advanceCharacter(this, this.moveVelocity, dt, jump);
+    updateCrouch(this);
     recoverSkyBridgeFall(this);
     if (this.climb) return;
     trackTraversalSupport(this);
     this.stepDistance =
       (this.stepDistance || 0) + Math.hypot(p.x - oldX, p.z - oldZ);
-    if (this.motionLanding?.drop > 1)
+    if (this.motionLanding?.drop > 1) {
       this.audio.noiseHit?.(0.012, 0.18, 800, p);
+      playerNoise(this, 16, "landing");
+    }
     if (moving) {
       const angle = Math.atan2(input.x, input.z),
         delta = angle - this.avatar.rotation.y;
@@ -1458,9 +1479,11 @@ export class Adventure {
       this.limbs.forEach((l) => (l.rotation.x *= Math.max(0, 1 - dt * 10)));
     animateExplorer(this, dt, moving && !this.swimming, sprint);
     if (this.grounded && moving && this.stepDistance > (sprint ? 2.5 : 1.8)) {
-      if (depth > 0.12) waterSplash(this, p, 0.6);
-      else if (!this.rig?.grounding?.active)
-        this.audio.footstep(this.level.biome, sprint, p);
+      if (depth > 0.12) {
+        waterSplash(this, p, 0.6);
+        playerNoise(this, 12, "splash");
+      } else if (!this.rig?.grounding?.active)
+        playerFootstep(this, this.level.biome, sprint, p);
       this.stepDistance = 0;
     }
     if (this.level.biome === "volcano" && this.jumpY < 0.3) {
@@ -1628,7 +1651,17 @@ export class Adventure {
     setAim(this, "toggle", !this.aimSources?.has("toggle"));
     this.cb.update?.(this.state());
   }
+  toggleCrouch() {
+    toggleCrouch(this);
+    this.cb.update?.(this.state());
+  }
   updateCamera(dt) {
+    this.crouchCamera = THREE.MathUtils.damp(
+      this.crouchCamera || 0,
+      this.crouching ? CROUCH_DROP : 0,
+      12,
+      dt,
+    );
     const blend = (this.aimBlend = THREE.MathUtils.damp(
       this.aimBlend || 0,
       this.aiming && canAim(this) ? 1 : 0,
@@ -1663,7 +1696,7 @@ export class Adventure {
         .add(
           new THREE.Vector3(
             Math.cos(this.yaw) * blend * aimShoulder(this.camera),
-            this.diving ? 0.3 : 1.3 + blend * 0.18,
+            this.diving ? 0.3 : 1.3 + blend * 0.18 - this.crouchCamera,
             -Math.sin(this.yaw) * blend * aimShoulder(this.camera),
           ),
         ),
@@ -1967,6 +2000,8 @@ export class Adventure {
     )
       return;
     this.attackCooldown = 0.48;
+    this.crouching = false;
+    playerNoise(this, 36, "shot");
     this.aimUntil = this.elapsed + 1.4;
     this.aimYaw = this.yaw;
     this.lastShot = this.elapsed;
@@ -2031,6 +2066,8 @@ export class Adventure {
     this.audio.tone("hurt");
     this.cb.damage?.();
     if (this.health <= 0) {
+      this.crouching = false;
+      this.playerNoises = [];
       clearAim(this);
       this.health = 100;
       resetTraversal(this);
@@ -2056,6 +2093,8 @@ export class Adventure {
     }
   }
   returnToCheckpoint() {
+    this.crouching = false;
+    this.playerNoises = [];
     clearAim(this);
     extinguishTorch(this);
     resetTraversal(this);
@@ -2125,6 +2164,7 @@ export class Adventure {
       health: this.health,
       stamina: this.stamina,
       aim: aimState(this),
+      stealth: stealthState(this),
       swimming: this.swimming,
       torch: this.torch ? this.progress.torch === true : null,
       diving: this.diving,
@@ -2222,7 +2262,7 @@ export class Adventure {
     this.audio.update(this.player.position, this.yaw, {
       stage: this.progress.stage,
       underwater: this.diving,
-      listenerHeight: this.swimming ? 0.3 : 1.6,
+      listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
       task: bellHoistObjective(this)
         ? this.bellHoist.motion
           ? "lift"
@@ -2253,7 +2293,7 @@ export class Adventure {
         this.enemies.some(
           (e) =>
             e.hp > 0 &&
-            !["idle", "return"].includes(e.state) &&
+            guardianEngaged(e) &&
             this.elapsed - e.lastSeen < 8 &&
             e.group.position.distanceTo(this.player.position) < 24,
         ),

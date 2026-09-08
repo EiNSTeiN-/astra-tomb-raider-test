@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { supportAt } from "./character-motion.js";
 import { poseFeet } from "./pose.js";
 import { waterAt } from "./hydrology.js";
+import { CROUCH_DROP, playerFootstep } from "./stealth.js";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -174,7 +175,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
   state.pelvis = reset
     ? pelvis
     : THREE.MathUtils.lerp(state.pelvis, pelvis, 1 - Math.exp(-20 * dt));
-  game.avatar.position.y = state.pelvis;
+  game.avatar.position.y = state.pelvis - (rig.crouchBlend || 0) * CROUCH_DROP;
   poseFeet(
     game,
     plans.map((p) => p.ankle.clone().add(new THREE.Vector3(0, p.shift, 0))),
@@ -206,7 +207,8 @@ export function groundExplorer(game, dt, moving, sprinting) {
         state.clock - state.lastStep > 0.16 &&
         !wading
       ) {
-        game.audio?.footstep?.(
+        playerFootstep(
+          game,
           p.center?.surface?.skyBridge ? "wood" : game.level?.biome,
           sprinting,
           contact.point,
