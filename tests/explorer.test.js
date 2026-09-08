@@ -22,6 +22,16 @@ import { normalizeGallery } from "../src/sunken-gallery-record.js";
 import { advanceSwimming } from "../src/water-motion.js";
 import { poseCylinderGrip, restoreCableGrip } from "../src/hand-grip.js";
 import { buildTorch } from "../src/torch.js";
+import { buildFireVault, updateFireVault } from "../src/fire-vault.js";
+import {
+  beginCausewayWheel,
+  advanceCausewayWheel,
+  wheelStance,
+  causewayPhase,
+  CAUSEWAY_WHEEL,
+} from "../src/fire-vault-motion.js";
+import { normalizeFireVault } from "../src/fire-vault-rules.js";
+import { Adventure } from "../src/game.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -66,6 +76,104 @@ async function groundedActor() {
     },
   };
 }
+
+test("causeway hand contact survives reach, turning and release on the delivered mesh without stretching bones", async (t) => {
+  const game = await groundedActor();
+  Object.assign(game, {
+    level: LEVELS[0],
+    map: { fireVault: { x: 0, z: 0 } },
+    progress: {
+      stage: 0,
+      field: [],
+      fireVault: normalizeFireVault(null),
+      torch: false,
+    },
+    world: new THREE.Group(),
+    stoneMat: new THREE.MeshStandardMaterial({ vertexColors: true }),
+    flames: [],
+    items: [],
+    keys: new Set(),
+    health: 100,
+    jumpY: 1.92,
+    audio: { tone() {} },
+    cb: {},
+    save() {},
+    state() {
+      return {};
+    },
+    walkable: () => true,
+    canMove: Adventure.prototype.canMove,
+  });
+  game.world.add(game.player);
+  const old = globalThis.document;
+  globalThis.document = {
+    createElement: () => ({ getContext: () => ({ fillText() {} }) }),
+  };
+  try {
+    buildFireVault(game);
+  } finally {
+    globalThis.document = old;
+  }
+  const control = game.fireVault.controls[1],
+    bones = [];
+  game.player.position.copy(wheelStance(control));
+  game.avatar.rotation.y = Math.PI;
+  for (let i = 0; i < 90; i++) animateExplorer(game, 1 / 60, false, false);
+  game.rig.model.traverse((bone) => {
+    if (bone.isBone)
+      bones.push({
+        bone,
+        position: bone.position.clone(),
+        scale: bone.scale.clone(),
+      });
+  });
+  assert(beginCausewayWheel(game, control));
+  let minimum = Infinity,
+    contactMaximum = 0,
+    samples = 0;
+  for (let i = 0; i < 145; i++) {
+    game.elapsed += 1 / 60;
+    advanceCausewayWheel(game, 1 / 60, { x: 0, z: 0 });
+    animateExplorer(game, 1 / 60, false, false);
+    updateFireVault(game, 1 / 60);
+    const op = game.fireVault.operation,
+      phase = op && causewayPhase(op);
+    for (const { bone, position, scale } of bones) {
+      if (/(?:Arm|ForeArm|Hand.*)$/.test(bone.name))
+        assert(bone.position.distanceTo(position) < 1e-7, bone.name);
+      assert(bone.scale.distanceTo(scale) < 1e-7, bone.name);
+      assert(bone.quaternion.toArray().every(Number.isFinite), bone.name);
+    }
+    if (!op || i % 2) continue;
+    samples++;
+    const contact =
+      phase >= CAUSEWAY_WHEEL.turnStart && phase <= CAUSEWAY_WHEEL.detent;
+    for (const hand of handGeometry(game, {
+      handles: control.grips,
+      halfLength: 0.1,
+    })) {
+      for (const [name, measurement] of Object.entries(hand.fingers)) {
+        minimum = Math.min(minimum, measurement.minimum);
+        assert(
+          measurement.minimum > -0.002,
+          `${i}/${hand.side}/${name}: enters grip ${measurement.minimum}`,
+        );
+        if (contact) {
+          assert(
+            measurement.minimum < 0.004,
+            `${i}/${hand.side}/${name}: loses grip ${measurement.minimum}`,
+          );
+          contactMaximum = Math.max(contactMaximum, measurement.minimum);
+        }
+      }
+    }
+  }
+  assert(samples > 50);
+  assert.equal(game.fireVault.operation, null);
+  assert.equal(game.rig.gripBaseActive, false);
+  assert.equal(game.fireVault.saved.turns[1], 1);
+  t.diagnostic(JSON.stringify({ samples, minimum, contactMaximum }));
+});
 
 test("the delivered left hand grips the vertical torch while the right arm keeps its base motion", async () => {
   const game = await groundedActor();

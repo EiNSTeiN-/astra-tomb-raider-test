@@ -92,6 +92,7 @@ import {
   fireVaultObjective,
 } from "./fire-vault.js";
 import { vaultBridgeBlocked } from "./fire-vault-rules.js";
+import { advanceCausewayWheel } from "./fire-vault-motion.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
@@ -1285,6 +1286,16 @@ export class Adventure {
       z: -x * Math.sin(this.yaw) + z * Math.cos(this.yaw),
     };
     this.carrying = !!carryingComponent(this.level, this.progress);
+    if (advanceCausewayWheel(this, dt, input)) {
+      animateExplorer(
+        this,
+        dt,
+        Math.hypot(this.moveVelocity.x, this.moveVelocity.z) > 0.1,
+        false,
+      );
+      this.survey();
+      return;
+    }
     if (updateCounterweightGrip(this, dt, -z)) {
       animateExplorer(
         this,
@@ -2068,7 +2079,9 @@ export class Adventure {
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : 1.6,
       task: fireVaultObjective(this)
-        ? "brazier"
+        ? this.fireVault.operation
+          ? "lift"
+          : "brazier"
         : this.diving || galleryObjective(this)
           ? "dive"
           : (this.nearest?.type === "resonator" ||

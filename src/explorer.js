@@ -3,6 +3,7 @@ import { updateTorch, poseTorch } from "./torch.js";
 import { cableHands } from "./return-cable.js";
 import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
 import { galleryWheelBrace, poseGalleryWheel } from "./gallery-wheel.js";
+import { poseCausewayWheel } from "./fire-vault-motion.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
@@ -291,6 +292,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
     rig.weapon.group.position.copy(grip);
     rig.weapon.group.rotation.set(-recoil * 2, angle, 0);
   }
+  poseCausewayWheel(game);
   poseTorch(game);
   rig.model.updateWorldMatrix(true, true);
 }

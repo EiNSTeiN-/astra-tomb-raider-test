@@ -3,7 +3,6 @@ import {
   VAULT_CELLS,
   VAULT_PORTS,
   VAULT_FIRES,
-  VAULT_RECORD,
   normalizeFireVault,
   vaultLinks,
   vaultPorts,
@@ -14,6 +13,11 @@ import {
 } from "./temple-architecture.js";
 import { lotusBowlGeometry } from "./jungle-shrines.js";
 import { torchHandsBusy } from "./torch.js";
+import {
+  beginCausewayWheel,
+  syncCausewayHandle,
+  causewayWheelMoving,
+} from "./fire-vault-motion.js";
 import { mergeArchitecture } from "./visuals.js";
 
 export function insideFireVault(game) {
@@ -295,16 +299,55 @@ export function buildFireVault(game) {
     const control = new THREE.Group();
     control.position.set(px - 0.7, 1.92, pz + 0.65);
     root.add(control);
-    block(0.28, 0.85, 0.28, 0, 0.425, 0, control, bronze);
-    const handle = mesh(
-      new THREE.TorusGeometry(0.32, 0.045, 8, 24),
+    block(0.28, 1.1, 0.28, 0, 0.55, 0, control, bronze);
+    obstacle(px - 0.7, pz + 0.65, 0.18, 0.18, 3.05);
+    const spindle = new THREE.Group();
+    spindle.position.y = 1.16;
+    spindle.rotation.x = -0.45;
+    control.add(spindle);
+    // A ratchet returns the grips after release without reversing the crossing.
+    const casing = mesh(
+      new THREE.CylinderGeometry(0.15, 0.15, 0.2, 16),
       bronze,
       0,
-      0.9,
       0,
-      control,
+      -0.14,
+      spindle,
     );
-    handle.rotation.x = -0.45;
+    casing.rotation.x = Math.PI / 2;
+    const handle = new THREE.Group();
+    handle.name = `Crossing ${i + 1} ratchet wheel`;
+    spindle.add(handle);
+    mesh(new THREE.TorusGeometry(0.34, 0.03, 8, 32), bronze, 0, 0, 0, handle);
+    for (const angle of [0, Math.PI / 2])
+      block(0.06, 0.65, 0.055, 0, 0, 0, handle, bronze).rotation.z = angle;
+    const grips = [-1, 1].map((side) => {
+      const grip = new THREE.Object3D();
+      grip.position.set(side * 0.23, 0, 0.16);
+      grip.name = `${side < 0 ? "Left" : "Right"} crossing wheel grip`;
+      handle.add(grip);
+      mesh(
+        new THREE.CylinderGeometry(0.019, 0.019, 0.2, 16),
+        bronze,
+        side * 0.23,
+        0,
+        0.16,
+        handle,
+      ).rotation.z = Math.PI / 2;
+      for (const end of [-1, 1]) {
+        const pin = mesh(
+          new THREE.CylinderGeometry(0.014, 0.014, 0.14, 10),
+          bronze,
+          side * 0.23 + end * 0.115,
+          0,
+          0.08,
+          handle,
+        );
+        pin.rotation.x = Math.PI / 2;
+      }
+      return grip;
+    });
+    mergeArchitecture(handle);
     const sign = inscription(String(i + 1), 0.55);
     sign.position.set(0, 0.6, 0.16);
     control.add(sign);
@@ -313,6 +356,7 @@ export function buildFireVault(game) {
       index: i,
       position: new THREE.Vector3(x + px - 0.7, y + 1.92, z + pz + 0.65),
       handle,
+      grips,
     });
     mergeArchitecture(pivot);
     mergeArchitecture(control);
@@ -500,7 +544,11 @@ export function updateFireVault(game, dt, initial = false) {
   v.rotors.forEach((r, i) => {
     r.target = (s.turns[i] * Math.PI) / 2;
     let delta = ((r.target - r.angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
-    if (initial || Math.abs(delta) < 0.006) {
+    const op = v.operation?.index === i ? v.operation : null;
+    if (op) {
+      r.angle = op.startAngle + (op.turn * Math.PI) / 2;
+      r.moving = op.turn > 0 && !op.committed;
+    } else if (initial || Math.abs(delta) < 0.006) {
       r.angle = r.target;
       r.moving = false;
     } else {
@@ -508,8 +556,9 @@ export function updateFireVault(game, dt, initial = false) {
       r.moving = true;
     }
     r.pivot.rotation.y = -r.angle;
-    r.source.activity = r.moving && !game.paused ? 1 : 0;
-    v.controls[i].handle.rotation.z = -r.angle;
+    r.source.activity =
+      !game.paused && (op ? causewayWheelMoving(op) : r.moving) ? 1 : 0;
+    syncCausewayHandle(v.controls[i], op, dt, initial);
   });
   const connected = vaultLinks(s.turns).map((p) => p.join("/"));
   for (const edge of v.edges) {
@@ -567,6 +616,8 @@ export function fireVaultControl(game) {
   return closest;
 }
 export function fireVaultHint(game) {
+  if (game.fireVault?.operation)
+    return { key: "E", label: "Turning the crossing · move to let go" };
   const c = fireVaultControl(game);
   if (!c) return null;
   const label =
@@ -583,6 +634,7 @@ export function fireVaultInteract(game) {
   const c = fireVaultControl(game),
     v = game.fireVault;
   if (!c || game.paused) return false;
+  if (v.operation) return true;
   if (c.kind === "read") {
     game.cb.fireVault?.(false);
     return true;
@@ -592,9 +644,7 @@ export function fireVaultInteract(game) {
       game.cb.toast?.("Let the stone crossings settle.");
       return true;
     }
-    v.saved.turns[c.index] = (v.saved.turns[c.index] + 1) % 4;
-    game.audio.tone("click");
-    game.save();
+    beginCausewayWheel(game, c);
     return true;
   }
   if (c.kind === "light") {

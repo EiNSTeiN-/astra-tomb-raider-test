@@ -71,7 +71,9 @@ optional flooded tomb. Swim to six handwheels, turn their bronze channels to
 lower connecting crossings, then carry fire along a dry route to three lamps.
 Their flames open an archive containing a new journal record. **M** shows the
 local crossing map; **Space toward a platform corner** climbs out of the water.
-Unfinished turns, burning lamps and the recovered record persist independently.
+Vesper reaches for each wheel with both hands; move away before the quarter-turn
+finishes to cancel. Completed wheel positions, burning lamps and the recovered
+record persist independently.
 See [the causeway guide and verification](docs/rainkeeper-causeway.md).
 
 ## Campaign

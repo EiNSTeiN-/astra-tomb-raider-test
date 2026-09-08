@@ -1,6 +1,7 @@
 // Isolated development fixtures, not a campaign playthrough.
 import * as THREE from "three";
 import { updateFireVault } from "/src/fire-vault.js";
+import { advanceCausewayWheel, wheelStance } from "/src/fire-vault-motion.js";
 
 export function placeVaultObserver(game, x, z, height = 1.92) {
   const v = game.fireVault;
@@ -44,10 +45,14 @@ export async function inspectVaultAudio(game) {
         .distanceTo(new THREE.Vector3(s.x, s.y, s.z)),
     };
   });
-  placeVaultObserver(game, 7.3, -15.35);
+  const stance = wheelStance(v.controls[1]);
+  placeVaultObserver(game, stance.x - v.x, stance.z - v.z);
   const cold = await mix();
   game.interact();
-  updateFireVault(game, 0.15);
+  for (let i = 0; i < 42; i++) {
+    advanceCausewayWheel(game, 1 / 60, { x: 0, z: 0 });
+    updateFireVault(game, 1 / 60);
+  }
   const moving = await mix();
   game.setPaused(true);
   const angle = v.rotors[1].angle;
@@ -58,7 +63,10 @@ export async function inspectVaultAudio(game) {
     activity: v.rotors[1].source.activity,
   };
   game.setPaused(false);
-  for (let i = 0; i < 150; i++) updateFireVault(game, 1 / 60);
+  for (let i = 0; i < 150; i++) {
+    advanceCausewayWheel(game, 1 / 60, { x: 0, z: 0 });
+    updateFireVault(game, 1 / 60);
+  }
   const settled = await mix();
   v.saved.lit = [1, 3, 5];
   placeVaultObserver(game, -2.7, 26);

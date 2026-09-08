@@ -21,6 +21,11 @@ import { CameraSurfaces } from "../src/camera-collision.js";
 import { advanceCharacter } from "../src/character-motion.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { torchFireSource } from "../src/torch.js";
+import {
+  advanceCausewayWheel,
+  wheelStance,
+  beginCausewayWheel,
+} from "../src/fire-vault-motion.js";
 
 function fixture() {
   const world = new THREE.Group(),
@@ -46,6 +51,8 @@ function fixture() {
     groundHeight: () => 0,
     walkable: () => true,
     grounded: true,
+    health: 100,
+    keys: new Set(),
     jumpY: 1.92,
     elapsed: 0,
     velocityY: 0,
@@ -72,9 +79,89 @@ function fixture() {
 function settle(g) {
   for (let i = 0; i < 140; i++) {
     g.elapsed += 1 / 60;
+    advanceCausewayWheel(g, 1 / 60, { x: 0, z: 0 });
     updateFireVault(g, 1 / 60);
   }
 }
+test("a handwheel saves at its detent, supports cancellation on both sides of it, and freezes while paused", () => {
+  const g = fixture(),
+    v = g.fireVault,
+    c = v.controls[1];
+  const tick = (count) => {
+    for (let i = 0; i < count; i++) {
+      g.elapsed += 1 / 60;
+      advanceCausewayWheel(g, 1 / 60, { x: 0, z: 0 });
+      updateFireVault(g, 1 / 60);
+    }
+  };
+  g.player.position.copy(wheelStance(c));
+  v.saved.visited = true;
+  g.progress.torch = true;
+  assert(beginCausewayWheel(g, c));
+  assert.equal(g.progress.torch, false, "turning frees both hands");
+  const saves = g.savedCount;
+  tick(42);
+  assert(v.operation.turn > 0 && v.operation.turn < 1);
+  assert.equal(v.saved.turns[1], VAULT_START[1]);
+  assert.equal(g.savedCount, saves);
+  assert.equal(normalizeFireVault(v.saved).turns[1], VAULT_START[1]);
+  assert.equal(
+    beginCausewayWheel(g, c),
+    false,
+    "repeated E does not queue a turn",
+  );
+  const snapshot = [v.operation.time, v.rotors[1].angle, c.handle.rotation.z];
+  g.paused = true;
+  advanceCausewayWheel(g, 5, { x: 0, z: 0 });
+  updateFireVault(g, 5);
+  assert.deepEqual(
+    [v.operation.time, v.rotors[1].angle, c.handle.rotation.z],
+    snapshot,
+  );
+  assert.equal(v.rotors[1].source.activity, 0);
+  g.paused = false;
+  assert.equal(advanceCausewayWheel(g, 1 / 60, { x: 1, z: 0 }), false);
+  assert.equal(v.operation, null);
+  settle(g);
+  assert.equal(v.saved.turns[1], VAULT_START[1]);
+  assert.equal(v.rotors[1].angle, 0);
+  assert(beginCausewayWheel(g, c));
+  tick(75);
+  assert(v.operation.committed);
+  assert.equal(v.saved.turns[1], 1);
+  assert.equal(g.savedCount, saves + 1);
+  g.keys.add("Space");
+  advanceCausewayWheel(g, 1 / 60, { x: 0, z: 0 });
+  g.keys.clear();
+  assert.equal(v.operation, null);
+  settle(g);
+  assert.equal(v.saved.turns[1], 1);
+  assert.equal(v.rotors[1].angle, Math.PI / 2);
+});
+
+test("every wheel has a supported stance, rejects a path through its pedestal, and returns its grips for the next turn", () => {
+  const g = fixture(),
+    v = g.fireVault;
+  for (const c of v.controls.filter((c) => c.kind === "turn")) {
+    const target = wheelStance(c);
+    assert(g.canMove(target.x, target.z, 1.92));
+    assert.equal(g.canMove(c.position.x, c.position.z, 1.92), false);
+    g.player.position.copy(c.position).add(new THREE.Vector3(0, 0, -0.4));
+    assert.equal(beginCausewayWheel(g, c), false);
+    g.player.position.copy(target).add(new THREE.Vector3(-0.15, 0, -0.1));
+    const start = v.saved.turns[c.index];
+    for (let turn = 0; turn < 4; turn++) {
+      assert(beginCausewayWheel(g, c));
+      settle(g);
+      assert.equal(v.operation, null);
+      assert(g.player.position.distanceTo(target) < 1e-7);
+      assert.equal(v.saved.turns[c.index], (start + turn + 1) % 4);
+      assert(Math.abs(c.handle.rotation.z - Math.PI / 4) < 0.002);
+      assert.equal(v.rotors[c.index].source.activity, 0);
+    }
+  }
+});
+
 function walk(g, to, minimum = 1.9) {
   let reached = false;
   for (let i = 0; i < 1200; i++) {
@@ -155,7 +242,7 @@ test("real handwheel interactions lower the matching crossings, freeze on pause,
   );
   for (let i = 0; i < 6; i++)
     while (v.saved.turns[i] !== target[i]) {
-      g.player.position.copy(v.controls[i].position);
+      g.player.position.copy(wheelStance(v.controls[i]));
       assert(fireVaultInteract(g));
       updateFireVault(g, 0.1);
       g.paused = true;

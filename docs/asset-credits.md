@@ -125,8 +125,10 @@ The unused Michelle reference remains under `asset-sources/characters/` for deve
 The Rainkeeper's causeway, its turning bronze channels, folding stone crossings,
 six handwheels, sanctuary lamps, archive grille, rain drain, local map and keeper's
 record are original project geometry, code and writing in `src/fire-vault*.js`.
-Its masonry and bowls reuse the credited temple maps and original temple/shrine
-geometry. Fire and drips use the existing recordings listed below; the handwheel
+The ratcheting handwheels, paired grips and their character interaction are also
+original project code; they reuse the delivered character and hand rig credited
+above. Its masonry and bowls reuse the credited temple maps and original
+temple/shrine geometry. Fire and drips use the existing recordings listed below; the handwheel
 and grille sounds use the existing original machine and hoist synthesis. No new
 external assets or recordings were added. [Causeway notes](rainkeeper-causeway.md)
 record the playable behavior and verification limits.

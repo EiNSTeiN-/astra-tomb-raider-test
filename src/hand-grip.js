@@ -110,7 +110,7 @@ function gripHands(model) {
   });
 }
 
-function curlFingers(grip, center, axis, distal, palm) {
+function curlFingers(grip, center, axis, distal, palm, closure = 1) {
   for (const finger of grip.fingers.slice(0, 4)) {
     const root = finger.bones[0].getWorldPosition(new THREE.Vector3());
     const relative = root.clone().sub(center);
@@ -144,8 +144,8 @@ function curlFingers(grip, center, axis, distal, palm) {
   const targetTip = center
     .clone()
     .addScaledVector(axis, -0.01 * grip.sign)
-    .addScaledVector(distal, CABLE_GRIP.thumbHeight)
-    .addScaledVector(palm, CABLE_GRIP.thumbForward);
+    .addScaledVector(distal, CABLE_GRIP.thumbHeight * (1 + 1.4 * (1 - closure)))
+    .addScaledVector(palm, CABLE_GRIP.thumbForward * (1 + 1.4 * (1 - closure)));
   const target = targetTip
     .clone()
     .addScaledVector(axis, -thumb.tip.length() * grip.sign);
@@ -187,7 +187,15 @@ export function poseCableGrip(game, centers) {
 
 // Reuse the calibrated 38 mm finger contact for a differently oriented handle.
 // Weight blends the reach/release; full weight maintains surface contact.
-export function poseCylinderGrip(game, centers, axis, distal, weight = 1) {
+export function poseCylinderGrip(
+  game,
+  centers,
+  axis,
+  distal,
+  weight = 1,
+  closure = 1,
+  linearReach = false,
+) {
   const rig = game.rig;
   if (!rig || !centers || weight <= 0) return false;
   const hands = (rig.gripHands ??= gripHands(rig.model));
@@ -225,9 +233,25 @@ export function poseCylinderGrip(game, centers, axis, distal, weight = 1) {
       .addScaledVector(palm, CABLE_GRIP.palmOffset)
       .sub(knuckle);
   });
-  poseHands(game, wrists);
+  poseHands(
+    game,
+    linearReach
+      ? wrists.map(
+          (w, i) =>
+            w &&
+            hands[i].hand.getWorldPosition(new THREE.Vector3()).lerp(w, weight),
+        )
+      : wrists,
+  );
   for (const [i, h] of hands.entries()) {
     if (!centers[i]) continue;
+    const openFingers =
+      closure < 1
+        ? h.fingers
+            .filter((f) => f.name !== "Thumb")
+            .flatMap((f) => f.bones)
+            .map((bone) => ({ bone, rotation: bone.quaternion.clone() }))
+        : [];
     // Carry palm rotation through the forearm's axial twist instead of forcing
     // the entire change into the wrist skin. The wrist position stays fixed.
     const forearm = h.hand.parent;
@@ -251,15 +275,21 @@ export function poseCylinderGrip(game, centers, axis, distal, weight = 1) {
     worldRotation(
       forearm,
       current.premultiply(
-        new THREE.Quaternion().setFromAxisAngle(forearmAxis, twist),
+        new THREE.Quaternion().setFromAxisAngle(
+          forearmAxis,
+          twist * (linearReach ? weight : 1),
+        ),
       ),
     );
     worldRotation(h.hand, rotations[i]);
-    curlFingers(h, centers[i], axis, distal, palm);
+    curlFingers(h, centers[i], axis, distal, palm, closure);
+    for (const { bone, rotation } of openFingers)
+      bone.quaternion.slerp(rotation, 1 - closure);
   }
   if (weight < 1) {
     for (const { bone, rotation } of rig.gripBase)
-      bone.quaternion.slerp(rotation, 1 - weight);
+      if (!linearReach || /Hand/.test(bone.name))
+        bone.quaternion.slerp(rotation, 1 - weight);
     rig.model.updateWorldMatrix(true, true);
   }
   return true;

@@ -7,8 +7,10 @@ former role as shelter. It is optional and does not advance the main sun gates.
 ![Flooded hall with raised stone crossings](images/rainkeeper-causeway.png)
 
 Six fixed platforms have handwheels and bronze channels. Press **E / Use** to turn
-a platform's channels clockwise. Facing channels on adjacent platforms lower
-paired stone bridge leaves. The platforms remain fixed while their channels turn,
+a platform's channels clockwise. Vesper approaches the two grips, turns the
+ratchet, opens her fingers and lets go. Moving away before the quarter-turn
+finishes cancels it; a completed turn stays saved. Facing channels on adjacent
+platforms lower paired stone bridge leaves. The platforms remain fixed while their channels turn,
 so a player can safely consider another move.
 
 Swim to other platforms while planning the route. Approach a platform corner and
@@ -39,8 +41,9 @@ forest regression now measures the canopy within 50 metres of camp to include
 the expanded clearing's banks; trunk and objective-clearance checks remain.
 
 The jungle save stores six quarter turns, the three lit-lamp IDs, discovery and
-record recovery. Each interaction saves immediately. Reload settles the saved
-wheel positions, restores burning lamps and opens a completed archive. Malformed
+record recovery. Lamp and record interactions save immediately; a wheel saves
+when its quarter-turn locks into place. An interrupted reach or partial turn is
+transient. Reload settles the saved wheel positions, restores burning lamps and opens a completed archive. Malformed
 values are normalized; other chapters do not acquire this tomb's state. Its
 record is separate from the campaign's 96 journal pages.
 
@@ -50,7 +53,52 @@ The existing jungle score continues with the brazier objective state. These
 sources share the existing HRTF positioning, linear falloff, obstruction filter,
 mix settings and voice budget. No additional music or field recording is loaded.
 
-## Verification
+## Reaching and turning the handwheels
+
+![The explorer turns a causeway wheel with both hands](images/rainkeeper-wheel.png)
+
+Each wheel now has a supported shaft, ratchet housing, spokes and two 38 mm
+hand grips. E / Use begins a short approach on the platform, a grasp, a
+quarter-turn and release. The wheel returns after the fingers lift clear; its
+ratchet keeps the crossing at the new orientation. The action puts a carried
+torch out to free both hands. Movement or a jump releases it immediately.
+
+The approach samples collision and floor support and stays within walking
+speed. A blocked approach cannot pull the explorer through the solid pedestal.
+The arms reach along a direct path; fingers close after reaching the grips and
+open before the hands lift away. Bone lengths and scales remain unchanged.
+The existing jungle score selects its lifting arrangement during the action,
+and the machinery voice follows turning/returning motion and pause state.
+
+The handwheel update passed all **321 tests** and the production build. Checks
+include all six supported stances, four successive turns per wheel, cancellation
+before and after the completed turn, paused angles/time, and persistence of only
+completed turns. The delivered character mesh was sampled through 63 action
+frames: the largest measured surface intersection with a grip was 1.23 mm,
+within the 2 mm test tolerance; during the held turn each measured hand region
+came within 2.47 mm of the handle. These are geometry measurements, not a claim
+of physically exact hand simulation.
+
+A new continuous assisted browser run reached every handwheel by swimming and
+climbing, configured the crossings, carried fire to the lamps, recovered the
+archive and returned at 100 health. Native keyboard cancellation, pause/resume,
+completed-turn release and portrait touch Use passed. High/Performance hand
+views rendered with linked shaders. The live audio state changed from lifting
+back to the brazier arrangement; the wheel voice stopped at rest and on pause.
+Changing to the desert disposed all 154 inspected geometries and 12 materials
+and removed the tomb's emitters.
+
+Production checks retained a cancelled turn as unfinished after reload, then
+saved and restored a completed turn. They also retained partial lamp progress,
+relighting, the final lamp, the recovered record and its journal entry. Health
+remained 93 in these isolated position fixtures, and the development hook was
+absent. Completed browser checks reported no errors, warnings or failed assets.
+The checked update bundles are `index-DC6gDxy5.js`, `game-BwBmLBH0.js`,
+`index-CPHETchX.css` and `three-DSdd5dJ3.js`. The final guide correction was
+checked with native E on `index-P4QPo6Dc.js` and `game-Dcas5GGi.js`; its production
+build also passes with the existing Three.js chunk-size advisory.
+
+## Initial tomb verification
 
 - All **318 automated tests passed**. The final entrance/archive details also
   passed the seven focused tomb and habitat tests. Checks search all 4,096 turn
@@ -85,8 +133,8 @@ mix settings and voice budget. No additional music or field recording is loaded.
   Completed browser checks reported no JavaScript errors, console warnings or
   failed asset responses.
 
-The final production build passes with the existing Three.js chunk-size advisory.
-Checked bundles are `index-Bv_qlZkI.js`, `game-C5fhhFMh.js`,
+The initial tomb production build passed with the existing Three.js chunk-size
+advisory. Its checked bundles were `index-Bv_qlZkI.js`, `game-C5fhhFMh.js`,
 `index-CPHETchX.css` and `three-DSdd5dJ3.js`. Reusable development helpers are
 [`verify-fire-vault-browser.js`](../scripts/verify-fire-vault-browser.js) and
 [`inspect-fire-vault-browser.js`](../scripts/inspect-fire-vault-browser.js).
