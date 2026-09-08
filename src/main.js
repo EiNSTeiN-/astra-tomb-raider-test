@@ -1,5 +1,7 @@
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
 import { GALLERY_RECORD } from "./sunken-gallery-record.js";
+import { VAULT_RECORD } from "./fire-vault-rules.js";
+import { drawFireVaultMap } from "./fire-vault-map.js";
 import { drawGalleryMap } from "./sunken-gallery-map.js";
 import { WIND_TRIALS, windName } from "./wind-rules.js";
 import { HYDRAULIC_TRIALS } from "./hydraulic-rules.js";
@@ -430,6 +432,7 @@ async function runStartup(request) {
           journal: showJournal,
           puzzle: showPuzzle,
           counterweights: showCounterweightGuide,
+          fireVault: showFireVaultGuide,
           note: showNote,
           complete: showComplete,
           saved: () => {
@@ -568,11 +571,13 @@ function updateHUD(s) {
   }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent = s.gallery
-    ? `${number(s.galleryStage)} / 02`
-    : s.diving
-      ? `${number(s.archive)} / 05`
-      : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.fireVault
+    ? `${number(s.fireVault.lit)} / 03`
+    : s.gallery
+      ? `${number(s.galleryStage)} / 02`
+      : s.diving
+        ? `${number(s.archive)} / 05`
+        : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
   document.querySelector("#objective-distance").textContent = s.target
     ? `${s.distance} m away`
@@ -580,7 +585,10 @@ function updateHUD(s) {
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
-  if (s.gallery)
+  if (s.fireVault)
+    document.querySelector("#objective-detail").textContent =
+      "Optional tomb · The Rainkeeper’s causeway · M shows connected crossings";
+  else if (s.gallery)
     document.querySelector("#objective-detail").textContent =
       "Optional exploration · Memorial gallery · Bronze air bells replenish your breath";
   else if (s.diving)
@@ -669,6 +677,7 @@ function updateWaypoint(s) {
 }
 function drawMap(canvas, full = false, s = game?.state()) {
   if (!game || !s) return;
+  if (s.fireVault) return drawFireVaultMap(canvas, game, full);
   if (s.gallery) return drawGalleryMap(canvas, game, full);
   const c = canvas.getContext("2d"),
     w = canvas.width,
@@ -915,7 +924,7 @@ function showMap() {
   modal(
     "Follow the forgotten paths.",
     `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${state.objective}</p>${
-      !state.gallery && state.mission
+      !state.gallery && !state.fireVault && state.mission
         ? `<p class="small-copy">${game.state().mission.briefing}</p><ol class="field-checklist">${game
             .state()
             .mission.tasks.map(
@@ -924,7 +933,7 @@ function showMap() {
             )
             .join("")}</ol>`
         : ""
-    } ${state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
+    } ${state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
     "map",
     "EXPEDITION CARTOGRAPHY",
     true,
@@ -960,6 +969,10 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const vault = store.data.levels.verdant?.fireVault;
+  const vaultSection = vault?.visited
+    ? `<section class="tide-journal"><span class="eyebrow">THE RAINKEEPER’S CAUSEWAY · ${vault.recovered ? "RECOVERED" : `${vault.lit.length} / 3 FIRES`}</span><h3>${VAULT_RECORD.title}</h3><p>${vault.recovered ? VAULT_RECORD.text : "A flooded hall south of the jungle’s entrance camp contains six turning crossings. Read the tablet beside its entrance fire, connect the carved arms, then carry fire to the three sanctuary lamps. Their flames release the archive on the far bank."}</p>${vault.recovered ? `<p class="small-copy">${VAULT_RECORD.note}</p>` : ""}</section>`
+    : "";
   const gallery = store.data.levels.tides?.gallery;
   const gallerySection = gallery?.visited?.length
     ? `<section class="tide-journal"><span class="eyebrow">THE SUBMERGED MEMORIAL · ${gallery.recovered ? "RECOVERED" : "IN PROGRESS"}</span><h3>${GALLERY_RECORD.title}</h3>${gallery.recovered ? `<p>${GALLERY_RECORD.text}</p><p class="small-copy">${GALLERY_RECORD.note}</p>` : "<p>A passage beneath the harbor well leads to the tidekeepers' memorial. Follow the bronze survey line, use the two air bells to catch your breath, and find the emergency wheel beyond the collapsed colonnade. It opens the memorial and an eastern return passage.</p>"}</section>`
@@ -985,7 +998,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,
@@ -1131,6 +1144,16 @@ function showNote(f, l) {
     l.title.toUpperCase(),
   );
 }
+function showFireVaultGuide(recovered = false) {
+  modal(
+    recovered ? VAULT_RECORD.title : "The Rainkeeper’s causeway",
+    recovered
+      ? `<div class="note-paper"><p>${VAULT_RECORD.text}</p><p class="small-copy">${VAULT_RECORD.note}</p></div><p class="small-copy">Added to the field journal. Your sanctuary fires and crossing positions are saved.</p><button class="primary-button" data-close>Return to the jungle ${icon("ArrowRight")}</button>`
+      : `<p class="modal-description">“Turn the roads until their hands meet. Bring one flame to the travelers, one to the children, and one to those who arrive after dark.”</p><div class="note-paper"><p>Each platform’s bronze channels show its open sides. Two facing channels lower a crossing between them. Stand beside a handwheel and press <kbd>E</kbd> (Use on touch) to turn it a quarter turn.</p><p>You may swim to reach other handwheels while planning the route. Swimming puts your torch out. Light it with <kbd>T</kbd> beside the entrance fire, then carry the flame across dry crossings and use it at the three sanctuary lamps. A lit lamp can relight your torch.</p><p>The three fires release the archive grille on the far bank. <kbd>M</kbd> shows the crossing map. If you fall, swim to a platform and use <kbd>Space</kbd> toward its edge to climb out.</p></div><button class="primary-button" data-close>Explore the causeway ${icon("ArrowRight")}</button>`,
+    "fire-vault",
+  );
+}
+
 function showCounterweightGuide(chamber) {
   modal(
     chamber.trial.title,

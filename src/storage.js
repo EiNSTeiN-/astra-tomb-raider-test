@@ -8,6 +8,7 @@ import { normalizeAlignments } from "./observatory-state.js";
 import { normalizeSolar } from "./solar-rules.js";
 import { normalizeBells } from "./bell-rules.js";
 import { normalizeGallery } from "./sunken-gallery-record.js";
+import { normalizeFireVault } from "./fire-vault-rules.js";
 export const SAVE_KEY = "vesper-expedition-v1";
 export const defaults = () => ({
   version: 1,
@@ -111,6 +112,7 @@ export function normalizeSave(value) {
             ]
           : [],
       gallery: key === "tides" ? normalizeGallery(v.gallery) : null,
+      fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       torch: key === "verdant" && v.torch === true,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
@@ -190,6 +192,7 @@ export class SaveStore {
       wind: {},
       archive: [],
       gallery: id === "tides" ? normalizeGallery(null) : null,
+      fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       torch: false,
       time: 0,
       health: 100,

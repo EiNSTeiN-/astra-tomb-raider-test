@@ -1,4 +1,5 @@
 import { skyDeckAt } from "./sky-bridge-rules.js";
+import { vaultDeckAt } from "./fire-vault-rules.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
 // support, and crossing uneven ground in the air must not lift the jump arc.
@@ -16,6 +17,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
   }
   const deck = skyDeckAt(game, x, z, maxY);
   if (deck && deck.height > height) return deck;
+  const vaultDeck = vaultDeckAt(game, x, z, maxY);
+  if (vaultDeck && vaultDeck.height > height) return vaultDeck;
   return { height, surface };
 }
 

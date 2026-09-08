@@ -1,6 +1,7 @@
 import { EXPEDITIONS } from "./expeditions.js";
 import { encounterType, ENEMY_TYPES } from "./encounters.js";
 import { createSkyMap } from "./sky-layout.js";
+import { addFireVault } from "./fire-vault-rules.js";
 
 export const LEVELS = [
   {
@@ -507,15 +508,18 @@ export function createMap(level) {
     }
     connect(previous, rooms[stage + 1]);
   }
-  return {
-    size,
-    grid,
-    rooms,
-    sideRooms,
-    fieldSites,
-    paths,
-    features,
-    enemies,
-    spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
-  };
+  return addFireVault(
+    {
+      size,
+      grid,
+      rooms,
+      sideRooms,
+      fieldSites,
+      paths,
+      features,
+      enemies,
+      spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
+    },
+    level,
+  );
 }

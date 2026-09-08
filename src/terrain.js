@@ -55,12 +55,14 @@ export function createTerrainProfile(map, level) {
     ...map.rooms,
     ...map.sideRooms,
     ...(map.fieldSites || []),
+    ...(map.fireVault ? [map.fireVault] : []),
   ].map((r) => ({
     x: r.x * 7,
     z: r.z * 7,
     radius: r.r * 7,
     y: raw(r.x * 7, r.z * 7),
     main: map.rooms.includes(r),
+    flat: !!r.fireVault,
   }));
   for (let iz = 0; iz < width; iz++)
     for (let ix = 0; ix < width; ix++) {
@@ -78,7 +80,12 @@ export function createTerrainProfile(map, level) {
           Math.abs(z - terrace.z),
         );
         const weight =
-          1 - smooth(terrace.radius * 0.9, terrace.radius + 6, distance);
+          1 -
+          smooth(
+            terrace.radius * (terrace.flat ? 1 : 0.9),
+            terrace.radius + 6,
+            distance,
+          );
         if (weight > strongest) {
           height = base * (1 - weight) + terrace.y * weight;
           strongest = weight;
@@ -145,7 +152,8 @@ export function createTerrainProfile(map, level) {
   for (const site of waters)
     site.baseY =
       sample(heights, site.room.x * 7, site.room.z * 7) +
-      (site.kind === "ice" ? 0.025 : biome === "sky" ? -0.08 : 0.12);
+      (site.baseOffset ??
+        (site.kind === "ice" ? 0.025 : biome === "sky" ? -0.08 : 0.12));
   // Excavate after terrace sampling. Preserve every field-station working pad and
   // nearby discoveries so their authored foundations retain the same heights.
   for (let iz = 0; iz < width; iz++)

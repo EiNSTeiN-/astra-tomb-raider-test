@@ -6,6 +6,18 @@ const smooth = (a, b, v) => {
 };
 export function waterSites(map, level) {
   const sites = [];
+  if (map.fireVault)
+    sites.push({
+      id: "rainkeeper-pool",
+      kind: "water",
+      x: map.fireVault.x * 7,
+      z: map.fireVault.z * 7,
+      width: 41.4,
+      length: 47,
+      depth: 0,
+      baseOffset: 1.3,
+      room: map.fireVault,
+    });
   const kind =
     level.biome === "volcano"
       ? "lava"

@@ -21,11 +21,13 @@ export function buildSoundLandmarks(game) {
       p.x,
       p.y,
       p.z,
-      station
-        ? { field: station.id, stage: station.stage }
-        : flame.userData.hazardId
-          ? { hazard: flame.userData.hazardId }
-          : {},
+      flame.userData.vaultFire !== undefined
+        ? { vaultFire: flame.userData.vaultFire }
+        : station
+          ? { field: station.id, stage: station.stage }
+          : flame.userData.hazardId
+            ? { hazard: flame.userData.hazardId }
+            : {},
     );
   }
   for (const [i, room] of game.map.rooms.entries()) {
@@ -103,6 +105,7 @@ export function buildSoundLandmarks(game) {
     ),
   );
   game.soundSources.push(...(game.thermalSources || []).map((s) => ({ ...s })));
+  game.soundSources.push(...(game.fireVault?.sources || []));
   game.soundSources.push(
     ...(game.resonanceSources || []).map((s) => ({ ...s })),
   );

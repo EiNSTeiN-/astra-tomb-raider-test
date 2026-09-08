@@ -37,9 +37,11 @@ test("denser jungle woodland remains reproducible and leaves all routes and obje
       ),
     );
   }
+  // The causeway replaces the woodland immediately south of camp. Check the
+  // canopy framing the expanded clearing, including its outer banks.
   assert.ok(
     trees.filter(
-      (t) => Math.hypot(t.x - map.spawn.x * 7, t.z - map.spawn.z * 7) < 40,
+      (t) => Math.hypot(t.x - map.spawn.x * 7, t.z - map.spawn.z * 7) < 50,
     ).length >= 20,
   );
 });

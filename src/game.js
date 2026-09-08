@@ -84,6 +84,14 @@ import {
   extinguishTorch,
 } from "./torch.js";
 import { loadMemorialArt } from "./memorial-art.js";
+import {
+  buildFireVault,
+  updateFireVault,
+  fireVaultHint,
+  fireVaultInteract,
+  fireVaultObjective,
+} from "./fire-vault.js";
+import { vaultBridgeBlocked } from "./fire-vault-rules.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
@@ -627,6 +635,7 @@ export class Adventure {
     buildResonanceCourts(this);
     buildWindCourts(this);
     buildCipherCourts(this);
+    buildFireVault(this);
     buildHazards(this);
     buildSoundLandmarks(this);
     buildTideArchive(this);
@@ -1158,6 +1167,7 @@ export class Adventure {
       return false;
     if (skyBridgeBlocked(this, x, z, this.groundHeight(x, z) + height))
       return false;
+    if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     for (const dx of [-0.45, 0.45])
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
@@ -1570,6 +1580,7 @@ export class Adventure {
     updateDiveView(this);
   }
   updateDecorations(dt, observatoryDt = dt, solarDt = dt) {
+    updateFireVault(this, dt);
     updateObservatory(this, observatoryDt);
     updateCaverns(this, dt);
     updateSkyBridges(this, dt);
@@ -1663,6 +1674,7 @@ export class Adventure {
     return useTorch(this);
   }
   interact() {
+    if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
     if (archiveInteract(this)) return;
     if (this.diving) return;
@@ -1953,8 +1965,10 @@ export class Adventure {
         ? { ...objectiveTarget, z: objectiveTarget.z - 5 / CELL }
         : objectiveTarget;
     const gallery = galleryObjective(this);
+    const vault = fireVaultObjective(this);
     const target =
-      this.diving || gallery ? null : traversalTarget(this, aimedTarget);
+      vault?.target ||
+      (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
     return {
       health: this.health,
       stamina: this.stamina,
@@ -1965,6 +1979,7 @@ export class Adventure {
       archive:
         this.level.biome === "water" ? archiveProgress(this).length : null,
       gallery: !!gallery,
+      fireVault: vault,
       galleryStage: this.progress.gallery?.recovered
         ? 2
         : this.progress.gallery?.opened
@@ -1974,6 +1989,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        vault?.text ||
         gallery ||
         (this.diving
           ? "Explore the tidekeeper’s submerged archive"
@@ -2027,7 +2043,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : torchHint(this) ||
+        : fireVaultHint(this) ||
+          torchHint(this) ||
           galleryHint(this) ||
           counterweightHint(this) ||
           traversalHint(this) ||
@@ -2050,8 +2067,9 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : 1.6,
-      task:
-        this.diving || galleryObjective(this)
+      task: fireVaultObjective(this)
+        ? "brazier"
+        : this.diving || galleryObjective(this)
           ? "dive"
           : (this.nearest?.type === "resonator" ||
                 this.resonanceFocus != null) &&
@@ -2078,15 +2096,18 @@ export class Adventure {
             e.group.position.distanceTo(this.player.position) < 24,
         ),
       sourceActive: (source) =>
-        source.hazard
-          ? this.hazards.some(
-              (h) =>
-                h.id === source.hazard && !h.disabled && h.phase === "active",
-            )
-          : source.field
-            ? this.progress.field.includes(source.field) ||
-              source.stage < this.progress.stage
-            : !source.mechanism || source.stage <= this.progress.stage,
+        source.vaultFire !== undefined
+          ? source.vaultFire === "entry" ||
+            this.progress.fireVault?.lit.includes(source.vaultFire)
+          : source.hazard
+            ? this.hazards.some(
+                (h) =>
+                  h.id === source.hazard && !h.disabled && h.phase === "active",
+              )
+            : source.field
+              ? this.progress.field.includes(source.field) ||
+                source.stage < this.progress.stage
+              : !source.mechanism || source.stage <= this.progress.stage,
       occluded: (source) =>
         !this.lineOfSight(
           this.swimming
@@ -2125,6 +2146,7 @@ export class Adventure {
       settleCipher(this);
     }
     this.paused = value;
+    updateFireVault(this, 0);
     if (value) silenceCableMotion(this);
     updateTorch(this);
     this.presentationRemaining = 0;

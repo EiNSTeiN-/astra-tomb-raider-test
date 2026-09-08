@@ -66,6 +66,14 @@ The five relay stops have distinct carved crowns, open bronze bowls and glowing
 coals, with solid columns that also obstruct sound. See the
 [shrine comparison and verification](docs/jungle-shrines.md).
 
+South of the jungle's entrance camp, **the Rainkeeper's causeway** adds an
+optional flooded tomb. Swim to six handwheels, turn their bronze channels to
+lower connecting crossings, then carry fire along a dry route to three lamps.
+Their flames open an archive containing a new journal record. **M** shows the
+local crossing map; **Space toward a platform corner** climbs out of the water.
+Unfinished turns, burning lamps and the recovered record persist independently.
+See [the causeway guide and verification](docs/rainkeeper-causeway.md).
+
 ## Campaign
 
 All chapters can be selected from the expedition screen and maintain independent progress.

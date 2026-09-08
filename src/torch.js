@@ -24,9 +24,11 @@ export function torchFireSource(game) {
   if (game.level.id !== "verdant" || !game.player) return null;
   let nearest = null,
     distance = 3;
-  for (const f of game.items) {
+  for (const f of [...game.items, ...(game.fireVault?.fires || [])]) {
     const lit =
       f.type === "camp" ||
+      (f.type === "vault-fire" &&
+        game.progress.fireVault?.lit.includes(f.id)) ||
       (f.type === "field" &&
         f.kind === "brazier" &&
         (f.stage < game.progress.stage || game.progress.field.includes(f.id)));
