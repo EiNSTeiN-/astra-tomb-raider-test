@@ -1,5 +1,7 @@
 # Asset credits and provenance
 
+The five jungle flame shrines in `src/jungle-shrines.js` are original code-authored geometry: chamfered masonry, botanical reliefs, stepped crowns, open fluted bowls, rings, fuel and sparks. They reuse the original temple geometry and its existing credited material maps; bronze patina and sparks are procedural shaders. The existing credited `fire.ogg` remains their sound source. No new external assets or recordings were introduced. See [shrine art notes](jungle-shrines.md).
+
 The jungle’s carried resin torch, bindings and wrapped head are original code-authored geometry in `src/torch.js`. Its hand pose reuses the calibrated cylinder grip; lighting and flame rendering reuse the original fire shader. Its positioned crackle uses the existing credited `fire.ogg` recording. No new external assets were introduced. See [torch relay notes](torch-relays.md).
 
 The cloud-city gate walls, niche reveals, timber screens, hinge straps, pin barrels and wind crests are original code-authored assets in `src/sky-gate-art.js`. They reuse the existing credited rock, temple and monastery timber maps, the original fitted-stone generator and the wind machinery's bronze shader. No new external assets or recordings were added. See [sky gate art notes](sky-gate-art.md).

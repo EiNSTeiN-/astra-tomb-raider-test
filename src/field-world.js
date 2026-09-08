@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { needsCarriedFlame, torchHandsBusy } from "./torch.js";
+import { buildJungleShrine, updateJungleShrine } from "./jungle-shrines.js";
 import {
   hasTraversalCourse,
   buildTraversalCourse,
@@ -12,6 +13,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildJungleShrine(game, f, group)) return;
   const { stoneMat: stone, darkMat: dark, goldMat: gold } = game;
   if (hasTraversalCourse(game.level, f)) buildTraversalCourse(game, f, group);
   game.cylinder(0.85, 1.1, 0.7, dark, 0, 0.35, 0, group, 12);
@@ -102,6 +104,7 @@ export function updateFieldWorld(game, dt) {
     f.group.visible = true;
     f.marker.visible = current?.id === f.id;
     if (f.fire) f.fire.visible = done;
+    updateJungleShrine(game, f, done);
     if (f.kind === "lift") f.core.visible = !done;
     if (f.kind === "delivery") f.core.visible = done;
     if (["valve", "winch"].includes(f.kind))

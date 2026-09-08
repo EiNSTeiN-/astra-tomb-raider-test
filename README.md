@@ -62,6 +62,9 @@ near a campfire or a burning brazier, then **E** (Use) at the next beacon.
 Swimming or using both hands puts the torch out; completed beacons stay lit and
 can relight it. The carried flame, saved progress and moving crackle follow the
 same world state. See [torch relay notes](docs/torch-relays.md).
+The five relay stops have distinct carved crowns, open bronze bowls and glowing
+coals, with solid columns that also obstruct sound. See the
+[shrine comparison and verification](docs/jungle-shrines.md).
 
 ## Campaign
 

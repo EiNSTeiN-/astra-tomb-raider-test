@@ -135,13 +135,18 @@ export function templePlan(room) {
 
 // Original botanical relief: recessed borders, rising stems and a lotus rosette.
 // It is sculpted geometry, so side lighting reveals the carving's depth.
-export function carvedPanelGeometry(w = 1.3, h = 3.4, variant = 0) {
+export function carvedPanelGeometry(
+  w = 1.3,
+  h = 3.4,
+  variant = 0,
+  segments = [30, 64],
+) {
   const p = [],
     uv = [],
     colors = [],
     index = [],
-    nx = 30,
-    ny = 64;
+    nx = segments[0],
+    ny = segments[1];
   for (let iy = 0; iy <= ny; iy++)
     for (let ix = 0; ix <= nx; ix++) {
       const u = ix / nx,
