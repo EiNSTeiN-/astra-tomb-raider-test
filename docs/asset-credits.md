@@ -50,6 +50,7 @@ These assets are published by Poly Haven under [CC0](https://polyhaven.com/licen
 | Worn Rock Natural 01 — Dimitrios Savva and Rob Tuytel | [Poly Haven](https://polyhaven.com/a/worn_rock_natural_01)  | `textures/temple-*` (2K)                     |
 | Sandstone Cracks — Rob Tuytel                         | [Poly Haven](https://polyhaven.com/a/sandstone_cracks)      | `textures/sandstone-*` (2K)                  |
 | Sandstone Blocks 08 — Rob Tuytel                      | [Poly Haven](https://polyhaven.com/a/sandstone_blocks_08)   | `textures/sandstone-wall-*` (2K)             |
+| Aerial Beach 01 — Rob Tuytel | [Poly Haven](https://polyhaven.com/a/aerial_beach_01) | `textures/desert-sand-*` (2K) |
 | Wood Planks — Amal Kumar | [Poly Haven](https://polyhaven.com/a/wood_planks) | `textures/monastery-wood-*` (2K) |
 | White Plaster 02 — Rob Tuytel | [Poly Haven](https://polyhaven.com/a/white_plaster_02) | `textures/monastery-plaster-*` (2K) |
 | Roof Slates 02 — Rob Tuytel | [Poly Haven](https://polyhaven.com/a/roof_slates_02) | `textures/monastery-roof-*` (1K) |
@@ -94,6 +95,15 @@ Additional distant tiers now contain 3,075 triangles for Island Tree 01, 1,724 f
 The original broadleaf tiers are Island Tree 01 (114,941 near / 15,646 middle triangles) and Island Tree 02 (56,896 near / 8,564 middle triangles). Tree 01's source has 1,599,403 triangles. `preserve-canopy.mjs` reduces each connected leaf to a textured diamond; the distant version samples leaves and expands their area to preserve coverage. The jungle combines both species. Tree detail is selected per instance, preserving all tree placements when quality or distance changes.
 
 Fir Tree 01 includes three tree specimens. Its source has 6,982,937 triangles; the bundled versions have 363,598 and 46,025. `preserve-needles.mjs` samples whole disconnected needles and increases their area for distant coverage. This avoids the nearly bare trunks produced by ordinary triangle simplification. These conversions trade some leaf and needle shape accuracy for rendering cost; they are not production-quality vegetation LODs.
+
+The desert's three Aerial Beach 01 maps are unmodified 2K JPEGs totaling
+1,826,595 bytes. Their shader adapts the tint and scale to the fictional desert.
+`python3 scripts/download-desert-sand.py` reproduces them; source URLs, SHA-256
+hashes and the CC0 license record are retained in `asset-sources/desert-sand/`.
+The erosion, sediment shader, dunes and distant escarpment in `src/desert-*.js`
+are original project code. The escarpment reuses the credited Sandstone Cracks
+color map. No new sound recordings or music were added in this landscape pass.
+See [desert landscape notes](desert-landscape.md).
 
 The flooded palace uses nine unmodified 2K maps from Marble Rock 02, Blue Plaster Weathered, and Marble Mosaic Tiles, totaling 24,476,296 bytes. `python3 scripts/download-palace-materials.py` reproduces them and retains source metadata/hashes in `asset-sources/palace-materials/`. The fluted columns, arch stones, broken vaults, capital scrolls, shell carvings, and weathering shader are original project geometry/code. [Palace art notes](palace-art.md) include rendered evidence and verification.
 

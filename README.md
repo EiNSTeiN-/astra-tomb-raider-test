@@ -182,6 +182,12 @@ High quality skips an unnecessary second directional-shadow render during contac
 
 The desert city now has ten sandstone courts with pointed arches, carved solar panels, varied galleries, and broken cornices. A hazy daylight sky also supplies reflections for its metalwork. Curved palm trunks and individually modeled leaflets replace the old branch clusters, with three distance-selected detail tiers and matching wind in their shadows. Bird models and positional emitters sit on the new stone perches. [Desert art notes](docs/desert-art.md) include the rendered comparisons, asset sources, collision checks, and performance limits.
 
+The desert landscape now has warm ripple-textured sand, dust entering the paving,
+layered exposed sandstone, and separate distant dune and escarpment ranges.
+Off-path erosion preserves the walking surfaces, reservoirs and climbing anchors.
+See [desert landscape comparisons](docs/desert-landscape.md) for the rendered
+change, added geometry cost, positional-audio checks and saved-climb recovery.
+
 The Himalayan monasteries now have supported timber bell pavilions, whitewashed upper halls, lattice windows, covered galleries, and damaged slate roofs carrying uneven snow. Wind moves the hanging cloth and its shadows; nearby wind audio comes from the banner lines. A cooler daylight sky lights the buildings against ridged alpine peaks. [Monastery art notes](docs/monastery-art.md) include the rendered comparisons, material sources, approach checks, and production save/reload verification.
 
 Eight playable bell racks now occupy the mountain's mechanism courts. Their 32 bronze bells swing above working ropes and pulleys, with brief hand poses when the explorer pulls a grip. Eight composed phrases use four response rules and share saved answers between the world and focused controls. Bell strikes have positional decay, obstruction filtering, and steady audio-clock timing beneath the quiet mountain score. Visual signs and flashes support play without hearing the notes. [Bell lesson notes](docs/bell-courts.md) include browser views, measured audio falloff, control routes, and release evidence.

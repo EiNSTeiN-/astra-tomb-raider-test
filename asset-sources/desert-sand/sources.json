@@ -1,0 +1,35 @@
+[
+  {
+    "asset": "aerial_beach_01",
+    "author": "Rob Tuytel",
+    "source": "https://polyhaven.com/a/aerial_beach_01",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_beach_01/aerial_beach_01_diff_2k.jpg",
+    "file": "public/assets/textures/desert-sand-color.jpg",
+    "bytes": 457152,
+    "sha256": "1803d7e2861b304bea6d2e124dcd4c657fcb93843b84c17bb2db98ce48a87e4e"
+  },
+  {
+    "asset": "aerial_beach_01",
+    "author": "Rob Tuytel",
+    "source": "https://polyhaven.com/a/aerial_beach_01",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_beach_01/aerial_beach_01_nor_gl_2k.jpg",
+    "file": "public/assets/textures/desert-sand-normal.jpg",
+    "bytes": 863847,
+    "sha256": "0f35185b7225fe2027897bb7e4586c7deb048817524f1ed104fdae7ce80bdc06"
+  },
+  {
+    "asset": "aerial_beach_01",
+    "author": "Rob Tuytel",
+    "source": "https://polyhaven.com/a/aerial_beach_01",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_beach_01/aerial_beach_01_rough_2k.jpg",
+    "file": "public/assets/textures/desert-sand-roughness.jpg",
+    "bytes": 505596,
+    "sha256": "318b440c109de7411f9e7443f38ae3cf873f34e90afd762c931bae3b23426da2"
+  }
+]

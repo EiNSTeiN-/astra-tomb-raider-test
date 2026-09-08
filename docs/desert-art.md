@@ -1,5 +1,9 @@
 # Sandstone city and desert palms
 
+The later [desert landscape pass](desert-landscape.md) adds ripple-textured sand,
+off-path sandstone erosion and two new horizon ranges. The city construction
+and its earlier verification are recorded below.
+
 The desert chapter now uses an original sandstone courtyard kit instead of its generic four-pier lintels, dark stone obelisks, and simple pyramid silhouettes. Pointed arches, individual beveled voussoirs, masonry spandrels, crenellated cornices, solar reliefs, and bronze details give the city a distinct architectural language. This is fictional environment design, not a reconstruction of a historical Omani site.
 
 All ten courts have authored combinations of gallery wings, arch heights, and broken spans. Structure stays around the perimeter, retaining the north/south and east/west crossing axes. The northwest support of court three shifts inward to leave its supply-cache approach clear without crowding the nearby camp. The gallery joins that shifted support. Terrain heights, objective locations, gate rules, and the existing two elevated desert routes are retained.

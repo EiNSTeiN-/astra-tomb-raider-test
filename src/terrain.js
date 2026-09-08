@@ -1,3 +1,5 @@
+import { refineDesertTerrain } from "./desert-geology.js";
+import { buildDesertHorizon } from "./desert-horizon.js";
 import * as THREE from "three";
 import { buildSnowMountains } from "./snow-mountains.js";
 import { buildForgeCaldera } from "./forge-caldera.js";
@@ -197,6 +199,7 @@ export function createTerrainProfile(map, level) {
     court: (x, z) => sample(courts, x, z),
   };
   profile.gallery = createSunkenGallery(profile, biome);
+  if (biome === "desert") return refineDesertTerrain(profile, map, level.seed);
   return upperHeights
     ? refineSkyTerrain(
         profile,
@@ -232,6 +235,7 @@ export function buildTerrainSurface(game) {
         court = new Float32Array(position.count),
         trail = new Float32Array(position.count),
         skyDepth = profile.geology ? new Float32Array(position.count) : null,
+        desertRock = profile.desert ? new Float32Array(position.count) : null,
         coast = profile.coastal ? new Float32Array(position.count * 3) : null;
       for (let i = 0; i < position.count; i++) {
         const px = position.getX(i),
@@ -241,6 +245,7 @@ export function buildTerrainSurface(game) {
         court[i] = profile.court(px, pz);
         trail[i] = profile.trail(px, pz);
         if (skyDepth) skyDepth[i] = profile.geology.depth(px, pz);
+        if (desertRock) desertRock[i] = profile.desert.rock(px, pz);
         if (coast) {
           const room = profile.coastal.nearest(px, pz);
           coast.set([px - room.x, pz - room.z, room.index], i * 3);
@@ -248,6 +253,11 @@ export function buildTerrainSurface(game) {
       }
       geometry.setAttribute("court", new THREE.BufferAttribute(court, 1));
       geometry.setAttribute("trail", new THREE.BufferAttribute(trail, 1));
+      if (desertRock)
+        geometry.setAttribute(
+          "desertRock",
+          new THREE.BufferAttribute(desertRock, 1),
+        );
       if (skyDepth)
         geometry.setAttribute(
           "skyDepth",
@@ -283,6 +293,11 @@ export function buildTerrainSurface(game) {
 
 export function buildHorizon(game) {
   game.cloudCity = null;
+  game.desertHorizon = [];
+  if (game.level.biome === "desert") {
+    buildDesertHorizon(game);
+    return;
+  }
   if (game.level.biome === "sky") {
     buildCloudCity(game);
     return;
