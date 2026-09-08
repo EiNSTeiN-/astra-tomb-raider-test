@@ -576,6 +576,7 @@ export class Adventure {
     this.items = [];
     this.detailPatches = [];
     this.naturePatches = [];
+    this.rockGrounding = null;
     this.desertScatter = null;
     this.forestPatches = [];
     this.explored = new Set(this.progress.explored || []);

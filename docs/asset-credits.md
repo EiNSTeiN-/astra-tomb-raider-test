@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The scattered-rock grounding uses original placement code in `src/stone-grounding.js`
+and `src/nature-rocks.js`. It reuses the existing six Rock Moss Set 01 scans by
+Kless Gyzen, credited below, and changes no model, texture or recording files.
+The desert retains its existing geometry derivative and terrain materials through
+the shared fitting functions. See [grounding comparisons](rock-grounding.md).
+
 The base-camp fire ring, timber, charcoal, supply chest, rolled bedding, straps,
 stitching, kettle and fire/particle shaders are original project geometry and code
 in `src/camp-*.js` and `src/camps.js`. They reuse the already bundled Wood Planks,

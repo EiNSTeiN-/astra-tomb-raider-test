@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Scattered rocks in the seven non-desert chapters now fit their scanned
+  undersides to the terrain and reject steep or reserved footprints. The fitting
+  accounts for rendered ground triangles as well as movement heights; an initially
+  missed coastal gap fell from 1.51 m to 0.37 m. All 384 tests and the build pass.
+  All eight chapters rendered in High and Performance; independent rays found
+  ground contact for all 1,058 retained rocks. Objective positions, obstacle
+  records and retained rock horizontal transforms matched the baseline. Native
+  production torch, rest, movement and exact save/reload passed without failed
+  assets or console warnings/errors. [Rock grounding notes](rock-grounding.md)
+  include before/after views, reduced scatter density and remaining local edge
+  overhangs. AAA graphics, human chapter pacing and subjective sound quality
+  remain open.
+
 - All 28 base camps now have fitted stone fire rings, charred timber, coals,
   detailed supply chests, rolled bedding and expedition equipment. A camp flame
   shader, sparks and smoke retain the existing positioned fire recording. All

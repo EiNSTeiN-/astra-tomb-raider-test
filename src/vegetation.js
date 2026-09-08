@@ -16,6 +16,8 @@ import {
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
 import { skyGroundSupported } from "./sky-geology.js";
 import { buildDesertScatter } from "./desert-scatter.js";
+import { stoneFootprint } from "./stone-grounding.js";
+import { placeNatureRock } from "./nature-rocks.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -178,6 +180,12 @@ export async function loadNature(game) {
   );
   if (game.world !== world) return;
   game.desertScatter = null;
+  game.rockGrounding = {
+    candidates: 0,
+    placed: 0,
+    reserved: 0,
+    unsupported: 0,
+  };
   if (biome === "desert") {
     buildDesertScatter(game, assets[0].tiers[0]);
     updateNature(game);
@@ -295,6 +303,7 @@ export async function loadNature(game) {
         return [{ geometry, material }];
       });
       const chunks = new Map();
+      const footprint = rock ? stoneFootprint(tiers[0][0].geometry) : null;
       for (let i = s; i < spots.length; i += sources.length) {
         const p = spots[i],
           key = `${Math.floor(p.x / 40)},${Math.floor(p.z / 40)}`;
@@ -308,10 +317,28 @@ export async function loadNature(game) {
           dummy.position.set(p.x, game.groundHeight(p.x, p.z) - 0.12, p.z);
           dummy.rotation.set(0, rng() * Math.PI * 2, 0);
           dummy.scale.setScalar(p.scale || 0.6 + rng() * 0.8);
+          if (rock) {
+            game.rockGrounding.candidates++;
+            const placed = placeNatureRock(game, footprint, {
+              x: p.x,
+              z: p.z,
+              size: dummy.scale.x,
+              yaw: dummy.rotation.y,
+            });
+            if (placed.reason) {
+              game.rockGrounding[placed.reason]++;
+              continue;
+            }
+            game.rockGrounding.placed++;
+            matrices.push(placed.matrix);
+            positions.push(placed.position);
+            continue;
+          }
           dummy.updateMatrix();
           matrices.push(dummy.matrix.clone());
           positions.push(dummy.position.clone());
         }
+        if (!matrices.length) continue;
         const patch = createLodPatch(world, tiers, matrices, positions, {
           castShadow: rock,
         });
