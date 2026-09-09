@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Jungle trees now use fitted full leaf cards, the original coverage mask and
+  shared cluster atlases baked once at load. The final suite passed all 456
+  tests and the production build passed. Nine browser comparisons found zero
+  color/depth silhouette differences across all three detail tiers and their
+  distance fades. All eight chapters rendered, and the new texture/framebuffer
+  allocations released on chapter change. Release keyboard and portrait-touch
+  checks preserved exact local saves on reload, at 100 health. Matched local GPU samples measured
+  about 9.8% more rendering time in High and 8.4% in Performance; the bake also
+  adds about 64 MiB of texture storage. [Leaf comparisons and checks](jungle-leaves.md)
+  record the visible improvement, geometry changes and memory/performance limits.
+
 - The jungle now has a grounded outer bank and 1,048 additional trees beyond
   its map boundary, filling formerly empty sightlines while preserving the
   original woodland, routes and sound anchors. All 453 tests and the release

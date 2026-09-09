@@ -1,10 +1,16 @@
-// Collapse each disconnected leaf to a textured diamond instead of deleting
-// whole leaves. Far detail samples leaves and grows their area to retain cover.
-export function preserveCanopy(document, primitive, stride = 1) {
-  const position = primitive.getAttribute("POSITION"),
-    normal = primitive.getAttribute("NORMAL"),
-    uv = primitive.getAttribute("TEXCOORD_0");
-  const indices = primitive.getIndices().getArray(),
+// Fit a two-triangle card to each disconnected leaf using its full UV bounds.
+// The original alpha mask supplies the silhouette. Distant tiers sample whole
+// leaves and expand their area; they remain an approximation of dense foliage.
+export function preserveCanopy(
+  document,
+  primitive,
+  stride = 1,
+  source = primitive,
+) {
+  const position = source.getAttribute("POSITION"),
+    normal = source.getAttribute("NORMAL"),
+    uv = source.getAttribute("TEXCOORD_0");
+  const indices = source.getIndices().getArray(),
     count = position.getCount();
   const parent = Int32Array.from({ length: count }, (_, i) => i);
   const root = (a) => {
@@ -28,58 +34,81 @@ export function preserveCanopy(document, primitive, stride = 1) {
   const positions = [],
     normals = [],
     uvs = [],
+    bounds = [],
     triangles = [];
-  const p = [],
-    n = [],
-    tex = [];
   let number = 0,
     retained = 0;
   for (const members of components.values()) {
     if (number++ % stride) continue;
     if (members.length > 128 || members.length < 4)
       throw new Error(`Unexpected leaf topology: ${members.length} vertices`);
-    let left = members[0],
-      right = left,
-      tip = left,
-      base = left,
-      minU = Infinity,
+    const samples = members.map((i) => ({
+      p: position.getElement(i, []),
+      n: normal.getElement(i, []),
+      uv: uv.getElement(i, []),
+    }));
+    const mean = [0, 0],
+      center = [0, 0, 0],
+      meanNormal = [0, 0, 0];
+    let minU = Infinity,
       maxU = -Infinity,
       minV = Infinity,
       maxV = -Infinity;
-    const center = [0, 0, 0];
-    for (const i of members) {
-      uv.getElement(i, tex);
-      position.getElement(i, p);
-      if (tex[0] < minU) {
-        minU = tex[0];
-        left = i;
-      }
-      if (tex[0] > maxU) {
-        maxU = tex[0];
-        right = i;
-      }
-      if (tex[1] < minV) {
-        minV = tex[1];
-        tip = i;
-      }
-      if (tex[1] > maxV) {
-        maxV = tex[1];
-        base = i;
-      }
-      for (let a = 0; a < 3; a++) center[a] += p[a] / members.length;
-    }
-    const selected = [tip, left, base, right],
-      start = positions.length / 3,
-      scale = Math.sqrt(stride);
-    for (const i of selected) {
-      position.getElement(i, p);
-      normal.getElement(i, n);
-      uv.getElement(i, tex);
+    for (const s of samples) {
+      minU = Math.min(minU, s.uv[0]);
+      maxU = Math.max(maxU, s.uv[0]);
+      minV = Math.min(minV, s.uv[1]);
+      maxV = Math.max(maxV, s.uv[1]);
+      for (let a = 0; a < 2; a++) mean[a] += s.uv[a] / samples.length;
       for (let a = 0; a < 3; a++) {
-        positions.push(center[a] + (p[a] - center[a]) * scale);
-        normals.push(n[a]);
+        center[a] += s.p[a] / samples.length;
+        meanNormal[a] += s.n[a] / samples.length;
       }
-      uvs.push(tex[0], tex[1]);
+    }
+    // Fit a plane from every source vertex's UV and position. Its full UV
+    // rectangle contains the leaf boundary; the supplied mask defines the edge.
+    // Selecting only four extreme source vertices cuts that boundary into a
+    // diamond and cannot be repaired by enabling alpha testing afterward.
+    let uu = 0,
+      uvSum = 0,
+      vv = 0;
+    const pu = [0, 0, 0],
+      pv = [0, 0, 0];
+    for (const s of samples) {
+      const u = s.uv[0] - mean[0],
+        v = s.uv[1] - mean[1];
+      uu += u * u;
+      uvSum += u * v;
+      vv += v * v;
+      for (let a = 0; a < 3; a++) {
+        pu[a] += u * (s.p[a] - center[a]);
+        pv[a] += v * (s.p[a] - center[a]);
+      }
+    }
+    const det = uu * vv - uvSum * uvSum;
+    if (det <= 1e-14)
+      throw new Error("Leaf has degenerate texture coordinates");
+    const uAxis = pu.map((p, a) => (p * vv - pv[a] * uvSum) / det);
+    const vAxis = pv.map((p, a) => (p * uu - pu[a] * uvSum) / det);
+    const length = Math.hypot(...meanNormal);
+    if (length < 1e-6) throw new Error("Leaf has no consistent front normal");
+    const start = positions.length / 3,
+      scale = Math.sqrt(stride);
+    for (const [u, v] of [
+      [minU, minV],
+      [maxU, minV],
+      [maxU, maxV],
+      [minU, maxV],
+    ]) {
+      for (let a = 0; a < 3; a++) {
+        positions.push(
+          center[a] +
+            (uAxis[a] * (u - mean[0]) + vAxis[a] * (v - mean[1])) * scale,
+        );
+        normals.push(meanNormal[a] / length);
+      }
+      uvs.push(u, v);
+      bounds.push(minU, minV, maxU, maxV);
     }
     // Match the source leaf's front face, regardless of UV orientation.
     const a = positions.slice(start * 3, start * 3 + 3),
@@ -112,6 +141,10 @@ export function preserveCanopy(document, primitive, stride = 1) {
   );
   primitive.setAttribute("NORMAL", accessor("VEC3", new Float32Array(normals)));
   primitive.setAttribute("TEXCOORD_0", accessor("VEC2", new Float32Array(uvs)));
+  primitive.setAttribute(
+    "_LEAF_BOUNDS",
+    accessor("VEC4", new Float32Array(bounds)),
+  );
   primitive.setIndices(accessor("SCALAR", new Uint32Array(triangles)));
   primitive.getMaterial().setAlphaMode("MASK").setAlphaCutoff(0.35);
   return {

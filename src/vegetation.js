@@ -19,6 +19,7 @@ import { buildDesertScatter } from "./desert-scatter.js";
 import { stoneFootprint } from "./stone-grounding.js";
 import { placeNatureRock } from "./nature-rocks.js";
 import { FRINGE_RANGES } from "./jungle-fringe.js";
+import { bakeLeafClusters } from "./leaf-atlas.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -48,6 +49,7 @@ function forestWind(material, uniform) {
 export async function loadForest(game) {
   const loader = new GLTFLoader(game.assetBatch?.manager);
   game.woodland = [];
+  game.leafAtlases = null;
   if (!["jungle", "snow"].includes(game.level.biome)) return;
   const names =
     game.level.biome === "snow"
@@ -58,24 +60,59 @@ export async function loadForest(game) {
     game.groundHeight(x, z),
   );
   game.woodland = layout;
-  const bundles = await Promise.all(
-    names.map((name) =>
-      Promise.all(
-        ["near", "optimized", "distant"].map((tier) =>
-          loader.loadAsync(`/assets/models/${name}/${tier}.glb`),
+  const [bundles, leafMask] = await Promise.all([
+    Promise.all(
+      names.map((name) =>
+        Promise.all(
+          ["near", "optimized", "distant"].map((tier) =>
+            loader.loadAsync(`/assets/models/${name}/${tier}.glb`),
+          ),
         ),
       ),
     ),
-  );
-  if (world !== game.world) return;
+    game.level.biome === "jungle"
+      ? new THREE.TextureLoader(game.assetBatch?.manager).loadAsync(
+          "/assets/textures/island-tree-leaves-alpha.png",
+        )
+      : Promise.resolve(null),
+  ]);
+  if (world !== game.world) {
+    leafMask?.dispose();
+    return;
+  }
+  if (leafMask) {
+    // Match glTF UV orientation. The PNG is linear coverage, not color.
+    leafMask.flipY = false;
+    leafMask.colorSpace = THREE.NoColorSpace;
+    leafMask.wrapS = leafMask.wrapT = THREE.RepeatWrapping;
+    leafMask.anisotropy = 8;
+  }
   game.forestWind = { value: 0 };
+  const canopyDepth = (material) => forestWind(material, game.forestWind);
+  if (leafMask) {
+    const specimen = meshSources(bundles[0][0].scene).find((m) =>
+      /leaves/.test(m.material.name),
+    );
+    game.leafAtlases = bakeLeafClusters(
+      game.renderer,
+      specimen.material,
+      leafMask,
+      specimen.geometry.getAttribute("_leaf_bounds"),
+    );
+  }
   for (let variant = 0; variant < bundles.length; variant++) {
     const assets = bundles[variant];
     assets[0].scene.updateMatrixWorld(true);
-    const bounds = new THREE.Box3().setFromObject(assets[0].scene);
+    const reference = assets[0].scene.userData.vesperTreeBounds;
+    const bounds = reference
+      ? new THREE.Box3(
+          new THREE.Vector3().fromArray(reference.min),
+          new THREE.Vector3().fromArray(reference.max),
+        )
+      : new THREE.Box3().setFromObject(assets[0].scene);
     const center = bounds.getCenter(new THREE.Vector3()),
       height = bounds.max.y - bounds.min.y;
-    const tiers = assets.map((asset) => {
+    const tiers = assets.map((asset, tier) => {
       const groups = new Map();
       for (const source of meshSources(asset.scene)) {
         let geometry = source.geometry.clone().applyMatrix4(source.matrixWorld);
@@ -103,8 +140,16 @@ export async function loadForest(game) {
         material.alphaTest = leaf ? 0.35 : 0;
         material.roughness = 0.95;
         if (leaf) {
-          if (game.level.biome === "jungle")
+          if (game.level.biome === "jungle") {
             material.color.multiply(new THREE.Color(0xc9e6ba));
+            material.userData.leafTiles = [1, 2, 4][tier];
+            if (tier) {
+              const maps = game.leafAtlases.tiers[material.userData.leafTiles];
+              Object.assign(material, maps);
+              material.metalnessMap = maps.roughnessMap;
+              material.alphaMap = null;
+            } else material.alphaMap = leafMask;
+          }
           forestWind(material, game.forestWind);
         }
         return { geometry, material };
@@ -125,7 +170,7 @@ export async function loadForest(game) {
     for (const chunk of chunks.values())
       game.forestPatches.push(
         createLodPatch(world, tiers, chunk.matrices, chunk.positions, {
-          wind: (material) => forestWind(material, game.forestWind),
+          wind: canopyDepth,
         }),
       );
     const fringeChunks = new Map();
@@ -149,7 +194,7 @@ export async function loadForest(game) {
         chunk.positions,
         {
           castShadow: false,
-          wind: (material) => forestWind(material, game.forestWind),
+          wind: canopyDepth,
         },
       );
       for (const mesh of patch.tiers.flat()) {

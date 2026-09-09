@@ -7,10 +7,13 @@ import {
   dedup,
 } from "@gltf-transform/functions";
 import { MeshoptSimplifier } from "meshoptimizer";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { preserveCanopy } from "./preserve-canopy.mjs";
 import { preserveNeedles } from "./preserve-needles.mjs";
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
+const treeLeaves = JSON.parse(
+  await readFile("asset-sources/tree-leaves/sources.json", "utf8"),
+);
 await MeshoptSimplifier.ready;
 for (const asset of process.argv.slice(2).length
   ? process.argv.slice(2)
@@ -62,6 +65,10 @@ for (const asset of process.argv.slice(2).length
       await doc.transform(weld(), prune(), dedup());
     }
 
+    const reference = treeLeaves.trees[asset]?.referenceBounds;
+    if (reference)
+      for (const scene of doc.getRoot().listScenes())
+        scene.setExtras({ ...scene.getExtras(), vesperTreeBounds: reference });
     await io.write(`public/assets/models/${asset}/${name}.glb`, doc);
     const triangles = doc
       .getRoot()

@@ -1,0 +1,137 @@
+{
+  "mask": {
+    "path": "public/assets/textures/island-tree-leaves-alpha.png",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/island_tree_01/island_tree_01_leaves_alpha_1k.png",
+    "sha256": "f4341f147988dbe6b58d9ca841a8f0e4bcff25bc40d05f9877da82006d489c39",
+    "bytes": 57438,
+    "license": "CC0-1.0",
+    "source": "https://polyhaven.com/a/island_tree_01",
+    "shared_with": "https://polyhaven.com/a/island_tree_02",
+    "derivation": "Unmodified 1K PNG; both assets publish the same leaf mask."
+  },
+  "trees": {
+    "island_tree_01": {
+      "source": "https://polyhaven.com/a/island_tree_01",
+      "license": "CC0-1.0",
+      "inputs": [
+        {
+          "path": "asset-sources/models/island_tree_01/scene.gltf",
+          "sha256": "78e905a40670bfabb2760601d4d9a6c17193a50d68e6271c66893eb7bd75906d"
+        },
+        {
+          "path": "asset-sources/models/island_tree_01/island_tree_01.bin",
+          "sha256": "1faa817b46e24ed6fc90d3ec72188a0dc5ac75e82c89b3dd3c5fdaecf7cc005c"
+        }
+      ],
+      "referenceBounds": {
+        "min": [
+          -2.344165802001953,
+          -0.01643257960677147,
+          -2.583538055419922
+        ],
+        "max": [
+          2.4107038974761963,
+          5.0071187019348145,
+          2.2341079711914062
+        ]
+      },
+      "outputs": [
+        {
+          "path": "public/assets/models/island_tree_01/near.glb",
+          "sha256": "1dc508ee88e0cdb5686e07684ec1664254b03db7f2b576f78a2f6d10e73de69a",
+          "leaves": [
+            {
+              "original": 44168,
+              "retained": 44168,
+              "triangles": 88336
+            }
+          ]
+        },
+        {
+          "path": "public/assets/models/island_tree_01/optimized.glb",
+          "sha256": "4558365e8f56d8490e877327f83cc0559683ebd3008fbc1c18fc84565350a5b4",
+          "leaves": [
+            {
+              "original": 44168,
+              "retained": 5521,
+              "triangles": 11042
+            }
+          ]
+        },
+        {
+          "path": "public/assets/models/island_tree_01/distant.glb",
+          "sha256": "b07f0f887a8fbd85fda167f109445ea4ae5a5b64a98c7644bb5f2b7766e533ee",
+          "leaves": [
+            {
+              "original": 44168,
+              "retained": 921,
+              "triangles": 1842
+            }
+          ]
+        }
+      ]
+    },
+    "island_tree_02": {
+      "source": "https://polyhaven.com/a/island_tree_02",
+      "license": "CC0-1.0",
+      "inputs": [
+        {
+          "path": "asset-sources/models/island_tree_02/scene.gltf",
+          "sha256": "d8c5d9ead41cdbef91a648f40ff60470faa19eb3a7010e59e44cb1a01250f75d"
+        },
+        {
+          "path": "asset-sources/models/island_tree_02/island_tree_02.bin",
+          "sha256": "427d69ccc1ea12d1fb9c6af89691563b4a097f39a6f34c15be6e45ef5e5fd4ce"
+        }
+      ],
+      "referenceBounds": {
+        "min": [
+          -2.052337884902954,
+          -0.01397637277841568,
+          -1.1138885021209717
+        ],
+        "max": [
+          2.155407428741455,
+          3.3892130851745605,
+          2.956543207168579
+        ]
+      },
+      "outputs": [
+        {
+          "path": "public/assets/models/island_tree_02/near.glb",
+          "sha256": "bd5c8e601170aad129f3f3c6146661a3ee9b1bfa31e12843aaedebb8d269ff1c",
+          "leaves": [
+            {
+              "original": 29781,
+              "retained": 29781,
+              "triangles": 59562
+            }
+          ]
+        },
+        {
+          "path": "public/assets/models/island_tree_02/optimized.glb",
+          "sha256": "284020d6dab22407fb31af7f9a14d75660a0a0fe97ab77653121830b11634d28",
+          "leaves": [
+            {
+              "original": 29781,
+              "retained": 3723,
+              "triangles": 7446
+            }
+          ]
+        },
+        {
+          "path": "public/assets/models/island_tree_02/distant.glb",
+          "sha256": "07fe20b6c1a70eeacc6ccedf618afb03b5658eba4a8299201a44e17df5f80722",
+          "leaves": [
+            {
+              "original": 29781,
+              "retained": 621,
+              "triangles": 1242
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "derivation": "Two-triangle UV-bounds leaf cards fitted to the source leaf vertices; original sampling strides 1/8/48, with area compensation. Existing non-leaf geometry and images retained. Original near-tier bounds retain tree normalization. Runtime supplies the shared unmodified alpha map and bakes middle/distant leaf clusters into shared color, normal and roughness atlases once per jungle load. Ordinary foliage and depth materials sample those atlases each frame."
+}

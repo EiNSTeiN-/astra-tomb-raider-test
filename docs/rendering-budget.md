@@ -48,6 +48,10 @@ The helper restores visibility and disposes temporary geometry even if the basel
 
 ## Earlier tree and shrub revision
 
+The counts and measurements in this section describe that earlier revision.
+The subsequent [leaf reconstruction](jungle-leaves.md) changes Tree 02 geometry,
+adds masked clusters and records current hardware GPU timings and memory costs.
+
 The jungle profile identified shrubs as the largest geometry contributor in a low-quality spawn view. Five visible shrub batches alone submitted approximately 1.51 million triangles. Each instance used the same 21,598-triangle mesh, and patch-level visibility could retain plants well beyond their intended draw distance.
 
 ## Changes

@@ -4,6 +4,8 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The requested approximately one-hour duration per chapter has not been established by human playtesting, and the real-time graphics do not yet reach modern AAA production quality. See [the production status](docs/production-status.md) for the original requirements, evidence, and remaining work.
 
+Jungle foliage now has [fitted leaf silhouettes and shared cluster textures](docs/jungle-leaves.md). The notes include matching views, GPU timings and the added memory cost.
+
 The jungle now has [a grounded outer forest](docs/jungle-fringe.md), filling
 empty boundary sightlines with varied trees while preserving playable routes.
 The comparison notes include the additional rendering cost and remaining limits.
