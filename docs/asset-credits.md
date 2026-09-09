@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The Cinder Relay's six pressure pistons, galleries, valve wheels, pipe routes,
+return lift, dispatch ledger, signs, map and recovered record are original
+project geometry, code and writing in `src/pressure-*.js`. They reuse the existing
+credited forge stone maps, original forge steam and fire shaders, and existing
+machine/steam synthesis and fire recording. The volcanic score retains its
+original lifting arrangement. No external image, model, recording or music files
+were added. See [the relay notes](cinder-relay.md).
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658

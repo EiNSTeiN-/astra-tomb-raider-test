@@ -1,4 +1,5 @@
 import { normalizeCleft } from "./cleft-rules.js";
+import { normalizePressure } from "./pressure-rules.js";
 import { normalizeBellHoist } from "./bell-hoist-rules.js";
 import { normalizeWind } from "./wind-rules.js";
 import { normalizeCipher } from "./cipher-rules.js";
@@ -119,6 +120,8 @@ export function normalizeSave(value) {
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
       cleft: key === "sands" ? normalizeCleft(v.cleft) : null,
+      pressureRelay:
+        key === "embers" ? normalizePressure(v.pressureRelay) : null,
       torch: key === "verdant" && v.torch === true,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
@@ -201,6 +204,7 @@ export class SaveStore {
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
+      pressureRelay: id === "embers" ? normalizePressure(null) : null,
       torch: false,
       time: 0,
       health: 100,

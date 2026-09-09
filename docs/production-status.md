@@ -20,6 +20,21 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The volcanic chapter now includes **the Cinder Relay**, an optional ascent
+  through six pressure pistons, three circuit controls and safe galleries to a
+  dispatch ledger and return lift. All 397 tests and the production build pass.
+  A continuous browser route used native movement/interactions with assisted
+  directions, crossed every piston and returned at 100 health. Browser checks
+  covered High/Performance in all eight chapters, unchanged original objectives
+  and obstacles, gallery/transit reloads, multi-touch Use/Jump, hot-floor recovery,
+  aligned steam sources, linear audio falloff, paused plumes and disposal of
+  173 inspected graphics resources. Production native E opened a saved circuit
+  and read the summit ledger; both saves restored exactly apart from last-played
+  timestamps. No failed assets or console warnings/errors were reported.
+  [Relay notes](cinder-relay.md) include the route, images, workload and limits.
+  Its primitive architecture needs further art work; AAA graphics, human chapter
+  pacing, consumer-device performance and subjective sound quality remain open.
+
 - The 33 perched birds now have regional plumage, shaped heads/bills, eyes,
   layered feathers and planted feet. Seven jungle birds formerly inside masonry
   now sit above the actual stone; desert/coastal body heights also match their

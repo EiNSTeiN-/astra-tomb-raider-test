@@ -65,6 +65,14 @@ the recovered bearing. See [climbing and verification notes](docs/surveyors-clef
 
 Mountain bells use **E / Use** at each named pull rope. Read the bellkeeper's tablet, listen to its phrase, and answer according to its repeat, reverse, or shifted-sign rule. The tablet offers replay, reset, activation, and focused controls. Replaying preserves your partial answer.
 
+In **A Heart of Embers**, **the Cinder Relay** branches west from the obsidian-hub
+station in Black Glass. Open three pressure circuits, ride six pistons and jump
+between their crowns to reach a dispatch ledger 24 metres above the settling
+floor. **E / Use** operates valves and lift controls; **Space / Jump** crosses
+gaps. Safe galleries preserve progress, and the ledger releases a return lift.
+**M** shows the chamber and **J** keeps its recovered story. See the
+[route, sound and verification notes](docs/cinder-relay.md).
+
 East of the mountain’s western library trail, **the bellkeepers’ hoist** adds an
 optional tomb with two counterweighted lifts, three floors and a broken gallery
 jump. Recover a bronze tongue, restore the upper bell and cross to a refuge
