@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The guardian watch routes, footing checks and patrol state in
+`src/guardian-patrols.js` and `src/encounters.js` are original project code.
+They reuse the existing guardian geometry, planted-foot animation, original
+footfall synthesis and adaptive chapter scores. No new external asset or
+dependency was added. See [patrol behavior and verification](guardian-patrols.md).
+
 The Courier Road's cable ferry, landings, stair gaps, controls, signs, map and
 letters are original project work in `src/courier-*.js`. They reuse the existing
 cloud-city rock maps, Wood Planks by Amal Kumar (Poly Haven, CC0), and the

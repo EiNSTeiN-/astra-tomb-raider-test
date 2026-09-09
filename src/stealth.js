@@ -175,7 +175,7 @@ export function perceivePlayer(game, enemy, dt) {
       enemy.alertCue = game.elapsed;
     }
   } else if (quiet && (heard || (sight && enemy.awareness > 0.12))) {
-    if (["idle", "return"].includes(enemy.state)) {
+    if (["idle", "patrol", "return"].includes(enemy.state)) {
       enemy.state = "investigate";
       enemy.route = [];
       enemy.routeSearch = null;
@@ -196,7 +196,7 @@ export function stealthState(game) {
     if (
       enemy.hp <= 0 ||
       distance > 38 ||
-      (enemy.state === "idle" && enemy.awareness < 0.05) ||
+      (["idle", "patrol"].includes(enemy.state) && enemy.awareness < 0.05) ||
       enemy.state === "return"
     )
       continue;

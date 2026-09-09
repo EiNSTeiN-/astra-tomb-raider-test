@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- All 122 guardians now follow regional watch routes with pauses and moving
+  sight lines, then resume after investigating a sound. Terrain-aware movement
+  keeps patrol, pursuit, charges and return on suitable footing. All 398 route
+  legs completed navigation searches; 210 simulated seconds in each chapter
+  produced 482 completed circuits without skipped stops. Prepared crouched
+  crossings passed in all eight chapters at 100 health. All 450 tests and the
+  production build passed, footfall attenuation remained linear, and three
+  native keyboard/touch/combat cases retained exact saves on reload. The
+  production fight preserved a defeated warden and 82 health after five shots.
+  [Patrol behavior and evidence](guardian-patrols.md) distinguish these local
+  and accelerated checks from human campaign pacing, encounter balance,
+  subjective audio quality and the remaining graphics/device work.
+
 - The Courier Road ferry now has weathered timber framing, grooved wheels,
   continuous rigging, fitted-stone landings and a woven sail that gathers upward
   while its spars retain their span. Moving wind follows the cloth centre and

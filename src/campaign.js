@@ -3,7 +3,11 @@ import { addPressureRelay } from "./pressure-rules.js";
 import { addEchoGallery } from "./echo-gallery-rules.js";
 import { addOrbitVault } from "./orbit-rules.js";
 import { EXPEDITIONS } from "./expeditions.js";
-import { encounterType, ENEMY_TYPES } from "./encounters.js";
+import {
+  encounterType,
+  ENEMY_TYPES,
+  guardianPatrolPlan,
+} from "./encounters.js";
 import { createSkyMap } from "./sky-layout.js";
 import { addBellHoist } from "./bell-hoist-rules.js";
 import { addFireVault } from "./fire-vault-rules.js";
@@ -467,6 +471,7 @@ export function createMap(level) {
           rooms[i + 1].z - r.z - (slot ? 2 : -2),
         ),
         hp: ENEMY_TYPES[kind].hp,
+        patrolPlan: guardianPatrolPlan(level.biome, r, slot, i),
       };
     }),
   );

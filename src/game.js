@@ -246,6 +246,7 @@ import {
   wadingDepth,
 } from "./water-motion.js";
 import { waterAt } from "./hydrology.js";
+import { prepareGuardianPatrols } from "./guardian-patrols.js";
 import { resetDiving, divingHint, updateDiveView, DIVE_AIR } from "./diving.js";
 import {
   buildTideArchive,
@@ -818,6 +819,7 @@ export class Adventure {
     buildTideArchive(this);
     buildSunkenGallery(this);
     buildTorch(this);
+    prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();
     this.templeCaptureGeometry?.forEach((g) => g.dispose());
     this.templeCaptureGeometry = [];

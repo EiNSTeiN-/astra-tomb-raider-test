@@ -4,6 +4,10 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The requested approximately one-hour duration per chapter has not been established by human playtesting, and the real-time graphics do not yet reach modern AAA production quality. See [the production status](docs/production-status.md) for the original requirements, evidence, and remaining work.
 
+Guardians now follow [regional patrol routes](docs/guardian-patrols.md), pausing
+to watch approaches and resuming after an investigation. Observe their routes,
+use cover, and crouch with **B / Crouch** to pass while they look away.
+
 The cloud-city chapter now includes [the Courier Road](docs/courier-road.md): an optional wind-powered ferry journey through three dispatch posts, with broken-stair climbs, a return register, positional wind and cable sounds, and saved landing recovery. Find it through the first court’s north gate.
 The [ferry construction update](docs/courier-construction.md) adds weathered
 timber, grooved wheels, fitted stone and a woven sail that gathers upward as you

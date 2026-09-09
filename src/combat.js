@@ -1,6 +1,12 @@
 import * as THREE from "three";
 import { buildGuardianArt, animateGuardian } from "./guardian-art.js";
 import { clearSegment, searchRoute } from "./navigation.js";
+import {
+  guardianFooting,
+  resetGuardianPatrol,
+  watchGuardianPatrol,
+  updateGuardianPatrol,
+} from "./guardian-patrols.js";
 
 import { ENEMY_TYPES } from "./encounters.js";
 import { perceivePlayer, playerNoise, guardianEngaged } from "./stealth.js";
@@ -89,7 +95,13 @@ export function buildGuardian(game, spawn) {
   };
 }
 
-function move(game, enemy, direction, distance) {
+function move(
+  game,
+  enemy,
+  direction,
+  distance,
+  canStand = (x, z) => guardianFooting(game, enemy, x, z),
+) {
   const p = enemy.group.position,
     steps = Math.max(1, Math.ceil(distance / 0.35)),
     amount = distance / steps;
@@ -97,7 +109,7 @@ function move(game, enemy, direction, distance) {
   for (let i = 0; i < steps; i++) {
     const x = p.x + direction.x * amount,
       z = p.z + direction.z * amount;
-    if (!game.canMove(x, z, 0)) break;
+    if (!canStand(x, z)) break;
     if (
       game.enemies.some(
         (other) =>
@@ -121,7 +133,14 @@ function recover(enemy) {
   enemy.warning.visible = false;
 }
 
-export function navigateGuardian(game, enemy, target, dt, pace = 1) {
+export function navigateGuardian(
+  game,
+  enemy,
+  target,
+  dt,
+  pace = 1,
+  canStand = (x, z) => guardianFooting(game, enemy, x, z),
+) {
   const p = enemy.group.position;
   enemy.routeCooldown = Math.max(0, (enemy.routeCooldown || 0) - dt);
   if (
@@ -132,7 +151,6 @@ export function navigateGuardian(game, enemy, target, dt, pace = 1) {
     enemy.route = [];
     enemy.routeSearch = null;
   }
-  const canStand = (x, z) => game.canMove(x, z, 0);
   if (!enemy.route.length && !enemy.routeSearch && enemy.routeCooldown <= 0) {
     if (clearSegment(canStand, p, target))
       enemy.route = [{ x: target.x, z: target.z }];
@@ -174,14 +192,14 @@ export function navigateGuardian(game, enemy, target, dt, pace = 1) {
   const direction = new THREE.Vector3(waypoint.x - p.x, 0, waypoint.z - p.z),
     distance = Math.min(enemy.spec.speed * dt * pace, direction.length());
   direction.normalize();
-  let moved = move(game, enemy, direction, distance);
+  let moved = move(game, enemy, direction, distance, canStand);
   if (moved < distance * 0.3) {
     // Short side steps let a pair pass one another without rebuilding both paths.
     for (const sign of [1, -1]) {
       const side = direction
         .clone()
         .applyAxisAngle(new THREE.Vector3(0, 1, 0), sign * 0.8);
-      moved = move(game, enemy, side, distance * 0.8);
+      moved = move(game, enemy, side, distance * 0.8, canStand);
       if (moved > 0) break;
     }
     if (moved === 0 && enemy.routeCooldown <= 0) enemy.route = [];
@@ -276,12 +294,14 @@ export function updateGuardians(game, dt) {
     enemy.flash = Math.max(0, enemy.flash - dt);
     enemy.cooldown -= dt;
     enemy.staggerCooldown = Math.max(0, (enemy.staggerCooldown || 0) - dt);
-    if (enemy.state === "idle")
+    if (enemy.state === "idle" && !watchGuardianPatrol(game, enemy, dt))
       enemy.group.rotation.y =
         enemy.homeYaw + Math.sin(game.elapsed * 0.35 + enemy.phase) * 0.3;
     const canSee = perceivePlayer(game, enemy, dt);
     const away = p.distanceTo(enemy.home) > 48;
-    if (enemy.state === "pursue") {
+    if (["idle", "patrol"].includes(enemy.state) && enemy.patrol) {
+      updateGuardianPatrol(game, enemy, dt, navigateGuardian);
+    } else if (enemy.state === "pursue") {
       if (
         away ||
         (!canSee &&
@@ -296,7 +316,13 @@ export function updateGuardians(game, dt) {
       } else if (!canSee && p.distanceTo(enemy.lastKnown) < 1.8) {
         enemy.state = "search";
         enemy.searchUntil = game.elapsed + 4;
-      } else if (canSee && distance < spec.reach && enemy.cooldown <= 0)
+      } else if (
+        canSee &&
+        distance < spec.reach &&
+        enemy.cooldown <= 0 &&
+        (enemy.kind !== "hunter" ||
+          clearSegment((x, z) => guardianFooting(game, enemy, x, z), p, player))
+      )
         beginAttack(game, enemy);
       else {
         if (
@@ -380,13 +406,14 @@ export function updateGuardians(game, dt) {
         enemy.awareness = 0;
         enemy.route = [];
         enemy.routeSearch = null;
+        resetGuardianPatrol(enemy);
       } else navigateGuardian(game, enemy, enemy.home, dt);
     }
     animateGuardian(game, enemy, dt);
     const engaged = guardianEngaged(enemy);
     enemy.bar.visible =
       distance < 26 &&
-      enemy.state !== "idle" &&
+      (!["idle", "patrol"].includes(enemy.state) || enemy.awareness > 0.05) &&
       enemy.state !== "return" &&
       game.lineOfSight(player, p);
     if (enemy.bar.visible && game.camera)

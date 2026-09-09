@@ -1,6 +1,10 @@
 import { addCourierFerry } from "./courier-rules.js";
 import { EXPEDITIONS } from "./expeditions.js";
-import { encounterType, ENEMY_TYPES } from "./encounters.js";
+import {
+  encounterType,
+  ENEMY_TYPES,
+  guardianPatrolPlan,
+} from "./encounters.js";
 
 export const SKY_ROUTE_VERSION = 1;
 
@@ -162,6 +166,7 @@ export function createSkyMap(level, rng) {
           rooms[i + 1].z - r.z - (slot ? 2 : -2),
         ),
         hp: ENEMY_TYPES[kind].hp,
+        patrolPlan: guardianPatrolPlan(level.biome, r, slot, i),
       };
     }),
   );

@@ -1,5 +1,10 @@
 # Quiet approaches and guardian awareness
 
+Guardians now follow [regional watch routes](guardian-patrols.md), with pauses,
+moving sight lines and resumed patrols after investigation. The verification
+below records the earlier stationary-post stealth milestone; the linked notes
+cover the current patrol behavior and its repeated checks.
+
 All eight chapters now support crouched movement and directional guardian perception. Press **B** or **Crouch** on touch to lower Vesper into a bent-leg stance and move at 2.2 metres per second. Aiming, firing, jumping, dodging, swimming and actions that occupy both hands release the stance. The camera lowers smoothly, the boots remain fitted to their supports, and the pistol grip follows the body while standing to fire.
 
 ![Crouching behind a jungle guardian and a stone pier](images/stealth-quiet.jpg)
@@ -25,7 +30,7 @@ Crouched footsteps use 30% of the ordinary footstep peak-envelope setting. Suspi
 
 ## Scope and remaining limits
 
-This is a prototype stealth system. Crouching lowers the visible pose and sight target; it retains the existing movement clearance and does not add crawl tunnels. Solid collision cover affects sight; individual leaves and grass do not provide a camouflage system. Investigation reuses the guardian navigator, with local scanning and return behavior rather than independently authored patrol schedules. Hearing currently models player footsteps, landings, dodges, splashes and shots, rather than every machine in the world.
+This is a prototype stealth system. Crouching lowers the visible pose and sight target; it retains the existing movement clearance and does not add crawl tunnels. Solid collision cover affects sight; individual leaves and grass do not provide a camouflage system. Investigation reuses the guardian navigator, with local scanning and return behavior. Hearing currently models player footsteps, landings, dodges, splashes and shots, rather than every machine in the world.
 
 The checks use prepared positions and assisted simulation steps except where native production input is stated. They do not establish full encounter balance, human playthrough difficulty, approximately one hour per chapter, broad browser/device performance, or AAA graphics. The original graphics, pacing and subjective mix targets remain open.
 
