@@ -110,7 +110,8 @@ The production build passes with the existing large-chunk advisory. The same fin
 `index-DYq9hjRy.css`.
 
 This remains procedural game artwork. The wider landscape, repeated
-construction, simple flame and jar shapes, and lack of hand contact during
-valve/lift use still need work. The requested AAA graphics, subjective mix
+construction, simple flame and jar shapes, and lift-control interaction still
+need work. The subsequent [valve interaction pass](cinder-relay-hands.md) adds
+two-hand contact and a cancellable turn to the three circuit valves. The requested AAA graphics, subjective mix
 quality, broader hardware coverage and approximately one-hour human chapter
 pacing remain open production targets.

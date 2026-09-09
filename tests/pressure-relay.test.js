@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
+import {
+  advancePressureWheel,
+  pressureWheelStance,
+} from "../src/pressure-motion.js";
+import { canAim } from "../src/aiming.js";
+import { canCrouch } from "../src/stealth.js";
+import { torchHandsBusy } from "../src/torch.js";
 import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
@@ -85,7 +92,8 @@ export function pressureTick(g, n = 1, v = { x: 0, z: 0 }, jump = false) {
   for (let i = 0; i < n; i++) {
     g.elapsed += 1 / 60;
     updatePressureRelay(g, 1 / 60);
-    if (!g.paused) advanceCharacter(g, v, 1 / 60, jump && i === 0);
+    if (!g.paused && !advancePressureWheel(g, 1 / 60, v))
+      advanceCharacter(g, v, 1 / 60, jump && i === 0);
     g.hitTimer = Math.max(0, g.hitTimer - 1 / 60);
   }
 }
@@ -136,6 +144,7 @@ export function climbPressureRoute(g) {
   pressureTick(g);
   assert.equal(pressureControl(g)?.bank, 0);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureWalk(g, 8.7, 6.6);
   pressureWait(g, () => h.pistons[0].deck.y < 0.22);
   pressureWalk(g, 7, 5);
@@ -152,6 +161,7 @@ export function climbPressureRoute(g) {
   pressureTick(g);
   assert.equal(h.saved.rest, 1);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureWalk(g, -7, 1.55);
   pressureWait(g, () => h.pistons[2].deck.y < 8.22);
   pressureJump(g, -7, -0.9, 8.2);
@@ -168,6 +178,7 @@ export function climbPressureRoute(g) {
   pressureTick(g);
   assert.equal(h.saved.rest, 2);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureWalk(g, -3.55, -16);
   pressureWait(g, () => h.pistons[4].deck.y < 16.22);
   pressureJump(g, -1.2, -16, 16.2);
@@ -184,6 +195,7 @@ export function climbPressureRoute(g) {
   pressureTick(g);
   assert.equal(h.saved.rest, 3);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   assert(h.saved.recovered);
 }
 
@@ -201,6 +213,99 @@ test("pressure pistons have paired transfer windows and bounded periodic travel"
     }
     assert.equal(pistonHeight(i, 6, 3), pistonHeight(i + 1, 6, 3));
     assert.equal(pistonHeight(i, 6, bank), PRESSURE_PISTONS[i].low);
+  }
+});
+
+test("pressure valves commit once at the detent, cancel with movement and freeze silently on pause", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay,
+    c = h.controls[0];
+  pressureTick(g);
+  g.player.position.copy(pressureWheelStance(c));
+  const tones = [];
+  g.audio.tone = (name) => tones.push(name);
+  pressureInteract(g);
+  const op = h.operation;
+  assert(op);
+  assert.equal(canAim(g), false);
+  assert.equal(canCrouch(g), false);
+  assert.equal(torchHandsBusy(g), true);
+  g.attack();
+  assert.deepEqual(tones, []);
+  pressureTick(g, 42);
+  assert(op.turn > 0 && op.turn < 1);
+  assert(c.source.activity > 0);
+  assert.equal(h.saved.opened, 0);
+  g.save();
+  const unfinished = structuredClone(g.progress);
+  pressureInteract(g);
+  assert.equal(h.operation, op, "Use does not queue or restart an operation");
+  const frozen = [op.time, c.wheel.rotation.z, ...g.player.position.toArray()];
+  g.paused = true;
+  pressureTick(g, 120);
+  assert.deepEqual(
+    [op.time, c.wheel.rotation.z, ...g.player.position.toArray()],
+    frozen,
+  );
+  assert.equal(c.source.activity, 0);
+  g.paused = false;
+  pressureTick(g, 1, { x: 0.5, z: 0 });
+  assert.equal(h.operation, null);
+  pressureTick(g, 90);
+  assert.equal(h.saved.opened, 0);
+  assert(Math.abs(c.turn) < 0.001);
+  assert.equal(c.source.activity, 0);
+  const reload = pressureFixture(unfinished);
+  assert.equal(reload.pressureRelay.operation, null);
+  assert.equal(reload.pressureRelay.saved.opened, 0);
+  assert.equal(reload.pressureRelay.controls[0].turn, 0);
+  g.player.position.copy(pressureWheelStance(c));
+  pressureInteract(g);
+  pressureTick(g, 75);
+  assert(h.operation.committed);
+  assert.equal(h.saved.opened, 1);
+  assert.deepEqual(tones, ["click"]);
+  const committed = structuredClone(g.progress);
+  g.keys.add("Space");
+  pressureTick(g);
+  g.keys.clear();
+  assert.equal(h.operation, null);
+  pressureTick(g, 90);
+  pressureInteract(g);
+  assert.equal(h.operation, null, "an open circuit cannot turn again");
+  assert.equal(h.saved.opened, 1);
+  assert.deepEqual(tones, ["click"]);
+  const completed = pressureFixture(committed);
+  assert.equal(completed.pressureRelay.saved.opened, 1);
+  assert.equal(completed.pressureRelay.controls[0].turn, 1);
+});
+
+test("all valve approaches remain on clear gallery floors and reject the back of the pedestal", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  pressureTick(g);
+  for (const c of h.controls.filter((c) => c.kind === "valve")) {
+    h.saved.opened = c.bank;
+    h.saved.rest = h.anchor = c.bank;
+    const stance = pressureWheelStance(c);
+    assert(g.canMove(stance.x, stance.z, stance.y));
+    assert.equal(supportAt(g, stance.x, stance.z, stance.y).height, stance.y);
+    g.player.position.copy(c.position).add(new THREE.Vector3(0, 0, -1.65));
+    pressureInteract(g);
+    assert.equal(h.operation, null);
+    g.player.position.copy(c.position).add(new THREE.Vector3(-0.9, 0, 0));
+    pressureInteract(g);
+    assert(h.operation);
+    pressureTick(g, 150);
+    assert.equal(h.saved.opened, c.bank + 1);
+    assert.equal(h.operation, null);
+    assert(g.player.position.distanceTo(stance) < 1e-8);
+    assert.equal(g.health, 100);
+    const source = c.wheel.getWorldPosition(new THREE.Vector3());
+    assert(
+      source.distanceTo(new THREE.Vector3(c.source.x, c.source.y, c.source.z)) <
+        1e-8,
+    );
   }
 });
 
@@ -340,6 +445,7 @@ test("the continuous pressure route crosses all six crowns, records each gallery
   pressureWalk(g, 16, -8);
   assert.equal(pressureControl(g)?.kind, "lift");
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureTick(g, 500);
   assert.equal(h.saved.lift, 0);
   assert(Math.abs(g.player.position.y - 0.18) < 1e-8);
@@ -357,6 +463,7 @@ test("riders freeze on pause, jumps release the piston, hot-floor falls recover 
     h = g.pressureRelay;
   pressureTick(g);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   g.player.position.set(7, 0.18, 5);
   pressureTick(g, 200);
   assert.equal(g.player.position.y, h.pistons[0].deck.y);
@@ -389,6 +496,7 @@ test("moving crowns and foundry walls block bodies, cameras and sound while supp
     h = g.pressureRelay;
   pressureTick(g);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureTick(g, 360);
   const p = h.pistons[0].deck;
   assert.equal(supportAt(g, p.x, p.z).height, p.y);
@@ -435,11 +543,13 @@ test("landing controls recall the return lift without moving the waiting explore
   pressureWalk(g, 16, -13.35);
   assert.equal(pressureControl(g)?.kind, "call");
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   assert.equal(h.motion, null); // The car is already at this landing.
   g.player.position.set(19, 0, -6.5);
   const waiting = g.player.position.clone();
   assert.equal(pressureControl(g)?.stop, 0);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureTick(g, 120);
   assert(h.motion);
   assert(g.player.position.equals(waiting));
@@ -448,6 +558,7 @@ test("landing controls recall the return lift without moving the waiting explore
   assert(g.player.position.equals(waiting));
   g.player.position.set(16, 24.2, -14);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureTick(g, 500);
   assert.equal(h.saved.lift, 1);
   assert.equal(g.player.position.y, 24.2);
@@ -464,6 +575,7 @@ test("a saved gallery and a mid-return save restore to supported landings with p
   pressureJump(g, 16, -9.3, 24.2);
   pressureWalk(g, 16, -8);
   pressureInteract(g);
+  if (h.operation) pressureWait(g, () => !h.operation);
   pressureTick(g, 180);
   assert(h.motion);
   g.save();

@@ -445,17 +445,46 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
   )) {
     const d = PRESSURE_DECKS[c.bank],
       x = d.x + 1,
-      z = d.z - 1.15;
+      z = d.z - 1.15,
+      plaqueLift = c.kind === "valve" ? 0.17 : 0;
     block(0.72, 0.1, 0.68, x, d.y + 0.57, z, bronze);
-    block(2.04, 0.39, 0.065, x, d.y + 1.65, z - 0.045, metal);
+    block(2.04, 0.39, 0.065, x, d.y + 1.65 + plaqueLift, z - 0.045, metal);
     for (const side of [-1, 1]) {
-      block(0.05, 0.94, 0.05, x + side * 0.25, d.y + 1.02, z - 0.32, metal);
-      block(0.05, 0.03, 0.29, x + side * 0.25, d.y + 1.48, z - 0.1975, metal);
+      block(
+        0.05,
+        0.94 + plaqueLift,
+        0.05,
+        x + side * 0.25,
+        d.y + 1.02 + plaqueLift / 2,
+        z - 0.32,
+        metal,
+      );
+      block(
+        0.05,
+        0.03,
+        0.29,
+        x + side * 0.25,
+        d.y + 1.48 + plaqueLift,
+        z - 0.1975,
+        metal,
+      );
     }
     for (const side of [-1, 1])
-      pin(0.034, 0.025, x + side * 0.92, d.y + 1.65, z, bronze, root, "z", 6);
+      pin(
+        0.034,
+        0.025,
+        x + side * 0.92,
+        d.y + 1.65 + plaqueLift,
+        z,
+        bronze,
+        root,
+        "z",
+        6,
+      );
     if (!c.wheel) continue;
     clear(c.wheel);
+    c.wheel.position.y += 0.16;
+    c.wheel.rotation.x = -0.3;
     ring(0.36, 0.043, 0, 0, 0, bronze, c.wheel, "z");
     for (let spoke = 0; spoke < 6; spoke++) {
       const a = (spoke / 6) * Math.PI * 2;
@@ -478,11 +507,46 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     }
     pin(0.105, 0.13, 0, 0, 0, metal, c.wheel, "z", 12);
     pin(0.044, 0.045, 0, 0, 0.09, bronze, c.wheel, "z", 6);
-    for (const side of [-1, 1])
-      pin(0.045, 0.12, side * 0.3, 0, 0.065, recess, c.wheel, "z", 12);
+    c.grips = [-1, 1].map((side) => {
+      const grip = new THREE.Object3D();
+      grip.position.set(side * 0.23, 0, 0.16);
+      grip.name = `${side < 0 ? "Left" : "Right"} pressure wheel grip`;
+      c.wheel.add(grip);
+      pin(0.019, 0.2, side * 0.23, 0, 0.16, recess, c.wheel, "x", 16);
+      for (const end of [-1, 1])
+        pin(
+          0.014,
+          0.14,
+          side * 0.23 + end * 0.115,
+          0,
+          0.08,
+          bronze,
+          c.wheel,
+          "z",
+          10,
+        );
+      return grip;
+    });
+    const origin = c.wheel.getWorldPosition(new THREE.Vector3());
+    c.source = {
+      id: `relay-valve-${c.bank}`,
+      kind: "hoist",
+      x: origin.x,
+      y: origin.y,
+      z: origin.z,
+      near: 1.5,
+      range: 12,
+      gain: 0.035,
+      activity: 0,
+    };
+    h.sources.push(c.source);
     mergeArchitecture(c.wheel);
-    pin(0.09, 0.45, x, d.y + 1, z - 0.24, ram, root, "z", 16);
-    pin(0.23, 0.22, x, d.y + 1, z - 0.39, metal, root, "z", 24);
+    const spindle = new THREE.Group();
+    spindle.position.copy(c.wheel.position);
+    spindle.rotation.x = c.wheel.rotation.x;
+    root.add(spindle);
+    pin(0.09, 0.45, 0, 0, -0.24, ram, spindle, "z", 16);
+    pin(0.23, 0.22, 0, 0, -0.39, metal, spindle, "z", 24);
     block(0.12, 0.52, 0.16, x, d.y + 0.8, z - 0.42, bronze);
     const gauge = new THREE.Group();
     gauge.position.set(x - 0.57, d.y + 1.03, z - 0.01);

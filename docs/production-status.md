@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Cinder Relay’s three valves now have two-hand reach, quarter-turn and
+  release actions with supported alignment. Circuits save at the completed turn;
+  movement cancels an unfinished turn, repeated Use cannot queue it, and pause
+  freezes motion and silences the positioned mechanical source. All 402 tests
+  and the production build pass. Browser checks cover hand-surface contact on
+  every valve, native keyboard/touch actions, distance falloff, exact unfinished
+  and completed reloads, and the full six-piston route at 100 health. Four final
+  production save fixtures passed interaction and exact reload checks without
+  failed assets or console warnings/errors. [Valve interaction notes](cinder-relay-hands.md)
+  include the sampled contact tolerances and limits. The return lever still
+  needs character interaction work; AAA graphics, human pacing and subjective
+  listening remain open.
+
 - The Cinder Relay now has dressed basalt, worn panel decks, fixed pressure
   housings, constant-length sliding rams, gauges, return-lift cable/rollers and
   dispatch cargo. The full 400-test suite passed, followed by ten focused checks

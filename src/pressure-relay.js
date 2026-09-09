@@ -16,6 +16,7 @@ import {
   pressureSlagMaterial,
 } from "./pressure-materials.js";
 import { buildPressureArt, updatePressureArt } from "./pressure-art.js";
+import { beginPressureWheel, syncPressureWheel } from "./pressure-motion.js";
 
 function sign(text, width = 1.8) {
   const canvas = document.createElement("canvas");
@@ -69,6 +70,7 @@ export function buildPressureRelay(game) {
     controls: [],
     sources: [],
     motion: null,
+    operation: null,
   });
   const materials = pressureMaterials(game),
     { stone, metal, bronze } = materials;
@@ -255,7 +257,7 @@ export function buildPressureRelay(game) {
       }
     }
     const plaque = sign(i < 3 ? `CIRCUIT ${i + 1}` : "DISPATCH");
-    plaque.position.set(d.x + 1, d.y + 1.65, d.z - 1.15);
+    plaque.position.set(d.x + 1, d.y + (i < 3 ? 1.82 : 1.65), d.z - 1.15);
     root.add(plaque);
     h.controls.push(control);
     const lampX = d.x - 1.8,
@@ -527,14 +529,7 @@ export function updatePressureRelay(game, dt, initial = false) {
   h.lift.source.y = h.lift.deck.y;
   h.lift.source.activity = h.motion && !game.paused ? 1 : 0;
   for (const c of h.controls)
-    if (c.wheel) {
-      const target =
-        c.kind === "record"
-          ? Number(h.saved.recovered)
-          : Number(h.saved.opened > c.bank);
-      c.turn = initial ? target : Math.min(target, c.turn + dt * 0.65);
-      c.wheel.rotation.z = (c.turn * Math.PI) / 2;
-    }
+    if (c.wheel) syncPressureWheel(game, c, dt, initial);
   updatePressureArt(h);
   if (initial || game.paused || !insidePressure(game)) return;
   if (!h.saved.visited) {
@@ -608,6 +603,13 @@ export function pressureControl(game) {
 export function pressureHint(game) {
   const c = pressureControl(game),
     h = game.pressureRelay;
+  if (h?.operation)
+    return {
+      key: "E",
+      label: h.operation.committed
+        ? "Circuit open · releasing the grips"
+        : "Turning the valve · move to cancel",
+    };
   if (!c) return null;
   return {
     key: "E",
@@ -641,16 +643,10 @@ export function pressureInteract(game) {
   const c = pressureControl(game),
     h = game.pressureRelay;
   if (!c || game.paused) return false;
+  if (h.operation) return true;
   if (c.kind === "guide") game.cb.pressureGuide?.();
   else if (c.kind === "valve" && h.saved.opened === c.bank) {
-    h.saved.opened++;
-    h.time[c.bank] = 0;
-    game.audio.tone("solve");
-    game.save();
-    game.cb.toast?.(
-      "Watch the crowns. Cross when the neighboring platforms meet.",
-      4500,
-    );
+    beginPressureWheel(game, c);
   } else if (c.kind === "record" && h.saved.rest === 3) {
     h.saved.recovered = true;
     game.audio.tone("collect");

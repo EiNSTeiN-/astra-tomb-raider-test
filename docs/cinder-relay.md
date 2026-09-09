@@ -15,7 +15,10 @@ current images, rendering costs and verification.
 
 ## Route and controls
 
-Read the entrance tablet, then open the intake valve with **E / Use**. Board the
+Read the entrance tablet, then stand in front of the intake valve and press
+**E / Use**. Vesper reaches for two grips and turns the valve. Movement or Jump
+cancels an unfinished turn; a completed turn opens the circuit and stays saved.
+See [valve operation and contact checks](cinder-relay-hands.md). Board the
 first crown, ride upward and jump from its edge when the neighboring crown meets
 it. The second piston carries you to the next safe gallery. Open that gallery's
 valve to start the next pair. The route first travels west, then north, then east,
@@ -115,8 +118,9 @@ JavaScript errors, console warnings or failed assets. Checked bundles:
 `index-DocUG3WN.js`, `game-qWwo162C.js`, `three-CJb2rOZj.js` and
 `index-DYq9hjRy.css`.
 
-The chamber still uses simple procedural architecture, metal surfaces and
-character interactions. Bespoke machinery art, hand contact, more environmental
-storytelling, blind route testing and difficulty tuning remain necessary. The
+The later [foundry art pass](cinder-relay-art.md) and
+[valve interaction pass](cinder-relay-hands.md) add machinery detail and valve
+hand contact. Lift controls still use a simple instant action. Wider scenery,
+blind route testing and difficulty tuning need further work. The
 requested AAA graphics and approximately hour-long human chapter pacing remain
 unfulfilled production targets.

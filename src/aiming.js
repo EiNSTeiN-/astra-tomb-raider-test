@@ -17,6 +17,7 @@ export function canAim(game) {
     game.carrying ||
     game.blockGrip ||
     game.fireVault?.operation ||
+    game.pressureRelay?.operation ||
     game.climb ||
     game.ropeRide ||
     game.zipRide ||

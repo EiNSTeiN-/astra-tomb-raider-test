@@ -15,6 +15,12 @@ machining and fractured-slag shaders. These reuse the already bundled Rock Face
 03, Rusty Metal 04 and Volcanic Rock Tiles maps credited below. No new external
 models, images or sounds were added. See [the foundry art comparison](cinder-relay-art.md).
 
+The relay valve interaction in `src/pressure-motion.js`, its grip fittings and
+revised spindle supports are original project code and geometry. The action
+reuses the existing cylinder-grip solver, delivered explorer rig and original
+mechanical synthesis. No external assets were added. See
+[valve interaction notes](cinder-relay-hands.md).
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658

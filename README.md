@@ -69,12 +69,15 @@ In **A Heart of Embers**, **the Cinder Relay** branches west from the obsidian-h
 station in Black Glass. Open three pressure circuits, ride six pistons and jump
 between their crowns to reach a dispatch ledger 24 metres above the settling
 floor. **E / Use** operates valves and lift controls; **Space / Jump** crosses
-gaps. Safe galleries preserve progress, and the ledger releases a return lift.
+gaps. At a valve, Vesper takes both grips and completes a quarter turn; move or
+jump before it finishes to cancel. Completed turns stay saved. Safe galleries
+preserve progress, and the ledger releases a return lift.
 **M** shows the chamber and **J** keeps its recovered story. See the
 [route, sound and verification notes](docs/cinder-relay.md).
 The [foundry art pass](docs/cinder-relay-art.md) adds dressed basalt, riveted
 platforms, sliding rams, return-lift hardware, pressure gauges and refuge cargo,
 with matching images and measured rendering costs.
+See [valve operation and hand-contact checks](docs/cinder-relay-hands.md).
 
 East of the mountain’s western library trail, **the bellkeepers’ hoist** adds an
 optional tomb with two counterweighted lifts, three floors and a broken gallery
