@@ -32,8 +32,9 @@ returns the explorer to the last gallery and costs 12 health; the eastern aisle
 remains cool. Main chapter objectives remain independent of this optional tomb.
 
 At the summit, use the open ledger on the dispatch console. Jump to the eastern
-return car and use its lever to descend. A second use raises it again, and call
-controls on both landings recall it when the car is elsewhere. Each journey takes
+return car and pull its lever to descend. A second completed pull raises it
+again, and levers on both landings recall it when the car is elsewhere. Move or
+jump before a pull finishes to cancel. See [lift lever details and checks](cinder-relay-levers.md). Each journey takes
 eight seconds. Pause freezes travel; continuing resumes the same journey.
 
 ![The dispatch ledger and return lift](images/cinder-relay-dispatch.png)
@@ -120,7 +121,8 @@ JavaScript errors, console warnings or failed assets. Checked bundles:
 
 The later [foundry art pass](cinder-relay-art.md) and
 [valve interaction pass](cinder-relay-hands.md) add machinery detail and valve
-hand contact. Lift controls still use a simple instant action. Wider scenery,
+hand contact. The subsequent [lift-control pass](cinder-relay-levers.md) adds
+physical pull levers and a hand action that follows the moving car. Wider scenery,
 blind route testing and difficulty tuning need further work. The
 requested AAA graphics and approximately hour-long human chapter pacing remain
 unfulfilled production targets.

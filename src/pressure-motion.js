@@ -17,6 +17,13 @@ export const PRESSURE_WHEEL = Object.freeze({
   end: 1.85,
 });
 
+export const PRESSURE_LEVER = Object.freeze({
+  readyAngle: 0.25,
+  travel: 0.75,
+  pivotForward: 0.14,
+  stanceForward: 0.72,
+});
+
 export function pressureWheelStance(control) {
   return control.position.clone().add(new THREE.Vector3(0, 0, -0.53));
 }
@@ -34,7 +41,40 @@ function clearApproach(game, from, target) {
   return true;
 }
 
+export function pressureLeverStance(game, control) {
+  const target = control.hardware
+    .getWorldPosition(new THREE.Vector3())
+    .add(new THREE.Vector3(-0.22, 0, PRESSURE_LEVER.stanceForward));
+  target.y = supportAt(game, target.x, target.z, target.y).height;
+  return target;
+}
+
 export function beginPressureWheel(game, control) {
+  if (
+    control.kind !== "valve" ||
+    game.pressureRelay.saved.opened !== control.bank
+  )
+    return false;
+  return beginPressureOperation(game, control, pressureWheelStance(control));
+}
+
+export function beginPressureLever(game, control) {
+  const h = game.pressureRelay;
+  if (
+    !h.saved.recovered ||
+    h.motion ||
+    (control.kind !== "lift" && control.kind !== "call") ||
+    (control.kind === "call" && control.stop === h.saved.lift)
+  )
+    return false;
+  return beginPressureOperation(
+    game,
+    control,
+    pressureLeverStance(game, control),
+  );
+}
+
+function beginPressureOperation(game, control, target) {
   const h = game.pressureRelay,
     p = game.player.position;
   if (
@@ -44,15 +84,15 @@ export function beginPressureWheel(game, control) {
     !game.grounded ||
     game.swimming ||
     game.diving ||
-    torchHandsBusy(game) ||
-    control.kind !== "valve" ||
-    h.saved.opened !== control.bank
+    torchHandsBusy(game)
   )
     return false;
-  const target = pressureWheelStance(control);
-  if (p.z < target.z - 0.12 || !clearApproach(game, p, target)) {
+  const front = target.z - (control.kind === "valve" ? 0.12 : 0.37);
+  if (p.z < front || !clearApproach(game, p, target)) {
     game.cb.toast?.(
-      "Stand on the gallery in front of the valve’s two hand grips.",
+      control.kind === "valve"
+        ? "Stand on the gallery in front of the valve’s two hand grips."
+        : "Stand on the floor in front of the lift lever.",
     );
     return false;
   }
@@ -78,17 +118,33 @@ export function beginPressureWheel(game, control) {
 export const pressureWheelPhase = (op) =>
   op.time - op.alignTime + PRESSURE_WHEEL.alignTime;
 
-export function syncPressureWheel(game, control, dt, initial = false) {
+export function syncPressureControl(game, control, dt, initial = false) {
   const h = game.pressureRelay;
   const op = h.operation?.control === control ? h.operation : null;
-  const target = Number(h.saved.opened > control.bank);
+  const target = control.wheel ? Number(h.saved.opened > control.bank) : 0;
   control.turn = op
     ? op.turn
     : initial
       ? target
       : THREE.MathUtils.damp(control.turn, target, 10, dt);
-  control.wheel.rotation.z =
-    PRESSURE_WHEEL.readyAngle - (control.turn * Math.PI) / 2;
+  if (control.wheel)
+    control.wheel.rotation.z =
+      PRESSURE_WHEEL.readyAngle - (control.turn * Math.PI) / 2;
+  else {
+    control.lever.rotation.x =
+      PRESSURE_LEVER.readyAngle + control.turn * PRESSURE_LEVER.travel;
+    const position = control.lever.getWorldPosition(new THREE.Vector3());
+    Object.assign(control.source, {
+      x: position.x,
+      y: position.y,
+      z: position.z,
+    });
+    if (control.arrows) {
+      const rising = h.motion ? h.motion.to > 1 : h.saved.lift === 0;
+      control.arrows[0].visible = rising;
+      control.arrows[1].visible = !rising;
+    }
+  }
   if (control.source)
     control.source.activity =
       !game.paused &&
@@ -99,15 +155,15 @@ export function syncPressureWheel(game, control, dt, initial = false) {
         : 0;
 }
 
-// Only a completed turn opens the circuit. A canceled partial turn returns to
-// its closed stop; a completed valve stays open across movement and reloads.
-export function advancePressureWheel(game, dt, input) {
+// Commit at the physical stop. Valves retain their open state; lift levers
+// spring back after release while the requested journey continues.
+export function advancePressureOperation(game, dt, input) {
   const h = game.pressureRelay,
     op = h?.operation;
   if (!op || game.paused) return false;
   const cancel = () => {
     h.operation = null;
-    syncPressureWheel(game, op.control, dt);
+    syncPressureControl(game, op.control, dt);
     return false;
   };
   if (
@@ -151,22 +207,40 @@ export function advancePressureWheel(game, dt, input) {
   );
   if (time >= PRESSURE_WHEEL.detent && !op.committed) {
     op.committed = true;
-    h.saved.opened = op.control.bank + 1;
-    h.time[op.control.bank] = 0;
+    if (op.control.kind === "valve") {
+      h.saved.opened = op.control.bank + 1;
+      h.time[op.control.bank] = 0;
+      game.cb.toast?.(
+        "Circuit open. Cross when the neighboring crowns meet.",
+        4500,
+      );
+    } else {
+      const stop =
+        op.control.kind === "call" ? op.control.stop : 1 - h.saved.lift;
+      h.motion = {
+        time: 0,
+        from: h.lift.root.position.y,
+        to: stop ? 24.2 : 0.18,
+      };
+      game.cb.toast?.(
+        op.control.kind === "call"
+          ? "The return lift is on its way."
+          : stop
+            ? "Return lift rising to the dispatch gallery."
+            : "Return lift descending to the intake floor.",
+        3500,
+      );
+    }
     game.audio.tone("click");
     game.save();
-    game.cb.toast?.(
-      "Circuit open. Cross when the neighboring crowns meet.",
-      4500,
-    );
     game.cb.update?.(game.state());
   }
   if (time >= PRESSURE_WHEEL.end) h.operation = null;
-  syncPressureWheel(game, op.control, dt);
+  syncPressureControl(game, op.control, dt);
   return true;
 }
 
-export function posePressureWheel(game) {
+export function posePressureOperation(game) {
   const h = game.pressureRelay,
     op = h?.operation;
   if (!op || !game.rig) return;
@@ -175,8 +249,9 @@ export function posePressureWheel(game) {
   const weight =
     THREE.MathUtils.smoothstep(t, w.reachStart, w.reach) *
     (1 - THREE.MathUtils.smoothstep(t, w.lift, w.release));
-  op.control.wheel.updateWorldMatrix(true, true);
-  const rotation = op.control.wheel.getWorldQuaternion(new THREE.Quaternion());
+  const handle = op.control.wheel || op.control.lever;
+  handle.updateWorldMatrix(true, true);
+  const rotation = handle.getWorldQuaternion(new THREE.Quaternion());
   const approach = 1 - THREE.MathUtils.smoothstep(t, w.reach, w.grasp);
   const lift = THREE.MathUtils.smoothstep(t, w.open, w.lift);
   const closure =
@@ -189,8 +264,8 @@ export function posePressureWheel(game) {
   ).applyQuaternion(rotation);
   poseCylinderGrip(
     game,
-    op.control.grips.map((g) =>
-      g.getWorldPosition(new THREE.Vector3()).add(away),
+    (op.control.grips || [null, op.control.grip]).map(
+      (g) => g && g.getWorldPosition(new THREE.Vector3()).add(away),
     ),
     new THREE.Vector3(-1, 0, 0).applyQuaternion(rotation),
     new THREE.Vector3(0, 1, 0).applyQuaternion(rotation),

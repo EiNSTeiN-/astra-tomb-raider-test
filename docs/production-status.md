@@ -20,6 +20,20 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Cinder Relay’s return car and both landings now have physical pull levers
+  and a right-hand action. Commands start at the completed pull; release follows
+  the moving car, cancellation preserves an already-started journey, and pause
+  freezes the machinery and sound. All 404 tests passed with two workers after
+  an interrupted initial run; the production build passes. Browser checks cover
+  both directions, both landing levers, hand/boot clearance, touch input, distance
+  audio, older occupied saves and cleanup of 297 inspected graphics resources.
+  A continuous native-input route with assisted directions completed the ascent,
+  return, step-off and lift recall at 100 health. Five final production fixtures
+  passed interaction and exact reload checks with no failed assets or console
+  warnings/errors. [Lift-control notes](cinder-relay-levers.md) include an image,
+  measured tolerances and limits. AAA graphics, human chapter pacing, subjective
+  listening and broader device performance remain open production work.
+
 - The Cinder Relay’s three valves now have two-hand reach, quarter-turn and
   release actions with supported alignment. Circuits save at the completed turn;
   movement cancels an unfinished turn, repeated Use cannot queue it, and pause
@@ -29,9 +43,9 @@ The user also added distance-sensitive environmental audio and quiet background 
   and completed reloads, and the full six-piston route at 100 health. Four final
   production save fixtures passed interaction and exact reload checks without
   failed assets or console warnings/errors. [Valve interaction notes](cinder-relay-hands.md)
-  include the sampled contact tolerances and limits. The return lever still
-  needs character interaction work; AAA graphics, human pacing and subjective
-  listening remain open.
+  include the sampled contact tolerances and limits. The later lift-control pass
+  extends the interaction to the return lever; AAA graphics, human pacing and
+  subjective listening remain open.
 
 - The Cinder Relay now has dressed basalt, worn panel decks, fixed pressure
   housings, constant-length sliding rams, gauges, return-lift cable/rollers and

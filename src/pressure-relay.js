@@ -16,7 +16,12 @@ import {
   pressureSlagMaterial,
 } from "./pressure-materials.js";
 import { buildPressureArt, updatePressureArt } from "./pressure-art.js";
-import { beginPressureWheel, syncPressureWheel } from "./pressure-motion.js";
+import { buildPressureLevers } from "./pressure-lever-art.js";
+import {
+  beginPressureWheel,
+  beginPressureLever,
+  syncPressureControl,
+} from "./pressure-motion.js";
 
 function sign(text, width = 1.8) {
   const canvas = document.createElement("canvas");
@@ -405,18 +410,6 @@ export function buildPressureRelay(game) {
   };
   h.controls.push(liftControl);
   h.lift.control = liftControl;
-  const bar = add(
-    new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8),
-    bronze,
-    1.2,
-    0.9,
-    1.4,
-    liftRoot,
-  );
-  bar.rotation.z = 0.4;
-  const liftSign = sign("RETURN", 1.2);
-  liftSign.position.set(0, 1.3, 1.8);
-  liftRoot.add(liftSign);
   for (const px of [13.5, 18.5]) {
     box(0.24, 26, 0.24, px, 13, -8, metal);
     solid(px, 13, -8, 0.24, 26, 0.24);
@@ -468,6 +461,7 @@ export function buildPressureRelay(game) {
     position: new THREE.Vector3(x + 20, y + 0.18, z + 10),
   });
   buildPressureArt(game, { add, box, solid, sign, materials });
+  buildPressureLevers(game, { add, box, solid, sign, materials });
   mergeArchitecture(root);
   updatePressureRelay(game, 0, true);
 }
@@ -492,7 +486,12 @@ export function updatePressureRelay(game, dt, initial = false) {
     car.root.position.y = next;
     car.deck.y = h.y + next;
     if (rider) {
-      p.y += car.deck.y - before;
+      const delta = car.deck.y - before;
+      p.y += delta;
+      // Keep the onboard reach frame attached as the car starts beneath it.
+      if (car === h.lift && h.operation?.control.kind === "lift")
+        for (const key of ["from", "target", "last"])
+          h.operation[key].y += delta;
       game.jumpY = Math.max(0, p.y - game.groundHeight(p.x, p.z));
       game.fallPeak = p.y;
     }
@@ -529,7 +528,7 @@ export function updatePressureRelay(game, dt, initial = false) {
   h.lift.source.y = h.lift.deck.y;
   h.lift.source.activity = h.motion && !game.paused ? 1 : 0;
   for (const c of h.controls)
-    if (c.wheel) syncPressureWheel(game, c, dt, initial);
+    if (c.wheel || c.lever) syncPressureControl(game, c, dt, initial);
   updatePressureArt(h);
   if (initial || game.paused || !insidePressure(game)) return;
   if (!h.saved.visited) {
@@ -606,9 +605,14 @@ export function pressureHint(game) {
   if (h?.operation)
     return {
       key: "E",
-      label: h.operation.committed
-        ? "Circuit open · releasing the grips"
-        : "Turning the valve · move to cancel",
+      label:
+        h.operation.control.kind === "valve"
+          ? h.operation.committed
+            ? "Circuit open · releasing the grips"
+            : "Turning the valve · move to cancel"
+          : h.operation.committed
+            ? "Lift moving · releasing the lever"
+            : "Pulling the lift lever · move to cancel",
     };
   if (!c) return null;
   return {
@@ -627,9 +631,13 @@ export function pressureHint(game) {
               ? "Read the dispatch ledger"
               : "Recover the dispatch ledger and release the return lift"
             : c.kind === "call"
-              ? h.saved.recovered
-                ? `Call return lift to the ${c.stop ? "dispatch gallery" : "intake floor"}`
-                : "Release the lift from the dispatch gallery"
+              ? h.motion
+                ? "The return lift is moving"
+                : h.saved.recovered
+                  ? c.stop === h.saved.lift
+                    ? "The return lift is at this landing"
+                    : `Call return lift to the ${c.stop ? "dispatch gallery" : "intake floor"}`
+                  : "Release the lift from the dispatch gallery"
               : !h.saved.recovered
                 ? "Release the return lift from the dispatch gallery"
                 : h.motion
@@ -652,23 +660,8 @@ export function pressureInteract(game) {
     game.audio.tone("collect");
     game.save();
     game.cb.pressureRecord?.();
-  } else if (
-    c.kind === "call" &&
-    h.saved.recovered &&
-    !h.motion &&
-    c.stop !== h.saved.lift
-  )
-    h.motion = {
-      time: 0,
-      from: h.lift.root.position.y,
-      to: c.stop ? 24.2 : 0.18,
-    };
-  else if (c.kind === "lift" && h.saved.recovered && !h.motion)
-    h.motion = {
-      time: 0,
-      from: h.lift.root.position.y,
-      to: h.saved.lift ? 0.18 : 24.2,
-    };
+  } else if (c.kind === "call" || c.kind === "lift")
+    beginPressureLever(game, c);
   return true;
 }
 export function pressureObjective(game) {

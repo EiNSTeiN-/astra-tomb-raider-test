@@ -78,6 +78,8 @@ The [foundry art pass](docs/cinder-relay-art.md) adds dressed basalt, riveted
 platforms, sliding rams, return-lift hardware, pressure gauges and refuge cargo,
 with matching images and measured rendering costs.
 See [valve operation and hand-contact checks](docs/cinder-relay-hands.md).
+The [return-lift levers](docs/cinder-relay-levers.md) now use a visible right-hand
+pull; movement cancels an unfinished command, and release follows the moving car.
 
 East of the mountain’s western library trail, **the bellkeepers’ hoist** adds an
 optional tomb with two counterweighted lifts, three floors and a broken gallery

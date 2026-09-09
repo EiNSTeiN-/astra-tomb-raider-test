@@ -2,8 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import {
-  advancePressureWheel,
+  advancePressureOperation,
   pressureWheelStance,
+  pressureLeverStance,
 } from "../src/pressure-motion.js";
 import { canAim } from "../src/aiming.js";
 import { canCrouch } from "../src/stealth.js";
@@ -92,7 +93,7 @@ export function pressureTick(g, n = 1, v = { x: 0, z: 0 }, jump = false) {
   for (let i = 0; i < n; i++) {
     g.elapsed += 1 / 60;
     updatePressureRelay(g, 1 / 60);
-    if (!g.paused && !advancePressureWheel(g, 1 / 60, v))
+    if (!g.paused && !advancePressureOperation(g, 1 / 60, v))
       advanceCharacter(g, v, 1 / 60, jump && i === 0);
     g.hitTimer = Math.max(0, g.hitTimer - 1 / 60);
   }
@@ -309,6 +310,122 @@ test("all valve approaches remain on clear gallery floors and reject the back of
   }
 });
 
+test("the onboard lever commits a journey at its stop and keeps the releasing hand frame attached to the moving deck", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay,
+    c = h.lift.control;
+  g.player.position.copy(c.position);
+  g.jumpY = g.player.position.y;
+  pressureInteract(g);
+  assert.equal(h.operation, null, "the ledger must first release the lift");
+  Object.assign(h.saved, {
+    visited: true,
+    opened: 3,
+    rest: 3,
+    recovered: true,
+  });
+  h.anchor = 3;
+  const tones = [];
+  g.audio.tone = (name) => tones.push(name);
+  pressureInteract(g);
+  pressureTick(g, 55);
+  assert(h.operation && !h.operation.committed);
+  assert.equal(h.motion, null);
+  assert(c.turn > 0 && c.turn < 1);
+  pressureTick(g, 1, { x: 0.5, z: 0 });
+  assert.equal(h.operation, null);
+  assert.equal(h.motion, null);
+  pressureTick(g, 90);
+  assert(c.turn < 0.001);
+  g.player.position.copy(c.position);
+  pressureInteract(g);
+  pressureTick(g, 90);
+  assert(h.operation.committed);
+  assert(h.motion);
+  assert(h.motion.time > 0);
+  assert.equal(
+    h.saved.lift,
+    1,
+    "the completed landing remains the save stop during travel",
+  );
+  assert.deepEqual(tones, ["click"]);
+  assert.equal(g.player.position.y, h.lift.deck.y);
+  for (const key of ["from", "last", "target"])
+    assert(Math.abs(h.operation[key].y - h.lift.deck.y) < 1e-8);
+  const origin = c.lever.getWorldPosition(new THREE.Vector3());
+  assert(Math.abs(c.source.y - origin.y) < 1e-8);
+  const snapshot = [
+    h.operation.time,
+    h.motion.time,
+    c.turn,
+    ...g.player.position.toArray(),
+  ];
+  g.paused = true;
+  pressureTick(g, 120);
+  assert.deepEqual(
+    [h.operation.time, h.motion.time, c.turn, ...g.player.position.toArray()],
+    snapshot,
+  );
+  assert.equal(c.source.activity, 0);
+  assert.equal(h.lift.source.activity, 0);
+  g.save();
+  const transit = pressureFixture(structuredClone(g.progress));
+  assert.equal(transit.pressureRelay.operation, null);
+  assert.equal(transit.pressureRelay.motion, null);
+  assert.equal(transit.pressureRelay.saved.lift, 1);
+  assert.equal(transit.pressureRelay.lift.control.turn, 0);
+  g.paused = false;
+  g.keys.add("Space");
+  pressureTick(g);
+  g.keys.clear();
+  assert.equal(h.operation, null);
+  assert(
+    h.motion,
+    "releasing control after commitment cannot undo the journey",
+  );
+  pressureTick(g, 500);
+  assert.equal(h.saved.lift, 0);
+  assert.equal(h.motion, null);
+  assert.equal(g.player.position.y, h.lift.deck.y);
+  assert(c.turn < 0.001);
+  assert.equal(g.health, 100);
+  assert.deepEqual(tones, ["click"]);
+});
+
+test("lift lever housings leave the center lane clear and track body, camera and sound frames at both stops", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  for (const stop of [1, 0]) {
+    h.motion = {
+      time: 8,
+      from: h.lift.root.position.y,
+      to: stop ? 24.2 : 0.18,
+    };
+    updatePressureRelay(g, 0);
+    const c = h.lift.control,
+      p = pressureLeverStance(g, c);
+    assert.equal(supportAt(g, p.x, p.z, p.y).height, p.y);
+    assert(!pressureBlocked(g, p.x, p.z, p.y));
+    for (let z = -1.8; z < 1.8; z += 0.1)
+      assert(!pressureBlocked(g, c.position.x, c.position.z + z, c.position.y));
+    assert(pressureBlocked(g, c.solid.x, c.solid.z, c.position.y));
+    assert(Math.abs(c.solid.bottom - h.lift.deck.y) < 1e-8);
+    assert(Math.abs(c.source.y - (h.lift.deck.y + 0.78)) < 1e-8);
+    g.world.updateMatrixWorld(true);
+    const a = new THREE.Vector3(c.solid.x, c.position.y + 0.4, c.solid.z - 1);
+    const b = a.clone().add(new THREE.Vector3(0, 0, 2));
+    assert(g.cameraSurfaces.entry(a, b, 0) < 1);
+    assert(pressureOccludes(g, a, b));
+  }
+  for (const c of h.controls.filter((c) => c.kind === "call")) {
+    const p = pressureLeverStance(g, c);
+    assert.equal(p.y, c.stop ? 24.2 : 0);
+    assert(!pressureBlocked(g, p.x, p.z, p.y));
+    assert(pressureBlocked(g, c.solid.x, c.solid.z, p.y));
+    assert(Math.abs(c.source.y - (p.y + 0.78)) < 1e-8);
+  }
+});
+
 test("dressed gallery and piston panels retain supported contact through every transfer phase", () => {
   const g = pressureFixture(),
     h = g.pressureRelay;
@@ -371,7 +488,7 @@ test("dressed gallery and piston panels retain supported contact through every t
     triangles +=
       (o.geometry.index?.count || o.geometry.attributes.position.count) / 3;
   });
-  assert(triangles < 130000, `chamber geometry budget exceeded: ${triangles}`);
+  assert(triangles < 135000, `chamber geometry budget exceeded: ${triangles}`);
 });
 
 test("return-cable ends, guide rollers and moving posts track the car and freeze with it", () => {
@@ -536,7 +653,7 @@ test("the optional site connects to Black Glass and malformed saves cannot skip 
     assert(!createMap(l).pressureRelay);
 });
 
-test("landing controls recall the return lift without moving the waiting explorer", () => {
+test("landing controls align the explorer for a pull and leave the waiting stance still during travel", () => {
   const g = pressureFixture(),
     h = g.pressureRelay;
   climbPressureRoute(g);
@@ -546,10 +663,18 @@ test("landing controls recall the return lift without moving the waiting explore
   if (h.operation) pressureWait(g, () => !h.operation);
   assert.equal(h.motion, null); // The car is already at this landing.
   g.player.position.set(19, 0, -6.5);
-  const waiting = g.player.position.clone();
   assert.equal(pressureControl(g)?.stop, 0);
   pressureInteract(g);
   if (h.operation) pressureWait(g, () => !h.operation);
+  const waiting = g.player.position.clone();
+  assert(
+    waiting.distanceTo(
+      pressureLeverStance(
+        g,
+        h.controls.find((c) => c.kind === "call" && c.stop === 0),
+      ),
+    ) < 1e-8,
+  );
   pressureTick(g, 120);
   assert(h.motion);
   assert(g.player.position.equals(waiting));

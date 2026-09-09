@@ -21,6 +21,12 @@ reuses the existing cylinder-grip solver, delivered explorer rig and original
 mechanical synthesis. No external assets were added. See
 [valve interaction notes](cinder-relay-hands.md).
 
+The return-car and landing lever artwork in `src/pressure-lever-art.js` is
+original project geometry. Its action extends `src/pressure-motion.js` and
+reuses the existing explorer rig, calibrated hand solver, credited forge
+materials and original mechanical synthesis. No external assets were added.
+See [lift-control notes](cinder-relay-levers.md).
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658

@@ -142,7 +142,7 @@ import {
 } from "./fire-vault.js";
 import { vaultBridgeBlocked } from "./fire-vault-rules.js";
 import { advanceCausewayWheel } from "./fire-vault-motion.js";
-import { advancePressureWheel } from "./pressure-motion.js";
+import { advancePressureOperation } from "./pressure-motion.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
@@ -1412,7 +1412,7 @@ export class Adventure {
       return;
     }
     if (
-      advancePressureWheel(this, dt, input) ||
+      advancePressureOperation(this, dt, input) ||
       advanceCausewayWheel(this, dt, input)
     ) {
       animateExplorer(

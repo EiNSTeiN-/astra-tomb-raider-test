@@ -6,7 +6,7 @@ import { cableHands } from "./return-cable.js";
 import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
 import { galleryWheelBrace, poseGalleryWheel } from "./gallery-wheel.js";
 import { poseCausewayWheel } from "./fire-vault-motion.js";
-import { posePressureWheel } from "./pressure-motion.js";
+import { posePressureOperation } from "./pressure-motion.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
@@ -367,7 +367,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
     );
   }
   poseCausewayWheel(game);
-  posePressureWheel(game);
+  posePressureOperation(game);
   poseTorch(game);
   rig.model.updateWorldMatrix(true, true);
 }

@@ -75,7 +75,8 @@ development hook was absent, with no failed assets, console warnings or errors.
 Checked bundles: `index-BMzcyeUT.js`, `game-CzKaV5O1.js`,
 `three-CJb2rOZj.js` and `index-DYq9hjRy.css`.
 
-This is a valve interaction milestone. The return lever still uses its existing
-instant action. The character's stance and transition quality, wider scenery,
+The subsequent [lift-control pass](cinder-relay-levers.md) adds physical pull
+levers and an action that follows the moving car. The character's stance and
+transition quality, wider scenery,
 human chapter pacing and subjective audio mix need further production work.
 These checks do not establish AAA graphics or consumer-device performance.

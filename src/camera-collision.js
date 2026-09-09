@@ -40,7 +40,7 @@ export class CameraSurfaces {
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
   }
-  capture(mesh) {
+  capture(mesh, { small = false } = {}) {
     if (
       !this.capturing ||
       !mesh.material.isMeshStandardMaterial ||
@@ -52,7 +52,7 @@ export class CameraSurfaces {
     const box = mesh.geometry.boundingBox.clone(),
       size = box.getSize(new THREE.Vector3());
     if (
-      Math.max(size.x, size.y, size.z) < 2 ||
+      (!small && Math.max(size.x, size.y, size.z) < 2) ||
       Math.min(size.x, size.y, size.z) < 0.12
     )
       return;
