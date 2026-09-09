@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildWaterfall, updateWaterfalls } from "./waterfall-effects.js";
+import { birdPerch, buildBird, updateBirds } from "./birds.js";
 
 export function buildSoundLandmarks(game) {
   const { biome } = game.level;
@@ -50,35 +51,9 @@ export function buildSoundLandmarks(game) {
       const bx = perch?.x ?? x + 19,
         bz = perch?.z ?? z + 18,
         birdY = perch?.y ?? game.groundHeight(bx, bz) + 9.1;
-      const bird = new THREE.Group();
-      bird.position.set(bx, birdY, bz);
-      const feathers = new THREE.MeshStandardMaterial({
-        color: biome === "jungle" ? 0x6e8865 : 0xc7c7ad,
-        roughness: 0.9,
-      });
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(0.18, 8, 6),
-        feathers,
-      );
-      body.scale.set(0.8, 1, 1.5);
-      bird.add(body);
-      const wings = [];
-      for (const side of [-1, 1]) {
-        const wing = game.box(
-          0.3,
-          0.035,
-          0.2,
-          feathers,
-          side * 0.18,
-          0,
-          0,
-          bird,
-        );
-        wings.push(wing);
-      }
-      game.world.add(bird);
-      game.birds.push({ bird, wings, phase: i * 2 });
-      source(`birds-${i}`, "birds", bx, birdY, bz, {
+      const anchor = birdPerch(game, i, bx, birdY, bz);
+      buildBird(game, i, anchor);
+      source(`birds-${i}`, "birds", anchor.x, anchor.y, anchor.z, {
         rate: 0.97 + (i % 4) * 0.018,
       });
     }
@@ -282,13 +257,5 @@ export function updateSoundSources(game) {
 
 export function updateSoundLandmarks(game) {
   updateWaterfalls(game);
-  for (const { bird, wings, phase } of game.birds) {
-    const flutter =
-      Math.sin(game.elapsed * 0.43 + phase) > 0.96
-        ? Math.sin(game.elapsed * 24) * 0.7
-        : 0.08;
-    wings[0].rotation.z = flutter;
-    wings[1].rotation.z = -flutter;
-    bird.rotation.y = phase + Math.sin(game.elapsed * 0.4 + phase) * 0.4;
-  }
+  updateBirds(game);
 }

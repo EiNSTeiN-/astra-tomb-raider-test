@@ -166,6 +166,8 @@ The 28 base camps now have stone fire rings, charred timber, glowing coals, fitt
 
 The 154 courtyard braziers have framed stone supports, regional ornament, weathered basins, rolled rims, handles and glowing fuel. Nearby and distant models share instanced material groups; fire, smoke and embers retain the existing positioned recordings. The supports are solid and older saves inside them recover on nearby clear ground. See [brazier artwork comparisons](docs/brazier-art.md).
 
+The jungle, desert, coast and cloud city now have 33 regional perched birds with layered feathers, planted feet and quiet head/wing movements. Corrected perches bring the jungle birds out of the masonry and align their visible bodies with the positioned sound. See [bird artwork and placement notes](docs/bird-art.md).
+
 Vesper now uses a human mesh with textured skin and hair, weathered olive clothing, and fitted expedition equipment. Blocked movement settles into idle; [locomotion notes](docs/explorer-locomotion.md) record the animation and collision checks. Retargeted locomotion fits the boot height while preserving the running clip’s airborne phase; arm and leg poses support swimming, jumping, mantling, ropes and cables. Firing draws a visible sidearm with a two-hand grip. The character remains an adapted base model with procedural pose overlays; see [character art notes](docs/character-art.md).
 
 The jungle sanctuaries now have supported stone arcades, recessed botanical carvings, weathered blocks, broken roof sections, and varied side galleries. Fine relief detail has a shorter draw distance than the structural masonry. Older saves made inside a newly added support recover on nearby clear ground.

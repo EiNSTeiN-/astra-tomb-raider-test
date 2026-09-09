@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The regional bird geometry, plumage shader and perch animation in
+`src/bird-geometry.js` and `src/birds.js` are original project code. They add no
+external model, texture or audio files and reuse the bird recording by isaiah658
+credited below. The four habitat variants are fictional, stylized birds. See
+[bird artwork and placement notes](bird-art.md).
+
 The courtyard brazier supports, motif paths, basins, fittings, charcoal and metal
 weathering in `src/brazier-geometry.js`, `src/brazier-materials.js` and
 `src/braziers.js` are original project geometry and code. They reuse the chapter's

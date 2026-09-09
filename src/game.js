@@ -1,5 +1,6 @@
 import { buildCamp, updateCamps } from "./camps.js";
 import { buildBrazier, finishBraziers, updateBraziers } from "./braziers.js";
+import { disposeBirdTemplates } from "./birds.js";
 import { buildSurveyorsCleft, updateCleftArt } from "./cleft-art.js";
 import { cleftBlocked, cleftOccludes } from "./cleft-rules.js";
 import {
@@ -612,6 +613,7 @@ export class Adventure {
         materials = new Set(),
         textures = new Set(),
         skeletons = new Set();
+      disposeBirdTemplates(this, geometries);
       this.scene.traverse((o) => {
         if (o.geometry) geometries.add(o.geometry);
         if (o.skeleton) skeletons.add(o.skeleton);
@@ -631,10 +633,12 @@ export class Adventure {
         m.dispose();
       });
       if (this.scene.background?.isTexture) textures.add(this.scene.background);
-      if (this.scene.environment?.isTexture) textures.add(this.scene.environment);
+      if (this.scene.environment?.isTexture)
+        textures.add(this.scene.environment);
       textures.forEach((t) => t.dispose());
       this.sun?.shadow.map?.dispose();
     }
+    this.birdKit = null;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(level.sky);
     this.scene.fog = new THREE.FogExp2(

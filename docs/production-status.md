@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The 33 perched birds now have regional plumage, shaped heads/bills, eyes,
+  layered feathers and planted feet. Seven jungle birds formerly inside masonry
+  now sit above the actual stone; desert/coastal body heights also match their
+  perches. The full 390-test suite passed, followed by the three focused tests
+  after the final wing-stretch correction. Final browser checks covered all eight
+  chapters in High/Performance, 264 toe-contact samples within 0.0041 m, exact
+  sound alignment, distance falloff, pause, shared resource disposal and unchanged
+  objectives/obstacles. The final production build accepted native movement and
+  exact save/reload without failed assets or console warnings/errors.
+  [Bird artwork notes](bird-art.md) include images, rendering costs and limits.
+  Stylized wildlife, AAA graphics, subjective audio quality and hour-long human
+  chapter pacing remain open production work.
+
 - All 154 courtyard braziers now have detailed stone supports, regional motifs,
   weathered basins, fittings and glowing fuel. Near/distant instances share four
   material groups per tier; existing positioned fire recordings remain aligned.
