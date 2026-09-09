@@ -12,6 +12,8 @@ export function buildSoundLandmarks(game) {
     game.soundSources.push({ id, kind, x, y, z, ...extra });
   game.world.updateMatrixWorld(true);
   for (const [i, flame] of game.flames.entries()) {
+    // The court registers a quieter, shorter-range emitter for each oil lamp.
+    if (flame.userData.orbitLamp) continue;
     const p = flame.getWorldPosition(new THREE.Vector3());
     const station = game.items.find(
       (f) => f.type === "field" && f.fire === flame,

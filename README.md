@@ -34,6 +34,8 @@ each bearing. The chart opens a direct bridge back. See
 The [physical instrument pass](docs/orrery-operation.md) adds two-hand bearing
 turns and a four-leaf bridge that unfolds after recovery. Move or jump to cancel
 an unfinished turn; completed calibrations persist.
+The [court artwork pass](docs/orrery-court-art.md) adds pale fitted paving,
+a broken colonnade, structural supports and quiet positional oil lamps.
 
 In **The Night Below**, the optional **Listening Gallery** lies west of the
 entry camp. Follow two, one, then three crystal pulses through its branching

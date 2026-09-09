@@ -14,6 +14,9 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
+import { buildFireEffects, updateFireEffects } from "../src/effects.js";
+import { orbitMaterials } from "../src/orbit-materials.js";
+import { buildSoundLandmarks } from "../src/sound-landmarks.js";
 import { supportAt, advanceCharacter } from "../src/character-motion.js";
 import {
   buildOrbitVault,
@@ -257,6 +260,104 @@ test("an older arrival inside the folded bridge is relocated beside the tablet",
   restoreOrbitArrival(g);
   assert.deepEqual(g.player.position.toArray(), [-22, h.y, -2.4]);
   assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+});
+
+test("the outer colonnade blocks its columns while leaving arch openings and the western approach clear", () => {
+  const g = fixture(),
+    h = g.orbitVault;
+  for (const c of h.art.columns) {
+    assert(!g.canMove(c.obstacle.x, c.obstacle.z, 0));
+    const radial = new THREE.Vector3(c.x, 0, c.z).normalize(),
+      p = new THREE.Vector3(c.x, h.y + 1.5, c.z);
+    assert(
+      g.cameraSurfaces.entry(
+        p.clone().addScaledVector(radial, -2),
+        p.clone().addScaledVector(radial, 2),
+        0.1,
+      ) < 1,
+    );
+  }
+  for (const a of h.art.arches) {
+    const normal = new THREE.Vector3(a.center.x, 0, a.center.z).normalize(),
+      middle = new THREE.Vector3(a.center.x, h.y + 1.5, a.center.z);
+    assert.equal(
+      g.cameraSurfaces.entry(
+        middle.clone().addScaledVector(normal, -2),
+        middle.clone().addScaledVector(normal, 2),
+        0.1,
+      ),
+      1,
+    );
+    assert(
+      g.canMove(middle.x, middle.z, h.y - g.groundHeight(middle.x, middle.z)),
+    );
+  }
+  for (let x = -28; x <= -22; x += 0.2)
+    assert(g.canMove(x, -2.4, h.y - g.groundHeight(x, -2.4)));
+  for (const c of h.controls)
+    assert(
+      g.canMove(
+        c.position.x,
+        c.position.z,
+        h.y - g.groundHeight(c.position.x, c.position.z),
+      ),
+    );
+});
+
+test("older column-overlapping arrivals recover, including body overlap just beyond the court radius", () => {
+  const g = fixture(),
+    h = g.orbitVault;
+  for (const c of h.art.columns) {
+    g.player.position.set(c.obstacle.x, 0, c.obstacle.z);
+    restoreOrbitArrival(g);
+    assert.deepEqual(g.player.position.toArray(), [-22, h.y, -2.4]);
+  }
+  const c = h.art.columns.find((c) => c.index === 1);
+  // This centre is beyond 25 m; its body still overlaps the column's northeast corner.
+  g.player.position.set(c.x + 0.95, 0, c.z + 0.95);
+  assert(Math.hypot(g.player.position.x, g.player.position.z) > 25);
+  assert(!g.canMove(g.player.position.x, g.player.position.z, 0));
+  restoreOrbitArrival(g);
+  assert.deepEqual(g.player.position.toArray(), [-22, h.y, -2.4]);
+  g.player.position.set(-25.5, 0, -2.4);
+  restoreOrbitArrival(g);
+  assert.deepEqual(g.player.position.toArray(), [-25.5, 0, -2.4]);
+});
+
+test("court lamps share the animated fire/light system and their emitters follow visible world positions", () => {
+  const g = fixture(),
+    h = g.orbitVault;
+  g.camera = new THREE.PerspectiveCamera();
+  g.map.rooms = [];
+  g.items = [];
+  g.waterMeshes = [];
+  buildSoundLandmarks(g);
+  assert.deepEqual(
+    g.soundSources.filter((s) => s.kind === "fire"),
+    h.art.lamps.map((l) => l.source),
+  );
+  buildFireEffects(g);
+  g.world.updateMatrixWorld(true);
+  for (const { flame, source } of h.art.lamps) {
+    const position = flame.getWorldPosition(new THREE.Vector3());
+    assert(
+      position.distanceTo(new THREE.Vector3(source.x, source.y, source.z)) <
+        1e-6,
+    );
+    assert(flame.material.isShaderMaterial);
+    g.player.position.copy(position).add(new THREE.Vector3(-0.5, -1.6, 0));
+    updateFireEffects(g);
+    assert(g.fireLights[0].position.distanceTo(position) < 1e-6);
+    assert.equal(g.fireLights[0].distance, 18);
+    assert(g.fireLights[0].intensity > 0);
+    const intensity = g.fireLights[0].intensity;
+    updateFireEffects(g);
+    assert.equal(g.fireLights[0].intensity, intensity);
+  }
+  assert.equal(new Set(h.art.lamps.map((l) => l.flame.material)).size, 1);
+  const materials = orbitMaterials(g);
+  assert.notEqual(materials.masonry, g.stoneMat);
+  assert.equal(g.stoneMat.color.getHex(), 0xffffff);
 });
 
 test("orbital sectors have outward closed faces and their gaps stay clear in support and camera collision", () => {

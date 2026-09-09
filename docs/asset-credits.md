@@ -14,6 +14,16 @@ explorer rig and calibrated cylinder-grip solver; machinery uses the existing
 original synthesis. [Operation notes](orrery-operation.md) record the changes and
 their verification. No new external asset or dependency was introduced.
 
+The surrounding court’s fitted paving, retaining courses, support girders,
+column arrangement and caged lamps are original project geometry in
+`src/orbit-court-art.js`; block tint and material clones are in
+`src/orbit-materials.js`. The columns and arches reuse the original palace
+geometry generators. These use the already bundled Worn Rock Natural 01 maps
+by Dimitrios Savva and Rob Tuytel and Marble Rock 02 maps by Amal Kumar, both
+from Poly Haven and credited below. The lamps reuse the existing fire shader
+and PagDev’s Fireplace Sound loop recording, also credited below. No external
+asset or dependency was added. See [court artwork notes](orrery-court-art.md).
+
 The Cinder Relay's six pressure pistons, galleries, valve wheels, pipe routes,
 return lift, dispatch ledger, signs, map and recovered record are original
 project geometry, code and writing in `src/pressure-*.js`. They reuse the existing

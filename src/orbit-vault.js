@@ -13,6 +13,8 @@ import { patinatedBronze } from "./observatory-geometry.js";
 import { mergeArchitecture } from "./visuals.js";
 import { buildOrbitBearing } from "./orbit-bearing-art.js";
 import { beginOrbitBearing, syncOrbitBearing } from "./orbit-motion.js";
+import { orbitMaterials } from "./orbit-materials.js";
+import { buildOrbitCourtArt } from "./orbit-court-art.js";
 import {
   buildOrbitBridge,
   updateOrbitBridge,
@@ -135,11 +137,20 @@ export function buildOrbitVault(game) {
     hub: { orbitHub: true },
     returnDeck: { orbitReturn: true },
   });
-  const stone = game.stoneMat,
+  const materials = orbitMaterials(game),
+    stone = materials.masonry,
     bronze = patinatedBronze(),
-    dark = game.darkMat;
+    dark = materials.recess;
   let serial = 23000;
   const add = (geometry, mat, px, py, pz, parent = fixed, camera = true) => {
+    if (mat.vertexColors && !geometry.attributes.color)
+      geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(
+          new Float32Array(geometry.attributes.position.count * 3).fill(1),
+          3,
+        ),
+      );
     const mesh = new THREE.Mesh(geometry, mat);
     mesh.position.set(px, py, pz);
     mesh.castShadow = mesh.receiveShadow = true;
@@ -229,7 +240,7 @@ export function buildOrbitVault(game) {
       sector(config.inner, config.outer, a, b, stone, 0, moving);
       for (const r of [config.inner, config.outer - 0.16])
         add(orbitSector(r, r + 0.16, a, b, 0.08), bronze, 0, 0.015, 0, moving);
-      const divisions = Math.ceil((b - a) / 0.15);
+      const divisions = Math.ceil((b - a) / 0.36);
       for (let j = 0; j <= divisions; j++) {
         const angle = a + ((b - a) * j) / divisions,
           r = (config.inner + config.outer) / 2;
@@ -351,6 +362,7 @@ export function buildOrbitVault(game) {
       0,
     ).rotation.x = Math.PI / 2;
   buildOrbitBridge(game, { add, box, bronze, dark });
+  buildOrbitCourtArt(game, { add, box, fixed, materials, bronze, orbitSector });
   mergeArchitecture(fixed);
   for (const r of h.rings) mergeArchitecture(r.root);
   updateOrbitVault(game, 0, true);

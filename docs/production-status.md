@@ -20,6 +20,20 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The orrery court now has pale fitted paving, a broken stone colonnade,
+  retaining masonry, under-deck supports and four caged oil lamps. Columns
+  block movement, arch openings remain clear, and older overlapping arrivals
+  recover at a safe landing. Each lamp uses one quiet positioned fire emitter
+  and the shared four-light pool. All 422 tests and the production build pass.
+  The assisted native-input route retained all three animated calibrations,
+  chart recovery and return in 48 segments at 100 health. Browser checks covered
+  fourteen columns, thirteen arch openings, source falloff and cleanup of 87
+  graphics resources. Five final production cases passed native keyboard/touch
+  interaction and exact reload comparisons without failed assets or console
+  warnings/errors. [Court comparisons and notes](orrery-court-art.md) record
+  the geometry increase and measured limits. AAA graphics, human chapter
+  pacing, subjective listening and broader device testing remain open.
+
 - The Cartographer’s Orrery now has physical bearing instruments, two-hand
   reach/turn/release actions and a four-leaf return bridge that unfolds after
   chart recovery. Calibrations commit at the wheel’s stop; movement cancels an

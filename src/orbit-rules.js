@@ -144,7 +144,9 @@ export function orbitSavePosition(game) {
 export function restoreOrbitArrival(game) {
   const h = game.orbitVault,
     p = game.player?.position;
-  if (!h || !p || !inOrbitVault(game.map, p.x, p.z)) return;
+  // A player's body can overlap the outer colonnade while their centre is
+  // just outside the deck radius. Clear ground in this margin remains valid.
+  if (!h || !p || !inOrbitVault(game.map, p.x, p.z, 1)) return;
   if (
     Math.hypot(p.x - h.x, p.z - h.z) >= 20 &&
     Math.abs(p.y - game.groundHeight(p.x, p.z)) < 0.3 &&

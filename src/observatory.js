@@ -9,10 +9,12 @@ export function buildObservatory(game) {
   game.observatories = [];
   game.observatorySources = [];
   game.orreryFocus = null;
+  game.observatoryMaterials = null;
   if (game.level.biome !== "eclipse") return false;
   const stone = pbrMaterial("temple", 0xc0c4bf),
     bronze = patinatedBronze();
   const dark = pbrMaterial("palace-stone", 0x606e78);
+  game.observatoryMaterials = { stone, dark, bronze };
   const glow = new THREE.MeshStandardMaterial({
     color: 0xdde3cd,
     emissive: 0xc7daca,
