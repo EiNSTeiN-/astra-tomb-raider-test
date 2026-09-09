@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Desert palms now have fuller crowns with angled, folded leaflets, tapered
+  stems, raised leaf scars and wind that keeps frond bases fixed. All 467 tests
+  and the release build passed. Matching browser views retained all 70 placements
+  and chapter collision/source records. Keyboard sprinting and portrait touch
+  movement finished at full health and preserved saves on reload; attenuation
+  and resource cleanup passed. A fixed Radeon 780M courtyard sample measured
+  GPU increases of 0.5% in High and 1.7% in Low, with sample variation.
+  [Palm comparisons and costs](palm-fronds.md) document the increased near
+  geometry, benchmark limits and remaining graphics, pacing and listening work.
+
 - The desert's near and middle-distance banks now have broader shoulders and
   varying, softened crests. A baseline comparison retained 51,375 walking-floor
   and 4,805 reservoir-floor samples exactly, together with the chapter's obstacle,

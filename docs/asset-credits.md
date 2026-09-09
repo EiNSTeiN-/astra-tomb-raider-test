@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The date-palm crown, folded leaflets, tapered stems, trunk scars and anchored
+wind in `src/palm-fronds.js` and `src/desert-palms.js` are original project code.
+They reuse the existing credited bark maps. The botanical reference was
+[Patti J. Anderson's Phoenix dactylifera identification page](https://idtools.org/palm_id/index.cfm?entityID=3227&packageID=1109);
+its photographs were inspected and are not bundled or redistributed. No new
+external image, model, audio or dependency was added. See
+[palm comparisons and verification](palm-fronds.md).
+
 The fitted spillway masonry, wet-stone treatment, upper channels, falling-water
 streaks, impact foam and spray in `src/spillway-art.js`,
 `src/waterfall-material.js` and `src/waterfall-effects.js` are original project

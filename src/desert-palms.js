@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { palmCrownGeometry } from "./palm-fronds.js";
 import { random } from "./campaign.js";
 import { pbrMaterial } from "./visuals.js";
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
@@ -26,17 +26,6 @@ export function desertPalmLayout(map, groundHeight, seed) {
   return palms;
 }
 
-function vertexColor(geometry, color) {
-  const a = new Float32Array(geometry.attributes.position.count * 3);
-  for (let i = 0; i < a.length; i += 3) {
-    a[i] = color.r;
-    a[i + 1] = color.g;
-    a[i + 2] = color.b;
-  }
-  geometry.setAttribute("color", new THREE.BufferAttribute(a, 3));
-  return geometry;
-}
-
 // Separate leaflets create feathered silhouettes in the geometry and its shadow.
 // Three deterministic versions share a crown shape across their detail tiers.
 export function palmGeometry(variant = 0, tier = 0) {
@@ -54,134 +43,65 @@ export function palmGeometry(variant = 0, tier = 0) {
     }),
   );
   const radial = [12, 8, 6][tier],
-    rows = [36, 22, 12][tier];
+    rows = [72, 40, 16][tier];
   const trunk = new THREE.TubeGeometry(trunkCurve, rows, 0.38, radial, false);
   const p = trunk.attributes.position,
-    uv = trunk.attributes.uv;
+    uv = trunk.attributes.uv,
+    colors = [];
   for (let row = 0; row <= rows; row++) {
     const t = row / rows,
       center = trunkCurve.getPointAt(t),
       taper = 1 - t * 0.43 + 0.22 * Math.exp(-t * 18);
     for (let j = 0; j <= radial; j++) {
-      const i = row * (radial + 1) + j;
+      const i = row * (radial + 1) + j,
+        band = t * height * 3,
+        ring = Math.sin((band - Math.floor(band)) * Math.PI) ** 2,
+        scar =
+          Math.max(
+            0,
+            Math.cos((j / radial) * Math.PI * 12 + Math.floor(band) * 1.9),
+          ) **
+            2 *
+          ring,
+        radius = taper + scar * (tier === 2 ? 0.04 : 0.18),
+        shade = 0.77 + scar * 0.2;
       p.setXYZ(
         i,
-        center.x + (p.getX(i) - center.x) * taper,
+        center.x + (p.getX(i) - center.x) * radius,
         p.getY(i),
-        center.z + (p.getZ(i) - center.z) * taper,
+        center.z + (p.getZ(i) - center.z) * radius,
       );
       uv.setXY(i, j / radial, (t * height) / 1.3);
+      colors.push(shade, shade * 0.95, shade * 0.85);
     }
   }
+  trunk.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   trunk.computeVertexNormals();
-  const leaves = [],
-    leaflets = [56, 32, 16][tier];
-  for (let f = 0; f < 17; f++) {
-    const a = f * 2.39996 + rng() * 0.2,
-      length = 4.1 + rng() * 1.6;
-    const lift = f < 5 ? 3.8 : 2.8,
-      droop = f < 5 ? 2.7 : 4.7;
-    const radialDirection = new THREE.Vector3(Math.cos(a), 0, Math.sin(a)),
-      sideDirection = new THREE.Vector3(-Math.sin(a), 0, Math.cos(a));
-    const rib = (t) =>
-      new THREE.Vector3(bend, height - f * 0.045, 0)
-        .addScaledVector(radialDirection, t * length)
-        .add(
-          new THREE.Vector3(
-            0,
-            Math.sin(t * Math.PI * 0.75) * lift - t * t * droop,
-            0,
-          ),
-        );
-    const curve = new THREE.CatmullRomCurve3(
-      Array.from({ length: 9 }, (_, i) => rib(i / 8)),
-    );
-    const stalk = new THREE.TubeGeometry(
-      curve,
-      [14, 9, 6][tier],
-      0.026,
-      4,
-      false,
-    );
-    leaves.push(vertexColor(stalk, new THREE.Color(0.35, 0.39, 0.15)));
-    const positions = [],
-      colors = [],
-      uvs = [];
-    for (let i = 0; i < leaflets; i++) {
-      const t = 0.09 + (i / leaflets) * 0.88;
-      for (const side of [-1, 1]) {
-        const point = rib(t + (side < 0 ? 0.008 : 0));
-        const reach = 0.2 + Math.sin(Math.PI * t) ** 0.65 * 1.28;
-        const end = point
-          .clone()
-          .addScaledVector(sideDirection, side * reach)
-          .addScaledVector(radialDirection, -0.22 - t * 0.28);
-        end.y -= 0.14 + t * 0.65;
-        const mid = point.clone().lerp(end, 0.48),
-          width = 0.08 * (56 / leaflets) ** 0.45;
-        const left = mid.clone().addScaledVector(radialDirection, width),
-          right = mid.clone().addScaledVector(radialDirection, -width);
-        const ridge = mid.clone();
-        ridge.y += 0.035;
-        const shade = 0.83 + (Math.sin(i * 4.7 + f) + 1) * 0.09;
-        const color = new THREE.Color().setRGB(
-          0.13 * shade,
-          0.2 * shade,
-          0.055 * shade,
-        );
-        if (f > 14) color.lerp(new THREE.Color(0.3, 0.23, 0.1), 0.44);
-        for (const tri of [
-          [point, left, ridge],
-          [left, end, ridge],
-          [end, right, ridge],
-          [right, point, ridge],
-        ]) {
-          for (const v of tri) {
-            positions.push(v.x, v.y, v.z);
-            colors.push(color.r, color.g, color.b);
-            uvs.push(t, side);
-          }
-        }
-      }
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    g.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-    g.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
-    g.computeVertexNormals();
-    leaves.push(g);
-  }
-  const parts = leaves.map((g) => {
-    if (!g.index) return g;
-    const expanded = g.toNonIndexed();
-    g.dispose();
-    return expanded;
-  });
-  const foliage = mergeGeometries(parts, false);
-  parts.forEach((g) => g.dispose());
+  const foliage = palmCrownGeometry(variant, bend, height, tier);
   trunk.computeBoundingSphere();
-  foliage.computeBoundingSphere();
   return { trunk, foliage };
 }
 
-function palmWind(material, time) {
+export function palmWind(material, time) {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.palmTime = time;
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
-        "#include <common>\nuniform float palmTime;",
+        "#include <common>\nuniform float palmTime; attribute vec2 palmMotion;",
       )
       .replace(
         "#include <begin_vertex>",
         `#include <begin_vertex>
-      float palmFlex = pow(max(0.0, position.y - 9.0)*.2, 2.0);
-      transformed.x += sin(palmTime*.55 + position.z*.5 + instanceMatrix[3].x*.17)*palmFlex*.24;
-      transformed.z += sin(palmTime*.43 + position.x*.6 + instanceMatrix[3].z*.12)*palmFlex*.18;
+      float palmPhase = instanceMatrix[3].x*.17 + instanceMatrix[3].z*.12;
+      float palmFlex = palmMotion.x;
+      transformed.x += sin(palmTime*.55 + palmPhase)*palmFlex*.24;
+      transformed.z += sin(palmTime*.43 + palmPhase*.8)*palmFlex*.18;
+      transformed.y += sin(palmTime*1.4 + position.x*2.0 + palmPhase)*palmMotion.y*.028;
     `,
       );
   };
-  material.customProgramCacheKey = () => "vesper-palm-wind-1";
+  material.customProgramCacheKey = () => "vesper-palm-wind-2";
 }
 
 export function buildDesertPalms(game) {
@@ -190,10 +110,11 @@ export function buildDesertPalms(game) {
   if (game.level.biome !== "desert") return;
   const bark = pbrMaterial("bark", 0xb5a087);
   bark.name = "Date palm bark";
+  bark.vertexColors = true;
   const leaves = new THREE.MeshStandardMaterial({
     name: "Date palm leaves",
     vertexColors: true,
-    roughness: 0.85,
+    roughness: 0.76,
     side: THREE.DoubleSide,
   });
   game.palmWind = { value: 0 };

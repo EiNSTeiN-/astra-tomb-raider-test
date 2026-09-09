@@ -217,7 +217,7 @@ test("solar panels retain physical carving depth and three different ray pattern
 test("palm tiers preserve crown shape, remain finite, and reduce geometry at each distance", () => {
   for (let variant = 0; variant < 3; variant++) {
     const tiers = [0, 1, 2].map((tier) => palmGeometry(variant, tier)),
-      budgets = [10600, 6200, 3300];
+      budgets = [29200, 8600, 3000];
     let previous = Infinity;
     for (let tier = 0; tier < 3; tier++) {
       const { trunk, foliage } = tiers[tier],

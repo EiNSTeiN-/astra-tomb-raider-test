@@ -267,6 +267,11 @@ their rectangular outlines while retaining the existing walking floors and
 climbing structures. [Bank comparisons and route checks](docs/desert-banks.md)
 include matching views, measured slope changes and the remaining limitations.
 
+Desert palms now have fuller crowns, angled folded leaflets, tapered stems and
+raised old leaf scars. Wind keeps the frond bases fixed and moves the leaf tips
+with matching shadows. [Palm comparisons and costs](docs/palm-fronds.md) describe
+the added near detail and the retained placements and distance tiers.
+
 Desert boulders now sit in the terrain using their sampled undersides and share
 its sandstone material. Small rubble gathers around piers and banks, with larger
 stones kept outside the walking cells. A smaller geometry-only rock asset replaces

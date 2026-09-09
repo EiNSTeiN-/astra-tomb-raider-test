@@ -18,6 +18,10 @@ The desert sky now uses the daylight shader with a lower sun angle, atmospheric 
 
 ## Palms and sound landmarks
 
+The later [palm crown revision](palm-fronds.md) replaces these seventeen-frond
+models with angled leaflets, upright young growth, tapered stems and fixed wind
+attachments. The counts and images below record the earlier art milestone.
+
 Seventy deterministic palm placements replace the earlier straight branch clusters. The original parametric models have tapered curved trunks, seventeen fronds, individual folded leaflets, and wind movement shared by their leaf shadows. Three crown variants each have three geometry tiers. Higher detail increases leaflet density; distant leaflets widen to retain coverage. This improves their silhouette but remains procedural plant art.
 
 The tiers contain **10,384**, **5,928**, and **3,136 triangles per complete palm**. Distance selection, 300 ms dither transitions, hysteresis, and range culling use the existing instance-detail system. Distances are measured horizontally, preventing elevation changes from unnecessarily changing a nearby palm's detail. The existing local bark texture is reused; no new palm bitmap is required.
