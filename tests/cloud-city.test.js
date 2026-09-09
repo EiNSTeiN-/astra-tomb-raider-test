@@ -221,6 +221,9 @@ test("moving the listener preserves mountain parallax while advancing cloud time
     before,
   );
   g.level = LEVELS[0];
+  g.map = createMap(g.level);
+  g.terrainProfile = createTerrainProfile(g.map, g.level);
+  g.terrainMeshes = [{ material: new THREE.MeshStandardMaterial() }];
   buildHorizon(g);
   assert.equal(
     g.cloudCity,

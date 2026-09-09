@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The outer jungle bank and deterministic planting in `src/jungle-fringe.js` are
+original project code. They reuse the existing credited Island Tree 01 and
+Island Tree 02 tiers, forest ground textures, canopy wind and distance fades.
+No external asset or dependency was added. See [forest boundary comparisons
+and verification](jungle-fringe.md).
+
 The guardian watch routes, footing checks and patrol state in
 `src/guardian-patrols.js` and `src/encounters.js` are original project code.
 They reuse the existing guardian geometry, planted-foot animation, original

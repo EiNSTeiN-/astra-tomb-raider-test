@@ -4,6 +4,10 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The requested approximately one-hour duration per chapter has not been established by human playtesting, and the real-time graphics do not yet reach modern AAA production quality. See [the production status](docs/production-status.md) for the original requirements, evidence, and remaining work.
 
+The jungle now has [a grounded outer forest](docs/jungle-fringe.md), filling
+empty boundary sightlines with varied trees while preserving playable routes.
+The comparison notes include the additional rendering cost and remaining limits.
+
 Guardians now follow [regional patrol routes](docs/guardian-patrols.md), pausing
 to watch approaches and resuming after an investigation. Observe their routes,
 use cover, and crouch with **B / Crouch** to pass while they look away.

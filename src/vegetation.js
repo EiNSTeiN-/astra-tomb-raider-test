@@ -18,6 +18,7 @@ import { skyGroundSupported } from "./sky-geology.js";
 import { buildDesertScatter } from "./desert-scatter.js";
 import { stoneFootprint } from "./stone-grounding.js";
 import { placeNatureRock } from "./nature-rocks.js";
+import { FRINGE_RANGES } from "./jungle-fringe.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -127,6 +128,36 @@ export async function loadForest(game) {
           wind: (material) => forestWind(material, game.forestWind),
         }),
       );
+    const fringeChunks = new Map();
+    for (const tree of game.jungleFringe?.trees || []) {
+      if (tree.variant !== variant) continue;
+      const key = `${Math.floor(tree.x / 48)},${Math.floor(tree.z / 48)}`;
+      if (!fringeChunks.has(key))
+        fringeChunks.set(key, { matrices: [], positions: [] });
+      dummy.position.set(tree.x, tree.y, tree.z);
+      dummy.rotation.set(0, tree.rotation, 0);
+      dummy.scale.setScalar(tree.scale);
+      dummy.updateMatrix();
+      fringeChunks.get(key).matrices.push(dummy.matrix.clone());
+      fringeChunks.get(key).positions.push(dummy.position.clone());
+    }
+    for (const chunk of fringeChunks.values()) {
+      const patch = createLodPatch(
+        world,
+        tiers.slice(1),
+        chunk.matrices,
+        chunk.positions,
+        {
+          castShadow: false,
+          wind: (material) => forestWind(material, game.forestWind),
+        },
+      );
+      for (const mesh of patch.tiers.flat()) {
+        mesh.name = "Outer jungle tree";
+        mesh.userData.excludeContact = true;
+      }
+      game.jungleFringe.patches.push(patch);
+    }
   }
   updateForest(game);
   game.renderOnce = true;
@@ -144,6 +175,14 @@ export function updateForest(game, dt = 0) {
       patch,
       game.player.position,
       FOREST_RANGES[game.store.data.settings.quality],
+      dt,
+      3,
+    );
+  for (const patch of game.jungleFringe?.patches || [])
+    updateLodPatch(
+      patch,
+      game.player.position,
+      FRINGE_RANGES[game.store.data.settings.quality],
       dt,
       3,
     );

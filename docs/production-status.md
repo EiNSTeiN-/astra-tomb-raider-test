@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The jungle now has a grounded outer bank and 1,048 additional trees beyond
+  its map boundary, filling formerly empty sightlines while preserving the
+  original woodland, routes and sound anchors. All 453 tests and the release
+  build passed. Twelve controlled High/Performance views linked shaders;
+  a prepared 6.58 metre crouched patrol crossing finished at 100 health,
+  all 42 jungle patrol route searches completed, and the new resources released
+  on chapter change. All seven other chapters rendered. Two release keyboard/portrait-touch
+  cases preserved exact saves on reload. The added scenery increases submitted
+  geometry and draw calls; [forest comparisons and costs](jungle-fringe.md)
+  record these limits alongside the remaining AAA graphics, human pacing,
+  listening and device work.
+
 - All 122 guardians now follow regional watch routes with pauses and moving
   sight lines, then resume after investigating a sound. Terrain-aware movement
   keeps patrol, pursuit, charges and return on suitable footing. All 398 route

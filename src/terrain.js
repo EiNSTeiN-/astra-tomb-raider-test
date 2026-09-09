@@ -13,6 +13,7 @@ import { coastalLayout } from "./coastal-layout.js";
 import { refineSkyTerrain } from "./sky-geology.js";
 import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
+import { buildJungleFringe } from "./jungle-fringe.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -314,6 +315,7 @@ export function buildTerrainSurface(game) {
 }
 
 export function buildHorizon(game) {
+  buildJungleFringe(game);
   game.cloudCity = null;
   game.desertHorizon = [];
   if (game.level.biome === "desert") {
