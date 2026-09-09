@@ -136,6 +136,14 @@ export function createTerrainProfile(map, level) {
         heights[iz * width + ix] =
           height * (1 - weight) + raw(35, 66.5) * weight;
       }
+      if (map.orbitVault) {
+        const cx = map.orbitVault.x * 7,
+          cz = map.orbitVault.z * 7,
+          radius = Math.hypot(x - cx, z - cz),
+          weight = 1 - smooth(24, 30, radius),
+          floor = raw(cx, cz) - 10 * (1 - smooth(18.8, 20, radius));
+        heights[iz * width + ix] = height * (1 - weight) + floor * weight;
+      }
       courts[iz * width + ix] = Math.max(paving, coastal?.coverage(x, z) || 0);
     }
   const sample = (data, x, z) => {

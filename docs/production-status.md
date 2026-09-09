@@ -20,6 +20,21 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The final chapter now includes **the Cartographer’s Orrery**, an optional
+  traversal through three rotating crowns, ordered bearing calibrations and a
+  central chart that opens a return bridge. Fixed landings support save and fall
+  recovery; the map follows ring angles, and moving machinery uses distance
+  attenuation. All 415 tests passed, followed by 14 affected tests after the
+  final texture correction. An assisted native-input route completed all three
+  rings and the return crossing in 47 movement segments at 100 health. Browser
+  checks covered rider/boot support, pause, touch controls, portrait layouts,
+  source falloff and cleanup of 44 inspected graphics resources. Five final
+  production save states passed native input and exact reload comparisons
+  without failed assets or console warnings/errors.
+  [Orrery notes and images](cartographers-orrery.md) record the evidence and
+  remaining animation work. Human chapter pacing, AAA graphics, subjective
+  listening and broader device coverage remain open requirements.
+
 - The crystal chapter now has an optional **Listening Gallery** west of its entry
   camp: 32 connected chambers, five pulse-counted voices, false echoes, three
   ordered expedition memories and two rising shortcut shutters. Engravings, map

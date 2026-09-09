@@ -25,6 +25,13 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+In **The Last Meridian**, the optional **Cartographer’s Orrery** lies beside the
+cache west of the entry area. Jump onto moving stone crowns, calibrate the Earth,
+Moon and Star bearings, and recover the central return chart. **M** shows the
+live ring positions; fixed landings preserve progress, and **E / Use** operates
+each bearing. The chart opens a direct bridge back. See
+[the route and verification](docs/cartographers-orrery.md).
+
 In **The Night Below**, the optional **Listening Gallery** lies west of the
 entry camp. Follow two, one, then three crystal pulses through its branching
 passages; **E / Use** records each memory. Engraved counts support muted play.
