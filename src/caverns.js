@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { inEchoGallery } from "./echo-gallery-rules.js";
 import { inResonanceCourt } from "./resonance-rules.js";
 import { random } from "./campaign.js";
 import { waterAt } from "./hydrology.js";
@@ -71,6 +72,7 @@ export function buildCaverns(game) {
       )
         continue;
       if (profile.height(px, pz) - py < 12) continue;
+      if (inEchoGallery(game.map, px, pz, 4)) continue;
       if (inResonanceCourt(game.map, px, pz, 3)) continue;
       if (centers.length === 4) break;
       const center = new THREE.Vector3(px, py, pz);

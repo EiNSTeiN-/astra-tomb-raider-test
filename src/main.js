@@ -1,6 +1,13 @@
 import { drawCleftMap } from "./cleft-map.js";
 import { drawPressureMap } from "./pressure-map.js";
 import { PRESSURE_RECORD } from "./pressure-rules.js";
+import {
+  ECHO_RECORD,
+  ECHO_FRAGMENTS,
+  ECHO_STONES,
+  ECHO_ORDER,
+} from "./echo-gallery-rules.js";
+import { drawEchoMap } from "./echo-gallery-map.js";
 import { CLEFT_RECORD } from "./cleft-rules.js";
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
 import { HOIST_RECORD } from "./bell-hoist-rules.js";
@@ -445,6 +452,8 @@ async function runStartup(request) {
           cleftRecord: () => showCleftGuide(true),
           pressureGuide: () => showPressureGuide(),
           pressureRecord: () => showPressureGuide(true),
+          echoGuide: showEchoGuide,
+          echoFragment: showEchoFragment,
           bellHoist: showBellHoistGuide,
           bellHoistRecord: () =>
             modal(
@@ -623,19 +632,21 @@ function updateHUD(s) {
   }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent = s.pressure
-    ? `${number(s.pressure.step)} / 04`
-    : s.cleft
-      ? `${number(s.cleft.step)} / 04`
-      : s.bellHoist
-        ? `${number(s.bellHoist.step)} / 03`
-        : s.fireVault
-          ? `${number(s.fireVault.lit)} / 03`
-          : s.gallery
-            ? `${number(s.galleryStage)} / 02`
-            : s.diving
-              ? `${number(s.archive)} / 05`
-              : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.echo
+    ? `${number(s.echo.step)} / 04`
+    : s.pressure
+      ? `${number(s.pressure.step)} / 04`
+      : s.cleft
+        ? `${number(s.cleft.step)} / 04`
+        : s.bellHoist
+          ? `${number(s.bellHoist.step)} / 03`
+          : s.fireVault
+            ? `${number(s.fireVault.lit)} / 03`
+            : s.gallery
+              ? `${number(s.galleryStage)} / 02`
+              : s.diving
+                ? `${number(s.archive)} / 05`
+                : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
   document.querySelector("#objective-distance").textContent = s.target
     ? `${s.distance} m away`
@@ -643,7 +654,10 @@ function updateHUD(s) {
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
-  if (s.pressure)
+  if (s.echo)
+    document.querySelector("#objective-detail").textContent =
+      "Optional exploration · Listening Gallery · M charts your route · J recalls the voices";
+  else if (s.pressure)
     document.querySelector("#objective-detail").textContent =
       "Optional tomb · The Cinder Relay · M shows crowns and safe galleries";
   else if (s.cleft)
@@ -744,6 +758,7 @@ function updateWaypoint(s) {
 }
 function drawMap(canvas, full = false, s = game?.state()) {
   if (!game || !s) return;
+  if (s.echo) return drawEchoMap(canvas, game, full);
   if (s.pressure) return drawPressureMap(canvas, game, full);
   if (s.cleft) return drawCleftMap(canvas, game, full);
   if (s.bellHoist) return drawBellHoistMap(canvas, game, full);
@@ -995,6 +1010,7 @@ function showMap() {
     "Follow the forgotten paths.",
     `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${state.objective}</p>${
       !state.cleft &&
+      !state.echo &&
       !state.pressure &&
       !state.gallery &&
       !state.fireVault &&
@@ -1008,7 +1024,7 @@ function showMap() {
             )
             .join("")}</ol>`
         : ""
-    } ${state.pressure ? `<p class="small-copy">Open a circuit from each green gallery. Ride its first piston upward, then jump when the neighboring crowns meet. Wait aboard the second piston for the next gallery. Numbers identify the six crowns; heights show their current elevation. The dispatch ledger releases the return lift. Reloading during a crossing returns you to the last safe gallery.</p>` : state.cleft ? `<p class="small-copy">This is a front view of the wall. Bronze marks show handholds; dashed links need a jump and catch. Green terraces are saved rest points. Climbing directions follow the wall: Up climbs, Left and Right traverse, Down descends. Press Jump with a direction at a broken span, then hold Use to catch. Release the direction and press Jump beside a terrace to step off. The line on the right is the return descent.</p>` : state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
+    } ${state.echo ? `<p class="small-copy">Only the passages you have walked appear here. Numbers identify the pulse counts at discovered stones; a check marks a recorded voice. Bronze lines are shortcut shutters and green dashed lines are open passages. The gold tablet lies beside the eastern exit. Follow two pulses, then one, then three. The engravings let you explore with sound muted.</p>` : state.pressure ? `<p class="small-copy">Open a circuit from each green gallery. Ride its first piston upward, then jump when the neighboring crowns meet. Wait aboard the second piston for the next gallery. Numbers identify the six crowns; heights show their current elevation. The dispatch ledger releases the return lift. Reloading during a crossing returns you to the last safe gallery.</p>` : state.cleft ? `<p class="small-copy">This is a front view of the wall. Bronze marks show handholds; dashed links need a jump and catch. Green terraces are saved rest points. Climbing directions follow the wall: Up climbs, Left and Right traverse, Down descends. Press Jump with a direction at a broken span, then hold Use to catch. Release the direction and press Jump beside a terrace to step off. The line on the right is the return descent.</p>` : state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
     "map",
     "EXPEDITION CARTOGRAPHY",
     true,
@@ -1047,6 +1063,15 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const echo = store.data.levels.crystal?.echoGallery;
+  const echoSection = echo?.visited
+    ? `<section class="tide-journal"><span class="eyebrow">THE LISTENING GALLERY · ${echo.recovered ? "RECOVERED" : `${echo.fragments} / 3 VOICES`}</span><h3>${ECHO_RECORD.title}</h3><p>${echo.recovered ? ECHO_RECORD.text : "West of the entry camp, five stones repeat their calls through a branching gallery. Follow two pulses, then one, then three, and return to the entrance tablet. Walls muffle the voices; their engraved counts remain readable with sound muted."}</p>${ECHO_FRAGMENTS.slice(
+        0,
+        echo.fragments,
+      )
+        .map((text) => `<p class="small-copy">${text}</p>`)
+        .join("")}</section>`
+    : "";
   const pressure = store.data.levels.embers?.pressureRelay;
   const pressureSection = pressure?.visited
     ? `<section class="tide-journal"><span class="eyebrow">THE CINDER RELAY · ${pressure.recovered ? "RECOVERED" : "IN PROGRESS"}</span><h3>${PRESSURE_RECORD.title}</h3><p>${pressure.recovered ? PRESSURE_RECORD.text : "West of the obsidian-hub station in Black Glass, pressure pistons once carried supplies to the upper dispatch gallery. Open three circuits, cross between their crowns and recover the last delivery ledger."}</p>${pressure.recovered ? `<p class="small-copy">${PRESSURE_RECORD.note}</p>` : ""}</section>`
@@ -1088,7 +1113,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${pressureSection}${cleftSection}${hoistSection}${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection || cleftSection || pressureSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${echoSection}${pressureSection}${cleftSection}${hoistSection}${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection || cleftSection || pressureSection || echoSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,
@@ -1661,5 +1686,27 @@ function showPressureGuide(record = false) {
       ? `<div class="note-paper"><p>${PRESSURE_RECORD.text}</p><p>${PRESSURE_RECORD.note}</p></div><button class="primary-button" data-close>Return to the dispatch gallery</button>`
       : `<p class="modal-description">Six pressure crowns. Three safe galleries. One last delivery.</p><div class="note-paper"><p>Stand in front of the intake valve and press E / Use. Vesper takes both grips and opens the circuit with a quarter turn. Moving or jumping before the turn finishes cancels it; a completed turn stays saved. Ride the first piston until its crown meets the neighboring platform, then jump across. The second piston carries you up to a safe gallery. Use that gallery’s valve to start the next pair.</p><p>Wait for aligned crowns and jump from the edge. The stone galleries save your progress and give you room to plan. M shows all six pistons and their current heights. Reloading during a jump or ride returns you to your last safe gallery.</p><p>The settling floor is too hot to cross; a fall costs health and returns you to the last gallery. The eastern aisle stays cool. Recover the dispatch ledger at the top to release the return lift. Pull the onboard lever to travel, or a landing lever to call the car. Moving before the pull finishes cancels it; once the lift starts, you can release the controls and move freely.</p></div><button class="primary-button" data-close>Explore the relay</button>`,
     "note",
+  );
+}
+
+function showEchoGuide() {
+  const s = game.progress.echoGallery;
+  modal(
+    s.recovered ? ECHO_RECORD.title : "The Listening Gallery",
+    s.recovered
+      ? `<div class="note-paper"><p>${ECHO_RECORD.text}</p></div><button class="primary-button" data-close>Return to the gallery</button>`
+      : `<p class="modal-description">Someone has left a voice for the next person in the dark.</p><div class="note-paper"><p>Begin with two pulses. Follow the single voice next, and three patient breaths last. The fractured stones repeat four pulses; they carry no words.</p><p>The voices grow louder as you approach. Walls muffle them. Each stone flashes the same rhythm, and its pulse count is engraved beneath the crystal. You can follow the engravings with sound muted.</p><p>Press E / Use beside the matching stone to record its memory. The first two fragments raise shortcut shutters. Return all three to this tablet. Your fragments and explored passages save automatically; use M to chart the gallery and J to reread the voices.</p></div><p class="small-copy">${s.fragments} / 3 voices recorded. ${s.fragments < 3 ? `Seek ${ECHO_STONES[ECHO_ORDER[s.fragments]].count} pulses.` : "All fragments are ready to join."}</p><button class="primary-button" data-close>Follow the voices</button>`,
+    "note",
+    "OPTIONAL EXPLORATION · THE NIGHT BELOW",
+  );
+}
+function showEchoFragment(index) {
+  modal(
+    ["Two breaths, returning", "One breath, alone", "Three breaths, waiting"][
+      index
+    ],
+    `<div class="note-paper"><p>${ECHO_FRAGMENTS[index]}</p></div><p class="small-copy">Memory ${index + 1} / 3 saved in your journal. ${index < 2 ? "A shortcut shutter rises nearby." : "Return to the entrance tablet to join the memories."}</p><button class="primary-button" data-close>Continue through the gallery</button>`,
+    "note",
+    "RECOVERED VOICE",
   );
 }

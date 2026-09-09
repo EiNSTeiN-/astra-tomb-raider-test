@@ -25,6 +25,13 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+In **The Night Below**, the optional **Listening Gallery** lies west of the
+entry camp. Follow two, one, then three crystal pulses through its branching
+passages; **E / Use** records each memory. Engraved counts support muted play.
+Two shortcut shutters open as fragments are recovered; return them to the
+entrance tablet. **M** charts the route and **J** keeps the voices. See
+[the gallery and verification](docs/listening-gallery.md).
+
 ## Controls
 
 | Control                    | Action                                                                |

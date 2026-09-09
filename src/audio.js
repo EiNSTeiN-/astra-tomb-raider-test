@@ -1,8 +1,15 @@
 import { createOcclusionFilter } from "./audio-occlusion.js";
+import { echoEnvelope, ECHO_PERIOD } from "./echo-gallery-rules.js";
 
 // Web Audio coordinates match the Three.js world. Each emitter is a mono source
 // positioned relative to the explorer; music and interface sounds stay in stereo.
 export const AUDIO_SOURCES = {
+  ...Object.fromEntries(
+    [1, 2, 3, 4].map((n) => [
+      `echo${n}`,
+      { range: 24, near: 1.5, gain: 0.4, filter: 7000 },
+    ]),
+  ),
   birds: { file: "birds.ogg", range: 48, near: 3, gain: 0.85, filter: 14000 },
   waterfall: {
     file: "waterfall.ogg",
@@ -381,6 +388,21 @@ export class Soundscape {
     return buffer;
   }
   synthetic(kind, duration) {
+    if (/^echo[1-4]$/.test(kind)) {
+      const rate = this.ctx.sampleRate,
+        count = Number(kind.at(-1)),
+        buffer = this.ctx.createBuffer(1, rate * ECHO_PERIOD, rate),
+        data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const t = i / rate;
+        data[i] =
+          echoEnvelope(count, t) *
+          0.22 *
+          (Math.sin(t * 2 * Math.PI * 294) +
+            0.22 * Math.sin(t * 2 * Math.PI * 588));
+      }
+      return buffer;
+    }
     const rate = this.ctx.sampleRate,
       buffer = this.ctx.createBuffer(1, Math.floor(rate * duration), rate);
     const pressureLowStep = 1 - Math.exp((-2 * Math.PI * 480) / rate),
@@ -472,7 +494,12 @@ export class Soundscape {
     panner.connect(gain);
     gain.connect(this.buses.ambience.input);
     const hash = [...source.id].reduce((a, c) => a + c.charCodeAt(0), 0);
-    player.start(0, (hash * 0.731) % buffer.duration);
+    player.start(
+      0,
+      source.phaseSync
+        ? ctx.currentTime % buffer.duration
+        : (hash * 0.731) % buffer.duration,
+    );
     this.track(player, [panner, gain, ...obstruction.nodes]);
     Object.assign(voice, {
       player,

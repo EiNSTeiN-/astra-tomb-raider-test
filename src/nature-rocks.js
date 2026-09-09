@@ -1,4 +1,5 @@
 import { seatStone } from "./stone-grounding.js";
+import { inEchoGallery } from "./echo-gallery-rules.js";
 
 // Movement samples a bilinear height field; the visible ground uses two planar
 // triangles per cell. Fit below both surfaces near non-planar bank corners.
@@ -27,6 +28,7 @@ export function rockGroundHeight(profile, x, z) {
 // Bounds include the actual rotated footprint, not only the instance's origin.
 export function natureRockAllowed(game, x, z, radius) {
   const { map, terrainProfile } = game;
+  if (inEchoGallery(map, x, z, radius + 1)) return false;
   const extent = map.size * 7;
   if (x < radius || z < radius || x > extent - radius || z > extent - radius)
     return false;

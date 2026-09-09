@@ -129,6 +129,13 @@ export function createTerrainProfile(map, level) {
             Math.max(0, distance - 5) * 0.35;
       }
       heights[iz * width + ix] = height;
+      if (map.echoGallery) {
+        const dx = Math.max(7 - x, 0, x - 42),
+          dz = Math.max(28 - z, 0, z - 84),
+          weight = 1 - smooth(0, 6, Math.hypot(dx, dz));
+        heights[iz * width + ix] =
+          height * (1 - weight) + raw(35, 66.5) * weight;
+      }
       courts[iz * width + ix] = Math.max(paving, coastal?.coverage(x, z) || 0);
     }
   const sample = (data, x, z) => {

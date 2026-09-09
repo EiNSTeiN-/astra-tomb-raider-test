@@ -258,3 +258,11 @@ Attribution to kurt, the original work, its license, and the looping/level chang
 Reproduce the bundled recordings with `python3 scripts/download-audio.py`.
 
 The eight adaptive musical arrangements, musical puzzle cues, action effects, and supplemental wind/machine/crystal textures are original Web Audio synthesis in `src/audio.js`. No external music service or prerecorded soundtrack is used. The score uses sparse phrases, tonal pads, deliberately empty bars, and different instrument spectra, scales, motifs, tempi, and chord progressions for each chapter.
+
+The Listening Gallery's authored labyrinth, shortcut shutters, engraved pulse
+counts, map, expedition fragments and original four-second crystal phrases are
+project code and writing in `src/echo-gallery*.js` and `src/audio.js`. Its masonry
+and quartz reuse the existing credited stone maps and original cavern geometry.
+The camera and source-clock synchronization are also original project code. No
+external art, recordings or dependencies were added. See
+[listening-gallery notes](listening-gallery.md) for behavior and verification.

@@ -1,5 +1,6 @@
 import { addSurveyorsCleft } from "./cleft-rules.js";
 import { addPressureRelay } from "./pressure-rules.js";
+import { addEchoGallery } from "./echo-gallery-rules.js";
 import { EXPEDITIONS } from "./expeditions.js";
 import { encounterType, ENEMY_TYPES } from "./encounters.js";
 import { createSkyMap } from "./sky-layout.js";
@@ -515,21 +516,24 @@ export function createMap(level) {
     }
     connect(previous, rooms[stage + 1]);
   }
-  return addPressureRelay(
-    addSurveyorsCleft(
-      addBellHoist(
-        addFireVault(
-          {
-            size,
-            grid,
-            rooms,
-            sideRooms,
-            fieldSites,
-            paths,
-            features,
-            enemies,
-            spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
-          },
+  return addEchoGallery(
+    addPressureRelay(
+      addSurveyorsCleft(
+        addBellHoist(
+          addFireVault(
+            {
+              size,
+              grid,
+              rooms,
+              sideRooms,
+              fieldSites,
+              paths,
+              features,
+              enemies,
+              spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
+            },
+            level,
+          ),
           level,
         ),
         level,

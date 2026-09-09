@@ -101,6 +101,15 @@ import {
 } from "./hydraulic-courts.js";
 import * as THREE from "three";
 import {
+  buildEchoGallery,
+  updateEchoGallery,
+  echoBlocked,
+  echoOccludes,
+  echoInteract,
+  echoHint,
+  echoObjective,
+} from "./echo-gallery.js";
+import {
   buildBellCourts,
   updateBellCourts,
   bellInteract,
@@ -770,6 +779,7 @@ export class Adventure {
     buildBellHoist(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
+    buildEchoGallery(this);
     buildHazards(this);
     buildSoundLandmarks(this);
     buildTideArchive(this);
@@ -1274,6 +1284,7 @@ export class Adventure {
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     if (cleftBlocked(this, x, z, worldY, clearance)) return false;
     if (pressureBlocked(this, x, z, worldY, clearance)) return false;
+    if (echoBlocked(this, x, z, worldY, clearance)) return false;
     for (const dx of [-0.45, 0.45])
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
@@ -1294,6 +1305,7 @@ export class Adventure {
     if (hoistOccludes(this, from, to)) return false;
     if (cleftOccludes(this, from, to)) return false;
     if (pressureOccludes(this, from, to)) return false;
+    if (echoOccludes(this, from, to)) return false;
     for (const o of this.obstacles || []) {
       if (o.h <= 0.2) continue;
       const base = this.groundHeight(o.x, o.z);
@@ -1779,6 +1791,7 @@ export class Adventure {
     updateDiveView(this);
   }
   updateDecorations(dt, observatoryDt = dt, solarDt = dt) {
+    updateEchoGallery(this, dt);
     updateFireVault(this, dt);
     updateObservatory(this, observatoryDt);
     updateCaverns(this, dt);
@@ -1879,6 +1892,7 @@ export class Adventure {
     clearAim(this);
     if (cleftInteract(this)) return;
     if (pressureInteract(this)) return;
+    if (echoInteract(this)) return;
     if (bellHoistInteract(this)) return;
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
@@ -2197,8 +2211,9 @@ export class Adventure {
     const hoist = bellHoistObjective(this);
     const cleft = cleftObjective(this);
     const pressure = pressureObjective(this);
+    const echo = echoObjective(this);
     const target =
-      hoist || cleft || pressure
+      hoist || cleft || pressure || echo
         ? null
         : vault?.target ||
           (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
@@ -2218,6 +2233,7 @@ export class Adventure {
       bellHoist: hoist,
       cleft,
       pressure,
+      echo,
       galleryStage: this.progress.gallery?.recovered
         ? 2
         : this.progress.gallery?.opened
@@ -2227,6 +2243,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        echo?.text ||
         pressure?.text ||
         cleft?.text ||
         hoist?.text ||
@@ -2284,7 +2301,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : pressureHint(this) ||
+        : echoHint(this) ||
+          pressureHint(this) ||
           cleftHint(this) ||
           bellHoistHint(this) ||
           fireVaultHint(this) ||
@@ -2311,40 +2329,42 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task: pressureObjective(this)
-        ? "lift"
-        : cleftObjective(this)
-          ? this.wallGrip
-            ? "climb"
-            : "survey"
-          : bellHoistObjective(this)
-            ? this.bellHoist.motion
-              ? "lift"
-              : "resonance"
-            : fireVaultObjective(this)
-              ? this.fireVault.operation
+      task: echoObjective(this)
+        ? "tuning"
+        : pressureObjective(this)
+          ? "lift"
+          : cleftObjective(this)
+            ? this.wallGrip
+              ? "climb"
+              : "survey"
+            : bellHoistObjective(this)
+              ? this.bellHoist.motion
                 ? "lift"
-                : "brazier"
-              : this.diving || galleryObjective(this)
-                ? "dive"
-                : (this.nearest?.type === "resonator" ||
-                      this.resonanceFocus != null) &&
-                    resonanceReady(
-                      this,
-                      this.resonanceSites?.[this.progress.stage],
-                    )
-                  ? "tuning"
-                  : this.hydraulicSites?.[this.progress.stage]?.flow ||
-                      this.thermalSites?.[this.progress.stage]?.moving ||
-                      this.windSites?.[this.progress.stage]?.moving
-                    ? "valve"
-                    : this.blockGrip ||
-                        this.cipherSites?.[this.progress.stage]?.moving
-                      ? "lift"
-                      : this.ropeRide || this.zipRide
-                        ? "climb"
-                        : currentFieldTask(this.level, this.progress)?.kind ||
-                          "mechanism",
+                : "resonance"
+              : fireVaultObjective(this)
+                ? this.fireVault.operation
+                  ? "lift"
+                  : "brazier"
+                : this.diving || galleryObjective(this)
+                  ? "dive"
+                  : (this.nearest?.type === "resonator" ||
+                        this.resonanceFocus != null) &&
+                      resonanceReady(
+                        this,
+                        this.resonanceSites?.[this.progress.stage],
+                      )
+                    ? "tuning"
+                    : this.hydraulicSites?.[this.progress.stage]?.flow ||
+                        this.thermalSites?.[this.progress.stage]?.moving ||
+                        this.windSites?.[this.progress.stage]?.moving
+                      ? "valve"
+                      : this.blockGrip ||
+                          this.cipherSites?.[this.progress.stage]?.moving
+                        ? "lift"
+                        : this.ropeRide || this.zipRide
+                          ? "climb"
+                          : currentFieldTask(this.level, this.progress)?.kind ||
+                            "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2416,6 +2436,7 @@ export class Adventure {
       settleCipher(this);
     }
     this.paused = value;
+    updateEchoGallery(this, 0);
     updateFireVault(this, 0);
     updateBellHoist(this, 0);
     updatePressureRelay(this, 0);

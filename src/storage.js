@@ -1,5 +1,6 @@
 import { normalizeCleft } from "./cleft-rules.js";
 import { normalizePressure } from "./pressure-rules.js";
+import { normalizeEcho } from "./echo-gallery-rules.js";
 import { normalizeBellHoist } from "./bell-hoist-rules.js";
 import { normalizeWind } from "./wind-rules.js";
 import { normalizeCipher } from "./cipher-rules.js";
@@ -122,6 +123,7 @@ export function normalizeSave(value) {
       cleft: key === "sands" ? normalizeCleft(v.cleft) : null,
       pressureRelay:
         key === "embers" ? normalizePressure(v.pressureRelay) : null,
+      echoGallery: key === "crystal" ? normalizeEcho(v.echoGallery) : null,
       torch: key === "verdant" && v.torch === true,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
@@ -205,6 +207,7 @@ export class SaveStore {
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,
+      echoGallery: id === "crystal" ? normalizeEcho(null) : null,
       torch: false,
       time: 0,
       health: 100,

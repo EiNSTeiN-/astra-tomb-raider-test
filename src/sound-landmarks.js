@@ -83,6 +83,7 @@ export function buildSoundLandmarks(game) {
   game.soundSources.push(...(game.fireVault?.sources || []));
   game.soundSources.push(...(game.bellHoist?.sources || []));
   game.soundSources.push(...(game.pressureRelay?.sources || []));
+  game.soundSources.push(...(game.echoGallery?.sources || []));
   game.soundSources.push(...(game.cleft?.sources || []));
   game.soundSources.push(
     ...(game.resonanceSources || []).map((s) => ({ ...s })),

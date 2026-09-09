@@ -20,6 +20,22 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The crystal chapter now has an optional **Listening Gallery** west of its entry
+  camp: 32 connected chambers, five pulse-counted voices, false echoes, three
+  ordered expedition memories and two rising shortcut shutters. Engravings, map
+  counts and the journal support muted play. Partial discoveries persist; the
+  local score omits its melody while listening. All 409 tests passed, followed
+  by all 17 affected tests after the final audio placement and arrival checks.
+  An assisted native-input route completed the gallery and returned to camp in
+  72 movement segments at full health. Five listening approaches were clear;
+  live voice diagnostics measured full/half gain and retirement across the
+  configured distance range. All 70 inspected graphics resources released on
+  chapter change. Four final production save states passed native keyboard/touch
+  interaction and exact reload checks without failed assets or console errors.
+  [Gallery notes and images](listening-gallery.md) include evidence and limits.
+  This adds exploration content; one-hour chapter pacing, AAA graphics and
+  subjective sound quality remain unverified or unmet.
+
 - The Cinder Relay’s return car and both landings now have physical pull levers
   and a right-hand action. Commands start at the completed pull; release follows
   the moving car, cancellation preserves an already-started journey, and pause
