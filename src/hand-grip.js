@@ -18,6 +18,13 @@ const PAD_OFFSET = {
   Pinky: -0.0043,
 };
 
+// Shared anatomical frames also support open-hand poses without a handle.
+export {
+  gripHands as handSkeleton,
+  point as aimHandBone,
+  worldRotation as setHandRotation,
+};
+
 export function restoreCableGrip(game) {
   if (!game.rig?.gripBaseActive) return;
   for (const { bone, rotation } of game.rig.gripBase)

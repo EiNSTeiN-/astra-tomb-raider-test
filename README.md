@@ -4,6 +4,10 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The requested approximately one-hour duration per chapter has not been established by human playtesting, and the real-time graphics do not yet reach modern AAA production quality. See [the production status](docs/production-status.md) for the original requirements, evidence, and remaining work.
 
+Crouching now uses [lowered hands and relaxed fingers](docs/explorer-crouch.md),
+with walking arm swing that settles when movement stops. The comparison notes
+include browser views, contact checks and keyboard/touch save verification.
+
 Waterfalls now use [grounded stone spillways with open feed channels](docs/waterfall-spillways.md), accelerating streaks, impact foam and spray that follows reservoir drainage.
 
 Jungle foliage now has [fitted leaf silhouettes and shared cluster textures](docs/jungle-leaves.md). The notes include matching views, GPU timings and the added memory cost.
@@ -348,6 +352,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 - `src/groundcover.js` — spatially culled grass clusters and wind animation.
 - `src/habitat.js` — deterministic woodland/undergrowth placement and a worn-trail mask.
 - `src/explorer.js`, `src/pose.js` — human character loading, equipment materials, locomotion, limb poses, and the visible sidearm.
+- `src/explorer-crouch.js` — blended crouch arm, wrist and finger poses with gait-driven swing and restoration before other actions.
 - `src/character-motion.js`, `src/traversal-courses.js`, `src/traversal.js` — world-space jumping, elevated routes, rope physics, return cables, and ledge recovery.
 - `src/pose.js` — hand placement on moving rope grips.
 - `src/temple-architecture.js` — chamfered masonry, corbelled galleries, carved relief, and weathered temple materials.

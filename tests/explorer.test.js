@@ -6,6 +6,7 @@ import { NodeIO } from "@gltf-transform/core";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { animateExplorer, explorerGait } from "../src/explorer.js";
+import { restoreCrouchHands } from "../src/explorer-crouch.js";
 import { resetTraversal } from "../src/traversal.js";
 import { supportAt } from "../src/character-motion.js";
 import { handGeometry } from "../scripts/inspect-hand-geometry.js";
@@ -200,36 +201,39 @@ test("the delivered left hand grips the vertical torch while the right arm keeps
     if (b.isBone) lengths.set(b, b.position.clone());
   });
   for (const yaw of [0, Math.PI / 2, Math.PI])
-    for (const moving of [false, true]) {
-      game.avatar.rotation.y = yaw;
-      game.progress.torch = false;
-      animateExplorer(game, 0.1, moving, false);
-      const base = right.map((b) => b.quaternion.clone());
-      for (const [bone, position] of lengths) position.copy(bone.position);
-      game.progress.torch = true;
-      animateExplorer(game, 0, moving, false);
-      for (const [i, b] of right.entries())
-        assert(
-          Math.abs(
-            b.quaternion.clone().normalize().dot(base[i].clone().normalize()),
-          ) >
-            1 - 1e-10,
-          `right arm changed: ${b.name} ${b.quaternion.toArray()} / ${base[i].toArray()}`,
-        );
-      const hand = handGeometry(game, {
-        handles: [handle, handle],
-        halfLength: 0.26,
-      })[0];
-      for (const [name, f] of Object.entries(hand.fingers)) {
-        assert(
-          f.minimum > -0.002,
-          `${name} penetrates the shaft: ${f.minimum}`,
-        );
-        assert(f.minimum < 0.004, `${name} misses its contact: ${f.minimum}`);
+    for (const crouching of [false, true])
+      for (const moving of [false, true]) {
+        game.avatar.rotation.y = yaw;
+        game.crouching = crouching;
+        game.rig.crouchBlend = Number(crouching);
+        game.progress.torch = false;
+        animateExplorer(game, 0.1, moving, false);
+        const base = right.map((b) => b.quaternion.clone());
+        for (const [bone, position] of lengths) position.copy(bone.position);
+        game.progress.torch = true;
+        animateExplorer(game, 0, moving, false);
+        for (const [i, b] of right.entries())
+          assert(
+            Math.abs(
+              b.quaternion.clone().normalize().dot(base[i].clone().normalize()),
+            ) >
+              1 - 1e-10,
+            `right arm changed: ${b.name} ${b.quaternion.toArray()} / ${base[i].toArray()}`,
+          );
+        const hand = handGeometry(game, {
+          handles: [handle, handle],
+          halfLength: 0.26,
+        })[0];
+        for (const [name, f] of Object.entries(hand.fingers)) {
+          assert(
+            f.minimum > -0.002,
+            `${name} penetrates the shaft: ${f.minimum}`,
+          );
+          assert(f.minimum < 0.004, `${name} misses its contact: ${f.minimum}`);
+        }
+        for (const [b, p] of lengths)
+          assert(b.position.distanceTo(p) < 1e-9, b.name);
       }
-      for (const [b, p] of lengths)
-        assert(b.position.distanceTo(p) < 1e-9, b.name);
-    }
   game.progress.torch = false;
   animateExplorer(game, 0.1, false, false);
   assert.equal(game.torch.root.visible, false);
@@ -579,6 +583,131 @@ function soleClearances(game) {
   }
   return result;
 }
+
+test("crouched hands stay below the shoulders with relaxed finger chains across gait phases, slopes and facing", async (t) => {
+  const game = await groundedActor();
+  const bones = [];
+  game.rig.model.traverse((bone) => {
+    if (bone.isBone && /(?:Arm|ForeArm|Hand.*)$/.test(bone.name))
+      bones.push({
+        bone,
+        position: bone.position.clone(),
+        scale: bone.scale.clone(),
+      });
+  });
+  const point = (name) =>
+    game.rig.model
+      .getObjectByName("mixamorig" + name)
+      .getWorldPosition(new THREE.Vector3());
+  let samples = 0,
+    minimumDrop = Infinity,
+    maximumDrop = 0;
+  game.crouching = true;
+  game.rig.crouchBlend = 1;
+  for (const yaw of [0, Math.PI / 2, Math.PI])
+    for (const slope of [-0.25, 0, 0.25])
+      for (const moving of [false, true]) {
+        game.avatar.rotation.y = yaw;
+        game.groundHeight = (x, z) => slope * z;
+        game.moveVelocity.z = game.actualMoveSpeed = moving ? 2.2 : 0;
+        for (let i = 0; i < 30; i++) {
+          game.elapsed += 1 / 30;
+          const root = game.player.position.clone();
+          animateExplorer(game, 1 / 30, moving, false);
+          assert(game.player.position.equals(root));
+          for (const { bone, position, scale } of bones) {
+            assert(bone.position.distanceTo(position) < 1e-7, bone.name);
+            assert(bone.scale.distanceTo(scale) < 1e-7, bone.name);
+            assert(bone.quaternion.toArray().every(Number.isFinite), bone.name);
+          }
+          for (const side of ["Left", "Right"]) {
+            const wrist = point(side + "Hand"),
+              shoulder = point(side + "Arm");
+            const drop = shoulder.y - wrist.y;
+            assert(drop > 0.2 && drop < 0.3, `${side}: raised wrist ${drop}`);
+            minimumDrop = Math.min(minimumDrop, drop);
+            maximumDrop = Math.max(maximumDrop, drop);
+            const knuckle = point(side + "HandMiddle1");
+            assert(knuckle.y < wrist.y - 0.025, `${side}: wrist bends upward`);
+            for (const finger of ["Index", "Middle", "Ring", "Pinky"]) {
+              const joints = [1, 2, 3].map((j) =>
+                point(side + "Hand" + finger + j),
+              );
+              const a = joints[1].clone().sub(joints[0]);
+              const b = joints[2].clone().sub(joints[1]);
+              const bend = a.angleTo(b);
+              assert(bend > 0.3 && bend < 0.65, `${side}/${finger}: ${bend}`);
+            }
+          }
+          samples++;
+        }
+      }
+  t.diagnostic(JSON.stringify({ samples, minimumDrop, maximumDrop }));
+});
+
+test("crouch hand overlays blend, stop with blocked travel and release without retaining rotations", async (t) => {
+  const game = await groundedActor();
+  const wrist = () =>
+    game.rig.model
+      .getObjectByName("mixamorigLeftHand")
+      .getWorldPosition(new THREE.Vector3());
+  animateExplorer(game, 1 / 60, false, false);
+  let previous = wrist(),
+    maximumStep = 0;
+  for (const crouching of [true, false]) {
+    game.crouching = crouching;
+    for (let i = 0; i < 60; i++) {
+      animateExplorer(game, 1 / 60, false, false);
+      const next = wrist();
+      maximumStep = Math.max(maximumStep, next.distanceTo(previous));
+      previous = next;
+    }
+  }
+  assert(maximumStep < 0.12, `crouch transition snaps ${maximumStep} m/frame`);
+  assert.equal(game.rig.crouchHands.active, false);
+  game.crouching = true;
+  game.actualMoveSpeed = 2.2;
+  for (let i = 0; i < 60; i++) animateExplorer(game, 1 / 60, true, false);
+  assert(game.rig.crouchHands.swing > 0.99);
+  game.actualMoveSpeed = 0;
+  for (let i = 0; i < 90; i++) animateExplorer(game, 1 / 60, true, false);
+  assert.equal(game.rig.state, "Idle");
+  assert(game.rig.crouchHands.swing < 0.001);
+  const phase = game.rig.actions.Walk.time;
+  game.elapsed += 200;
+  animateExplorer(game, 0, true, false);
+  assert.equal(game.rig.actions.Walk.time, phase);
+  const base = game.rig.crouchHands.base.map(({ bone, rotation }) => [
+    bone,
+    rotation.clone(),
+  ]);
+  restoreCrouchHands(game);
+  restoreCrouchHands(game);
+  for (const [bone, rotation] of base)
+    assert(bone.quaternion.equals(rotation), bone.name);
+  // An airborne state cancels the crouch immediately; fingers must follow its clip.
+  const reference = await groundedActor();
+  game.grounded = reference.grounded = false;
+  game.crouching = false;
+  for (const g of [game, reference]) {
+    g.rig.mixer.stopAllAction();
+    g.rig.actions.Idle.reset().play();
+    g.rig.state = "Idle";
+    animateExplorer(g, 1 / 60, false, false);
+  }
+  for (const [bone] of base) {
+    if (!/Hand.*[123]$/.test(bone.name)) continue;
+    assert(
+      bone.quaternion.angleTo(
+        reference.rig.model.getObjectByName(bone.name).quaternion,
+      ) < 0.001,
+      bone.name,
+    );
+  }
+  t.diagnostic(
+    JSON.stringify({ maximumStep, stoppedSwing: game.rig.crouchHands.swing }),
+  );
+});
 
 test("crouching lowers the delivered actor with bent legs and grounded soles through travel and release", async () => {
   const game = await groundedActor();

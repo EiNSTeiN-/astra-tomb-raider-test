@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { updateTorch, poseTorch } from "./torch.js";
 import { cableHands } from "./return-cable.js";
 import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
+import { poseCrouchHands, restoreCrouchHands } from "./explorer-crouch.js";
 import { galleryWheelBrace, poseGalleryWheel } from "./gallery-wheel.js";
 import { poseCausewayWheel } from "./fire-vault-motion.js";
 import { posePressureOperation } from "./pressure-motion.js";
@@ -164,6 +165,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   const rig = game.rig;
   if (!rig) return;
   restoreCableGrip(game);
+  restoreCrouchHands(game);
   const gait = explorerGait(game, moving, sprinting);
   if (gait.name !== rig.state) {
     const action = rig.actions[gait.name];
@@ -348,25 +350,12 @@ export function animateExplorer(game, dt, moving, sprinting) {
     rig.weapon.group.rotation.set(-recoil * 2, angle, 0);
     if (game.aiming && game.aimPoint) rig.weapon.group.lookAt(game.aimPoint);
   } else if (
-    rig.crouchBlend > 0.01 &&
+    rig.crouchBlend > 0.001 &&
     !game.carrying &&
     !game.dodge &&
     !game.blockGrip
   ) {
-    const b = rig.crouchBlend;
-    poseHands(
-      game,
-      [1, -1].map((side, i) =>
-        point(
-          side * 0.24,
-          0.88 - b * 0.06,
-          0.15 +
-            b * 0.25 +
-            (moving ? Math.sin(game.elapsed * 5 + i * Math.PI) * 0.08 : 0),
-        ),
-      ),
-      [new THREE.Vector3(0.35, -1, -0.5), new THREE.Vector3(-0.35, -1, -0.5)],
-    );
+    poseCrouchHands(game, dt, gait.name === "Walk");
   }
   poseCausewayWheel(game);
   posePressureOperation(game);

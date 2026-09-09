@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Crouching now lowers the hands below the shoulders, relaxes the fingers and
+  ties arm swing to the walking clip. All 461 tests and the production build
+  passed. New checks cover 540 poses across gait phases, slopes and facing,
+  transition/release behavior, blocked movement, and crouched torch contact.
+  Native keyboard input completed a 4.68 m crouched walk, stopped, jumped and
+  landed at 100 health. Production keyboard and portrait-touch wading checks
+  preserved exact local saves on reload. Three matching views retained their
+  triangle and draw-call counts; additional joint calculations are not covered
+  by a CPU-performance claim. [Crouch comparisons and verification](explorer-crouch.md)
+  record the procedural-animation and broader production limits.
+
 - All nine waterfalls in the jungle, coastal and sky chapters now have fitted
   spillway masonry, open upper channels, accelerating streaks, impact foam and
   spray scaled for the active render viewport. Their foundations now extend to
