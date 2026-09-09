@@ -1,4 +1,5 @@
 import { buildCamp, updateCamps } from "./camps.js";
+import { buildBrazier, finishBraziers, updateBraziers } from "./braziers.js";
 import { buildSurveyorsCleft, updateCleftArt } from "./cleft-art.js";
 import { cleftBlocked, cleftOccludes } from "./cleft-rules.js";
 import {
@@ -583,6 +584,12 @@ export class Adventure {
     this.lastSurvey = null;
     this.waterMeshes = [];
     this.flames = [];
+    this.braziers = [];
+    this.brazierKit =
+      this.brazierPatch =
+      this.brazierTime =
+      this.brazierStats =
+        null;
     this.camps = [];
     this.campMaterials = null;
     this.campEffects = null;
@@ -603,6 +610,7 @@ export class Adventure {
       disposeInstanceBuffers(this.scene);
       const geometries = new Set(),
         materials = new Set(),
+        textures = new Set(),
         skeletons = new Set();
       this.scene.traverse((o) => {
         if (o.geometry) geometries.add(o.geometry);
@@ -616,14 +624,15 @@ export class Adventure {
       geometries.forEach((g) => g.dispose());
       skeletons.forEach((s) => s.dispose());
       materials.forEach((m) => {
-        m.userData.additionalTextures?.forEach((t) => t.dispose());
+        m.userData.additionalTextures?.forEach((t) => textures.add(t));
         for (const value of Object.values(m)) {
-          if (value?.isTexture) value.dispose();
+          if (value?.isTexture) textures.add(value);
         }
         m.dispose();
       });
-      if (this.scene.background?.isTexture) this.scene.background.dispose();
-      if (this.scene.environment?.isTexture) this.scene.environment.dispose();
+      if (this.scene.background?.isTexture) textures.add(this.scene.background);
+      if (this.scene.environment?.isTexture) textures.add(this.scene.environment);
+      textures.forEach((t) => t.dispose());
       this.sun?.shadow.map?.dispose();
     }
     this.scene = new THREE.Scene();
@@ -942,19 +951,8 @@ export class Adventure {
       }
       for (const sx of [-1, 1]) {
         const tx = x + sx * 8,
-          tz = z - 9,
-          ty = this.groundHeight(tx, tz);
-        this.cylinder(0.3, 0.5, 2.5, dark, tx, ty + 1.25, tz);
-        this.cylinder(0.75, 0.25, 0.5, this.goldMat, tx, ty + 2.6, tz);
-        const flame = new THREE.Mesh(
-          new THREE.ConeGeometry(0.22, 0.85, 7),
-          new THREE.MeshBasicMaterial({ color: 0xffb660, toneMapped: false }),
-        );
-        flame.position.set(tx, ty + 3.1, tz);
-        flame.scale.y = 1.6;
-        flame.userData.animated = true;
-        this.world.add(flame);
-        this.flames.push(flame);
+          tz = z - 9;
+        buildBrazier(this, tx, tz, `court-${i}-${sx}`);
       }
       if (i % 3 === 1) {
         const bx = x + 12,
@@ -970,6 +968,7 @@ export class Adventure {
         });
       }
     });
+    finishBraziers(this);
     if (hasTemple) return;
     // A large distant temple crowns each chapter.
     const last = this.map.rooms.at(-1),
@@ -1826,11 +1825,12 @@ export class Adventure {
     updateSunkenGallery(this, dt);
     updateSoundLandmarks(this);
     this.flames.forEach((f, i) => {
-      if (!f.userData.campFire)
+      if (!f.userData.campFire && !f.userData.brazierFire)
         f.scale.y = 1.5 + Math.sin(this.elapsed * 12 + i) * 0.3;
     });
     updateTorch(this);
     updateCamps(this);
+    updateBraziers(this, dt);
     updateFireEffects(this);
     this.particles.position.set(
       this.player.position.x,

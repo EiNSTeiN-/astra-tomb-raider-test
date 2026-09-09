@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- All 154 courtyard braziers now have detailed stone supports, regional motifs,
+  weathered basins, fittings and glowing fuel. Near/distant instances share four
+  material groups per tier; existing positioned fire recordings remain aligned.
+  All 387 tests and the build pass. Browser checks covered 616 clear approaches,
+  solid supports, camera bounds, both graphics settings, native input with
+  assisted movement, pause, audio falloff and exact chapter resource cleanup.
+  Shared textures are now disposed once. Production recovered an older save from
+  inside a new footprint, accepted native movement and restored the exact save
+  without failed assets or console warnings/errors. [Brazier artwork notes](brazier-art.md)
+  include images, workload and limits. AAA graphics, subjective sound quality and
+  approximately hour-long human chapter pacing remain open.
+
 - Scattered rocks in the seven non-desert chapters now fit their scanned
   undersides to the terrain and reject steep or reserved footprints. The fitting
   accounts for rendered ground triangles as well as movement heights; an initially

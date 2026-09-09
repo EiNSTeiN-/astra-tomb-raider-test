@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The courtyard brazier supports, motif paths, basins, fittings, charcoal and metal
+weathering in `src/brazier-geometry.js`, `src/brazier-materials.js` and
+`src/braziers.js` are original project geometry and code. They reuse the chapter's
+existing Rock Boulder Dry, Sandstone Cracks, Marble Rock 02 or Rock Face 03 maps,
+credited below, along with the existing project flame/particle shaders and local
+fire recording. No new external assets were added. See [brazier notes](brazier-art.md).
+
 The scattered-rock grounding uses original placement code in `src/stone-grounding.js`
 and `src/nature-rocks.js`. It reuses the existing six Rock Moss Set 01 scans by
 Kless Gyzen, credited below, and changes no model, texture or recording files.

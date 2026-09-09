@@ -54,7 +54,7 @@ export function buildFireEffects(game) {
     THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
   );
   for (const flame of game.flames) {
-    if (flame.userData.campFire) continue;
+    if (flame.userData.campFire || flame.userData.brazierFire) continue;
     const height = flame.geometry.parameters.height || 1;
     const width =
       (flame.geometry.parameters.radius ||
@@ -77,7 +77,7 @@ export function updateFireEffects(game) {
   game.fireTime.value = game.elapsed;
   const visible = [];
   for (const flame of game.flames) {
-    if (flame.userData.campFire) {
+    if (flame.userData.campFire || flame.userData.brazierFire) {
       const position = flame.getWorldPosition(new THREE.Vector3());
       flame.lookAt(game.camera.position.x, position.y, game.camera.position.z);
     } else flame.lookAt(game.camera.position);
@@ -95,7 +95,9 @@ export function updateFireEffects(game) {
       light.distance = source.flame.userData.fireRange ?? 15;
       const time = source.flame.userData.campFire
         ? game.campTime.value
-        : game.elapsed;
+        : source.flame.userData.brazierFire
+          ? game.brazierTime.value
+          : game.elapsed;
       light.intensity =
         (source.flame.userData.fireIntensity ?? 14) *
         (1 +
