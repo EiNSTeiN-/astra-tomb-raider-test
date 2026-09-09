@@ -1,5 +1,9 @@
 # Desert sand, strata and horizon
 
+The later [desert bank revision](desert-banks.md) broadens the near and
+middle-distance shoulders and softens stepped crests while preserving walking
+floors. The comparisons below record the earlier texture and horizon milestone.
+
 The subsequent [stone scatter pass](desert-scatter.md) replaces the moss-covered
 rocks visible in these images with seated sandstone boulders and smaller rubble.
 The terrain and horizon milestone below retains its original comparison evidence.

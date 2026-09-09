@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The desert's near and middle-distance banks now have broader shoulders and
+  varying, softened crests. A baseline comparison retained 51,375 walking-floor
+  and 4,805 reservoir-floor samples exactly, together with the chapter's obstacle,
+  feature-foundation and sound-source records. All 465 tests and the release
+  build passed. The assisted 34-transfer climb recovered its record and returned
+  at 100 health; release keyboard climbing and reload retained the safe terrace
+  and journal record. Bird attenuation and terrain-resource cleanup passed.
+  [Bank comparisons and measurements](desert-banks.md) include matching Low/High
+  rendering counts and the remaining grid boundaries, graphics, pacing,
+  subjective listening and device limits.
+
 - Stride length and animation playback now follow measured travel speed, while
   crouched recovery steps move beneath the hips. Controlled scans measured
   65–85% reductions in median near-floor sole sliding across four gaits, with

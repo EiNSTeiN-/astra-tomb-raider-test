@@ -16,6 +16,53 @@ import {
   desertHorizonHeight,
 } from "../src/desert-horizon.js";
 
+test("broader desert banks preserve the previously published walking floor", () => {
+  const map = createMap(LEVELS[1]),
+    profile = createTerrainProfile(map, LEVELS[1]),
+    floors = [];
+  // Captured from 0693507, before the new bank profile. Boundary samples are
+  // included: changing a nearby non-walkable vertex must not move a route's
+  // bilinearly interpolated floor or an older saved standing position.
+  for (let gz = 0; gz < map.size; gz++)
+    for (let gx = 0; gx < map.size; gx++)
+      if (map.grid[gz][gx])
+        for (const dx of [-3.5, -2, 0, 2, 3.5])
+          for (const dz of [-3.5, -2, 0, 2, 3.5])
+            floors.push(profile.height(gx * 7 + dx, gz * 7 + dz));
+  assert.equal(floors.length, 51375);
+  assert.equal(
+    createHash("sha256").update(JSON.stringify(floors)).digest("hex"),
+    "4adffd830d70db7527787b49d71a3ae5ebf7240937adf7393bde52bef1ce9877",
+  );
+});
+
+test("desert banks have broader shoulders at the route edges", () => {
+  const map = createMap(LEVELS[1]),
+    profile = createTerrainProfile(map, LEVELS[1]),
+    { step, width } = profile,
+    slopes = [];
+  for (let iz = 1; iz < width - 1; iz++)
+    for (let ix = 1; ix < width - 1; ix++) {
+      const x = ix * step,
+        z = iz * step,
+        distance = desertRouteDistance(map, x, z);
+      if (distance <= 0 || distance > 3.5) continue;
+      const dx =
+          (profile.height(x + step, z) - profile.height(x - step, z)) /
+          (2 * step),
+        dz =
+          (profile.height(x, z + step) - profile.height(x, z - step)) /
+          (2 * step);
+      slopes.push((Math.atan(Math.hypot(dx, dz)) * 180) / Math.PI);
+    }
+  slopes.sort((a, b) => a - b);
+  assert.equal(slopes.length, 7985);
+  // The previous generic bank measured 45.90 / 60.79 degrees here. These
+  // tolerances retain wider shoulders without prescribing individual crests.
+  assert(slopes[Math.floor(slopes.length * 0.5)] < 41);
+  assert(slopes[Math.floor(slopes.length * 0.9)] < 56);
+});
+
 test("desert erosion retains every walking-cell boundary, feature foundation, reservoir and climbing pad", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),

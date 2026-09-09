@@ -1,5 +1,5 @@
 import { courierFoundationWeight } from "./courier-rules.js";
-import { refineDesertTerrain } from "./desert-geology.js";
+import { desertBankRise, refineDesertTerrain } from "./desert-geology.js";
 import { buildDesertHorizon } from "./desert-horizon.js";
 import * as THREE from "three";
 import { buildSnowMountains } from "./snow-mountains.js";
@@ -126,6 +126,8 @@ export function createTerrainProfile(map, level) {
         const rise = 1 - Math.exp(-distance * 0.72);
         if (biome === "sky") height -= rise * (24 + Math.min(40, distance * 2));
         else if (biome === "water") height -= rise * 7;
+        else if (biome === "desert")
+          height += desertBankRise(x, z, distance, level.seed);
         else
           height +=
             rise *

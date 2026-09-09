@@ -17,6 +17,18 @@ export function desertNoise(x, z, seed = 0) {
     (hash(ix, iz + 1) * (1 - u) + hash(ix + 1, iz + 1) * u) * v
   );
 }
+// Broad wind-shaped shoulders replace the generic, nearly vertical grid banks.
+// The route distance vanishes on every walking-cell edge, so its floor remains
+// unchanged. Domain warping varies both crest height and the width of the rise.
+export function desertBankRise(x, z, distance, seed) {
+  const warp = (desertNoise(x * 0.017, z * 0.017, seed + 119) - 0.5) * 22,
+    along = x * 0.83 + z * 0.56 + warp,
+    across = z * 0.83 - x * 0.56,
+    crest = desertNoise(along * 0.028, across * 0.047, seed + 307),
+    shoulder = desertNoise(along * 0.018, across * 0.035, seed + 503),
+    rise = 1 - Math.exp(-distance / (5 + shoulder * 9));
+  return rise * (5 + crest * 11) + Math.max(0, distance - 12) * 0.15;
+}
 export function desertRouteDistance(map, x, z) {
   const gx = Math.round(x / 7),
     gz = Math.round(z / 7);
@@ -76,6 +88,27 @@ export function refineDesertTerrain(profile, map, seed) {
       heights[index] += mask * erosion;
       exposure[index] = mask;
     }
+  // Relax the high shoulders after erosion. Adjacent grid corridors otherwise
+  // meet in sharp, stair-stepped crests. Separate source/destination samples
+  // make each pass independent of iteration direction; the protected margin
+  // and water mask also apply to this smoothing.
+  for (let pass = 0; pass < 3; pass++) {
+    const previous = heights.slice();
+    for (let iz = 1; iz < width - 1; iz++)
+      for (let ix = 1; ix < width - 1; ix++) {
+        const index = iz * width + ix,
+          blend = exposure[index] * 0.85;
+        if (!blend) continue;
+        let sum = 0;
+        for (let dz = -1; dz <= 1; dz++)
+          for (let dx = -1; dx <= 1; dx++)
+            sum +=
+              previous[index + dz * width + dx] *
+              (dx === 0 ? 2 : 1) *
+              (dz === 0 ? 2 : 1);
+        heights[index] += (sum / 16 - previous[index]) * blend;
+      }
+  }
   return {
     ...profile,
     heights,

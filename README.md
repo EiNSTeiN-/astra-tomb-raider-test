@@ -262,6 +262,11 @@ Off-path erosion preserves the walking surfaces, reservoirs and climbing anchors
 See [desert landscape comparisons](docs/desert-landscape.md) for the rendered
 change, added geometry cost, positional-audio checks and saved-climb recovery.
 
+The nearer desert banks now have broader shoulders and varying crests, reducing
+their rectangular outlines while retaining the existing walking floors and
+climbing structures. [Bank comparisons and route checks](docs/desert-banks.md)
+include matching views, measured slope changes and the remaining limitations.
+
 Desert boulders now sit in the terrain using their sampled undersides and share
 its sandstone material. Small rubble gathers around piers and banks, with larger
 stones kept outside the walking cells. A smaller geometry-only rock asset replaces
