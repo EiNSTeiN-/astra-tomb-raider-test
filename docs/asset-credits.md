@@ -8,6 +8,13 @@ machine/steam synthesis and fire recording. The volcanic score retains its
 original lifting arrangement. No external image, model, recording or music files
 were added. See [the relay notes](cinder-relay.md).
 
+The relay's revised pressure housings, rams, panel decks, gauges, lift rollers,
+cable drive, canopy, tablets and refuge cargo in `src/pressure-art.js` are
+original project geometry. `src/pressure-materials.js` adds original wear,
+machining and fractured-slag shaders. These reuse the already bundled Rock Face
+03, Rusty Metal 04 and Volcanic Rock Tiles maps credited below. No new external
+models, images or sounds were added. See [the foundry art comparison](cinder-relay-art.md).
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658

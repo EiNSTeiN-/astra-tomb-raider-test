@@ -11,6 +11,11 @@ import { stoneBlockGeometry } from "./temple-architecture.js";
 import { campTube } from "./camp-geometry.js";
 import { mergeArchitecture } from "./visuals.js";
 import { forgePlume } from "./forge-effects.js";
+import {
+  pressureMaterials,
+  pressureSlagMaterial,
+} from "./pressure-materials.js";
+import { buildPressureArt, updatePressureArt } from "./pressure-art.js";
 
 function sign(text, width = 1.8) {
   const canvas = document.createElement("canvas");
@@ -65,17 +70,10 @@ export function buildPressureRelay(game) {
     sources: [],
     motion: null,
   });
-  const stone = game.darkMat.clone(),
-    metal = new THREE.MeshStandardMaterial({
-      color: 0x5f655f,
-      metalness: 0.72,
-      roughness: 0.62,
-    }),
-    bronze = new THREE.MeshStandardMaterial({
-      color: 0x9d7548,
-      metalness: 0.65,
-      roughness: 0.57,
-    });
+  const materials = pressureMaterials(game),
+    { stone, metal, bronze } = materials;
+  h.walls = [];
+  h.piers = [];
   let serial = 9000;
   const add = (
     geometry,
@@ -128,11 +126,12 @@ export function buildPressureRelay(game) {
     return o;
   };
   const wall = (w, t, d, px, py, pz, mat = stone) => {
-    box(w, t, d, px, py, pz, mat);
+    const mesh = box(w, t, d, px, py, pz, mat);
+    (t > 20 ? h.piers : h.walls).push({ mesh, w, t, d, x: px, y: py, z: pz });
     solid(px, py, pz, w, t, d);
   };
   const deck = (px, pz, w, d, py, parent = root, local = false) => {
-    box(
+    const mesh = box(
       w,
       0.35,
       d,
@@ -149,28 +148,15 @@ export function buildPressureRelay(game) {
       d: d / 2,
       y: y + py,
       pressure: true,
+      mesh,
     };
     h.decks.push(v);
     return v;
   };
   // An open-framed foundry rises above the hot settling floor. The eastern aisle
   // leads back to the intake door without crossing a live piston bed.
-  box(44, 0.4, 46, 0, -0.25, 0);
-  const hot = new THREE.MeshStandardMaterial({
-    color: 0x2b201b,
-    emissive: 0xff3609,
-    emissiveIntensity: 0.45,
-    roughness: 0.87,
-  });
-  hot.onBeforeCompile = (shader) => {
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <emissivemap_fragment>",
-      `#include <emissivemap_fragment>
-    vec2 q=vUv*vec2(31.,39.);float crack=pow(abs(sin(q.x+sin(q.y*1.8)*.7)*sin(q.y+sin(q.x)*.7)),28.);totalEmissiveRadiance*=crack;`,
-    );
-  };
-  hot.defines = { USE_UV: "" };
-  hot.customProgramCacheKey = () => "pressure-slag-1";
+  h.floorMesh = box(44, 0.4, 46, 0, -0.25, 0);
+  const hot = pressureSlagMaterial();
   const slag = add(new THREE.PlaneGeometry(28, 34), hot, -3, 0.025, -5);
   slag.rotation.x = -Math.PI / 2;
   wall(1.4, 5, 46, -22, 2.4, 0);
@@ -328,7 +314,7 @@ export function buildPressureRelay(game) {
       shaft,
       true,
     );
-    add(
+    const base = add(
       new THREE.CylinderGeometry(1.45, 1.65, 0.35, 24),
       metal,
       p.x,
@@ -381,6 +367,8 @@ export function buildPressureRelay(game) {
       drive,
       amount,
       plume,
+      base,
+      collar,
     });
     const bank = PRESSURE_DECKS[p.bank];
     add(
@@ -472,10 +460,12 @@ export function buildPressureRelay(game) {
   tablet.position.set(20, 2, 10);
   tablet.rotation.y = Math.PI / 2;
   root.add(tablet);
+  h.entrySign = tablet;
   h.controls.push({
     kind: "guide",
     position: new THREE.Vector3(x + 20, y + 0.18, z + 10),
   });
+  buildPressureArt(game, { add, box, solid, sign, materials });
   mergeArchitecture(root);
   updatePressureRelay(game, 0, true);
 }
@@ -545,6 +535,7 @@ export function updatePressureRelay(game, dt, initial = false) {
       c.turn = initial ? target : Math.min(target, c.turn + dt * 0.65);
       c.wheel.rotation.z = (c.turn * Math.PI) / 2;
     }
+  updatePressureArt(h);
   if (initial || game.paused || !insidePressure(game)) return;
   if (!h.saved.visited) {
     h.saved.visited = true;

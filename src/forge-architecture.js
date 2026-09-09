@@ -425,6 +425,10 @@ export function updateForgeArchitecture(game, dt) {
         });
     }
   }
+  for (const position of game.pressureRelay?.art?.heatLights || []) {
+    const d = position.distanceTo(game.player.position);
+    if (d < 40) lights.push({ position, heat: 0.55, score: 0.55 / (d + 2) });
+  }
   lights.sort((a, b) => b.score - a.score);
   game.forgeLights.forEach((light, i) => {
     const selected = lights[i];

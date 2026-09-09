@@ -6,6 +6,7 @@ import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { advanceCharacter, supportAt } from "../src/character-motion.js";
 import { restoreTraversal } from "../src/traversal.js";
+import { RELAY_RAM_LENGTH, RELAY_CABLE_TOP } from "../src/pressure-art.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import {
@@ -20,6 +21,7 @@ import {
   normalizePressure,
   pistonHeight,
   pressureSavePosition,
+  restorePressureArrival,
   pressureBlocked,
   pressureOccludes,
 } from "../src/pressure-rules.js";
@@ -62,6 +64,7 @@ export function pressureFixture(progress = null) {
       },
     },
     records: 0,
+    flames: [],
     checkpoint: { x: 30, z: 10 },
   });
   const old = globalThis.document;
@@ -198,6 +201,132 @@ test("pressure pistons have paired transfer windows and bounded periodic travel"
     }
     assert.equal(pistonHeight(i, 6, 3), pistonHeight(i + 1, 6, 3));
     assert.equal(pistonHeight(i, 6, bank), PRESSURE_PISTONS[i].low);
+  }
+});
+
+test("dressed gallery and piston panels retain supported contact through every transfer phase", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  h.saved.opened = 3;
+  const ray = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(0, -1, 0),
+    0,
+    0.4,
+  );
+  for (const phase of [0, 3, 6, 9]) {
+    h.time.fill(phase);
+    updatePressureRelay(g, 0);
+    g.world.updateMatrixWorld(true);
+    for (const d of h.decks)
+      for (const [dx, dz] of [
+        [0, 0],
+        [-0.8, -0.7],
+        [0.8, 0.7],
+        [d.w - 0.12, 0],
+      ]) {
+        ray.ray.origin.set(d.x + dx, d.y + 0.08, d.z + dz);
+        const hit = ray
+          .intersectObject(h.root, true)
+          .find((hit) => hit.object.isMesh && !hit.object.material.transparent);
+        assert(hit, `missing deck at ${phase}: ${d.x + dx},${d.z + dz}`);
+        assert(
+          Math.abs(hit.point.y - d.y) < 0.025,
+          `deck/support gap at ${phase}: ${d.x + dx},${d.z + dz}: ${hit.point.y - d.y}`,
+        );
+        assert.equal(supportAt(g, d.x + dx, d.z + dz, d.y).height, d.y);
+      }
+    for (const { mesh, car, fixedTop } of h.art.rams) {
+      const bounds = new THREE.Box3().setFromObject(mesh);
+      assert(Math.abs(bounds.max.y - bounds.min.y - RELAY_RAM_LENGTH) < 1e-6);
+      assert(
+        bounds.min.y < fixedTop - 0.1,
+        "the sliding ram must remain inside its pressure housing",
+      );
+      assert(Math.abs(bounds.max.y - (h.pistons[car].deck.y - 0.55)) < 1e-6);
+    }
+  }
+  let triangles = 0;
+  const cargoBounds = new THREE.Box3().setFromObject(h.art.cargo);
+  for (const flame of g.flames) {
+    const p = flame.getWorldPosition(new THREE.Vector3());
+    const lampBounds = new THREE.Box3(
+      p.clone().add(new THREE.Vector3(-0.15, -2, -0.15)),
+      p.clone().add(new THREE.Vector3(0.15, -0.3, 0.15)),
+    );
+    assert(
+      !cargoBounds.intersectsBox(lampBounds),
+      "the water cargo must clear the gallery lamp supports",
+    );
+  }
+  h.root.traverse((o) => {
+    if (!o.isMesh) return;
+    assert(o.geometry.attributes.position.array.every(Number.isFinite));
+    assert(o.geometry.attributes.normal.array.every(Number.isFinite));
+    triangles +=
+      (o.geometry.index?.count || o.geometry.attributes.position.count) / 3;
+  });
+  assert(triangles < 130000, `chamber geometry budget exceeded: ${triangles}`);
+});
+
+test("return-cable ends, guide rollers and moving posts track the car and freeze with it", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  h.saved.visited = true;
+  h.saved.opened = 3;
+  h.saved.rest = 3;
+  h.saved.recovered = true;
+  h.motion = { time: 0, from: 24.2, to: 0.18 };
+  const snapshot = () => ({
+    cable: h.art.cable.position.toArray(),
+    scale: h.art.cable.scale.y,
+    rotor: h.art.rotor.rotation.z,
+    rollers: h.art.rollers.map((r) => r.root.rotation.z),
+  });
+  for (let frame = 0; frame < 490; frame++) {
+    updatePressureRelay(g, 1 / 60);
+    const y = h.lift.root.position.y,
+      cable = h.art.cable;
+    assert(
+      Math.abs(cable.position.y + cable.scale.y / 2 - RELAY_CABLE_TOP) < 1e-8,
+    );
+    assert(Math.abs(cable.position.y - cable.scale.y / 2 - y - 2.8) < 1e-8);
+    for (const m of h.art.movingSolids) assert.equal(m.collider.bottom, y);
+    for (const roller of h.art.rollers)
+      assert(
+        Math.abs(Math.abs(roller.root.position.x) + 0.2 - (2.5 - 0.12)) < 1e-8,
+      );
+  }
+  const before = snapshot();
+  g.paused = true;
+  updatePressureRelay(g, 4);
+  assert.deepEqual(snapshot(), before);
+});
+
+test("older gallery saves occupied by new cargo recover on the same supported floor", () => {
+  for (const [x, z, height, rest] of [
+    [18.1, 12.7, 0.18, 0],
+    [12.2, -18.15, 24.2, 3],
+  ]) {
+    const g = pressureFixture({
+      pressureRelay: {
+        visited: true,
+        opened: 3,
+        rest,
+        recovered: rest === 3,
+        lift: 1,
+      },
+      position: { x, z, height },
+    });
+    assert(!g.canMove(x, z, height));
+    g.player.position.set(x, 0, z);
+    restoreTraversal(g);
+    restorePressureArrival(g);
+    assert.equal(g.player.position.y, height);
+    assert(g.canMove(g.player.position.x, g.player.position.z, height));
+    pressureTick(g, 30);
+    assert.equal(g.health, 100);
+    assert.equal(g.player.position.y, height);
   }
 });
 test("the continuous pressure route crosses all six crowns, records each gallery, retrieves the ledger and returns by lift", () => {

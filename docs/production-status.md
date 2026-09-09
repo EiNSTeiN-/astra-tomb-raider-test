@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Cinder Relay now has dressed basalt, worn panel decks, fixed pressure
+  housings, constant-length sliding rams, gauges, return-lift cable/rollers and
+  dispatch cargo. The full 400-test suite passed, followed by ten focused checks
+  after final scenery adjustments. Browser checks covered the continuous route,
+  all eight chapters in High/Performance, unchanged original controls and bounds,
+  audio alignment/falloff, touch input and disposal of 260 inspected resources.
+  Older saves occupied by new cargo recover on the same supported gallery.
+  Final production interaction and exact reload checks cover partial, transit and
+  occupied-gallery fixtures, with no failed assets or console warnings/errors.
+  [The art comparison](cinder-relay-art.md) includes matching images and the
+  increased rendering cost. AAA graphics, human pacing, subjective listening and
+  broader hardware performance remain open production work.
+
 - The volcanic chapter now includes **the Cinder Relay**, an optional ascent
   through six pressure pistons, three circuit controls and safe galleries to a
   dispatch ledger and return lift. All 397 tests and the production build pass.

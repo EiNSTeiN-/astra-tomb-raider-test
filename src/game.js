@@ -12,6 +12,7 @@ import {
   pressureBlocked,
   pressureOccludes,
   pressureSavePosition,
+  restorePressureArrival,
 } from "./pressure-rules.js";
 import { buildSurveyorsCleft, updateCleftArt } from "./cleft-art.js";
 import { cleftBlocked, cleftOccludes } from "./cleft-rules.js";
@@ -812,6 +813,7 @@ export class Adventure {
       this.player.position.z,
     );
     restoreTraversal(this);
+    restorePressureArrival(this);
     restoreSkyBridgeArrival(this);
     const arrival = safeArrival(this, this.player.position);
     if (arrival) {

@@ -137,6 +137,38 @@ export function pressureAnchor(h) {
   return { x: h.x + d.x, y: h.y + d.y, z: h.z + d.z };
 }
 
+// A later art pass can occupy an otherwise valid gallery save. Keep that
+// arrival on its recorded floor before generic ground-level recovery runs.
+export function restorePressureArrival(game) {
+  const h = game.pressureRelay,
+    saved = game.progress.position,
+    p = game.player.position;
+  if (
+    !h ||
+    !Number.isFinite(saved?.height) ||
+    Math.abs(p.x - saved.x) > 0.01 ||
+    Math.abs(p.z - saved.z) > 0.01
+  )
+    return;
+  const expected = game.groundHeight(p.x, p.z) + saved.height;
+  for (const [i, d] of h.rests.entries()) {
+    if (
+      i > h.saved.rest ||
+      Math.abs(p.x - d.x) >= d.w ||
+      Math.abs(p.z - d.z) >= d.d ||
+      Math.abs(expected - d.y) > 0.25 ||
+      game.canMove(p.x, p.z, saved.height)
+    )
+      continue;
+    if (!game.canMove(d.x, d.z, d.y - game.groundHeight(d.x, d.z))) return;
+    p.set(d.x, d.y, d.z);
+    h.anchor = i;
+    game.jumpY = d.y - game.groundHeight(d.x, d.z);
+    game.fallPeak = d.y;
+    return;
+  }
+}
+
 export function pressureSavePosition(game) {
   const h = game.pressureRelay,
     p = game.player?.position;

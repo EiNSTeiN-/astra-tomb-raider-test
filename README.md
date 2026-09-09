@@ -72,6 +72,9 @@ floor. **E / Use** operates valves and lift controls; **Space / Jump** crosses
 gaps. Safe galleries preserve progress, and the ledger releases a return lift.
 **M** shows the chamber and **J** keeps its recovered story. See the
 [route, sound and verification notes](docs/cinder-relay.md).
+The [foundry art pass](docs/cinder-relay-art.md) adds dressed basalt, riveted
+platforms, sliding rams, return-lift hardware, pressure gauges and refuge cargo,
+with matching images and measured rendering costs.
 
 East of the mountain’s western library trail, **the bellkeepers’ hoist** adds an
 optional tomb with two counterweighted lifts, three floors and a broken gallery

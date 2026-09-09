@@ -8,6 +8,11 @@ reserve to carry refuge supplies. Recovering it releases an eastern return lift.
 
 ![The intake valve and first pressure crowns](images/cinder-relay-intake.png)
 
+The subsequent [foundry art pass](cinder-relay-art.md) replaces the initial
+platform and shaft artwork, adds working lift hardware and dispatch furnishings,
+and protects older gallery saves from the new cargo footprints. Its notes contain
+current images, rendering costs and verification.
+
 ## Route and controls
 
 Read the entrance tablet, then open the intake valve with **E / Use**. Board the
