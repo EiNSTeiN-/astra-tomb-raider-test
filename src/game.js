@@ -100,6 +100,7 @@ import {
   settleHydraulics,
 } from "./hydraulic-courts.js";
 import * as THREE from "three";
+import { updateSkyGusts, skyWindVelocity } from "./sky-gusts.js";
 import {
   buildOrbitVault,
   updateOrbitVault,
@@ -1405,6 +1406,8 @@ export class Adventure {
   }
   updatePlayer(dt) {
     updateOrbitVault(this, dt);
+    updateSkyGusts(this);
+    this.skyWind = null;
     // Scripted traversal supplies its own motion. Only the regular collision
     // controller below reports measured travel for locomotion selection.
     this.actualMoveSpeed = null;
@@ -1515,7 +1518,12 @@ export class Adventure {
       oldZ = p.z;
     this.moveVelocity = { x: input.x * speed, z: input.z * speed };
     if (!advanceSwimming(this, input, dt, jump))
-      advanceCharacter(this, this.moveVelocity, dt, jump);
+      advanceCharacter(
+        this,
+        skyWindVelocity(this, this.moveVelocity),
+        dt,
+        jump,
+      );
     updateCrouch(this);
     recoverSkyBridgeFall(this);
     recoverOrbitFall(this);
@@ -2244,6 +2252,7 @@ export class Adventure {
       stamina: this.stamina,
       aim: aimState(this),
       stealth: stealthState(this),
+      windBraced: !!this.skyWind?.braced && Math.abs(this.skyWind.force) > 0.05,
       swimming: this.swimming,
       torch: this.torch ? this.progress.torch === true : null,
       diving: this.diving,
@@ -2388,10 +2397,12 @@ export class Adventure {
                         : this.blockGrip ||
                             this.cipherSites?.[this.progress.stage]?.moving
                           ? "lift"
-                          : this.ropeRide || this.zipRide
-                            ? "climb"
-                            : currentFieldTask(this.level, this.progress)
-                                ?.kind || "mechanism",
+                          : this.skyWind
+                            ? "crosswind"
+                            : this.ropeRide || this.zipRide
+                              ? "climb"
+                              : currentFieldTask(this.level, this.progress)
+                                  ?.kind || "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(

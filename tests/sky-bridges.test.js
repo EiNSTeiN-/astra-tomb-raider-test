@@ -10,7 +10,12 @@ import { restoreTraversal } from "../src/traversal.js";
 import { normalizeSave } from "../src/storage.js";
 import { migrateSkyRoute } from "../src/sky-layout.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
-import { distanceGain } from "../src/audio.js";
+import { distanceGain, scoreBar } from "../src/audio.js";
+import {
+  bridgeGust,
+  updateSkyGusts,
+  skyWindVelocity,
+} from "../src/sky-gusts.js";
 import {
   bridgeBoardGeometry,
   bridgeRopeGeometry,
@@ -161,6 +166,207 @@ test("all eighteen spans can be crossed in both directions at carrying speed thr
       );
       assert.equal(jumps, b.gaps.length);
     }
+});
+
+test("gusts give advance warning, progress through three patterns and include calm windows", () => {
+  const kinds = new Set();
+  for (let stage = 0; stage < 9; stage++) {
+    const b = { stage, section: 1 },
+      sample = bridgeGust(b, 0);
+    kinds.add(sample.kind);
+    assert.equal(sample.force, 0);
+    let calm = 0,
+      positive = 0,
+      negative = 0,
+      previous = 0;
+    for (let time = 0; time < sample.period; time += 0.02) {
+      const s = bridgeGust(b, time);
+      assert(Math.abs(s.force) <= s.peak + 1e-8);
+      if (Math.abs(s.force) < 1e-8) calm++;
+      if (s.force > 0.01) positive++;
+      if (s.force < -0.01) negative++;
+      if (Math.abs(s.force) > 1e-8 && Math.abs(previous) < 1e-8)
+        assert(
+          bridgeGust(b, time - 0.7).warning > 0.4,
+          "each force onset must follow a visible warning",
+        );
+      previous = s.force;
+    }
+    assert(calm > 120);
+    if (stage >= 3) assert(positive > 0 && negative > 0);
+  }
+  assert.equal(kinds.size, 3);
+  assert(bridgeGust({ stage: 0 }, 6).peak < bridgeGust({ stage: 8 }, 4).peak);
+});
+
+test("crossing music retains the sky harmony while leaving space for gust warnings", () => {
+  for (let stage = 0; stage < 9; stage++)
+    for (let bar = 0; bar < 16; bar++) {
+      const normal = scoreBar("sky", stage, bar, "explore", "survey"),
+        crossing = scoreBar("sky", stage, bar, "explore", "crosswind");
+      assert.deepEqual(
+        crossing,
+        normal.filter((e) => e.voice === "pad" || e.voice === "bass"),
+      );
+      assert(!crossing.some((e) => e.voice === "pulse"));
+    }
+});
+
+test("bracing prevents a sustained gust from sweeping an idle explorer off the deck; paused and sheltered bodies do not drift", (t) => {
+  const g = fixture(t),
+    b = g.skyBridges.find((b) => b.stage === 2),
+    c = spanCoordinates(b, b.bx, b.bz),
+    along = c.length * 0.27;
+  const place = () => {
+    const x = b.ax + c.ux * along,
+      z = b.az + c.uz * along;
+    g.player.position.set(x, bridgeDeckY(b, along), z);
+    g.grounded = true;
+    g.velocityY = 0;
+    g.airVelocity = null;
+    g.carrying = false;
+    g.elapsed = 0;
+    g.paused = false;
+    g.coyote = g.jumpBuffer = 0;
+  };
+  for (const crouching of [true, false]) {
+    place();
+    g.crouching = crouching;
+    let caught = false;
+    for (let i = 0; i < 11 * 60; i++) {
+      g.elapsed += 1 / 60;
+      updateSkyGusts(g);
+      advanceCharacter(g, skyWindVelocity(g, { x: 0, z: 0 }), 1 / 60);
+      if (recoverSkyBridgeFall(g)) {
+        caught = true;
+        break;
+      }
+    }
+    assert.equal(caught, !crouching);
+    if (crouching) {
+      assert(g.grounded);
+      assert(
+        Math.abs(
+          spanCoordinates(b, g.player.position.x, g.player.position.z).across,
+        ) < 0.3,
+      );
+    }
+  }
+  place();
+  g.elapsed = 6;
+  updateSkyGusts(g);
+  g.crouching = false;
+  assert(
+    Math.hypot(...Object.values(skyWindVelocity(g, { x: 0, z: 0 }))) > 0.5,
+  );
+  const sample = b.gust,
+    vertices = b.streamers.mesh.geometry.attributes.position.array.slice();
+  g.paused = true;
+  g.elapsed = 20;
+  updateSkyBridges(g, 5);
+  assert.equal(b.gust, sample);
+  assert.deepEqual(
+    b.streamers.mesh.geometry.attributes.position.array,
+    vertices,
+  );
+  assert.deepEqual(skyWindVelocity(g, { x: 1, z: 0 }), { x: 1, z: 0 });
+  g.paused = false;
+  for (const s of [-1, c.length + 1]) {
+    g.player.position.set(b.ax + c.ux * s, bridgeDeckY(b, s), b.az + c.uz * s);
+    assert.deepEqual(skyWindVelocity(g, { x: 0, z: 0 }), { x: 0, z: 0 });
+  }
+  place();
+  b.open = 0;
+  assert.deepEqual(skyWindVelocity(g, { x: 0, z: 0 }), { x: 0, z: 0 });
+});
+
+test("all eighteen gusting spans remain crossable both ways at carrying speed with steering and gap jumps", (t) => {
+  const g = fixture(t);
+  for (const b of g.skyBridges)
+    for (const direction of [1, -1]) {
+      const c = spanCoordinates(b, b.bx, b.bz),
+        start = direction > 0 ? -1 : c.length + 1,
+        x = b.ax + c.ux * start,
+        z = b.az + c.uz * start;
+      g.player.position.set(x, g.groundHeight(x, z), z);
+      Object.assign(g, {
+        grounded: true,
+        velocityY: 0,
+        airVelocity: null,
+        jumpBuffer: 0,
+        coyote: 0,
+        carrying: true,
+        crouching: false,
+        elapsed: b.stage * 0.71 + 2,
+        fallPeak: g.player.position.y,
+      });
+      let finished = false,
+        peak = 0,
+        jumps = 0;
+      for (let i = 0; i < 1000; i++) {
+        const p = spanCoordinates(b, g.player.position.x, g.player.position.z);
+        if (direction > 0 ? p.along > c.length + 0.8 : p.along < -0.8) {
+          finished = true;
+          break;
+        }
+        g.elapsed += 1 / 60;
+        updateSkyGusts(g);
+        const jump =
+          g.grounded &&
+          b.gaps.some((gap) => {
+            const d = direction > 0 ? gap.start - p.along : p.along - gap.end;
+            return d > 0 && d < 1.15;
+          });
+        if (jump) jumps++;
+        // Correct observed lateral drift; no cancellation of the wind signal.
+        const velocity = new THREE.Vector2(
+          c.ux * 4.6 * direction - c.uz * p.across * 3,
+          c.uz * 4.6 * direction + c.ux * p.across * 3,
+        )
+          .normalize()
+          .multiplyScalar(4.6);
+        const pushed = skyWindVelocity(g, { x: velocity.x, z: velocity.y });
+        peak = Math.max(peak, Math.abs(g.skyWind?.force || 0));
+        advanceCharacter(g, pushed, 1 / 60, jump);
+        assert(!recoverSkyBridgeFall(g), `${b.id} direction ${direction} fell`);
+      }
+      assert(finished, `${b.id} direction ${direction} did not finish`);
+      assert(peak > 0.1);
+      assert.equal(jumps, b.gaps.length);
+    }
+});
+
+test("streamer roots stay attached, tips reverse with the gust, and one existing positional wind source follows each pulse", (t) => {
+  const g = fixture(t),
+    b = g.skyBridges.find((b) => b.stage === 4),
+    h = b.streamers;
+  const tips = [];
+  for (const time of [4.5, 11.5]) {
+    g.elapsed = time;
+    g.player.position.set(b.ax, b.ay, b.az);
+    updateSkyBridges(g, 0);
+    const p = h.mesh.geometry.attributes.position;
+    for (const [i, a] of h.anchors.entries()) {
+      const n = i * (h.segments + 1) * 2;
+      assert(Math.abs(p.getX(n) - a.x) < 1e-5);
+      assert(Math.abs(p.getY(n) - a.y) < 1e-5);
+      assert(Math.abs((p.getZ(n) + p.getZ(n + 1)) / 2 - a.z) < 1e-5);
+    }
+    tips.push(p.getX(h.segments * 2) - h.anchors[0].x);
+  }
+  assert(tips[0] * tips[1] < 0);
+  g.soundSources = g.skyBridgeSources.map((s) => ({ ...s }));
+  updateSoundSources(g);
+  assert.equal(
+    g.soundSources.filter((s) => s.skyBridgeWind === b.id).length,
+    1,
+  );
+  const source = g.soundSources.find((s) => s.skyBridgeWind === b.id);
+  assert.equal(source.activity, b.gust.activity);
+  assert(source.activity > 0.8);
+  g.paused = true;
+  updateSoundSources(g);
+  assert.equal(source.activity, 0);
 });
 
 test("missing boards remove physical support and a missed jump returns to the last bank without advancing objectives", (t) => {

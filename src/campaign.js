@@ -189,7 +189,7 @@ export const LEVELS = [
     tag: "The edge of everything",
     type: "Traversal · Wind puzzles",
     description:
-      "A city hangs between mountains, held together by rope, stone, and a forgotten understanding of the wind. Find a way across the sky.",
+      "A city hangs between mountains, held together by rope, stone, and a forgotten understanding of the wind. Watch the bridge streamers: crouch to brace against gusts, then stand and steer into the wind for gap jumps. Find a way across the sky.",
     goal: "Rebuild the skyward passage",
     artifact: "The Feather of Stone",
     color: "#bbc5a4",

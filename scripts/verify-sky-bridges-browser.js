@@ -136,7 +136,8 @@ export function inspectSkyBanks(game) {
   return result;
 }
 
-// Assisted collision/physics review, not a timed or blind playthrough.
+// Baseline gap/collision review without the later crosswind controller; not a
+// timed or blind playthrough. Current wind checks are documented in sky-crosswinds.md.
 export function crossSkyBridges(game) {
   const oldProgress = {
     stage: game.progress.stage,

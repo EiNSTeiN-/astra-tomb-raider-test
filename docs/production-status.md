@@ -20,6 +20,20 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The cloud city’s eighteen suspension spans now have warned crosswinds,
+  crouch bracing, balance-arm poses and striped streamers. Early gusts are
+  gentle; later ones reverse or arrive in shorter pulses. Existing positional
+  wind follows the envelope, and the score leaves space for the warning.
+  All 427 tests and the production build pass. Physics checks crossed every
+  span in both directions with carried cargo and steering; 36 assisted native
+  browser crossings also finished at 100 health. High/Performance views,
+  portrait touch bracing/jumping, pause, source falloff and cleanup passed.
+  Four final production cases passed native input and exact save reloads,
+  including supported, airborne and older-route positions. No failed assets
+  or console warnings/errors were reported. [Crosswind notes and images](sky-crosswinds.md)
+  record controls, measured limits and the remaining human pacing, subjective
+  listening, browser/GPU and AAA graphics work.
+
 - The orrery court now has pale fitted paving, a broken stone colonnade,
   retaining masonry, under-deck supports and four caged oil lamps. Columns
   block movement, arch openings remain clear, and older overlapping arrivals

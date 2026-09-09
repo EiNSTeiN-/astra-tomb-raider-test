@@ -166,6 +166,7 @@ export function scoreBar(biome, stage, bar, mode = "explore", task = "survey") {
     mode !== "puzzle" &&
     mode !== "reading" &&
     task !== "tuning" &&
+    task !== "crosswind" &&
     task !== "dive"
   ) {
     const sparse = ["snow", "crystal", "eclipse"].includes(biome);

@@ -84,6 +84,12 @@ the recovered bearing. See [climbing and verification notes](docs/surveyors-clef
 
 Mountain bells use **E / Use** at each named pull rope. Read the bellkeeper's tablet, listen to its phrase, and answer according to its repeat, reverse, or shifted-sign rule. The tablet offers replay, reset, activation, and focused controls. Replaying preserves your partial answer.
 
+The cloud city’s eighteen suspension bridges now have **crosswinds**. Rising
+striped streamers warn of gusts and show their direction. **B / Crouch** braces
+against the push; stand and countersteer for gap jumps. Later spans reverse the
+wind or introduce shorter pulses. The safety tether, saved crossings and
+winch requirements remain in place. See [crosswind controls and checks](docs/sky-crosswinds.md).
+
 In **A Heart of Embers**, **the Cinder Relay** branches west from the obsidian-hub
 station in Black Glass. Open three pressure circuits, ride six pistons and jump
 between their crowns to reach a dispatch ledger 24 metres above the settling

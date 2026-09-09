@@ -1,6 +1,12 @@
 import * as THREE from "three";
 import { mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
+import { bridgeGust, updateSkyGusts } from "./sky-gusts.js";
+import {
+  skyStreamerMaterial,
+  buildSkyStreamers,
+  updateSkyStreamers,
+} from "./sky-streamers.js";
 import {
   bridgeArtMaterials,
   bridgeBoardGeometry,
@@ -22,8 +28,10 @@ export function buildSkyBridges(game) {
   game.skyBridges = [];
   game.skyBridgeSources = [];
   game.skyTether = null;
+  game.skyWind = null;
   if (game.level.biome !== "sky") return;
   const materials = bridgeArtMaterials();
+  const streamerMaterial = skyStreamerMaterial();
   const { wood, rope } = materials;
   for (const plan of game.terrainProfile.bridges) {
     const c = spanCoordinates(plan, plan.bx, plan.bz),
@@ -46,6 +54,7 @@ export function buildSkyBridges(game) {
       drums: [],
       driveActivity: 0,
       lastBank: "a",
+      gust: bridgeGust(plan, 0),
     };
     const add = (
       geometry,
@@ -269,6 +278,7 @@ export function buildSkyBridges(game) {
     for (const { rotor } of bridge.drums) mergeArchitecture(rotor);
     mergeArchitecture(root);
     mergeArchitecture(detail);
+    buildSkyStreamers(bridge, streamerMaterial);
     const middle = c.length / 2;
     game.skyBridgeSources.push({
       id: `${plan.id}-wind`,
@@ -279,6 +289,8 @@ export function buildSkyBridges(game) {
       gain: 0.32,
       range: 55,
       near: 3,
+      skyBridgeWind: plan.id,
+      activity: bridge.gust.activity,
     });
     game.skyBridgeSources.push({
       id: `${plan.id}-rope`,
@@ -340,6 +352,8 @@ function poseBridge(bridge) {
 
 export function updateSkyBridges(game, dt) {
   if (!game.skyBridges?.length) return;
+  if (game.paused) dt = 0;
+  updateSkyGusts(game);
   let tether = null;
   for (const bridge of game.skyBridges) {
     const target = Number(bridgeDeployed(game.progress, bridge));
@@ -365,6 +379,9 @@ export function updateSkyBridges(game, dt) {
         ? 0.5
         : 0);
     bridge.detail.visible = Math.hypot(p.along - p.length / 2, p.across) < 85;
+    bridge.streamers.mesh.visible =
+      Math.hypot(p.along - p.length / 2, p.across) < 110;
+    if (!game.paused) updateSkyStreamers(bridge, game.elapsed);
     for (const detail of bridge.deckDetails)
       detail.visible = Math.hypot(p.along - p.length / 2, p.across) < 48;
     if (Math.abs(p.across) < 5 && p.along >= -3 && p.along <= p.length + 3) {
@@ -483,8 +500,21 @@ export function skyBridgeHint(game) {
     if (gap)
       return {
         key: "Space",
-        label: "Jump the missing boards · your safety tether is attached",
+        label:
+          bridge.gust.strength > 0.25
+            ? "Jump the gap · steer into the crosswind"
+            : "Jump the missing boards · your safety tether is attached",
       };
+    return {
+      key: "B",
+      label: game.crouching
+        ? "Braced against the wind · stand to jump"
+        : bridge.gust.warning > 0.1
+          ? "Streamers rising · crouch to brace for the gust"
+          : bridge.gust.strength > 0.25
+            ? "Crosswind · crouch to brace or steer against the streamers"
+            : "Watch the streamers · crouch to brace, stand to jump",
+    };
   }
   return null;
 }

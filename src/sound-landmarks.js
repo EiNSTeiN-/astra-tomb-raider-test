@@ -236,6 +236,11 @@ export function updateSoundSources(game) {
       source.activity =
         game.skyBridges?.find((b) => b.id === source.skyBridgeDrum)
           ?.driveActivity ?? 0;
+    if (source.skyBridgeWind)
+      source.activity = game.paused
+        ? 0
+        : (game.skyBridges?.find((b) => b.id === source.skyBridgeWind)?.gust
+            ?.activity ?? 0);
     if (source.forgeRoom !== undefined) {
       const patch = game.forgePatches?.find(
         (p) => p.index === source.forgeRoom,

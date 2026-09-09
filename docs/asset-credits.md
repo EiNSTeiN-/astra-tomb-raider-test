@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The cloud-city crosswind envelopes, balance-arm pose, striped cloth geometry
+and woven-cloth shader in `src/sky-gusts.js`, `src/sky-balance.js` and
+`src/sky-streamers.js` are original project work. They reuse the existing bridge
+geometry, explorer rig and original wind synthesis. The quieter crossing
+arrangement retains the existing original sky harmony. No external image,
+model, recording, music file or dependency was added. See
+[crosswind behavior and verification](sky-crosswinds.md).
+
 The Cartographer’s Orrery’s stone crowns, bearing tracks, rollers, piers, chart,
 bridge, engraved labels and map are original project work in `src/orbit-vault.js`
 and `src/orbit-map.js`. They reuse the existing stone maps and project bronze

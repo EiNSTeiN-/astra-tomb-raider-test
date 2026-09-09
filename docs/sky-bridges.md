@@ -1,5 +1,11 @@
 # Cloud-city crossings and responsive sound
 
+The later [crosswind pass](sky-crosswinds.md) adds warned lateral gusts,
+crouch bracing and directional streamers. Its native crossings and source
+activity checks supersede the static traversal measurements below. The
+`crossSkyBridges` helper at the end of this older article checks gap geometry
+and carrying-speed movement without the later crosswind controller.
+
 The subsequent [bridge construction pass](sky-bridge-art.md) replaces the original primitive anchors and decking, adds rope fittings and rotating bank drums, and gives those drums localized sound. Its source counts and rendered costs supersede the historical measurements below.
 
 Where Eagles Sleep now has an authored route between ten alternating cliff courts, with twenty-seven ordered field stations and eighteen physical suspension bridges. The crossings replace the previous decorative terraces. Each pair of spans connects three stations between successive courts; solid causeways connect the shared banks to the sanctuaries. Existing mechanism, discovery, camp, guardian, and field-action identifiers remain intact.
