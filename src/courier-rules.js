@@ -174,7 +174,8 @@ export function courierCarSolids(h) {
     { x: h.x - 3, z: 14, w: 0.045, d: 2.55, y: h.y, h: 1.1 },
     { x: h.x + 3, z: 14, w: 0.045, d: 2.55, y: h.y, h: 1.1 },
     { x: h.x, z: 11.5, w: 3, d: 0.045, y: h.y, h: 1.1 },
-    { x: h.x + 1.4, z: 13.3, w: 0.08, d: 0.08, y: h.y, h: 5 },
+    { x: h.x + 1.4, z: 13.3, w: 0.08, d: 0.08, y: h.y, h: 6.2 },
+    { x: h.x, z: 14.6, w: 0.08, d: 0.08, y: h.y, h: 1.25, padding: 0.2 },
   ];
 }
 export function courierBlocked(game, x, z, feet) {
@@ -193,8 +194,8 @@ export function courierBlocked(game, x, z, feet) {
       (p) =>
         feet < p.y + p.h &&
         feet + 1.8 > p.y &&
-        Math.abs(x - p.x) < p.w + 0.35 &&
-        Math.abs(z - p.z) < p.d + 0.35,
+        Math.abs(x - p.x) < p.w + (p.padding ?? 0.35) &&
+        Math.abs(z - p.z) < p.d + (p.padding ?? 0.35),
     ) ||
     h.solids.some(
       (p) =>

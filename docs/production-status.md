@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Courier Road ferry now has weathered timber framing, grooved wheels,
+  continuous rigging, fitted-stone landings and a woven sail that gathers upward
+  while its spars retain their span. Moving wind follows the cloth centre and
+  cable creaks originate at an axle. All 442 tests and the release build passed.
+  Ten final High/Performance views linked shaders, the assisted round trip
+  retained all three dispatches at 100 health, both moving voices retained
+  linear falloff, and four production keyboard/touch cases preserved exact
+  saves on reload. The additional detail raises source triangles from 14,682
+  to 63,166 while batching reduces meshes from 59 to 31; these are not frame-rate
+  measurements. [Construction comparisons and checks](courier-construction.md)
+  record the remaining graphics, human pacing, listening and device work.
+
 - The cloud city now has the optional Courier Road through its first court’s
   north gate. A wind-driven ferry serves three dispatch posts with increasingly
   broken stairs; returning the letters restores a journal register. Trim,

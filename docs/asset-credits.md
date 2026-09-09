@@ -7,6 +7,13 @@ project's bronze material. Positional wind and rope voices and the quiet sky
 crossing score use the existing original synthesis. No external image, model,
 recording or dependency was added. See [Courier Road notes](courier-road.md).
 
+Its later timber framing, grooved pulleys, fitted paving, rigging, woven sail
+shader, bird motif and shared labels are original code-native artwork in
+`src/courier-construction.js` and `src/courier-sail.js`. They reuse the same
+credited maps and original bridge stone, timber, rope and patinated-metal
+materials. [Construction comparisons](courier-construction.md) document the
+rendered changes. No external texture, model or audio asset was added.
+
 The cloud-city crosswind envelopes, balance-arm pose, striped cloth geometry
 and woven-cloth shader in `src/sky-gusts.js`, `src/sky-balance.js` and
 `src/sky-streamers.js` are original project work. They reuse the existing bridge

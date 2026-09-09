@@ -38,6 +38,10 @@ original synthesis. No external assets or dependencies were added.
 
 ## Views
 
+These views and the measurements below record the initial playable Courier
+Road milestone. See the later [construction update](courier-construction.md)
+for the current ferry, sail, landings, geometry counts and repeated checks.
+
 ![Courier ferry and its four landings above the cloud bank](images/courier-road-overview.webp)
 
 ![The second dispatch post and its broken stair](images/courier-road-post.webp)
