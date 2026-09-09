@@ -3,6 +3,7 @@ import { supportAt } from "./character-motion.js";
 import { poseFeet } from "./pose.js";
 import { waterAt } from "./hydrology.js";
 import { CROUCH_DROP, playerFootstep } from "./stealth.js";
+import { strideScale } from "./stride.js";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -123,6 +124,15 @@ export function groundExplorer(game, dt, moving, sprinting) {
   state.clock += dt;
   state.travel = reset || !moving ? 0 : state.travel + distance;
   updateSkin(game);
+  const facing = game.avatar.getWorldQuaternion(new THREE.Quaternion());
+  const inverseFacing = facing.clone().invert();
+  const speed =
+    game.actualMoveSpeed ??
+    Math.hypot(game.moveVelocity?.x || 0, game.moveVelocity?.z || 0);
+  const scale = game.blockGrip ? 1 : strideScale(game, rig.state, speed);
+  state.stride = reset
+    ? scale
+    : THREE.MathUtils.damp(state.stride ?? 1, scale, 14, dt);
   const support = (x, z) => {
     const result = supportAt(game, x, z, root.y + 0.45);
     return Math.abs(result.height - root.y) <= 0.5 ? result : null;
@@ -131,6 +141,17 @@ export function groundExplorer(game, dt, moving, sprinting) {
     const points = probes(foot),
       ankle = foot.bone.getWorldPosition(new THREE.Vector3());
     const lift = Math.max(0, Math.min(...points.map((p) => p.y)) - root.y);
+    const local = ankle.clone().sub(root).applyQuaternion(inverseFacing);
+    const crouch = rig.crouchBlend || 0;
+    // A crouched recovery passes beneath the hips instead of lifting the heel
+    // far behind them, which would drive the bent knee into the floor.
+    const recovery = THREE.MathUtils.smoothstep(lift, 0.015, 0.045) * 0.2;
+    const offset = new THREE.Vector3(
+      0,
+      0,
+      local.z * (state.stride - 1) + crouch * (0.14 + recovery),
+    ).applyQuaternion(facing);
+    ankle.add(offset);
     const rotation = foot.bone.getWorldQuaternion(new THREE.Quaternion());
     const center = support(ankle.x, ankle.z);
     const samples = [
@@ -158,6 +179,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       }
     }
     const clearances = probes(foot).flatMap((p) => {
+      p.add(offset);
       const floor = support(p.x, p.z);
       return floor ? [p.y - floor.height] : [];
     });
@@ -171,10 +193,33 @@ export function groundExplorer(game, dt, moving, sprinting) {
       : 0;
     return { foot, ankle, rotation, lift, valid, center, shift };
   });
-  const pelvis = Math.max(-0.3, Math.min(0, ...plans.map((p) => p.shift)));
+  let pelvis = Math.max(-0.3, Math.min(0, ...plans.map((p) => p.shift)));
+  // Longer steps need room to extend. Lower only the visual pelvis enough for
+  // the existing leg lengths to reach the ankle targets, preserving sole lift.
+  for (const p of plans) {
+    const knee = p.foot.bone.parent,
+      thigh = knee.parent;
+    const hip = thigh.getWorldPosition(new THREE.Vector3());
+    const reach =
+      (knee.position.length() + p.foot.bone.position.length()) * 0.995;
+    const horizontal = Math.hypot(p.ankle.x - hip.x, p.ankle.z - hip.z);
+    const vertical = Math.sqrt(
+      Math.max(0.01, reach * reach - horizontal * horizontal),
+    );
+    const needed =
+      p.ankle.y +
+      p.shift +
+      vertical -
+      hip.y +
+      (rig.crouchBlend || 0) * CROUCH_DROP;
+    pelvis = Math.min(pelvis, Math.max(-0.3, needed));
+  }
   state.pelvis = reset
     ? pelvis
-    : THREE.MathUtils.lerp(state.pelvis, pelvis, 1 - Math.exp(-20 * dt));
+    : Math.min(
+        pelvis,
+        THREE.MathUtils.lerp(state.pelvis, pelvis, 1 - Math.exp(-20 * dt)),
+      );
   game.avatar.position.y = state.pelvis - (rig.crouchBlend || 0) * CROUCH_DROP;
   poseFeet(
     game,

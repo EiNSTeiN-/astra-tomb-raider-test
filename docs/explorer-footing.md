@@ -1,5 +1,9 @@
 # Explorer footing and contact sounds
 
+The later [stride-alignment update](explorer-stride.md) queries terrain beneath
+adjusted foot positions and fits the pelvis to the available leg reach. It also
+calibrates playback to movement speed while retaining the contact-sound path.
+
 The later [locomotion correction](explorer-locomotion.md) preserves the running clip’s airborne phase and uses collision-resolved travel to settle blocked input into idle. The measurements below record the earlier terrain-fitting milestone.
 
 The explorer now adapts the boots to sloping terrain, climbable platform tops and

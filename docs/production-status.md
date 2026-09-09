@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Stride length and animation playback now follow measured travel speed, while
+  crouched recovery steps move beneath the hips. Controlled scans measured
+  65–85% reductions in median near-floor sole sliding across four gaits, with
+  residual sliding still present. Running retains its flight phase. All 463
+  tests and the release build passed, including moving slopes and contact sounds
+  at 20/30 updates per second. Native jogging, sprinting and crouched travel
+  stopped at 100 health; three release keyboard/touch cases preserved exact
+  saves on reload. Five matching pose comparisons retained their triangle and
+  draw-call counts. [Stride comparisons and limitations](explorer-stride.md)
+  distinguish this correction from planted feet, motion capture and a device
+  performance claim.
+
 - Crouching now lowers the hands below the shoulders, relaxes the fingers and
   ties arm swing to the walking clip. All 461 tests and the production build
   passed. New checks cover 540 poses across gait phases, slopes and facing,

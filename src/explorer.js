@@ -15,6 +15,7 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 import { poseHands, poseFeet } from "./pose.js";
 import { groundExplorer } from "./explorer-grounding.js";
 import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
+import { strideRate } from "./stride.js";
 
 function equipmentSurface(material) {
   const canvas = /canvas|bottle/.test(material.name);
@@ -154,11 +155,8 @@ export function explorerGait(game, moving, sprinting) {
         Math.max(0.25, Math.min(1.25, speed / 2.4)) *
         (game.blockGrip.move?.pull ? -1 : 1),
     };
-  return sprinting
-    ? { name: "Run", rate: 1.5 }
-    : speed > 4.3
-      ? { name: "Run", rate: 1 }
-      : { name: "Walk", rate: Math.max(0.75, Math.min(1.6, speed / 2.4)) };
+  const name = sprinting || speed > 4.3 ? "Run" : "Walk";
+  return { name, rate: strideRate(game, name, speed) };
 }
 export function animateExplorer(game, dt, moving, sprinting) {
   updateTorch(game);
@@ -166,15 +164,6 @@ export function animateExplorer(game, dt, moving, sprinting) {
   if (!rig) return;
   restoreCableGrip(game);
   restoreCrouchHands(game);
-  const gait = explorerGait(game, moving, sprinting);
-  if (gait.name !== rig.state) {
-    const action = rig.actions[gait.name];
-    action.reset().setEffectiveWeight(1).play();
-    rig.actions[rig.state]?.crossFadeTo(action, 0.18, true);
-    rig.state = gait.name;
-  }
-  rig.actions[gait.name].setEffectiveTimeScale(gait.rate);
-  rig.mixer.update(dt);
   rig.crouchBlend = THREE.MathUtils.damp(
     rig.crouchBlend || 0,
     game.crouching ? 1 : 0,
@@ -189,6 +178,15 @@ export function animateExplorer(game, dt, moving, sprinting) {
     game.zipRide
   )
     rig.crouchBlend = 0;
+  const gait = explorerGait(game, moving, sprinting);
+  if (gait.name !== rig.state) {
+    const action = rig.actions[gait.name];
+    action.reset().setEffectiveWeight(1).play();
+    rig.actions[rig.state]?.crossFadeTo(action, 0.18, true);
+    rig.state = gait.name;
+  }
+  rig.actions[gait.name].setEffectiveTimeScale(gait.rate);
+  rig.mixer.update(dt);
   const hanging = !!game.ropeRide || !!(game.zipRide && !game.zipRide.approach);
   rig.hangLift = hanging
     ? 0.4

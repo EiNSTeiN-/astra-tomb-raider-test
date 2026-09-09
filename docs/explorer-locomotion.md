@@ -1,5 +1,10 @@
 # Explorer locomotion
 
+The later [stride-alignment update](explorer-stride.md) reduces horizontal
+sliding through bounded stride warping and calibrated playback, and brings
+crouched recovery steps beneath the hips. The measurements below record the
+earlier running-flight and blocked-movement correction.
+
 Holding movement against a solid wall now settles Vesper into the idle animation.
 The controller reports actual horizontal travel after resolving collisions, and
 locomotion uses that measurement instead of assuming that requested movement

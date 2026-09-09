@@ -7,6 +7,11 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { animateExplorer, explorerGait } from "../src/explorer.js";
 import { restoreCrouchHands } from "../src/explorer-crouch.js";
+import {
+  strideSoles,
+  sampleStrideSoles,
+  soleSlip,
+} from "../scripts/inspect-stride.js";
 import { resetTraversal } from "../src/traversal.js";
 import { supportAt } from "../src/character-motion.js";
 import { handGeometry } from "../scripts/inspect-hand-geometry.js";
@@ -765,6 +770,130 @@ test("crouching lowers the delivered actor with bent legs and grounded soles thr
   }
 });
 
+test("delivered sole movement matches travel more closely while running retains flight and crouched knees clear the floor", async (t) => {
+  const results = [];
+  for (const [mode, speed, limit] of [
+    ["walk", 2.4, 0.3],
+    ["jog", 6, 0.5],
+    ["sprint", 10, 0.75],
+    ["crouch", 2.2, 0.4],
+  ]) {
+    const game = await groundedActor(),
+      feet = strideSoles(game.rig.model),
+      slips = [];
+    game.crouching = mode === "crouch";
+    game.moveVelocity.z = game.actualMoveSpeed = speed;
+    let previous,
+      minimumKnee = Infinity,
+      minimumSole = Infinity,
+      flight = 0;
+    for (let i = 0; i < 240; i++) {
+      game.player.position.z += speed / 60;
+      game.elapsed += 1 / 60;
+      const root = game.player.position.clone();
+      animateExplorer(game, 1 / 60, true, mode === "sprint");
+      assert(game.player.position.equals(root));
+      const current = sampleStrideSoles(feet);
+      if (i > 40) {
+        slips.push(...soleSlip(previous, current, 1 / 60));
+        const lowest = Math.min(...current.flat().map((p) => p.y));
+        minimumSole = Math.min(minimumSole, lowest);
+        flight = Math.max(flight, lowest);
+        for (const side of ["Left", "Right"])
+          minimumKnee = Math.min(
+            minimumKnee,
+            game.rig.model
+              .getObjectByName("mixamorig" + side + "Leg")
+              .getWorldPosition(new THREE.Vector3()).y,
+          );
+      }
+      previous = current;
+    }
+    slips.sort((a, b) => a - b);
+    assert(slips.length > 10000, `${mode}: too few contact samples`);
+    const median = slips[Math.floor(slips.length / 2)];
+    assert(
+      median < limit,
+      `${mode}: near-floor material points slide at ${median} m/s`,
+    );
+    assert(minimumSole > -0.012, `${mode}: boot enters the floor`);
+    if (mode === "jog" || mode === "sprint")
+      assert(flight > 0.055, `${mode}: lost running flight`);
+    if (mode === "crouch")
+      assert(minimumKnee > 0.105, `kneeling during travel: ${minimumKnee}`);
+    results.push({
+      mode,
+      median,
+      p90: slips[Math.floor(slips.length * 0.9)],
+      minimumKnee,
+      minimumSole,
+      flight,
+    });
+  }
+  t.diagnostic(JSON.stringify(results));
+});
+
+test("moving slopes keep stride soles supported and contact sounds at the floor at 20 and 30 updates per second", async (t) => {
+  const results = [];
+  for (const hz of [20, 30]) {
+    const counts = {};
+    for (const [mode, speed] of [
+      ["walk", 2.4],
+      ["jog", 6],
+      ["sprint", 10],
+      ["crouch", 2.2],
+    ]) {
+      const game = await groundedActor(),
+        sounds = [];
+      game.crouching = mode === "crouch";
+      game.groundHeight = (x, z) => x * 0.06 + z * 0.12;
+      game.moveVelocity.z = game.actualMoveSpeed = speed;
+      game.audio = {
+        footstep(surface, sprint, point) {
+          sounds.push({
+            surface,
+            sprint,
+            gap: point.y - game.groundHeight(point.x, point.z),
+          });
+        },
+      };
+      let minimum = Infinity;
+      for (let i = 0; i < hz * 3; i++) {
+        game.player.position.z += speed / hz;
+        game.player.position.y = game.groundHeight(0, game.player.position.z);
+        game.elapsed += 1 / hz;
+        const root = game.player.position.clone();
+        animateExplorer(game, 1 / hz, true, mode === "sprint");
+        assert(game.player.position.equals(root));
+        const soles = soleClearances(game);
+        minimum = Math.min(minimum, ...soles);
+        assert(
+          soles.every((y) => y > -0.012),
+          `${hz}/${mode}: slope penetration ${soles}`,
+        );
+        for (let f = 0; f < 2; f++)
+          assert(
+            Math.abs(soles[f] - game.rig.grounding.contacts[f].lift) < 0.045,
+            `${hz}/${mode}: lost support`,
+          );
+      }
+      assert(sounds.length >= 4, `${hz}/${mode}: missed footfalls`);
+      assert(
+        sounds.every((s) => s.gap > -0.012 && s.gap < 0.045),
+        `${hz}/${mode}: sound leaves the floor`,
+      );
+      assert(sounds.every((s) => s.sprint === (mode === "sprint")));
+      counts[mode] = sounds.length;
+      results.push({ hz, mode, contacts: sounds.length, minimum });
+    }
+    assert(
+      counts.sprint > counts.jog,
+      `${hz}: sprint cadence does not follow speed`,
+    );
+  }
+  t.diagnostic(JSON.stringify(results));
+});
+
 test("boots fit slopes in either direction while retaining swing clearance and the physical root", async () => {
   const game = await groundedActor();
   for (const grade of [-0.38, 0, 0.38]) {
@@ -858,6 +987,7 @@ test("visible contact drives positioned footsteps and stays quiet without travel
   const jogContacts = sounds.length - startJog;
   assert.ok(jogContacts >= 6, "jogging lost its foot contacts");
   const startSprint = sounds.length;
+  game.moveVelocity.z = 10;
   for (let i = 0; i < 180; i++) {
     game.player.position.z += 10 / 60;
     game.elapsed += 1 / 60;
@@ -1110,10 +1240,19 @@ test("shoulder aim follows elevation while preserving arm lengths and the pistol
 });
 test("locomotion selects a jog at travel speed, a faster sprint, and a quiet pose while swimming", () => {
   const g = { grounded: true, moveVelocity: { x: 6, z: 0 } };
-  assert.deepEqual(explorerGait(g, true, false), { name: "Run", rate: 1 });
-  assert.deepEqual(explorerGait(g, true, true), { name: "Run", rate: 1.5 });
+  const jog = explorerGait(g, true, false);
+  assert.equal(jog.name, "Run");
+  assert(jog.rate > 1 && jog.rate < 1.4);
+  g.moveVelocity.x = 10;
+  const sprint = explorerGait(g, true, true);
+  assert.equal(sprint.name, "Run");
+  assert(sprint.rate > jog.rate && sprint.rate < 2);
   g.moveVelocity.x = 2.4;
-  assert.deepEqual(explorerGait(g, true, false), { name: "Walk", rate: 1 });
+  const walk = explorerGait(g, true, false);
+  assert.equal(walk.name, "Walk");
+  assert(walk.rate > 1.2 && walk.rate < 1.5);
+  g.actualMoveSpeed = 0.8;
+  assert(explorerGait(g, true, false).rate < walk.rate / 2);
   g.swimming = true;
   assert.deepEqual(explorerGait(g, true, true), { name: "Idle", rate: 1 });
 });
@@ -1141,7 +1280,8 @@ test("blocked input settles the delivered explorer into idle and movement restar
   game.actualMoveSpeed = 10;
   animateExplorer(game, 1 / 60, true, true);
   assert.equal(game.rig.state, "Run");
-  assert.equal(game.rig.actions.Run.getEffectiveTimeScale(), 1.5);
+  assert(game.rig.actions.Run.getEffectiveTimeScale() > 1.5);
+  assert(game.rig.actions.Run.getEffectiveTimeScale() < 2);
   game.actualMoveSpeed = 0;
   game.blockGrip = { move: { pull: true } };
   game.moveVelocity.z = 1.8;

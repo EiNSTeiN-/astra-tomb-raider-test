@@ -4,6 +4,10 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The requested approximately one-hour duration per chapter has not been established by human playtesting, and the real-time graphics do not yet reach modern AAA production quality. See [the production status](docs/production-status.md) for the original requirements, evidence, and remaining work.
 
+Locomotion now uses [stride length and playback calibrated to travel](docs/explorer-stride.md).
+This reduces foot sliding and brings crouched recovery steps beneath the hips;
+the notes include measured limits and matching browser views.
+
 Crouching now uses [lowered hands and relaxed fingers](docs/explorer-crouch.md),
 with walking arm swing that settles when movement stops. The comparison notes
 include browser views, contact checks and keyboard/touch save verification.
@@ -353,6 +357,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 - `src/habitat.js` — deterministic woodland/undergrowth placement and a worn-trail mask.
 - `src/explorer.js`, `src/pose.js` — human character loading, equipment materials, locomotion, limb poses, and the visible sidearm.
 - `src/explorer-crouch.js` — blended crouch arm, wrist and finger poses with gait-driven swing and restoration before other actions.
+- `src/stride.js`, `src/explorer-grounding.js` — calibrated playback, stride warping, terrain support, leg reach and positioned contact sounds.
 - `src/character-motion.js`, `src/traversal-courses.js`, `src/traversal.js` — world-space jumping, elevated routes, rope physics, return cables, and ledge recovery.
 - `src/pose.js` — hand placement on moving rope grips.
 - `src/temple-architecture.js` — chamfered masonry, corbelled galleries, carved relief, and weathered temple materials.

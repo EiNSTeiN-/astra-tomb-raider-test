@@ -1,5 +1,9 @@
 # Explorer crouch hand poses
 
+The later [stride update](explorer-stride.md) also shortens the crouched recovery
+step and improves knee clearance. The views below record the hand-pose milestone
+before that leg adjustment.
+
 Crouching now lowers Vesper's hands to waist height, brings the elbows closer to
 the body, and turns the palms and fingers into a relaxed pose. Previously, the
 wrists stayed almost level with the shoulders and retained the imported clip's
