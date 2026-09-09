@@ -1,3 +1,5 @@
+import { drawCourierMap } from "./courier-map.js";
+import { COURIER_RECORD, COURIER_FRAGMENTS } from "./courier-rules.js";
 import { drawCleftMap } from "./cleft-map.js";
 import { drawPressureMap } from "./pressure-map.js";
 import { PRESSURE_RECORD } from "./pressure-rules.js";
@@ -456,6 +458,8 @@ async function runStartup(request) {
           pressureRecord: () => showPressureGuide(true),
           echoGuide: showEchoGuide,
           echoFragment: showEchoFragment,
+          courierGuide: showCourierGuide,
+          courierFragment: showCourierFragment,
           orbitGuide: showOrbitGuide,
           orbitRecord: () => showOrbitGuide(true),
           bellHoist: showBellHoistGuide,
@@ -638,23 +642,25 @@ function updateHUD(s) {
   }
   document.querySelector("#medkit-count").textContent = s.medkits;
   document.querySelector("#treasure-count").textContent = `${s.treasures} / 6`;
-  document.querySelector("#objective-progress").textContent = s.orbit
-    ? `${number(s.orbit.step)} / 04`
-    : s.echo
-      ? `${number(s.echo.step)} / 04`
-      : s.pressure
-        ? `${number(s.pressure.step)} / 04`
-        : s.cleft
-          ? `${number(s.cleft.step)} / 04`
-          : s.bellHoist
-            ? `${number(s.bellHoist.step)} / 03`
-            : s.fireVault
-              ? `${number(s.fireVault.lit)} / 03`
-              : s.gallery
-                ? `${number(s.galleryStage)} / 02`
-                : s.diving
-                  ? `${number(s.archive)} / 05`
-                  : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
+  document.querySelector("#objective-progress").textContent = s.courier
+    ? `${number(s.courier.step)} / 04`
+    : s.orbit
+      ? `${number(s.orbit.step)} / 04`
+      : s.echo
+        ? `${number(s.echo.step)} / 04`
+        : s.pressure
+          ? `${number(s.pressure.step)} / 04`
+          : s.cleft
+            ? `${number(s.cleft.step)} / 04`
+            : s.bellHoist
+              ? `${number(s.bellHoist.step)} / 03`
+              : s.fireVault
+                ? `${number(s.fireVault.lit)} / 03`
+                : s.gallery
+                  ? `${number(s.galleryStage)} / 02`
+                  : s.diving
+                    ? `${number(s.archive)} / 05`
+                    : `${number(s.stage + 1)} / ${number(s.total + 1)}`;
   document.querySelector("#objective-text").textContent = s.objective;
   document.querySelector("#objective-distance").textContent = s.target
     ? `${s.distance} m away`
@@ -662,7 +668,9 @@ function updateHUD(s) {
   document.querySelector("#objective-detail").textContent = s.mission
     ? `${s.mission.place} · ${s.fieldTask ? `Field station ${s.fieldTask.step + 1} / 3` : "Sanctuary mechanism"}${s.carrying ? " · Carrying component" : ""}`
     : "";
-  if (s.orbit)
+  if (s.courier)
+    document.querySelector("#objective-detail").textContent = s.courier.detail;
+  else if (s.orbit)
     document.querySelector("#objective-detail").textContent =
       "Optional traversal · Cartographer’s Orrery · M shows moving rings and safe landings";
   else if (s.echo)
@@ -770,6 +778,7 @@ function updateWaypoint(s) {
 }
 function drawMap(canvas, full = false, s = game?.state()) {
   if (!game || !s) return;
+  if (s.courier) return drawCourierMap(canvas, game, full);
   if (s.orbit) return drawOrbitMap(canvas, game, full);
   if (s.echo) return drawEchoMap(canvas, game, full);
   if (s.pressure) return drawPressureMap(canvas, game, full);
@@ -1022,6 +1031,7 @@ function showMap() {
   modal(
     "Follow the forgotten paths.",
     `<div class="map-layout"><canvas id="full-map" width="570" height="570"></canvas><aside><span class="eyebrow">${game.level.location}</span><h3>${game.level.title}</h3><p>${state.objective}</p>${
+      !state.courier &&
       !state.cleft &&
       !state.echo &&
       !state.orbit &&
@@ -1038,7 +1048,7 @@ function showMap() {
             )
             .join("")}</ol>`
         : ""
-    } ${state.orbit ? `<p class="small-copy">The map shows the rings in their current positions. Jump onto the outer crown from the western bank, then reach landing 1 in the north, landing 2 in the west, and landing 3 in the south. Use each bearing to stop its ring and start the next. Green landings are safe rest points. Your return chart opens a direct bridge west.</p>` : state.echo ? `<p class="small-copy">Only the passages you have walked appear here. Numbers identify the pulse counts at discovered stones; a check marks a recorded voice. Bronze lines are shortcut shutters and green dashed lines are open passages. The gold tablet lies beside the eastern exit. Follow two pulses, then one, then three. The engravings let you explore with sound muted.</p>` : state.pressure ? `<p class="small-copy">Open a circuit from each green gallery. Ride its first piston upward, then jump when the neighboring crowns meet. Wait aboard the second piston for the next gallery. Numbers identify the six crowns; heights show their current elevation. The dispatch ledger releases the return lift. Reloading during a crossing returns you to the last safe gallery.</p>` : state.cleft ? `<p class="small-copy">This is a front view of the wall. Bronze marks show handholds; dashed links need a jump and catch. Green terraces are saved rest points. Climbing directions follow the wall: Up climbs, Left and Right traverse, Down descends. Press Jump with a direction at a broken span, then hold Use to catch. Release the direction and press Jump beside a terrace to step off. The line on the right is the return descent.</p>` : state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
+    } ${state.courier ? `<p class="small-copy">Follow the north gate from the entry court. Board at HOME, use the helm, and trim with Left / Right. Positive trim sails east in a southerly wind; reverse trim when the wind reverses. Space / Jump furls the sail and brakes. Furl beside a landing to latch, then release the helm with Use. Climb each broken stair and read its dispatch in order. Return all three to the HOME tablet. The gold square is the ferry; the white dot is you. Landing cranks retrieve an empty car. Reloads and missed crossings return to the last secured landing.</p>` : state.orbit ? `<p class="small-copy">The map shows the rings in their current positions. Jump onto the outer crown from the western bank, then reach landing 1 in the north, landing 2 in the west, and landing 3 in the south. Use each bearing to stop its ring and start the next. Green landings are safe rest points. Your return chart opens a direct bridge west.</p>` : state.echo ? `<p class="small-copy">Only the passages you have walked appear here. Numbers identify the pulse counts at discovered stones; a check marks a recorded voice. Bronze lines are shortcut shutters and green dashed lines are open passages. The gold tablet lies beside the eastern exit. Follow two pulses, then one, then three. The engravings let you explore with sound muted.</p>` : state.pressure ? `<p class="small-copy">Open a circuit from each green gallery. Ride its first piston upward, then jump when the neighboring crowns meet. Wait aboard the second piston for the next gallery. Numbers identify the six crowns; heights show their current elevation. The dispatch ledger releases the return lift. Reloading during a crossing returns you to the last safe gallery.</p>` : state.cleft ? `<p class="small-copy">This is a front view of the wall. Bronze marks show handholds; dashed links need a jump and catch. Green terraces are saved rest points. Climbing directions follow the wall: Up climbs, Left and Right traverse, Down descends. Press Jump with a direction at a broken span, then hold Use to catch. Release the direction and press Jump beside a terrace to step off. The line on the right is the return descent.</p>` : state.bellHoist ? `<p class="small-copy">West and east lifts share a counterweight: raising one lowers the other. Use the lever aboard a platform to visit its next landing; landing controls call it back. Explore the broken middle gallery, then restore the bell above the east lift. The upper crossing leads to the refuge archive.</p>` : state.fireVault ? `<div class="map-legend"><span><i style="background:#fff8d8"></i>You are here</span><span><i style="background:#d8c491"></i>Lowered crossing</span><span><i style="background:#ffb75d"></i>Lit sanctuary lamp</span><span><i style="background:#728f90"></i>Unlit lamp</span></div><p class="small-copy">Numbers mark the six handwheels. The thin arms show their current directions; facing arms lower a crossing. Swim to plan your route, then bring a torch from the entrance fire. Every lit lamp can supply another flame.</p>` : state.gallery ? `<div class="map-legend"><span><i style="background:#fff3c6"></i>You are here</span><span><i style="background:#e4c885"></i>Bronze air bell</span><span><i style="background:#c19562"></i>Closed gate</span><span><i style="background:#83bda8"></i>Open gate</span></div><p class="small-copy">Follow the bronze survey line. Air bells replenish your breath; dive beneath their skirts to leave. The emergency wheel opens the memorial and the eastern return passage. Your next reload returns to the last bell where you breathed.</p>` : `<span class="map-distance">${game.state().distance} m to objective</span><div class="map-legend"><span><i style="background:#fff9e8"></i>You are here</span><span><i style="background:#edc180"></i>Current objective</span><span><i style="background:#a1c99c"></i>Base camp</span><span><i style="background:#96b9d0"></i>Journal page</span><span><i style="background:#94815e"></i>Relic / mechanism</span><span><i style="background:#c07a67"></i>Guardian</span></div><p class="small-copy">Your map fills as you explore. Surveyed paths, discoveries, and checkpoints are saved together. The gold beacon points toward your next objective.</p>`}<button class="secondary-button" data-close>Return to the world ${icon("ArrowRight")}</button></aside></div>`,
     "map",
     "EXPEDITION CARTOGRAPHY",
     true,
@@ -1048,7 +1058,7 @@ function showMap() {
 function showGuide() {
   modal(
     "Leave no story buried.",
-    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. A passage in the western bank of the first sounding well leads beneath the harbor court. Bronze air bells refill your breath; dive below their skirts to leave. Find the emergency wheel beyond the collapsed colonnade to open the memorial and its return passage. Reloading in the gallery returns you to your last air bell; other dives return to the surface, with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, anchor controls unfold suspended crossings. Watch their streamers: rising cloth warns of a gust, and its trailing direction shows the push. Crouch to brace, or steer against the wind while walking. Stand before jumping; later spans reverse direction. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Press B (Crouch on touch) to move slowly with quiet steps. Watch where guardians face, and use solid cover to break their sight. An amber meter and arrow show suspicion and its direction; a full meter means you have been detected. A guardian investigates footsteps or gunfire at the place it heard them, searches there, then returns to its post. Crouching helps you slip behind one, but a close approach or a lit torch can expose you. Aiming, firing, jumping and dodging stand you up. Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Hold the right mouse button or toggle V (Aim on touch) for shoulder aiming. Move the crosshair onto a guardian and fire with F or a locked left click; aimed shots can miss and stop at cover. Drag the world to look on touch, or use Z/C and I/K to adjust the view from the keyboard. Movement while aiming is slower. F without aiming keeps directional assistance. A blue diamond and SHIELDED mean the armor stopped your shot. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. In the jungle, press T (Torch on touch) beside a campfire or a burning brazier to light your torch. Carry the flame to unlit braziers and use E. Swimming, combat, and actions needing both hands put it out; completed beacons remain lit. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
+    `<p class="modal-description">You are Vesper Vale. Archaeologist, climber, and daughter of a woman who vanished following a compass that pointed down. Eight places hold the truth.</p><div class="guide-grid"><article>${icon("Footprints")}<h3>Find your own way</h3><p>Explore the stone paths between sanctuaries. Jump fallen masonry, follow the gold objective marker, and open your map when the trail gets lost. You swim automatically in deep pools. In the Drowned Kingdom, hold X (Dive on touch) to descend and Space (Rise) to surface. Release both to hold your depth. Follow the bronze floats and bubbles to five sunken records; recover them with Use, then read them in your journal. Watch your air: the last ten seconds are marked amber. Refill at the surface before diving again. Swimming toward a shallow bank exits the water; Space toward a nearby ledge lets you climb out. A passage in the western bank of the first sounding well leads beneath the harbor court. Bronze air bells refill your breath; dive below their skirts to leave. Find the emergency wheel beyond the collapsed colonnade to open the memorial and its return passage. Reloading in the gallery returns you to your last air bell; other dives return to the surface, with discoveries retained.</p></article><article>${icon("Sun")}<h3>Read the ancient world</h3><p>Follow the three field stations in each sector to open its sanctuary gate. Carry missing components, work valves and winches, light beacons, and climb the gilded towers. Follow the gold ledges, jump gaps, and hold E while jumping toward a hanging rope to catch it. Hold a direction to swing, then press Space to release toward the far ledge. Restored tower stations unlock a return cable; press E on the summit to ride it. Your last secure ledge saves as you climb. In the cliffside city, the first court’s north gate leads to the optional Courier Road. Sail its wind-powered ferry, climb the three dispatch posts, and bring their letters home. Anchor controls elsewhere unfold suspended crossings. Watch their streamers: rising cloth warns of a gust, and its trailing direction shows the push. Crouch to brace, or steer against the wind while walking. Stand before jumping; later spans reverse direction. Jump the missing boards; the attached safety tether returns a missed crossing to the last bank. The first sanctuary of each chapter also contains a counterweight chamber. Read its entrance tablet, grip a carved stone with Use, and use forward/backward to push or pull. Match named sockets, balance the marked loads, and keep clear tracks empty. Release the stone to approach another face; the tablet can reset the chamber. Then inspect the mechanism’s inscription. Decipher glyphs, route sunlight, recall bell sequences, balance water vessels, cool furnaces, connect wind channels, tune crystals, and align the celestial rings.</p></article><article>${icon("Crosshair")}<h3>Keep your distance</h3><p>Press B (Crouch on touch) to move slowly with quiet steps. Watch where guardians face, and use solid cover to break their sight. An amber meter and arrow show suspicion and its direction; a full meter means you have been detected. A guardian investigates footsteps or gunfire at the place it heard them, searches there, then returns to its post. Crouching helps you slip behind one, but a close approach or a lit torch can expose you. Aiming, firing, jumping and dodging stand you up. Guardians signal attacks with glowing ground marks. Move clear or press R with a direction to dodge; without a direction, you evade backward. Hunters charge, sentries launch bolts, and shield keepers expose their cores after striking. Hold the right mouse button or toggle V (Aim on touch) for shoulder aiming. Move the crosshair onto a guardian and fire with F or a locked left click; aimed shots can miss and stop at cover. Drag the world to look on touch, or use Z/C and I/K to adjust the view from the keyboard. Movement while aiming is slower. F without aiming keeps directional assistance. A blue diamond and SHIELDED mean the armor stopped your shot. Dodging costs stamina and requires free hands on firm ground.</p></article><article>${icon("Flame")}<h3>Make camp. Carry on.</h3><p>Base camps restore health and supplies. In the jungle, press T (Torch on touch) beside a campfire or a burning brazier to light your torch. Carry the flame to unlit braziers and use E. Swimming, combat, and actions needing both hands put it out; completed beacons remain lit. Every solved mechanism becomes a checkpoint. Discoveries and progress save automatically.</p></article></div><div class="controls-table">${[
       ["W A S D / ↑ ↓ ← →", "Move"],
       ["MOUSE / Z C", "Look around"],
       ["SHIFT", "Sprint"],
@@ -1077,6 +1087,15 @@ function showGuide() {
   );
 }
 function showJournal() {
+  const courier = store.data.levels.sky?.courierFerry;
+  const courierSection = courier?.visited
+    ? `<section class="tide-journal"><span class="eyebrow">THE COURIER ROAD · ${courier.recovered ? "RECOVERED" : `${courier.post} / 3 DISPATCHES`}</span><h3>${COURIER_RECORD.title}</h3><p>${courier.recovered ? COURIER_RECORD.text : "Through the first court’s north gate, a wind-powered ferry follows the old courier cable. Read the three dispatches, then sail home to join them at the entrance tablet."}</p>${COURIER_FRAGMENTS.slice(
+        0,
+        courier.post,
+      )
+        .map((t) => `<p class="small-copy">${t}</p>`)
+        .join("")}</section>`
+    : "";
   const orbit = store.data.levels.eclipse?.orbitVault;
   const orbitSection = orbit?.visited
     ? `<section class="tide-journal"><span class="eyebrow">THE CARTOGRAPHER’S ORRERY · ${orbit.recovered ? "RECOVERED" : `${orbit.aligned} / 3 BEARINGS`}</span><h3>${ORBIT_RECORD.title}</h3><p>${orbit.recovered ? ORBIT_RECORD.text : "East of the central cache, three rotating crowns carry the earthly, lunar and astral bearings. Begin at the western tablet, ride the rings to the north, west and south landings, and calibrate each bearing in order. The centre holds a chart of the way home. Each fixed landing is a saved resting point."}</p></section>`
@@ -1131,7 +1150,7 @@ function showJournal() {
   }
   modal(
     "The things we leave behind.",
-    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${orbitSection}${echoSection}${pressureSection}${cleftSection}${hoistSection}${vaultSection}${gallerySection}${archiveSection}${entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection || cleftSection || pressureSection || echoSection || orbitSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
+    `<p class="modal-description">Fragments of a lost expedition. A mother’s words. Your own story, still being written.</p><div class="journal-top"><span>${entries.length} / 96 PAGES DISCOVERED</span><span>${formatTime(store.total().time)} IN THE FIELD</span></div>${courierSection}${orbitSection}${echoSection}${pressureSection}${cleftSection}${hoistSection}${vaultSection}${gallerySection}${archiveSection}${courierSection || entries.length || memories.length || archive.length || gallerySection || vaultSection || hoistSection || cleftSection || pressureSection || echoSection || orbitSection ? `<div class="journal-entries">${memories.map((m, i) => `<article><span class="eyebrow">RECOVERED MEMORY · ${number(i + 1)} / 08</span><h3>${m.title}</h3><p>${m.memory}</p></article>`).join("")}${entries.map(({ l, index }) => `<article><span class="eyebrow">${l.title}</span><h3>${readNote(l.id, index)[0]}</h3><p>${readNote(l.id, index)[1]}</p></article>`).join("")}</div>` : `<div class="empty-state">${icon("BookOpen")}<h3>Every journey begins with a blank page.</h3><p>Look for blue journal markers along the side paths.<br>Your discoveries will be collected here.</p><button class="secondary-button" id="journal-explore">${inGame ? "Return to your expedition" : "Begin your expedition"} ${icon("ArrowUpRight")}</button></div>`}`,
     "journal",
     "FIELD JOURNAL",
     true,
@@ -1737,5 +1756,25 @@ function showOrbitGuide(record = false) {
       : `<p class="modal-description">Three moving skies. Three bearings. One way home.</p><div class="note-paper"><p>The Earth ring is turning. Walk around the folded bridge on its north side, then jump from the western bank onto the broad stone crown. Walking changes your place on the ring; standing still carries you with it. Bright bronze edges mark breaks in the decks.</p><p>Reach the northern Earth bearing, stand west of its two grips and press E / Use. Vesper reaches, turns the instrument and releases it. The completed turn stops the outer ring and starts the Moon ring in the opposite direction. Movement or Jump cancels an unfinished turn. Follow it to the western Moon bearing, then use the Star ring to reach the southern bearing. Each fixed landing saves your progress.</p><p>Space / Jump crosses the gaps. A missed crossing costs health and returns you to your last safe landing. Reloading during a ride or jump also returns there, with your calibrations preserved. M shows the live ring positions and numbered landings.</p><p>Calibrate all three bearings, recover the return chart at the centre, then wait for the folded leaves to form the western bridge. The field journal keeps the completed chart.</p></div><button class="primary-button" data-close>Step onto the Earth ring</button>`,
     "note",
     "OPTIONAL TRAVERSAL · THE LAST MERIDIAN",
+  );
+}
+
+function showCourierGuide() {
+  const s = game.progress.courierFerry;
+  modal(
+    s.recovered ? COURIER_RECORD.title : "The Courier Road",
+    s.recovered
+      ? `<div class="note-paper"><p>${COURIER_RECORD.text}</p></div><button class="primary-button" data-close>Return to the city</button>`
+      : `<p class="modal-description">Across the clouds, someone is waiting for a letter.</p><div class="note-paper"><p>Step onto the timber ferry and press E / Use beside its helm. A / D, arrow keys or the touch stick’s Left / Right trim the sail. Positive trim drives east in a southerly wind; negative trim returns west. The wind reverses beyond the first post: watch the vane and the wind readout, then reverse your trim to maintain your direction.</p><p>Space / Jump furls the sail and applies the brake. Furl within a few metres of a landing and let the car slow until it latches. E / Use releases the helm. The open south side faces the stone landings. Climb each broken stair, jump its missing treads and read the three dispatches in order. Return them to this tablet.</p><p>Landing cranks retrieve an empty ferry. A safety line returns missed crossings to your last secured landing. Reloading while sailing or jumping also returns there, preserving your dispatches. M charts the line; J keeps the letters. Wind direction is visible with audio muted.</p></div><button class="primary-button" data-close>Step aboard</button>`,
+    "note",
+    "OPTIONAL TRAVERSAL · CITY IN THE CLOUDS",
+  );
+}
+function showCourierFragment(index) {
+  modal(
+    `Courier dispatch ${index + 1}`,
+    `<div class="note-paper"><p>${COURIER_FRAGMENTS[index]}</p></div><p class="small-copy">Dispatch saved in your journal. ${index < 2 ? "Continue east to the next post." : "Sail home and join the three dispatches at the entrance tablet."}</p><button class="primary-button" data-close>Continue the courier road</button>`,
+    "note",
+    "RECOVERED DISPATCH",
   );
 }

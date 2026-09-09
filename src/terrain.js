@@ -1,3 +1,4 @@
+import { courierFoundationWeight } from "./courier-rules.js";
 import { refineDesertTerrain } from "./desert-geology.js";
 import { buildDesertHorizon } from "./desert-horizon.js";
 import * as THREE from "three";
@@ -103,6 +104,10 @@ export function createTerrainProfile(map, level) {
           1 - smooth(inner, inner + 8, distance + organicEdge),
         );
       }
+      if (map.courierFerry) {
+        const weight = courierFoundationWeight(x, z);
+        height = height * (1 - weight) + raw(84, 42) * weight;
+      }
       if (upperHeights) upperHeights[iz * width + ix] = height;
       if (!map.grid[gz]?.[gx]) {
         let distance = 36;
@@ -201,6 +206,7 @@ export function createTerrainProfile(map, level) {
     }
   const profile = {
     extent,
+    courierY: map.courierFerry ? raw(84, 42) : null,
     waters,
     bridges,
     foundationHeight: (x, z) => sample(foundationHeights, x, z),

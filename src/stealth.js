@@ -16,6 +16,7 @@ export function canCrouch(game) {
     game.fireVault?.operation ||
     game.pressureRelay?.operation ||
     game.orbitVault?.operation ||
+    game.courierFerry?.helm ||
     game.climb ||
     game.ropeRide ||
     game.zipRide ||

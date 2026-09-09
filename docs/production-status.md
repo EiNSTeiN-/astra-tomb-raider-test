@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The cloud city now has the optional Courier Road through its first court’s
+  north gate. A wind-driven ferry serves three dispatch posts with increasingly
+  broken stairs; returning the letters restores a journal register. Trim,
+  braking, empty-car retrieval, a local map and saved landing recovery support
+  the round trip. Positional wind and rope voices move with the car beneath the
+  quiet sky crossing score. All 437 tests passed; all eight focused courier
+  checks passed after the final helm fit. The continuous assisted return route
+  finished at 100 health, both new voices measured linear attenuation, and
+  four production keyboard/touch cases retained exact saves on reload. Existing
+  wind controls and bridge approaches remained clear. [Courier Road views and
+  evidence](courier-road.md) distinguish this added prototype content from the
+  remaining human pacing, AAA graphics, listening and device requirements.
+
 - The cloud city's upper masonry now follows the damaged walls that support it,
   and intact walls meet their level coping. This closes gaps up to 1.2 metres
   beneath six towers. All 4,810 sampled front/rear bearings now meet stone; the

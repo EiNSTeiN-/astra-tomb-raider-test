@@ -1,3 +1,4 @@
+import { courierDeckAt } from "./courier-rules.js";
 import { cleftDeckAt } from "./cleft-rules.js";
 import { pressureDeckAt } from "./pressure-rules.js";
 import { orbitDeckAt } from "./orbit-rules.js";
@@ -31,6 +32,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
   if (pressureDeck && pressureDeck.height > height) return pressureDeck;
   const orbitDeck = orbitDeckAt(game, x, z, maxY);
   if (orbitDeck && orbitDeck.height > height) return orbitDeck;
+  const courierDeck = courierDeckAt(game, x, z, maxY);
+  if (courierDeck && courierDeck.height > height) return courierDeck;
   return { height, surface };
 }
 

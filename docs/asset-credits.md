@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The Courier Road's cable ferry, landings, stair gaps, controls, signs, map and
+letters are original project work in `src/courier-*.js`. They reuse the existing
+cloud-city rock maps, Wood Planks by Amal Kumar (Poly Haven, CC0), and the
+project's bronze material. Positional wind and rope voices and the quiet sky
+crossing score use the existing original synthesis. No external image, model,
+recording or dependency was added. See [Courier Road notes](courier-road.md).
+
 The cloud-city crosswind envelopes, balance-arm pose, striped cloth geometry
 and woven-cloth shader in `src/sky-gusts.js`, `src/sky-balance.js` and
 `src/sky-streamers.js` are original project work. They reuse the existing bridge

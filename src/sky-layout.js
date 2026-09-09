@@ -1,3 +1,4 @@
+import { addCourierFerry } from "./courier-rules.js";
 import { EXPEDITIONS } from "./expeditions.js";
 import { encounterType, ENEMY_TYPES } from "./encounters.js";
 
@@ -164,7 +165,7 @@ export function createSkyMap(level, rng) {
       };
     }),
   );
-  return {
+  return addCourierFerry({
     size,
     grid,
     rooms,
@@ -176,7 +177,7 @@ export function createSkyMap(level, rng) {
     bridges,
     routeVersion: SKY_ROUTE_VERSION,
     spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
-  };
+  });
 }
 
 // Preserve discoveries and objective completion when an older sky layout is

@@ -1,3 +1,21 @@
+import {
+  buildCourierFerry,
+  updateCourierFerry,
+  updateCourierArt,
+  controlCourier,
+  poseCourier,
+  interactCourier,
+  courierHint,
+  courierObjective,
+  recoverCourierFall,
+  courierOccludes,
+} from "./courier-ferry.js";
+import {
+  courierCorridor,
+  courierBlocked,
+  courierSavePosition,
+  restoreCourierArrival,
+} from "./courier-rules.js";
 import { buildCamp, updateCamps } from "./camps.js";
 import { buildBrazier, finishBraziers, updateBraziers } from "./braziers.js";
 import { disposeBirdTemplates } from "./birds.js";
@@ -794,6 +812,7 @@ export class Adventure {
     buildPressureRelay(this);
     buildEchoGallery(this);
     buildOrbitVault(this);
+    buildCourierFerry(this);
     buildHazards(this);
     buildSoundLandmarks(this);
     buildTideArchive(this);
@@ -841,6 +860,7 @@ export class Adventure {
     restorePressureArrival(this);
     restoreOrbitArrival(this);
     restoreSkyBridgeArrival(this);
+    restoreCourierArrival(this);
     const arrival = safeArrival(this, this.player.position);
     if (arrival) {
       this.player.position.set(arrival.x, arrival.y, arrival.z);
@@ -1282,7 +1302,8 @@ export class Adventure {
     this.scene.add(this.particles);
   }
   walkable(x, z) {
-    if (skySpanCorridor(this, x, z)) return true;
+    if (skySpanCorridor(this, x, z) || courierCorridor(this.map, x, z))
+      return true;
     const gx = Math.round(x / CELL),
       gz = Math.round(z / CELL);
     return !!this.map.grid[gz]?.[gx];
@@ -1301,6 +1322,7 @@ export class Adventure {
     if (pressureBlocked(this, x, z, worldY, clearance)) return false;
     if (echoBlocked(this, x, z, worldY, clearance)) return false;
     if (orbitBlocked(this, x, z, worldY, clearance)) return false;
+    if (courierBlocked(this, x, z, worldY)) return false;
     for (const dx of [-0.45, 0.45])
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
@@ -1323,6 +1345,7 @@ export class Adventure {
     if (pressureOccludes(this, from, to)) return false;
     if (echoOccludes(this, from, to)) return false;
     if (orbitOccludes(this, from, to)) return false;
+    if (courierOccludes(this, from, to)) return false;
     for (const o of this.obstacles || []) {
       if (o.h <= 0.2) continue;
       const base = this.groundHeight(o.x, o.z);
@@ -1405,6 +1428,7 @@ export class Adventure {
     else this.renderer.render(this.scene, this.camera);
   }
   updatePlayer(dt) {
+    updateCourierFerry(this, dt);
     updateOrbitVault(this, dt);
     updateSkyGusts(this);
     this.skyWind = null;
@@ -1438,6 +1462,12 @@ export class Adventure {
     this.carrying = !!carryingComponent(this.level, this.progress);
     updateAim(this);
     updateCrouch(this);
+    if (controlCourier(this, dt, x)) {
+      animateExplorer(this, dt, false, false);
+      poseCourier(this);
+      this.survey();
+      return;
+    }
     if (updateCleft(this, dt, x, -z)) {
       animateExplorer(this, dt, false, false);
       this.survey();
@@ -1527,6 +1557,7 @@ export class Adventure {
     updateCrouch(this);
     recoverSkyBridgeFall(this);
     recoverOrbitFall(this);
+    recoverCourierFall(this);
     if (this.climb) return;
     trackTraversalSupport(this);
     this.stepDistance =
@@ -1917,6 +1948,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (interactCourier(this)) return;
     if (cleftInteract(this)) return;
     if (pressureInteract(this)) return;
     if (echoInteract(this)) return;
@@ -2071,6 +2103,7 @@ export class Adventure {
       this.fireVault?.operation ||
       this.pressureRelay?.operation ||
       this.orbitVault?.operation ||
+      this.courierFerry?.helm ||
       this.wallGrip ||
       this.blockGrip ||
       this.swimming ||
@@ -2242,8 +2275,9 @@ export class Adventure {
     const pressure = pressureObjective(this);
     const echo = echoObjective(this);
     const orbit = orbitObjective(this);
+    const courier = courierObjective(this);
     const target =
-      hoist || cleft || pressure || echo || orbit
+      hoist || cleft || pressure || echo || orbit || courier
         ? null
         : vault?.target ||
           (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
@@ -2266,6 +2300,7 @@ export class Adventure {
       pressure,
       echo,
       orbit,
+      courier,
       galleryStage: this.progress.gallery?.recovered
         ? 2
         : this.progress.gallery?.opened
@@ -2275,6 +2310,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        courier?.text ||
         orbit?.text ||
         echo?.text ||
         pressure?.text ||
@@ -2334,7 +2370,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : orbitHint(this) ||
+        : courierHint(this) ||
+          orbitHint(this) ||
           echoHint(this) ||
           pressureHint(this) ||
           cleftHint(this) ||
@@ -2363,46 +2400,48 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task: orbitObjective(this)
-        ? "lift"
-        : echoObjective(this)
-          ? "tuning"
-          : pressureObjective(this)
-            ? "lift"
-            : cleftObjective(this)
-              ? this.wallGrip
-                ? "climb"
-                : "survey"
-              : bellHoistObjective(this)
-                ? this.bellHoist.motion
-                  ? "lift"
-                  : "resonance"
-                : fireVaultObjective(this)
-                  ? this.fireVault.operation
+      task: courierObjective(this)
+        ? "crosswind"
+        : orbitObjective(this)
+          ? "lift"
+          : echoObjective(this)
+            ? "tuning"
+            : pressureObjective(this)
+              ? "lift"
+              : cleftObjective(this)
+                ? this.wallGrip
+                  ? "climb"
+                  : "survey"
+                : bellHoistObjective(this)
+                  ? this.bellHoist.motion
                     ? "lift"
-                    : "brazier"
-                  : this.diving || galleryObjective(this)
-                    ? "dive"
-                    : (this.nearest?.type === "resonator" ||
-                          this.resonanceFocus != null) &&
-                        resonanceReady(
-                          this,
-                          this.resonanceSites?.[this.progress.stage],
-                        )
-                      ? "tuning"
-                      : this.hydraulicSites?.[this.progress.stage]?.flow ||
-                          this.thermalSites?.[this.progress.stage]?.moving ||
-                          this.windSites?.[this.progress.stage]?.moving
-                        ? "valve"
-                        : this.blockGrip ||
-                            this.cipherSites?.[this.progress.stage]?.moving
-                          ? "lift"
-                          : this.skyWind
-                            ? "crosswind"
-                            : this.ropeRide || this.zipRide
-                              ? "climb"
-                              : currentFieldTask(this.level, this.progress)
-                                  ?.kind || "mechanism",
+                    : "resonance"
+                  : fireVaultObjective(this)
+                    ? this.fireVault.operation
+                      ? "lift"
+                      : "brazier"
+                    : this.diving || galleryObjective(this)
+                      ? "dive"
+                      : (this.nearest?.type === "resonator" ||
+                            this.resonanceFocus != null) &&
+                          resonanceReady(
+                            this,
+                            this.resonanceSites?.[this.progress.stage],
+                          )
+                        ? "tuning"
+                        : this.hydraulicSites?.[this.progress.stage]?.flow ||
+                            this.thermalSites?.[this.progress.stage]?.moving ||
+                            this.windSites?.[this.progress.stage]?.moving
+                          ? "valve"
+                          : this.blockGrip ||
+                              this.cipherSites?.[this.progress.stage]?.moving
+                            ? "lift"
+                            : this.skyWind
+                              ? "crosswind"
+                              : this.ropeRide || this.zipRide
+                                ? "climb"
+                                : currentFieldTask(this.level, this.progress)
+                                    ?.kind || "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2440,6 +2479,7 @@ export class Adventure {
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
     const hoistPosition =
+      courierSavePosition(this) ||
       orbitSavePosition(this) ||
       pressureSavePosition(this) ||
       cleftSavePosition(this) ||
@@ -2476,6 +2516,7 @@ export class Adventure {
     }
     this.paused = value;
     updateOrbitVault(this, 0);
+    updateCourierArt(this);
     updateEchoGallery(this, 0);
     updateFireVault(this, 0);
     updateBellHoist(this, 0);

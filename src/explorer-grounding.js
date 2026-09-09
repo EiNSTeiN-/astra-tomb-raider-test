@@ -209,7 +209,9 @@ export function groundExplorer(game, dt, moving, sprinting) {
       ) {
         playerFootstep(
           game,
-          p.center?.surface?.skyBridge ? "wood" : game.level?.biome,
+          p.center?.surface?.skyBridge || p.center?.surface?.courier
+            ? "wood"
+            : game.level?.biome,
           sprinting,
           contact.point,
         );

@@ -1,3 +1,4 @@
+import { normalizeCourier } from "./courier-rules.js";
 import { normalizeCleft } from "./cleft-rules.js";
 import { normalizePressure } from "./pressure-rules.js";
 import { normalizeEcho } from "./echo-gallery-rules.js";
@@ -126,6 +127,7 @@ export function normalizeSave(value) {
         key === "embers" ? normalizePressure(v.pressureRelay) : null,
       echoGallery: key === "crystal" ? normalizeEcho(v.echoGallery) : null,
       orbitVault: key === "eclipse" ? normalizeOrbit(v.orbitVault) : null,
+      courierFerry: key === "sky" ? normalizeCourier(v.courierFerry) : null,
       torch: key === "verdant" && v.torch === true,
       time: Number.isFinite(v.time) ? Math.max(0, v.time) : 0,
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
@@ -211,6 +213,7 @@ export class SaveStore {
       pressureRelay: id === "embers" ? normalizePressure(null) : null,
       echoGallery: id === "crystal" ? normalizeEcho(null) : null,
       orbitVault: id === "eclipse" ? normalizeOrbit(null) : null,
+      courierFerry: id === "sky" ? normalizeCourier(null) : null,
       torch: false,
       time: 0,
       health: 100,
