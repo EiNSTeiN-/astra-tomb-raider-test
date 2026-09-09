@@ -1,5 +1,9 @@
 # Cloud-city citadels
 
+This page records the original citadel milestone. The later
+[masonry support correction](citadel-supports.md) fits upper towers to damaged
+wall tops and levels intact coping; that page has current counts and comparisons.
+
 The cloud-city chapter replaces its original round pillars, long lintels and stacked pyramids with fitted stone court walls, trapezoidal gateways, recessed niches and broken upper masonry. Ten plans vary gateway height, the taller side, surviving wings and wall damage. These are original fantasy ruins inspired by Andean masonry, not a reconstruction of a historical site.
 
 `src/sky-masonry.js` partitions convex wall sections into deterministic irregular stone cells. Each stone has a closed back, beveled edges, physical texture coordinates and a slightly crowned face. Narrow recessed joints separate the fitted surfaces; packed stone behind them prevents daylight leaking through solid walls. Niches have tapered reveals, lintels, projecting sills and recessed masonry backs. Structural geometry batches by material within each court.

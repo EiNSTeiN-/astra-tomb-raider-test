@@ -216,7 +216,7 @@ export function buildSkyArchitecture(game) {
         });
       }
       // The broken corner is removed through the full wall thickness.
-      const drop = broken ? Math.min(1.35, height - top - 0.55) : 0.12;
+      const drop = broken ? Math.min(1.35, height - top - 0.55) : 0;
       panel(
         [
           [-width / 2, top],
@@ -246,11 +246,19 @@ export function buildSkyArchitecture(game) {
           );
         }
       }
+      return {
+        baseY: y,
+        topAt: (along) => y + height - (along / width + 0.5) * drop,
+      };
     };
     // Two solid gallery walls flank a broad trapezoidal portal. The east/west
     // court axis and the diagonal discovery paths pass between separate wings.
+    const northWalls = new Map();
     for (const side of [-1, 1]) {
-      wall(14.3, plan.wallHeight, side * 12, -18, 0, plan.breakSide === side);
+      northWalls.set(
+        side,
+        wall(14.3, plan.wallHeight, side * 12, -18, 0, plan.breakSide === side),
+      );
       const py = floor(side * 3.8, -18) - 0.28;
       panel(
         [
@@ -316,13 +324,17 @@ export function buildSkyArchitecture(game) {
     }
     if (plan.tower) {
       const tx = plan.towerSide * 14.5,
-        ty = floor(tx, -18) + plan.wallHeight - 0.28;
-      // Upper masonry is supported along the existing wall; no floating room.
+        bearing = northWalls.get(plan.towerSide),
+        ty = bearing.baseY + plan.wallHeight;
+      // Fit the full lower edge to the wall's actual broken crown. A small
+      // overlap beds the chamfered stones into the backing through its depth.
+      const bottom = (dx) =>
+        bearing.topAt(tx + dx - plan.towerSide * 12) - ty - 0.045;
       const h = plan.tower;
       panel(
         [
-          [-3.1, 0],
-          [3.1, 0],
+          [-3.1, bottom(-3.1)],
+          [3.1, bottom(3.1)],
           [3.1, h * 0.68],
           [0.45, h + 1],
           [-3.1, h * 0.82],

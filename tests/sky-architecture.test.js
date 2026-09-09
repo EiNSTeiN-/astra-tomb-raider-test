@@ -6,6 +6,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
 import { buildSoundLandmarks } from "../src/sound-landmarks.js";
+import { inspectCitadelSupports } from "../scripts/inspect-citadel-supports-browser.js";
 import {
   fittedStoneCells,
   fittedStoneGeometry,
@@ -217,4 +218,14 @@ test("citadel walls block movement and the camera while the portal remains open,
   assert.equal(buildSkyArchitecture(g), false);
   assert.deepEqual(g.skyCitadels, []);
   assert.deepEqual(g.skyBirdPerches, {});
+});
+
+test("upper citadel masonry and intact coping have continuous stone bearings from both sides", (t) => {
+  const g = fixture(t);
+  for (const result of inspectCitadelSupports(g))
+    assert.deepEqual(
+      result.holes,
+      [],
+      `court ${result.index}: daylight through a masonry bearing`,
+    );
 });

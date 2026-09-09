@@ -268,6 +268,8 @@ gullies, fractured rock and baked mountain shadows. It also corrects depth
 ordering between slopes while keeping the distant ranges behind playable scenery.
 
 Ten fitted-stone citadels replace the cloud city's original round pillars and stacked pyramids. Trapezoidal gateways, recessed niches, surviving side wings and broken upper walls vary their silhouettes. Bird models and emitters share perches on their forward caps. [Citadel notes](docs/sky-citadels.md) describe the original masonry and its integration checks.
+The [support correction](docs/citadel-supports.md) joins upper towers to their
+damaged walls and closes gaps beneath intact coping stones.
 
 The nine cloud-city mechanism chambers now share that masonry, with recessed niches and framed timber wind screens. Bronze straps, hinge barrels and drives move with the opening leaves; their positional creaks follow motion and stop at rest. [Sky gate art notes](docs/sky-gate-art.md) include closed/open views, sound approaches, material details and verification.
 

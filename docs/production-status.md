@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The cloud city's upper masonry now follows the damaged walls that support it,
+  and intact walls meet their level coping. This closes gaps up to 1.2 metres
+  beneath six towers. All 4,810 sampled front/rear bearings now meet stone; the
+  previous geometry had 1,822 open samples. All 429 tests and the release build
+  pass. Eight High/Performance views linked their shaders, 119 wind-control
+  routes and 54 bridge-bank approach searches remained clear, and native turns
+  saved at two repaired courts. Two production cases passed keyboard/touch
+  operation, movement and exact reloads without console warnings/errors or
+  failed assets. [Masonry comparisons and checks](citadel-supports.md) record
+  the 1,888-triangle increase with unchanged mesh count and the remaining
+  graphics, human pacing, listening and device work.
+
 - The cloud city's distant ranges now have irregular crests, branching gullies,
   fractured rock, baked sun visibility and cavity shading. Corrected background
   depth prevents rear faces from painting over nearer slopes while preserving
