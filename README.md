@@ -263,6 +263,10 @@ The bridge anchors now match the fitted-stone city, with supported timber header
 
 Layered Andean-inspired ranges now surround these crossings, with slowly moving high clouds and a displaced cloud bank below the routes. Warmer direct light and cooler fill distinguish bronze machinery from stone; local waterfalls retain their surfaces and positioned sounds. [Cloud-city atmosphere notes](docs/cloud-city-atmosphere.md) include matched views, geometry costs and clearance checks.
 
+The [mountain relief pass](docs/andean-ridges.md) adds irregular crests, branching
+gullies, fractured rock and baked mountain shadows. It also corrects depth
+ordering between slopes while keeping the distant ranges behind playable scenery.
+
 Ten fitted-stone citadels replace the cloud city's original round pillars and stacked pyramids. Trapezoidal gateways, recessed niches, surviving side wings and broken upper walls vary their silhouettes. Bird models and emitters share perches on their forward caps. [Citadel notes](docs/sky-citadels.md) describe the original masonry and its integration checks.
 
 The nine cloud-city mechanism chambers now share that masonry, with recessed niches and framed timber wind screens. Bronze straps, hinge barrels and drives move with the opening leaves; their positional creaks follow motion and stop at rest. [Sky gate art notes](docs/sky-gate-art.md) include closed/open views, sound approaches, material details and verification.
@@ -334,7 +338,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 - `src/forge-effects.js`, `src/forge-sky.js`, `src/forge-caldera.js` — fireboxes, lava crust, plumes, ash clouds, and an eroded volcanic rim.
 - `src/monastery-architecture.js`, `src/monastery-roof.js`, `src/monastery-cloth.js` — supported timber halls, damaged snow-covered roofs, and animated banners with matching shadows.
 - `src/snow-mountains.js` — ridged alpine background geometry and slope-dependent snow.
-- `src/atmosphere.js`, `src/cloud-city.js` — regional daylight, matching sunlight and sky reflections, plus layered Andean ridges and drifting cloud banks. See [cloud-city atmosphere notes](docs/cloud-city-atmosphere.md).
+- `src/atmosphere.js`, `src/cloud-city.js`, `src/andean-geology.js` — regional daylight, sky reflections, eroded Andean ranges with baked illumination, and drifting cloud banks. See [cloud-city atmosphere notes](docs/cloud-city-atmosphere.md) and [mountain relief](docs/andean-ridges.md).
 - `src/sky-masonry.js`, `src/sky-architecture.js` — fitted, beveled masonry with recessed joints, trapezoidal gateways, niches and varied cloud-city ruins.
 - `src/rendering.js` — bloom, high-quality contact occlusion, antialiasing, and quality tiers.
 - `src/effects.js` — animated shader fire and nearby fire lighting.

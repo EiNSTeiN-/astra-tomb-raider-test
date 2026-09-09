@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile, buildHorizon } from "../src/terrain.js";
 import { updateAtmosphere } from "../src/atmosphere.js";
+import { bakeAndeanLight, sampleAndeanHeight } from "../src/andean-geology.js";
 import {
   andeanGeometry,
   andeanHeight,
@@ -19,6 +20,7 @@ test("Andean ranges close their seams with finite upward normals outside the ent
     const g = andeanGeometry(extent, layer),
       p = g.attributes.position,
       n = g.attributes.normal,
+      light = g.attributes.ridgeLight,
       { segments, rings, radius } = g.userData;
     assert.ok(
       radius > extent / Math.SQRT2,
@@ -29,6 +31,16 @@ test("Andean ranges close their seams with finite upward normals outside the ent
         for (const value of [a.getX(i), a.getY(i), a.getZ(i)])
           assert.ok(Number.isFinite(value));
       assert.ok(n.getY(i) >= 0, "height-field surfaces face upward");
+      assert.ok(
+        Number.isFinite(light.getX(i)) &&
+          light.getX(i) >= 0 &&
+          light.getX(i) <= 1,
+      );
+      assert.ok(
+        Number.isFinite(light.getY(i)) &&
+          light.getY(i) >= Math.fround(0.35) &&
+          light.getY(i) <= 1,
+      );
       assert.ok(
         Math.hypot(p.getX(i) - extent / 2, p.getZ(i) - extent / 2) >=
           radius - 0.001,
@@ -45,6 +57,16 @@ test("Andean ranges close their seams with finite upward normals outside the ent
           "closed position and lighting seam",
         );
       }
+      assert.equal(
+        light.getX(a),
+        light.getX(b),
+        "sun visibility closes at seam",
+      );
+      assert.equal(
+        light.getY(a),
+        light.getY(b),
+        "cavity shading closes at seam",
+      );
     }
     silhouettes.push(
       Array.from({ length: 24 }, (_, i) =>
@@ -55,6 +77,50 @@ test("Andean ranges close their seams with finite upward normals outside the ent
   }
   assert.notDeepEqual(silhouettes[0], silhouettes[1]);
   assert.notDeepEqual(silhouettes[1], silhouettes[2]);
+});
+
+test("baked mountain shadows follow an intervening ridge and the sun direction", () => {
+  const geometry = new THREE.BufferGeometry(),
+    positions = [],
+    segments = 64,
+    rings = 12;
+  for (let r = 0; r <= rings; r++)
+    for (let i = 0; i <= segments; i++) {
+      const angle = (i / segments) * Math.PI * 2,
+        d = 100 + r * 10;
+      const x = Math.cos(angle) * d,
+        z = Math.sin(angle) * d;
+      positions.push(x, Math.max(0, 40 - Math.abs(x - 150) * 2), z);
+    }
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(positions, 3),
+  );
+  geometry.userData = { center: 0, radius: 100, width: 120, segments, rings };
+  assert.equal(sampleAndeanHeight(geometry, 150, 0), 40);
+  assert.equal(sampleAndeanHeight(geometry, 0, 0), -Infinity);
+  assert.equal(sampleAndeanHeight(geometry, 240, 0), -Infinity);
+  const sample = segments + 1; // Flat ground at x=110, before the ridge.
+  const before = geometry.attributes.position.array.slice();
+  bakeAndeanLight(geometry, new THREE.Vector3(1, 0.2, 0));
+  assert.ok(
+    geometry.attributes.ridgeLight.getX(sample) < 0.05,
+    "ridge blocks low sun",
+  );
+  bakeAndeanLight(geometry, new THREE.Vector3(-1, 0.2, 0));
+  assert.ok(
+    geometry.attributes.ridgeLight.getX(sample) > 0.95,
+    "opposite sun clears ridge",
+  );
+  bakeAndeanLight(geometry, new THREE.Vector3(0, 1, 0));
+  for (let i = 0; i < geometry.attributes.position.count; i++)
+    assert.equal(
+      geometry.attributes.ridgeLight.getX(i),
+      1,
+      "overhead sun has no occluder",
+    );
+  assert.deepEqual(geometry.attributes.position.array, before);
+  geometry.dispose();
 });
 
 function fixture(t) {

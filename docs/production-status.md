@@ -20,6 +20,19 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The cloud city's distant ranges now have irregular crests, branching gullies,
+  fractured rock, baked sun visibility and cavity shading. Corrected background
+  depth prevents rear faces from painting over nearer slopes while preserving
+  distant gameplay scenery. All 428 tests and the production build pass.
+  Twelve High/Performance views linked their shaders; reversing triangle order
+  produced identical diagnostic pixels, and all eight background resources
+  released on chapter change. All 36 assisted native-input bridge crossings
+  finished at full health, and 59 feature approaches remained clear. Four release
+  cases passed keyboard/touch input and exact save reloads, including airborne
+  and older-route recovery. [Mountain comparisons and notes](andean-ridges.md)
+  record the additional 48,128 triangles, unchanged draw counts, verification
+  limits and the remaining AAA graphics, pacing, listening and device work.
+
 - The cloud city’s eighteen suspension spans now have warned crosswinds,
   crouch bracing, balance-arm poses and striped streamers. Early gusts are
   gentle; later ones reverse or arrive in shorter pulses. Existing positional

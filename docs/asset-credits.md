@@ -104,7 +104,13 @@ The cloud-city gate walls, niche reveals, timber screens, hinge straps, pin barr
 
 The cloud-city citadels, fitted polygonal stone geometry, trapezoidal portals, recessed niches and broken upper walls are original code-authored assets in `src/sky-masonry.js` and `src/sky-architecture.js`. They reuse the credited local rock and temple maps. The new perches reuse the existing bird models and recordings. No new external assets were added. See [citadel notes](sky-citadels.md).
 
-The cloud-city sky, three Andean-inspired ridge layers and drifting valley cloud bank are original geometry and shaders in `src/cloud-city.js`. The ridges reuse the existing credited rock map. No new external image, model or sound files were added for this environment pass. See [cloud-city atmosphere notes](cloud-city-atmosphere.md).
+The cloud-city sky, three Andean-inspired ridge layers and drifting valley cloud
+bank are original geometry and shaders in `src/cloud-city.js`. The revised
+crests, gullies, fractured slopes and baked illumination in
+`src/andean-geology.js` are also original project code. The ranges reuse the
+existing credited rock color and normal maps. No new external image, model or
+sound files were added. See [the atmosphere notes](cloud-city-atmosphere.md)
+and [mountain relief comparisons](andean-ridges.md).
 
 The wind-engine castings, collars, rotating grips, braces, supports, turbines, channel rules and inscriptions are original to this repository. Their detailed mechanical kit and dedicated cast/worn bronze shader are in `src/wind-art.js`. They reuse the existing credited rock maps and original procedural wind/mechanical sounds. No new external assets were added. See [wind engine notes](wind-engines.md) and [wind art notes](wind-art.md).
 

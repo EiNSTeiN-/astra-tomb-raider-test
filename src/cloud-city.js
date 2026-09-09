@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { andeanGeometry } from "./andean-geology.js";
+export { andeanGeometry, andeanHeight } from "./andean-geology.js";
 
 export const CLOUD_BANK_FLOOR = -34;
 export const CLOUD_BANK_RISE = 23;
@@ -50,132 +52,68 @@ export function cloudCitySky(sunPosition) {
   return sky;
 }
 
-const ridgePeaks = [
-  [
-    [0.18, 115, 0.2],
-    [1.06, 155, 0.24],
-    [2.7, 100, 0.18],
-    [4.05, 170, 0.25],
-    [5.4, 95, 0.21],
-  ],
-  [
-    [0.55, 180, 0.18],
-    [1.6, 245, 0.2],
-    [3.1, 180, 0.28],
-    [4.8, 240, 0.21],
-    [5.8, 190, 0.19],
-  ],
-  [
-    [0.15, 320, 0.17],
-    [1.23, 280, 0.22],
-    [2.35, 300, 0.16],
-    [3.8, 290, 0.23],
-    [5.15, 310, 0.2],
-  ],
-];
-export function andeanHeight(angle, across, layer) {
-  const a = angle + layer * 0.19;
-  let peak =
-    [160, 400, 650][layer] +
-    [80, 130, 240][layer] * Math.pow(Math.abs(Math.sin(a * 5 + 0.4)), 4);
-  for (const [center, height, width] of ridgePeaks[layer]) {
-    const distance = Math.atan2(
-      Math.sin(angle - center),
-      Math.cos(angle - center),
-    );
-    peak += height * Math.exp(-Math.pow(distance / width, 2));
-  }
-  const crest = 0.39 + 0.055 * Math.sin(a * 7) + 0.022 * Math.cos(a * 13);
-  const flank = Math.max(
-    0,
-    across < crest ? across / crest : (1 - across) / (1 - crest),
-  );
-  const ribs =
-    (Math.abs(Math.sin(a * 61 + across * 5)) * 0.075 +
-      Math.abs(Math.sin(a * 127 - across * 8)) * 0.025) *
-    Math.sin(Math.PI * flank);
-  return (
-    [-125, -160, -210][layer] + Math.max(0, Math.pow(flank, 1.24) - ribs) * peak
-  );
-}
-
-export function andeanGeometry(extent, layer) {
-  const segments = 384,
-    rings = 28,
-    radius = extent * [0.93, 1.55, 2.25][layer],
-    width = [250, 410, 650][layer];
-  const positions = [],
-    indices = [];
-  for (let r = 0; r <= rings; r++)
-    for (let i = 0; i <= segments; i++) {
-      const a = (i / segments) * Math.PI * 2,
-        t = r / rings,
-        d = radius + t * width;
-      positions.push(
-        extent / 2 + Math.cos(a) * d,
-        andeanHeight(a, t, layer),
-        extent / 2 + Math.sin(a) * d,
-      );
-      if (r < rings && i < segments) {
-        const n = r * (segments + 1) + i;
-        indices.push(
-          n,
-          n + 1,
-          n + segments + 1,
-          n + 1,
-          n + segments + 2,
-          n + segments + 1,
-        );
-      }
-    }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(positions, 3),
-  );
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  const n = geometry.attributes.normal;
-  for (let r = 0; r <= rings; r++) {
-    const a = r * (segments + 1),
-      b = a + segments,
-      normal = new THREE.Vector3()
-        .fromBufferAttribute(n, a)
-        .add(new THREE.Vector3().fromBufferAttribute(n, b))
-        .normalize();
-    n.setXYZ(a, ...normal.toArray());
-    n.setXYZ(b, ...normal.toArray());
-  }
-  geometry.computeBoundingBox();
-  geometry.computeBoundingSphere();
-  geometry.userData = { segments, rings, radius, width, layer };
-  return geometry;
-}
-
 function ridgeMaterial(game, layer) {
   return new THREE.ShaderMaterial({
     name: `Andean ridge ${layer}`,
-    depthWrite: false,
+    depthWrite: true,
     uniforms: {
       rock: { value: game.darkMat.map },
+      rockNormal: { value: game.darkMat.normalMap || game.darkMat.map },
+      hasRockNormal: { value: game.darkMat.normalMap ? 1 : 0 },
       sunDirection: { value: game.sunOffset.clone().normalize() },
       layer: { value: layer },
     },
-    vertexShader: `varying vec3 vRidge,vNormal;void main(){vRidge=(modelMatrix*vec4(position,1.)).xyz;vNormal=normal;
-      vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position=vec4(p.xy,p.w*.9999,p.w);}`,
-    fragmentShader: `varying vec3 vRidge,vNormal;uniform sampler2D rock;uniform vec3 sunDirection;uniform float layer;
+    vertexShader: `attribute vec2 ridgeLight;varying vec2 vRidgeLight;varying vec3 vRidge,vNormal;
+      void main(){vRidge=(modelMatrix*vec4(position,1.)).xyz;vNormal=normal;vRidgeLight=ridgeLight;
+      vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.);
+      float backgroundDepth=.2+.75*(max(0.,p.w)/(max(0.,p.w)+700.));
+      gl_Position=vec4(p.xy,p.w*backgroundDepth,p.w);}`,
+    fragmentShader: `varying vec3 vRidge,vNormal;varying vec2 vRidgeLight;
+      uniform sampler2D rock,rockNormal;uniform vec3 sunDirection;uniform float layer,hasRockNormal;
+      ${cloudNoise}
+      vec3 relief(vec2 uv,vec3 n){
+        vec3 q0=dFdx(vRidge),q1=dFdy(vRidge);vec2 st0=dFdx(uv),st1=dFdy(uv);
+        vec3 a=cross(q1,n),b=cross(n,q0),t=a*st0.x+b*st1.x,bt=a*st0.y+b*st1.y;
+        float scale=inversesqrt(max(.000001,max(dot(t,t),dot(bt,bt))));
+        vec3 detail=texture2D(rockNormal,uv).xyz*2.-1.;detail.xy*=.58*hasRockNormal;
+        detail.z=mix(1.,detail.z,hasRockNormal);
+        return normalize(t*scale*detail.x+bt*scale*detail.y+n*detail.z);
+      }
+      vec3 fractureNormal(float height,vec3 n){
+        vec3 q0=dFdx(vRidge),q1=dFdy(vRidge),a=cross(q1,n),b=cross(n,q0);
+        float determinant=dot(q0,a);
+        vec3 gradient=sign(determinant)*(dFdx(height)*a+dFdy(height)*b);
+        return normalize(max(.000001,abs(determinant))*n-gradient);
+      }
       void main(){vec3 n=normalize(vNormal),w=pow(abs(n),vec3(4.));w/=max(.001,w.x+w.y+w.z);
-        vec3 p=vRidge*.026;
+        vec3 p=vRidge*.31;
         vec3 grain=texture2D(rock,p.zy).rgb*w.x+texture2D(rock,p.xz).rgb*w.y+texture2D(rock,p.xy).rgb*w.z;
-        float strata=.5+.5*sin(vRidge.y*.063+sin(vRidge.x*.032)*2.+sin(vRidge.z*.024));
-        vec3 color=grain*vec3(.42,.44,.41)*(.85+.15*strata);
-        float forest=smoothstep(.12,.68,n.y)*(1.-smoothstep(170.,370.,vRidge.y));
-        color=mix(color,vec3(.043,.074,.035)*(.8+.2*strata),forest);
-        float snow=smoothstep(350.+layer*130.,430.+layer*140.,vRidge.y)*smoothstep(.35,.84,n.y);
-        color=mix(color,vec3(.69,.77,.81),snow);
-        color*=.3+.85*max(0.,dot(n,sunDirection));
-        float haze=1.-exp(-distance(vRidge,cameraPosition)*(.00035+layer*.00015));
-        haze=max(haze,(1.-smoothstep(-70.,90.,vRidge.y))*.83);
+        vec3 detailN=normalize(relief(p.zy,n)*w.x+relief(p.xz,n)*w.y+relief(p.xy,n)*w.z);
+        float broad=cloudFbm(vRidge.xz*.008+vec2(vRidge.y*.004,layer*17.));
+        float broken=cloudFbm(vRidge.zy*.12)*w.x+cloudFbm(vRidge.xz*.12)*w.y+cloudFbm(vRidge.xy*.12)*w.z;
+        vec3 fractureN=fractureNormal(broken*5.,n);
+        float phase=vRidge.y*.19+vRidge.x*.009-vRidge.z*.014+broad*18.+broken*3.;
+        float strata=smoothstep(.08,.35,abs(sin(phase)));
+        strata=mix(strata,1.,smoothstep(.5,2.,fwidth(phase)));
+        float gray=dot(grain,vec3(.2126,.7152,.0722));
+        float detailFade=1.-smoothstep(280.,750.,distance(vRidge,cameraPosition));
+        vec3 color=mix(vec3(.12,.16,.17),vec3(.27,.23,.18),smoothstep(.24,.73,broad));
+        color*=mix(.55,1.3,smoothstep(.2,.72,broken))*(.95+.05*strata);
+        color*=mix(vec3(1.),mix(grain,vec3(gray),.8)*1.8,.12+detailFade*.14);
+        detailN=normalize(mix(fractureN,detailN,.15+detailFade*.2));
+        float forest=smoothstep(.38,.84,n.y)*(1.-smoothstep(90.,300.,vRidge.y))
+          *smoothstep(.23,.58,broken)*(.65+.35*vRidgeLight.y);
+        color=mix(color,vec3(.036,.065,.031)*(.75+broken*.55),forest*.85);
+        float snowLine=270.+layer*85.+broad*70.;
+        float snow=smoothstep(snowLine,snowLine+85.,vRidge.y)
+          *smoothstep(.18+broken*.3,.78,n.y+(1.-vRidgeLight.y)*.4);
+        color=mix(color,vec3(.73,.81,.85)*(.87+.13*broken),snow);
+        detailN=normalize(mix(detailN,n,snow*.8));
+        float direct=max(0.,dot(detailN,sunDirection))*vRidgeLight.x;
+        vec3 ambient=vec3(.16,.21,.26)*vRidgeLight.y*(.7+.3*n.y);
+        color*=ambient+vec3(1.1,1.04,.89)*direct;
+        float haze=1.-exp(-distance(vRidge,cameraPosition)*(.00023+layer*.00008));
+        haze=max(haze,(1.-smoothstep(-75.,70.,vRidge.y))*.83);
         color=mix(color,vec3(.38,.5,.57),haze);
         gl_FragColor=vec4(color,1.);
         #include <tonemapping_fragment>
@@ -235,13 +173,18 @@ export function buildCloudCity(game) {
   group.name = "Andean ranges and valley cloud";
   for (let layer = 2; layer >= 0; layer--) {
     const mesh = new THREE.Mesh(
-      andeanGeometry(game.map.size * 7, layer),
+      andeanGeometry(game.map.size * 7, layer, game.sunOffset),
       ridgeMaterial(game, layer),
     );
     mesh.name = `Andean range ${layer}`;
     mesh.renderOrder = -10 - layer * 10;
     mesh.frustumCulled = false;
     mesh.userData.excludeContact = true;
+    // These ranges render before the playable world. Give their overlapping
+    // faces a full-precision depth interval, then clear only that depth after
+    // the last opaque range. Their color remains behind all gameplay geometry,
+    // including objects close to the camera's far plane and water reflections.
+    if (layer === 0) mesh.onAfterRender = (renderer) => renderer.clearDepth();
     group.add(mesh);
   }
   const bank = cloudBank(game, time);

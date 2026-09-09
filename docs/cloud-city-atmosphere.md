@@ -1,5 +1,9 @@
 # Cloud-city atmosphere and distant landscape
 
+This page records the original atmosphere milestone. The later
+[mountain relief pass](andean-ridges.md) replaces its ridge geometry, materials
+and depth ordering; that page contains current counts and matched comparisons.
+
 The sky chapter now has three surrounding Andean-inspired ridge layers, drifting high clouds and a shaped cloud bank below its crossings. Cooler fill light and a lower, warmer sun give its stonework and bronze stronger separation. The visible sky and filtered reflection capture use the same sky shader.
 
 ## Landscape and light
