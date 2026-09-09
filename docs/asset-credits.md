@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The fitted spillway masonry, wet-stone treatment, upper channels, falling-water
+streaks, impact foam and spray in `src/spillway-art.js`,
+`src/waterfall-material.js` and `src/waterfall-effects.js` are original project
+code. They reuse the existing chapter stone textures, waterfall recording and
+chapter scores. No external image, model, audio or dependency was added. See
+[spillway comparisons and checks](waterfall-spillways.md).
+
 The revised jungle leaf cards and one-time cluster atlas bake are original
 project code in `scripts/preserve-canopy.mjs`, `scripts/rebuild-tree-leaves.mjs`
 and `src/leaf-*.js`. They derive from the credited

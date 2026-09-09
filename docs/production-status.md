@@ -20,6 +20,20 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- All nine waterfalls in the jungle, coastal and sky chapters now have fitted
+  spillway masonry, open upper channels, accelerating streaks, impact foam and
+  spray scaled for the active render viewport. Their foundations now extend to
+  the sampled pool floor inside the existing collision bounds. All 459 tests
+  and the production build passed. Six matched
+  views preserved exact obstacle and sound records; all eight chapters rendered.
+  Three prepared wading routes retained 100 health, and drainage moved the lower
+  effects and sound with the reservoir. Live audio kept linear falloff, including
+  half gain at its midpoint. All 42 watched geometry/material resources released
+  when leaving each affected chapter. Release keyboard and portrait-touch cases
+  preserved exact local saves on reload at 100 health. [Spillway views and evidence](waterfall-spillways.md)
+  record the geometry increase, lower draw counts in the selected views and the
+  remaining graphics, human pacing, listening and device requirements.
+
 - Jungle trees now use fitted full leaf cards, the original coverage mask and
   shared cluster atlases baked once at load. The final suite passed all 456
   tests and the production build passed. Nine browser comparisons found zero

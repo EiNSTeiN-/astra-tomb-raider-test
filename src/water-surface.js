@@ -35,6 +35,7 @@ export function waterMaterial(game, site) {
     mirrorWeight: { value: 0 },
     impactCenter: { value: new THREE.Vector2(1e5, 1e5) },
     impactAmount: { value: 0 },
+    impactHalfWidth: { value: 0 },
     waterSky: { value: new THREE.Color(game.level.sky) },
     splashCenter: { value: new THREE.Vector3(1e5, 0, 1e5) },
     splashTime: { value: -100 },
@@ -58,7 +59,7 @@ export function waterMaterial(game, site) {
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <common>",
       `#include <common>\n${common}
-      uniform sampler2D waterMirror;uniform mat4 waterMirrorMatrix;uniform float mirrorWeight;uniform vec3 waterSky;uniform vec3 splashCenter;uniform float splashTime;uniform vec2 poolSize;uniform vec2 poolCenter;uniform vec2 impactCenter;uniform float impactAmount;`,
+      uniform sampler2D waterMirror;uniform mat4 waterMirrorMatrix;uniform float mirrorWeight;uniform vec3 waterSky;uniform vec3 splashCenter;uniform float splashTime;uniform vec2 poolSize;uniform vec2 poolCenter;uniform vec2 impactCenter;uniform float impactAmount;uniform float impactHalfWidth;`,
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <normal_fragment_begin>",
@@ -67,7 +68,7 @@ export function waterMaterial(game, site) {
       float age=waterTime-splashTime;float radius=length(vWaterWorld.xz-splashCenter.xz);
       float ring=sin(radius*16.0-age*13.0)*exp(-pow((radius-age*1.8)*2.5,2.0))*exp(-age*.85)*step(0.0,age);
       slope+=normalize(vWaterWorld.xz-splashCenter.xz+vec2(.0001))*ring*.12;
-      vec2 impactDelta=vWaterWorld.xz-impactCenter;float impactRadius=length(impactDelta);
+      vec2 impactDelta=vWaterWorld.xz-impactCenter;impactDelta.x-=clamp(impactDelta.x,-impactHalfWidth,impactHalfWidth);float impactRadius=length(impactDelta);
       slope+=normalize(impactDelta+vec2(.0001))*sin(impactRadius*10.0-waterTime*6.0)*exp(-impactRadius*.65)*impactAmount*.045;
       normal=normalize(mat3(viewMatrix)*vec3(-slope.x,1.0,-slope.y));`,
     );
@@ -80,7 +81,8 @@ export function waterMaterial(game, site) {
       diffuseColor.rgb=mix(diffuseColor.rgb*1.45,diffuseColor.rgb*.4,deep);
       float shore=1.0-smoothstep(.025,.32,waterDepth);
       float foam=shore*(.35+.65*pow(.5+.5*sin(vWaterWorld.x*8.0+vWaterWorld.z*6.0-waterTime*2.0),3.0))*waveScale;
-      foam+=exp(-length(vWaterWorld.xz-impactCenter)*1.3)*impactAmount*.5;
+      vec2 foamDelta=vWaterWorld.xz-impactCenter;foamDelta.x-=clamp(foamDelta.x,-impactHalfWidth,impactHalfWidth);
+      foam+=exp(-length(foamDelta)*1.3)*impactAmount*.5;
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.7,.78,.72),foam*.6);
       diffuseColor.a=smoothstep(.005,.075,waterDepth)*mix(.34,.91,deep)+foam*.15;`,
     );

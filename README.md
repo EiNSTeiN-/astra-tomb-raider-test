@@ -4,6 +4,8 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The requested approximately one-hour duration per chapter has not been established by human playtesting, and the real-time graphics do not yet reach modern AAA production quality. See [the production status](docs/production-status.md) for the original requirements, evidence, and remaining work.
 
+Waterfalls now use [grounded stone spillways with open feed channels](docs/waterfall-spillways.md), accelerating streaks, impact foam and spray that follows reservoir drainage.
+
 Jungle foliage now has [fitted leaf silhouettes and shared cluster textures](docs/jungle-leaves.md). The notes include matching views, GPU timings and the added memory cost.
 
 The jungle now has [a grounded outer forest](docs/jungle-fringe.md), filling
