@@ -163,6 +163,7 @@ import {
 import { vaultBridgeBlocked } from "./fire-vault-rules.js";
 import { advanceCausewayWheel } from "./fire-vault-motion.js";
 import { advancePressureOperation } from "./pressure-motion.js";
+import { advanceOrbitBearing } from "./orbit-motion.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
@@ -1440,6 +1441,7 @@ export class Adventure {
       return;
     }
     if (
+      advanceOrbitBearing(this, dt, input) ||
       advancePressureOperation(this, dt, input) ||
       advanceCausewayWheel(this, dt, input)
     ) {
@@ -2060,6 +2062,7 @@ export class Adventure {
       this.carrying ||
       this.fireVault?.operation ||
       this.pressureRelay?.operation ||
+      this.orbitVault?.operation ||
       this.wallGrip ||
       this.blockGrip ||
       this.swimming ||

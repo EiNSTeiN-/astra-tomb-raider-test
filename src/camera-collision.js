@@ -40,7 +40,7 @@ export class CameraSurfaces {
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
   }
-  capture(mesh, { small = false } = {}) {
+  capture(mesh, { small = false, thin = false } = {}) {
     if (
       !this.capturing ||
       !mesh.material.isMeshStandardMaterial ||
@@ -53,7 +53,7 @@ export class CameraSurfaces {
       size = box.getSize(new THREE.Vector3());
     if (
       (!small && Math.max(size.x, size.y, size.z) < 2) ||
-      Math.min(size.x, size.y, size.z) < 0.12
+      (!thin && Math.min(size.x, size.y, size.z) < 0.12)
     )
       return;
     this.pending.push({ mesh, parent: mesh.parent, box });

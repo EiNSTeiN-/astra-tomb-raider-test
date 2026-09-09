@@ -11,6 +11,13 @@ import {
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { mergeArchitecture } from "./visuals.js";
+import { buildOrbitBearing } from "./orbit-bearing-art.js";
+import { beginOrbitBearing, syncOrbitBearing } from "./orbit-motion.js";
+import {
+  buildOrbitBridge,
+  updateOrbitBridge,
+  orbitBridgeBlocked,
+} from "./orbit-bridge.js";
 
 export function orbitSector(inner, outer, from, to, thickness = 0.35) {
   const points = [],
@@ -119,6 +126,7 @@ export function buildOrbitVault(game) {
     root,
     saved,
     anchor: saved.rest,
+    operation: null,
     rings: [],
     rests: [],
     controls: [],
@@ -296,55 +304,37 @@ export function buildOrbitVault(game) {
     box(r.w * 2, 0.4, r.d * 2, r.x, -0.2, r.z);
     if (index) {
       add(new THREE.CylinderGeometry(0.72, 1.05, 9.5, 12), stone, r.x, -5, r.z);
-      const bezel = add(
-        new THREE.TorusGeometry(0.55, 0.11, 8, 24),
-        bronze,
-        r.x + 0.85,
-        0.045,
-        r.z,
-      );
-      bezel.rotation.x = Math.PI / 2;
-      const pointer = box(
-        0.1,
-        0.08,
-        0.75,
-        r.x + 0.85,
-        0.075,
-        r.z,
-        game.glowMat,
-      );
-      pointer.userData.animated = true;
-      h.controls.push({
+      const control = {
         kind: "bearing",
         index: index - 1,
         position: new THREE.Vector3(d.x - 0.35, y, d.z),
-        pointer,
-      });
+      };
+      h.controls.push(control);
+      buildOrbitBearing(game, control, { add, box, bronze, dark, label });
       const plaque = label(["EARTH", "MOON", "STAR"][index - 1], 1.5);
       plaque.rotation.x = -Math.PI / 2;
       plaque.position.set(r.x, 0.07, r.z - 0.95);
       fixed.add(plaque);
     }
   }
-  const tablet = box(0.8, 1.1, 0.6, -22, 0.55, 1.7, dark);
+  box(0.8, 1.1, 0.6, -22, 0.55, -3.7, dark);
   game.obstacles.push({
     x: x - 22,
-    z: z + 1.7,
+    z: z - 3.7,
     w: 0.8,
     d: 0.7,
-    h: y - game.groundHeight(x - 22, z + 1.7) + 1.1,
+    h: y - game.groundHeight(x - 22, z - 3.7) + 1.1,
     orbitVault: true,
   });
   const title = label("THE CARTOGRAPHER’S ORRERY", 4.2);
-  title.position.set(-22, 2, 2);
+  title.position.set(-22, 2, -3.4);
   fixed.add(title);
   const text = label("EARTH → MOON → STAR", 2.2);
-  text.position.set(-22, 1.1, 1.34);
-  text.rotation.y = Math.PI;
+  text.position.set(-22, 1.1, -3.34);
   fixed.add(text);
   h.controls.unshift({
     kind: "guide",
-    position: new THREE.Vector3(x - 22, y, z),
+    position: new THREE.Vector3(x - 22, y, z - 2.4),
   });
   h.controls.push({
     kind: "record",
@@ -360,24 +350,21 @@ export function buildOrbitVault(game) {
       1.23,
       0,
     ).rotation.x = Math.PI / 2;
-  const back = new THREE.Group();
-  back.userData.animated = true;
-  root.add(back);
-  h.returnRoot = back;
-  box(22, 0.28, 2.5, -11, -0.04, 0, bronze, back);
+  buildOrbitBridge(game, { add, box, bronze, dark });
   mergeArchitecture(fixed);
   for (const r of h.rings) mergeArchitecture(r.root);
   updateOrbitVault(game, 0, true);
 }
 
 export function orbitBlocked(game, x, z, y, clearance = 1.8) {
+  if (orbitBridgeBlocked(game, x, z, y, clearance)) return true;
   const d = orbitDeckAt(game, x, z);
   return !!d && y < d.height - 0.4 && y + clearance > d.height - 0.35;
 }
 export function orbitOccludes(game, from, to) {
   const h = game.orbitVault;
   if (!h) return false;
-  for (const height of [h.y - 0.35, h.y, h.y + 0.1]) {
+  for (const height of [h.y - 0.35, h.y, h.y + 0.18]) {
     const dy = to.y - from.y;
     if (Math.abs(dy) < 1e-8) continue;
     const t = (height - from.y) / dy;
@@ -397,6 +384,7 @@ export function updateOrbitVault(game, dt, initial = false) {
   const h = game.orbitVault;
   if (!h) return;
   if (game.paused) dt = 0;
+  updateOrbitBridge(game, dt);
   const p = game.player?.position,
     standing = p && game.grounded ? orbitDeckAt(game, p.x, p.z, p.y) : null;
   for (const r of h.rings) {
@@ -430,10 +418,11 @@ export function updateOrbitVault(game, dt, initial = false) {
     r.source.z = h.z + Math.sin(a) * rad;
     r.source.activity = running && !game.paused ? 0.6 : 0;
   }
-  h.returnRoot.visible = h.saved.recovered;
   for (const c of h.controls)
-    if (c.pointer)
-      c.pointer.rotation.y = h.saved.aligned > c.index ? Math.PI / 2 : 0;
+    if (c.wheel) {
+      syncOrbitBearing(game, c, dt, initial);
+      c.pointer.rotation.z = (-c.turn * Math.PI) / 2;
+    }
   if (initial || game.paused || !p) return;
   let changed = false;
   if (standing?.surface === h.bank) h.anchor = 0;
@@ -501,6 +490,13 @@ export function orbitControl(game) {
   );
 }
 export function orbitHint(game) {
+  if (game.orbitVault?.operation)
+    return {
+      key: "WASD / SPACE",
+      label: game.orbitVault.operation.committed
+        ? "Bearing calibrated · releasing grips"
+        : "Turning bearing · move or jump to cancel",
+    };
   const c = orbitControl(game);
   if (!c) return null;
   const s = game.orbitVault.saved;
@@ -523,6 +519,7 @@ export function orbitHint(game) {
   };
 }
 export function orbitInteract(game) {
+  if (game.orbitVault?.operation) return true;
   const c = orbitControl(game);
   if (!c) return false;
   const h = game.orbitVault,
@@ -538,13 +535,7 @@ export function orbitInteract(game) {
     s.aligned === c.index &&
     s.rest >= c.index + 1
   ) {
-    s.aligned++;
-    game.audio.tone("solve");
-    game.save();
-    game.cb.toast?.(
-      `${ORBIT_RINGS[c.index].name} bearing calibrated. ${s.aligned < 3 ? "The next ring is turning." : "Recover the chart at the centre."}`,
-      4500,
-    );
+    beginOrbitBearing(game, c);
   } else if (c.kind === "record" && s.aligned === 3) {
     s.recovered = true;
     game.audio.tone("collect");
@@ -563,7 +554,9 @@ export function orbitObjective(game) {
     text: !h.saved.started
       ? "Start the orrery from its western tablet"
       : h.saved.recovered
-        ? "Cross the return bridge to the western landing"
+        ? h.bridge.progress < 1
+          ? "Wait for the return bridge to unfold"
+          : "Cross the return bridge to the western landing"
         : h.saved.aligned === 3
           ? "Recover the cartographers’ return chart"
           : `Reach and calibrate the ${ORBIT_RINGS[h.saved.aligned].name.toLowerCase()} bearing`,

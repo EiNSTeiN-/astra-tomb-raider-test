@@ -7,6 +7,13 @@ shader. Moving machinery uses the existing original machine synthesis; no new
 external assets, recordings or dependencies were introduced.
 [Orrery notes](cartographers-orrery.md) record the behavior and verification.
 
+The later bearing pedestals, two-hand wheel grips, gauges, hinged return leaves,
+bridge ribs and gear housings are original project geometry in
+`src/orbit-bearing-art.js` and `src/orbit-bridge.js`. The actions use the existing
+explorer rig and calibrated cylinder-grip solver; machinery uses the existing
+original synthesis. [Operation notes](orrery-operation.md) record the changes and
+their verification. No new external asset or dependency was introduced.
+
 The Cinder Relay's six pressure pistons, galleries, valve wheels, pipe routes,
 return lift, dispatch ledger, signs, map and recovered record are original
 project geometry, code and writing in `src/pressure-*.js`. They reuse the existing

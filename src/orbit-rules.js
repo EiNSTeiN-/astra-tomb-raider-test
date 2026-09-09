@@ -1,4 +1,13 @@
 export const TAU = Math.PI * 2;
+export const ORBIT_BRIDGE = Object.freeze({
+  start: -22,
+  length: 5,
+  leaves: 4,
+  width: 2.5,
+  top: 0.18,
+  duration: 6,
+  folded: Math.PI / 2 - 0.08,
+});
 export const ORBIT_RINGS = [
   {
     inner: 15,
@@ -91,13 +100,13 @@ export function orbitDeckAt(game, x, z, maxY = Infinity) {
     dz = z - h.z,
     r = Math.hypot(dx, dz);
   if (
-    h.saved.recovered &&
+    (h.bridge ? h.bridge.progress >= 1 : h.saved.recovered) &&
     dx >= -22 &&
-    dx <= 0 &&
+    dx <= -2 &&
     Math.abs(dz) < 1.25 &&
-    h.y + 0.1 <= maxY + 0.2
+    h.y + ORBIT_BRIDGE.top <= maxY + 0.2
   )
-    return { height: h.y + 0.1, surface: h.returnDeck };
+    return { height: h.y + ORBIT_BRIDGE.top, surface: h.returnDeck };
   if (r >= 20 && r <= 24) return { height: h.y, surface: h.bank };
   for (const d of h.rests)
     if (Math.abs(x - d.x) <= d.w && Math.abs(z - d.z) <= d.d)
@@ -109,8 +118,9 @@ export function orbitDeckAt(game, x, z, maxY = Infinity) {
   return null;
 }
 export function orbitAnchor(h) {
-  const d = ORBIT_RESTS[h.anchor ?? h.saved.rest];
-  return { x: h.x + d.x, y: h.y, z: h.z + d.z };
+  const index = h.anchor ?? h.saved.rest,
+    d = ORBIT_RESTS[index];
+  return { x: h.x + d.x, y: h.y, z: h.z + d.z + (index === 0 ? -2.4 : 0) };
 }
 export function orbitSavePosition(game) {
   const h = game.orbitVault,

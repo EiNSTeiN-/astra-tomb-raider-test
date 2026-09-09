@@ -1,5 +1,9 @@
 # The Cartographer’s Orrery
 
+The subsequent [instrument and folding-bridge pass](orrery-operation.md) adds
+physical bearing actions and a visible deployment sequence. The verification
+figures below record this route’s initial release.
+
 **The Last Meridian** now has an optional traversal court beside the cache west
 of its entry area. Three concentric stone crowns rotate above a ten-metre well.
 Walking changes the explorer’s place on a crown; standing still carries her with
@@ -54,8 +58,8 @@ original project geometry. They reuse the existing stone and patinated-bronze
 materials. Deck faces use planar paving coordinates; cut edges unwrap along arc
 length and height to avoid stretched texture stripes. Engraved labels and the
 map are generated locally. No external assets, recordings or dependencies were
-added. The return bridge currently appears when the chart is recovered; its
-deployment and the bearing interactions still need further animation work.
+added. The later operation pass replaces the instant bridge appearance and
+bearing calibration with physical mechanisms and timed actions.
 
 ## Verification
 

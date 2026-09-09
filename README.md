@@ -31,6 +31,9 @@ Moon and Star bearings, and recover the central return chart. **M** shows the
 live ring positions; fixed landings preserve progress, and **E / Use** operates
 each bearing. The chart opens a direct bridge back. See
 [the route and verification](docs/cartographers-orrery.md).
+The [physical instrument pass](docs/orrery-operation.md) adds two-hand bearing
+turns and a four-leaf bridge that unfolds after recovery. Move or jump to cancel
+an unfinished turn; completed calibrations persist.
 
 In **The Night Below**, the optional **Listening Gallery** lies west of the
 entry camp. Follow two, one, then three crystal pulses through its branching

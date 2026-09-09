@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
+import {
+  advanceOrbitBearing,
+  orbitBearingStance,
+} from "../src/orbit-motion.js";
+import { ORBIT_BRIDGE } from "../src/orbit-rules.js";
+import { canAim } from "../src/aiming.js";
+import { canCrouch } from "../src/stealth.js";
+import { torchHandsBusy } from "../src/torch.js";
 import { Adventure } from "../src/game.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
@@ -24,7 +32,7 @@ import {
   restoreOrbitArrival,
 } from "../src/orbit-rules.js";
 
-function fixture() {
+export function fixture(progress = {}) {
   const old = globalThis.document;
   globalThis.document = {
     createElement: () => ({ getContext: () => ({ fillText() {} }) }),
@@ -50,6 +58,8 @@ function fixture() {
       jumpY: 0.18,
       velocityY: 0,
       health: 100,
+      keys: new Set(),
+      elapsed: 0,
       saves: [],
       audio: { tone() {} },
       cb: {
@@ -71,12 +81,13 @@ function fixture() {
       },
     });
   try {
+    Object.assign(g.progress, progress);
     buildOrbitVault(g);
   } finally {
     globalThis.document = old;
   }
   g.cameraSurfaces.rebuild();
-  g.player.position.set(-22, 0.18, 0);
+  g.player.position.set(-22, 0.18, -2.4);
   return g;
 }
 
@@ -86,7 +97,7 @@ test("the western bank gap can be jumped onto the moving outer ring and back at 
       h = g.orbitVault;
     h.saved.started = true;
     h.saved.visited = true;
-    g.player.position.set(outward ? -16.5 : -20.2, h.y, 0);
+    g.player.position.set(outward ? -16.5 : -20.2, h.y, -2.2);
     g.jumpY = h.y - g.groundHeight(g.player.position.x, 0);
     for (let i = 0; i < 70; i++) {
       updateOrbitVault(g, 1 / 60);
@@ -108,6 +119,144 @@ test("the western bank gap can be jumped onto the moving outer ring and back at 
     );
     assert.equal(d.surface, outward ? h.bank : h.rings[0]);
   }
+});
+
+test("bearing actions retain the calibration only after the stop, cancel promptly, and exclude competing hand actions", () => {
+  for (const committed of [false, true]) {
+    const g = fixture(),
+      h = g.orbitVault;
+    h.saved.visited = h.saved.started = true;
+    h.saved.rest = 1;
+    const c = h.controls.find((c) => c.kind === "bearing");
+    g.player.position.copy(c.position);
+    assert(orbitInteract(g));
+    const op = h.operation;
+    assert(op);
+    assert(!canAim(g));
+    assert(!canCrouch(g));
+    assert(torchHandsBusy(g));
+    orbitInteract(g);
+    assert.equal(h.operation, op);
+    for (let i = 0; i < (committed ? 93 : 42); i++) {
+      updateOrbitVault(g, 1 / 60);
+      advanceOrbitBearing(g, 1 / 60, { x: 0, z: 0 });
+    }
+    assert.equal(op.committed, committed);
+    const time = op.time,
+      turn = c.turn,
+      position = g.player.position.clone();
+    g.paused = true;
+    updateOrbitVault(g, 2);
+    advanceOrbitBearing(g, 2, { x: 0, z: 0 });
+    assert.equal(op.time, time);
+    assert.equal(c.turn, turn);
+    assert(g.player.position.equals(position));
+    assert.equal(c.source.activity, 0);
+    g.paused = false;
+    g.keys.add("Space");
+    assert(!advanceOrbitBearing(g, 1 / 60, { x: 0, z: 0 }));
+    assert.equal(h.operation, null);
+    assert.equal(h.saved.aligned, Number(committed));
+    for (let i = 0; i < 90; i++) updateOrbitVault(g, 1 / 60);
+    assert(Math.abs(c.turn - Number(committed)) < 1e-6);
+    assert.equal(c.source.activity, 0);
+    const restored = fixture({ orbitVault: structuredClone(h.saved) });
+    assert.equal(restored.orbitVault.operation, null);
+    assert.equal(restored.orbitVault.controls[1].turn, Number(committed));
+  }
+});
+
+test("each bearing has a supported front stance, a clear approach, and a solid pedestal that rejects rear operation", () => {
+  const g = fixture(),
+    h = g.orbitVault;
+  h.saved.visited = h.saved.started = true;
+  for (const c of h.controls.filter((c) => c.kind === "bearing")) {
+    h.saved.aligned = c.index;
+    h.saved.rest = c.index + 1;
+    const p = orbitBearingStance(c);
+    assert.equal(supportAt(g, p.x, p.z, p.y).surface, h.rests[c.index + 1]);
+    assert(g.canMove(p.x, p.z, p.y - g.groundHeight(p.x, p.z)));
+    assert(
+      !g.canMove(
+        c.solid.x,
+        c.solid.z,
+        h.y - g.groundHeight(c.solid.x, c.solid.z),
+      ),
+    );
+    g.player.position.copy(c.position);
+    assert(orbitInteract(g));
+    assert(h.operation);
+    advanceOrbitBearing(g, 1 / 60, { x: 1, z: 0 });
+    assert.equal(h.operation, null);
+    g.player.position.copy(p).add(new THREE.Vector3(0.4, 0, 0));
+    orbitInteract(g);
+    assert.equal(h.operation, null);
+  }
+});
+
+test("the concertina has connected hinges above the crowns, blocks its unfolding corridor, freezes on pause and restores settled", () => {
+  const g = fixture(),
+    h = g.orbitVault,
+    b = h.bridge;
+  assert.equal(b.progress, 0);
+  const across = [-1, 1].map((y) =>
+    b.panels[0].localToWorld(new THREE.Vector3(2.5, y, 0)),
+  );
+  assert(g.cameraSurfaces.entry(across[0], across[1], 0.01) < 1);
+  across.forEach((p) => (p.z = 3));
+  assert.equal(g.cameraSurfaces.entry(across[0], across[1], 0.01), 1);
+  assert(!g.canMove(-21.8, 0, h.y - g.groundHeight(-21.8, 0)));
+  assert(g.canMove(-22, -2.4, h.y - g.groundHeight(-22, -2.4)));
+  h.saved.visited = h.saved.started = true;
+  h.saved.aligned = 3;
+  h.saved.recovered = true;
+  for (let tick = 0; tick < 360; tick++) {
+    updateOrbitVault(g, 1 / 60);
+    for (let i = 0; i < 4; i++) {
+      const panel = b.panels[i],
+        end = new THREE.Vector3(5, 0, 0)
+          .applyEuler(panel.rotation)
+          .add(panel.position);
+      assert(panel.position.y >= ORBIT_BRIDGE.top - 1e-8);
+      assert(end.y >= ORBIT_BRIDGE.top - 1e-8);
+      if (i < 3) assert(end.distanceTo(b.panels[i + 1].position) < 1e-8);
+    }
+    if (tick === 90) {
+      assert(orbitBlocked(g, -14, 0, h.y));
+      assert.equal(orbitDeckAt(g, -14, 0), null);
+      assert(b.source.activity > 0);
+      const progress = b.progress,
+        matrices = b.panels.map((p) => p.matrixWorld.clone());
+      g.paused = true;
+      updateOrbitVault(g, 3);
+      assert.equal(b.progress, progress);
+      assert.equal(b.source.activity, 0);
+      assert(b.panels.every((p, i) => p.matrixWorld.equals(matrices[i])));
+      g.paused = false;
+    }
+  }
+  updateOrbitVault(g, 1 / 60);
+  assert.equal(b.progress, 1);
+  assert.equal(b.source.activity, 0);
+  assert.equal(orbitDeckAt(g, -14, 0).surface, h.returnDeck);
+  g.player.position.set(-2.4, h.y, 0);
+  g.jumpY = h.y - g.groundHeight(-2.4, 0);
+  for (let i = 0; i < 197; i++) advanceCharacter(g, { x: -6, z: 0 }, 1 / 60);
+  assert(g.player.position.x < -21.9);
+  assert(g.grounded);
+  const restored = fixture({ orbitVault: structuredClone(h.saved) });
+  assert.equal(restored.orbitVault.bridge.progress, 1);
+  assert(restored.orbitVault.bridge.panels.every((p) => p.rotation.z === 0));
+});
+
+test("an older arrival inside the folded bridge is relocated beside the tablet", () => {
+  const g = fixture(),
+    h = g.orbitVault;
+  g.player.position.set(-21.7, h.y, 0);
+  assert(!g.canMove(-21.7, 0, h.y - g.groundHeight(-21.7, 0)));
+  restoreOrbitArrival(g);
+  assert.deepEqual(g.player.position.toArray(), [-22, h.y, -2.4]);
+  assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
 });
 
 test("orbital sectors have outward closed faces and their gaps stay clear in support and camera collision", () => {
@@ -197,7 +346,7 @@ test("a ring carries a grounded rider around its axis, leaves air and fixed land
     h.rings[0],
   );
   const saved = orbitSavePosition(g);
-  assert.deepEqual(saved, { x: -22, y: 0.18, z: 0 });
+  assert.deepEqual(saved, { x: -22, y: 0.18, z: -2.4 });
   const before = g.player.position.clone(),
     angle = h.rings[0].angle;
   g.paused = true;
@@ -229,6 +378,11 @@ test("three calibrated bearings unlock their next rings, save independently, and
     g.grounded = true;
     updateOrbitVault(g, 0);
     assert(orbitInteract(g));
+    assert(h.operation);
+    for (let tick = 0; tick < 150; tick++) {
+      updateOrbitVault(g, 1 / 60);
+      advanceOrbitBearing(g, 1 / 60, { x: 0, z: 0 });
+    }
     assert.equal(h.saved.aligned, i + 1);
     orbitInteract(g);
     assert.equal(h.saved.aligned, i + 1);
@@ -243,13 +397,15 @@ test("three calibrated bearings unlock their next rings, save independently, and
     for (let j = 0; j < 3; j++)
       assert.equal(h.rings[j].angle !== angles[j], j === i + 1);
   }
-  assert(!h.returnRoot.visible);
+  assert.equal(h.bridge.progress, 0);
   g.player.position.copy(h.controls.find((c) => c.kind === "record").position);
   assert(orbitInteract(g));
   assert(h.saved.recovered);
-  assert(h.returnRoot.visible);
+  assert.equal(h.bridge.progress, 0);
+  for (let tick = 0; tick < 361; tick++) updateOrbitVault(g, 1 / 60);
+  assert.equal(h.bridge.progress, 1);
   assert.equal(g.records, 1);
-  assert.equal(orbitDeckAt(g, -14, 0).height, h.y + 0.1);
+  assert.equal(orbitDeckAt(g, -14, 0).height, h.y + ORBIT_BRIDGE.top);
   assert.equal(g.progress.stage, 0);
 });
 

@@ -20,6 +20,21 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Cartographer’s Orrery now has physical bearing instruments, two-hand
+  reach/turn/release actions and a four-leaf return bridge that unfolds after
+  chart recovery. Calibrations commit at the wheel’s stop; movement cancels an
+  unfinished action, pause freezes machinery and sound, and older occupied
+  arrivals recover beside the relocated tablet. All 419 tests and the production
+  build pass. A continuous assisted native-input route completed all three
+  actions, deployment and return in 48 segments at 100 health. Nine turning
+  frames supplied 108 hand-surface measurements; keyboard/touch cancellation,
+  source falloff, portrait map and cleanup of 78 graphics resources also passed.
+  Four final production cases passed native input and exact reload comparisons
+  without failed assets or console warnings/errors.
+  [Operation notes and images](orrery-operation.md) include the rendering cost
+  and measured contact tolerances. AAA graphics, human chapter pacing,
+  subjective listening and broader hardware/browser coverage remain open.
+
 - The final chapter now includes **the Cartographer’s Orrery**, an optional
   traversal through three rotating crowns, ordered bearing calibrations and a
   central chart that opens a return bridge. Fixed landings support save and fall

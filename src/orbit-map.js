@@ -61,7 +61,8 @@ export function drawOrbitMap(canvas, game, full = false) {
   }
   if (v.saved.recovered) {
     c.fillStyle = "#d8ba78";
-    c.fillRect(ox - 22 * scale, oz - 1.25 * scale, 22 * scale, 2.5 * scale);
+    const reach = 20 * Math.cos(game.orbitVault.bridge.panels[0].rotation.z);
+    c.fillRect(ox - 22 * scale, oz - 1.25 * scale, reach * scale, 2.5 * scale);
   }
   c.fillStyle = "#ead19a";
   c.beginPath();
