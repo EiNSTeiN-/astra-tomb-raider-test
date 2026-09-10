@@ -162,9 +162,12 @@ export function buildHazards(game) {
     const x = f.x * 7,
       z = f.z * 7,
       y =
-        f.stairHeight !== undefined || f.reflectorHeight !== undefined
+        f.stairHeight !== undefined ||
+        f.reflectorHeight !== undefined ||
+        f.gardenHeight !== undefined
           ? (f.group?.position.y ??
-            game.groundHeight(x, z) + (f.stairHeight ?? f.reflectorHeight))
+            game.groundHeight(x, z) +
+              (f.stairHeight ?? f.reflectorHeight ?? f.gardenHeight))
           : game.groundHeight(x, z),
       root = new THREE.Group();
     root.position.set(x, y, z);
@@ -213,7 +216,18 @@ export function buildHazards(game) {
       game.box(w, h, d, mat, px, py, pz, parent);
     if (spec.kind === "blade") {
       for (const side of [-1, 1]) {
-        box(0.6, 7, 0.6, stone, side * 5.5, 3.5, 0);
+        const pier = box(0.6, 7, 0.6, stone, side * 5.5, 3.5, 0);
+        if (f.gardenHeight !== undefined) {
+          game.cameraSurfaces?.capture(pier);
+          game.rainGarden?.solids.push({
+            x: x + side * 5.5,
+            z,
+            w: 0.3,
+            d: 0.3,
+            bottom: y,
+            top: y + 7,
+          });
+        }
         box(0.9, 0.24, 0.9, gold, side * 5.5, 7, 0);
       }
       box(12, 0.55, 0.8, stone, 0, 7.35, 0);

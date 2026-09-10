@@ -16,7 +16,7 @@ const chapters = {
     ],
     [
       "The rain garden",
-      "The temple’s reservoirs are dry. Open the spring before releasing the garden’s two lower channels.",
+      "Release the spring, climb the west stair and turn the nine channel stones to join the west inlet to the northeast outlet. Open the garden channel when the water reaches its receiver, then ride the water lift to the upper sanctuary sluice. Both landings can call the lift.",
       "Release the hillside spring|Open the garden channel|Turn the sanctuary sluice",
       "Water runs through the garden for the first time in centuries.",
     ],

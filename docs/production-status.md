@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The jungle's third field mission now restores [the rain garden](rain-garden.md).
+  Nine turnable channel stones connect a released spring to a water-powered
+  cargo lift and upper sanctuary sluice. A stair, irrigation terrace, raised
+  blade trap and return route give the existing field actions physical context.
+  Channel turns, either lift stop and interrupted journeys persist correctly;
+  positioned water and machinery sounds and the lifting score follow the flow.
+  All 504 tests, the build, a continuous assisted route with live hazards and
+  enemies, and eight production keyboard/touch/reload checks pass. The guide
+  includes actual renders and retains the graphics, pacing, listening and
+  broader device limitations.
+
 - The desert's sixth field mission now restores [the eastern reflector](eastern-reflector.md).
   Brace its fallen timber back, jump to a rear locking pin, descend the west
   service platforms, haul the mirror upright and cross beneath it. Elevated

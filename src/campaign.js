@@ -1,3 +1,4 @@
+import { addRainGarden } from "./rain-garden-rules.js";
 import { addEasternReflector } from "./eastern-reflector-rules.js";
 import { addFrozenStair } from "./frozen-stair-rules.js";
 import { addSurveyorsCleft } from "./cleft-rules.js";
@@ -524,7 +525,7 @@ export function createMap(level) {
     }
     connect(previous, rooms[stage + 1]);
   }
-  return addEasternReflector(
+  const map = addEasternReflector(
     addFrozenStair(
       addOrbitVault(
         addEchoGallery(
@@ -559,4 +560,5 @@ export function createMap(level) {
     ),
     level,
   );
+  return addRainGarden(map, level);
 }

@@ -1,3 +1,5 @@
+import { buildGardenStation } from "./rain-garden.js";
+import { traceGarden } from "./rain-garden-rules.js";
 import { buildReflectorStation } from "./eastern-reflector.js";
 import { buildCoralStation } from "./coral-pump-art.js";
 import { PUMP_FIELD, PUMP_SETTLE_SECONDS } from "./coral-pump-rules.js";
@@ -17,6 +19,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildGardenStation(game, f, group)) return;
   if (buildReflectorStation(game, f, group)) return;
   if (buildCoralStation(game, f, group)) return;
   if (buildFrozenStation(game, f, group)) return;
@@ -140,6 +143,19 @@ export function finishFieldTask(game, f) {
     game.cb.toast?.(
       "This brazier needs a carried flame. Light your torch at a camp or a burning brazier with T / Torch.",
       5500,
+    );
+    return false;
+  }
+  if (
+    f.gardenHeight !== undefined &&
+    f.step === 1 &&
+    (!game.rainGarden ||
+      game.rainGarden.turn ||
+      !traceGarden(game.rainGarden.saved.rotations).complete)
+  ) {
+    game.cb.toast?.(
+      "Join the wet channel ends from the west inlet to the northeast outlet before opening the garden channel.",
+      6000,
     );
     return false;
   }

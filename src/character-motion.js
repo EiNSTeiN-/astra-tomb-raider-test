@@ -1,3 +1,4 @@
+import { gardenDeckAt } from "./rain-garden-rules.js";
 import { reflectorDeckAt } from "./eastern-reflector-rules.js";
 import { frozenStairDeckAt } from "./frozen-stair-rules.js";
 import { courierDeckAt } from "./courier-rules.js";
@@ -22,6 +23,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const gardenDeck = gardenDeckAt(game, x, z, maxY);
+  if (gardenDeck && gardenDeck.height > height) return gardenDeck;
   const reflectorDeck = reflectorDeckAt(game, x, z, maxY);
   if (reflectorDeck && reflectorDeck.height > height) return reflectorDeck;
   const stairDeck = frozenStairDeckAt(game, x, z, maxY);

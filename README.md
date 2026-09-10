@@ -125,6 +125,12 @@ Crouch with **B / Crouch** to move quietly behind guardians. Watch their facing 
 
 Counterweight stones use **E / Use** to grip or release. While gripping, **W / Up** pushes and **S / Down** pulls; release to walk around to another face.
 
+The jungle's third field mission restores [the rain garden](docs/rain-garden.md).
+Release its spring, climb the west stair and turn nine channel stones to connect
+the west inlet to the northeast outlet. Open the receiver to power a water lift,
+ride to the upper sluice, then return by the lift and stair. Channel orientations
+and the last completed lift stop persist.
+
 Desert mirrors use **E / Use** at each numbered handwheel. Follow the reflected sunlight and activate the receiver when it lights up. The sanctuary tablet also offers diagram controls for the same saved mirrors.
 
 The desert's sixth field mission restores [the eastern reflector](docs/eastern-reflector.md).

@@ -1,3 +1,4 @@
+import { normalizeRainGarden } from "./rain-garden-rules.js";
 import { normalizeEasternReflector } from "./eastern-reflector-rules.js";
 import { normalizeCoralPump } from "./coral-pump-rules.js";
 import { normalizeFrozenStair } from "./frozen-stair-rules.js";
@@ -139,6 +140,13 @@ export function normalizeSave(value) {
               field: strings(v.field),
             })
           : null,
+      rainGarden:
+        key === "verdant"
+          ? normalizeRainGarden(v.rainGarden, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       easternReflector:
         key === "sands"
           ? normalizeEasternReflector(v.easternReflector, {
@@ -244,6 +252,10 @@ export class SaveStore {
       frozenStair: id === "frost" ? { restored: false } : null,
       coralPump:
         id === "tides" ? { installed: false, intake: 0, bypass: 3 } : null,
+      rainGarden:
+        id === "verdant"
+          ? normalizeRainGarden(null, { stage: 0, field: [] })
+          : null,
       easternReflector: id === "sands" ? { raised: false } : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,

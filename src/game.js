@@ -1,4 +1,15 @@
 import {
+  buildRainGarden,
+  updateRainGarden,
+  gardenHint,
+  gardenInteract,
+} from "./rain-garden.js";
+import {
+  gardenBlocked,
+  gardenOccludes,
+  gardenSavePosition,
+} from "./rain-garden-rules.js";
+import {
   buildEasternReflector,
   updateEasternReflector,
   reflectorHint,
@@ -836,6 +847,7 @@ export class Adventure {
     buildBellHoist(this);
     buildFrozenStair(this);
     buildEasternReflector(this);
+    buildRainGarden(this);
     buildCoralPump(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
@@ -1350,6 +1362,7 @@ export class Adventure {
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
     if (reflectorBlocked(this, x, z, worldY, clearance)) return false;
+    if (gardenBlocked(this, x, z, worldY, clearance)) return false;
     if (coralPumpBlocked(this, x, z, worldY, clearance)) return false;
     if (cleftBlocked(this, x, z, worldY, clearance)) return false;
     if (pressureBlocked(this, x, z, worldY, clearance)) return false;
@@ -1376,6 +1389,7 @@ export class Adventure {
     if (hoistOccludes(this, from, to)) return false;
     if (frozenStairOccludes(this, from, to)) return false;
     if (reflectorOccludes(this, from, to)) return false;
+    if (gardenOccludes(this, from, to)) return false;
     if (coralPumpOccludes(this, from, to)) return false;
     if (cleftOccludes(this, from, to)) return false;
     if (pressureOccludes(this, from, to)) return false;
@@ -1474,6 +1488,7 @@ export class Adventure {
     updateBellHoist(this, dt);
     updateFrozenStair(this, dt);
     updateEasternReflector(this, dt);
+    updateRainGarden(this, dt);
     updateCoralPump(this, dt);
     updatePressureRelay(this, dt);
     this.dodgeCooldown = Math.max(0, (this.dodgeCooldown || 0) - dt);
@@ -1648,7 +1663,8 @@ export class Adventure {
         (f.type === "field" &&
           (f.stage < this.progress.stage ||
             this.progress.field.includes(f.id) ||
-            (f.reflectorHeight !== undefined &&
+            ((f.reflectorHeight !== undefined ||
+              f.gardenHeight !== undefined) &&
               Math.abs(p.y - f.group.position.y) > 0.8))) ||
         (f.type === "mechanism" && f.stage < this.progress.stage) ||
         (f.type === "solar" &&
@@ -1998,6 +2014,7 @@ export class Adventure {
     if (bellHoistInteract(this)) return;
     if (frozenStairInteract(this)) return;
     if (reflectorInteract(this)) return;
+    if (gardenInteract(this)) return;
     if (coralPumpInteract(this)) return;
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
@@ -2433,6 +2450,7 @@ export class Adventure {
           cleftHint(this) ||
           bellHoistHint(this) ||
           reflectorHint(this) ||
+          gardenHint(this) ||
           frozenStairHint(this) ||
           coralPumpHint(this) ||
           fireVaultHint(this) ||
@@ -2461,7 +2479,9 @@ export class Adventure {
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
       task: coralPumpObjective(this)
         ? "valve"
-        : this.frozenStair?.motion || this.easternReflector?.motion
+        : this.frozenStair?.motion ||
+            this.easternReflector?.motion ||
+            this.rainGarden?.motion
           ? "lift"
           : courierObjective(this)
             ? "crosswind"
@@ -2547,6 +2567,7 @@ export class Adventure {
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
     const hoistPosition =
+      gardenSavePosition(this) ||
       courierSavePosition(this) ||
       orbitSavePosition(this) ||
       pressureSavePosition(this) ||
@@ -2590,6 +2611,7 @@ export class Adventure {
     updateBellHoist(this, 0);
     updateFrozenStair(this, 0);
     updateEasternReflector(this, 0);
+    updateRainGarden(this, 0);
     updateCoralPump(this, 0);
     updatePressureRelay(this, 0);
     updateCleftArt(this);
