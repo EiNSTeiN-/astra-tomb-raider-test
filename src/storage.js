@@ -1,3 +1,4 @@
+import { normalizeCoralPump } from "./coral-pump-rules.js";
 import { normalizeFrozenStair } from "./frozen-stair-rules.js";
 import { normalizeCourier } from "./courier-rules.js";
 import { normalizeCleft } from "./cleft-rules.js";
@@ -121,6 +122,13 @@ export function normalizeSave(value) {
             ]
           : [],
       gallery: key === "tides" ? normalizeGallery(v.gallery) : null,
+      coralPump:
+        key === "tides"
+          ? normalizeCoralPump(v.coralPump, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
       frozenStair:
@@ -187,6 +195,14 @@ export class SaveStore {
     this.save();
   }
   save() {
+    // Keep the live object and written save consistent when chapter progress
+    // already implies a restored pump, including imported/older progress.
+    const coastal = this.data.levels.tides;
+    if (coastal)
+      Object.assign(
+        (coastal.coralPump ??= {}),
+        normalizeCoralPump(coastal.coralPump, coastal),
+      );
     try {
       this.storage.setItem(SAVE_KEY, JSON.stringify(this.data));
       this.available = true;
@@ -218,6 +234,8 @@ export class SaveStore {
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
       frozenStair: id === "frost" ? { restored: false } : null,
+      coralPump:
+        id === "tides" ? { installed: false, intake: 0, bypass: 3 } : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,
       echoGallery: id === "crystal" ? normalizeEcho(null) : null,

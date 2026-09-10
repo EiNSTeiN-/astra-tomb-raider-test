@@ -404,3 +404,10 @@ and quartz reuse the existing credited stone maps and original cavern geometry.
 The camera and source-clock synchronization are also original project code. No
 external art, recordings or dependencies were added. See
 [listening-gallery notes](listening-gallery.md) for behavior and verification.
+
+The coral pump’s impeller, inspection casing, handwheels, gauge, pipes, cisterns,
+receiving channel, masonry and inscriptions are original project geometry and
+writing in `src/coral-pump*.js`. They reuse the existing coastal stone and mosaic
+textures, patinated bronze shader, hydraulic stream shader, original machinery
+synthesis and credited `stream.ogg` recording. No external assets or dependencies
+were added. See [coral pump notes](coral-pump.md) for behavior and verification.

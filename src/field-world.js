@@ -1,3 +1,5 @@
+import { buildCoralStation } from "./coral-pump-art.js";
+import { PUMP_FIELD, PUMP_SETTLE_SECONDS } from "./coral-pump-rules.js";
 import { buildFrozenStation } from "./frozen-stair.js";
 import * as THREE from "three";
 import { needsCarriedFlame, torchHandsBusy } from "./torch.js";
@@ -14,6 +16,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildCoralStation(game, f, group)) return;
   if (buildFrozenStation(game, f, group)) return;
   if (buildJungleShrine(game, f, group)) return;
   const { stoneMat: stone, darkMat: dark, goldMat: gold } = game;
@@ -145,6 +148,17 @@ export function finishFieldTask(game, f) {
   ) {
     game.cb.toast?.(
       "Release both locks and use the hauling wheel before crossing the stair.",
+    );
+    return false;
+  }
+  if (
+    game.level.id === "tides" &&
+    f.id === PUMP_FIELD &&
+    (!game.coralPump?.saved.installed ||
+      game.coralPump.stable < PUMP_SETTLE_SECONDS)
+  ) {
+    game.cb.toast?.(
+      "Install the impeller, then hold steady pump pressure between the gold ticks.",
     );
     return false;
   }

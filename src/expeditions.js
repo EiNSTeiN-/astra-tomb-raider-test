@@ -172,8 +172,8 @@ const chapters = {
     ],
     [
       "A machine of coral",
-      "The coral pump needs its impeller. Carry the surviving bronze rotor to the pump house.",
-      "Recover the pump impeller|Inspect the pump-house bearing|Install the coral pump rotor",
+      "Carry the bronze impeller to the coral pump after reading the pumpkeeper’s diagram. Seat the rotor, open the intake at least halfway and adjust the bypass until the gauge holds between its gold ticks. Steady pressure restores the flow.",
+      "Recover the pump impeller|Read the pumpkeeper’s diagram|Restore flow through the coral pump",
       "The old pump turns, shedding centuries of salt.",
     ],
     [
@@ -499,6 +499,12 @@ export function currentFieldTask(level, progress) {
 }
 
 export function carryingComponent(level, progress) {
+  if (
+    level.id === "tides" &&
+    progress.stage === 2 &&
+    progress.coralPump?.installed
+  )
+    return false;
   const mission = EXPEDITIONS[level.id]?.[progress.stage];
   return (
     !!mission?.tasks.some(

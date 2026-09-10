@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The coastal chapter’s third field mission now repairs [a physical coral pump](coral-pump.md).
+  Install the recovered impeller, then balance intake and bypass pressure for
+  steady flow. A central gauge and two smaller valve gauges show the same needle,
+  including in portrait play. The repair, both valve configurations and older
+  saves are covered by four new tests; all 487 tests and the release build pass.
+  An assisted repair and perimeter walk finished at full health. Release keyboard
+  and portrait touch repairs and four complete save/reload comparisons pass. Machinery and
+  outflow voices follow the pump, pause quietly and pass midpoint attenuation
+  checks. The guide retains the limits on pacing, graphics and subjective audio.
+
 - The mountain's fourth field mission now restores [a physical frozen stair](frozen-stair.md).
   Two locks, a broken service-gallery jump, a hauling wheel and a six-metre
   ascent replace the three scattered generic winches. The completed stair and
