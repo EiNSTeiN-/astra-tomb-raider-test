@@ -32,6 +32,9 @@ include browser views, contact checks and keyboard/touch save verification.
 
 High-quality water reflections now [refresh after quick camera changes](docs/water-reflections.md),
 with gradual blending at capture edges to remove geometric patches across the sea.
+Water also has [curved ripples filtered for viewing distance](docs/water-ripples.md),
+with stronger open seas, calmer reservoirs and quieter crystal pools. The notes
+include matched views, a GPU filtering check and the measured rendering cost.
 
 Waterfalls now use [grounded stone spillways with open feed channels](docs/waterfall-spillways.md), accelerating streaks, impact foam and spray that follows reservoir drainage.
 

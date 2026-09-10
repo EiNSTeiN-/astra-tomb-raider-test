@@ -4,10 +4,10 @@ import { EXPEDITIONS, fieldComplete } from "./expeditions.js";
 import { waterAt } from "./hydrology.js";
 import { moltenMaterial } from "./forge-effects.js";
 import { updateCoastalWater } from "./coastal-material.js";
+import { waterRipples } from "./water-ripples.js";
 
 const waveCode = `
 float waterWave(vec2 p,float t){return sin(p.x*1.7+p.y*.8-t*1.4)*.028+sin(p.x*-.9+p.y*2.3-t*.9)*.017+sin(p.x*4.7+p.y*3.1+t*.8)*.006;}
-vec2 waterSlope(vec2 p,float t){return vec2(1.7,.8)*cos(p.x*1.7+p.y*.8-t*1.4)*.028+vec2(-.9,2.3)*cos(p.x*-.9+p.y*2.3-t*.9)*.017+vec2(4.7,3.1)*cos(p.x*4.7+p.y*3.1+t*.8)*.006;}
 `;
 const common = `uniform float waterTime; uniform float waveScale; varying vec3 vWaterWorld; varying float vWaterBed;
 ${waveCode}`;
@@ -30,6 +30,9 @@ export function waterMaterial(game, site) {
   const uniforms = {
     waterTime: { value: 0 },
     waveScale: { value: ice ? 0 : 1 },
+    rippleStrength: {
+      value: site.sea ? 1.4 : game.level.biome === "crystal" ? 0.35 : 0.7,
+    },
     waterMirror: { value: null },
     waterMirrorMatrix: { value: new THREE.Matrix4() },
     mirrorWeight: { value: 0 },
@@ -58,18 +61,22 @@ export function waterMaterial(game, site) {
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <common>",
-      `#include <common>\n${common}
+      `#include <common>\n${common}\n${waterRipples}
+      uniform float rippleStrength;
       uniform sampler2D waterMirror;uniform mat4 waterMirrorMatrix;uniform float mirrorWeight;uniform vec3 waterSky;uniform vec3 splashCenter;uniform float splashTime;uniform vec2 poolSize;uniform vec2 poolCenter;uniform vec2 impactCenter;uniform float impactAmount;uniform float impactHalfWidth;`,
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <normal_fragment_begin>",
       `#include <normal_fragment_begin>
-      vec2 slope=waterSlope(vWaterWorld.xz,waterTime)*waveScale;
+      vec2 waterDx=dFdx(vWaterWorld.xz),waterDy=dFdy(vWaterWorld.xz);
+      vec2 slope=waterRipples(vWaterWorld.xz,waterTime,waterDx,waterDy)*waveScale*rippleStrength;
       float age=waterTime-splashTime;float radius=length(vWaterWorld.xz-splashCenter.xz);
-      float ring=sin(radius*16.0-age*13.0)*exp(-pow((radius-age*1.8)*2.5,2.0))*exp(-age*.85)*step(0.0,age);
+      float ringPhase=radius*16.0-age*13.0;
+      float ring=sin(ringPhase)*waterBandWeight(vec2(dFdx(ringPhase),dFdy(ringPhase)))*exp(-pow((radius-age*1.8)*2.5,2.0))*exp(-age*.85)*step(0.0,age);
       slope+=normalize(vWaterWorld.xz-splashCenter.xz+vec2(.0001))*ring*.12;
       vec2 impactDelta=vWaterWorld.xz-impactCenter;impactDelta.x-=clamp(impactDelta.x,-impactHalfWidth,impactHalfWidth);float impactRadius=length(impactDelta);
-      slope+=normalize(impactDelta+vec2(.0001))*sin(impactRadius*10.0-waterTime*6.0)*exp(-impactRadius*.65)*impactAmount*.045;
+      float impactPhase=impactRadius*10.0-waterTime*6.0;
+      slope+=normalize(impactDelta+vec2(.0001))*sin(impactPhase)*waterBandWeight(vec2(dFdx(impactPhase),dFdy(impactPhase)))*exp(-impactRadius*.65)*impactAmount*.045;
       normal=normalize(mat3(viewMatrix)*vec3(-slope.x,1.0,-slope.y));`,
     );
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -80,7 +87,10 @@ export function waterMaterial(game, site) {
       float deep=1.0-exp(-waterDepth*.7);
       diffuseColor.rgb=mix(diffuseColor.rgb*1.45,diffuseColor.rgb*.4,deep);
       float shore=1.0-smoothstep(.025,.32,waterDepth);
-      float foam=shore*(.35+.65*pow(.5+.5*sin(vWaterWorld.x*8.0+vWaterWorld.z*6.0-waterTime*2.0),3.0))*waveScale;
+      float foamPhase=vWaterWorld.x*8.0+vWaterWorld.z*6.0-waterTime*2.0;
+      vec2 foamStep=vec2(dFdx(foamPhase),dFdy(foamPhase));
+      float foamPattern=.3125+.46875*sin(foamPhase)*waterBandWeight(foamStep)-.1875*cos(foamPhase*2.0)*waterBandWeight(foamStep*2.0)-.03125*sin(foamPhase*3.0)*waterBandWeight(foamStep*3.0);
+      float foam=shore*(.35+.65*foamPattern)*waveScale;
       vec2 foamDelta=vWaterWorld.xz-impactCenter;foamDelta.x-=clamp(foamDelta.x,-impactHalfWidth,impactHalfWidth);
       foam+=exp(-length(foamDelta)*1.3)*impactAmount*.5;
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.7,.78,.72),foam*.6);
@@ -101,7 +111,7 @@ export function waterMaterial(game, site) {
       #include <opaque_fragment>`,
     );
   };
-  material.customProgramCacheKey = () => `vesper-water-2-${ice}`;
+  material.customProgramCacheKey = () => `vesper-water-3-${ice}`;
   return material;
 }
 

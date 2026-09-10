@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Water now uses [curved ripples filtered for viewing distance](water-ripples.md),
+  with stronger open seas and calmer enclosed pools. The filtering fixture
+  reduced spatial sampling error by 82–93% in its six cases. All 488 tests and
+  the release build pass; eight chapter views, frozen-water isolation and
+  release keyboard/touch swimming, diving, surfacing and save recovery pass.
+  The sampled coastal view increased mean GPU time by 5.2% on High and 3.5% on
+  Low. The guide includes comparison images, measurement limits and the
+  remaining production requirements.
+
 - High-quality water now [refreshes reflections after camera changes](water-reflections.md)
   and blends their capture edges. Matched coastal views reproduce and remove
   the old sharp boundary across the sea. All 488 tests and the release build
