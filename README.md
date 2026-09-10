@@ -127,6 +127,11 @@ Counterweight stones use **E / Use** to grip or release. While gripping, **W / U
 
 Desert mirrors use **E / Use** at each numbered handwheel. Follow the reflected sunlight and activate the receiver when it lights up. The sanctuary tablet also offers diagram controls for the same saved mirrors.
 
+The desert's sixth field mission restores [the eastern reflector](docs/eastern-reflector.md).
+Brace the fallen mirror, walk up its timber back and jump to the rear locking
+pin. Jump west and descend the service platforms, then use the hauling wheel.
+Cross beneath the raised mirror to read the threshold; the seated state persists.
+
 The desert’s **Surveyor’s Cleft** branches east from the western survey path.
 Climb 37 handholds to three rest terraces and a summit record. **E / Use** grips;
 **WASD / arrows** follow the wall. At a broken span, use **Jump + direction**, then

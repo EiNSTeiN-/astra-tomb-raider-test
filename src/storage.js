@@ -1,3 +1,4 @@
+import { normalizeEasternReflector } from "./eastern-reflector-rules.js";
 import { normalizeCoralPump } from "./coral-pump-rules.js";
 import { normalizeFrozenStair } from "./frozen-stair-rules.js";
 import { normalizeCourier } from "./courier-rules.js";
@@ -138,6 +139,13 @@ export function normalizeSave(value) {
               field: strings(v.field),
             })
           : null,
+      easternReflector:
+        key === "sands"
+          ? normalizeEasternReflector(v.easternReflector, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       cleft: key === "sands" ? normalizeCleft(v.cleft) : null,
       pressureRelay:
         key === "embers" ? normalizePressure(v.pressureRelay) : null,
@@ -236,6 +244,7 @@ export class SaveStore {
       frozenStair: id === "frost" ? { restored: false } : null,
       coralPump:
         id === "tides" ? { installed: false, intake: 0, bypass: 3 } : null,
+      easternReflector: id === "sands" ? { raised: false } : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,
       echoGallery: id === "crystal" ? normalizeEcho(null) : null,

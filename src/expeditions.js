@@ -84,8 +84,8 @@ const chapters = {
     ],
     [
       "The eastern shadow",
-      "A fallen reflector has jammed the eastern chamber. Its cables can turn the whole assembly.",
-      "Tension the north hauling cable|Release the broken locking pin|Winch the eastern reflector upright",
+      "Brace the fallen reflector, climb its timber back and jump to the rear gallery to release the locking pin. Descend by the west service platforms, use the hauling wheel, then cross beneath the raised mirror to the eastern threshold.",
+      "Brace the fallen reflector|Release the rear locking pin|Cross the eastern threshold",
       "The eastern reflector lifts clear of the chamber entrance.",
     ],
     [
@@ -435,7 +435,7 @@ const chapters = {
 
 const patterns = {
   verdant: ["sbb", "lsd", "vvv", "scs", "lsd", "www", "bbb", "lsd"],
-  sands: ["sss", "lsd", "vvv", "lsd", "csc", "www", "www", "lsd", "ssr"],
+  sands: ["sss", "lsd", "vvv", "lsd", "csc", "wws", "www", "lsd", "ssr"],
   frost: ["wcw", "lsd", "scs", "wws", "lsd", "cww", "cwc", "lsd"],
   tides: ["vvv", "vvv", "lsd", "csc", "vvv", "www", "vvv", "vvv", "lsd"],
   embers: ["vvv", "lsd", "vvv", "lsd", "vvv", "bbb", "lsd", "vvv"],

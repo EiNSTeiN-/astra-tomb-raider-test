@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The desert's sixth field mission now restores [the eastern reflector](eastern-reflector.md).
+  Brace its fallen timber back, jump to a rear locking pin, descend the west
+  service platforms, haul the mirror upright and cross beneath it. Elevated
+  darts, collision, camera obstruction and save recovery follow the structure.
+  Three positional machinery emitters and the adaptive lifting score track
+  hauling and pause; measured distance falloff and resource cleanup pass.
+  All 499 tests, the build, a continuous assisted route with live hazards and
+  enemies, and seven production keyboard/touch/reload checks pass. The guide
+  retains the graphics, pacing, listening and broader device limitations.
+
 - The tidekeeper's archive now has [rounded, translucent bubble guides](archive-bubbles.md)
   with clear centers, soft rims and source, surface and near-camera fades.
   Rise speed stays consistent across well depths; a regression prevents

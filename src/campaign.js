@@ -1,3 +1,4 @@
+import { addEasternReflector } from "./eastern-reflector-rules.js";
 import { addFrozenStair } from "./frozen-stair-rules.js";
 import { addSurveyorsCleft } from "./cleft-rules.js";
 import { addPressureRelay } from "./pressure-rules.js";
@@ -523,24 +524,27 @@ export function createMap(level) {
     }
     connect(previous, rooms[stage + 1]);
   }
-  return addFrozenStair(
-    addOrbitVault(
-      addEchoGallery(
-        addPressureRelay(
-          addSurveyorsCleft(
-            addBellHoist(
-              addFireVault(
-                {
-                  size,
-                  grid,
-                  rooms,
-                  sideRooms,
-                  fieldSites,
-                  paths,
-                  features,
-                  enemies,
-                  spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
-                },
+  return addEasternReflector(
+    addFrozenStair(
+      addOrbitVault(
+        addEchoGallery(
+          addPressureRelay(
+            addSurveyorsCleft(
+              addBellHoist(
+                addFireVault(
+                  {
+                    size,
+                    grid,
+                    rooms,
+                    sideRooms,
+                    fieldSites,
+                    paths,
+                    features,
+                    enemies,
+                    spawn: { x: rooms[0].x, z: rooms[0].z + 2 },
+                  },
+                  level,
+                ),
                 level,
               ),
               level,

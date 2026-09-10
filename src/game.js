@@ -1,4 +1,15 @@
 import {
+  buildEasternReflector,
+  updateEasternReflector,
+  reflectorHint,
+  reflectorInteract,
+  reflectorObjective,
+} from "./eastern-reflector.js";
+import {
+  reflectorBlocked,
+  reflectorOccludes,
+} from "./eastern-reflector-rules.js";
+import {
   buildCoralPump,
   updateCoralPump,
   coralPumpInteract,
@@ -824,6 +835,7 @@ export class Adventure {
     buildFireVault(this);
     buildBellHoist(this);
     buildFrozenStair(this);
+    buildEasternReflector(this);
     buildCoralPump(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
@@ -1337,6 +1349,7 @@ export class Adventure {
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
+    if (reflectorBlocked(this, x, z, worldY, clearance)) return false;
     if (coralPumpBlocked(this, x, z, worldY, clearance)) return false;
     if (cleftBlocked(this, x, z, worldY, clearance)) return false;
     if (pressureBlocked(this, x, z, worldY, clearance)) return false;
@@ -1362,6 +1375,7 @@ export class Adventure {
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
     if (frozenStairOccludes(this, from, to)) return false;
+    if (reflectorOccludes(this, from, to)) return false;
     if (coralPumpOccludes(this, from, to)) return false;
     if (cleftOccludes(this, from, to)) return false;
     if (pressureOccludes(this, from, to)) return false;
@@ -1459,6 +1473,7 @@ export class Adventure {
     this.actualMoveSpeed = null;
     updateBellHoist(this, dt);
     updateFrozenStair(this, dt);
+    updateEasternReflector(this, dt);
     updateCoralPump(this, dt);
     updatePressureRelay(this, dt);
     this.dodgeCooldown = Math.max(0, (this.dodgeCooldown || 0) - dt);
@@ -1632,7 +1647,9 @@ export class Adventure {
         this.progress.found.includes(f.id) ||
         (f.type === "field" &&
           (f.stage < this.progress.stage ||
-            this.progress.field.includes(f.id))) ||
+            this.progress.field.includes(f.id) ||
+            (f.reflectorHeight !== undefined &&
+              Math.abs(p.y - f.group.position.y) > 0.8))) ||
         (f.type === "mechanism" && f.stage < this.progress.stage) ||
         (f.type === "solar" &&
           (f.stage !== this.progress.stage ||
@@ -1980,6 +1997,7 @@ export class Adventure {
     if (orbitInteract(this)) return;
     if (bellHoistInteract(this)) return;
     if (frozenStairInteract(this)) return;
+    if (reflectorInteract(this)) return;
     if (coralPumpInteract(this)) return;
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
@@ -2300,6 +2318,7 @@ export class Adventure {
     const gallery = galleryObjective(this);
     const vault = fireVaultObjective(this);
     const hoist = bellHoistObjective(this);
+    const reflector = reflectorObjective(this);
     const stair = frozenStairObjective(this);
     const pump = coralPumpObjective(this);
     const cleft = cleftObjective(this);
@@ -2310,7 +2329,8 @@ export class Adventure {
     const target =
       hoist || cleft || pressure || echo || orbit || courier
         ? null
-        : pump?.target ||
+        : reflector?.target ||
+          pump?.target ||
           stair?.target ||
           vault?.target ||
           (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
@@ -2343,6 +2363,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        reflector?.text ||
         pump?.text ||
         stair?.text ||
         courier?.text ||
@@ -2411,6 +2432,7 @@ export class Adventure {
           pressureHint(this) ||
           cleftHint(this) ||
           bellHoistHint(this) ||
+          reflectorHint(this) ||
           frozenStairHint(this) ||
           coralPumpHint(this) ||
           fireVaultHint(this) ||
@@ -2439,7 +2461,7 @@ export class Adventure {
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
       task: coralPumpObjective(this)
         ? "valve"
-        : this.frozenStair?.motion
+        : this.frozenStair?.motion || this.easternReflector?.motion
           ? "lift"
           : courierObjective(this)
             ? "crosswind"
@@ -2567,6 +2589,7 @@ export class Adventure {
     updateFireVault(this, 0);
     updateBellHoist(this, 0);
     updateFrozenStair(this, 0);
+    updateEasternReflector(this, 0);
     updateCoralPump(this, 0);
     updatePressureRelay(this, 0);
     updateCleftArt(this);

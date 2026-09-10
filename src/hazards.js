@@ -162,8 +162,9 @@ export function buildHazards(game) {
     const x = f.x * 7,
       z = f.z * 7,
       y =
-        f.stairHeight !== undefined
-          ? (f.group?.position.y ?? game.groundHeight(x, z) + f.stairHeight)
+        f.stairHeight !== undefined || f.reflectorHeight !== undefined
+          ? (f.group?.position.y ??
+            game.groundHeight(x, z) + (f.stairHeight ?? f.reflectorHeight))
           : game.groundHeight(x, z),
       root = new THREE.Group();
     root.position.set(x, y, z);
@@ -240,21 +241,50 @@ export function buildHazards(game) {
       blade.position.y = -5;
       hazard.fx.add(blade);
     } else if (spec.kind === "darts") {
-      for (const side of [-1, 1]) {
-        box(0.8, 2.8, 5.5, stone, side * 5.7, 1.4, 0);
+      if (f.reflectorHeight !== undefined) {
+        // Ports in the east parapet leave the west service jump open.
+        const parapet = box(0.35, 2.2, 3.5, stone, 3.95, 1.1, -0.5);
+        game.cameraSurfaces?.capture(parapet);
+        game.easternReflector?.solids.push({
+          x: x + 3.95,
+          z: z - 0.5,
+          w: 0.175,
+          d: 1.75,
+          bottom: y,
+          top: y + 2.2,
+        });
         for (const dz of [-1.3, 0, 1.3])
           game.cylinder(
             0.13,
             0.13,
             0.2,
             glow,
-            side * 5.21,
-            1.3,
+            3.72,
+            1.2,
             dz,
             root,
             8,
           ).rotation.z = Math.PI / 2;
-      }
+        hazard.dartStart = 3.55;
+        hazard.dartEnd = -6;
+        marker.scale.set(0.62, 0.25, 1);
+        marker.position.z = -0.5;
+      } else
+        for (const side of [-1, 1]) {
+          box(0.8, 2.8, 5.5, stone, side * 5.7, 1.4, 0);
+          for (const dz of [-1.3, 0, 1.3])
+            game.cylinder(
+              0.13,
+              0.13,
+              0.2,
+              glow,
+              side * 5.21,
+              1.3,
+              dz,
+              root,
+              8,
+            ).rotation.z = Math.PI / 2;
+        }
     } else if (spec.kind === "ice") {
       if (f.stairHeight !== undefined) {
         // Fit this crown to the surviving service gallery. The wide field
@@ -409,9 +439,13 @@ export function updateHazards(game, dt) {
         for (const dz of [-1.3, 0, 1.3]) {
           spawnBolt(game, {
             group: {
-              position: new THREE.Vector3(h.x - 5, h.y - 1.15, h.z + dz),
+              position: new THREE.Vector3(
+                h.x + (h.dartStart ?? -5),
+                h.y - 1.15,
+                h.z + dz,
+              ),
             },
-            aim: new THREE.Vector3(h.x + 6, h.y, h.z + dz),
+            aim: new THREE.Vector3(h.x + (h.dartEnd ?? 6), h.y, h.z + dz),
             spec: h.spec,
           });
         }

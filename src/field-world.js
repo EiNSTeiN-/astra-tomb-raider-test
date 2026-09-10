@@ -1,3 +1,4 @@
+import { buildReflectorStation } from "./eastern-reflector.js";
 import { buildCoralStation } from "./coral-pump-art.js";
 import { PUMP_FIELD, PUMP_SETTLE_SECONDS } from "./coral-pump-rules.js";
 import { buildFrozenStation } from "./frozen-stair.js";
@@ -16,6 +17,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildReflectorStation(game, f, group)) return;
   if (buildCoralStation(game, f, group)) return;
   if (buildFrozenStation(game, f, group)) return;
   if (buildJungleShrine(game, f, group)) return;
@@ -138,6 +140,16 @@ export function finishFieldTask(game, f) {
     game.cb.toast?.(
       "This brazier needs a carried flame. Light your torch at a camp or a burning brazier with T / Torch.",
       5500,
+    );
+    return false;
+  }
+  if (
+    f.reflectorHeight !== undefined &&
+    f.step === 2 &&
+    !game.easternReflector?.saved.raised
+  ) {
+    game.cb.toast?.(
+      "Brace the reflector, release its rear pin and use the hauling wheel first.",
     );
     return false;
   }
