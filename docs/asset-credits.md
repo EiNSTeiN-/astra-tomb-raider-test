@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The quarry depth helper in `src/quarry-depth.js` is original project code using
+Three.js's existing depth material and the survey house's existing geometry
+buffers. No external art, audio or dependency was added. Its documentation
+image is a lossless conversion of the actual game canvas. See
+[quarry rendering comparisons and measurements](quarry-rendering.md).
+
 The ruined survey house in `src/cleft-masonry.js` is original project geometry:
 its stepped buttresses, broken galleries, uneven courses, recesses and floor
 sockets reuse the existing sandstone maps and original solar relief/arch

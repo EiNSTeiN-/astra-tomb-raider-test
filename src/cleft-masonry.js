@@ -6,6 +6,7 @@ import {
   solarPanelGeometry,
 } from "./desert-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
+import { addQuarryDepth } from "./quarry-depth.js";
 
 // The survey face is the surviving front of a roofless building. Its rear
 // galleries and buttresses occupy the quarry pad, leaving the climbing face
@@ -262,5 +263,6 @@ export function buildCleftMasonry(game, c, stone, dark) {
       box(1.15, 0.18, 0.8, x, y - 0.43, -2.55);
     }
   mergeArchitecture(root);
+  addQuarryDepth(root);
   return root;
 }

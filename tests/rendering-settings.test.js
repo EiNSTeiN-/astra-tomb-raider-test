@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import * as THREE from "three";
 import { Adventure } from "../src/game.js";
 import { SolidContactPass } from "../src/rendering.js";
+import { addQuarryDepth } from "../src/quarry-depth.js";
 
 test("contact depth draws suppress duplicate shadows and preserve pending updates, including failures", () => {
   for (const enabled of [false, true])
@@ -131,4 +132,78 @@ test("quality switches refresh shadow receivers once, including hidden and share
   geometry.dispose();
   stone.dispose();
   leaves.dispose();
+});
+
+test("quarry depth shares exact triangles and transforms without adding color, shadows, normal surfaces or ray hits", () => {
+  const scene = new THREE.Scene(),
+    root = new THREE.Group(),
+    material = new THREE.MeshStandardMaterial(),
+    originals = [
+      new THREE.BoxGeometry(3, 4, 2),
+      new THREE.BoxGeometry(2, 5, 3),
+    ].map((geometry, i) => {
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(i * 5, i * 2, 0);
+      mesh.rotation.set(0.1 * i, 0.3, 0);
+      mesh.castShadow = mesh.receiveShadow = true;
+      root.add(mesh);
+      return mesh;
+    });
+  scene.add(root);
+  scene.updateMatrixWorld(true);
+  const ray = new THREE.Raycaster(
+      new THREE.Vector3(0, 0, 8),
+      new THREE.Vector3(0, 0, -1),
+    ),
+    before = ray
+      .intersectObject(root, true)
+      .map((h) => ({ object: h.object, point: h.point.clone() })),
+    geometries = originals.map((m) => m.geometry);
+  assert(before.length > 0);
+  addQuarryDepth(root);
+  const depths = root.children.filter((m) => m.userData.quarryDepth);
+  assert.equal(depths.length, originals.length);
+  assert.equal(new Set(depths.map((m) => m.material)).size, 1);
+  for (const [i, depth] of depths.entries()) {
+    assert.equal(
+      depth.geometry,
+      geometries[i],
+      "no copied or simplified buffers",
+    );
+    assert.equal(originals[i].material, material);
+    assert(depth.renderOrder < originals[i].renderOrder);
+    assert.equal(depth.material.colorWrite, false);
+    assert.equal(depth.material.depthWrite, true);
+    assert.equal(depth.material.depthTest, true);
+    assert.equal(depth.material.depthFunc, THREE.LessEqualDepth);
+    assert.equal(depth.castShadow || depth.receiveShadow, false);
+  }
+  scene.updateMatrixWorld(true);
+  assert.deepEqual(
+    ray
+      .intersectObject(root, true)
+      .map((h) => ({ object: h.object, point: h.point.clone() })),
+    before,
+  );
+  root.position.set(203, -1.4, 217);
+  root.rotation.y = 0.4;
+  root.scale.set(1.2, 0.9, 1.1);
+  scene.updateMatrixWorld(true);
+  for (let i = 0; i < depths.length; i++)
+    assert.deepEqual(depths[i].matrixWorld, originals[i].matrixWorld);
+  const pass = Object.assign(Object.create(SolidContactPass.prototype), {
+    scene,
+    _visibilityCache: [],
+  });
+  for (const enabled of [false, true]) {
+    depths.forEach((m) => (m.visible = enabled));
+    pass._overrideVisibility();
+    assert(depths.every((m) => !m.visible));
+    assert(originals.every((m) => m.visible));
+    pass._restoreVisibility();
+    assert(depths.every((m) => m.visible === enabled));
+  }
+  geometries.forEach((g) => g.dispose());
+  depths[0].material.dispose();
+  material.dispose();
 });

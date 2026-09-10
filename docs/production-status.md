@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The quarry now draws its opaque masonry depth before shading the stone,
+  reducing hidden-surface work while sharing its existing geometry buffers.
+  Fifteen matched views across Low, Balanced and High found zero differing
+  RGBA values. A fixed Radeon 780M overview measured GPU reductions of 17.0%
+  in High and 27.5% in Low; a distant view had little change. All 476 tests and
+  the release build passed. The full assisted climb, rear walk, release climbing,
+  keyboard/touch movement and saved recovery passed at full health. Draft
+  attenuation, music selection and resource cleanup also passed.
+  [Rendering comparisons and measurements](quarry-rendering.md) record the
+  added depth submissions, benchmark limits and remaining production requirements.
+
 - The quarry climb now occupies a ruined survey house with stepped buttresses,
   broken rear galleries, an uneven roofline and masonry on both faces. New
   collision and camera bounds leave the rear passages and climbing route clear.

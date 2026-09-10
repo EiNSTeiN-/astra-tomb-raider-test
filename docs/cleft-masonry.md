@@ -90,6 +90,10 @@ and cleared the climbing state.
 
 ## Rendering cost
 
+The following measurements describe the original survey house art milestone.
+A subsequent [quarry depth optimization](quarry-rendering.md) preserves its
+appearance and reduces GPU shading cost in a separately measured close view.
+
 A fixed quarry overview on Radeon 780M at 1280 × 800, pixel ratio 1, compared
 four-second before/after/after/before samples for each quality. Both variants
 used the current game loop, terrain, lighting and sun-shadow settings. The
