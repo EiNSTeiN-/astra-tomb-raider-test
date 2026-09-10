@@ -268,8 +268,9 @@ change, added geometry cost, positional-audio checks and saved-climb recovery.
 
 The nearer desert banks now have broader shoulders and varying crests, reducing
 their rectangular outlines while retaining the existing walking floors and
-climbing structures. [Bank comparisons and route checks](docs/desert-banks.md)
-include matching views, measured slope changes and the remaining limitations.
+climbing structures. Their [lower slopes now rise more gently from the routes](docs/desert-transitions.md),
+opening views of the ruins. The comparison includes measured slope changes,
+GPU costs, route/save checks and the remaining fixed boundaries.
 
 Desert palms now have fuller crowns, angled folded leaflets, tapered stems and
 raised old leaf scars. Wind keeps the frond bases fixed and moves the leaf tips

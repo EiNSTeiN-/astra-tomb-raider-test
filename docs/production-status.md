@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Desert banks now have rounded lower slopes beside the walking routes, opening
+  views between their shoulders. Median near-route slope fell from 38.80° to
+  17.85° while 51,375 walking-floor and 4,805 reservoir-floor samples remained
+  exact. All 473 tests and the release build passed. The assisted climbing route
+  recovered its record and returned at full health; release climbing, keyboard
+  sprinting, portrait touch controls and saved recovery passed. Bird attenuation
+  and terrain-resource cleanup also passed. A fixed Radeon 780M court view
+  measured GPU increases of 3.1% in High and 8.9% in Low.
+  [Slope comparisons and measurements](desert-transitions.md) record the more
+  open views, retained route boundaries and remaining production requirements.
+
 - Sun shadows now use smaller calibrated offsets and a stable world texel
   alignment; High uses a 4096-square map and Balanced retains 2048. A controlled
   GPU fixture reduced shadow separation from about 20 cm to 2–3 cm and removed

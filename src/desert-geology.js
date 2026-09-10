@@ -26,7 +26,10 @@ export function desertBankRise(x, z, distance, seed) {
     across = z * 0.83 - x * 0.56,
     crest = desertNoise(along * 0.028, across * 0.047, seed + 307),
     shoulder = desertNoise(along * 0.018, across * 0.035, seed + 503),
-    rise = 1 - Math.exp(-distance / (5 + shoulder * 9));
+    // A rounded toe eases out of the route floor. A linear exponent made the
+    // first off-route sample do most of the climb, leaving a straight cliff
+    // even after the higher crest was smoothed.
+    rise = 1 - Math.exp(-Math.pow(distance / (10 + shoulder * 9), 1.6));
   return rise * (5 + crest * 11) + Math.max(0, distance - 12) * 0.15;
 }
 export function desertRouteDistance(map, x, z) {

@@ -36,11 +36,12 @@ test("broader desert banks preserve the previously published walking floor", () 
   );
 });
 
-test("desert banks have broader shoulders at the route edges", () => {
+test("desert banks ease out of route floors before rising into their shoulders", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),
     { step, width } = profile,
-    slopes = [];
+    slopes = [],
+    toes = [];
   for (let iz = 1; iz < width - 1; iz++)
     for (let ix = 1; ix < width - 1; ix++) {
       const x = ix * step,
@@ -54,13 +55,27 @@ test("desert banks have broader shoulders at the route edges", () => {
           (profile.height(x, z + step) - profile.height(x, z - step)) /
           (2 * step);
       slopes.push((Math.atan(Math.hypot(dx, dz)) * 180) / Math.PI);
+      if (Math.abs(distance - step) < 1e-6)
+        for (const [dx, dz] of [
+          [step, 0],
+          [-step, 0],
+          [0, step],
+          [0, -step],
+        ])
+          if (desertRouteDistance(map, x + dx, z + dz) === 0)
+            toes.push(profile.height(x, z) - profile.height(x + dx, z + dz));
     }
   slopes.sort((a, b) => a - b);
   assert.equal(slopes.length, 7985);
-  // The previous generic bank measured 45.90 / 60.79 degrees here. These
-  // tolerances retain wider shoulders without prescribing individual crests.
-  assert(slopes[Math.floor(slopes.length * 0.5)] < 41);
-  assert(slopes[Math.floor(slopes.length * 0.9)] < 56);
+  // b02fd56 measured 38.80 / 52.90 degrees here, with first-interval rises
+  // reaching 4.50 m. Check the actual sampled terrain, including terrace and
+  // erosion contributions, so a soft crest cannot conceal another steep toe.
+  assert(slopes[Math.floor(slopes.length * 0.5)] < 22);
+  assert(slopes[Math.floor(slopes.length * 0.9)] < 35);
+  toes.sort((a, b) => a - b);
+  assert(toes.length > 4000);
+  assert(toes[Math.floor(toes.length * 0.9)] < 0.9);
+  assert(toes.at(-1) < 1.5);
 });
 
 test("desert erosion retains every walking-cell boundary, feature foundation, reservoir and climbing pad", () => {

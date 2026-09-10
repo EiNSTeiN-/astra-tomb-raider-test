@@ -1,5 +1,9 @@
 # Desert banks
 
+The later [rounded lower-slope revision](desert-transitions.md) eases the steep
+first interval that remained beside walking routes after this crest update.
+The measurements below describe this earlier milestone.
+
 The desert's near and middle-distance banks now rise over broader shoulders
 with varying crest heights. Previously, the generic terrain rose rapidly beside
 the square walking cells, making many ridges look like rectangular blocks.

@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The rounded lower desert slopes in `src/desert-geology.js` are original
+procedural project code. They reuse the existing credited sand and sandstone
+maps, with no new external model, image, recording, music or dependency. See
+[slope comparisons and verification](desert-transitions.md).
+
 The directional-shadow calibration, quality sizing and stabilized projection
 in `src/sun-shadows.js` are original project code using Three.js's existing
 shadow renderer. No external art, audio or dependency was added. See
