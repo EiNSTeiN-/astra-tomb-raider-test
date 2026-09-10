@@ -94,13 +94,14 @@ export function waterMaterial(game, site) {
       float fresnel=.025+.62*pow(1.0-max(0.0,dot(waterN,waterV)),5.0);
       vec4 mirrorUv=waterMirrorMatrix*vec4(vWaterWorld,1.0);
       vec2 reflectedUv=mirrorUv.xy/max(.0001,mirrorUv.w)+slope*.014;
-      float inside=step(0.001,reflectedUv.x)*step(reflectedUv.x,.999)*step(.001,reflectedUv.y)*step(reflectedUv.y,.999);
+      vec2 mirrorEdge=min(reflectedUv,1.0-reflectedUv);
+      float inside=smoothstep(.001,.035,min(mirrorEdge.x,mirrorEdge.y))*step(.0001,mirrorUv.w);
       vec3 reflected=mix(waterSky*.58,texture2D(waterMirror,clamp(reflectedUv,.001,.999)).rgb,mirrorWeight*inside);
       outgoingLight=mix(outgoingLight,reflected,fresnel);
       #include <opaque_fragment>`,
     );
   };
-  material.customProgramCacheKey = () => `vesper-water-1-${ice}`;
+  material.customProgramCacheKey = () => `vesper-water-2-${ice}`;
   return material;
 }
 

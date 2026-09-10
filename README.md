@@ -30,6 +30,9 @@ Crouching now uses [lowered hands and relaxed fingers](docs/explorer-crouch.md),
 with walking arm swing that settles when movement stops. The comparison notes
 include browser views, contact checks and keyboard/touch save verification.
 
+High-quality water reflections now [refresh after quick camera changes](docs/water-reflections.md),
+with gradual blending at capture edges to remove geometric patches across the sea.
+
 Waterfalls now use [grounded stone spillways with open feed channels](docs/waterfall-spillways.md), accelerating streaks, impact foam and spray that follows reservoir drainage.
 
 Jungle foliage now has [fitted leaf silhouettes and shared cluster textures](docs/jungle-leaves.md). The notes include matching views, GPU timings and the added memory cost.
@@ -249,7 +252,7 @@ Guardians route around cover, investigate the player's last visible position, an
 
 Guardians now have carved masks, layered stone armor, articulated limbs, and distinct maces, forearm blades, staffs, and shields. Foot placement follows the terrain, and their poses show each attack and recovery window. Eight regional material palettes weather their stone and metal. Nearby models use about 20–22 thousand triangles, while distant models retain the silhouette at roughly 30% of that geometry; each guardian uses three character draw calls. Staff bolts and shot tracers now align with the visible lens, shield, and chest core. See [guardian art notes](docs/guardian-art.md) for verification and remaining limits.
 
-Liquid pools have excavated beds and shallow banks. Vesper automatically swims in deeper water, can climb a nearby ledge with Space, and resumes at the water surface after reloading a swimming save. Completing hydraulic work lowers the reservoir and exposes its banks; that drainage restores immediately on load. Animated surface normals, depth-dependent color and transparency, shoreline foam, stroke ripples, waterfall ribbons, spray, and mist replace the earlier flat water treatment. High quality captures a single nearby planar reflection at 512 px, at most once every three active frames; other settings use a sky-color reflection approximation.
+Liquid pools have excavated beds and shallow banks. Vesper automatically swims in deeper water, can climb a nearby ledge with Space, and resumes at the water surface after reloading a swimming save. Completing hydraulic work lowers the reservoir and exposes its banks; that drainage restores immediately on load. Animated surface normals, depth-dependent color and transparency, shoreline foam, stroke ripples, waterfall ribbons, spray, and mist replace the earlier flat water treatment. High quality captures a single nearby planar reflection at 512 px. Stable views update every three active frames; camera movement beyond the reuse tolerance, resizing, changing surfaces and drainage trigger an immediate refresh. Capture edges blend into the sky-color approximation, which also serves other quality settings. See [water reflection verification](docs/water-reflections.md) for the rendering cost and limits.
 
 The 28 base camps now have stone fire rings, charred timber, glowing coals, fitted supply chests, rolled bedding and small expedition equipment. Animated flame tongues, embers and light smoke use the existing positioned fire sound. Resting and torch lighting keep their familiar controls; the chests now have solid footprints. See [camp artwork comparisons](docs/camp-art.md) for verification and rendering cost.
 

@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- High-quality water now [refreshes reflections after camera changes](water-reflections.md)
+  and blends their capture edges. Matched coastal views reproduce and remove
+  the old sharp boundary across the sea. All 488 tests and the release build
+  pass; inspected surfaces in all eight chapters compile, and seven chapter
+  transitions release their reflection targets. Release keyboard and portrait
+  touch swimming and complete save/reload comparisons pass at full health.
+  Faster camera motion can increase capture frequency; the guide records that
+  cost and the remaining graphics, pacing and device limitations.
+
 - The coastal chapter’s third field mission now repairs [a physical coral pump](coral-pump.md).
   Install the recovered impeller, then balance intake and bypass pressure for
   steady flow. A central gauge and two smaller valve gauges show the same needle,

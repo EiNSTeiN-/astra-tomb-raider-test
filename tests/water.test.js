@@ -186,6 +186,63 @@ test("one reflection capture is budgeted every three active frames and restores 
   mirror.dispose();
 });
 
+test("water reflections refresh after camera recovery, turning, resizing and drainage while retaining the idle budget", () => {
+  const g = liquidGame();
+  g.player.position.set(0, 0, 3);
+  g.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+  g.camera.position.set(0, 3, 5);
+  g.camera.lookAt(0, 0, 0);
+  g.camera.updateMatrixWorld();
+  g.world.updateMatrixWorld(true);
+  const mirror = new WaterReflection(g),
+    water = g.waterMeshes[0];
+  mirror.reflector.onBeforeRender = () => {};
+  mirror.render();
+  function next(changed) {
+    const before = mirror.captures;
+    mirror.frame = 3; // A frame that the normal cadence would skip.
+    mirror.render();
+    assert.equal(mirror.captures, before + Number(changed));
+    assert.equal(water.visible, true);
+  }
+  next(false);
+  g.camera.position.x += 0.1;
+  next(false);
+  g.camera.position.x += 0.2;
+  next(true);
+  next(false);
+  g.camera.rotateY(THREE.MathUtils.degToRad(1));
+  next(false);
+  g.camera.rotateY(THREE.MathUtils.degToRad(2));
+  next(true);
+  g.camera.aspect = 0.6;
+  g.camera.updateProjectionMatrix();
+  next(true);
+  water.position.y -= 0.02;
+  next(true);
+  g.store.data.settings.quality = "medium";
+  next(false);
+  assert.equal(water.material.userData.waterUniforms.mirrorWeight.value, 0);
+  g.store.data.settings.quality = "high";
+  next(true);
+  assert.equal(water.material.userData.waterUniforms.mirrorWeight.value, 1);
+
+  // A failed capture must not mark the new viewpoint as reusable.
+  const before = mirror.capturePosition.clone();
+  g.camera.position.x += 1;
+  g.camera.updateMatrixWorld();
+  mirror.reflector.onBeforeRender = () => {
+    throw Error("capture interrupted");
+  };
+  mirror.frame = 3;
+  assert.throws(() => mirror.render(), /capture interrupted/);
+  assert.deepEqual(mirror.capturePosition, before);
+  mirror.reflector.onBeforeRender = () => {};
+  next(true);
+  next(false);
+  mirror.dispose();
+});
+
 test("a waterfall shares its enclosing reservoir and follows the restored drain level visually and acoustically", () => {
   const g = liquidGame();
   g.waterMeshes = [];
