@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The coastal wells now have [natural rock banks beneath their marble courts](coastal-banks.md).
+  Separate slab maps and an earlier slope transition remove stretched paving
+  from steep banks. Twenty-six matched coastal pairs retain geometry counts;
+  seven selected other-chapter views are pixel-identical. The compiled shader
+  passes a six-angle material check, and all 12 terrain textures release on
+  chapter change. All 491 tests, the build and release keyboard/touch archive
+  recovery and reload checks pass. The new maps add an estimated 16 MiB of
+  terrain texture memory; sampled GPU time rose 9.9% on High and 17.3% on Low,
+  with substantial High timing variation. The guide records the comparison,
+  cost and remaining graphics, pacing, listening and device requirements.
+
 - The coastal sluices now have [fitted masonry foundations](sluice-foundations.md)
   beneath all nine gates. Forty-five footings support the walls and wider posts
   exposed by diving and drainage, with matching camera and movement collision.

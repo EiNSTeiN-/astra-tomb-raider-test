@@ -324,6 +324,10 @@ Nine hydraulic circuits now occupy those palace courts, with 27 open cisterns, t
 
 Limestone paving now extends across the palace floors and follows the actual causeways. Worn teal mosaic borders and floral medallions distinguish the courts, and the ground's wet staining follows draining reservoirs. Revised coastal daylight gives the arcades clearer shadows; thin grout detail softens at distance. [Coastal ground notes](docs/coastal-ground.md) include before/after views, drainage checks and rendering limits.
 
+Steep coastal well banks now use natural rock, with separate marble maps for
+the level courts. [Coastal bank comparisons](docs/coastal-banks.md) show the
+corrected paving stretch and record the added texture memory and rendering cost.
+
 The volcanic forge now has nine furnace halls with recessed fireboxes, corroded metal hoods, hollow chimneys, overhead pipes, and rotating toothed gears. An ash-cloud sky, eroded caldera rim, dark paving, and moving lava crust establish its volcanic setting. Saved objectives control furnace glow and rumble, coolant steam and pressure hiss, and gear motion. Positional emitters follow their visible machinery and retain the quiet adaptive score. [Forge art and sound notes](docs/forge-art.md) include comparisons, source records, distance measurements, and release save/reload verification.
 
 Eight physical regulators now occupy the forge forecourts. Their 102 chambers use six different coupling rules and engraved HEAT / COOL targets, progressing from a cold manifold to an alternating heart-engine pattern. Turn handwheels with E or Use, watch linked shutters and coolant outlets respond, and activate the completed pattern at its record tablet. The optional focused controls share the same saved state. Hot chambers emit restrained mechanical rumble, changing shutters release short localized steam, and the score adds its quiet working accent during a turn. [Thermal regulator notes](docs/thermal-regulators.md) describe the designs, access checks, audio falloff and save verification.

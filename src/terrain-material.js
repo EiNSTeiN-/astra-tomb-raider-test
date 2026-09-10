@@ -7,6 +7,7 @@ import {
 import * as THREE from "three";
 import {
   coastalDeclarations,
+  coastalCliffCoordinates,
   coastalColor,
   coastalAlbedo,
   coastalNormal,
@@ -57,6 +58,7 @@ vec2 cliffUvX = vTerrainPosition.zy / 5.0;
 vec2 cliffUvY = vTerrainPosition.xz / 5.0;
 vec2 cliffUvZ = vTerrainPosition.xy / 5.0;
 ${skyCliffCoordinates}
+${coastalCliffCoordinates}
 float terrainMacro = terrainNoise(vTerrainPosition.xz * .065);
 float earthBlend = smoothstep(.2, .8, terrainMacro) * .65;
 vec3 earthColor = mix(texture2D(map, earthUv).rgb,
@@ -119,7 +121,7 @@ float terrainRough = mix(texture2D(roughnessMap, earthUv).g,
 terrainRough = mix(terrainRough, .92, trailWeight);
 terrainRough = mix(terrainRough, texture2D(pavingRoughness, pavingUv).g, pavingWeight);
 #ifdef TERRAIN_COASTAL
-terrainRough=mix(terrainRough,mix(texture2D(cliffRoughness,vTerrainPosition.xz/2.7).g,
+terrainRough=mix(terrainRough,mix(texture2D(coastalSlabRoughness,vTerrainPosition.xz/2.7).g,
   .94,slab.x),pavingWeight*(1.0-ornament));
 #endif
 float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
@@ -221,13 +223,11 @@ export function terrainMaterial(game) {
             ? "forge-paving"
             : "stone";
   const cliff =
-    biome === "water"
-      ? "palace-stone"
-      : biome === "desert"
-        ? "sandstone"
-        : ["volcano", "sky"].includes(biome)
-          ? "forge-rock"
-          : "rock";
+    biome === "desert"
+      ? "sandstone"
+      : ["volcano", "sky"].includes(biome)
+        ? "forge-rock"
+        : "rock";
   const uniforms = {
     pavingMap: { value: load(paving, "color") },
     pavingNormal: { value: load(paving, "normal") },
@@ -271,7 +271,11 @@ export function terrainMaterial(game) {
   }
   if (biome === "water") {
     material.defines = { TERRAIN_COASTAL: 1 };
-    Object.assign(uniforms, coastalUniforms(game));
+    Object.assign(uniforms, coastalUniforms(game), {
+      coastalSlabMap: { value: load("palace-stone", "color") },
+      coastalSlabNormal: { value: load("palace-stone", "normal") },
+      coastalSlabRoughness: { value: load("palace-stone", "roughness") },
+    });
   }
   if (biome === "jungle") {
     material.defines = { TERRAIN_JUNGLE: 1 };
@@ -307,6 +311,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${biome === "desert" ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["desert", "water"].includes(biome) ? 8 : 7}`;
   return material;
 }

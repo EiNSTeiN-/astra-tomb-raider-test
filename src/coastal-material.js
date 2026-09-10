@@ -5,6 +5,7 @@ export const coastalDeclarations = /* glsl */ `
 varying vec3 vCoastal;
 uniform vec4 coastalBasins[8];
 uniform float coastalWaterHeight[8];
+uniform sampler2D coastalSlabMap, coastalSlabNormal, coastalSlabRoughness;
 
 vec3 coastalStone(vec2 p) {
   vec2 uv = p / vec2(1.45, .96);
@@ -29,6 +30,14 @@ float coastalTessera(vec2 p) {
 #endif
 `;
 
+export const coastalCliffCoordinates = /* glsl */ `
+#ifdef TERRAIN_COASTAL
+  cliffUvX=vTerrainPosition.zy/3.2;
+  cliffUvY=vTerrainPosition.xz/3.2;
+  cliffUvZ=vTerrainPosition.xy/3.2;
+#endif
+`;
+
 export const coastalColor = /* glsl */ `
 #ifdef TERRAIN_COASTAL
   vec2 cp = vCoastal.xy;
@@ -38,7 +47,7 @@ export const coastalColor = /* glsl */ `
   float burial = smoothstep(.65,.88,breakage) * .38;
   pavingWeight = smoothstep(.05,.8, vCourt - burial);
   // Broad worn limestone slabs sit beneath the surviving tessellated inlays.
-  vec3 limestone = texture2D(cliffMap,vTerrainPosition.xz/2.7).rgb;
+  vec3 limestone = texture2D(coastalSlabMap,vTerrainPosition.xz/2.7).rgb;
   vec3 slabColor = limestone * (.55+.22*slab.z) * mix(1.0,.32,slab.x);
   slabColor *= vec3(.89,.95,.92);
   float frame = min(20.0-abs(cp.x),21.0-abs(cp.y));
@@ -64,6 +73,12 @@ export const coastalColor = /* glsl */ `
   ornament*=1.0-smoothstep(.55,.77,breakage + terrainNoise(vTerrainPosition.xz*1.6)*.1);
   pavingColor=mix(slabColor,mosaic,ornament);
   earthColor*=vec3(.53,.58,.52);
+  // Paving belongs to the level courts. Exposed banks use their own rock maps
+  // and world-space projection before the horizontal tiles visibly stretch.
+  terrainSlope=1.0-smoothstep(.72,.96,abs(normalize(vTerrainNormal).y));
+  float bankVariation=terrainNoise(vTerrainPosition.xz*.19
+    +vec2(vTerrainPosition.y*.071,vTerrainPosition.y*.13));
+  cliffColor*=mix(.86,1.12,bankVariation);
   // Recent water height controls darkening; old salt remains after drainage.
   float tidalWet=1.0-smoothstep(-2.4,-1.65,vTerrainPosition.y);
   for(int i=0;i<8;i++) {
@@ -98,7 +113,7 @@ export const coastalNormal = /* glsl */ `
   float determinant=dot(q0,r1);
   vec3 gradient=sign(determinant)*(dFdx(slabHeight)*r1+dFdy(slabHeight)*r2);
   vec3 bevelN=normalize(max(.000001,abs(determinant))*normal-gradient);
-  vec3 slabN=terrainSurfaceNormal(texture2D(cliffNormal,vTerrainPosition.xz/2.7).xyz,
+  vec3 slabN=terrainSurfaceNormal(texture2D(coastalSlabNormal,vTerrainPosition.xz/2.7).xyz,
     vTerrainPosition.xz/2.7,normal,.4);
   pavingN=normalize(mix(slabN,pavingN,ornament));
   pavingN=normalize(mix(pavingN,bevelN,.6*(1.0-ornament)));
