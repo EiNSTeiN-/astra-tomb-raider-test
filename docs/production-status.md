@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Desert daylight now uses a calibrated visible sky and reflection capture,
+  cooler ambient fill and clearer separation between sun and shade. Eighteen
+  matched desert pairs retained all geometry counts, route bounds and source
+  positions; the seven other chapters were pixel-identical in matched High
+  views. Sky resources released on all eight chapter transitions. All 476 tests,
+  the build and release climbing, keyboard/touch movement and save recovery
+  passed. A fixed GPU check showed small changes within sample variation.
+  [Daylight comparisons and verification](desert-daylight.md) include the
+  remaining camera crowding observed beside the quarry wall and the broader
+  graphics, pacing, listening and device requirements.
+
 - The quarry now draws its opaque masonry depth before shading the stone,
   reducing hidden-surface work while sharing its existing geometry buffers.
   Fifteen matched views across Low, Balanced and High found zero differing

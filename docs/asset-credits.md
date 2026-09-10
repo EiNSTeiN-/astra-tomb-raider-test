@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The desert daylight calibration in `src/atmosphere.js` uses Three.js's existing
+Sky and reflection-capture code with original project lighting settings. Its
+comparison images are lossless conversions of actual game canvases. No external
+art, recording, music or dependency was added. See
+[daylight comparisons and verification](desert-daylight.md).
+
 The quarry depth helper in `src/quarry-depth.js` is original project code using
 Three.js's existing depth material and the survey house's existing geometry
 buffers. No external art, audio or dependency was added. Its documentation

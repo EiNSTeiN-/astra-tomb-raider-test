@@ -13,6 +13,10 @@ listening and wider browser/device coverage remain open.
 
 ## Matching views
 
+These images record the original art milestone. The subsequent
+[desert daylight calibration](desert-daylight.md) changes the building's
+illumination; its geometry remains the same.
+
 Actual 1440 × 900 High-quality development-browser views compare the published
 `64b903e` structure with the revised masonry. The camera, observer and chapter
 time match, and the explorer settles on a supported floor before capture.

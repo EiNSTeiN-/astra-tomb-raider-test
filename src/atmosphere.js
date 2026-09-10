@@ -109,19 +109,25 @@ export function buildAtmosphere(game) {
     game.scene.fog.density = 0.0036;
   }
   if (game.level.biome === "desert") {
+    // Keep the visible sky and its reflection capture at the same radiance.
+    // The unscaled sky overfilled shaded masonry and washed out its relief.
+    sky.material.fragmentShader = sky.material.fragmentShader.replace(
+      "gl_FragColor = vec4( retColor, 1.0 );",
+      "gl_FragColor = vec4( retColor * .38, 1.0 );",
+    );
     game.sunOffset.set(-70, 55, 45);
-    sky.material.uniforms.turbidity.value = 7;
-    sky.material.uniforms.rayleigh.value = 1.7;
-    sky.material.uniforms.mieCoefficient.value = 0.008;
+    sky.material.uniforms.turbidity.value = 4.5;
+    sky.material.uniforms.rayleigh.value = 2.3;
+    sky.material.uniforms.mieCoefficient.value = 0.006;
     sky.material.uniforms.sunPosition.value.copy(game.sunOffset).normalize();
     game.sun.color.set(0xffeed4);
-    game.sun.intensity = 3;
+    game.sun.intensity = 2.8;
     const hemisphere = game.scene.children.find(
       (light) => light.isHemisphereLight,
     );
-    hemisphere?.color.set(0xbdcede);
-    hemisphere?.groundColor.set(0xaa8053);
-    if (hemisphere) hemisphere.intensity = 0.8;
+    hemisphere?.color.set(0x9fb9d5);
+    hemisphere?.groundColor.set(0x8b7354);
+    if (hemisphere) hemisphere.intensity = 0.45;
     game.scene.fog.color.set(0xd2b390);
     game.scene.fog.density = 0.0045;
   }
