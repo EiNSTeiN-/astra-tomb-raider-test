@@ -161,7 +161,10 @@ export function buildHazards(game) {
     if (!f) continue;
     const x = f.x * 7,
       z = f.z * 7,
-      y = game.groundHeight(x, z),
+      y =
+        f.stairHeight !== undefined
+          ? (f.group?.position.y ?? game.groundHeight(x, z) + f.stairHeight)
+          : game.groundHeight(x, z),
       root = new THREE.Group();
     root.position.set(x, y, z);
     game.world.add(root);
@@ -253,8 +256,26 @@ export function buildHazards(game) {
           ).rotation.z = Math.PI / 2;
       }
     } else if (spec.kind === "ice") {
-      for (const side of [-1, 1]) box(0.65, 8, 0.7, stone, side * 4.8, 4, 0);
-      box(10, 0.7, 1.1, stone, 0, 8, 0);
+      if (f.stairHeight !== undefined) {
+        // Fit this crown to the surviving service gallery. The wide field
+        // frame would otherwise put its eastern pier through the stair landing.
+        const timber = game.monasteryMaterials?.wood || stone;
+        for (const side of [-1, 1]) {
+          box(0.28, 8, 0.3, timber, side * 1.5, 4, 0);
+          game.frozenStair?.solids.push({
+            x: x + side * 1.5,
+            z,
+            w: 0.14,
+            d: 0.15,
+            bottom: y,
+            top: y + 8,
+          });
+        }
+        box(3.8, 0.35, 0.55, timber, 0, 8, 0);
+      } else {
+        for (const side of [-1, 1]) box(0.65, 8, 0.7, stone, side * 4.8, 4, 0);
+        box(10, 0.7, 1.1, stone, 0, 8, 0);
+      }
       const ice = new THREE.Mesh(
         new THREE.ConeGeometry(1.1, 3.8, 6),
         new THREE.MeshStandardMaterial({

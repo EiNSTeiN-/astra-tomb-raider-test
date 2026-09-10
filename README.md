@@ -127,6 +127,11 @@ the recovered bearing. See [climbing and verification notes](docs/surveyors-clef
 
 Mountain bells use **E / Use** at each named pull rope. Read the bellkeeper's tablet, listen to its phrase, and answer according to its repeat, reverse, or shifted-sign rule. The tablet offers replay, reset, activation, and focused controls. Replaying preserves your partial answer.
 
+The mountain chapter's fourth field mission now has [a physical frozen stair](docs/frozen-stair.md).
+Release its lower lock, climb and jump the broken west gallery to reach the upper
+lock, then use the hauling wheel. Ascend the restored flight to the pass marker;
+its saved state preserves the completed crossing.
+
 The cloud city’s eighteen suspension bridges now have **crosswinds**. Rising
 striped streamers warn of gusts and show their direction. **B / Crouch** braces
 against the push; stand and countersteer for gap jumps. Later spans reverse the

@@ -1,4 +1,15 @@
 import {
+  buildFrozenStair,
+  updateFrozenStair,
+  frozenStairHint,
+  frozenStairInteract,
+  frozenStairObjective,
+} from "./frozen-stair.js";
+import {
+  frozenStairBlocked,
+  frozenStairOccludes,
+} from "./frozen-stair-rules.js";
+import {
   buildCourierFerry,
   updateCourierFerry,
   updateCourierArt,
@@ -803,6 +814,7 @@ export class Adventure {
     buildCipherCourts(this);
     buildFireVault(this);
     buildBellHoist(this);
+    buildFrozenStair(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
     buildEchoGallery(this);
@@ -1314,6 +1326,7 @@ export class Adventure {
       return false;
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
+    if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
     if (cleftBlocked(this, x, z, worldY, clearance)) return false;
     if (pressureBlocked(this, x, z, worldY, clearance)) return false;
     if (echoBlocked(this, x, z, worldY, clearance)) return false;
@@ -1337,6 +1350,7 @@ export class Adventure {
     const from = { x: a.x, y: a.y + fromHeight, z: a.z },
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
+    if (frozenStairOccludes(this, from, to)) return false;
     if (cleftOccludes(this, from, to)) return false;
     if (pressureOccludes(this, from, to)) return false;
     if (echoOccludes(this, from, to)) return false;
@@ -1432,6 +1446,7 @@ export class Adventure {
     // controller below reports measured travel for locomotion selection.
     this.actualMoveSpeed = null;
     updateBellHoist(this, dt);
+    updateFrozenStair(this, dt);
     updatePressureRelay(this, dt);
     this.dodgeCooldown = Math.max(0, (this.dodgeCooldown || 0) - dt);
     let x =
@@ -1951,6 +1966,7 @@ export class Adventure {
     if (echoInteract(this)) return;
     if (orbitInteract(this)) return;
     if (bellHoistInteract(this)) return;
+    if (frozenStairInteract(this)) return;
     if (fireVaultInteract(this)) return;
     if (galleryInteract(this)) return;
     if (archiveInteract(this)) return;
@@ -1976,7 +1992,9 @@ export class Adventure {
         this.groundHeight(f.x * CELL, f.z * CELL) + f.yOffset - 0.5
     ) {
       this.cb.toast?.(
-        "Climb the gilded ledge: move toward it and press Space.",
+        f.stairHeight !== undefined
+          ? "Climb the west service gallery; the final marker needs the restored stair."
+          : "Climb the gilded ledge: move toward it and press Space.",
       );
       return;
     }
@@ -2268,6 +2286,7 @@ export class Adventure {
     const gallery = galleryObjective(this);
     const vault = fireVaultObjective(this);
     const hoist = bellHoistObjective(this);
+    const stair = frozenStairObjective(this);
     const cleft = cleftObjective(this);
     const pressure = pressureObjective(this);
     const echo = echoObjective(this);
@@ -2276,7 +2295,8 @@ export class Adventure {
     const target =
       hoist || cleft || pressure || echo || orbit || courier
         ? null
-        : vault?.target ||
+        : stair?.target ||
+          vault?.target ||
           (this.diving || gallery ? null : traversalTarget(this, aimedTarget));
     return {
       health: this.health,
@@ -2307,6 +2327,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        stair?.text ||
         courier?.text ||
         orbit?.text ||
         echo?.text ||
@@ -2373,6 +2394,7 @@ export class Adventure {
           pressureHint(this) ||
           cleftHint(this) ||
           bellHoistHint(this) ||
+          frozenStairHint(this) ||
           fireVaultHint(this) ||
           torchHint(this) ||
           galleryHint(this) ||
@@ -2397,48 +2419,51 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task: courierObjective(this)
-        ? "crosswind"
-        : orbitObjective(this)
-          ? "lift"
-          : echoObjective(this)
-            ? "tuning"
-            : pressureObjective(this)
-              ? "lift"
-              : cleftObjective(this)
-                ? this.wallGrip
-                  ? "climb"
-                  : "survey"
-                : bellHoistObjective(this)
-                  ? this.bellHoist.motion
-                    ? "lift"
-                    : "resonance"
-                  : fireVaultObjective(this)
-                    ? this.fireVault.operation
+      task: this.frozenStair?.motion
+        ? "lift"
+        : courierObjective(this)
+          ? "crosswind"
+          : orbitObjective(this)
+            ? "lift"
+            : echoObjective(this)
+              ? "tuning"
+              : pressureObjective(this)
+                ? "lift"
+                : cleftObjective(this)
+                  ? this.wallGrip
+                    ? "climb"
+                    : "survey"
+                  : bellHoistObjective(this)
+                    ? this.bellHoist.motion
                       ? "lift"
-                      : "brazier"
-                    : this.diving || galleryObjective(this)
-                      ? "dive"
-                      : (this.nearest?.type === "resonator" ||
-                            this.resonanceFocus != null) &&
-                          resonanceReady(
-                            this,
-                            this.resonanceSites?.[this.progress.stage],
-                          )
-                        ? "tuning"
-                        : this.hydraulicSites?.[this.progress.stage]?.flow ||
-                            this.thermalSites?.[this.progress.stage]?.moving ||
-                            this.windSites?.[this.progress.stage]?.moving
-                          ? "valve"
-                          : this.blockGrip ||
-                              this.cipherSites?.[this.progress.stage]?.moving
-                            ? "lift"
-                            : this.skyWind
-                              ? "crosswind"
-                              : this.ropeRide || this.zipRide
-                                ? "climb"
-                                : currentFieldTask(this.level, this.progress)
-                                    ?.kind || "mechanism",
+                      : "resonance"
+                    : fireVaultObjective(this)
+                      ? this.fireVault.operation
+                        ? "lift"
+                        : "brazier"
+                      : this.diving || galleryObjective(this)
+                        ? "dive"
+                        : (this.nearest?.type === "resonator" ||
+                              this.resonanceFocus != null) &&
+                            resonanceReady(
+                              this,
+                              this.resonanceSites?.[this.progress.stage],
+                            )
+                          ? "tuning"
+                          : this.hydraulicSites?.[this.progress.stage]?.flow ||
+                              this.thermalSites?.[this.progress.stage]
+                                ?.moving ||
+                              this.windSites?.[this.progress.stage]?.moving
+                            ? "valve"
+                            : this.blockGrip ||
+                                this.cipherSites?.[this.progress.stage]?.moving
+                              ? "lift"
+                              : this.skyWind
+                                ? "crosswind"
+                                : this.ropeRide || this.zipRide
+                                  ? "climb"
+                                  : currentFieldTask(this.level, this.progress)
+                                      ?.kind || "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2517,6 +2542,7 @@ export class Adventure {
     updateEchoGallery(this, 0);
     updateFireVault(this, 0);
     updateBellHoist(this, 0);
+    updateFrozenStair(this, 0);
     updatePressureRelay(this, 0);
     updateCleftArt(this);
     if (value) silenceCableMotion(this);

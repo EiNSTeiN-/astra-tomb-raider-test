@@ -128,9 +128,9 @@ const chapters = {
     ],
     [
       "The frozen stair",
-      "The stair lift is frozen against its guide rails. Release its locks, then draw it toward the courtyard.",
-      "Free the lower stair lock|Release the upper lock|Winch the frozen stair into place",
-      "The frozen doors swing free with the scrape of ice on stone.",
+      "The stair is raised against its hauling frame. Free the lower lock, climb the west service gallery and jump its broken span to reach the upper lock. Return to the hauling wheel, lower the stair, then climb to the pass marker.",
+      "Free the lower stair lock|Release the upper gallery lock|Cross the restored stair",
+      "The pass marker records a safe crossing. The frozen sanctuary doors swing free.",
     ],
     [
       "The bell of names",
@@ -436,7 +436,7 @@ const chapters = {
 const patterns = {
   verdant: ["sbb", "lsd", "vvv", "scs", "lsd", "www", "bbb", "lsd"],
   sands: ["sss", "lsd", "vvv", "lsd", "csc", "www", "www", "lsd", "ssr"],
-  frost: ["wcw", "lsd", "scs", "www", "lsd", "cww", "cwc", "lsd"],
+  frost: ["wcw", "lsd", "scs", "wws", "lsd", "cww", "cwc", "lsd"],
   tides: ["vvv", "vvv", "lsd", "csc", "vvv", "www", "vvv", "vvv", "lsd"],
   embers: ["vvv", "lsd", "vvv", "lsd", "vvv", "bbb", "lsd", "vvv"],
   sky: ["cww", "lsd", "www", "csc", "lsd", "www", "cwc", "www", "lsd"],

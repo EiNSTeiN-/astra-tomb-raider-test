@@ -1,3 +1,4 @@
+import { buildFrozenStation } from "./frozen-stair.js";
 import * as THREE from "three";
 import { needsCarriedFlame, torchHandsBusy } from "./torch.js";
 import { buildJungleShrine, updateJungleShrine } from "./jungle-shrines.js";
@@ -13,6 +14,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildFrozenStation(game, f, group)) return;
   if (buildJungleShrine(game, f, group)) return;
   const { stoneMat: stone, darkMat: dark, goldMat: gold } = game;
   if (hasTraversalCourse(game.level, f)) buildTraversalCourse(game, f, group);
@@ -104,6 +106,7 @@ export function updateFieldWorld(game, dt) {
     f.group.visible = true;
     f.marker.visible = current?.id === f.id;
     if (f.fire) f.fire.visible = done;
+    if (f.frozenIce) f.frozenIce.visible = !done;
     updateJungleShrine(game, f, done);
     if (f.kind === "lift") f.core.visible = !done;
     if (f.kind === "delivery") f.core.visible = done;
@@ -132,6 +135,16 @@ export function finishFieldTask(game, f) {
     game.cb.toast?.(
       "This brazier needs a carried flame. Light your torch at a camp or a burning brazier with T / Torch.",
       5500,
+    );
+    return false;
+  }
+  if (
+    f.stairHeight !== undefined &&
+    f.step === 2 &&
+    !game.frozenStair?.saved.restored
+  ) {
+    game.cb.toast?.(
+      "Release both locks and use the hauling wheel before crossing the stair.",
     );
     return false;
   }

@@ -1,3 +1,4 @@
+import { normalizeFrozenStair } from "./frozen-stair-rules.js";
 import { normalizeCourier } from "./courier-rules.js";
 import { normalizeCleft } from "./cleft-rules.js";
 import { normalizePressure } from "./pressure-rules.js";
@@ -122,6 +123,13 @@ export function normalizeSave(value) {
       gallery: key === "tides" ? normalizeGallery(v.gallery) : null,
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
+      frozenStair:
+        key === "frost"
+          ? normalizeFrozenStair(v.frozenStair, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       cleft: key === "sands" ? normalizeCleft(v.cleft) : null,
       pressureRelay:
         key === "embers" ? normalizePressure(v.pressureRelay) : null,
@@ -209,6 +217,7 @@ export class SaveStore {
       gallery: id === "tides" ? normalizeGallery(null) : null,
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
+      frozenStair: id === "frost" ? { restored: false } : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,
       echoGallery: id === "crystal" ? normalizeEcho(null) : null,

@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The mountain's fourth field mission now restores [a physical frozen stair](frozen-stair.md).
+  Two locks, a broken service-gallery jump, a hauling wheel and a six-metre
+  ascent replace the three scattered generic winches. The completed stair and
+  pass marker persist, including recovery from older saves. All 483 tests and
+  the release build pass. The assisted full route, release keyboard/touch ascent
+  and four saved-state checks pass at full health. Both positioned pulley voices
+  stop at rest/pause and pass a distance-falloff check. The comparison notes
+  retain the limits on pacing, graphics, listening and broader device coverage.
+
 - The mountain monastery's 147 timber columns now meet their stone bases in
   all nine courts. All 1,323 browser joint samples are connected, and six
   matched views across the three graphics settings retain the same rendering
