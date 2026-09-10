@@ -37,6 +37,8 @@ with stronger open seas, calmer reservoirs and quieter crystal pools. The notes
 include matched views, a GPU filtering check and the measured rendering cost.
 The five coastal wells now have [one consistent underwater surface](docs/underwater-surfaces.md),
 removing the extra ocean sheet that obscured their floors and archive cases.
+The coastal sluices also have [masonry foundations fitted to the well floors](docs/sluice-foundations.md),
+supporting the walls and wider gate posts exposed by diving and drainage.
 
 Waterfalls now use [grounded stone spillways with open feed channels](docs/waterfall-spillways.md), accelerating streaks, impact foam and spray that follows reservoir drainage.
 

@@ -18,6 +18,7 @@ import { fieldComplete } from "./expeditions.js";
 import { softParticleMaterial } from "./effects.js";
 import { weatherSkyStone } from "./sky-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
+import { buildSluiceFoundation } from "./sluice-foundations.js";
 import {
   skyGateWallGeometry,
   skyTimberSurface,
@@ -137,6 +138,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     wheels: [],
     weights: [],
     sources: [],
+    foundations: [],
     seals: null,
     obstacle: { x, z: z + 6.5, w: 6.5, d: 0.9, h: open ? 0 : 7.5 },
   };
@@ -227,16 +229,33 @@ export function buildSanctuaryGate(game, feature, materials) {
       floor = Math.min(floor, game.groundHeight(x + p.x, z + p.z) - y - 0.12);
     }
     const center = point(0);
-    if (floor < -0.05)
-      block(
-        back ? length : 0.9,
-        -floor + 0.13,
-        back ? 0.9 : length,
-        m.trim,
-        center.x,
-        (floor + 0.13) / 2,
-        center.z,
-      );
+    if (floor < -0.05) {
+      if (design.panel === "sluice")
+        gate.foundations.push(
+          buildSluiceFoundation(
+            game,
+            root,
+            m.trim,
+            {
+              x: center.x,
+              z: center.z,
+              width: back ? length : 0.9,
+              depth: back ? 0.9 : length,
+            },
+            ++serial,
+          ),
+        );
+      else
+        block(
+          back ? length : 0.9,
+          -floor + 0.13,
+          back ? 0.9 : length,
+          m.trim,
+          center.x,
+          (floor + 0.13) / 2,
+          center.z,
+        );
+    }
     if (design.panel === "lattice") {
       const angle = back ? Math.PI : (side * Math.PI) / 2;
       const wall = add(
@@ -320,6 +339,24 @@ export function buildSanctuaryGate(game, feature, materials) {
   }
   // The jambs carry their lintels, drive axles, tracks and visible counterweights.
   for (const side of [-1, 1]) {
+    if (design.panel === "sluice") {
+      const footing = buildSluiceFoundation(
+        game,
+        root,
+        m.trim,
+        { x: side * 6.5, z: 6.65, width: 1.7, depth: 2.2 },
+        game.level.seed + feature.stage * 557 + side * 1009,
+      );
+      gate.foundations.push(footing);
+      // The fluted face and its footing extend beyond the thin side wall.
+      game.obstacles.push({
+        x: x + footing.x,
+        z: z + footing.z,
+        w: footing.width / 2,
+        d: footing.depth / 2,
+        h: y + 8.5 - game.groundHeight(x + footing.x, z + footing.z),
+      });
+    }
     if (design.panel === "lattice") buildSkyGateJamb({ side, m, add, block });
     else
       for (let row = 0; row < 8; row++)

@@ -102,7 +102,8 @@ this camera and device, not general frame-rate guarantees.
 
 This corrects overlapping water surfaces. The well architecture, materials,
 lighting and physical swimming model still have visible limitations; the
-clearer view also exposes abruptly ending masonry supports. The broader
+clearer view exposed abruptly ending masonry supports, subsequently corrected
+by the [sluice foundation update](sluice-foundations.md). The broader
 requirements for modern AAA graphics, approximately one hour of human play
 per chapter, subjective sound/music review and wider browser/device acceptance
 remain open. See [production status](production-status.md) and

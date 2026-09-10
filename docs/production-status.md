@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The coastal sluices now have [fitted masonry foundations](sluice-foundations.md)
+  beneath all nine gates. Forty-five footings support the walls and wider posts
+  exposed by diving and drainage, with matching camera and movement collision.
+  All 1,125 sampled contacts meet both physical and rendered terrain; 20 matched
+  underwater pairs cover all five full/drained wells on High and Low. All 491
+  tests, the build, assisted archive and memorial routes, release keyboard/touch
+  recovery and older-save restoration pass. The added stone increased sampled
+  High GPU time by 4.8% with the same draw-call count. The guide retains the
+  graphics, pacing, listening and broader device limitations.
+
 - The five coastal wells now have [one consistent underwater surface](underwater-surfaces.md).
   The ocean is cut out of higher reservoir footprints, and immersed cameras
   skip exterior reflection captures. Twenty underwater comparisons cover full

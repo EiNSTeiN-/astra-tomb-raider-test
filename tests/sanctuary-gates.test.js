@@ -46,6 +46,7 @@ function fixture(t, index, saved = null, all = false) {
     store,
     progress,
     groundHeight: terrain.height,
+    terrainProfile: terrain,
     player: new THREE.Group(),
     obstacles: [],
     elapsed: 0,
@@ -131,6 +132,55 @@ test("all 69 chapter gates have regional construction, finite batches, retained 
     }
   }
   assert.equal(total, 69);
+});
+
+test("coastal sluice footings meet the terrain across their full width and protect submerged camera approaches", (t) => {
+  const { game } = fixture(t, 3, null, true),
+    ray = new THREE.Raycaster();
+  game.world.updateMatrixWorld(true);
+  let rays = 0,
+    immersed = 0;
+  for (const gate of game.fieldGates) {
+    assert.equal(gate.foundations.length, 5);
+    const origin = gate.root.position;
+    for (const footing of gate.foundations) {
+      for (const u of [-0.45, -0.22, 0, 0.22, 0.45])
+        for (const v of [-0.45, -0.22, 0, 0.22, 0.45]) {
+          const x = origin.x + footing.x + u * footing.width,
+            z = origin.z + footing.z + v * footing.depth,
+            ground = game.groundHeight(x, z);
+          ray.set(
+            new THREE.Vector3(x, origin.y - 30, z),
+            new THREE.Vector3(0, 1, 0),
+          );
+          const hit = ray.intersectObject(gate.root, true)[0];
+          assert.ok(hit, `foundation exists at ${gate.stage}/${x}/${z}`);
+          assert.ok(
+            hit.point.y <= ground + 0.025,
+            `foundation meets bank at ${gate.stage}/${x}/${z}`,
+          );
+          rays++;
+        }
+      // Approach the wider jamb from its exposed well side. Its new submerged
+      // stone must stop both the camera and the diver, as the dry post does.
+      if (footing.width !== 1.7) continue;
+      const x = origin.x + footing.x,
+        z = origin.z + footing.z + footing.depth / 2 - 0.15,
+        ground = game.groundHeight(x, z),
+        y = (ground + origin.y) / 2;
+      if (origin.y - ground < 0.7) continue;
+      assert.equal(game.canMove(x, z, y - ground, 0.8), false);
+      assert.ok(
+        game.cameraSurfaces.entry(
+          new THREE.Vector3(x, y, z + 2),
+          new THREE.Vector3(x, y, z),
+        ) < 1,
+      );
+      immersed++;
+    }
+  }
+  assert.equal(rays, 1125);
+  assert.ok(immersed >= 5, "all five sounding wells exercise a submerged jamb");
 });
 
 test("hinged collision bounds contain the transformed door corners throughout the inward swing", () => {
