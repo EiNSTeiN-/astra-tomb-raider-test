@@ -159,6 +159,77 @@ test("reflection selection ignores hidden, frozen, underwater-facing and distant
   g.store.data.settings.quality = "medium";
   assert.equal(reflectionCandidate(g), null);
 });
+
+test("an immersed camera does not capture a lower surface, and reflections return outside the higher pool", () => {
+  const g = liquidGame(),
+    lower = g.waterMeshes[0],
+    upper = createWaterSurface(g, {
+      id: "upper",
+      kind: "water",
+      x: 0,
+      z: 0,
+      width: 6,
+      length: 6,
+      baseY: 1.5,
+    });
+  g.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+  g.camera.position.set(0, 0.5, 2);
+  g.camera.lookAt(0, 0, 0);
+  g.world.updateMatrixWorld(true);
+  const reflection = new WaterReflection(g);
+  reflection.reflector.onBeforeRender = () => {};
+  reflection.render();
+  assert.equal(reflection.selected, null);
+  assert.equal(reflection.captures, 0);
+  assert.equal(lower.material.userData.waterUniforms.mirrorWeight.value, 0);
+  g.camera.position.x = 4;
+  g.camera.lookAt(0, 0, 0);
+  reflection.render();
+  assert.equal(reflection.selected, lower);
+  assert.equal(reflection.captures, 1);
+  g.player.position.y = 1.2;
+  g.camera.position.set(0, 3, 2);
+  g.camera.lookAt(0, 1.5, 0);
+  reflection.render();
+  assert.equal(reflection.selected, upper);
+  assert.equal(reflection.captures, 2);
+  reflection.dispose();
+});
+
+test("the ocean remains above a lower basin and agrees with the sampled water level", () => {
+  const g = liquidGame(),
+    basin = {
+      id: "lower",
+      kind: "water",
+      x: 0,
+      z: 0,
+      width: 6,
+      length: 6,
+      baseY: -1,
+    };
+  g.waterMeshes = [];
+  g.world.clear();
+  g.terrainProfile = { waters: [basin] };
+  createWaterSurface(g, basin);
+  const sea = createWaterSurface(g, {
+    id: "sea",
+    kind: "water",
+    sea: true,
+    x: 0,
+    z: 0,
+    width: 30,
+    length: 30,
+    baseY: 0,
+  });
+  g.world.updateMatrixWorld(true);
+  const sample = waterAt(g, 0, 0),
+    ray = new THREE.Raycaster(
+      new THREE.Vector3(0, 2, 0),
+      new THREE.Vector3(0, -1, 0),
+    );
+  assert.equal(sample.water, sea);
+  assert.equal(ray.intersectObject(sea)[0].point.y, sample.y);
+});
 test("one reflection capture is budgeted every three active frames and restores hidden water even after a render error", () => {
   const g = liquidGame();
   g.player.position.set(0, 0, 3);

@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The five coastal wells now have [one consistent underwater surface](underwater-surfaces.md).
+  The ocean is cut out of higher reservoir footprints, and immersed cameras
+  skip exterior reflection captures. Twenty underwater comparisons cover full
+  and drained wells; three exterior shoreline views remain pixel-identical.
+  All 490 tests and the release build pass. Assisted archive and memorial routes,
+  positional bubble audio, and release keyboard/touch recovery and reload checks
+  pass at full health. Mean GPU time fell by 7.4% in the sampled High underwater
+  view. The guide records the comparison, performance limits and remaining
+  architecture, graphics, pacing and listening work.
+
 - Water now uses [curved ripples filtered for viewing distance](water-ripples.md),
   with stronger open seas and calmer enclosed pools. The filtering fixture
   reduced spatial sampling error by 82–93% in its six cases. All 488 tests and

@@ -115,6 +115,28 @@ export function waterMaterial(game, site) {
   return material;
 }
 
+function seaExclusions(profile, sea) {
+  const volumes = [...(profile?.gallery?.volumes || [])];
+  // A higher reservoir already fills its excavated footprint. The ocean must
+  // not introduce a second surface through the submerged part of that well.
+  for (const basin of profile?.waters || []) {
+    if (basin.kind !== "water" || basin.baseY <= sea.baseY) continue;
+    volumes.push({
+      min: {
+        x: basin.x - basin.width / 2,
+        y: sea.baseY - 1,
+        z: basin.z - basin.length / 2,
+      },
+      max: {
+        x: basin.x + basin.width / 2,
+        y: basin.baseY,
+        z: basin.z + basin.length / 2,
+      },
+    });
+  }
+  return volumes;
+}
+
 export function createWaterSurface(game, site) {
   const segments = Math.min(
     48,
@@ -139,12 +161,13 @@ export function createWaterSurface(game, site) {
     material = moltenMaterial({ value: game.elapsed || 0 }, { value: 1 }, true);
   else material = waterMaterial(game, site);
   let surfaceGeometry = geometry;
-  if (site.sea && game.terrainProfile.gallery) {
+  const exclusions = site.sea ? seaExclusions(game.terrainProfile, site) : [];
+  if (exclusions.length) {
     const world = geometry
       .clone()
       .rotateX(-Math.PI / 2)
       .translate(site.x, site.baseY, site.z);
-    const cut = cutTerrainGeometry(world, game.terrainProfile.gallery.volumes);
+    const cut = cutTerrainGeometry(world, exclusions);
     surfaceGeometry = cut
       .translate(-site.x, -site.baseY, -site.z)
       .rotateX(Math.PI / 2);

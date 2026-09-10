@@ -1,11 +1,22 @@
 import * as THREE from "three";
 import { Reflector } from "three/addons/objects/Reflector.js";
+import { waterAt } from "./hydrology.js";
+
+const cameraPosition = new THREE.Vector3();
 
 export function reflectionCandidate(game) {
   if (game.store.data.settings.quality !== "high") return null;
   // This pass precedes renderer.render(), which normally updates the camera.
   // Selection, reprojection and capture all need this frame's transform.
   game.camera.updateWorldMatrix(true, false);
+  cameraPosition.setFromMatrixPosition(game.camera.matrixWorld);
+  const immersed = waterAt(
+    game,
+    cameraPosition.x,
+    cameraPosition.z,
+    cameraPosition.y,
+  );
+  if (immersed && cameraPosition.y < immersed.y + 0.08) return null;
   const frustum = new THREE.Frustum().setFromProjectionMatrix(
     new THREE.Matrix4().multiplyMatrices(
       game.camera.projectionMatrix,
@@ -18,7 +29,7 @@ export function reflectionCandidate(game) {
     if (
       water.userData.kind !== "water" ||
       !water.visible ||
-      game.camera.position.y < water.position.y + 0.08
+      cameraPosition.y < water.position.y + 0.08
     )
       continue;
     water.updateMatrixWorld();

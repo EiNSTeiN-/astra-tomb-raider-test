@@ -369,7 +369,60 @@ test("the coastal sea is cut out of buried rooms and remains compatible with sou
     area +=
       points[1].sub(points[0]).cross(points[2].sub(points[0])).length() / 2;
   }
-  assert(area > 1281 ** 2 - 1500 && area < 1281 ** 2 - 100);
+  // Compute the expected union independently as a grid of rectangles. This
+  // catches both incomplete cuts and accidental removal of surrounding ocean.
+  const holes = g.terrainProfile.gallery.volumes
+    .filter((v) => v.min.y < sea.position.y && v.max.y > sea.position.y)
+    .map((v) => [v.min.x, v.max.x, v.min.z, v.max.z]);
+  for (const basin of g.terrainProfile.waters) {
+    holes.push([
+      basin.x - basin.width / 2,
+      basin.x + basin.width / 2,
+      basin.z - basin.length / 2,
+      basin.z + basin.length / 2,
+    ]);
+    if (!basin.id.startsWith("reservoir")) continue;
+    assert.ok(
+      basin.baseY - 1.8 > sea.position.y,
+      "drained wells remain higher",
+    );
+    for (const dx of [-6, 0, 6])
+      for (const dz of [-6, 0, 6]) {
+        const ray = new THREE.Raycaster(
+          new THREE.Vector3(basin.x + dx, sea.position.y + 1, basin.z + dz),
+          new THREE.Vector3(0, -1, 0),
+        );
+        assert.equal(
+          ray.intersectObject(sea).length,
+          0,
+          `${basin.id}/${dx}/${dz}`,
+        );
+      }
+  }
+  const xs = [...new Set(holes.flatMap((h) => h.slice(0, 2)))].sort(
+      (a, b) => a - b,
+    ),
+    zs = [...new Set(holes.flatMap((h) => h.slice(2)))].sort((a, b) => a - b);
+  let removed = 0;
+  for (let i = 1; i < xs.length; i++)
+    for (let j = 1; j < zs.length; j++) {
+      const x = (xs[i - 1] + xs[i]) / 2,
+        z = (zs[j - 1] + zs[j]) / 2;
+      if (holes.some((h) => x > h[0] && x < h[1] && z > h[2] && z < h[3]))
+        removed += (xs[i] - xs[i - 1]) * (zs[j] - zs[j - 1]);
+    }
+  assert.ok(Math.abs(area - (1281 ** 2 - removed)) < 0.1);
+  for (const [x, z] of [
+    [-30, 100],
+    [500, 213.5],
+    [50, 400],
+  ]) {
+    const ray = new THREE.Raycaster(
+      new THREE.Vector3(x, sea.position.y + 1, z),
+      new THREE.Vector3(0, -1, 0),
+    );
+    assert.ok(ray.intersectObject(sea).length > 0, "surrounding sea remains");
+  }
   g.map = { rooms: [] };
   g.flames = g.items = [];
   assert.doesNotThrow(() => buildSoundLandmarks(g));
