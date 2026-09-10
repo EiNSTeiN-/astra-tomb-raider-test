@@ -39,6 +39,7 @@ import {
 } from "../src/fire-vault-motion.js";
 import { normalizeFireVault } from "../src/fire-vault-rules.js";
 import { Adventure } from "../src/game.js";
+import { ExplorerContact } from "../src/explorer-contact.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -892,6 +893,85 @@ test("moving slopes keep stride soles supported and contact sounds at the floor 
     );
   }
   t.diagnostic(JSON.stringify(results));
+});
+
+test("ambient contacts track delivered animated soles without changing the actor or its pose", async () => {
+  const game = await groundedActor();
+  game.scene = new THREE.Scene();
+  game.scene.add(game.player);
+  game.audio = { footstep() {} };
+  const contacts = new ExplorerContact(game),
+    feet = strideSoles(game.rig.model),
+    bones = [];
+  game.rig.model.traverse((o) => {
+    if (o.isBone) bones.push(o);
+  });
+  let visible = 0,
+    lifted = 0;
+  try {
+    for (const grade of [-0.3, 0, 0.3])
+      for (const mode of ["Idle", "Walk", "Run", "Crouch"]) {
+        game.groundHeight = (x, z) => x * grade + z * 0.05;
+        game.player.position.set(5, game.groundHeight(5, 8), 8);
+        game.avatar.rotation.y = 0.8;
+        game.crouching = mode === "Crouch";
+        const clip = mode === "Crouch" ? "Walk" : mode;
+        game.rig.mixer.stopAllAction();
+        game.rig.actions[clip].reset().play();
+        game.rig.state = clip;
+        game.rig.grounding = undefined;
+        game.moveVelocity.z =
+          mode === "Run" ? 6 : mode === "Crouch" ? 2.2 : 2.4;
+        for (let i = 0; i < 30; i++) {
+          game.player.position.x += mode === "Idle" ? 0 : 0.04;
+          game.player.position.y = game.groundHeight(game.player.position.x, 8);
+          animateExplorer(game, 1 / 30, mode !== "Idle", false);
+          const root = game.player.position.toArray(),
+            pose = bones.map((b) => [
+              b.position.toArray(),
+              b.quaternion.toArray(),
+            ]);
+          contacts.update();
+          assert.deepEqual(game.player.position.toArray(), root);
+          assert.deepEqual(
+            bones.map((b) => [b.position.toArray(), b.quaternion.toArray()]),
+            pose,
+          );
+          const soles = sampleStrideSoles(feet);
+          for (const [f, mesh] of contacts.meshes.entries()) {
+            if (!mesh.visible) {
+              lifted++;
+              continue;
+            }
+            visible++;
+            const p = mesh.geometry.attributes.position,
+              index = mesh.geometry.index,
+              center = new THREE.Vector3().fromBufferAttribute(p, 24),
+              bounds = new THREE.Box3().setFromPoints(soles[f]);
+            assert(
+              center.x >= bounds.min.x - 0.02 &&
+                center.x <= bounds.max.x + 0.02,
+            );
+            assert(
+              center.z >= bounds.min.z - 0.02 &&
+                center.z <= bounds.max.z + 0.02,
+            );
+            for (let k = 0; k < mesh.geometry.drawRange.count; k++) {
+              const v = index.getX(k),
+                gap = p.getY(v) - game.groundHeight(p.getX(v), p.getZ(v));
+              assert(
+                gap > 0.0039 && gap < 0.0041,
+                `${mode}: contact leaves support`,
+              );
+            }
+          }
+        }
+      }
+    assert(visible > 300);
+    assert(lifted > 0, "raised running feet must lose their contact patch");
+  } finally {
+    contacts.dispose();
+  }
 });
 
 test("boots fit slopes in either direction while retaining swing clearance and the physical root", async () => {

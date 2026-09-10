@@ -4,6 +4,12 @@ Use Node.js 22.12 or newer and install the locked dependencies with `npm ci`.
 Run `npm run dev` to play locally, `npm test` for the automated checks, and
 `npm run build` to produce the static site in `dist/`.
 
+If this checkout has a workspace-local Node installation, use `./local/bin/node`
+and `./local/bin/npm` for commands. In Bash, `source local/activate-node.sh` also
+puts that installation on `PATH`. Its npm cache, global install prefix and
+temporary files stay under the ignored `local/` directory. Keep downloaded
+toolchains out of commits; a fresh clone can use its own supported Node install.
+
 Keep temporary scripts, test results, browser profiles, captures and other
 project staging files in `local/staging/` inside this checkout. This directory is
 covered by the `/local/` exclusion in `.gitignore`. Do not use `/tmp` for project

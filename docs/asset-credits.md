@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The animated boot contact grids and soft ambient-shading shader in
+`src/explorer-contact.js` are original project code. They sample the existing
+credited explorer mesh and use no new external model, image, recording, music
+or dependency. See [contact comparisons and verification](explorer-contact.md).
+
 The date-palm crown, folded leaflets, tapered stems, trunk scars and anchored
 wind in `src/palm-fronds.js` and `src/desert-palms.js` are original project code.
 They reuse the existing credited bark maps. The botanical reference was

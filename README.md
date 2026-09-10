@@ -7,6 +7,8 @@ An original, browser-based third-person archaeological adventure built with Thre
 Locomotion now uses [stride length and playback calibrated to travel](docs/explorer-stride.md).
 This reduces foot sliding and brings crouched recovery steps beneath the hips;
 the notes include measured limits and matching browser views.
+The boots also have [soft ambient contact shading](docs/explorer-contact.md)
+that follows animated soles and nearby supports on all graphics settings.
 
 Crouching now uses [lowered hands and relaxed fingers](docs/explorer-crouch.md),
 with walking arm swing that settles when movement stops. The comparison notes

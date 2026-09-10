@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Soft ambient shading now follows the explorer's animated boot soles on all
+  three graphics settings, fading with lift and fitting nearby ground or decks.
+  All 471 tests and the release build passed. Hardware checks covered 34 views
+  across all eight chapters, a raised terrace and a snow slope; native movement
+  and jump checks finished at full health. Release keyboard sprinting and
+  portrait two-finger movement/crouching retained exact saves on reload.
+  Matching views added two draw calls and 144 triangles; separate Radeon 780M
+  samples had enough variability to preclude a speed-change claim.
+  [Contact comparisons and limits](explorer-contact.md) document the local
+  approximation and the remaining graphics, pacing, listening and device work.
+
 - Desert palms now have fuller crowns with angled, folded leaflets, tapered
   stems, raised leaf scars and wind that keeps frond bases fixed. All 467 tests
   and the release build passed. Matching browser views retained all 70 placements
