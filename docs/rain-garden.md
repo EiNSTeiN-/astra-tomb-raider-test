@@ -1,5 +1,9 @@
 # The rain garden
 
+The later [construction artwork pass](rain-garden-construction.md) records the
+current paving, shelter, wheel and lift rigging. The images and measurements
+below document the initial playable mechanism.
+
 The third field mission in **The Verdant Veil** now restores a connected
 irrigation terrace. Its three scattered valve stations become a spring release,
 a channel receiver and an upper sanctuary sluice in the existing garden clearing.

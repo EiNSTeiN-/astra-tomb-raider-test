@@ -1,3 +1,11 @@
+import {
+  prepareGardenGeometry,
+  gardenPavingGeometry,
+  gardenLiftPulleyGeometry,
+  gardenPlaque,
+  buildGardenShelter,
+  buildGardenWheel,
+} from "./rain-garden-art.js";
 import * as THREE from "three";
 import {
   stoneBlockGeometry,
@@ -34,7 +42,12 @@ function label(text, width = 2.5) {
   map.colorSpace = THREE.SRGBColorSpace;
   return new THREE.Mesh(
     new THREE.PlaneGeometry(width, width / 6),
-    new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false }),
+    new THREE.MeshStandardMaterial({
+      map,
+      transparent: true,
+      depthWrite: false,
+      roughness: 0.95,
+    }),
   );
 }
 export function buildGardenStation(game, f, group) {
@@ -43,7 +56,32 @@ export function buildGardenStation(game, f, group) {
     y = game.groundHeight(site.x * 7, site.z * 7) + f.gardenHeight;
   group.position.y = y;
   f.yOffset = y - game.groundHeight(f.x * 7, f.z * 7);
-  game.box(1.05, 0.9, 0.8, game.stoneMat, 0, 0.45, 0, group);
+  const stone = game.templeMaterial || game.stoneMat,
+    metal = game.climbingMaterials?.metal || game.goldMat;
+  const part = (w, h, d, py, mat = stone) => {
+    const mesh = new THREE.Mesh(
+      prepareGardenGeometry(stoneBlockGeometry(w, h, d, 9300 + f.step), mat),
+      mat,
+    );
+    mesh.position.y = py;
+    mesh.castShadow = mesh.receiveShadow = true;
+    group.add(mesh);
+    return mesh;
+  };
+  part(1.18, 0.16, 0.96, 0.08);
+  part(0.87, 0.65, 0.66, 0.47);
+  part(1.03, 0.16, 0.83, 0.83);
+  part(0.24, 0.54, 0.24, 1.12, metal);
+  const panel = new THREE.Mesh(
+    prepareGardenGeometry(
+      carvedPanelGeometry(0.57, 0.55, f.step, [12, 22]),
+      stone,
+    ),
+    stone,
+  );
+  panel.position.set(0, 0.2, 0.34);
+  panel.castShadow = panel.receiveShadow = true;
+  group.add(panel);
   const core = (f.core = new THREE.Group());
   core.position.set(0, 1.35, 0);
   group.add(core);
@@ -53,10 +91,17 @@ export function buildGardenStation(game, f, group) {
   for (let i = 0; i < 4; i++)
     game.box(0.055, 0.82, 0.07, game.goldMat, 0, 0, 0, core).rotation.z =
       (i * Math.PI) / 4;
-  const sign = label(
-    ["SPRING RELEASE", "OPEN THE GARDEN CHANNEL", "SANCTUARY SLUICE"][f.step],
-    3.1,
+  const sign = gardenPlaque(
+    ["SPRING RELEASE", "GARDEN CHANNEL", "SANCTUARY SLUICE"][f.step],
+    2.35,
+    stone,
+    metal,
+    label,
   );
+  for (const px of [-0.36, 0.36]) {
+    const post = part(0.075, 1.22, 0.075, 1.43, metal);
+    post.position.set(px, 1.43, -0.08);
+  }
   sign.position.set(0, 2.05, 0.15);
   group.add(sign);
   return true;
@@ -98,15 +143,7 @@ export function buildRainGarden(game) {
   water.name = "Rain garden channel flow";
   let seed = 88000;
   const add = (geo, mat, px, py, pz, parent = root, camera = true) => {
-    if (!mat.vertexColors) geo.deleteAttribute("color");
-    if (mat.vertexColors && !geo.attributes.color)
-      geo.setAttribute(
-        "color",
-        new THREE.Float32BufferAttribute(
-          new Float32Array(geo.attributes.position.count * 3).fill(0.96),
-          3,
-        ),
-      );
+    prepareGardenGeometry(geo, mat);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(px, py, pz);
     mesh.castShadow = mesh.receiveShadow = true;
@@ -149,7 +186,16 @@ export function buildRainGarden(game) {
     return s;
   };
   const deck = (px, pz, w, d, top, thickness = 0.35, parent = root) => {
-    block(w, thickness, d, px, top - thickness / 2, pz, stone, parent);
+    if (d > 0.5 && w > 1.7 && thickness <= 0.45)
+      add(
+        gardenPavingGeometry(w, d, thickness, ++seed),
+        stone,
+        px,
+        top,
+        pz,
+        parent,
+      );
+    else block(w, thickness, d, px, top - thickness / 2, pz, stone, parent);
     const data = {
       x: x + px,
       z: z + pz,
@@ -172,7 +218,7 @@ export function buildRainGarden(game) {
     solid(px, pz, w, w, bottom, top);
   };
   const sign = (text, px, py, pz, width = 3) => {
-    const m = label(text, width);
+    const m = gardenPlaque(text, width, stone, metal, label);
     m.position.set(px, py, pz);
     root.add(m);
     return m;
@@ -195,6 +241,15 @@ export function buildRainGarden(game) {
   deck(0, 1, 12.6, 16, GARDEN_FLOOR, 0.45);
   for (const px of [-5.7, 5.7])
     for (const pz of [-6.3, 0, 7.9]) pier(px, pz, GARDEN_FLOOR - 0.45, 0.9);
+  for (const pz of [-6.3, 0, 7.9]) {
+    for (let course = 0; course < 12; course++)
+      block(1.034, 0.34, 0.7, -5.69 + course * 1.035, 4.99, pz);
+    solid(0, pz, 12.42, 0.7, 4.82, 5.16);
+    for (const px of [-5.7, 5.7]) {
+      block(1.25, 0.23, 1.1, px, 4.77, pz);
+      solid(px, pz, 1.25, 1.1, 4.65, 4.885);
+    }
+  }
   for (let i = 0; i < 36; i++)
     deck(
       -9,
@@ -207,8 +262,9 @@ export function buildRainGarden(game) {
   deck(-7.4, -0.75, 5.8, 1.66, GARDEN_FLOOR);
   rail(0, -6.92, 12.6, 0.13, GARDEN_FLOOR);
   rail(6.18, 6.0, 0.13, 5.8, GARDEN_FLOOR);
-  sign("WEST STAIR → CHANNEL TERRACE", -8.8, 1.6, 11.8, 4);
-  sign("SPRING → JOIN THE WET CHANNELS → WHEEL", 0, 7.5, -6.6, 7);
+  block(0.22, 1.25, 0.22, -11.5, 0.625, 11.8, wood);
+  sign("CHANNEL TERRACE →", -11.5, 1.3, 11.8, 2.3);
+  sign("SPRING → CHANNELS → WHEEL", 0, 6.74, -6.92, 4.8);
   // The original lower spring valve controls a lifted sluice inside this stone
   // headwall. Its feed reaches the west port of the middle row.
   for (const px of [-7.25, -5.95]) pier(px, -3.5, 8.1, 0.75);
@@ -309,8 +365,9 @@ export function buildRainGarden(game) {
       false,
     );
     handle.rotation.x = Math.PI / 2;
-    const number = label(String(i + 1), 0.6);
-    number.position.set(0.95, 0.65, 1.0);
+    const number = label(String(i + 1), 0.7);
+    number.position.set(0.95, 0.142, 1.42);
+    number.rotation.x = -Math.PI / 2;
     tile.add(number);
     g.channels.push({
       root: tile,
@@ -361,51 +418,19 @@ export function buildRainGarden(game) {
   };
   g.inlet = [flume(-6.6, -2.9, -6.6, 0, 5.84), flume(-6.6, 0, -5.25, 0, 5.84)];
   g.outlet = flume(5.25, -3.5, 7.3, -3.5, 5.84);
-  sign("IN", -5.45, 6.45, 0.4, 1);
-  sign("OUT", 5.4, 6.45, -3.1, 1);
+  for (const [text, px, pz] of [
+    ["IN", -5.45, 0.4],
+    ["OUT", 5.4, -3.1],
+  ]) {
+    block(0.1, 0.8, 0.1, px, 6.0, pz, metal);
+    sign(text, px, 6.4, pz, 0.75);
+  }
   // Restored irrigation drives a wheel below the raised headrace.
   const wheel = (g.wheel = new THREE.Group());
   wheel.position.set(9, 2.5, -3.5);
   wheel.userData.animated = true;
   root.add(wheel);
-  for (const side of [-1, 1]) {
-    const rim = add(
-      new THREE.TorusGeometry(2.25, 0.12, 8, 48),
-      wood,
-      0,
-      0,
-      side * 0.48,
-      wheel,
-      false,
-    );
-    for (let i = 0; i < 8; i++)
-      block(
-        0.13,
-        4.35,
-        0.13,
-        0,
-        0,
-        side * 0.48,
-        wood,
-        wheel,
-        false,
-      ).rotation.z = (i * Math.PI) / 4;
-  }
-  for (let i = 0; i < 16; i++) {
-    const a = (i * Math.PI) / 8,
-      paddle = block(
-        0.95,
-        0.14,
-        1.16,
-        Math.cos(a) * 2.25,
-        Math.sin(a) * 2.25,
-        0,
-        wood,
-        wheel,
-        false,
-      );
-    paddle.rotation.z = a + Math.PI / 2;
-  }
+  buildGardenWheel({ add, block, wood, metal, wheel });
   for (const pz of [-4.25, -2.75]) pier(9, pz, 2.55, 0.65);
   const shaft = add(
     new THREE.CylinderGeometry(0.18, 0.18, 2.2, 16),
@@ -415,11 +440,14 @@ export function buildRainGarden(game) {
     -3.5,
   );
   shaft.rotation.x = Math.PI / 2;
+  const fallTop = 5.895,
+    fallBottom = 0.07,
+    fallHeight = fallTop - fallBottom;
   const curtain = (g.fall = add(
-    new THREE.PlaneGeometry(0.75, 3.55, 4, 20),
-    curtainMaterial(g.time, { value: 3.55 }, 23, game.level),
+    new THREE.PlaneGeometry(0.75, fallHeight, 4, 20),
+    curtainMaterial(g.time, { value: fallHeight }, 23, game.level),
     7.3,
-    4.15,
+    (fallTop + fallBottom) / 2,
     -3.5,
     root,
     false,
@@ -459,7 +487,7 @@ export function buildRainGarden(game) {
     for (const pz of [-1.5, 1.5]) pier(px, pz, 10.9, 0.42);
   for (const pz of [-7.8, -4]) pier(10.5, pz, GARDEN_UPPER - 0.35, 0.65);
   pier(4.4, -7.8, GARDEN_UPPER - 0.35, 0.65);
-  block(4.3, 0.6, 4.0, 9, 11.15, 0, wood);
+  buildGardenShelter({ add, block, wood, metal });
   rail(10.65, -5, 0.13, 7.4, GARDEN_UPPER);
   rail(7, -8.6, 6, 0.13, GARDEN_UPPER);
   const car = (g.car = new THREE.Group());
@@ -467,7 +495,13 @@ export function buildRainGarden(game) {
   car.userData.animated = true;
   car.userData.cameraDynamic = true;
   root.add(car);
-  const slab = block(3.4, 0.28, 3.2, 0, -0.14, 0, wood, car);
+  for (let plank = 0; plank < 10; plank++)
+    block(0.332, 0.19, 3.2, -1.53 + plank * 0.34, -0.095, 0, wood, car);
+  for (const pz of [-1.2, 1.2]) {
+    block(3.4, 0.1, 0.25, 0, -0.23, pz, wood, car);
+    for (const px of [-1.48, 1.48])
+      block(0.1, 0.025, 0.45, px, 0.014, pz, metal, car, false);
+  }
   g.carDeck = {
     x: x + 9,
     z,
@@ -509,28 +543,29 @@ export function buildRainGarden(game) {
     rope,
     9,
     9,
-    0,
+    1.45,
     root,
     false,
   ));
   cable.userData.animated = true;
-  const pulley = add(
-    new THREE.TorusGeometry(0.45, 0.08, 8, 24),
+  const pulley = (g.pulley = add(
+    gardenLiftPulleyGeometry(),
     metal,
     9,
-    10.8,
-    0,
+    11.8,
+    1,
     root,
     false,
-  );
+  ));
+  pulley.userData.animated = true;
   pulley.rotation.y = Math.PI / 2;
   add(
     new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
         new THREE.Vector3(9, 2.5, -4.2),
         new THREE.Vector3(10.4, 5, -3),
-        new THREE.Vector3(10.4, 10.6, 0),
-        new THREE.Vector3(9, 10.8, 0),
+        new THREE.Vector3(10.4, 11.6, 0.3),
+        new THREE.Vector3(9, 11.8, 0.55),
       ]),
       32,
       0.04,
@@ -544,15 +579,41 @@ export function buildRainGarden(game) {
     root,
     false,
   );
+  const wrap = Array.from({ length: 17 }, (_, i) => {
+    const a = Math.PI - (i * Math.PI) / 16;
+    return new THREE.Vector3(
+      9,
+      11.8 + Math.sin(a) * 0.45,
+      1 + Math.cos(a) * 0.45,
+    );
+  });
+  add(
+    new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3(wrap),
+      32,
+      0.04,
+      8,
+      false,
+    ),
+    rope,
+    0,
+    0,
+    0,
+    root,
+    false,
+  );
+  block(0.24, 0.27, 0.14, 0, 1.08, 1.45, metal, car, false);
   g.calls = [
     new THREE.Vector3(x + 6.7, y + GARDEN_FLOOR, z + 1),
     new THREE.Vector3(x + 9, y + GARDEN_UPPER, z - 2.1),
   ];
   for (const [i, p] of g.calls.entries()) {
-    block(0.3, 0.8, 0.3, p.x - x, p.y - y + 0.4, p.z - z, stone);
-    const s = sign("CALL LIFT", p.x - x, p.y - y + 1.1, p.z - z + 0.12, 1.5);
+    block(0.3, 1.1, 0.3, p.x - x, p.y - y + 0.55, p.z - z, stone);
+    sign("CALL LIFT", p.x - x, p.y - y + 1.1, p.z - z + 0.12, 1.2);
   }
-  sign("RIDE TO THE SANCTUARY", 9, 7.0, 1.5, 3.4);
+  const rideSign = gardenPlaque("SANCTUARY LIFT", 2.7, stone, metal, label);
+  rideSign.position.set(0, 1, 1.55);
+  car.add(rideSign);
   g.sources = [
     {
       id: "rain-garden-spring",
@@ -580,8 +641,8 @@ export function buildRainGarden(game) {
       id: "rain-garden-lift",
       kind: "hoist",
       x: x + 9,
-      y: y + 10.8,
-      z: z + 0.3,
+      y: y + 11.8,
+      z: z + 1.4,
       gain: 0.06,
       near: 2,
       range: 25,
@@ -691,7 +752,8 @@ export function updateRainGarden(game, dt, initial = false) {
   g.lever.rotation.z = g.motion?.stop === 1 ? -0.45 : 0.45;
   g.carRail.bottom = g.carDeck.y + 0.94;
   g.carRail.top = g.carDeck.y + 1.06;
-  const length = 10.8 - g.car.position.y - 1.2;
+  g.pulley.rotation.z = -g.car.position.y / 0.45;
+  const length = 11.8 - g.car.position.y - 1.2;
   g.cable.position.y = g.car.position.y + 1.2 + length / 2;
   g.cable.scale.y = Math.max(0.1, length);
   g.sources[0].activity = spring && !game.paused ? 1 : 0;

@@ -130,6 +130,8 @@ Release its spring, climb the west stair and turn nine channel stones to connect
 the west inlet to the northeast outlet. Open the receiver to power a water lift,
 ride to the upper sluice, then return by the lift and stair. Channel orientations
 and the last completed lift stop persist.
+Its [construction artwork](docs/rain-garden-construction.md) adds fitted paving,
+a timber roof, a jointed waterwheel and lift rigging that clears the passenger.
 
 Desert mirrors use **E / Use** at each numbered handwheel. Follow the reflected sunlight and activate the receiver when it lights up. The sanctuary tablet also offers diagram controls for the same saved mirrors.
 

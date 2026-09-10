@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The rain garden now has [fitted construction artwork](rain-garden-construction.md):
+  stone paving, supported beams, timber roof trusses and shingles, a planked
+  cargo floor, segmented waterwheel rims and mounted inscriptions. Its grooved
+  pulley and cable clear the upper passenger area, and falling water reaches its
+  impact pool. All 507 tests and the build pass, along with the continuous
+  assisted route, positioned audio, shader/resource checks and final production
+  keyboard/touch completion and reload. The guide includes matched captures,
+  added rendering costs and the remaining graphics, pacing and listening limits.
+
 - The jungle's third field mission now restores [the rain garden](rain-garden.md).
   Nine turnable channel stones connect a released spring to a water-powered
   cargo lift and upper sanctuary sluice. A stair, irrigation terrace, raised

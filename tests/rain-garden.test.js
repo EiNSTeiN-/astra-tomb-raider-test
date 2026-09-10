@@ -22,6 +22,7 @@ import {
   GARDEN_FLOOR,
   GARDEN_UPPER,
 } from "../src/rain-garden-rules.js";
+import { gardenPavingGeometry } from "../src/rain-garden-art.js";
 function fixture(progress = { stage: 2 }) {
   const store = new SaveStore({
       getItem: () =>
@@ -269,5 +270,87 @@ test("rendered treads and channel pads match footing and the lift rail follows i
   assert.equal(
     game.canMove(g.carDeck.x, g.carDeck.z + 1.45, GARDEN_FLOOR),
     true,
+  );
+});
+
+test("fitted garden paving has level walking faces and closed bedding under its joints", () => {
+  const geometry = gardenPavingGeometry(12.6, 16, 0.45, 7300);
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+  const ray = new THREE.Raycaster();
+  ray.far = 0.32;
+  let minimum = 0;
+  for (let ix = 0; ix <= 24; ix++)
+    for (let iz = 0; iz <= 30; iz++) {
+      ray.set(
+        new THREE.Vector3(-6.15 + ix * 0.51, 0.2, -7.85 + iz * 0.52),
+        new THREE.Vector3(0, -1, 0),
+      );
+      const hit = ray.intersectObject(mesh)[0];
+      assert(hit, "A paving joint must retain its continuous stone bedding");
+      assert(
+        hit.point.y <= 0.00001,
+        "Paving must not rise above the collision deck",
+      );
+      assert(
+        hit.point.y > -0.11,
+        "Recesses stay below the player's step height",
+      );
+      minimum = Math.min(minimum, hit.point.y);
+    }
+  assert(minimum < -0.005, "The fitted joints have physical depth");
+  geometry.dispose();
+  mesh.material.dispose();
+});
+
+test("the lift rigging clears a standing passenger and stays attached through its journey", () => {
+  const g = fixture({ stage: 3 }),
+    r = g.rainGarden;
+  const ray = new THREE.Raycaster();
+  ray.far = 1.65;
+  g.world.updateMatrixWorld(true);
+  for (const dx of [-0.6, 0, 0.6])
+    for (const dz of [-0.6, 0, 0.6]) {
+      ray.set(
+        new THREE.Vector3(r.carDeck.x + dx, GARDEN_UPPER + 0.2, r.z + dz),
+        new THREE.Vector3(0, 1, 0),
+      );
+      assert.equal(
+        ray.intersectObject(r.root, true).length,
+        0,
+        "The pulley and hanging rope must clear the upper passenger volume",
+      );
+    }
+  place(g, 9, GARDEN_UPPER, 0);
+  const upperAngle = r.pulley.rotation.z;
+  assert(startGardenLift(g, 0));
+  for (let i = 0; i < 14; i++) {
+    tick(g, 15);
+    assert(
+      Math.abs(
+        r.cable.position.y - r.cable.scale.y / 2 - (r.car.position.y + 1.2),
+      ) < 0.00001,
+    );
+    assert(Math.abs(r.cable.position.y + r.cable.scale.y / 2 - 11.8) < 0.00001);
+    assert.equal(r.cable.position.z, 1.45);
+  }
+  assert.notEqual(r.pulley.rotation.z, upperAngle);
+  assert.equal(r.saved.stop, 0);
+  assert.equal(g.player.position.y, GARDEN_FLOOR);
+});
+
+test("the visible wheel feed joins the outlet to the impact water", () => {
+  const g = fixture({ stage: 3 }),
+    r = g.rainGarden;
+  g.world.updateMatrixWorld(true);
+  const fall = new THREE.Box3().setFromObject(r.fall),
+    outlet = r.outlet.getWorldPosition(new THREE.Vector3()),
+    impact = r.foam.getWorldPosition(new THREE.Vector3());
+  assert(r.fall.visible);
+  assert(Math.abs(fall.max.y - outlet.y) < 0.00001);
+  assert(Math.abs(fall.min.y - impact.y) < 0.00001);
+  assert(
+    Math.abs(
+      r.fall.material.uniforms.height.value - (fall.max.y - fall.min.y),
+    ) < 0.00001,
   );
 });
