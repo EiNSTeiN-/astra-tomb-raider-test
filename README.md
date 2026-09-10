@@ -15,6 +15,9 @@ High uses a larger shadow map; the notes record its GPU and memory costs.
 The desert now has [calibrated daylight and sky reflections](docs/desert-daylight.md),
 with cooler ambient fill and clearer separation between sunlight and shade.
 
+The mountain monastery's [timber columns now meet their stone bases](docs/monastery-joints.md)
+across all nine courts, closing the visible gaps beneath the gallery supports.
+
 The desert quarry climb now occupies [a ruined survey house](docs/cleft-masonry.md),
 with stepped buttresses, broken rear galleries and an uneven roofline. The notes
 include comparison images, traversal checks and the added rendering cost.

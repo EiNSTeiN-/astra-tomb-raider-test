@@ -2,6 +2,10 @@
 
 The Himalayan chapter now has nine supported timber monastery courts: central bell pavilions, whitewashed upper halls, window latticework, covered side galleries, and varied damaged roofs. These are original procedural buildings for the fictional game setting, not a reconstruction of a particular monastery.
 
+The later [column-joint correction](monastery-joints.md) seats all 147 timber
+shafts in their stone bases; its comparison and verification supersede the
+visible gaps in this original art pass's captures.
+
 Ground-level routes pass beneath the upper rooms. Grounded stone footings and timber posts use explicit navigation bounds; separate height-aware camera surfaces block the upper walls and roofs. Batching keeps static structure to roughly seven materials per court, while window detail has a shorter range. The final court has a taller roof crest, and the damaged middle court omits its upper loft. The former floating cones and flat flags are removed.
 
 ## Materials and environment

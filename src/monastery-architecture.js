@@ -226,7 +226,11 @@ export function buildMonasteryArchitecture(game) {
     for (const post of plan.posts) {
       const floor = ground(post.x, post.z),
         foot = post.width + 0.22,
-        h = post.top - floor;
+        h = post.top - floor,
+        // Seat the timber inside the 1.5 m stone base, allowing for chipped
+        // block faces. Keep its upper end at the existing beam joint.
+        timberBottom = floor + 1.46,
+        timberTop = post.top - 0.15;
       game.obstacles.push({
         x: x + post.x,
         z: z + post.z,
@@ -249,11 +253,11 @@ export function buildMonasteryArchitecture(game) {
         );
       block(
         post.width * 0.67,
-        h - 1.85,
+        timberTop - timberBottom,
         post.width * 0.67,
         wood,
         post.x,
-        floor + 1.7 + (h - 1.85) / 2,
+        (timberBottom + timberTop) / 2,
         post.z,
       );
       block(
@@ -271,7 +275,7 @@ export function buildMonasteryArchitecture(game) {
         post.width * 0.8,
         red,
         post.x,
-        floor + 2,
+        timberBottom + 0.3,
         post.z,
       );
       const brace = block(

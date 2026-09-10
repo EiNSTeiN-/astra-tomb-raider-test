@@ -20,6 +20,14 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The mountain monastery's 147 timber columns now meet their stone bases in
+  all nine courts. All 1,323 browser joint samples are connected, and six
+  matched views across the three graphics settings retain the same rendering
+  counts. Forty assisted bell-rack walking legs, all 478 tests, the build,
+  release keyboard/touch movement and save recovery pass.
+  [Joint comparisons and checks](monastery-joints.md) record the correction
+  and remaining graphics, pacing, listening and device work.
+
 - The quarry climbing camera now frames the wall when taking a grip or return
   line, retains look input around nearby holds, and restores full orbit on
   terraces. The reproduced torso close-up improved from a 0.97-metre to a
