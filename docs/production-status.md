@@ -20,6 +20,18 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The tidekeeper's archive now has [rounded, translucent bubble guides](archive-bubbles.md)
+  with clear centers, soft rims and source, surface and near-camera fades.
+  Rise speed stays consistent across well depths; a regression prevents
+  drainage from reshuffling bubbles after a long session. All 494 tests,
+  the build and release keyboard/touch recovery and reload checks pass.
+  Twenty-six matched views and six GPU cases cover appearance, opacity,
+  camera direction and occlusion. Ten assisted archive dives and the memorial
+  route pass at full health; positional audio and resource cleanup pass.
+  Bubble geometry falls from 36 to two triangles per particle with unchanged
+  draw-call counts and no new textures. The guide retains shader, frame-rate,
+  graphics, pacing, listening and device limitations.
+
 - The coastal wells now have [natural rock banks beneath their marble courts](coastal-banks.md).
   Separate slab maps and an earlier slope transition remove stretched paving
   from steep banks. Twenty-six matched coastal pairs retain geometry counts;

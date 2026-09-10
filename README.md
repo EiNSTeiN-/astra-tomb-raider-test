@@ -243,6 +243,11 @@ story; reloading a dive returns you safely to the water surface. Underwater soun
 is muffled and the chapter score becomes more sparse. Touch players have Dive,
 Rise and a journal link in the pause menu. See [diving and archive notes](docs/diving-archive.md).
 
+The [archive bubble trails](docs/archive-bubbles.md) now have transparent
+centers, rounded rims and gentle fades at the source, surface and camera.
+Their rise remains steady as the wells drain, and recovering a record removes
+its visual and audible guide.
+
 A submerged memorial gallery now extends west from the first sounding well.
 Follow its bronze survey line, breathe in two air bells, swim through a collapsed
 colonnade, and open the emergency gates to recover a copper evacuation record.

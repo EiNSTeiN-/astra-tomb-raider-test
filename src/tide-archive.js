@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
+import {
+  archiveBubbleMaterial,
+  createArchiveBubbles,
+  updateArchiveBubbles,
+} from "./archive-bubbles.js";
 
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
 
@@ -26,13 +31,7 @@ export function buildTideArchive(game) {
     emissive: 0x51411a,
     emissiveIntensity: 0.14,
   });
-  const bubbleMaterial = new THREE.MeshBasicMaterial({
-    color: 0xbbdfe1,
-    transparent: true,
-    opacity: 0.34,
-    depthWrite: false,
-  });
-  const bubbleGeometry = new THREE.SphereGeometry(0.035, 6, 4);
+  const bubbleMaterial = archiveBubbleMaterial();
   const wells = game.waterMeshes.filter((w) =>
     w.userData.id?.startsWith("reservoir-"),
   );
@@ -95,9 +94,7 @@ export function buildTideArchive(game) {
     mergeArchitecture(root);
     root.add(tablet);
     game.obstacles?.push({ x, z, w: 1.1, d: 0.82, h: 1.12, climbable: false });
-    const bubbles = new THREE.InstancedMesh(bubbleGeometry, bubbleMaterial, 20);
-    bubbles.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    bubbles.frustumCulled = false;
+    const bubbles = createArchiveBubbles(bubbleMaterial);
     game.world.add(bubbles);
     const buoy = new THREE.Group();
     buoy.position.set(x, water.position.y, z);
@@ -151,7 +148,6 @@ export function buildTideArchive(game) {
 }
 
 export function updateTideArchive(game) {
-  const matrix = new THREE.Matrix4();
   for (const site of game.tideArchive || []) {
     const found = game.progress.archive?.includes(site.record.id);
     site.tablet.visible = !found;
@@ -162,19 +158,7 @@ export function updateTideArchive(game) {
     site.bubbles.visible =
       !found &&
       site.position.distanceTo(game.player?.position || site.position) < 50;
-    for (let i = 0; i < 20; i++) {
-      const height = Math.max(0, site.water.position.y - site.source.y);
-      const t = (game.elapsed * 0.24 + i / 20) % 1;
-      const scale = 0.6 + t * 1.3;
-      matrix.makeScale(scale, scale, scale);
-      matrix.setPosition(
-        site.source.x + Math.sin(i * 17 + t * 4) * 0.22,
-        site.source.y + t * height,
-        site.source.z + Math.cos(i * 11 + t * 3) * 0.22,
-      );
-      site.bubbles.setMatrixAt(i, matrix);
-    }
-    site.bubbles.instanceMatrix.needsUpdate = true;
+    updateArchiveBubbles(site, game.elapsed);
   }
 }
 

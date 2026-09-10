@@ -47,6 +47,11 @@ sky. Leaving the water restores the exact chapter fog/background. Water renders
 its underside in one double-sided pass. Existing shadows, material detail and
 the explorer's procedural swimming pose remain in use.
 
+The archive's [revised bubble trails](archive-bubbles.md) have transparent
+centers, soft rims and source/surface fades, replacing the solid polygon beads
+visible in the earlier captures above. Their rise speed stays consistent across
+well depths, and they fade near the camera.
+
 Each unrecovered case has an original synthesized bubble voice at its actual
 depth. Its linear falloff extends from 1 to 16 metres and participates in the
 shared twelve-voice selection. Source height does not follow the surface marker;

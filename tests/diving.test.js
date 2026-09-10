@@ -194,6 +194,7 @@ test("five distinct archive wells remain submerged after drainage and require cl
     assert.equal(archiveInteract(g), false, "no duplicate reward");
     assert.equal(site.source.activity, 0);
     assert.equal(site.buoy.visible, false);
+    assert.equal(site.bubbles.visible, false);
   }
   assert.equal(depths.size, 5);
   assert.equal(saves, 5);
