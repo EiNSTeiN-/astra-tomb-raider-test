@@ -79,7 +79,8 @@ prepared six-metre terrace, reducing stamina to 93.35%. Pausing mid-climb and
 reloading restored x=209, z=219.2, height=6 with the recovered survey record
 retained and readable in the journal. Health stayed at 100. This verified input
 and recovery; the capture also exposed camera crowding beside the wall, where
-the explorer can obscure the view. That camera behavior still needs correction.
+the explorer can obscure the view. The later [climbing camera correction](quarry-camera.md)
+addresses that reproduction.
 
 Separate release cases travelled 4.378 metres with keyboard sprinting and
 1.123 metres with portrait two-finger movement/crouching. Both finished at

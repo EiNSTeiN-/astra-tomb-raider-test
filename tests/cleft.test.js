@@ -111,6 +111,94 @@ function mount(g, index) {
   assert.equal(g.cleft.anchor, index);
 }
 
+function cameraFixture() {
+  const g = fixture();
+  g.camera = new THREE.PerspectiveCamera(58, 1280 / 800, 0.1, 1200);
+  g.sun = new THREE.DirectionalLight();
+  g.yaw = -2.05306456382522;
+  g.pitch = 0.15;
+  g.camera.position.copy(g.player.position).add(new THREE.Vector3(-4, 2, -2));
+  return g;
+}
+
+test("taking a quarry grip frames its open face, retains look input, and releases the orbit on a terrace", () => {
+  const g = cameraFixture();
+  grip(g, 1);
+  const saved = JSON.stringify(g.progress);
+  for (let i = 0; i < 90; i++) g.updateCamera(1 / 60);
+  const target = g.player.position.clone().add(new THREE.Vector3(0, 1.3, 0));
+  assert(g.camera.position.distanceTo(target) > 5);
+  assert(g.camera.position.z > target.z + 5);
+  assert(g.avatar.visible);
+  g.yaw = 0.4;
+  g.pitch = 0.3;
+  g.updateCamera(1 / 60);
+  assert(Math.abs(g.yaw - 0.4) < 1e-10);
+  assert.equal(g.pitch, 0.3);
+  assert.equal(
+    JSON.stringify(g.progress),
+    saved,
+    "camera never changes the save",
+  );
+  mount(g, 1);
+  g.yaw = 2.4;
+  g.pitch = -0.2;
+  g.updateCamera(1 / 60);
+  assert.equal(g.yaw, 2.4);
+  assert.equal(g.pitch, -0.2);
+  grip(g, 1);
+  g.updateCamera(1 / 60);
+  assert.equal(g.yaw, 0, "a new grip reframes after free terrace look");
+  g.wallGrip = null;
+  g.updateCamera(1 / 60);
+  g.wallGrip = { kind: "rappel-reach" };
+  g.yaw = Math.PI;
+  g.updateCamera(1 / 60);
+  assert.equal(g.yaw, 0, "the return line also faces out from the wall");
+});
+
+test("all quarry handholds retain a clear camera and visible grip across the bounded look arc", () => {
+  const g = cameraFixture();
+  for (const node of g.cleft.nodes)
+    for (const yaw of [
+      -Math.PI,
+      -0.85,
+      -0.55,
+      -0.5,
+      -0.4,
+      0,
+      0.4,
+      0.5,
+      0.55,
+      0.85,
+      Math.PI,
+    ])
+      for (const pitch of [-0.65, 0.02, 0.08, 0.15, 0.2, 0.55, 1.05]) {
+        g.wallGrip = { kind: "hang", node: node.id };
+        g.cleft.cameraActive = true;
+        g.yaw = yaw;
+        g.pitch = pitch;
+        g.player.position.copy(node.grip).add(new THREE.Vector3(0, -1.9, 0.55));
+        const target = g.player.position
+          .clone()
+          .add(new THREE.Vector3(0, 1.3, 0));
+        g.camera.position.copy(target).add(new THREE.Vector3(0, 1, 5.3));
+        g.updateCamera(2);
+        g.camera.updateMatrixWorld();
+        const arm = g.camera.position.distanceTo(target),
+          grip = node.grip.clone().project(g.camera),
+          feet = g.player.position.clone().project(g.camera);
+        // Railings can retract an oblique view. Both ends of the climber must
+        // still fit the frame, rather than accepting the original torso close-up.
+        assert(arm > 2.5 && arm < 5.5, `${node.id}/${yaw}/${pitch}: ${arm}`);
+        assert(g.cameraSurfaces.entry(target, g.camera.position) > 0.99999);
+        assert(g.camera.position.y > g.groundHeight() + 0.28);
+        assert(Math.abs(grip.x) < 0.8 && Math.abs(grip.y) < 0.8);
+        assert(Math.abs(feet.x) < 0.9 && Math.abs(feet.y) < 0.9);
+        assert(g.avatar.visible);
+      }
+});
+
 test("cleft graph offers a climbable bypass and directional, bidirectional gap transfers", () => {
   const reach = new Set([0]);
   for (let i = 0; i < CLEFT_NODES.length; i++)

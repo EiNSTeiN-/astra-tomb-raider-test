@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The quarry climbing camera now frames the wall when taking a grip or return
+  line, retains look input around nearby holds, and restores full orbit on
+  terraces. The reproduced torso close-up improved from a 0.97-metre to a
+  5.33-metre camera arm. Native keyboard/touch look and 1,295 posed browser views
+  across all 37 holds passed; the full assisted route returned at full health.
+  All 478 tests and the release build passed, including two new camera
+  regressions. Release climbing, keyboard/touch movement and saved recovery
+  passed. [Camera comparisons and checks](quarry-camera.md) document the look
+  limits, railing retractions and remaining graphics, pacing and device work.
+
 - Desert daylight now uses a calibrated visible sky and reflection capture,
   cooler ambient fill and clearer separation between sun and shade. Eighteen
   matched desert pairs retained all geometry counts, route bounds and source

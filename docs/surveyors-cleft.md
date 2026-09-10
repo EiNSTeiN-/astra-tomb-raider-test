@@ -19,6 +19,9 @@ Read the cairn at the western foot of the wall. Use **E / Use** near the first
 bronze bar to grip it. While hanging, directions follow the face of the wall:
 Up climbs, Down descends, and Left / Right traverse. Turning the camera does not
 change those directions. Hold a direction to continue between connected grips.
+The [climbing camera](quarry-camera.md) faces the wall when you take a grip.
+Look controls stay around nearby holds; step onto a terrace to look all the
+way around.
 
 The upper fork bypasses the first broken span. Longer transfers require a
 direction and **Space / Jump**, followed by holding **E / Use** to catch the far

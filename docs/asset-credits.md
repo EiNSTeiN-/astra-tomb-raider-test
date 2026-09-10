@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The quarry framing helper in `src/cleft-camera.js` is original project code
+using the existing camera collision and smoothing system. Its documentation
+images are lossless conversions of actual game captures. No external art,
+audio or dependency was added. See [camera comparisons and checks](quarry-camera.md).
+
 The desert daylight calibration in `src/atmosphere.js` uses Three.js's existing
 Sky and reflection-capture code with original project lighting settings. Its
 comparison images are lossless conversions of actual game canvases. No external

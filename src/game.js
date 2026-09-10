@@ -33,6 +33,7 @@ import {
   restorePressureArrival,
 } from "./pressure-rules.js";
 import { buildSurveyorsCleft, updateCleftArt } from "./cleft-art.js";
+import { frameCleftCamera } from "./cleft-camera.js";
 import { cleftBlocked, cleftOccludes } from "./cleft-rules.js";
 import {
   updateCleft,
@@ -1753,6 +1754,7 @@ export class Adventure {
     this.cb.update?.(this.state());
   }
   updateCamera(dt) {
+    frameCleftCamera(this);
     this.crouchCamera = THREE.MathUtils.damp(
       this.crouchCamera || 0,
       this.crouching ? CROUCH_DROP : 0,
