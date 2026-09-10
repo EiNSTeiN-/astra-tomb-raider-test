@@ -12,6 +12,10 @@ that follows animated soles and nearby supports on all graphics settings.
 Outdoor [sun shadows sit closer to objects and stay steadier during travel](docs/sun-shadows.md).
 High uses a larger shadow map; the notes record its GPU and memory costs.
 
+The desert quarry climb now occupies [a ruined survey house](docs/cleft-masonry.md),
+with stepped buttresses, broken rear galleries and an uneven roofline. The notes
+include comparison images, traversal checks and the added rendering cost.
+
 Crouching now uses [lowered hands and relaxed fingers](docs/explorer-crouch.md),
 with walking arm swing that settles when movement stops. The comparison notes
 include browser views, contact checks and keyboard/touch save verification.

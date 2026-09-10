@@ -5,6 +5,7 @@ import {
 } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
 import { CLEFT_NODES, CLEFT_TERRACES, normalizeCleft } from "./cleft-rules.js";
+import { buildCleftMasonry } from "./cleft-masonry.js";
 
 export function buildSurveyorsCleft(game) {
   game.cleft = null;
@@ -30,8 +31,18 @@ export function buildSurveyorsCleft(game) {
     anchor: 0,
   });
   game.progress.cleft = c.saved;
-  const stone = game.stoneMat,
-    dark = game.darkMat || stone;
+  const stone = game.stoneMat.clone(),
+    dark = (game.darkMat || game.stoneMat).clone();
+  for (const [material, source, name] of [
+    [stone, game.stoneMat, "Survey house sandstone"],
+    [dark, game.darkMat || game.stoneMat, "Survey house exposed core"],
+  ]) {
+    material.name = name;
+    material.vertexColors = true;
+    material.onBeforeCompile = source.onBeforeCompile;
+    material.customProgramCacheKey = source.customProgramCacheKey;
+  }
+  dark.color.set(0xa7acae);
   const bronze = new THREE.MeshStandardMaterial({
     color: 0xb8a16a,
     metalness: 0.72,
@@ -91,30 +102,10 @@ export function buildSurveyorsCleft(game) {
     );
     return mesh;
   }
-  // Recessed backing and irregular outer courses: dark joints have real depth.
-  block(30, 22, 2, 0, 11, -1.3, dark, true);
-  solid(0, 11, -1.3, 30, 22, 2);
-  for (let row = 0; row < 30; row++) {
-    const h = 0.72,
-      py = 0.36 + row * 0.73;
-    for (let col = 0; col < 12; col++) {
-      const px = -13.75 + col * 2.5 + (row % 2 ? 0.17 : -0.17);
-      const fracture =
-        (Math.abs(px + 5) < 1.4 && py > 4.3 && py < 6.8) ||
-        (Math.abs(px - 0.7) < 1.1 && py > 10.4 && py < 12.2) ||
-        (Math.abs(px + 0.9) < 1.2 && py > 16.8);
-      if (!fracture)
-        block(2.44, h, 0.48, px, py, -0.2 - Math.sin(row * 7 + col) * 0.025);
-    }
-  }
-  for (const px of [-15.1, 15.1]) {
-    for (let row = 0; row < 17; row++)
-      block(1.7, 1.28, 2.2, px, row * 1.3 + 0.64, -0.7, stone, true);
-    block(2.4, 0.45, 2.8, px, 22.35, -0.7, stone, true);
-    solid(px, 11, -0.7, 1.7, 22, 2.2);
-  }
+  c.masonry = buildCleftMasonry(game, c, stone, dark);
   // Chiseled measuring bands and blind niches below the climb.
   for (const px of [-6, 0, 6, 12]) {
+    solid(px, 1.55, 0.15, 2.65, 3.1, 0.7);
     block(2.1, 2.2, 0.13, px, 1.5, 0.11, dark);
     add(
       carvedPanelGeometry(1.8, 1.85, serial++ % 4, [18, 28]),

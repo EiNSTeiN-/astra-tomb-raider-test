@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The quarry climb now occupies a ruined survey house with stepped buttresses,
+  broken rear galleries, an uneven roofline and masonry on both faces. New
+  collision and camera bounds leave the rear passages and climbing route clear.
+  All 475 tests and the release build passed; the full assisted climb and rear
+  walk finished at full health, and release climbing, keyboard/touch movement
+  and saved recovery passed. Draft attenuation, music selection and resource
+  cleanup also passed. A fixed Radeon 780M view measured GPU increases of
+  22.3% in High and 44.6% in Low despite removing hidden geometry.
+  [Masonry comparisons and costs](cleft-masonry.md) document that tradeoff and
+  the remaining graphics, pacing, listening and device requirements.
+
 - Desert banks now have rounded lower slopes beside the walking routes, opening
   views between their shoulders. Median near-route slope fell from 38.80° to
   17.85° while 51,375 walking-floor and 4,805 reservoir-floor samples remained

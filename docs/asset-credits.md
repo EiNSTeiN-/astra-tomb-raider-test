@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The ruined survey house in `src/cleft-masonry.js` is original project geometry:
+its stepped buttresses, broken galleries, uneven courses, recesses and floor
+sockets reuse the existing sandstone maps and original solar relief/arch
+helpers. Its local materials preserve those shaders with vertex color variation.
+No external model, image, recording, music or dependency was added. See
+[quarry masonry comparisons and verification](cleft-masonry.md).
+
 The rounded lower desert slopes in `src/desert-geology.js` are original
 procedural project code. They reuse the existing credited sand and sandstone
 maps, with no new external model, image, recording, music or dependency. See

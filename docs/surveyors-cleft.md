@@ -1,5 +1,9 @@
 # The Surveyor’s Cleft
 
+The later [ruined survey house update](cleft-masonry.md) adds buttresses,
+rear galleries and revised masonry around the preserved climbing route.
+The images and validation below describe the original traversal milestone.
+
 The desert chapter has an optional climb east of its western survey station.
 The quarry face contains 37 handholds, a branch around the first broken span,
 three upper rest terraces and a summit writing desk. Recovering the surveyors’

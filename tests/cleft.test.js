@@ -28,7 +28,7 @@ import {
   normalizeCleft,
 } from "../src/cleft-rules.js";
 
-function fixture() {
+function fixture(groundHeight = () => 3) {
   const world = new THREE.Group(),
     store = new SaveStore({ getItem: () => null, setItem() {} });
   const g = Object.assign(Object.create(Adventure.prototype), {
@@ -39,7 +39,7 @@ function fixture() {
     map: { cleft: { x: 29, z: 31 } },
     player: new THREE.Group(),
     avatar: new THREE.Group(),
-    groundHeight: () => 3,
+    groundHeight,
     walkable: () => true,
     stoneMat: new THREE.MeshStandardMaterial(),
     darkMat: new THREE.MeshStandardMaterial(),
@@ -309,4 +309,98 @@ test("every authored transfer clears the wall and terrace undersides; a newly ob
   assert.equal(g.wallGrip.kind, "recover");
   step(g, 102);
   assert(g.grounded);
+});
+
+test("the ruined rear galleries block piers while their ground-level passages remain open to players and cameras", () => {
+  const g = fixture(),
+    c = g.cleft;
+  for (const x of [-15.2, -6, 4.6, 15.2]) {
+    assert(!g.canMove(c.x + x, c.z - 9.1, 0));
+    const from = new THREE.Vector3(c.x + x, c.y + 1.6, c.z - 15),
+      to = new THREE.Vector3(c.x + x, c.y + 1.6, c.z - 4);
+    assert(!g.lineOfSight(from, to, 0, 0));
+    assert(g.cameraSurfaces.entry(from, to, 0) < 1);
+  }
+  for (const x of [-10.6, -0.7, 9.9]) {
+    for (let z = -15; z <= -3.5; z += 0.25)
+      assert(g.canMove(c.x + x, c.z + z, 0), `${x}, ${z}`);
+    const from = new THREE.Vector3(c.x + x, c.y + 1.6, c.z - 15),
+      to = new THREE.Vector3(c.x + x, c.y + 1.6, c.z - 3.5);
+    assert(g.lineOfSight(from, to, 0, 0));
+    assert.equal(g.cameraSurfaces.entry(from, to, 0), 1);
+  }
+  // A ray through the intact crown is stopped; the open space below is not
+  // filled by an oversized gallery collision box.
+  const from = new THREE.Vector3(c.x - 0.7, c.y + 24.4, c.z - 15),
+    to = new THREE.Vector3(c.x - 0.7, c.y + 24.4, c.z - 3.5);
+  assert(!g.lineOfSight(from, to, 0, 0));
+  assert(g.cameraSurfaces.entry(from, to, 0) < 1);
+  for (const x of [-6, 0, 6, 12])
+    assert(!g.canMove(c.x + x, c.z + 0.4, 0), "base relief has physical depth");
+});
+
+test("quarry masonry seats its foundations on uneven ground and keeps the draft fracture visibly open", () => {
+  const g = fixture((x, z) => 3 + (x - 203) * 0.035 + (z - 217) * 0.08),
+    c = g.cleft,
+    ray = new THREE.Raycaster();
+  for (const [x, z, w, d] of [
+    [-15.7, 0.15, 3.8, 5.4],
+    [15.7, 0.15, 3.8, 5.4],
+    [-15.2, -9.1, 2.7, 2.7],
+    [15.2, -9.1, 2.7, 2.7],
+    [-6, -9.1, 2.6, 2.7],
+    [4.6, -9.1, 2.6, 2.7],
+  ])
+    for (const sx of [-1, 1])
+      for (const sz of [-1, 1]) {
+        const px = c.x + x + sx * w * 0.4,
+          pz = c.z + z + sz * d * 0.4,
+          floor = g.groundHeight(px, pz);
+        ray.set(
+          new THREE.Vector3(px, floor - 3, pz),
+          new THREE.Vector3(0, 1, 0),
+        );
+        const hit = ray.intersectObject(c.masonry, true)[0];
+        assert(
+          hit && hit.point.y <= floor,
+          "foundation underside must meet the ground",
+        );
+        assert(
+          hit.point.y > floor - 1,
+          "buried foundation remains fitted to the slope",
+        );
+      }
+  const draft = c.sources[0];
+  ray.set(
+    new THREE.Vector3(draft.x, draft.y, draft.z + 0.5),
+    new THREE.Vector3(0, 0, -1),
+  );
+  const hit = ray.intersectObject(c.masonry, true)[0];
+  assert(
+    hit && hit.distance > 0.85,
+    "draft emerges at the exposed recessed core",
+  );
+  assert(
+    g.lineOfSight(
+      new THREE.Vector3(draft.x, draft.y, draft.z),
+      new THREE.Vector3(draft.x, draft.y, draft.z + 3),
+      0,
+      0,
+    ),
+  );
+  const materials = new Set();
+  c.root.traverse((m) => {
+    if (m.material) materials.add(m.material);
+  });
+  for (const name of ["Survey house sandstone", "Survey house exposed core"]) {
+    const material = [...materials].find((m) => m.name === name);
+    assert(material.vertexColors);
+    assert.notEqual(material, g.stoneMat);
+    assert.notEqual(material, g.darkMat);
+  }
+  assert.equal(
+    g.stoneMat.vertexColors,
+    false,
+    "other architecture keeps its original material",
+  );
 });
