@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- Sun shadows now use smaller calibrated offsets and a stable world texel
+  alignment; High uses a 4096-square map and Balanced retains 2048. A controlled
+  GPU fixture reduced shadow separation from about 20 cm to 2–3 cm and removed
+  measured subpixel drift. All 473 tests and the release build passed. Forty-eight
+  chapter views, native movement, quality changes, slopes, raised platforms and
+  resource cleanup passed; release keyboard/touch cases preserved exact saves
+  at full health. High GPU rendering cost rose 8.6% in the sampled desert view
+  and 4.6% in the jungle, and its larger map adds texture/depth storage.
+  [Shadow comparisons and measurements](sun-shadows.md) record these costs,
+  fixture limits and the remaining production requirements.
+
 - Soft ambient shading now follows the explorer's animated boot soles on all
   three graphics settings, fading with lift and fitting nearby ground or decks.
   All 471 tests and the release build passed. Hardware checks covered 34 views

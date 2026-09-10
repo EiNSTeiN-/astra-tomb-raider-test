@@ -3,6 +3,7 @@ import { Sky } from "three/addons/objects/Sky.js";
 import { forgeSky } from "./forge-sky.js";
 import { observatorySky } from "./observatory-sky.js";
 import { cloudCitySky } from "./cloud-city.js";
+import { stabilizeSunShadow } from "./sun-shadows.js";
 
 export function buildAtmosphere(game) {
   game.sunOffset = new THREE.Vector3(55, 120, 35);
@@ -222,6 +223,7 @@ export function updateAtmosphere(game, target) {
     .copy(target)
     .add(game.sunOffset || new THREE.Vector3(55, 120, 35));
   game.sun.target.position.copy(target);
+  stabilizeSunShadow(game.sun);
   game.daylightSky?.position.copy(target);
   if (
     ["volcano", "eclipse", "sky"].includes(game.level.biome) &&

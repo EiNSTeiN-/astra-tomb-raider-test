@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The directional-shadow calibration, quality sizing and stabilized projection
+in `src/sun-shadows.js` are original project code using Three.js's existing
+shadow renderer. No external art, audio or dependency was added. See
+[shadow comparisons and measurements](sun-shadows.md).
+
 The animated boot contact grids and soft ambient-shading shader in
 `src/explorer-contact.js` are original project code. They sample the existing
 credited explorer mesh and use no new external model, image, recording, music

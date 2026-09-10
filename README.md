@@ -9,6 +9,8 @@ This reduces foot sliding and brings crouched recovery steps beneath the hips;
 the notes include measured limits and matching browser views.
 The boots also have [soft ambient contact shading](docs/explorer-contact.md)
 that follows animated soles and nearby supports on all graphics settings.
+Outdoor [sun shadows sit closer to objects and stay steadier during travel](docs/sun-shadows.md).
+High uses a larger shadow map; the notes record its GPU and memory costs.
 
 Crouching now uses [lowered hands and relaxed fingers](docs/explorer-crouch.md),
 with walking arm swing that settles when movement stops. The comparison notes

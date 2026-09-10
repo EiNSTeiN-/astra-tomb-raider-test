@@ -288,6 +288,7 @@ import {
 import { buildHazards, updateHazards } from "./hazards.js";
 import { buildRuinGrowth, updateRuinGrowth } from "./ruin-growth.js";
 import { buildAtmosphere, updateAtmosphere } from "./atmosphere.js";
+import { configureSunShadow } from "./sun-shadows.js";
 import {
   CameraSurfaces,
   followCamera,
@@ -724,15 +725,7 @@ export class Adventure {
     );
     this.sun.position.set(80, 130, 40);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
-    this.sun.shadow.camera.left = -55;
-    this.sun.shadow.camera.right = 55;
-    this.sun.shadow.camera.top = 55;
-    this.sun.shadow.camera.bottom = -55;
-    this.sun.shadow.camera.near = 0.5;
-    this.sun.shadow.camera.far = 300;
-    this.sun.shadow.bias = -0.0008;
-    this.sun.shadow.normalBias = 0.15;
+    configureSunShadow(this);
     this.scene.add(this.sun, this.sun.target);
     buildAtmosphere(this);
     this.stoneMat = pbrMaterial(
@@ -2570,6 +2563,7 @@ export class Adventure {
         material.needsUpdate = true;
       });
     }
+    configureSunShadow(this);
     this.cinematic?.configure();
     this.audio.setMix(this.store.data.settings);
     this.audio.setVolume(
