@@ -164,10 +164,14 @@ export function buildHazards(game) {
       y =
         f.stairHeight !== undefined ||
         f.reflectorHeight !== undefined ||
-        f.gardenHeight !== undefined
+        f.gardenHeight !== undefined ||
+        f.cartHeight !== undefined
           ? (f.group?.position.y ??
             game.groundHeight(x, z) +
-              (f.stairHeight ?? f.reflectorHeight ?? f.gardenHeight))
+              (f.stairHeight ??
+                f.reflectorHeight ??
+                f.gardenHeight ??
+                f.cartHeight))
           : game.groundHeight(x, z),
       root = new THREE.Group();
     root.position.set(x, y, z);
@@ -333,7 +337,9 @@ export function buildHazards(game) {
       ice.rotation.z = Math.PI;
       hazard.fx.add(ice);
     } else if (["jet", "vent", "gust"].includes(spec.kind)) {
-      for (const dx of [-3, 0, 3]) {
+      for (const dx of f.cartHeight !== undefined
+        ? [-1.6, 0, 1.6]
+        : [-3, 0, 3]) {
         game.cylinder(0.62, 0.8, 0.28, stone, dx, 0.15, 0, root, 12);
         game.cylinder(0.45, 0.45, 0.08, gold, dx, 0.32, 0, root, 12);
       }

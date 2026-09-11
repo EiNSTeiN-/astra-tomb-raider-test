@@ -12,6 +12,7 @@ export function torchHandsBusy(game) {
     game.fireVault?.operation ||
     game.pressureRelay?.operation ||
     game.orbitVault?.operation ||
+    game.temperingCart?.drive ||
     game.courierFerry?.helm ||
     game.climb ||
     game.ropeRide ||

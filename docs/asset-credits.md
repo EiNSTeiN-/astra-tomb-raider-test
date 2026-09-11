@@ -431,3 +431,11 @@ writing in `src/coral-pump*.js`. They reuse the existing coastal stone and mosai
 textures, patinated bronze shader, hydraulic stream shader, original machinery
 synthesis and credited `stream.ogg` recording. No external assets or dependencies
 were added. See [coral pump notes](coral-pump.md) for behavior and verification.
+
+The [obsidian tempering railway](tempering-cart.md), including its cart, rails,
+turntable, gallery, mounted inscriptions, coolant bath and work lamp, is original
+project geometry and writing in `src/tempering-cart*.js`. Fitted paving reuses the
+original garden geometry helpers. The railway uses the credited forge stone and
+Rusty Metal 04 maps, existing water and steam shaders, and original machinery
+synthesis and volcanic score. No external assets or dependencies were added.
+The guide's screenshots are captures of the running game.

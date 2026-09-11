@@ -1,4 +1,18 @@
 import {
+  buildTemperingCart,
+  updateTemperingCart,
+  updateCartArt,
+  controlTemperingCart,
+  poseTemperingCart,
+  interactTemperingCart,
+  cartHint,
+} from "./tempering-cart.js";
+import {
+  cartBlocked,
+  cartOccludes,
+  cartSavePosition,
+} from "./tempering-cart-rules.js";
+import {
   buildRainGarden,
   updateRainGarden,
   gardenHint,
@@ -848,6 +862,7 @@ export class Adventure {
     buildFrozenStair(this);
     buildEasternReflector(this);
     buildRainGarden(this);
+    buildTemperingCart(this);
     buildCoralPump(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
@@ -1362,6 +1377,7 @@ export class Adventure {
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
     if (reflectorBlocked(this, x, z, worldY, clearance)) return false;
+    if (cartBlocked(this, x, z, worldY, clearance)) return false;
     if (gardenBlocked(this, x, z, worldY, clearance)) return false;
     if (coralPumpBlocked(this, x, z, worldY, clearance)) return false;
     if (cleftBlocked(this, x, z, worldY, clearance)) return false;
@@ -1389,6 +1405,7 @@ export class Adventure {
     if (hoistOccludes(this, from, to)) return false;
     if (frozenStairOccludes(this, from, to)) return false;
     if (reflectorOccludes(this, from, to)) return false;
+    if (cartOccludes(this, from, to)) return false;
     if (gardenOccludes(this, from, to)) return false;
     if (coralPumpOccludes(this, from, to)) return false;
     if (cleftOccludes(this, from, to)) return false;
@@ -1478,6 +1495,7 @@ export class Adventure {
     else this.renderer.render(this.scene, this.camera);
   }
   updatePlayer(dt) {
+    updateTemperingCart(this, dt);
     updateCourierFerry(this, dt);
     updateOrbitVault(this, dt);
     updateSkyGusts(this);
@@ -1516,6 +1534,13 @@ export class Adventure {
     this.carrying = !!carryingComponent(this.level, this.progress);
     updateAim(this);
     updateCrouch(this);
+    if (controlTemperingCart(this, dt, -z)) {
+      animateExplorer(this, dt, false, false);
+      poseTemperingCart(this);
+      this.nearest = null;
+      this.survey();
+      return;
+    }
     if (controlCourier(this, dt, x)) {
       animateExplorer(this, dt, false, false);
       poseCourier(this);
@@ -1664,7 +1689,8 @@ export class Adventure {
           (f.stage < this.progress.stage ||
             this.progress.field.includes(f.id) ||
             ((f.reflectorHeight !== undefined ||
-              f.gardenHeight !== undefined) &&
+              f.gardenHeight !== undefined ||
+              f.cartHeight !== undefined) &&
               Math.abs(p.y - f.group.position.y) > 0.8))) ||
         (f.type === "mechanism" && f.stage < this.progress.stage) ||
         (f.type === "solar" &&
@@ -2006,6 +2032,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (interactTemperingCart(this)) return;
     if (interactCourier(this)) return;
     if (cleftInteract(this)) return;
     if (pressureInteract(this)) return;
@@ -2167,6 +2194,7 @@ export class Adventure {
       this.fireVault?.operation ||
       this.pressureRelay?.operation ||
       this.orbitVault?.operation ||
+      this.temperingCart?.drive ||
       this.courierFerry?.helm ||
       this.wallGrip ||
       this.blockGrip ||
@@ -2443,7 +2471,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : courierHint(this) ||
+        : cartHint(this) ||
+          courierHint(this) ||
           orbitHint(this) ||
           echoHint(this) ||
           pressureHint(this) ||
@@ -2481,6 +2510,8 @@ export class Adventure {
         ? "valve"
         : this.frozenStair?.motion ||
             this.easternReflector?.motion ||
+            this.temperingCart?.drive ||
+            this.temperingCart?.turn ||
             this.rainGarden?.motion
           ? "lift"
           : courierObjective(this)
@@ -2567,6 +2598,7 @@ export class Adventure {
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
     const hoistPosition =
+      cartSavePosition(this) ||
       gardenSavePosition(this) ||
       courierSavePosition(this) ||
       orbitSavePosition(this) ||
@@ -2605,6 +2637,7 @@ export class Adventure {
     }
     this.paused = value;
     updateOrbitVault(this, 0);
+    updateCartArt(this);
     updateCourierArt(this);
     updateEchoGallery(this, 0);
     updateFireVault(this, 0);

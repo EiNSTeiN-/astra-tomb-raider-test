@@ -1,3 +1,4 @@
+import { cartDeckAt } from "./tempering-cart-rules.js";
 import { gardenDeckAt } from "./rain-garden-rules.js";
 import { reflectorDeckAt } from "./eastern-reflector-rules.js";
 import { frozenStairDeckAt } from "./frozen-stair-rules.js";
@@ -23,6 +24,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const cartDeck = cartDeckAt(game, x, z, maxY);
+  if (cartDeck && cartDeck.height > height) return cartDeck;
   const gardenDeck = gardenDeckAt(game, x, z, maxY);
   if (gardenDeck && gardenDeck.height > height) return gardenDeck;
   const reflectorDeck = reflectorDeckAt(game, x, z, maxY);

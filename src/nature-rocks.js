@@ -1,3 +1,4 @@
+import { temperingFoundationDistance } from "./tempering-cart-rules.js";
 import { seatStone } from "./stone-grounding.js";
 import { inEchoGallery } from "./echo-gallery-rules.js";
 import { inOrbitVault } from "./orbit-rules.js";
@@ -29,6 +30,8 @@ export function rockGroundHeight(profile, x, z) {
 // Bounds include the actual rotated footprint, not only the instance's origin.
 export function natureRockAllowed(game, x, z, radius) {
   const { map, terrainProfile } = game;
+  if (map.temperingCart && temperingFoundationDistance(x, z) < radius + 0.5)
+    return false;
   if (inEchoGallery(map, x, z, radius + 1)) return false;
   if (inOrbitVault(map, x, z, radius + 1)) return false;
   const extent = map.size * 7;

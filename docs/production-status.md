@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The volcanic chapter's seventh field mission now uses [a tempering railway](tempering-cart.md).
+  A manually driven cargo cart follows two rail runs joined by a turntable.
+  Loading, climbing to the coolant inspection, turning the rails and delivery
+  replace its generic transport sequence. Moving passenger support, brakes,
+  retrieval, safe save recovery, fitted construction and three positional
+  machinery/steam emitters are implemented. All 515 tests, the build, a complete
+  assisted route with live hazards, and seven production keyboard/touch/save
+  cases pass. The guide includes actual renders, measured attenuation and
+  cleanup evidence, and retains the pacing, graphics and listening limitations.
+
 - The rain garden now has [fitted construction artwork](rain-garden-construction.md):
   stone paving, supported beams, timber roof trusses and shingles, a planked
   cargo floor, segmented waterwheel rims and mounted inscriptions. Its grooved

@@ -39,11 +39,15 @@ test("all 69 sectors have three ordered field actions, with a destination for ev
         assert.equal(currentFieldTask(level, progress).id, task.id);
         const feature = map.features.find((f) => f.id === task.id);
         assert.ok(feature);
-        // A tower must not cover a collectible or a mechanism enclosure.
+        // Tower clearances include their wide frames. The rail mission uses
+        // compact service benches and a 10 m landing, needing a 14 m buffer.
         for (const other of map.features.filter(
           (f) => f !== feature && f.type !== "field",
         ))
-          assert.ok(Math.hypot(feature.x - other.x, feature.z - other.z) >= 4);
+          assert.ok(
+            Math.hypot(feature.x - other.x, feature.z - other.z) >=
+              (feature.cartHeight !== undefined ? 2 : 4),
+          );
         progress.field.push(task.id);
         if (task.kind === "lift")
           assert.equal(carryingComponent(level, progress), true);

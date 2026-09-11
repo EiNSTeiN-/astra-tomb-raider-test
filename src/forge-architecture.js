@@ -25,10 +25,12 @@ export function buildForgeArchitecture(game) {
   game.forgeSources = [];
   game.forgeLights = [];
   game.forgeTime = null;
+  game.forgeMetal = null;
   if (game.level.biome !== "volcano") return false;
   const time = (game.forgeTime = { value: game.elapsed || 0 });
   const stone = game.stoneMat;
   const metal = pbrMaterial("forge-metal", 0xc8cbcc);
+  game.forgeMetal = metal;
   metal.name = "Corroded furnace steel";
   metal.normalScale.set(0.42, 0.42);
   metal.metalness = 1;

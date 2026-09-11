@@ -252,7 +252,7 @@ const chapters = {
     ],
     [
       "The shape of a key",
-      "A blank of volcanic glass must reach the tempering station intact. Follow the shielded route.",
+      "Load the volcanic-glass blank onto the rail cart. Ride to the inspection turntable, climb to the coolant gauge, then turn the rails north toward the tempering cradle.",
       "Lift the obsidian key blank|Inspect the cooling bath|Place the key in the tempering cradle",
       "The glass cools around a pattern older than the forge.",
     ],
@@ -499,6 +499,12 @@ export function currentFieldTask(level, progress) {
 }
 
 export function carryingComponent(level, progress) {
+  if (
+    level.id === "embers" &&
+    progress.stage === 6 &&
+    progress.temperingCart?.loaded
+  )
+    return false;
   if (
     level.id === "tides" &&
     progress.stage === 2 &&

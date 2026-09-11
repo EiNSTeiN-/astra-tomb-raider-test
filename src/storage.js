@@ -1,3 +1,4 @@
+import { normalizeTemperingCart } from "./tempering-cart-rules.js";
 import { normalizeRainGarden } from "./rain-garden-rules.js";
 import { normalizeEasternReflector } from "./eastern-reflector-rules.js";
 import { normalizeCoralPump } from "./coral-pump-rules.js";
@@ -147,6 +148,13 @@ export function normalizeSave(value) {
               field: strings(v.field),
             })
           : null,
+      temperingCart:
+        key === "embers"
+          ? normalizeTemperingCart(v.temperingCart, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       easternReflector:
         key === "sands"
           ? normalizeEasternReflector(v.easternReflector, {
@@ -256,6 +264,8 @@ export class SaveStore {
         id === "verdant"
           ? normalizeRainGarden(null, { stage: 0, field: [] })
           : null,
+      temperingCart:
+        id === "embers" ? { loaded: false, stop: 0, turned: false } : null,
       easternReflector: id === "sands" ? { raised: false } : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,

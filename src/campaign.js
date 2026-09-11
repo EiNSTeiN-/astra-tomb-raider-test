@@ -1,3 +1,4 @@
+import { addTemperingCart } from "./tempering-cart-rules.js";
 import { addRainGarden } from "./rain-garden-rules.js";
 import { addEasternReflector } from "./eastern-reflector-rules.js";
 import { addFrozenStair } from "./frozen-stair-rules.js";
@@ -560,5 +561,5 @@ export function createMap(level) {
     ),
     level,
   );
-  return addRainGarden(map, level);
+  return addTemperingCart(addRainGarden(map, level), level);
 }

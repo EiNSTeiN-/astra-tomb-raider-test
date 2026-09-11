@@ -125,6 +125,12 @@ Crouch with **B / Crouch** to move quietly behind guardians. Watch their facing 
 
 Counterweight stones use **E / Use** to grip or release. While gripping, **W / Up** pushes and **S / Down** pulls; release to walk around to another face.
 
+The volcanic chapter's seventh field mission uses [a tempering railway](docs/tempering-cart.md).
+Load the key blank, drive a rail cart to the raised coolant inspection, turn its
+junction and ride north to the cradle. **E / Use** takes or releases the handle;
+**W / Up** and **S / Down** drive, while releasing movement or holding
+**Space / Jump** brakes. Cargo, secured landings and table alignment persist.
+
 The jungle's third field mission restores [the rain garden](docs/rain-garden.md).
 Release its spring, climb the west stair and turn nine channel stones to connect
 the west inlet to the northeast outlet. Open the receiver to power a water lift,

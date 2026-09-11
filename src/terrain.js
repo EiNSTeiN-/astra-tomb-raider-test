@@ -1,3 +1,4 @@
+import { temperingFoundationWeight } from "./tempering-cart-rules.js";
 import { courierFoundationWeight } from "./courier-rules.js";
 import { desertBankRise, refineDesertTerrain } from "./desert-geology.js";
 import { buildDesertHorizon } from "./desert-horizon.js";
@@ -136,6 +137,10 @@ export function createTerrainProfile(map, level) {
                 Math.sin(x * 0.22 - z * 0.16) * 0.5) +
             Math.max(0, distance - 5) * 0.35;
       }
+      if (map.temperingCart) {
+        const weight = temperingFoundationWeight(x, z);
+        height = height * (1 - weight) + raw(119, 392) * weight;
+      }
       heights[iz * width + ix] = height;
       if (map.echoGallery) {
         const dx = Math.max(7 - x, 0, x - 42),
@@ -209,6 +214,7 @@ export function createTerrainProfile(map, level) {
     }
   const profile = {
     extent,
+    temperingY: map.temperingCart ? raw(119, 392) : null,
     courierY: map.courierFerry ? raw(84, 42) : null,
     waters,
     bridges,
