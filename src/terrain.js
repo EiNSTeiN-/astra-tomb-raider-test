@@ -1,3 +1,4 @@
+import { refineMeridianTerrain } from "./meridian-geology.js";
 import { buildMeridianEscarpment } from "./meridian-escarpment.js";
 import { craneFoundationWeight } from "./astral-crane-rules.js";
 import { refineVolcanicTerrain } from "./volcanic-geology.js";
@@ -238,6 +239,8 @@ export function createTerrainProfile(map, level) {
     court: (x, z) => sample(courts, x, z),
   };
   profile.gallery = createSunkenGallery(profile, biome);
+  if (biome === "eclipse")
+    return refineMeridianTerrain(profile, map, level.seed);
   if (biome === "desert") return refineDesertTerrain(profile, map, level.seed);
   if (biome === "volcano")
     return refineVolcanicTerrain(profile, map, level.seed);
@@ -276,6 +279,9 @@ export function buildTerrainSurface(game) {
         court = new Float32Array(position.count),
         trail = new Float32Array(position.count),
         skyDepth = profile.geology ? new Float32Array(position.count) : null,
+        meridianRock = profile.meridian
+          ? new Float32Array(position.count)
+          : null,
         desertRock = profile.desert ? new Float32Array(position.count) : null,
         coast = profile.coastal ? new Float32Array(position.count * 3) : null;
       for (let i = 0; i < position.count; i++) {
@@ -286,6 +292,7 @@ export function buildTerrainSurface(game) {
         court[i] = profile.court(px, pz);
         trail[i] = profile.trail(px, pz);
         if (skyDepth) skyDepth[i] = profile.geology.depth(px, pz);
+        if (meridianRock) meridianRock[i] = profile.meridian.rock(px, pz);
         if (desertRock) desertRock[i] = profile.desert.rock(px, pz);
         if (coast) {
           const room = profile.coastal.nearest(px, pz);
@@ -294,6 +301,11 @@ export function buildTerrainSurface(game) {
       }
       geometry.setAttribute("court", new THREE.BufferAttribute(court, 1));
       geometry.setAttribute("trail", new THREE.BufferAttribute(trail, 1));
+      if (meridianRock)
+        geometry.setAttribute(
+          "meridianRock",
+          new THREE.BufferAttribute(meridianRock, 1),
+        );
       if (desertRock)
         geometry.setAttribute(
           "desertRock",

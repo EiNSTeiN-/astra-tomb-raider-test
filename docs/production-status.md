@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The final chapter now has [uneven nearby rock shelves and darker surface shading](meridian-banks.md).
+  Walking heights, observatory foundations, water, objectives and obstacle data
+  retain their previous values. Five matched views keep the same rendering
+  counts, and all 115 loose stones pass ground-contact and clearance checks.
+  All 530 tests, the build, the assisted crane route, orrery recovery and seven
+  production keyboard/touch/reload cases pass. The guide records a bounded
+  terrain GPU comparison, added attribute/profile memory and the remaining
+  graphics, pacing, listening and device limitations.
+
 - The final chapter's [meridian escarpment](meridian-escarpment.md) replaces its
   generic triangular ranges with textured rock shelves and eroded cuts. Five
   matching camera captures preserve the sampled gameplay terrain, water,

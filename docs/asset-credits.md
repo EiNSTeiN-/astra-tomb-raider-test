@@ -468,3 +468,11 @@ bands and distance haze reuse the existing **Rock Boulder Dry** color and normal
 maps from Poly Haven, credited above. The background depth method uses the
 project's existing caldera/cloud-city approach. No external art, recordings,
 textures or dependencies were added.
+
+The [meridian foreground banks](meridian-banks.md) use original heightfield
+refinement and shader code in `src/meridian-geology.js` and
+`src/meridian-terrain-material.js`. Their tilted shelves, interrupted joints,
+dust and regional boulder shading reuse the credited **Rock Boulder Dry** maps
+and existing loose-rock scans. Source images and scan geometry are unchanged.
+No external art, textures, recordings or dependencies were added. Documentation
+images are captures of the running game converted to WebP.

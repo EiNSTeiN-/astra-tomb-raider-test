@@ -78,6 +78,11 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+The final chapter's [nearby rock banks](docs/meridian-banks.md) now have
+uneven shelves, darker joints and matte dust shading. Walking heights and
+observatory foundations retain their previous values; the guide records
+matched views, grounding checks and a bounded GPU comparison.
+
 The final chapter’s [distant escarpment](docs/meridian-escarpment.md) now has
 weathered shelves and uneven rock crests in place of its earlier triangular
 mountain silhouettes. The notes include matching views and measured GPU cost.

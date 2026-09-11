@@ -1,4 +1,10 @@
 import {
+  meridianDeclarations,
+  meridianColor,
+  meridianNormal,
+  meridianRoughness,
+} from "./meridian-terrain-material.js";
+import {
   volcanicDeclarations,
   volcanicColor,
   volcanicNormal,
@@ -55,6 +61,7 @@ ${coastalDeclarations}
 ${skyTerrainDeclarations}
 ${desertTerrainDeclarations}
 ${volcanicDeclarations}
+${meridianDeclarations}
 `;
 
 const colorLayer = /* glsl */ `
@@ -106,6 +113,7 @@ ${coastalColor}
 ${skyTerrainColor}
 ${desertTerrainColor}
 ${volcanicColor}
+${meridianColor}
 vec3 terrainAlbedo = mix(earthColor, pavingColor, pavingWeight);
 terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 #ifdef TERRAIN_JUNGLE
@@ -134,6 +142,7 @@ float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
 ${skyTerrainRoughness}
 ${desertTerrainRoughness}
 ${volcanicRoughness}
+${meridianRoughness}
 terrainRough = mix(terrainRough, rockRough, terrainSlope);
 terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
@@ -165,6 +174,7 @@ ${coastalNormal}
 ${skyTerrainNormal}
 ${desertTerrainNormal}
 ${volcanicNormal}
+${meridianNormal}
 vec3 terrainN = normalize(mix(earthN, pavingN, pavingWeight));
 terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
 #ifdef TERRAIN_JUNGLE
@@ -267,6 +277,7 @@ export function terrainMaterial(game) {
     },
   };
   if (biome === "desert") material.defines = { TERRAIN_DESERT: 1 };
+  if (biome === "eclipse") material.defines = { TERRAIN_MERIDIAN: 1 };
   if (biome === "volcano") material.defines = { TERRAIN_FORGE: 1 };
   if (biome === "sky") {
     material.defines = { TERRAIN_SKY: 1 };
@@ -300,11 +311,11 @@ export function terrainMaterial(game) {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader.replace(
       "#include <common>",
-      "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif\n#ifdef TERRAIN_DESERT\nattribute float desertRock; varying float vDesertRock;\n#endif\n#ifdef TERRAIN_SKY\nattribute float skyDepth; varying float vSkyDepth;\n#endif",
+      "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif\n#ifdef TERRAIN_DESERT\nattribute float desertRock; varying float vDesertRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nattribute float meridianRock; varying float vMeridianRock;\n#endif\n#ifdef TERRAIN_SKY\nattribute float skyDepth; varying float vSkyDepth;\n#endif",
     );
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
-      "#include <begin_vertex>\nvCourt=court; vTrail=trail; vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz; vTerrainNormal=normalize(mat3(modelMatrix)*normal);\n#ifdef TERRAIN_COASTAL\nvCoastal=coast;\n#endif\n#ifdef TERRAIN_DESERT\nvDesertRock=desertRock;\n#endif\n#ifdef TERRAIN_SKY\nvSkyDepth=skyDepth;\n#endif",
+      "#include <begin_vertex>\nvCourt=court; vTrail=trail; vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz; vTerrainNormal=normalize(mat3(modelMatrix)*normal);\n#ifdef TERRAIN_COASTAL\nvCoastal=coast;\n#endif\n#ifdef TERRAIN_DESERT\nvDesertRock=desertRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nvMeridianRock=meridianRock;\n#endif\n#ifdef TERRAIN_SKY\nvSkyDepth=skyDepth;\n#endif",
     );
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\n" + declarations)
@@ -317,6 +328,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["desert", "water", "volcano", "eclipse"].includes(biome) ? 8 : 7}`;
   return material;
 }

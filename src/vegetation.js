@@ -1,3 +1,4 @@
+import { meridianBoulderMaterial } from "./meridian-terrain-material.js";
 import { buildVolcanicScree } from "./volcanic-scree.js";
 import { volcanicBoulderMaterial } from "./volcanic-material.js";
 import { inWindCourt } from "./wind-rules.js";
@@ -369,10 +370,12 @@ export async function loadNature(game) {
         (rock ? 2.6 : fern ? (biome === "jungle" ? 2 : 1.6) : 2.4) /
         Math.max(size.x, size.y, size.z);
       reference.dispose();
-      const volcanicMaterial =
+      const regionalRockMaterial =
         rock && biome === "volcano"
           ? volcanicBoulderMaterial(sources[s].material)
-          : null;
+          : rock && biome === "eclipse"
+            ? meridianBoulderMaterial(sources[s].material)
+            : null;
       const tiers = asset.tiers.map((tier) => {
         const source = tier.find((node) => node.name === sources[s].name);
         if (!source)
@@ -384,7 +387,7 @@ export async function loadNature(game) {
           .applyMatrix4(source.matrixWorld);
         geometry.translate(-center.x, -bounds.min.y, -center.z);
         geometry.scale(scale, scale, scale);
-        const material = volcanicMaterial || source.material;
+        const material = regionalRockMaterial || source.material;
         material.side = THREE.DoubleSide;
         if (!rock) {
           material.alphaTest = 0.4;
