@@ -106,6 +106,26 @@ export function shutterBlocked(game, x, z, y, clearance = 1.8) {
     )
   );
 }
+// Stop rising before the standing capsule crosses a beam, roof or deck.
+// Downward motion still uses the ordinary support/landing controller.
+export function shutterCeiling(game, x, z, from, to, clearance = 1.8) {
+  const h = game.shutterHouse;
+  if (!h || to <= from || shutterFoundationDistance(x, z) > 1) return to;
+  let limit = to;
+  const check = (s, bottom) => {
+    if (
+      s.enabled !== false &&
+      Math.abs(x - s.x) < s.w + 0.16 &&
+      Math.abs(z - s.z) < s.d + 0.16 &&
+      bottom >= from + clearance - 0.025 &&
+      bottom < limit + clearance
+    )
+      limit = Math.max(from, bottom - clearance - 0.005);
+  };
+  for (const s of h.solids) check(s, s.bottom);
+  for (const d of h.decks) check(d, d.y - d.thickness);
+  return limit;
+}
 export function shutterOccludes(game, from, to) {
   const h = game.shutterHouse;
   if (!h) return false;

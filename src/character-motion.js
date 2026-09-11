@@ -1,4 +1,4 @@
-import { shutterDeckAt } from "./shutter-house-rules.js";
+import { shutterDeckAt, shutterCeiling } from "./shutter-house-rules.js";
 import { causewayDeckAt } from "./echo-causeway-rules.js";
 import { craneDeckAt } from "./astral-crane-rules.js";
 import { cartDeckAt } from "./tempering-cart-rules.js";
@@ -81,6 +81,11 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
     if (!game.grounded) {
       game.velocityY -= 19 * step;
       p.y += game.velocityY * step;
+      const ceiling = shutterCeiling(game, p.x, p.z, before, p.y);
+      if (ceiling < p.y) {
+        p.y = ceiling;
+        game.velocityY = 0;
+      }
     }
     const momentum = game.airVelocity,
       hasMomentum = momentum && Math.hypot(momentum.x, momentum.z) > 0.1;

@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { buildShutterArt } from "./shutter-house-art.js";
-import { finishFieldTask } from "./field-world.js";
+import {
+  prepareShutterTurn,
+  syncShutterControls,
+  shutterTurnPhase,
+  SHUTTER_WHEEL,
+} from "./shutter-motion.js";
 import {
   SHUTTER_STATIONS,
   normalizeShutterHouse,
@@ -31,6 +36,8 @@ export function buildShutterHouse(game) {
     y,
     z,
     saved,
+    louverAmount: saved.turns.map((n) => n / 3),
+    wheelTurn: [0, 0, 0],
     decks: [],
     solids: [],
     sources: [],
@@ -71,53 +78,14 @@ export function startShutterTurn(game, index) {
     (index > 0 && !shutterDone(game.progress, index - 1))
   )
     return false;
-  h.turn = { index, time: 0 };
-  game.keys?.clear();
-  return true;
+  return prepareShutterTurn(game, index);
 }
 export function updateShutterHouse(game, dt) {
   const h = game.shutterHouse;
   if (!h) return;
   dt = game.paused || !Number.isFinite(dt) ? 0 : Math.max(0, Math.min(dt, 1));
   h.time += dt;
-  if (h.turn && dt) {
-    if (!shutterReachable(game, h.turn.index)) h.turn = null;
-    else {
-      h.turn.time += dt;
-      if (h.turn.time >= 0.9) {
-        const index = h.turn.index;
-        h.saved.turns[index] = Math.min(3, h.saved.turns[index] + 1);
-        h.turn = null;
-        if (h.saved.turns[index] === 3) {
-          const f = game.items.find((f) => f.id === `field-5-${index}`);
-          finishFieldTask(game, f);
-        } else {
-          game.audio.tone("field");
-          game.cb.toast?.(
-            `${h.saved.turns[index]} / 3 catches seated · Use to close the next catch`,
-          );
-          game.save();
-        }
-      }
-    }
-  }
-  for (let i = 0; i < 3; i++) {
-    const amount =
-      (h.saved.turns[i] +
-        (h.turn?.index === i ? Math.min(1, h.turn.time / 0.9) : 0)) /
-      3;
-    for (const slat of h.louvers[i])
-      slat.rotation.x = (1 - amount) * Math.PI * 0.47;
-    const f = game.items?.find((f) => f.id === `field-5-${i}`);
-    if (f?.core) f.core.rotation.z = -amount * Math.PI * 3;
-    const gust = shutterGust(i, h.time, h.saved.turns[i]);
-    h.sources[i * 2].activity = game.paused ? 0 : gust.activity;
-    h.sources[i * 2 + 1].activity = game.paused
-      ? 0
-      : h.turn?.index === i
-        ? 1
-        : 0;
-  }
+  syncShutterControls(game, dt);
   for (const r of h.ribbons) {
     const gust = shutterGust(r.index, h.time, h.saved.turns[r.index]),
       p = r.mesh.geometry.attributes.position;
@@ -169,6 +137,16 @@ export function updateShutterHouse(game, dt) {
 export function shutterHint(game) {
   const h = game.shutterHouse;
   if (!h || game.progress.stage !== 5) return null;
+  if (h.turn)
+    return {
+      key: "E",
+      label:
+        shutterTurnPhase(h.turn) < SHUTTER_WHEEL.turnStart
+          ? "Reaching for the shutter grips · move to cancel"
+          : h.turn.committed
+            ? "Catch seated · releasing the shutter wheel"
+            : "Turning the shutter catch · move to cancel",
+    };
   for (let i = 0; i < 3; i++)
     if (shutterReachable(game, i) && !shutterDone(game.progress, i))
       return {
@@ -176,8 +154,8 @@ export function shutterHint(game) {
         label:
           i > 0 && !shutterDone(game.progress, i - 1)
             ? "Close the previous shutter first"
-            : h.turn
-              ? "Turning the shutter catch · move away to cancel"
+            : game.crouching
+              ? "Stand to use the shutter wheel"
               : `Close ${SHUTTER_STATIONS[i].label.toLowerCase()} · ${h.saved.turns[i]} / 3 catches`,
       };
   return null;

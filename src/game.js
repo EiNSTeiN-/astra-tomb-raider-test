@@ -4,6 +4,7 @@ import {
   shutterHint,
   shutterObjective,
 } from "./shutter-house.js";
+import { advanceShutterTurn } from "./shutter-motion.js";
 import {
   shutterBlocked,
   shutterOccludes,
@@ -1611,6 +1612,7 @@ export class Adventure {
       return;
     }
     if (
+      advanceShutterTurn(this, dt, input) ||
       advanceOrbitBearing(this, dt, input) ||
       advancePressureOperation(this, dt, input) ||
       advanceCausewayWheel(this, dt, input)
@@ -2255,6 +2257,7 @@ export class Adventure {
       this.paused ||
       this.active === false ||
       this.carrying ||
+      this.shutterHouse?.turn ||
       this.fireVault?.operation ||
       this.pressureRelay?.operation ||
       this.orbitVault?.operation ||

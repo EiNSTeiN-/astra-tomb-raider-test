@@ -83,6 +83,8 @@ three elevated wind walks, broken spans and sheltered shutter controls. Brace
 against a gust, stand to jump and close each shutter’s three catches. Every
 catch reduces its wind, and the final shutter opens an eastern return stair.
 Ribbons, a live route map and local-storage recovery support the climb.
+[Hand contact and roof clearance](docs/shutter-contact.md) add a visible reach,
+grasp, turn and release at the wheels, and stop jumps beneath the windbreak roofs.
 
 In **The Night Below**, [the Echo Causeway](docs/echo-causeway.md) turns
 **The echo that returns** into two timed stone crossings. Sound each relay,

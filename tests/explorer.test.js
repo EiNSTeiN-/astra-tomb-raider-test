@@ -40,6 +40,18 @@ import {
 import { normalizeFireVault } from "../src/fire-vault-rules.js";
 import { Adventure } from "../src/game.js";
 import { ExplorerContact } from "../src/explorer-contact.js";
+import {
+  buildShutterHouse,
+  startShutterTurn,
+  updateShutterHouse,
+} from "../src/shutter-house.js";
+import { buildShutterStation } from "../src/shutter-house-art.js";
+import {
+  advanceShutterTurn,
+  shutterStance,
+  shutterTurnPhase,
+  SHUTTER_WHEEL,
+} from "../src/shutter-motion.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -1517,4 +1529,110 @@ test("cleft return descent keeps both hands on the inclined rope", async () => {
         );
       }
   }
+});
+
+test("delivered hands follow all nine shutter catches through reach, ratchet turn and release with fixed bone lengths", async (t) => {
+  const game = await groundedActor();
+  Object.assign(game, {
+    level: LEVELS[2],
+    map: createMap(LEVELS[2]),
+    progress: { stage: 5, field: [], shutterHouse: { turns: [0, 0, 0] } },
+    world: new THREE.Group(),
+    stoneMat: new THREE.MeshStandardMaterial(),
+    darkMat: new THREE.MeshStandardMaterial(),
+    goldMat: new THREE.MeshStandardMaterial(),
+    keys: new Set(),
+    health: 100,
+    audio: { tone() {} },
+    cb: {},
+    save() {},
+    canMove: Adventure.prototype.canMove,
+    walkable: () => true,
+    box: Adventure.prototype.box,
+    shadow: Adventure.prototype.shadow,
+  });
+  game.world.add(game.player);
+  game.items = game.map.features.filter((f) => f.shutterHeight !== undefined);
+  const old = globalThis.document;
+  globalThis.document = {
+    createElement: () => ({ getContext: () => ({ fillText() {} }) }),
+  };
+  try {
+    for (const f of game.items) {
+      f.group = new THREE.Group();
+      f.group.position.set(f.x * 7, 0, f.z * 7);
+      game.world.add(f.group);
+      buildShutterStation(game, f, f.group);
+    }
+    buildShutterHouse(game);
+  } finally {
+    globalThis.document = old;
+  }
+  const bones = [];
+  game.rig.model.traverse((bone) => {
+    if (bone.isBone)
+      bones.push({
+        bone,
+        position: bone.position.clone(),
+        scale: bone.scale.clone(),
+      });
+  });
+  let samples = 0,
+    minimum = Infinity,
+    contactMaximum = -Infinity;
+  for (let index = 0; index < 3; index++) {
+    game.player.position.copy(shutterStance(game, index));
+    game.avatar.rotation.y = Math.PI;
+    for (let i = 0; i < 30; i++) animateExplorer(game, 1 / 60, false, false);
+    for (let catchIndex = 0; catchIndex < 3; catchIndex++) {
+      assert(startShutterTurn(game, index));
+      for (let i = 0; i < 115; i++) {
+        game.elapsed += 1 / 60;
+        updateShutterHouse(game, 1 / 60);
+        advanceShutterTurn(game, 1 / 60, { x: 0, z: 0 });
+        animateExplorer(game, 1 / 60, false, false);
+        for (const { bone, position, scale } of bones) {
+          if (/(?:Arm|ForeArm|Hand.*)$/.test(bone.name))
+            assert(bone.position.distanceTo(position) < 1e-7);
+          assert(bone.scale.distanceTo(scale) < 1e-7);
+          assert(bone.quaternion.toArray().every(Number.isFinite));
+        }
+        const op = game.shutterHouse.turn;
+        if (!op || i % 6) continue;
+        samples++;
+        const phase = shutterTurnPhase(op),
+          contact =
+            phase >= SHUTTER_WHEEL.turnStart && phase <= SHUTTER_WHEEL.detent;
+        for (const hand of handGeometry(game, {
+          handles: game.items[index].shutterGrips,
+          halfLength: 0.1,
+        })) {
+          for (const [part, m] of Object.entries(hand.fingers)) {
+            minimum = Math.min(minimum, m.minimum);
+            assert(
+              m.minimum > -0.002,
+              `${index}/${catchIndex}/${i}/${hand.side}/${part}: penetrates ${m.minimum}`,
+            );
+            if (contact) {
+              contactMaximum = Math.max(contactMaximum, m.minimum);
+              assert(
+                m.minimum < 0.004,
+                `${index}/${catchIndex}/${i}/${hand.side}/${part}: separated ${m.minimum}`,
+              );
+            }
+          }
+        }
+      }
+      assert.equal(game.shutterHouse.turn, null);
+      assert.equal(game.rig.gripBaseActive, false);
+      assert.equal(game.shutterHouse.saved.turns[index], catchIndex + 1);
+    }
+  }
+  assert(samples >= 150);
+  assert.deepEqual(game.progress.field, [
+    "field-5-0",
+    "field-5-1",
+    "field-5-2",
+  ]);
+  t.diagnostic(JSON.stringify({ samples, minimum, contactMaximum }));
 });

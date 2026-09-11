@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **A Silence of Snow** now has [shutter wheel hand contact and roof clearance](shutter-contact.md).
+  Vesper aligns, reaches, grips, turns and releases each wheel; a ratchet holds
+  every saved catch. Rising jumps stop beneath the six windbreak roofs.
+  All 551 tests and the build pass, including delivered-mesh hand measurements
+  and roof checks. The complete assisted wind-walk and return route passes at
+  full health, with positional audio, three shader qualities and resource
+  cleanup checked. Twelve production keyboard/touch/reload scenarios also pass.
+  The guide records the evidence and remaining graphics, human pacing,
+  listening and device limitations.
+
 - **A Silence of Snow** now has [the Room of Wind](shutter-house.md): three
   elevated wind walks, differently placed breaks, sequential shutter controls
   and an eastern return stair. Warning ribbons, bracing, persistent catches,

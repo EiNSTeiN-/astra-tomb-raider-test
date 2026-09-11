@@ -498,3 +498,10 @@ map artwork in `src/shutter-house*.js`. It reuses the credited monastery timber,
 stone and snow materials and the existing original wind and hoist synthesis.
 No external models, images, recordings or dependencies were introduced.
 Documentation images are actual game captures converted to WebP.
+
+The [shutter wheel contact and roof clearance](shutter-contact.md) update adds
+original grip bars, bearing supports, ratchet geometry, iron/bronze material
+settings and a character interaction in `src/shutter-motion.js`. It reuses the
+credited Vesper mesh, original calibrated hand solver and existing environment
+materials. No external assets or dependencies were introduced. Images are
+captures of the running game.

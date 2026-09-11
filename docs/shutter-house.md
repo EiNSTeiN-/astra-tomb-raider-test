@@ -1,5 +1,9 @@
 # The Room of Wind
 
+The wheel interaction was subsequently refined with [hand contact and roof
+clearance](shutter-contact.md). The verification counts below describe the
+initial shutter-house release.
+
 The sixth field mission in **A Silence of Snow** now crosses a connected
 shutter house. Three scattered controls, including one repeated cable course,
 are replaced by three elevated wind walks with different breaks, sheltered
@@ -14,10 +18,9 @@ crosswind. **B / Crouch** braces Vesper against it; stand again before using
 from the opposite side; the third changes direction between pulses, after the
 previous gust has faded. The three breaks occupy different positions.
 
-At each sheltered control, use **E / Use** to seat one of three catches. Its
-0.9-second turn moves the handwheel and linked louvers. Moving out of reach or
-leaving the landing cancels the unfinished catch. Every seated catch reduces
-that shutter's wind by one third; the third catch completes its existing field
+At each sheltered control, use **E / Use** to seat one of three catches. The
+handwheel moves the linked louvers. Moving away cancels the unfinished catch.
+Every seated catch reduces that shutter's wind by one third; the third catch completes its existing field
 action. Closing the chamber shutter lowers a short bridge to the eastern
 return stair. The world mechanism and its sanctuary gate use the same field
 progress as the original mission.
@@ -144,7 +147,8 @@ match the final build: `index-DKO-TE7Y.js`, `game-BvYHXWN3.js`,
 The assets are original project geometry and writing, reusing the credited
 monastery materials and existing original sound synthesis. No external assets
 or dependencies were introduced. Images are actual game captures converted to
-WebP. The handwheel animates without a new synchronized hand-contact pose.
+WebP. The initial release animated the wheel without hand contact; the
+[subsequent interaction update](shutter-contact.md) adds a synchronized pose.
 
 This adds a distinct physical objective and traversal sequence. The assisted
 route supplies navigation and jump timing; it does not measure a blind human

@@ -8,6 +8,10 @@ import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { advanceCharacter, supportAt } from "../src/character-motion.js";
 import { finishFieldTask, buildFieldStation } from "../src/field-world.js";
+import { advanceShutterTurn } from "../src/shutter-motion.js";
+import { canAim } from "../src/aiming.js";
+import { canCrouch } from "../src/stealth.js";
+import { torchHandsBusy } from "../src/torch.js";
 import {
   buildShutterHouse,
   updateShutterHouse,
@@ -97,7 +101,7 @@ function place(g, x, y, z) {
 function tick(g, n = 1, v = { x: 0, z: 0 }, jump = false) {
   for (let i = 0; i < n; i++) {
     updateShutterHouse(g, 1 / 60);
-    if (!g.paused)
+    if (!g.paused && !advanceShutterTurn(g, 1 / 60, v))
       advanceCharacter(g, shutterWindVelocity(g, v), 1 / 60, jump && i === 0);
   }
 }
@@ -132,7 +136,7 @@ function cross(g, index) {
 function close(g, index) {
   for (let i = 0; i < 3; i++) {
     assert(startShutterTurn(g, index));
-    tick(g, 55);
+    tick(g, 110);
   }
   assert(g.progress.field.includes(`field-5-${index}`));
 }
@@ -212,7 +216,7 @@ test("turning requires the current landing, cancels on leaving, pauses and saves
   assert.equal(g.shutterHouse.saved.turns[0], 0);
   place(g, 12, 3.6, 5);
   assert(startShutterTurn(g, 0));
-  tick(g, 55);
+  tick(g, 110);
   assert.equal(g.shutterHouse.saved.turns[0], 1);
   assert.equal(g.saves, 1);
   assert(!g.progress.field.includes("field-5-0"));
@@ -303,4 +307,81 @@ test("shutter platforms preserve undercroft headroom, obstruct sight at their el
   buildShutterHouse(g);
   assert.equal(g.shutterHouse, null);
   assert.equal(g.shutterWind, null);
+});
+
+test("standing jumps stop below all six actual windbreak roofs and keep the exposed jump arc", () => {
+  const g = fixture(),
+    h = g.shutterHouse;
+  g.world.updateMatrixWorld(true);
+  for (const s of SHUTTER_SPANS)
+    for (const x of [-12, 12]) {
+      place(g, x, s.height, s.z + 1);
+      assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+      const base = g.player.position.y;
+      const ray = new THREE.Raycaster(
+        g.player.position.clone().add(new THREE.Vector3(0, 1.8, 0)),
+        new THREE.Vector3(0, 1, 0),
+        0,
+        2,
+      );
+      const roof = ray.intersectObject(h.root, true)[0];
+      assert(roof, `No roof at ${x},${s.z}`);
+      let peak = base;
+      for (let i = 0; i < 90; i++) {
+        tick(g, 1, { x: 0, z: 0 }, i === 0);
+        peak = Math.max(peak, g.player.position.y);
+        assert(g.player.position.y + 1.8 < roof.point.y + 0.001);
+      }
+      assert(peak > base + 0.15);
+      assert(g.grounded);
+      assert(Math.abs(g.player.position.y - base) < 0.01);
+      assert.equal(g.health, 100);
+    }
+  place(g, 0, 0, 15);
+  let peak = h.y;
+  for (let i = 0; i < 90; i++) {
+    tick(g, 1, { x: 0, z: 0 }, i === 0);
+    peak = Math.max(peak, g.player.position.y);
+  }
+  assert(peak - h.y > 1.5);
+});
+
+test("the wheel aligns only across supported clear ground and releases occupied hands without losing a seated catch", () => {
+  const g = fixture(),
+    h = g.shutterHouse;
+  place(g, 12, 3.6, 3);
+  assert(!startShutterTurn(g, 0), "approach from behind rejected");
+  place(g, 11, 3.6, 5.5);
+  h.solids.push({
+    x: h.x + 11.5,
+    z: h.z + 5,
+    w: 0.2,
+    d: 0.2,
+    bottom: h.y + 3.6,
+    top: h.y + 5.6,
+  });
+  assert(!startShutterTurn(g, 0), "blocked alignment rejected");
+  h.solids.pop();
+  assert(startShutterTurn(g, 0));
+  assert(!canAim(g));
+  assert(!canCrouch(g));
+  assert(torchHandsBusy(g));
+  tick(g, 90);
+  assert.equal(h.saved.turns[0], 1);
+  assert(h.turn?.committed, "catch persists before release finishes");
+  const position = g.player.position.clone();
+  tick(g, 1, { x: -3, z: 0 });
+  assert.equal(h.turn, null);
+  assert(
+    g.player.position.x < position.x,
+    "movement resumes on cancellation frame",
+  );
+  assert.equal(h.saved.turns[0], 1);
+  assert(canAim(g));
+  assert(canCrouch(g));
+  assert(!torchHandsBusy(g));
+  tick(g, 30);
+  assert(h.wheelTurn[0] < 0.001);
+  assert(Math.abs(h.louverAmount[0] - 1 / 3) < 0.001);
+  assert.equal(g.health, 100);
 });

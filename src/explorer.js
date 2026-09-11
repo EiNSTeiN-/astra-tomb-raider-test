@@ -8,6 +8,7 @@ import { poseCrouchHands, restoreCrouchHands } from "./explorer-crouch.js";
 import { galleryWheelBrace, poseGalleryWheel } from "./gallery-wheel.js";
 import { poseCausewayWheel } from "./fire-vault-motion.js";
 import { posePressureOperation } from "./pressure-motion.js";
+import { poseShutterTurn } from "./shutter-motion.js";
 import { poseOrbitBearing } from "./orbit-motion.js";
 import { poseSkyBalance } from "./sky-balance.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -357,6 +358,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   }
   poseCausewayWheel(game);
   posePressureOperation(game);
+  poseShutterTurn(game);
   poseOrbitBearing(game);
   poseSkyBalance(game, dt);
   poseTorch(game);

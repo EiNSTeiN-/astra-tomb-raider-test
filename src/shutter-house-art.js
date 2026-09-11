@@ -27,29 +27,102 @@ function inscription(text, width) {
 }
 export function buildShutterStation(game, f, group) {
   if (f.shutterHeight === undefined) return false;
+  const bronze = new THREE.MeshStandardMaterial({
+    color: 0x89663c,
+    metalness: 0.78,
+    roughness: 0.48,
+  });
+  const iron = new THREE.MeshStandardMaterial({
+    color: 0x343c3b,
+    metalness: 0.72,
+    roughness: 0.58,
+  });
   const y = game.groundHeight(SHUTTER_SITE.x, SHUTTER_SITE.z) + f.shutterHeight;
   f.yOffset = y - game.groundHeight(f.x * 7, f.z * 7);
   group.position.y = y;
   game.box(1.25, 0.8, 0.65, game.darkMat, 0, 0.4, 0, group);
-  game.box(1.4, 0.15, 0.8, game.goldMat, 0, 0.85, 0, group);
+  game.box(
+    1.4,
+    0.15,
+    0.8,
+    game.monasteryMaterials?.stone || game.stoneMat,
+    0,
+    0.85,
+    0,
+    group,
+  );
+  game.box(1.36, 0.025, 0.76, bronze, 0, 0.934, 0, group);
+  for (const x of [-0.13, 0.13])
+    game.box(0.05, 0.38, 0.12, iron, x, 1.115, -0.03, group);
   const wheel = (f.core = new THREE.Group());
   wheel.position.set(0, 1.35, 0.12);
   wheel.userData.animated = true;
   group.add(wheel);
   const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.48, 0.065, 8, 24),
-    game.goldMat,
+    new THREE.TorusGeometry(0.38, 0.043, 8, 32),
+    bronze,
   );
   wheel.add(rim);
-  for (let i = 0; i < 6; i++) {
-    const m = game.box(0.045, 0.96, 0.045, game.goldMat, 0, 0, 0, wheel);
+  for (let i = 0; i < 3; i++) {
+    const m = game.box(0.045, 0.72, 0.045, bronze, 0, 0, 0, wheel);
     m.rotation.z = (i * Math.PI) / 3;
   }
+  f.shutterGrips = [-1, 1].map((side) => {
+    const grip = new THREE.Object3D();
+    grip.name = `${side < 0 ? "Left" : "Right"} shutter hand grip`;
+    grip.position.set(side * 0.23, 0, 0.16);
+    wheel.add(grip);
+    const bar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.019, 0.019, 0.2, 16),
+      iron,
+    );
+    bar.rotation.z = Math.PI / 2;
+    grip.add(bar);
+    for (const x of [-0.1, 0.1])
+      game.box(0.025, 0.04, 0.16, bronze, side * 0.23 + x, 0, 0.08, wheel);
+    return grip;
+  });
+  const spindle = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.085, 0.085, 0.26, 16),
+    iron,
+  );
+  spindle.rotation.x = Math.PI / 2;
+  spindle.position.set(0, 1.35, 0.04);
+  group.add(spindle);
+  // A pawl retains each closed catch while the handwheel returns to rest.
+  const ratchet = (f.shutterRatchet = new THREE.Group());
+  ratchet.userData.animated = true;
+  ratchet.position.set(0, 1.35, -0.055);
+  group.add(ratchet);
+  const disk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.18, 0.18, 0.065, 24),
+    iron,
+  );
+  disk.rotation.x = Math.PI / 2;
+  ratchet.add(disk);
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI) / 6;
+    const tooth = game.box(
+      0.05,
+      0.05,
+      0.07,
+      bronze,
+      Math.cos(angle) * 0.18,
+      Math.sin(angle) * 0.18,
+      0,
+      ratchet,
+    );
+    tooth.rotation.z = angle;
+  }
+  game.box(0.12, 0.06, 0.08, bronze, 0.24, 1.48, -0.06, group).rotation.z =
+    -0.35;
   for (let i = 0; i < 3; i++)
-    game.box(0.12, 0.12, 0.1, game.goldMat, (i - 1) * 0.24, 0.68, 0.4, group);
+    game.box(0.12, 0.12, 0.1, bronze, (i - 1) * 0.24, 0.68, 0.4, group);
   const label = inscription(SHUTTER_STATIONS[f.step].label, 2.1);
   label.position.set(0, 2.05, 0.15);
   group.add(label);
+  mergeArchitecture(wheel);
+  mergeArchitecture(ratchet);
   return true;
 }
 export function buildShutterArt(game, h) {
@@ -153,6 +226,16 @@ export function buildShutterArt(game, h) {
     block(2.3, 0.18, 4.1, x + side * 1.05, y + 2.65, z, snow);
     const roof = block(2.5, 0.24, 4.3, x + side * 1.05, y + 2.5, z, wood);
     roof.rotation.z = side * 0.12;
+    roof.updateWorldMatrix(true, false);
+    const bounds = new THREE.Box3().setFromObject(roof);
+    h.solids.push({
+      x: (bounds.min.x + bounds.max.x) / 2,
+      z: (bounds.min.z + bounds.max.z) / 2,
+      w: (bounds.max.x - bounds.min.x) / 2,
+      d: (bounds.max.z - bounds.min.z) / 2,
+      bottom: bounds.min.y,
+      top: bounds.max.y,
+    });
   }
   function stairs(x, start, end, bottom, top, width = 2.6) {
     const n = Math.ceil((top - bottom) / 0.16),
