@@ -314,12 +314,17 @@ test("eroded caldera stays beyond the playable square and joins smoothly at its 
   const { segments, rings } = g.userData;
   assert.ok(p.array.every(Number.isFinite));
   assert.ok(n.array.every(Number.isFinite));
-  assert.equal(g.index.count / 3, 16128);
-  for (let i = 0; i < p.count; i++)
+  assert.ok(
+    g.index.count / 3 <= 70000,
+    "distant rim stays within its triangle budget",
+  );
+  for (let i = 0; i < p.count; i++) {
+    assert.ok(n.getY(i) > 0, "the continuous heightfield faces upward");
     assert.ok(
       Math.hypot(p.getX(i) - extent / 2, p.getZ(i) - extent / 2) >
         (Math.SQRT2 * extent) / 2,
     );
+  }
   for (let r = 0; r <= rings; r++)
     for (const attribute of [p, n]) {
       const a = new THREE.Vector3().fromBufferAttribute(

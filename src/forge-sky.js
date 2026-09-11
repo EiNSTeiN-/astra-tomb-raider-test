@@ -32,5 +32,6 @@ export function forgeSky(sunPosition) {
   });
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(4000, 40, 20), material);
   mesh.frustumCulled = false;
+  mesh.renderOrder = -100;
   return mesh;
 }

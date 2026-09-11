@@ -446,3 +446,10 @@ in `src/volcanic-*.js`. It reuses the credited forge stone and paving maps and
 Rock Moss Set 01 scan textures; its tint is applied at runtime without changing
 the source maps. No external art, recordings or dependencies were added. The
 comparison images are unretouched game captures encoded as lossless WebP.
+
+The [caldera skyline](caldera-rim.md) uses original heightfield geometry in
+`src/forge-caldera.js`, original surface and haze code in
+`src/caldera-material.js`, and the existing cloud-city background depth
+technique. It reuses the credited Rock Face 03 color and normal maps without
+modifying the source images. No new external assets, recordings or dependencies
+were added. The guide's images are unretouched captures of the running game.

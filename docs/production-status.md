@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The volcanic chapter now has [a continuous caldera skyline](caldera-rim.md).
+  A broader irregular rim and world-space rock projection replace the earlier
+  triangular slopes and stretched texture mapping. Background depth rendering
+  removes far-plane cutoffs while preserving foreground objects and oblique
+  reflection clipping. Four ordinary GPU reference views are pixel-identical;
+  twelve foreground probes and four clipping comparisons pass. All 519 tests,
+  the build, an assisted railway route and seven production keyboard/touch/save
+  cases pass. The guide records the added geometry, GPU cost, audio and cleanup
+  checks, plus the remaining graphics, pacing, listening and device limits.
+
 - The volcanic chapter now has [fractured banks, matte ash and small fitted rock fragments](volcanic-banks.md).
   Uneven crests retain all walking and working foundations, water and obstacle
   definitions. Five matched High views add 6–9 calls and 4,440–16,560 submitted
