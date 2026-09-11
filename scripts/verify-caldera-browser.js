@@ -4,9 +4,12 @@ import { calderaMaterial } from "../src/caldera-material.js";
 // Run in a disposable development expedition with its animation loop stopped.
 // Compare the background projection to a conventional camera that can see the
 // entire range, then exercise foreground depth at the gameplay camera's limits.
-export function verifyCalderaDepth(game) {
-  const source = game.world.getObjectByName("Eroded caldera rim");
-  if (!source) throw new Error("Load A Heart of Embers first.");
+export function verifyCalderaDepth(
+  game,
+  { name = "Eroded caldera rim", createMaterial = calderaMaterial } = {},
+) {
+  const source = game.world.getObjectByName(name);
+  if (!source) throw new Error(`Load the chapter containing ${name} first.`);
   const renderer = game.renderer,
     target = new THREE.WebGLRenderTarget(512, 320),
     previousTarget = renderer.getRenderTarget(),
@@ -25,7 +28,7 @@ export function verifyCalderaDepth(game) {
   rim.frustumCulled = false;
   rim.renderOrder = source.renderOrder;
   scene.add(rim);
-  const reference = calderaMaterial(game.darkMat, game.scene.fog.color);
+  const reference = createMaterial(game.darkMat, game.scene.fog.color);
   const compile = reference.onBeforeCompile;
   reference.onBeforeCompile = (shader) => {
     compile(shader);
@@ -35,7 +38,7 @@ export function verifyCalderaDepth(game) {
     shader.vertexShader = shader.vertexShader.replace(code, "");
   };
   reference.customProgramCacheKey = () =>
-    "vesper-caldera-perspective-reference";
+    `vesper-distant-perspective-reference-${name}`;
   const camera = new THREE.PerspectiveCamera(58, 512 / 320, 0.1, 450);
   scene.add(camera);
   const marker = new THREE.Mesh(

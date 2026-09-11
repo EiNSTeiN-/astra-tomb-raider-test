@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The final chapter's [meridian escarpment](meridian-escarpment.md) replaces its
+  generic triangular ranges with textured rock shelves and eroded cuts. Five
+  matching camera captures preserve the sampled gameplay terrain, water,
+  objectives and obstacles. Four depth references, twelve foreground probes,
+  oblique clipping, a continuous crane route and seven production input/save
+  cases pass. All 527 tests pass. The bounded Radeon 780M comparison adds
+  0.716 ms of GPU rendering time on High and 0.817 ms on Low; the notes retain
+  the increased geometry memory and limits of those measurements.
+
 - The final chapter now has [an astral spindle crane](astral-crane.md) for
   **The distance between stars**. The sequence connects a loading cradle,
   gallery climb, two different cargo clearances and a broken upper walkway.

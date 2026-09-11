@@ -1,3 +1,4 @@
+import { buildMeridianEscarpment } from "./meridian-escarpment.js";
 import { craneFoundationWeight } from "./astral-crane-rules.js";
 import { refineVolcanicTerrain } from "./volcanic-geology.js";
 import { temperingFoundationWeight } from "./tempering-cart-rules.js";
@@ -352,59 +353,5 @@ export function buildHorizon(game) {
     buildForgeCaldera(game);
     return;
   }
-  const extent = game.map.size * 7,
-    center = extent / 2;
-  for (let layer = 0; layer < 2; layer++) {
-    const segments = 160,
-      rings = 10,
-      vertices = [],
-      indices = [];
-    const radius = extent * (0.72 + layer * 0.2);
-    for (let r = 0; r <= rings; r++)
-      for (let i = 0; i <= segments; i++) {
-        const a = (i / segments) * Math.PI * 2,
-          distance = radius + r * 18;
-        const ridge = Math.pow(
-          Math.abs(Math.sin(a * 3 + layer) * Math.cos(a * 5 + 0.7)),
-          0.7,
-        );
-        const peak = 40 + ridge * 105 + Math.sin(a * 23) * 5;
-        const h =
-          -22 +
-          Math.sin((r / rings) * Math.PI) * peak +
-          (["snow", "sky"].includes(game.level.biome) ? 28 : 0);
-        vertices.push(
-          center + Math.cos(a) * distance,
-          h,
-          center + Math.sin(a) * distance,
-        );
-        if (r < rings && i < segments) {
-          const n = r * (segments + 1) + i;
-          indices.push(
-            n,
-            n + segments + 1,
-            n + 1,
-            n + 1,
-            n + segments + 1,
-            n + segments + 2,
-          );
-        }
-      }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3),
-    );
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-    const material = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(game.level.fog).multiplyScalar(
-        layer ? 0.85 : 0.66,
-      ),
-      roughness: 1,
-      side: THREE.DoubleSide,
-    });
-    const mountain = new THREE.Mesh(geometry, material);
-    game.world.add(mountain);
-  }
+  if (game.level.biome === "eclipse") buildMeridianEscarpment(game);
 }

@@ -39,5 +39,6 @@ export function observatorySky(sunPosition, progress) {
   });
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(4000, 48, 24), material);
   mesh.frustumCulled = false;
+  mesh.renderOrder = -100;
   return mesh;
 }

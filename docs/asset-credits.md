@@ -460,3 +460,11 @@ mounted plaques, is original project geometry and writing in
 `src/astral-crane*.js`. It reuses the existing stone and bronze materials,
 original paving/stone-block geometry helpers, and original machine, hoist and
 wind synthesis. No external artwork, recordings or dependencies were added.
+
+The [meridian escarpment](meridian-escarpment.md) is original project geometry
+and shader code in `src/meridian-escarpment.js` and
+`src/meridian-rock-material.js`. Its eroded shelves, fault variation, mineral
+bands and distance haze reuse the existing **Rock Boulder Dry** color and normal
+maps from Poly Haven, credited above. The background depth method uses the
+project's existing caldera/cloud-city approach. No external art, recordings,
+textures or dependencies were added.

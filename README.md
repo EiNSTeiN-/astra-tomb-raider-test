@@ -78,6 +78,10 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+The final chapter’s [distant escarpment](docs/meridian-escarpment.md) now has
+weathered shelves and uneven rock crests in place of its earlier triangular
+mountain silhouettes. The notes include matching views and measured GPU cost.
+
 In **The Last Meridian**, the [astral spindle crane](docs/astral-crane.md) now
 turns **The distance between stars** into a cargo-handling and traversal sequence.
 Climb the west gallery, guide the spindle through two clearance restrictions,
