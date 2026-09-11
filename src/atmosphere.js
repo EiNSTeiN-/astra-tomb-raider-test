@@ -132,6 +132,7 @@ export function buildAtmosphere(game) {
     game.scene.fog.density = 0.0045;
   }
   if (game.level.biome === "snow") {
+    sky.renderOrder = -100;
     game.sunOffset.set(-80, 110, 20);
     sky.material.uniforms.turbidity.value = 3.2;
     sky.material.uniforms.rayleigh.value = 2.6;

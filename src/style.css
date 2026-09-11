@@ -1521,6 +1521,10 @@ kbd {
   gap: 14px;
   pointer-events: none;
   max-width: 310px;
+  padding: 12px 16px 12px 12px;
+  background: linear-gradient(110deg, #101b23eb 0%, #101b23c9 78%, #101b238c 100%);
+  border-left: 1px solid #dfc5857a;
+  border-radius: 0 3px 3px 0;
 }
 .objective-diamond {
   color: var(--gold);
@@ -2800,7 +2804,7 @@ body:has(#game-screen:not(.hidden)) {
   .toast {
     font-size: 10px;
     padding: 12px 17px;
-    top: 218px;
+    top: max(218px, var(--toast-top, 218px));
     bottom: auto;
   }
   .loading-screen h2 {

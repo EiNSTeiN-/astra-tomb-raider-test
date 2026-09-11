@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The revised [alpine ranges](alpine-range.md) use original procedural geometry in
+`src/snow-mountains.js` and the original rock/snow shader in
+`src/alpine-material.js`. They reuse the credited Rock Boulder Dry color and
+normal maps. The objective panel is original CSS. Documentation images are
+WebP conversions of actual browser captures; no external art, audio or new
+dependency was added.
+
 The quarry framing helper in `src/cleft-camera.js` is original project code
 using the existing camera collision and smoothing system. Its documentation
 images are lossless conversions of actual game captures. No external art,

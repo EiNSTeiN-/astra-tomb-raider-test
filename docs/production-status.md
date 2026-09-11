@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **A Silence of Snow** now has [irregular alpine ranges and a clearer objective panel](alpine-range.md).
+  Two connected ridges, projected rock normals, snow shelves and altitude haze
+  replace the repeating peaks. Shared background depth keeps both silhouettes
+  visible beyond the gameplay camera. All 551 tests, the build, four depth
+  comparisons, the full assisted wind-house route and four production
+  keyboard/touch/map/reload cases pass. Positional audio and cleanup pass.
+  A bounded Radeon 780M comparison adds about 1.09 ms on High and 1.48 ms on Low.
+  The guide records actual views, memory cost, mobile notification placement
+  and the remaining graphics, human pacing, listening and device requirements.
+
 - **A Silence of Snow** now has [shutter wheel hand contact and roof clearance](shutter-contact.md).
   Vesper aligns, reaches, grips, turns and releases each wheel; a ratchet holds
   every saved catch. Rising jumps stop beneath the six windbreak roofs.

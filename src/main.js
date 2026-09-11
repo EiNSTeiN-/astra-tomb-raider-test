@@ -370,11 +370,25 @@ function updateProgress() {
     ? "LOCAL SAVE ACTIVE"
     : "SAVING UNAVAILABLE";
 }
+function positionToast() {
+  const el = document.querySelector("#toast");
+  if (
+    el.classList.contains("hidden") ||
+    !matchMedia("(max-width: 550px)").matches
+  )
+    return;
+  const panel = document
+    .querySelector(".hud-objective")
+    .getBoundingClientRect();
+  el.style.setProperty("--toast-top", `${panel.bottom + 12}px`);
+}
+window.addEventListener("resize", positionToast);
 function toast(message, duration = 3500) {
   const el = document.querySelector("#toast");
   clearTimeout(toastTimer);
   el.textContent = message;
   el.classList.remove("hidden");
+  positionToast();
   toastTimer = setTimeout(() => el.classList.add("hidden"), duration);
 }
 function finishLoadingUI() {
@@ -756,10 +770,11 @@ function updateHUD(s) {
   ][Math.round(angle / 45) % 8];
   drawMap(document.querySelector("#minimap"), false, s);
   updateWaypoint(s);
+  positionToast();
 }
 function updateWaypoint(s) {
   const el = document.querySelector("#waypoint");
-  if (!s.target || !game) {
+  if (!s.target || !game || s.distance <= 6) {
     el.style.display = "none";
     return;
   }

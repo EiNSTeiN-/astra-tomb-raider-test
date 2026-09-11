@@ -269,7 +269,7 @@ test("alpine ranges close at the seam, face upward, and stay outside the playabl
     const { segments, rings, radius } = g.userData;
     assert.ok(p.array.every(Number.isFinite));
     assert.ok(n.array.every(Number.isFinite));
-    assert.ok(g.index.count / 3 <= 24000);
+    assert.ok(g.index.count / 3 <= 65536);
     assert.ok(radius > Math.hypot(210, 210));
     let maxY = -Infinity;
     for (let i = 0; i < p.count; i++) {

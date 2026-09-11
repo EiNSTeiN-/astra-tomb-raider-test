@@ -6,10 +6,17 @@ import { calderaMaterial } from "../src/caldera-material.js";
 // entire range, then exercise foreground depth at the gameplay camera's limits.
 export function verifyCalderaDepth(
   game,
-  { name = "Eroded caldera rim", createMaterial = calderaMaterial } = {},
+  {
+    name = "Eroded caldera rim",
+    names = [name],
+    createMaterial = calderaMaterial,
+  } = {},
 ) {
-  const source = game.world.getObjectByName(name);
-  if (!source) throw new Error(`Load the chapter containing ${name} first.`);
+  const sources = names.map((name) => {
+    const source = game.world.getObjectByName(name);
+    if (!source) throw new Error(`Load the chapter containing ${name} first.`);
+    return source;
+  });
   const renderer = game.renderer,
     target = new THREE.WebGLRenderTarget(512, 320),
     previousTarget = renderer.getRenderTarget(),
@@ -24,11 +31,19 @@ export function verifyCalderaDepth(
     copy.castShadow = false;
     scene.add(copy);
   }
-  const rim = new THREE.Mesh(source.geometry, source.material);
-  rim.frustumCulled = false;
-  rim.renderOrder = source.renderOrder;
-  scene.add(rim);
+  const rims = sources.map((source) => {
+    const rim = new THREE.Mesh(source.geometry, source.material);
+    rim.frustumCulled = false;
+    rim.renderOrder = source.renderOrder;
+    scene.add(rim);
+    return rim;
+  });
   const reference = createMaterial(game.darkMat, game.scene.fog.color);
+  const setReference = (enabled) =>
+    rims.forEach((rim, i) => {
+      rim.material = enabled ? reference : sources[i].material;
+      rim.onAfterRender = enabled ? () => {} : sources[i].onAfterRender;
+    });
   const compile = reference.onBeforeCompile;
   reference.onBeforeCompile = (shader) => {
     compile(shader);
@@ -106,13 +121,11 @@ export function verifyCalderaDepth(
       camera.updateMatrixWorld(true);
       camera.far = 1600;
       camera.updateProjectionMatrix();
-      rim.material = reference;
-      rim.onAfterRender = () => {};
+      setReference(true);
       const expected = capture();
       camera.far = 450;
       camera.updateProjectionMatrix();
-      rim.material = source.material;
-      rim.onAfterRender = source.onAfterRender;
+      setReference(false);
       const projection = difference(capture(), expected);
       if (
         projection.mean > 0.02 ||
@@ -127,7 +140,9 @@ export function verifyCalderaDepth(
         marker.position.set(0, 0, -distance);
         marker.scale.setScalar(distance * 0.2);
         const actual = capture();
-        rim.visible = false;
+        rims.forEach((rim) => {
+          rim.visible = false;
+        });
         const expected = capture();
         const centre = (160 * 512 + 256) * 4;
         if (
@@ -138,7 +153,9 @@ export function verifyCalderaDepth(
           throw new Error(
             `${name}: foreground probe at ${distance} m was not visible`,
           );
-        rim.visible = true;
+        rims.forEach((rim) => {
+          rim.visible = true;
+        });
         const delta = difference(actual, expected, true);
         if (delta.max)
           throw new Error(`${name}: foreground at ${distance} m was obscured`);
@@ -148,16 +165,14 @@ export function verifyCalderaDepth(
       camera.far = 1600;
       camera.updateProjectionMatrix();
       clipAtHeight(60);
-      rim.material = reference;
-      rim.onAfterRender = () => {};
+      setReference(true);
       const clippedReference = capture();
       if (difference(expected, clippedReference).changed < 1000)
         throw new Error(`${name}: the oblique plane did not clip the ridge`);
       camera.far = 450;
       camera.updateProjectionMatrix();
       clipAtHeight(60);
-      rim.material = source.material;
-      rim.onAfterRender = source.onAfterRender;
+      setReference(false);
       const clipping = difference(capture(), clippedReference);
       if (clipping.mean > 0.04 || clipping.changed / clipping.channels > 0.002)
         throw new Error(
