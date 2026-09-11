@@ -1,8 +1,9 @@
+import { cavernStrata } from "./cavern-strata.js";
 import * as THREE from "three";
 import { pbrMaterial } from "./visuals.js";
 
 export function cavernRock() {
-  const material = pbrMaterial("rock", 0x899495);
+  const material = pbrMaterial("rock", 0xc0c3bf);
   material.name = "Wet stratified cavern rock";
   material.side = THREE.DoubleSide;
   material.shadowSide = THREE.DoubleSide;
@@ -22,6 +23,7 @@ export function cavernRock() {
         /* glsl */ `
       #include <common>
       varying vec3 cavePosition, caveNormal;
+      ${cavernStrata}
     `,
       )
       .replace(
@@ -42,9 +44,8 @@ export function cavernRock() {
       vec2 caveX=cavePosition.zy/5.0, caveY=cavePosition.xz/5.0, caveZ=cavePosition.xy/5.0;
       vec3 caveAlbedo=texture2D(map,caveX).rgb*caveW.x+
         texture2D(map,caveY).rgb*caveW.y+texture2D(map,caveZ).rgb*caveW.z;
-      float caveLayer=sin(cavePosition.y*1.3+sin(cavePosition.x*.17)*1.6+sin(cavePosition.z*.19));
-      float caveWet=smoothstep(.1,.85,sin(cavePosition.x*.37+sin(cavePosition.z*.21)*3.));
-      diffuseColor.rgb*=caveAlbedo*mix(.67,1.04,smoothstep(-.9,.6,caveLayer))*mix(1.,.7,caveWet);
+      KarstSurface karst=karstSurface(cavePosition,normalize(caveNormal));
+      diffuseColor.rgb*=karstColor(caveAlbedo,karst);
     `,
       )
       .replace(
@@ -52,7 +53,7 @@ export function cavernRock() {
         /* glsl */ `
       float caveRough=texture2D(roughnessMap,caveX).g*caveW.x+
         texture2D(roughnessMap,caveY).g*caveW.y+texture2D(roughnessMap,caveZ).g*caveW.z;
-      float roughnessFactor=mix(clamp(caveRough,.62,1.),.32,caveWet*.7);
+      float roughnessFactor=mix(clamp(caveRough,.78,1.),.55,karst.damp);
     `,
       )
       .replace(
@@ -61,10 +62,11 @@ export function cavernRock() {
       normal=normalize(caveDetail(texture2D(normalMap,caveX).xyz,caveX,normal)*caveW.x+
         caveDetail(texture2D(normalMap,caveY).xyz,caveY,normal)*caveW.y+
         caveDetail(texture2D(normalMap,caveZ).xyz,caveZ,normal)*caveW.z);
+      normal=karstNormal(normal,karst.relief);
     `,
       );
   };
-  material.customProgramCacheKey = () => "cavern-rock-v1";
+  material.customProgramCacheKey = () => "cavern-rock-v2";
   return material;
 }
 

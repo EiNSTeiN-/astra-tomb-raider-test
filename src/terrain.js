@@ -1,3 +1,4 @@
+import { refineCavernTerrain } from "./cavern-geology.js";
 import {
   CAUSEWAY_SITE,
   causewayFoundationWeight,
@@ -253,6 +254,7 @@ export function createTerrainProfile(map, level) {
     court: (x, z) => sample(courts, x, z),
   };
   profile.gallery = createSunkenGallery(profile, biome);
+  if (biome === "crystal") return refineCavernTerrain(profile, map, level.seed);
   if (biome === "eclipse")
     return refineMeridianTerrain(profile, map, level.seed);
   if (biome === "desert") return refineDesertTerrain(profile, map, level.seed);
@@ -296,6 +298,7 @@ export function buildTerrainSurface(game) {
         meridianRock = profile.meridian
           ? new Float32Array(position.count)
           : null,
+        cavernRock = profile.cavern ? new Float32Array(position.count) : null,
         desertRock = profile.desert ? new Float32Array(position.count) : null,
         coast = profile.coastal ? new Float32Array(position.count * 3) : null;
       for (let i = 0; i < position.count; i++) {
@@ -307,6 +310,7 @@ export function buildTerrainSurface(game) {
         trail[i] = profile.trail(px, pz);
         if (skyDepth) skyDepth[i] = profile.geology.depth(px, pz);
         if (meridianRock) meridianRock[i] = profile.meridian.rock(px, pz);
+        if (cavernRock) cavernRock[i] = profile.cavern.rock(px, pz);
         if (desertRock) desertRock[i] = profile.desert.rock(px, pz);
         if (coast) {
           const room = profile.coastal.nearest(px, pz);
@@ -319,6 +323,11 @@ export function buildTerrainSurface(game) {
         geometry.setAttribute(
           "meridianRock",
           new THREE.BufferAttribute(meridianRock, 1),
+        );
+      if (cavernRock)
+        geometry.setAttribute(
+          "cavernRock",
+          new THREE.BufferAttribute(cavernRock, 1),
         );
       if (desertRock)
         geometry.setAttribute(

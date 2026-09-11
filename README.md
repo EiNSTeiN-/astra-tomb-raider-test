@@ -84,6 +84,9 @@ follow the rising platforms and reach the next gallery to hold the route
 behind you. The second crossing climbs toward the chamber relay. Numbered
 inlays, a route map, positional resonance and safe gallery saves support
 keyboard and touch play.
+Its surrounding [cavern banks and mineral beds](docs/cavern-banks.md) now have
+irregular shelves, broken rock seams and shallow, ground-fitted crystal bases.
+Matched views and a bounded GPU comparison accompany the visual changes.
 
 The final chapter's [nearby rock banks](docs/meridian-banks.md) now have
 uneven shelves, darker joints and matte dust shading. Walking heights and

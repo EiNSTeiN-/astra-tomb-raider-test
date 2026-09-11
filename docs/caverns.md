@@ -8,6 +8,11 @@ The interior roof has **97,238 triangles in 102 spatial chunks**. Its triangle-h
 
 Wet, layered rock uses the existing local color, normal, and roughness maps with projection on three axes. Strata and damp patches vary the surface response. Smaller stalactites interrupt the ceiling silhouette while staying above the routes. This remains procedural environment art, rather than a scanned or individually sculpted cave.
 
+The later [cavern banks and mineral beds update](cavern-banks.md) refines the
+enclosing shelves and shared rock material and replaces the rounded crystal
+bases with shallow, ground-fitted formations. Its notes contain current
+geometry, rendering and verification measurements.
+
 ## Mineral formations, light, and objective response
 
 There are **36 mineral clusters**, containing **324 six-sided quartz prisms**, with varying heights, tilted shafts, and offset terminations. They sit on irregular rock beds. Opaque physical materials use hard facets, restrained internal bands, clearcoat, and emissive edges. Cluster placements leave at least seven metres to objective centres. Their collision beds and captured camera surfaces keep the explorer and camera out of the formations.

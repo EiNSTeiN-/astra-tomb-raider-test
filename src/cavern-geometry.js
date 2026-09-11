@@ -57,6 +57,83 @@ export function cavernChunks(profile, chunk = 24) {
 
 export { quartzGeometry } from "./mineral-art.js";
 
+// Irregular, shallow rock fans grow around each mineral root. The outer ring
+// tucks below the sampled ground instead of leaving a raised circular rim.
+export function mineralBedGeometry(x, z, ground, seed) {
+  const segments = 32,
+    rings = 4,
+    base = ground(x, z),
+    positions = [0, 0.26, 0],
+    uv = [0, 0],
+    indices = [];
+  let bottom = -0.8;
+  for (let ring = 1; ring <= rings; ring++)
+    for (let i = 0; i < segments; i++) {
+      const angle = (i / segments) * Math.PI * 2,
+        t = ring / rings,
+        radius =
+          (1 +
+            Math.sin(angle * 3 + seed) * 0.12 +
+            Math.sin(angle * 7 - seed) * 0.06) *
+          t,
+        dx = Math.cos(angle) * 2.8 * radius,
+        dz = Math.sin(angle) * 2.4 * radius,
+        rise =
+          (1 - t) * 0.28 +
+          (1 - t) * Math.sin(i * 1.7 + seed) * 0.055 -
+          0.14 * t * t,
+        y = ground(x + dx, z + dz) - base + rise;
+      bottom = Math.min(bottom, y - 0.55);
+      positions.push(dx, y, dz);
+      uv.push(dx / 5, dz / 5);
+    }
+  for (let i = 0; i < segments; i++) {
+    const next = (i + 1) % segments;
+    indices.push(0, 1 + next, 1 + i);
+    for (let ring = 1; ring < rings; ring++) {
+      const a = 1 + (ring - 1) * segments + i,
+        b = 1 + (ring - 1) * segments + next,
+        c = 1 + ring * segments + i,
+        d = 1 + ring * segments + next;
+      indices.push(a, b, c, b, d, c);
+    }
+  }
+  const lower = positions.length / 3,
+    outer = 1 + (rings - 1) * segments;
+  for (let i = 0; i < segments; i++) {
+    const k = (outer + i) * 3;
+    positions.push(positions[k], bottom, positions[k + 2]);
+    uv.push(0, 0);
+  }
+  const center = positions.length / 3;
+  positions.push(0, bottom, 0);
+  uv.push(0, 0);
+  for (let i = 0; i < segments; i++) {
+    const next = (i + 1) % segments;
+    indices.push(
+      outer + i,
+      outer + next,
+      lower + i,
+      outer + next,
+      lower + next,
+      lower + i,
+      center,
+      lower + i,
+      lower + next,
+    );
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(positions, 3),
+  );
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
+  return geometry;
+}
+
 export function stalactiteGeometry(radius, height, seed) {
   const points = Array.from({ length: 13 }, (_, i) => {
     const t = i / 12;

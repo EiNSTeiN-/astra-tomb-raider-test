@@ -12,7 +12,9 @@ import {
   cavernChunks,
   quartzGeometry,
   stalactiteGeometry,
+  mineralBedGeometry,
 } from "../src/cavern-geometry.js";
+import { rockGroundHeight } from "../src/nature-rocks.js";
 import { buildCaverns, updateCaverns } from "../src/caverns.js";
 import {
   buildSoundLandmarks,
@@ -38,7 +40,6 @@ function fixture(t) {
     level,
     map,
     terrainProfile: terrain,
-    groundHeight: terrain.height,
     world,
     progress: { stage: 0, field: [] },
     elapsed: 0,
@@ -60,6 +61,37 @@ function fixture(t) {
   );
   return game;
 }
+
+test("every mineral-bed perimeter stays below both the visible triangles and sampled floor", (t) => {
+  const game = fixture(t);
+  let probes = 0;
+  for (const patch of game.cavernPatches)
+    for (const [index, center] of patch.centers.entries()) {
+      const geometry = mineralBedGeometry(
+          center.x,
+          center.z,
+          terrain.height,
+          patch.index + index + 1,
+        ),
+        p = geometry.attributes.position;
+      for (let i = 0; i < 32; i++)
+        for (let step = 0; step < 6; step++) {
+          const a = 97 + i,
+            b = 97 + ((i + 1) % 32),
+            u = step / 6,
+            x = center.x + p.getX(a) * (1 - u) + p.getX(b) * u,
+            z = center.z + p.getZ(a) * (1 - u) + p.getZ(b) * u,
+            y = center.y + p.getY(a) * (1 - u) + p.getY(b) * u;
+          assert(
+            y <= rockGroundHeight(terrain, x, z) + 1e-5,
+            `Exposed mineral rim at ${x},${z}`,
+          );
+          probes++;
+        }
+      geometry.dispose();
+    }
+  assert(probes > 6000);
+});
 
 test("cave vaults preserve headroom over every map route and seal at all four world edges", () => {
   assert.deepEqual(createCavernProfile(map, terrain).heights, profile.heights);

@@ -484,3 +484,10 @@ reuses the existing credited stone maps and original quartz geometry/shading.
 Its eleven positional emitters use the existing original crystal synthesis;
 no new external textures, models, recordings or dependencies were added. The
 documentation images are captures of the running game.
+
+The [cavern banks and mineral beds](cavern-banks.md) use original project
+heightfield refinement in `src/cavern-geology.js`, shared limestone shading
+in `src/cavern-strata.js` and fitted bed geometry in `src/cavern-geometry.js`.
+They reuse the credited **Rock Boulder Dry** maps and existing loose-rock scans.
+No new external images, models, recordings or dependencies were introduced.
+Documentation images are captures of the running game converted to WebP.

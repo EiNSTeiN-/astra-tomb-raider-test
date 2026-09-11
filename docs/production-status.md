@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **The Night Below** now has [irregular limestone banks and fitted mineral beds](cavern-banks.md).
+  Shared broken seams, mineral deposits and damp shading vary the floor, vault
+  and gallery walls. All 33 mineral-bed rims and 99 loose rocks pass ground
+  contact checks. All 542 tests, the build, a complete assisted causeway route
+  and seven final production keyboard/touch/reload cases pass. Positioned audio,
+  three-quality shader checks and resource cleanup also pass. The guide includes
+  matched views, added geometry/memory and a bounded Radeon 780M comparison;
+  graphics, human pacing, listening and broad device acceptance remain open.
+
 - **The Night Below** now has [the Echo Causeway](echo-causeway.md) for
   **The echo that returns**: two timed four-stone crossings, three relay
   galleries, a climbing second route and a held return path. Moving support,

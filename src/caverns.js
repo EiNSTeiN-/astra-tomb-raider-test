@@ -10,6 +10,7 @@ import {
   cavernChunks,
   quartzGeometry,
   stalactiteGeometry,
+  mineralBedGeometry,
 } from "./cavern-geometry.js";
 import { cavernRock, mineralMaterial } from "./cavern-material.js";
 
@@ -80,9 +81,17 @@ export function buildCaverns(game) {
       if (centers.length === 4) break;
       const center = new THREE.Vector3(px, py, pz);
       centers.push(center);
-      const bed = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), rock);
-      bed.position.set(px, py + 0.22, pz);
-      bed.scale.set(2.8, 0.65, 2.4);
+      const bed = new THREE.Mesh(
+        mineralBedGeometry(
+          px,
+          pz,
+          (x, z) => game.groundHeight(x, z),
+          room.index + centers.length,
+        ),
+        rock,
+      );
+      bed.name = "Grounded mineral bed";
+      bed.position.set(px, py, pz);
       root.add(bed);
       game.cameraSurfaces?.capture(bed);
       game.obstacles.push({
