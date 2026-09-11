@@ -439,3 +439,10 @@ original garden geometry helpers. The railway uses the credited forge stone and
 Rusty Metal 04 maps, existing water and steam shaders, and original machinery
 synthesis and volcanic score. No external assets or dependencies were added.
 The guide's screenshots are captures of the running game.
+
+The [volcanic bank pass](volcanic-banks.md) adds original heightfield relief,
+cooling-joint and ash shaders, charcoal tinting and three small fragment shapes
+in `src/volcanic-*.js`. It reuses the credited forge stone and paving maps and
+Rock Moss Set 01 scan textures; its tint is applied at runtime without changing
+the source maps. No external art, recordings or dependencies were added. The
+comparison images are unretouched game captures encoded as lossless WebP.

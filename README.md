@@ -130,6 +130,9 @@ Load the key blank, drive a rail cart to the raised coolant inspection, turn its
 junction and ride north to the cradle. **E / Use** takes or releases the handle;
 **W / Up** and **S / Down** drive, while releasing movement or holding
 **Space / Jump** brakes. Cargo, secured landings and table alignment persist.
+Its surrounding [volcanic banks now have fractured rock and ash surfaces](docs/volcanic-banks.md),
+with uneven crests and small fitted fragments. The comparison notes include
+matched captures, rendering costs and the remaining graphics limitations.
 
 The jungle's third field mission restores [the rain garden](docs/rain-garden.md).
 Release its spring, climb the west stair and turn nine channel stones to connect

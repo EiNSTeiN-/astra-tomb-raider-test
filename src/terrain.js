@@ -1,3 +1,4 @@
+import { refineVolcanicTerrain } from "./volcanic-geology.js";
 import { temperingFoundationWeight } from "./tempering-cart-rules.js";
 import { courierFoundationWeight } from "./courier-rules.js";
 import { desertBankRise, refineDesertTerrain } from "./desert-geology.js";
@@ -231,6 +232,8 @@ export function createTerrainProfile(map, level) {
   };
   profile.gallery = createSunkenGallery(profile, biome);
   if (biome === "desert") return refineDesertTerrain(profile, map, level.seed);
+  if (biome === "volcano")
+    return refineVolcanicTerrain(profile, map, level.seed);
   return upperHeights
     ? refineSkyTerrain(
         profile,

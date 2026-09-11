@@ -1,4 +1,10 @@
 import {
+  volcanicDeclarations,
+  volcanicColor,
+  volcanicNormal,
+  volcanicRoughness,
+} from "./volcanic-material.js";
+import {
   desertTerrainDeclarations,
   desertTerrainColor,
   desertTerrainNormal,
@@ -48,6 +54,7 @@ float terrainNoise(vec2 p) {
 ${coastalDeclarations}
 ${skyTerrainDeclarations}
 ${desertTerrainDeclarations}
+${volcanicDeclarations}
 `;
 
 const colorLayer = /* glsl */ `
@@ -63,10 +70,6 @@ float terrainMacro = terrainNoise(vTerrainPosition.xz * .065);
 float earthBlend = smoothstep(.2, .8, terrainMacro) * .65;
 vec3 earthColor = mix(texture2D(map, earthUv).rgb,
   texture2D(map, rotatedEarthUv).rgb, earthBlend);
-#ifdef TERRAIN_FORGE
-  float ashGray=dot(earthColor,vec3(.2126,.7152,.0722));
-  earthColor=mix(earthColor,vec3(ashGray),.8)*vec3(.28,.3,.32);
-#endif
 vec3 pavingColor = texture2D(pavingMap, pavingUv).rgb;
 vec3 terrainWeights = pow(abs(normalize(vTerrainNormal)), vec3(4.0));
 terrainWeights /= max(.0001, terrainWeights.x + terrainWeights.y + terrainWeights.z);
@@ -102,6 +105,7 @@ float growthWeight = 0.0;
 ${coastalColor}
 ${skyTerrainColor}
 ${desertTerrainColor}
+${volcanicColor}
 vec3 terrainAlbedo = mix(earthColor, pavingColor, pavingWeight);
 terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 #ifdef TERRAIN_JUNGLE
@@ -129,6 +133,7 @@ float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
   + texture2D(cliffRoughness, cliffUvZ).g * terrainWeights.z;
 ${skyTerrainRoughness}
 ${desertTerrainRoughness}
+${volcanicRoughness}
 terrainRough = mix(terrainRough, rockRough, terrainSlope);
 terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
@@ -159,6 +164,7 @@ vec3 cliffN = normalize(
 ${coastalNormal}
 ${skyTerrainNormal}
 ${desertTerrainNormal}
+${volcanicNormal}
 vec3 terrainN = normalize(mix(earthN, pavingN, pavingWeight));
 terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
 #ifdef TERRAIN_JUNGLE
@@ -242,7 +248,7 @@ export function terrainMaterial(game) {
           desert: 0xe0bd82,
           snow: 0xd4e1e7,
           water: 0xa8b9b0,
-          volcano: 0x747c87,
+          volcano: 0xadb4be,
           sky: 0xe0e4df,
           crystal: 0x737386,
           eclipse: 0x9d9991,
@@ -311,6 +317,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["desert", "water"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
   return material;
 }

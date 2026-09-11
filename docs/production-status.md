@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The volcanic chapter now has [fractured banks, matte ash and small fitted rock fragments](volcanic-banks.md).
+  Uneven crests retain all walking and working foundations, water and obstacle
+  definitions. Five matched High views add 6–9 calls and 4,440–16,560 submitted
+  triangles, with the terrain mesh count unchanged. The guide records a bounded
+  GPU material/fragment comparison and its limits. All 519 tests, the build,
+  a continuous assisted railway route and seven production keyboard/touch/save
+  cases pass. Positioned audio, attenuation, three-quality shader checks and
+  chapter resource cleanup also pass. AAA graphics, human pacing and listening
+  acceptance remain open requirements.
+
 - The volcanic chapter's seventh field mission now uses [a tempering railway](tempering-cart.md).
   A manually driven cargo cart follows two rail runs joined by a turntable.
   Loading, climbing to the coolant inspection, turning the rails and delivery

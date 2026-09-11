@@ -1,3 +1,5 @@
+import { buildVolcanicScree } from "./volcanic-scree.js";
+import { volcanicBoulderMaterial } from "./volcanic-material.js";
 import { inWindCourt } from "./wind-rules.js";
 import { inCipherCourt } from "./cipher-rules.js";
 import { inHydraulicCourt } from "./hydraulic-rules.js";
@@ -264,6 +266,7 @@ export async function loadNature(game) {
   );
   if (game.world !== world) return;
   game.desertScatter = null;
+  game.volcanicScree = null;
   game.rockGrounding = {
     candidates: 0,
     placed: 0,
@@ -366,6 +369,10 @@ export async function loadNature(game) {
         (rock ? 2.6 : fern ? (biome === "jungle" ? 2 : 1.6) : 2.4) /
         Math.max(size.x, size.y, size.z);
       reference.dispose();
+      const volcanicMaterial =
+        rock && biome === "volcano"
+          ? volcanicBoulderMaterial(sources[s].material)
+          : null;
       const tiers = asset.tiers.map((tier) => {
         const source = tier.find((node) => node.name === sources[s].name);
         if (!source)
@@ -377,7 +384,7 @@ export async function loadNature(game) {
           .applyMatrix4(source.matrixWorld);
         geometry.translate(-center.x, -bounds.min.y, -center.z);
         geometry.scale(scale, scale, scale);
-        const material = source.material;
+        const material = volcanicMaterial || source.material;
         material.side = THREE.DoubleSide;
         if (!rock) {
           material.alphaTest = 0.4;
@@ -431,6 +438,7 @@ export async function loadNature(game) {
       }
     }
   }
+  buildVolcanicScree(game);
   updateNature(game);
   game.renderOnce = true;
 }
