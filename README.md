@@ -88,6 +88,8 @@ grasp, turn and release at the wheels, and stop jumps beneath the windbreak roof
 The surrounding [alpine ranges](docs/alpine-range.md) now have irregular ridges,
 rock faces and snow shelves, with full distant silhouettes and a clearer
 objective panel. The guide includes matching views and measured rendering cost.
+Its [nearby snow banks](docs/snow-banks.md) now vary their shoulders and rock
+exposure, with snow-dusted boulders and verified walking/foundation heights.
 
 In **The Night Below**, [the Echo Causeway](docs/echo-causeway.md) turns
 **The echo that returns** into two timed stone crossings. Sound each relay,

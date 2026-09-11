@@ -1,3 +1,4 @@
+import { snowBoulderMaterial } from "./snow-terrain-material.js";
 import { meridianBoulderMaterial } from "./meridian-terrain-material.js";
 import { buildVolcanicScree } from "./volcanic-scree.js";
 import { volcanicBoulderMaterial } from "./volcanic-material.js";
@@ -375,7 +376,9 @@ export async function loadNature(game) {
           ? volcanicBoulderMaterial(sources[s].material)
           : rock && biome === "eclipse"
             ? meridianBoulderMaterial(sources[s].material)
-            : null;
+            : rock && biome === "snow"
+              ? snowBoulderMaterial(sources[s].material)
+              : null;
       const tiers = asset.tiers.map((tier) => {
         const source = tier.find((node) => node.name === sources[s].name);
         if (!source)

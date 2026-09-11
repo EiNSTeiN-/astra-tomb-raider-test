@@ -1,3 +1,4 @@
+import { refineSnowTerrain } from "./snow-geology.js";
 import { shutterFoundationWeight } from "./shutter-house-rules.js";
 import { refineCavernTerrain } from "./cavern-geology.js";
 import {
@@ -259,6 +260,7 @@ export function createTerrainProfile(map, level) {
     court: (x, z) => sample(courts, x, z),
   };
   profile.gallery = createSunkenGallery(profile, biome);
+  if (biome === "snow") return refineSnowTerrain(profile, map, level.seed);
   if (biome === "crystal") return refineCavernTerrain(profile, map, level.seed);
   if (biome === "eclipse")
     return refineMeridianTerrain(profile, map, level.seed);
@@ -299,6 +301,7 @@ export function buildTerrainSurface(game) {
         uv = geometry.attributes.uv,
         court = new Float32Array(position.count),
         trail = new Float32Array(position.count),
+        snowRock = profile.snow ? new Float32Array(position.count) : null,
         skyDepth = profile.geology ? new Float32Array(position.count) : null,
         meridianRock = profile.meridian
           ? new Float32Array(position.count)
@@ -313,6 +316,7 @@ export function buildTerrainSurface(game) {
         uv.setXY(i, px / 4, pz / 4);
         court[i] = profile.court(px, pz);
         trail[i] = profile.trail(px, pz);
+        if (snowRock) snowRock[i] = profile.snow.rock(px, pz);
         if (skyDepth) skyDepth[i] = profile.geology.depth(px, pz);
         if (meridianRock) meridianRock[i] = profile.meridian.rock(px, pz);
         if (cavernRock) cavernRock[i] = profile.cavern.rock(px, pz);
@@ -324,6 +328,11 @@ export function buildTerrainSurface(game) {
       }
       geometry.setAttribute("court", new THREE.BufferAttribute(court, 1));
       geometry.setAttribute("trail", new THREE.BufferAttribute(trail, 1));
+      if (snowRock)
+        geometry.setAttribute(
+          "snowRock",
+          new THREE.BufferAttribute(snowRock, 1),
+        );
       if (meridianRock)
         geometry.setAttribute(
           "meridianRock",

@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [nearby mountain banks](snow-banks.md) are original procedural geometry and
+shading in `src/snow-geology.js` and `src/snow-terrain-material.js`. They reuse
+the credited Snow 01, Monastery Stone Floor and Rock Boulder Dry textures.
+The snow-dusted boulders reuse Rock Moss Set 01 geometry/maps with an original
+chapter-specific material; no external asset or dependency was added. The
+comparison images are WebP conversions of actual browser captures.
+
 The revised [alpine ranges](alpine-range.md) use original procedural geometry in
 `src/snow-mountains.js` and the original rock/snow shader in
 `src/alpine-material.js`. They reuse the credited Rock Boulder Dry color and

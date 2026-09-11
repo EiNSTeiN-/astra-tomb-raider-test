@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **A Silence of Snow** now has [uneven snow shoulders, exposed rock and snow-dusted boulders](snow-banks.md).
+  All walking cells, monastery footings, ice edges and moving structure
+  foundations retain their previous heights. All 554 tests, the build, assisted
+  wind-house/frozen-stair routes and five production input/map/reload cases pass.
+  All 109 placed rocks pass ground-contact and clearance checks; three graphics
+  qualities, positioned audio and resource cleanup also pass. The guide records
+  matched views, memory additions and a bounded Radeon 780M terrain comparison.
+  Graphics, human chapter pacing, subjective listening and broad device
+  acceptance remain unfinished requirements.
+
 - **A Silence of Snow** now has [irregular alpine ranges and a clearer objective panel](alpine-range.md).
   Two connected ridges, projected rock normals, snow shelves and altitude haze
   replace the repeating peaks. Shared background depth keeps both silhouettes
