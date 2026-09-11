@@ -30,7 +30,7 @@ test("eight chapter hazards have warning, active, and usable clear intervals", (
     }
   }
 });
-test("each sector gets a trap tied to one reachable field station, and a restored station stays disarmed after reload", () => {
+test("ordinary sectors have station traps while the echo causeway reserves safe relay galleries; restored traps remain disarmed", () => {
   let count = 0;
   for (const level of LEVELS) {
     const map = createMap(level),
@@ -45,7 +45,12 @@ test("each sector gets a trap tied to one reachable field station, and a restore
         flames: [],
       });
     buildHazards(game);
-    assert.equal(game.hazards.length, level.mechanisms);
+    assert.equal(
+      game.hazards.length,
+      level.mechanisms - (level.id === "crystal" ? 1 : 0),
+    );
+    if (level.id === "crystal")
+      assert(!game.hazards.some((h) => h.stage === 3));
     for (const hazard of game.hazards) {
       const field = map.features.find((f) => f.id === hazard.fieldId);
       assert.equal(field.type, "field");
@@ -67,7 +72,7 @@ test("each sector gets a trap tied to one reachable field station, and a restore
       count++;
     }
   }
-  assert.equal(count, 69);
+  assert.equal(count, 68);
 });
 test("ice locks its impact point, beams can be jumped, and ground pulses have a safe airborne interval", () => {
   const ice = {

@@ -1,3 +1,8 @@
+import {
+  CAUSEWAY_SITE,
+  causewayFoundationWeight,
+  causewayChannelDepth,
+} from "./echo-causeway-rules.js";
 import { refineMeridianTerrain } from "./meridian-geology.js";
 import { buildMeridianEscarpment } from "./meridian-escarpment.js";
 import { craneFoundationWeight } from "./astral-crane-rules.js";
@@ -165,6 +170,14 @@ export function createTerrainProfile(map, level) {
           floor = raw(cx, cz) - 10 * (1 - smooth(18.8, 20, radius));
         heights[iz * width + ix] = height * (1 - weight) + floor * weight;
       }
+      if (map.echoCauseway) {
+        const weight = causewayFoundationWeight(x, z);
+        heights[iz * width + ix] =
+          heights[iz * width + ix] * (1 - weight) +
+          raw(CAUSEWAY_SITE.x, CAUSEWAY_SITE.z) * weight -
+          causewayChannelDepth(x, z);
+        paving *= 1 - weight;
+      }
       courts[iz * width + ix] = Math.max(paving, coastal?.coverage(x, z) || 0);
     }
   const sample = (data, x, z) => {
@@ -222,6 +235,7 @@ export function createTerrainProfile(map, level) {
     }
   const profile = {
     extent,
+    causewayY: map.echoCauseway ? raw(CAUSEWAY_SITE.x, CAUSEWAY_SITE.z) : null,
     craneY: map.astralCrane ? raw(182, 217) : null,
     temperingY: map.temperingCart ? raw(119, 392) : null,
     courierY: map.courierFerry ? raw(84, 42) : null,

@@ -1,3 +1,4 @@
+import { normalizeEchoCauseway } from "./echo-causeway-rules.js";
 import { normalizeAstralCrane } from "./astral-crane-rules.js";
 import { normalizeTemperingCart } from "./tempering-cart-rules.js";
 import { normalizeRainGarden } from "./rain-garden-rules.js";
@@ -149,6 +150,13 @@ export function normalizeSave(value) {
               field: strings(v.field),
             })
           : null,
+      echoCauseway:
+        key === "crystal"
+          ? normalizeEchoCauseway(v.echoCauseway, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       astralCrane:
         key === "eclipse"
           ? normalizeAstralCrane(v.astralCrane, {
@@ -274,6 +282,7 @@ export class SaveStore {
           : null,
       temperingCart:
         id === "embers" ? { loaded: false, stop: 0, turned: false } : null,
+      echoCauseway: id === "crystal" ? { anchor: 0 } : null,
       astralCrane:
         id === "eclipse"
           ? normalizeAstralCrane(null, { stage: 0, field: [] })

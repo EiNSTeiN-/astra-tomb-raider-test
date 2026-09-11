@@ -1,3 +1,4 @@
+import { causewayFoundationDistance } from "./echo-causeway-rules.js";
 import { craneFoundationDistance } from "./astral-crane-rules.js";
 import { temperingFoundationDistance } from "./tempering-cart-rules.js";
 import { seatStone } from "./stone-grounding.js";
@@ -31,6 +32,8 @@ export function rockGroundHeight(profile, x, z) {
 // Bounds include the actual rotated footprint, not only the instance's origin.
 export function natureRockAllowed(game, x, z, radius) {
   const { map, terrainProfile } = game;
+  if (map.echoCauseway && causewayFoundationDistance(x, z) < radius + 1)
+    return false;
   if (map.astralCrane && craneFoundationDistance(x, z) < radius + 0.5)
     return false;
   if (map.temperingCart && temperingFoundationDistance(x, z) < radius + 0.5)

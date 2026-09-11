@@ -1,3 +1,4 @@
+import { addEchoCauseway } from "./echo-causeway-rules.js";
 import { addAstralCrane } from "./astral-crane-rules.js";
 import { addTemperingCart } from "./tempering-cart-rules.js";
 import { addRainGarden } from "./rain-garden-rules.js";
@@ -562,8 +563,8 @@ export function createMap(level) {
     ),
     level,
   );
-  return addAstralCrane(
-    addTemperingCart(addRainGarden(map, level), level),
+  return addEchoCauseway(
+    addAstralCrane(addTemperingCart(addRainGarden(map, level), level), level),
     level,
   );
 }

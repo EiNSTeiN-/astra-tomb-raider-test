@@ -1,3 +1,4 @@
+import { causewayFoundationWeight } from "./echo-causeway-rules.js";
 // A continuous inner roof closes against the existing terrain outside the map.
 // Its triangle sampler is also used by movement, camera and sight checks.
 export function createCavernProfile(map, terrain) {
@@ -54,7 +55,11 @@ export function createCavernProfile(map, terrain) {
       const clearance =
         seal * arch * (17 + vault + layers) - (1 - seal * arch) * 1.2;
       heights[iz * width + ix] = terrain.height(x, z) + clearance;
-      air[iz * width + ix] = clearance;
+      if (map.echoCauseway)
+        heights[iz * width + ix] +=
+          Math.max(0, terrain.causewayY + 26 - heights[iz * width + ix]) *
+          causewayFoundationWeight(x, z);
+      air[iz * width + ix] = heights[iz * width + ix] - terrain.height(x, z);
     }
   const height = (x, z) => {
     const fx = Math.max(0, Math.min(width - 1.001, x / step));

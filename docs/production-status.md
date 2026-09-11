@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **The Night Below** now has [the Echo Causeway](echo-causeway.md) for
+  **The echo that returns**: two timed four-stone crossings, three relay
+  galleries, a climbing second route and a held return path. Moving support,
+  fall recovery, local-storage anchors, positioned resonance, a muted-play
+  route map and pause behavior are implemented. All 537 tests, the build, a
+  continuous assisted outward/return route and seven production keyboard,
+  touch and reload cases pass. The guide records rendering counts, attenuation
+  and resource cleanup. Human chapter pacing and modern AAA graphics remain
+  unmet acceptance requirements.
+
 - The final chapter now has [uneven nearby rock shelves and darker surface shading](meridian-banks.md).
   Walking heights, observatory foundations, water, objectives and obstacle data
   retain their previous values. Five matched views keep the same rendering

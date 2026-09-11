@@ -340,7 +340,7 @@ const chapters = {
     ],
     [
       "The echo that returns",
-      "The echo chamber has three relay stones. Sound them from the outer gallery toward the sealed door.",
+      "Climb the southern stair and sound the outer relay. Follow its pulse across four rising stones to the gallery relay, which holds the first crossing. Send a second echo up the higher stones to the chamber. Fading amber edges warn when a stone is about to descend.",
       "Sound the outer relay|Sound the gallery relay|Wake the echo chamber relay",
       "The echo returns along a path no living person has mapped.",
     ],

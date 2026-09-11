@@ -78,6 +78,13 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+In **The Night Below**, [the Echo Causeway](docs/echo-causeway.md) turns
+**The echo that returns** into two timed stone crossings. Sound each relay,
+follow the rising platforms and reach the next gallery to hold the route
+behind you. The second crossing climbs toward the chamber relay. Numbered
+inlays, a route map, positional resonance and safe gallery saves support
+keyboard and touch play.
+
 The final chapter's [nearby rock banks](docs/meridian-banks.md) now have
 uneven shelves, darker joints and matte dust shading. Walking heights and
 observatory foundations retain their previous values; the guide records
@@ -326,7 +333,7 @@ Scattered rocks now fit their scanned undersides into the terrain across all cha
 
 The jungle has denser woodland along route edges, two scanned broadleaf tree forms, fern and shrub clusters, and roots with climbing leaves on ruin piers. A moss-and-leaf-litter material blends into worn trails and stone courts. Its daylight sky shares a sun direction with scene lighting. Trees, shrubs, ferns, and rocks use per-instance distance selection. Three tree tiers preserve near detail, with short dithered transitions and matching wind in leaf shadows. [Rendering workload notes](docs/rendering-budget.md) record a 69% reduction in submitted triangles at the low-quality jungle spawn. These additions improve environmental dressing; they do not establish AAA visual quality or a supported hardware frame rate.
 
-Each sector also has an environmental trap connected to a field station: swinging blades, dart galleries, falling ice, pressure jets, furnace vents, crosswinds, sweeping crystal beams, or expanding ground pulses. Traps have visible warning and clear intervals. Restoring the connected station disables its trap, and that state follows the existing field-progress save. Beams and pulses can be jumped; crosswinds push against movement and consume stamina. Keyboard and touch controls both support dodging. Touch movement stays held while another finger uses an action button.
+The campaign also has 68 environmental traps connected to field stations: swinging blades, dart galleries, falling ice, pressure jets, furnace vents, crosswinds, sweeping crystal beams, or expanding ground pulses. Traps have visible warning and clear intervals. The Echo Causeway instead uses timed moving stones between safe relay galleries. Restoring the connected station disables its trap, and that state follows the existing field-progress save. Beams and pulses can be jumped; crosswinds push against movement and consume stamina. Keyboard and touch controls both support dodging. Touch movement stays held while another finger uses an action button.
 
 The terrain now blends color, surface normals, and roughness consistently across ground, paving, and cliffs. The jungle adds mottled moss, damp variation, and worn paving edges guided by a stone height map. Switching graphics quality refreshes shadow receivers correctly. [Terrain material notes](docs/terrain-materials.md) include comparisons, asset sources, and verified shader limits.
 

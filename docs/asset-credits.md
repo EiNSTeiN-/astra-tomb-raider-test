@@ -476,3 +476,11 @@ dust and regional boulder shading reuse the credited **Rock Boulder Dry** maps
 and existing loose-rock scans. Source images and scan geometry are unchanged.
 No external art, textures, recordings or dependencies were added. Documentation
 images are captures of the running game converted to WebP.
+
+The [Echo Causeway](echo-causeway.md) uses original project geometry in
+`src/echo-causeway-art.js`: fitted stone galleries, a staircase, telescoping
+columns, bronze rails, engraved inlays and mounted instruction plaques. It
+reuses the existing credited stone maps and original quartz geometry/shading.
+Its eleven positional emitters use the existing original crystal synthesis;
+no new external textures, models, recordings or dependencies were added. The
+documentation images are captures of the running game.

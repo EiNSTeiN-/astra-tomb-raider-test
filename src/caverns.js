@@ -1,3 +1,4 @@
+import { causewayFoundationDistance } from "./echo-causeway-rules.js";
 import * as THREE from "three";
 import { inEchoGallery } from "./echo-gallery-rules.js";
 import { inResonanceCourt } from "./resonance-rules.js";
@@ -72,6 +73,8 @@ export function buildCaverns(game) {
       )
         continue;
       if (profile.height(px, pz) - py < 12) continue;
+      if (game.map.echoCauseway && causewayFoundationDistance(px, pz) < 4)
+        continue;
       if (inEchoGallery(game.map, px, pz, 4)) continue;
       if (inResonanceCourt(game.map, px, pz, 3)) continue;
       if (centers.length === 4) break;

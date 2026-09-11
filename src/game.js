@@ -1,4 +1,18 @@
 import {
+  buildEchoCauseway,
+  updateEchoCauseway,
+  recoverCausewayFall,
+  causewayInteract,
+  causewayHint,
+  causewayObjective,
+} from "./echo-causeway.js";
+import {
+  causewayBlocked,
+  causewayOccludes,
+  causewaySavePosition,
+  restoreCausewayArrival,
+} from "./echo-causeway-rules.js";
+import {
   buildAstralCrane,
   updateAstralCrane,
   controlAstralCrane,
@@ -874,6 +888,7 @@ export class Adventure {
     buildRainGarden(this);
     buildTemperingCart(this);
     buildAstralCrane(this);
+    buildEchoCauseway(this);
     buildCoralPump(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
@@ -927,6 +942,7 @@ export class Adventure {
     restoreTraversal(this);
     restorePressureArrival(this);
     restoreOrbitArrival(this);
+    restoreCausewayArrival(this);
     restoreSkyBridgeArrival(this);
     restoreCourierArrival(this);
     const arrival = safeArrival(this, this.player.position);
@@ -1388,6 +1404,7 @@ export class Adventure {
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
     if (craneBlocked(this, x, z, worldY, clearance)) return false;
+    if (causewayBlocked(this, x, z, worldY, clearance)) return false;
     if (reflectorBlocked(this, x, z, worldY, clearance)) return false;
     if (cartBlocked(this, x, z, worldY, clearance)) return false;
     if (gardenBlocked(this, x, z, worldY, clearance)) return false;
@@ -1417,6 +1434,7 @@ export class Adventure {
     if (hoistOccludes(this, from, to)) return false;
     if (frozenStairOccludes(this, from, to)) return false;
     if (craneOccludes(this, from, to)) return false;
+    if (causewayOccludes(this, from, to)) return false;
     if (reflectorOccludes(this, from, to)) return false;
     if (cartOccludes(this, from, to)) return false;
     if (gardenOccludes(this, from, to)) return false;
@@ -1509,6 +1527,7 @@ export class Adventure {
   }
   updatePlayer(dt) {
     updateAstralCrane(this, dt);
+    updateEchoCauseway(this, dt);
     updateTemperingCart(this, dt);
     updateCourierFerry(this, dt);
     updateOrbitVault(this, dt);
@@ -1657,6 +1676,7 @@ export class Adventure {
     updateCrouch(this);
     recoverSkyBridgeFall(this);
     recoverOrbitFall(this);
+    recoverCausewayFall(this);
     recoverCourierFall(this);
     if (this.climb) return;
     trackTraversalSupport(this);
@@ -1712,7 +1732,8 @@ export class Adventure {
             ((f.reflectorHeight !== undefined ||
               f.gardenHeight !== undefined ||
               f.cartHeight !== undefined ||
-              f.craneHeight !== undefined) &&
+              f.craneHeight !== undefined ||
+              f.causewayHeight !== undefined) &&
               Math.abs(p.y - f.group.position.y) > 0.8))) ||
         (f.type === "mechanism" && f.stage < this.progress.stage) ||
         (f.type === "solar" &&
@@ -2054,6 +2075,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (causewayInteract(this)) return;
     if (craneInteract(this)) return;
     if (interactTemperingCart(this)) return;
     if (interactCourier(this)) return;
@@ -2387,6 +2409,7 @@ export class Adventure {
     const gallery = galleryObjective(this);
     const vault = fireVaultObjective(this);
     const hoist = bellHoistObjective(this);
+    const causeway = causewayObjective(this);
     const crane = craneObjective(this);
     const reflector = reflectorObjective(this);
     const stair = frozenStairObjective(this);
@@ -2419,6 +2442,7 @@ export class Adventure {
         this.level.biome === "water" ? archiveProgress(this).length : null,
       gallery: !!gallery,
       fireVault: vault,
+      causeway,
       bellHoist: hoist,
       cleft,
       pressure,
@@ -2434,6 +2458,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        causeway?.text ||
         crane?.text ||
         reflector?.text ||
         pump?.text ||
@@ -2498,7 +2523,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : craneHint(this) ||
+        : causewayHint(this) ||
+          craneHint(this) ||
           cartHint(this) ||
           courierHint(this) ||
           orbitHint(this) ||
@@ -2534,62 +2560,64 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task: coralPumpObjective(this)
-        ? "valve"
-        : this.astralCrane?.operating ||
-            this.frozenStair?.motion ||
-            this.easternReflector?.motion ||
-            this.temperingCart?.drive ||
-            this.temperingCart?.turn ||
-            this.rainGarden?.motion
-          ? "lift"
-          : courierObjective(this)
-            ? "crosswind"
-            : orbitObjective(this)
-              ? "lift"
-              : echoObjective(this)
-                ? "tuning"
-                : pressureObjective(this)
-                  ? "lift"
-                  : cleftObjective(this)
-                    ? this.wallGrip
-                      ? "climb"
-                      : "survey"
-                    : bellHoistObjective(this)
-                      ? this.bellHoist.motion
-                        ? "lift"
-                        : "resonance"
-                      : fireVaultObjective(this)
-                        ? this.fireVault.operation
+      task: causewayObjective(this)
+        ? "resonance"
+        : coralPumpObjective(this)
+          ? "valve"
+          : this.astralCrane?.operating ||
+              this.frozenStair?.motion ||
+              this.easternReflector?.motion ||
+              this.temperingCart?.drive ||
+              this.temperingCart?.turn ||
+              this.rainGarden?.motion
+            ? "lift"
+            : courierObjective(this)
+              ? "crosswind"
+              : orbitObjective(this)
+                ? "lift"
+                : echoObjective(this)
+                  ? "tuning"
+                  : pressureObjective(this)
+                    ? "lift"
+                    : cleftObjective(this)
+                      ? this.wallGrip
+                        ? "climb"
+                        : "survey"
+                      : bellHoistObjective(this)
+                        ? this.bellHoist.motion
                           ? "lift"
-                          : "brazier"
-                        : this.diving || galleryObjective(this)
-                          ? "dive"
-                          : (this.nearest?.type === "resonator" ||
-                                this.resonanceFocus != null) &&
-                              resonanceReady(
-                                this,
-                                this.resonanceSites?.[this.progress.stage],
-                              )
-                            ? "tuning"
-                            : this.hydraulicSites?.[this.progress.stage]
-                                  ?.flow ||
-                                this.thermalSites?.[this.progress.stage]
-                                  ?.moving ||
-                                this.windSites?.[this.progress.stage]?.moving
-                              ? "valve"
-                              : this.blockGrip ||
-                                  this.cipherSites?.[this.progress.stage]
-                                    ?.moving
-                                ? "lift"
-                                : this.skyWind
-                                  ? "crosswind"
-                                  : this.ropeRide || this.zipRide
-                                    ? "climb"
-                                    : currentFieldTask(
-                                        this.level,
-                                        this.progress,
-                                      )?.kind || "mechanism",
+                          : "resonance"
+                        : fireVaultObjective(this)
+                          ? this.fireVault.operation
+                            ? "lift"
+                            : "brazier"
+                          : this.diving || galleryObjective(this)
+                            ? "dive"
+                            : (this.nearest?.type === "resonator" ||
+                                  this.resonanceFocus != null) &&
+                                resonanceReady(
+                                  this,
+                                  this.resonanceSites?.[this.progress.stage],
+                                )
+                              ? "tuning"
+                              : this.hydraulicSites?.[this.progress.stage]
+                                    ?.flow ||
+                                  this.thermalSites?.[this.progress.stage]
+                                    ?.moving ||
+                                  this.windSites?.[this.progress.stage]?.moving
+                                ? "valve"
+                                : this.blockGrip ||
+                                    this.cipherSites?.[this.progress.stage]
+                                      ?.moving
+                                  ? "lift"
+                                  : this.skyWind
+                                    ? "crosswind"
+                                    : this.ropeRide || this.zipRide
+                                      ? "climb"
+                                      : currentFieldTask(
+                                          this.level,
+                                          this.progress,
+                                        )?.kind || "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2627,6 +2655,7 @@ export class Adventure {
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
     const hoistPosition =
+      causewaySavePosition(this) ||
       cartSavePosition(this) ||
       gardenSavePosition(this) ||
       courierSavePosition(this) ||
@@ -2666,6 +2695,7 @@ export class Adventure {
     }
     this.paused = value;
     updateAstralCrane(this, 0);
+    updateEchoCauseway(this, 0);
     updateOrbitVault(this, 0);
     updateCartArt(this);
     updateCourierArt(this);

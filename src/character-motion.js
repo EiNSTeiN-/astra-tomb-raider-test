@@ -1,3 +1,4 @@
+import { causewayDeckAt } from "./echo-causeway-rules.js";
 import { craneDeckAt } from "./astral-crane-rules.js";
 import { cartDeckAt } from "./tempering-cart-rules.js";
 import { gardenDeckAt } from "./rain-garden-rules.js";
@@ -25,6 +26,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const causewayDeck = causewayDeckAt(game, x, z, maxY);
+  if (causewayDeck && causewayDeck.height > height) return causewayDeck;
   const craneDeck = craneDeckAt(game, x, z, maxY);
   if (craneDeck && craneDeck.height > height) return craneDeck;
   const cartDeck = cartDeckAt(game, x, z, maxY);

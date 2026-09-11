@@ -1,3 +1,6 @@
+import { buildCausewayStation } from "./echo-causeway-art.js";
+import { soundCausewayRelay } from "./echo-causeway.js";
+import { causewayRelayReachable } from "./echo-causeway-rules.js";
 import { buildCraneStation } from "./astral-crane-art.js";
 import { buildCartStation } from "./tempering-cart-art.js";
 import { buildGardenStation } from "./rain-garden.js";
@@ -21,6 +24,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildCausewayStation(game, f, group)) return;
   if (buildCartStation(game, f, group)) return;
   if (buildGardenStation(game, f, group)) return;
   if (buildCraneStation(game, f, group)) return;
@@ -219,7 +223,12 @@ export function finishFieldTask(game, f) {
     );
     return false;
   }
+  if (f.causewayHeight !== undefined && !causewayRelayReachable(game, f.step)) {
+    game.cb.toast?.("Reach the relay's stone gallery before sounding it.");
+    return false;
+  }
   game.progress.field.push(f.id);
+  if (f.causewayHeight !== undefined) soundCausewayRelay(game, f.step);
   game.audio.tone("field");
   const mission = EXPEDITIONS[game.level.id][f.stage];
   const complete = fieldComplete(game.level, game.progress);
