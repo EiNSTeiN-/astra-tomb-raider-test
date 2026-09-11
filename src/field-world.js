@@ -1,3 +1,5 @@
+import { buildShutterStation } from "./shutter-house-art.js";
+import { startShutterTurn, shutterReachable } from "./shutter-house.js";
 import { buildCausewayStation } from "./echo-causeway-art.js";
 import { soundCausewayRelay } from "./echo-causeway.js";
 import { causewayRelayReachable } from "./echo-causeway-rules.js";
@@ -24,6 +26,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildShutterStation(game, f, group)) return;
   if (buildCausewayStation(game, f, group)) return;
   if (buildCartStation(game, f, group)) return;
   if (buildGardenStation(game, f, group)) return;
@@ -126,7 +129,7 @@ export function updateFieldWorld(game, dt) {
     updateJungleShrine(game, f, done);
     if (f.kind === "lift") f.core.visible = !done;
     if (f.kind === "delivery") f.core.visible = done;
-    if (["valve", "winch"].includes(f.kind))
+    if (f.shutterHeight === undefined && ["valve", "winch"].includes(f.kind))
       f.core.rotation.z +=
         ((done ? Math.PI * 1.5 : 0) - f.core.rotation.z) * Math.min(1, dt * 3);
     if (f.kind === "resonance") f.core.rotation.y += dt * (done ? 1.2 : 0.2);
@@ -226,6 +229,13 @@ export function finishFieldTask(game, f) {
   if (f.causewayHeight !== undefined && !causewayRelayReachable(game, f.step)) {
     game.cb.toast?.("Reach the relay's stone gallery before sounding it.");
     return false;
+  }
+  if (f.shutterHeight !== undefined) {
+    if (!shutterReachable(game, f.step)) return false;
+    if (game.shutterHouse.saved.turns[f.step] < 3) {
+      startShutterTurn(game, f.step);
+      return false;
+    }
   }
   game.progress.field.push(f.id);
   if (f.causewayHeight !== undefined) soundCausewayRelay(game, f.step);

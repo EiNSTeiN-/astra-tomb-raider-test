@@ -1,3 +1,4 @@
+import { shutterDeckAt } from "./shutter-house-rules.js";
 import { causewayDeckAt } from "./echo-causeway-rules.js";
 import { craneDeckAt } from "./astral-crane-rules.js";
 import { cartDeckAt } from "./tempering-cart-rules.js";
@@ -26,6 +27,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const shutterDeck = shutterDeckAt(game, x, z, maxY);
+  if (shutterDeck && shutterDeck.height > height) return shutterDeck;
   const causewayDeck = causewayDeckAt(game, x, z, maxY);
   if (causewayDeck && causewayDeck.height > height) return causewayDeck;
   const craneDeck = craneDeckAt(game, x, z, maxY);

@@ -187,7 +187,7 @@ function mantle(g, c, x, z) {
   g.updateClimb(1);
   trackTraversalSupport(g);
 }
-test("all 22 routes across eight chapters can be climbed, jumped, rope-crossed, and exited through their unlocked cable", () => {
+test("all 21 cable routes across eight chapters can be climbed, jumped, rope-crossed, and exited through their unlocked cable", () => {
   let count = 0;
   for (const level of LEVELS)
     for (const f of createMap(level).features.filter(
@@ -265,7 +265,7 @@ test("all 22 routes across eight chapters can be climbed, jumped, rope-crossed, 
       assert.ok(g.player.position.distanceTo(c.exit) < 0.01, label);
       count++;
     }
-  assert.equal(count, 22);
+  assert.equal(count, 21);
 });
 test("secure ledges survive save normalization and invalid platform heights cannot create airborne spawns", () => {
   const level = LEVELS[0],

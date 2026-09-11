@@ -72,7 +72,7 @@ function world(t, level) {
   return g;
 }
 
-test("all 44 cable terminals have grounded posts, visible locked frames and clear departure and arrival paths", (t) => {
+test("all 42 cable terminals have grounded posts, visible locked frames and clear departure and arrival paths", (t) => {
   let terminals = 0;
   for (const level of LEVELS) {
     const g = world(t, level);
@@ -103,7 +103,7 @@ test("all 44 cable terminals have grounded posts, visible locked frames and clea
       });
     }
   }
-  assert.equal(terminals, 44);
+  assert.equal(terminals, 42);
 });
 
 test("carriages and hand grips track the cable plane; both spatial sources stop after the automatic return", (t) => {

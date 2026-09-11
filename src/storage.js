@@ -1,3 +1,4 @@
+import { normalizeShutterHouse } from "./shutter-house-rules.js";
 import { normalizeEchoCauseway } from "./echo-causeway-rules.js";
 import { normalizeAstralCrane } from "./astral-crane-rules.js";
 import { normalizeTemperingCart } from "./tempering-cart-rules.js";
@@ -136,6 +137,13 @@ export function normalizeSave(value) {
           : null,
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
+      shutterHouse:
+        key === "frost"
+          ? normalizeShutterHouse(v.shutterHouse, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       frozenStair:
         key === "frost"
           ? normalizeFrozenStair(v.frozenStair, {
@@ -273,6 +281,7 @@ export class SaveStore {
       gallery: id === "tides" ? normalizeGallery(null) : null,
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
+      shutterHouse: id === "frost" ? { turns: [0, 0, 0] } : null,
       frozenStair: id === "frost" ? { restored: false } : null,
       coralPump:
         id === "tides" ? { installed: false, intake: 0, bypass: 3 } : null,

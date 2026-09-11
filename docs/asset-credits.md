@@ -491,3 +491,10 @@ in `src/cavern-strata.js` and fitted bed geometry in `src/cavern-geometry.js`.
 They reuse the credited **Rock Boulder Dry** maps and existing loose-rock scans.
 No new external images, models, recordings or dependencies were introduced.
 Documentation images are captures of the running game converted to WebP.
+
+The [Room of Wind](shutter-house.md) uses original timber walks, fitted masonry,
+windbreaks, handwheels, louver boards, drive cables, warning ribbons and route
+map artwork in `src/shutter-house*.js`. It reuses the credited monastery timber,
+stone and snow materials and the existing original wind and hoist synthesis.
+No external models, images, recordings or dependencies were introduced.
+Documentation images are actual game captures converted to WebP.

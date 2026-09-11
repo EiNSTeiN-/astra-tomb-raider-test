@@ -491,7 +491,7 @@ test("delivered palms and fingers fit every cable grip without stretching bones 
       course.root.traverse((o) => o.geometry?.dispose());
     }
   }
-  assert.equal(samples, 396);
+  assert.equal(samples, 378);
   t.diagnostic(
     JSON.stringify({
       samples,

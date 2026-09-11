@@ -78,6 +78,12 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+In **A Silence of Snow**, [the Room of Wind](docs/shutter-house.md) now has
+three elevated wind walks, broken spans and sheltered shutter controls. Brace
+against a gust, stand to jump and close each shutter’s three catches. Every
+catch reduces its wind, and the final shutter opens an eastern return stair.
+Ribbons, a live route map and local-storage recovery support the climb.
+
 In **The Night Below**, [the Echo Causeway](docs/echo-causeway.md) turns
 **The echo that returns** into two timed stone crossings. Sound each relay,
 follow the rising platforms and reach the next gallery to hold the route
@@ -261,7 +267,7 @@ All chapters can be selected from the expedition screen and maintain independent
 | The Night Below     | Crystal caverns            | Tune eight relational resonance arrays and recover stored memories | Enclosed chambers and winding tunnels       |
 | The Last Meridian   | Celestial observatory      | Align coupled orbital rings                               | Concentric citadel routes                   |
 
-The campaign contains 69 main mechanisms, 207 ordered field actions across 69 sectors, eight chapter relics, 96 distinct journal pages, and 48 supply caches. Each sector has a three-station field route that opens a physical sanctuary gate. Routes include transporting components, 22 elevated routes with mantles, jump gaps, swinging ropes, and unlockable return cables, valves, winches, beacon fires, surveys, and resonance stations. Water objectives drain reservoirs; cooling circuits turn hazardous lava into safe surfaces. Each main mechanism becomes a checkpoint; camps heal and replenish supplies. Falling in combat returns you to your last checkpoint while preserving discoveries.
+The campaign contains 69 main mechanisms, 207 ordered field actions across 69 sectors, eight chapter relics, 96 distinct journal pages, and 48 supply caches. Each sector has a three-station field route that opens a physical sanctuary gate. Routes include transporting components, 21 elevated routes with mantles, jump gaps, swinging ropes, and unlockable return cables, valves, winches, beacon fires, surveys, and resonance stations. Water objectives drain reservoirs; cooling circuits turn hazardous lava into safe surfaces. Each main mechanism becomes a checkpoint; camps heal and replenish supplies. Falling in combat returns you to your last checkpoint while preserving discoveries.
 
 There are 61 paired guardian encounters, with chapter-specific combinations of melee wardens, charging hunters, ranged sentries, and shield keepers. Glowing ground marks precede attacks; charges and bolts commit to the position marked during the warning. Shield keepers resist frontal shots until they recover from a strike, and can also be attacked from behind. Dodging costs 28 stamina and grants a short evasion window. It requires firm ground and free hands. The sidearm has unlimited ammunition with a short firing cooldown.
 
@@ -269,7 +275,7 @@ Each chapter's first sanctuary also has a physical counterweight chamber, with a
 
 On an elevated route, hold E (Use on touch) while jumping toward the hanging rope. Directional input builds the swing; the prompt indicates when releasing Space (Jump on touch) should reach the far ledge. Restored summit stations unlock a return cable. A missed crossing recovers at the last secure ledge, and reloading during a swing restores that ledge. Cable sounds follow the rider, and the score uses its climbing arrangement during the crossing.
 
-The 22 climbing routes now have fitted masonry piers, recessed panels, stepped
+The 21 climbing routes now have fitted masonry piers, recessed panels, stepped
 capstones and braced timber or iron hoists. Swiveling eyes follow the swinging
 ropes, with local friction sounds that fade with distance and become silent at
 rest. The same jump and landing locations retain saved traversal progress.
@@ -336,7 +342,7 @@ Scattered rocks now fit their scanned undersides into the terrain across all cha
 
 The jungle has denser woodland along route edges, two scanned broadleaf tree forms, fern and shrub clusters, and roots with climbing leaves on ruin piers. A moss-and-leaf-litter material blends into worn trails and stone courts. Its daylight sky shares a sun direction with scene lighting. Trees, shrubs, ferns, and rocks use per-instance distance selection. Three tree tiers preserve near detail, with short dithered transitions and matching wind in leaf shadows. [Rendering workload notes](docs/rendering-budget.md) record a 69% reduction in submitted triangles at the low-quality jungle spawn. These additions improve environmental dressing; they do not establish AAA visual quality or a supported hardware frame rate.
 
-The campaign also has 68 environmental traps connected to field stations: swinging blades, dart galleries, falling ice, pressure jets, furnace vents, crosswinds, sweeping crystal beams, or expanding ground pulses. Traps have visible warning and clear intervals. The Echo Causeway instead uses timed moving stones between safe relay galleries. Restoring the connected station disables its trap, and that state follows the existing field-progress save. Beams and pulses can be jumped; crosswinds push against movement and consume stamina. Keyboard and touch controls both support dodging. Touch movement stays held while another finger uses an action button.
+The campaign also has 67 environmental traps connected to field stations: swinging blades, dart galleries, falling ice, pressure jets, furnace vents, crosswinds, sweeping crystal beams, or expanding ground pulses. Traps have visible warning and clear intervals. The Echo Causeway uses timed moving stones between safe relay galleries, and the mountain’s shutter house has three gust-driven walks controlled by physical wind shutters. Restoring the connected station disables its trap, and that state follows the existing field-progress save. Beams and pulses can be jumped; crosswinds push against movement and consume stamina. Keyboard and touch controls both support dodging. Touch movement stays held while another finger uses an action button.
 
 The terrain now blends color, surface normals, and roughness consistently across ground, paving, and cliffs. The jungle adds mottled moss, damp variation, and worn paving edges guided by a stone height map. Switching graphics quality refreshes shadow receivers correctly. [Terrain material notes](docs/terrain-materials.md) include comparisons, asset sources, and verified shader limits.
 

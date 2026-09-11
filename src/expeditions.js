@@ -140,8 +140,8 @@ const chapters = {
     ],
     [
       "The room of wind",
-      "Wind shutters protect the chamber’s resonator. The controls are scattered across exposed watchposts.",
-      "Climb to the western shutter|Close the ridge shutter|Secure the chamber shutter",
+      "Climb the southern stair into the shutter house. Cross its three broken wind walks, climbing at each sheltered landing. Rising ribbons warn of a gust: B braces against the wind, but stand before jumping. Use each wheel three times to seat its catches and weaken the wind. The last shutter opens the eastern return stair.",
+      "Close the western wind shutter|Close the ridge shutter|Secure the chamber shutter",
       "The gale falls silent inside the chamber.",
     ],
     [
@@ -436,7 +436,7 @@ const chapters = {
 const patterns = {
   verdant: ["sbb", "lsd", "vvv", "scs", "lsd", "www", "bbb", "lsd"],
   sands: ["sss", "lsd", "vvv", "lsd", "csc", "wws", "www", "lsd", "ssr"],
-  frost: ["wcw", "lsd", "scs", "wws", "lsd", "cww", "cwc", "lsd"],
+  frost: ["wcw", "lsd", "scs", "wws", "lsd", "www", "cwc", "lsd"],
   tides: ["vvv", "vvv", "lsd", "csc", "vvv", "www", "vvv", "vvv", "lsd"],
   embers: ["vvv", "lsd", "vvv", "lsd", "vvv", "bbb", "lsd", "vvv"],
   sky: ["cww", "lsd", "www", "csc", "lsd", "www", "cwc", "www", "lsd"],

@@ -1,3 +1,4 @@
+import { shutterFoundationDistance } from "./shutter-house-rules.js";
 import { causewayFoundationDistance } from "./echo-causeway-rules.js";
 import { craneFoundationDistance } from "./astral-crane-rules.js";
 import { temperingFoundationDistance } from "./tempering-cart-rules.js";
@@ -32,6 +33,8 @@ export function rockGroundHeight(profile, x, z) {
 // Bounds include the actual rotated footprint, not only the instance's origin.
 export function natureRockAllowed(game, x, z, radius) {
   const { map, terrainProfile } = game;
+  if (map.shutterHouse && shutterFoundationDistance(x, z) < radius + 1)
+    return false;
   if (map.echoCauseway && causewayFoundationDistance(x, z) < radius + 1)
     return false;
   if (map.astralCrane && craneFoundationDistance(x, z) < radius + 0.5)

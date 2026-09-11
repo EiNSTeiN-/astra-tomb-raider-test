@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **A Silence of Snow** now has [the Room of Wind](shutter-house.md): three
+  elevated wind walks, differently placed breaks, sequential shutter controls
+  and an eastern return stair. Warning ribbons, bracing, persistent catches,
+  fall recovery, a local route map and positioned wind/drive sounds are
+  implemented. All 548 tests, the build, a continuous assisted outward/return
+  route and nine final production keyboard/touch/reload cases pass. The guide
+  records measured attenuation, rendering counts, resource cleanup and recovery
+  of older airborne saves. Human chapter pacing, AAA graphics, listening and
+  broader device acceptance remain open requirements.
+
 - **The Night Below** now has [irregular limestone banks and fitted mineral beds](cavern-banks.md).
   Shared broken seams, mineral deposits and damp shading vary the floor, vault
   and gallery walls. All 33 mineral-bed rims and 99 loose rocks pass ground

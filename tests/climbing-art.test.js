@@ -64,7 +64,7 @@ function world(t, level) {
   return game;
 }
 
-test("all 110 climbing piers have finite fitted masonry, bounded batches and exact walking surfaces", (t) => {
+test("all 105 climbing piers have finite fitted masonry, bounded batches and exact walking surfaces", (t) => {
   let count = 0;
   for (const level of LEVELS) {
     const g = world(t, level),
@@ -109,7 +109,7 @@ test("all 110 climbing piers have finite fitted masonry, bounded batches and exa
       }
     }
   }
-  assert.equal(count, 22);
+  assert.equal(count, 21);
 });
 
 test("all anchor yokes track the real pendulum and leave the rope swept path clear", (t) => {

@@ -1,4 +1,17 @@
 import {
+  buildShutterHouse,
+  updateShutterHouse,
+  shutterHint,
+  shutterObjective,
+} from "./shutter-house.js";
+import {
+  shutterBlocked,
+  shutterOccludes,
+  shutterWindVelocity,
+  shutterSavePosition,
+  restoreShutterArrival,
+} from "./shutter-house-rules.js";
+import {
   buildEchoCauseway,
   updateEchoCauseway,
   recoverCausewayFall,
@@ -884,6 +897,7 @@ export class Adventure {
     buildFireVault(this);
     buildBellHoist(this);
     buildFrozenStair(this);
+    buildShutterHouse(this);
     buildEasternReflector(this);
     buildRainGarden(this);
     buildTemperingCart(this);
@@ -943,6 +957,7 @@ export class Adventure {
     restorePressureArrival(this);
     restoreOrbitArrival(this);
     restoreCausewayArrival(this);
+    restoreShutterArrival(this);
     restoreSkyBridgeArrival(this);
     restoreCourierArrival(this);
     const arrival = safeArrival(this, this.player.position);
@@ -1402,6 +1417,7 @@ export class Adventure {
       return false;
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
+    if (shutterBlocked(this, x, z, worldY, clearance)) return false;
     if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
     if (craneBlocked(this, x, z, worldY, clearance)) return false;
     if (causewayBlocked(this, x, z, worldY, clearance)) return false;
@@ -1432,6 +1448,7 @@ export class Adventure {
     const from = { x: a.x, y: a.y + fromHeight, z: a.z },
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
+    if (shutterOccludes(this, from, to)) return false;
     if (frozenStairOccludes(this, from, to)) return false;
     if (craneOccludes(this, from, to)) return false;
     if (causewayOccludes(this, from, to)) return false;
@@ -1538,6 +1555,7 @@ export class Adventure {
     this.actualMoveSpeed = null;
     updateBellHoist(this, dt);
     updateFrozenStair(this, dt);
+    updateShutterHouse(this, dt);
     updateEasternReflector(this, dt);
     updateRainGarden(this, dt);
     updateCoralPump(this, dt);
@@ -1669,7 +1687,7 @@ export class Adventure {
     if (!advanceSwimming(this, input, dt, jump))
       advanceCharacter(
         this,
-        skyWindVelocity(this, this.moveVelocity),
+        shutterWindVelocity(this, skyWindVelocity(this, this.moveVelocity)),
         dt,
         jump,
       );
@@ -1733,7 +1751,8 @@ export class Adventure {
               f.gardenHeight !== undefined ||
               f.cartHeight !== undefined ||
               f.craneHeight !== undefined ||
-              f.causewayHeight !== undefined) &&
+              f.causewayHeight !== undefined ||
+              f.shutterHeight !== undefined) &&
               Math.abs(p.y - f.group.position.y) > 0.8))) ||
         (f.type === "mechanism" && f.stage < this.progress.stage) ||
         (f.type === "solar" &&
@@ -2433,7 +2452,9 @@ export class Adventure {
       stamina: this.stamina,
       aim: aimState(this),
       stealth: stealthState(this),
-      windBraced: !!this.skyWind?.braced && Math.abs(this.skyWind.force) > 0.05,
+      windBraced:
+        (!!this.skyWind?.braced && Math.abs(this.skyWind.force) > 0.05) ||
+        (!!this.shutterWind?.braced && Math.abs(this.shutterWind.force) > 0.05),
       swimming: this.swimming,
       torch: this.torch ? this.progress.torch === true : null,
       diving: this.diving,
@@ -2443,6 +2464,7 @@ export class Adventure {
       gallery: !!gallery,
       fireVault: vault,
       causeway,
+      shutterHouse: shutterObjective(this),
       bellHoist: hoist,
       cleft,
       pressure,
@@ -2523,7 +2545,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : causewayHint(this) ||
+        : shutterHint(this) ||
+          causewayHint(this) ||
           craneHint(this) ||
           cartHint(this) ||
           courierHint(this) ||
@@ -2560,64 +2583,71 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task: causewayObjective(this)
-        ? "resonance"
-        : coralPumpObjective(this)
-          ? "valve"
-          : this.astralCrane?.operating ||
-              this.frozenStair?.motion ||
-              this.easternReflector?.motion ||
-              this.temperingCart?.drive ||
-              this.temperingCart?.turn ||
-              this.rainGarden?.motion
-            ? "lift"
-            : courierObjective(this)
-              ? "crosswind"
-              : orbitObjective(this)
+      task: this.shutterHouse?.turn
+        ? "winch"
+        : this.shutterWind
+          ? "crosswind"
+          : causewayObjective(this)
+            ? "resonance"
+            : coralPumpObjective(this)
+              ? "valve"
+              : this.astralCrane?.operating ||
+                  this.frozenStair?.motion ||
+                  this.easternReflector?.motion ||
+                  this.temperingCart?.drive ||
+                  this.temperingCart?.turn ||
+                  this.rainGarden?.motion
                 ? "lift"
-                : echoObjective(this)
-                  ? "tuning"
-                  : pressureObjective(this)
+                : courierObjective(this)
+                  ? "crosswind"
+                  : orbitObjective(this)
                     ? "lift"
-                    : cleftObjective(this)
-                      ? this.wallGrip
-                        ? "climb"
-                        : "survey"
-                      : bellHoistObjective(this)
-                        ? this.bellHoist.motion
-                          ? "lift"
-                          : "resonance"
-                        : fireVaultObjective(this)
-                          ? this.fireVault.operation
-                            ? "lift"
-                            : "brazier"
-                          : this.diving || galleryObjective(this)
-                            ? "dive"
-                            : (this.nearest?.type === "resonator" ||
-                                  this.resonanceFocus != null) &&
-                                resonanceReady(
-                                  this,
-                                  this.resonanceSites?.[this.progress.stage],
-                                )
-                              ? "tuning"
-                              : this.hydraulicSites?.[this.progress.stage]
-                                    ?.flow ||
-                                  this.thermalSites?.[this.progress.stage]
-                                    ?.moving ||
-                                  this.windSites?.[this.progress.stage]?.moving
-                                ? "valve"
-                                : this.blockGrip ||
-                                    this.cipherSites?.[this.progress.stage]
-                                      ?.moving
-                                  ? "lift"
-                                  : this.skyWind
-                                    ? "crosswind"
-                                    : this.ropeRide || this.zipRide
-                                      ? "climb"
-                                      : currentFieldTask(
-                                          this.level,
-                                          this.progress,
-                                        )?.kind || "mechanism",
+                    : echoObjective(this)
+                      ? "tuning"
+                      : pressureObjective(this)
+                        ? "lift"
+                        : cleftObjective(this)
+                          ? this.wallGrip
+                            ? "climb"
+                            : "survey"
+                          : bellHoistObjective(this)
+                            ? this.bellHoist.motion
+                              ? "lift"
+                              : "resonance"
+                            : fireVaultObjective(this)
+                              ? this.fireVault.operation
+                                ? "lift"
+                                : "brazier"
+                              : this.diving || galleryObjective(this)
+                                ? "dive"
+                                : (this.nearest?.type === "resonator" ||
+                                      this.resonanceFocus != null) &&
+                                    resonanceReady(
+                                      this,
+                                      this.resonanceSites?.[
+                                        this.progress.stage
+                                      ],
+                                    )
+                                  ? "tuning"
+                                  : this.hydraulicSites?.[this.progress.stage]
+                                        ?.flow ||
+                                      this.thermalSites?.[this.progress.stage]
+                                        ?.moving ||
+                                      this.windSites?.[this.progress.stage]
+                                        ?.moving
+                                    ? "valve"
+                                    : this.blockGrip ||
+                                        this.cipherSites?.[this.progress.stage]
+                                          ?.moving
+                                      ? "lift"
+                                      : this.skyWind
+                                        ? "crosswind"
+                                        : this.ropeRide || this.zipRide
+                                          ? "climb"
+                                          : currentFieldTask(
+                                              this.level,
+                                              this.progress,
+                                            )?.kind || "mechanism",
       danger:
         !this.paused &&
         this.enemies.some(
@@ -2655,6 +2685,7 @@ export class Adventure {
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
     const hoistPosition =
+      shutterSavePosition(this) ||
       causewaySavePosition(this) ||
       cartSavePosition(this) ||
       gardenSavePosition(this) ||
@@ -2703,6 +2734,7 @@ export class Adventure {
     updateFireVault(this, 0);
     updateBellHoist(this, 0);
     updateFrozenStair(this, 0);
+    updateShutterHouse(this, 0);
     updateEasternReflector(this, 0);
     updateRainGarden(this, 0);
     updateCoralPump(this, 0);

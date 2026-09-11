@@ -1,3 +1,4 @@
+import { shutterFoundationWeight } from "./shutter-house-rules.js";
 import { refineCavernTerrain } from "./cavern-geology.js";
 import {
   CAUSEWAY_SITE,
@@ -154,6 +155,10 @@ export function createTerrainProfile(map, level) {
       if (map.astralCrane) {
         const weight = craneFoundationWeight(x, z);
         height = height * (1 - weight) + raw(182, 217) * weight;
+      }
+      if (map.shutterHouse) {
+        const weight = shutterFoundationWeight(x, z);
+        height = height * (1 - weight) + raw(175, 238) * weight;
       }
       heights[iz * width + ix] = height;
       if (map.echoGallery) {

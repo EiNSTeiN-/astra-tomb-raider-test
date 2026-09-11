@@ -30,7 +30,7 @@ test("eight chapter hazards have warning, active, and usable clear intervals", (
     }
   }
 });
-test("ordinary sectors have station traps while the echo causeway reserves safe relay galleries; restored traps remain disarmed", () => {
+test("ordinary sectors have station traps while authored wind walks and echo crossings supply their own hazards", () => {
   let count = 0;
   for (const level of LEVELS) {
     const map = createMap(level),
@@ -47,10 +47,11 @@ test("ordinary sectors have station traps while the echo causeway reserves safe 
     buildHazards(game);
     assert.equal(
       game.hazards.length,
-      level.mechanisms - (level.id === "crystal" ? 1 : 0),
+      level.mechanisms - (["crystal", "frost"].includes(level.id) ? 1 : 0),
     );
     if (level.id === "crystal")
       assert(!game.hazards.some((h) => h.stage === 3));
+    if (level.id === "frost") assert(!game.hazards.some((h) => h.stage === 5));
     for (const hazard of game.hazards) {
       const field = map.features.find((f) => f.id === hazard.fieldId);
       assert.equal(field.type, "field");
@@ -72,7 +73,7 @@ test("ordinary sectors have station traps while the echo causeway reserves safe 
       count++;
     }
   }
-  assert.equal(count, 68);
+  assert.equal(count, 67);
 });
 test("ice locks its impact point, beams can be jumped, and ground pulses have a safe airborne interval", () => {
   const ice = {

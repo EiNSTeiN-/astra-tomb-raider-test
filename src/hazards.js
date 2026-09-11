@@ -159,7 +159,8 @@ export function buildHazards(game) {
       (f) => f && f.kind !== "climb",
     );
     // The echo causeway has timed moving stones and safe relay galleries.
-    if (!f || f.causewayHeight !== undefined) continue;
+    if (!f || f.causewayHeight !== undefined || f.shutterHeight !== undefined)
+      continue;
     const x = f.x * 7,
       z = f.z * 7,
       y =
