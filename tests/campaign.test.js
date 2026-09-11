@@ -44,7 +44,7 @@ test("all eight worlds have distinct maps and every objective, enemy and discove
     );
     for (const f of [...map.features, ...map.enemies])
       assert.ok(
-        visited.has(`${f.x},${f.z}`),
+        visited.has(`${Math.round(f.x)},${Math.round(f.z)}`),
         `${level.id}: ${f.id} is unreachable`,
       );
     assert.deepEqual(
@@ -88,6 +88,12 @@ test("local saves survive a new store and preserve all independent chapter progr
       time: 1200,
     });
   }
+  // This fixture is already past the spindle mission; its mechanism is seated.
+  a.level("eclipse").astralCrane = {
+    angle: Math.PI / 2,
+    height: 4.2,
+    seated: true,
+  };
   a.data.currentLevel = 3;
   a.data.createdAt = 1700000000000;
   a.data.settings.volume = 0;

@@ -88,6 +88,7 @@ export function buildSoundLandmarks(game) {
   game.soundSources.push(...(game.easternReflector?.sources || []));
   game.soundSources.push(...(game.rainGarden?.sources || []));
   game.soundSources.push(...(game.temperingCart?.sources || []));
+  game.soundSources.push(...(game.astralCrane?.sources || []));
   game.soundSources.push(...(game.coralPump?.sources || []));
   game.soundSources.push(...(game.pressureRelay?.sources || []));
   game.soundSources.push(...(game.echoGallery?.sources || []));

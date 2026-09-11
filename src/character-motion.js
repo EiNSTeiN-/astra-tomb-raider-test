@@ -1,3 +1,4 @@
+import { craneDeckAt } from "./astral-crane-rules.js";
 import { cartDeckAt } from "./tempering-cart-rules.js";
 import { gardenDeckAt } from "./rain-garden-rules.js";
 import { reflectorDeckAt } from "./eastern-reflector-rules.js";
@@ -24,6 +25,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const craneDeck = craneDeckAt(game, x, z, maxY);
+  if (craneDeck && craneDeck.height > height) return craneDeck;
   const cartDeck = cartDeckAt(game, x, z, maxY);
   if (cartDeck && cartDeck.height > height) return cartDeck;
   const gardenDeck = gardenDeckAt(game, x, z, maxY);

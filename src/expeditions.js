@@ -408,8 +408,8 @@ const chapters = {
     ],
     [
       "The distance between stars",
-      "A star-metal spindle belongs inside the astral orrery. Its weight resists every step toward the axis.",
-      "Recover the astral spindle|Survey the star-metal socket|Install the astral spindle",
+      "Recover the spindle at the loading cradle and climb the west gallery to read the inspection gauges. Use the crane to pass the low inspection fork, clear the counterweight wall and lower the spindle into its socket. Cross the broken upper walkway to install it.",
+      "Recover the astral spindle|Read the crane inspection gauges|Install the astral spindle",
       "The orrery charts the distance between this world and the next.",
     ],
     [
@@ -499,6 +499,7 @@ export function currentFieldTask(level, progress) {
 }
 
 export function carryingComponent(level, progress) {
+  if (level.id === "eclipse" && progress.stage === 6) return false;
   if (
     level.id === "embers" &&
     progress.stage === 6 &&

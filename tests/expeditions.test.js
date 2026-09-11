@@ -41,16 +41,25 @@ test("all 69 sectors have three ordered field actions, with a destination for ev
         assert.ok(feature);
         // Tower clearances include their wide frames. The rail mission uses
         // compact service benches and a 10 m landing, needing a 14 m buffer.
+        // The crane preserves a floor cache 7 m from its raised loading cradle;
+        // its physical clearances and continuous cache route have separate checks.
         for (const other of map.features.filter(
           (f) => f !== feature && f.type !== "field",
         ))
           assert.ok(
             Math.hypot(feature.x - other.x, feature.z - other.z) >=
-              (feature.cartHeight !== undefined ? 2 : 4),
+              (feature.craneHeight !== undefined
+                ? 1
+                : feature.cartHeight !== undefined
+                  ? 2
+                  : 4),
           );
         progress.field.push(task.id);
         if (task.kind === "lift")
-          assert.equal(carryingComponent(level, progress), true);
+          assert.equal(
+            carryingComponent(level, progress),
+            !(level.id === "eclipse" && stage === 6),
+          );
         if (task.kind === "delivery")
           assert.equal(carryingComponent(level, progress), false);
         count++;

@@ -453,3 +453,10 @@ The [caldera skyline](caldera-rim.md) uses original heightfield geometry in
 technique. It reuses the credited Rock Face 03 color and normal maps without
 modifying the source images. No new external assets, recordings or dependencies
 were added. The guide's images are unretouched captures of the running game.
+
+The [astral spindle crane](astral-crane.md), including its galleries, stair,
+lattice boom, cable, spindle, inspection fork, counterweight wall, grips and
+mounted plaques, is original project geometry and writing in
+`src/astral-crane*.js`. It reuses the existing stone and bronze materials,
+original paving/stone-block geometry helpers, and original machine, hoist and
+wind synthesis. No external artwork, recordings or dependencies were added.

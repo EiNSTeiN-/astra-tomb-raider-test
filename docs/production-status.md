@@ -20,6 +20,15 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The final chapter now has [an astral spindle crane](astral-crane.md) for
+  **The distance between stars**. The sequence connects a loading cradle,
+  gallery climb, two different cargo clearances and a broken upper walkway.
+  Continuous angle/height saves, positioned drive sounds, pause behavior and
+  resource cleanup are checked. All 525 tests pass; an assisted continuous
+  route and seven production keyboard/touch/reload cases pass. This extends
+  authored traversal and mechanism content without establishing chapter pacing
+  or modern AAA visual quality.
+
 - The volcanic chapter now has [a continuous caldera skyline](caldera-rim.md).
   A broader irregular rim and world-space rock projection replace the earlier
   triangular slopes and stretched texture mapping. Background depth rendering

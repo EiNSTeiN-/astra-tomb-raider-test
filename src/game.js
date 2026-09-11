@@ -1,4 +1,14 @@
 import {
+  buildAstralCrane,
+  updateAstralCrane,
+  controlAstralCrane,
+  poseAstralCrane,
+  craneInteract,
+  craneHint,
+  craneObjective,
+} from "./astral-crane.js";
+import { craneBlocked, craneOccludes } from "./astral-crane-rules.js";
+import {
   buildTemperingCart,
   updateTemperingCart,
   updateCartArt,
@@ -863,6 +873,7 @@ export class Adventure {
     buildEasternReflector(this);
     buildRainGarden(this);
     buildTemperingCart(this);
+    buildAstralCrane(this);
     buildCoralPump(this);
     buildSurveyorsCleft(this);
     buildPressureRelay(this);
@@ -1376,6 +1387,7 @@ export class Adventure {
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
     if (frozenStairBlocked(this, x, z, worldY, clearance)) return false;
+    if (craneBlocked(this, x, z, worldY, clearance)) return false;
     if (reflectorBlocked(this, x, z, worldY, clearance)) return false;
     if (cartBlocked(this, x, z, worldY, clearance)) return false;
     if (gardenBlocked(this, x, z, worldY, clearance)) return false;
@@ -1404,6 +1416,7 @@ export class Adventure {
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
     if (frozenStairOccludes(this, from, to)) return false;
+    if (craneOccludes(this, from, to)) return false;
     if (reflectorOccludes(this, from, to)) return false;
     if (cartOccludes(this, from, to)) return false;
     if (gardenOccludes(this, from, to)) return false;
@@ -1495,6 +1508,7 @@ export class Adventure {
     else this.renderer.render(this.scene, this.camera);
   }
   updatePlayer(dt) {
+    updateAstralCrane(this, dt);
     updateTemperingCart(this, dt);
     updateCourierFerry(this, dt);
     updateOrbitVault(this, dt);
@@ -1534,6 +1548,13 @@ export class Adventure {
     this.carrying = !!carryingComponent(this.level, this.progress);
     updateAim(this);
     updateCrouch(this);
+    if (controlAstralCrane(this, dt, x, -z)) {
+      animateExplorer(this, dt, false, false);
+      poseAstralCrane(this);
+      this.nearest = null;
+      this.survey();
+      return;
+    }
     if (controlTemperingCart(this, dt, -z)) {
       animateExplorer(this, dt, false, false);
       poseTemperingCart(this);
@@ -1690,7 +1711,8 @@ export class Adventure {
             this.progress.field.includes(f.id) ||
             ((f.reflectorHeight !== undefined ||
               f.gardenHeight !== undefined ||
-              f.cartHeight !== undefined) &&
+              f.cartHeight !== undefined ||
+              f.craneHeight !== undefined) &&
               Math.abs(p.y - f.group.position.y) > 0.8))) ||
         (f.type === "mechanism" && f.stage < this.progress.stage) ||
         (f.type === "solar" &&
@@ -2032,6 +2054,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (craneInteract(this)) return;
     if (interactTemperingCart(this)) return;
     if (interactCourier(this)) return;
     if (cleftInteract(this)) return;
@@ -2194,6 +2217,7 @@ export class Adventure {
       this.fireVault?.operation ||
       this.pressureRelay?.operation ||
       this.orbitVault?.operation ||
+      this.astralCrane?.operating ||
       this.temperingCart?.drive ||
       this.courierFerry?.helm ||
       this.wallGrip ||
@@ -2363,6 +2387,7 @@ export class Adventure {
     const gallery = galleryObjective(this);
     const vault = fireVaultObjective(this);
     const hoist = bellHoistObjective(this);
+    const crane = craneObjective(this);
     const reflector = reflectorObjective(this);
     const stair = frozenStairObjective(this);
     const pump = coralPumpObjective(this);
@@ -2374,7 +2399,8 @@ export class Adventure {
     const target =
       hoist || cleft || pressure || echo || orbit || courier
         ? null
-        : reflector?.target ||
+        : crane?.target ||
+          reflector?.target ||
           pump?.target ||
           stair?.target ||
           vault?.target ||
@@ -2408,6 +2434,7 @@ export class Adventure {
       stage: this.progress.stage,
       total: this.level.mechanisms,
       objective:
+        crane?.text ||
         reflector?.text ||
         pump?.text ||
         stair?.text ||
@@ -2471,7 +2498,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : cartHint(this) ||
+        : craneHint(this) ||
+          cartHint(this) ||
           courierHint(this) ||
           orbitHint(this) ||
           echoHint(this) ||
@@ -2508,7 +2536,8 @@ export class Adventure {
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
       task: coralPumpObjective(this)
         ? "valve"
-        : this.frozenStair?.motion ||
+        : this.astralCrane?.operating ||
+            this.frozenStair?.motion ||
             this.easternReflector?.motion ||
             this.temperingCart?.drive ||
             this.temperingCart?.turn ||
@@ -2636,6 +2665,7 @@ export class Adventure {
       settleCipher(this);
     }
     this.paused = value;
+    updateAstralCrane(this, 0);
     updateOrbitVault(this, 0);
     updateCartArt(this);
     updateCourierArt(this);

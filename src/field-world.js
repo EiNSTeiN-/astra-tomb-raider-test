@@ -1,3 +1,4 @@
+import { buildCraneStation } from "./astral-crane-art.js";
 import { buildCartStation } from "./tempering-cart-art.js";
 import { buildGardenStation } from "./rain-garden.js";
 import { traceGarden } from "./rain-garden-rules.js";
@@ -22,6 +23,7 @@ import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 export function buildFieldStation(game, f, group) {
   if (buildCartStation(game, f, group)) return;
   if (buildGardenStation(game, f, group)) return;
+  if (buildCraneStation(game, f, group)) return;
   if (buildReflectorStation(game, f, group)) return;
   if (buildCoralStation(game, f, group)) return;
   if (buildFrozenStation(game, f, group)) return;
@@ -203,6 +205,17 @@ export function finishFieldTask(game, f) {
       f.step === 1
         ? "Load the blank and bring the cart onto the inspection turntable first."
         : "Turn the rails at the gallery, then bring the loaded cart to the tempering landing.",
+    );
+    return false;
+  }
+  if (
+    f.craneHeight !== undefined &&
+    f.step === 2 &&
+    !game.astralCrane?.saved.seated
+  ) {
+    game.cb.toast?.(
+      "Use the west gallery crane controls to lower the spindle into this socket first.",
+      5500,
     );
     return false;
   }

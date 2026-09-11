@@ -1,3 +1,4 @@
+import { normalizeAstralCrane } from "./astral-crane-rules.js";
 import { normalizeTemperingCart } from "./tempering-cart-rules.js";
 import { normalizeRainGarden } from "./rain-garden-rules.js";
 import { normalizeEasternReflector } from "./eastern-reflector-rules.js";
@@ -148,6 +149,13 @@ export function normalizeSave(value) {
               field: strings(v.field),
             })
           : null,
+      astralCrane:
+        key === "eclipse"
+          ? normalizeAstralCrane(v.astralCrane, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       temperingCart:
         key === "embers"
           ? normalizeTemperingCart(v.temperingCart, {
@@ -266,6 +274,10 @@ export class SaveStore {
           : null,
       temperingCart:
         id === "embers" ? { loaded: false, stop: 0, turned: false } : null,
+      astralCrane:
+        id === "eclipse"
+          ? normalizeAstralCrane(null, { stage: 0, field: [] })
+          : null,
       easternReflector: id === "sands" ? { raised: false } : null,
       cleft: id === "sands" ? normalizeCleft(null) : null,
       pressureRelay: id === "embers" ? normalizePressure(null) : null,

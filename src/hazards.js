@@ -165,12 +165,14 @@ export function buildHazards(game) {
         f.stairHeight !== undefined ||
         f.reflectorHeight !== undefined ||
         f.gardenHeight !== undefined ||
+        f.craneHeight !== undefined ||
         f.cartHeight !== undefined
           ? (f.group?.position.y ??
             game.groundHeight(x, z) +
               (f.stairHeight ??
                 f.reflectorHeight ??
                 f.gardenHeight ??
+                f.craneHeight ??
                 f.cartHeight))
           : game.groundHeight(x, z),
       root = new THREE.Group();

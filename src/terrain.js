@@ -1,3 +1,4 @@
+import { craneFoundationWeight } from "./astral-crane-rules.js";
 import { refineVolcanicTerrain } from "./volcanic-geology.js";
 import { temperingFoundationWeight } from "./tempering-cart-rules.js";
 import { courierFoundationWeight } from "./courier-rules.js";
@@ -142,6 +143,10 @@ export function createTerrainProfile(map, level) {
         const weight = temperingFoundationWeight(x, z);
         height = height * (1 - weight) + raw(119, 392) * weight;
       }
+      if (map.astralCrane) {
+        const weight = craneFoundationWeight(x, z);
+        height = height * (1 - weight) + raw(182, 217) * weight;
+      }
       heights[iz * width + ix] = height;
       if (map.echoGallery) {
         const dx = Math.max(7 - x, 0, x - 42),
@@ -215,6 +220,7 @@ export function createTerrainProfile(map, level) {
     }
   const profile = {
     extent,
+    craneY: map.astralCrane ? raw(182, 217) : null,
     temperingY: map.temperingCart ? raw(119, 392) : null,
     courierY: map.courierFerry ? raw(84, 42) : null,
     waters,
