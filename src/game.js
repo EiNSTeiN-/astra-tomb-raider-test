@@ -228,6 +228,7 @@ import {
   settleHydraulics,
 } from "./hydraulic-courts.js";
 import * as THREE from "three";
+import { updateSunBridgeDepth } from "./sun-bridge-depth.js";
 import { updateSkyGusts, skyWindVelocity } from "./sky-gusts.js";
 import {
   buildOrbitVault,
@@ -1559,6 +1560,7 @@ export class Adventure {
     }
   }
   renderScene(dt = 0) {
+    updateSunBridgeDepth(this);
     if (this.cinematic) this.cinematic.render(dt);
     else this.renderer.render(this.scene, this.camera);
   }

@@ -6,6 +6,11 @@ four masonry arches support the fixed galleries. Small instruction tablets sit
 on the winch plinths, with supported axles, geared handwheels and metal fittings.
 The [route and controls](hanging-garden.md) retain their existing sequence.
 
+The later [rendering optimization](hanging-garden-rendering.md) draws nearby
+stone and timber depth before shading. It preserves the sampled images and
+avoids extra depth submissions from distant viewpoints. The cost comparison
+below records this construction milestone before that optimization.
+
 | Earlier winch construction | Current winch construction |
 | --- | --- |
 | ![Earlier freestanding sign and simple wheel base](images/hanging-garden-construction/before-winch.webp) | ![Mounted tablet, supported handwheel and fitted rope rails](images/hanging-garden-construction/after-winch.webp) |

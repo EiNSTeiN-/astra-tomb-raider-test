@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildSunBridgeArt } from "./sun-bridge-art.js";
+import { addSunBridgeDepth } from "./sun-bridge-depth.js";
 import {
   SUN_FIELDS,
   sunDone,
@@ -45,6 +46,7 @@ export function buildSunBridge(game) {
     time: 0,
   });
   buildSunBridgeArt(game, h);
+  h.depthDraws = addSunBridgeDepth(game);
   updateSunBridge(game, 0);
 }
 function canReach(game, p, distance = 2.2) {

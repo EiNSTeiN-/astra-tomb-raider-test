@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Hanging Garden's [nearby depth drawing](hanging-garden-rendering.md)
+  reduces repeated shading of hidden stone and timber. Twenty-one camera/quality
+  comparisons retain identical pixels, including moving spans and lifts.
+  The measured close view uses 13.2% less High and 21.9% less Low GPU rendering
+  time with simulation held still; distant views add no depth submissions.
+  All 570 tests, the build, the complete assisted route at 100 health and four
+  production keyboard/touch/reload cases pass. Audio and cleanup checks also
+  pass. The guide records measurement limits;
+  chapter pacing, modern AAA graphics and listening acceptance remain unfinished.
+
 - The Hanging Garden now has [coursed piers, stone arches, timber trusses,
   mounted winches and fitted rope rails](hanging-garden-construction.md).
   Camera obstruction covers the rebuilt shafts and arches, and the old blade

@@ -31,6 +31,8 @@ import { canAim } from "../src/aiming.js";
 import { canCrouch } from "../src/stealth.js";
 import { torchHandsBusy } from "../src/torch.js";
 import { distanceGain } from "../src/audio.js";
+import { SolidContactPass } from "../src/rendering.js";
+import { updateSunBridgeDepth } from "../src/sun-bridge-depth.js";
 const map = createMap(LEVELS[0]),
   terrain = createTerrainProfile(map, LEVELS[0]);
 function fixture(progress = { stage: 5 }) {
@@ -432,4 +434,63 @@ test("coursed shafts and individual arch stones still obstruct the following cam
       "Camera missed the underside of a masonry arch",
     );
   }
+});
+
+test("garden depth shares exact surfaces through span motion and excludes duplicate shadows, normals and picking", () => {
+  const g = fixture(completed),
+    h = g.sunBridge,
+    depths = h.depthDraws,
+    kit = g.world.userData.sunConstructionMaterials;
+  assert(depths.length > 0);
+  assert.equal(new Set(depths.map((d) => d.material)).size, 1);
+  for (const d of depths) {
+    assert.equal(d.geometry, d.parent.geometry);
+    assert([kit.stone, kit.wood].includes(d.parent.material));
+    assert.equal(d.layers.mask, d.parent.layers.mask);
+    assert(d.renderOrder < d.parent.renderOrder);
+    assert.equal(d.material.colorWrite, false);
+    assert.equal(d.material.depthWrite, true);
+    assert.equal(d.material.depthTest, true);
+    assert.equal(d.material.depthFunc, THREE.LessEqualDepth);
+    assert.equal(d.castShadow || d.receiveShadow, false);
+    const hits = [];
+    d.raycast(new THREE.Raycaster(), hits);
+    assert.deepEqual(hits, []);
+  }
+  for (const amount of [0, 0.37, 1]) {
+    h.bridges[0].root.rotation.y = (amount * Math.PI) / 2;
+    h.bridges[1].root.position.y = 2 + amount * 4;
+    h.returnRoot.position.y = 2 + amount * 4;
+    h.weight.position.y = 5 - amount * 2;
+    g.world.updateMatrixWorld(true);
+    for (const d of depths)
+      assert.deepEqual(d.matrixWorld, d.parent.matrixWorld);
+  }
+  const pass = Object.assign(Object.create(SolidContactPass.prototype), {
+    scene: g.world,
+    _visibilityCache: [],
+  });
+  for (const visible of [false, true]) {
+    for (const d of depths) d.visible = visible;
+    pass._overrideVisibility();
+    assert(depths.every((d) => !d.visible));
+    pass._restoreVisibility();
+    assert(depths.every((d) => d.visible === visible));
+  }
+  // The rendering cost is useful nearby, while distant cameras skip the work.
+  const mount = new THREE.Group();
+  g.camera = new THREE.PerspectiveCamera();
+  mount.add(g.camera);
+  mount.position.set(h.x, h.y + 6, h.z);
+  for (const [position, expected] of [
+    [[0, 0, 39.9], true],
+    [[0, 0, 40.1], false],
+    [[42, 25, 38], false],
+    [[-21.4, 1.8, 3.4], true],
+  ]) {
+    g.camera.position.set(...position);
+    updateSunBridgeDepth(g);
+    assert(depths.every((d) => d.visible === expected));
+  }
+  assert.doesNotThrow(() => updateSunBridgeDepth({ sunBridge: null }));
 });

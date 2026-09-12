@@ -85,6 +85,8 @@ has a live map, local machinery sounds and saved recovery landings.
 Its [construction refinement](docs/hanging-garden-construction.md) adds coursed
 stone shafts, arches, timber trusses, mounted winches and fitted rope rails.
 The comparison records the visual changes, camera checks and added GPU cost.
+A [nearby rendering optimization](docs/hanging-garden-rendering.md) avoids
+shading hidden stone and timber while preserving the sampled images.
 
 In **A Silence of Snow**, [the Room of Wind](docs/shutter-house.md) now has
 three elevated wind walks, broken spans and sheltered shutter controls. Brace
