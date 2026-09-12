@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [guardian shoulder castings and surface weathering](guardian-surfaces.md)
+are original procedural geometry and shader code in `src/guardian-surfaces.js`,
+integrated with the existing original guardian kit. They reuse the credited
+Temple stone maps. No external art, audio, dependency or generated bitmap was
+added. Documentation images are WebP conversions of actual browser captures;
+the matched close-ups use the development material gallery.
+
 The [nearby mountain banks](snow-banks.md) are original procedural geometry and
 shading in `src/snow-geology.js` and `src/snow-terrain-material.js`. They reuse
 the credited Snow 01, Monastery Stone Floor and Rock Boulder Dry textures.

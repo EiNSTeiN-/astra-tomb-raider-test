@@ -1,8 +1,8 @@
 # Production status
 
-The original request remains the acceptance target: a Tomb Raider-inspired adventure that runs entirely in a browser, with eight distinct levels lasting approximately an hour each, local-storage persistence, and graphics comparable to a AAA title.
+The updated acceptance target is a Tomb Raider-inspired adventure that runs entirely in a browser, with eight distinct levels and local-storage persistence. There is **no minimum duration per level**. The playable world must feel polished, rich and interesting to look at, with no observed defects such as placement or geometry anomalies. AAA remains the artistic direction; matching a commercial AAA title is not a separate completion gate.
 
-The user also added distance-sensitive environmental audio and quiet background music tailored to each level and objective. That requirement is tracked below alongside the original scope.
+The distance-sensitive environmental soundscape and quiet background music tailored to each level and objective remain part of the scope. The user revised the duration and graphics criteria on September 12, 2026. Earlier milestone notes below record the requirements and evidence at their publication time; their hour-long pacing and mandatory AAA statements no longer define acceptance.
 
 ## Requirement audit
 
@@ -12,13 +12,23 @@ The user also added distance-sensitive environmental audio and quiet background 
 | Tomb Raider-inspired exploration and action   | Third-person camera, directional movement, sprinting, jumping, ledge mantling, guardian combat, ancient mechanisms, side discoveries, camps, and a campaign journal                                                                                                 | Implemented prototype; traversal and encounter design need further depth             |
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
-| Approximately one hour per level              | No full-length, blind human playthrough data has been collected. Solver and accelerated integration checks do not establish duration.                                                                                                                               | **Not verified; content and pacing are still below a confirmed eight-hour campaign** |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| Graphics comparable to a modern AAA title     | Generated cinematic menu art, PBR textures, scanned and optimized environment meshes, rigged character animation, shadows, fog, water, particles, and chapter landmarks                                                                                             | **Not met; real-time environments remain prototype quality**                         |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: a current visual audit covering all eight chapters is still required; shared primitive forms and repetitive spaces remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- The four guardian types now have [cast shoulder plates and weathered surfaces](guardian-surfaces.md).
+  Closed armor geometry replaces the stacked shoulder spheres; oxidation changes
+  the bronze's color, roughness and reflectivity. All 595 tests and the production
+  build pass. Twelve material-gallery views and 32 posed renders across all eight
+  chapters link their shaders without browser errors or warnings. The measured
+  close gallery adds about 0.19 ms of GPU time while reducing its triangle count.
+  Native production combat defeats a warden at 64 health, and reloading preserves
+  the earned progress and defeat.
+  The guide records the scope and measurement limits. A full visual audit of the
+  playable world remains open under the revised acceptance criteria.
 
 - **Beneath the Sands** now opens with [a two-lookout observation mission](desert-survey.md).
   Mounted optics identify distant monuments; their bearings locate three doorways,
@@ -896,11 +906,10 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Remaining production work
 
-1. Continue authoring more memorable spaces and meaningful traversal chains, environmental mechanisms, encounters, and narrative content throughout each chapter.
-   Enemy routes currently use a bounded local search over movement obstacles; broader navigation around complex architecture, combat balancing, and encounter playtests remain necessary.
-2. Run blind playtests, record main-path and discovery play times for every chapter, and tune substantive content toward the requested approximately one-hour pacing. Do not introduce mandatory waits to inflate duration.
-3. Replace the remaining primitive architecture and simple effects with coherent production assets and animation; develop the procedural guardian kit into bespoke character art, and refine the adapted human character's materials, deformation, and traversal animation.
-4. Improve lighting, terrain composition, water, visual feedback, and distant environments; evaluate real-time views against an explicit AAA visual reference.
-5. Benchmark supported desktop and mobile GPUs, add geometry and texture level-of-detail policies, and test more browsers, accessibility settings, and input devices.
+1. Inspect the playable spaces of every chapter: approaches, camps, sanctuary courts, field stations, elevated routes, optional chambers, water interiors and return paths. Track observed placement, geometry, camera and rendering defects and fix them before closing the audit.
+2. Improve visual composition and surface richness wherever the audit reveals sparse, repetitive or unfinished-looking areas. Preserve distinct goals, atmospheres and map layouts. Additional duration is not a target.
+3. Refine remaining primitive architecture, character forms, effects and animation where they detract from the playable scene. Confirm changes in actual chapter lighting and poses, not only isolated asset galleries.
+4. Check lighting, terrain transitions, water, distant environments and visual feedback across the available graphics settings. Keep AAA as a direction while judging completion against the user's observable polish and defect criteria.
+5. Verify that the finished routes remain playable with keyboard, mouse and touch, that local saves retain earned progress, and that environmental attenuation and the quiet adaptive music continue to work.
 
-The original goal must remain open until the duration and graphics requirements are met with stronger evidence.
+The goal remains open until the current playable world satisfies these visual criteria across all eight chapters, alongside the functional and audio requirements. Human one-hour playthroughs and commercial-AAA parity are no longer required for completion.

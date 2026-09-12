@@ -1,3 +1,8 @@
+import {
+  guardianPauldronGeometry,
+  guardianSurfaceData,
+  weatherGuardianMaterial,
+} from "./guardian-surfaces.js";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { pbrMaterial } from "./visuals.js";
@@ -137,6 +142,7 @@ function geometryFor(kind, detail) {
     g.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(indices, 4));
     g.setAttribute("skinWeight", new THREE.Float32BufferAttribute(weights, 4));
     g.clearGroups();
+    guardianSurfaceData(g);
     parts[material].push(g);
   };
   const orb = (b, mat, at, scale, tint) =>
@@ -487,11 +493,11 @@ function geometryFor(kind, detail) {
       );
     orb(`${side}Arm`, 1, [0, 0, 0], [0.2, 0.2, 0.22]);
     for (let j = 0; j < 3; j++) {
-      orb(
+      add(
         `${side}Arm`,
         j === 0 ? 1 : 0,
-        [sign * 0.04, 0.02 - j * 0.095, -0.015],
-        [0.32 - j * 0.02, 0.18, 0.31 - j * 0.015],
+        guardianPauldronGeometry(detail, j, sign),
+        [sign * 0.04, 0.02 - j * 0.105, -0.015],
       );
     }
     shell(
@@ -745,53 +751,6 @@ function geometryFor(kind, detail) {
   return geometries;
 }
 
-function weatherMaterial(material, biome, metal = false) {
-  const damp = ["jungle", "water", "sky"].includes(biome);
-  material.onBeforeCompile = (shader) => {
-    shader.vertexShader = shader.vertexShader
-      .replace(
-        "#include <common>",
-        `#include <common>
-      varying vec3 vGuardianStone;`,
-      )
-      .replace(
-        "#include <begin_vertex>",
-        `#include <begin_vertex>
-      vGuardianStone = position;`,
-      );
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <common>",
-      `#include <common>
-      varying vec3 vGuardianStone;
-      float guardianHash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
-      float guardianNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
-        return mix(mix(mix(guardianHash(i),guardianHash(i+vec3(1,0,0)),f.x),mix(guardianHash(i+vec3(0,1,0)),guardianHash(i+vec3(1,1,0)),f.x),f.y),
-          mix(mix(guardianHash(i+vec3(0,0,1)),guardianHash(i+vec3(1,0,1)),f.x),mix(guardianHash(i+vec3(0,1,1)),guardianHash(i+vec3(1,1,1)),f.x),f.y),f.z);}`,
-    );
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <map_fragment>",
-      `
-      #ifdef USE_MAP
-        vec4 stoneSample = texture2D(map, vMapUv);
-        float stoneGrain = dot(stoneSample.rgb, vec3(.2126,.7152,.0722));
-        diffuseColor *= vec4(vec3(stoneGrain), stoneSample.a);
-      #endif
-      float weatherPatch = guardianNoise(vGuardianStone*4.2)*.7 + guardianNoise(vGuardianStone*15.0)*.3;
-      float patina = smoothstep(.48,.72,weatherPatch);
-      diffuseColor.rgb *= mix(.69,1.12,weatherPatch);
-      ${damp ? `diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.38,.69,.48),patina*${metal ? ".74" : ".48"});` : ""}
-    `,
-    );
-    if (metal)
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <roughnessmap_fragment>",
-        `#include <roughnessmap_fragment>
-      roughnessFactor = mix(roughnessFactor, .88, patina*.8);`,
-      );
-  };
-  material.customProgramCacheKey = () => `guardian-weather-${damp}-${metal}-1`;
-}
-
 function materials(game) {
   let cached = materialCache.get(game);
   if (cached?.scene === game.world) return cached;
@@ -805,15 +764,15 @@ function materials(game) {
   stone.vertexColors = true;
   stone.roughness = 0.92;
   stone.normalScale.set(0.38, 0.38);
-  weatherMaterial(stone, game.level?.biome);
+  weatherGuardianMaterial(stone, game.level?.biome);
   const metal = game.goldMat.clone();
   metal.color.set(palette[1]);
   metal.vertexColors = true;
   metal.metalness = 0.72;
   metal.roughness = 0.47;
-  metal.normalMap = stone.normalMap;
+  metal.normalMap = null;
   metal.normalScale.set(0.14, 0.14);
-  weatherMaterial(metal, game.level?.biome, true);
+  weatherGuardianMaterial(metal, game.level?.biome, true);
   cached = { scene: game.world, stone, metal };
   materialCache.set(game, cached);
   return cached;
