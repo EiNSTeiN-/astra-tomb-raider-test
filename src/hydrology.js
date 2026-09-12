@@ -36,7 +36,10 @@ export function waterSites(map, level) {
         ? "ice"
         : "water";
   for (const [i, room] of map.rooms.entries())
-    if (i % 2 === 1)
+    // Wind courts have occupied working pads here. Their supplied cascades use
+    // the dedicated basins below; an additional broad excavation leaves only
+    // disconnected strips of water around the protected controls.
+    if (i % 2 === 1 && level.biome !== "sky")
       sites.push({
         id: `reservoir-${i}`,
         kind,
@@ -69,14 +72,34 @@ export function waterSites(map, level) {
         fall: index,
       });
     }
-  return sites;
+  return sites.map((site) => {
+    if (
+      !["jungle", "water", "sky"].includes(level.biome) ||
+      site.depth <= 0 ||
+      site.baseOffset !== undefined
+    )
+      return site;
+    // A coarse terrain cell blends the excavated bed beyond its analytic edge.
+    // Continue the water across that entire cell, below the surrounding terrace,
+    // so its visible shoreline is the ground intersection, not the mesh border.
+    return {
+      ...site,
+      bedWidth: site.width,
+      bedLength: site.length,
+      width: site.width + 3.5,
+      length: site.length + 3.5,
+      // The lowest palace terrace must still drain its full 1.8 m without
+      // dropping below the sea. Both offsets leave room for the wave crests.
+      baseOffset: level.biome === "water" ? -0.08 : -0.18,
+    };
+  });
 }
 export function basinDepression(site, x, z) {
-  const dx = site.width / 2 - Math.abs(x - site.x),
-    dz = site.length / 2 - Math.abs(z - site.z);
-  return (
-    site.depth * smooth(0, Math.min(2.8, site.width * 0.28), Math.min(dx, dz))
-  );
+  const width = site.bedWidth ?? site.width,
+    length = site.bedLength ?? site.length,
+    dx = width / 2 - Math.abs(x - site.x),
+    dz = length / 2 - Math.abs(z - site.z);
+  return site.depth * smooth(0, Math.min(2.8, width * 0.28), Math.min(dx, dz));
 }
 export function protectedGround(map, x, z, biome) {
   let keep = 0;

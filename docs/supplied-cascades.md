@@ -3,8 +3,10 @@
 The nine waterfalls in the jungle, drowned palace and cloud city now have
 visible water supplies, deeper masonry supports and three separate spill
 channels. This advances VA-03 in the [visual audit](visual-audit.md). The
-receiving areas still need work: some pool boundaries look angular, especially
-around the cloud-city mechanism courts. VA-03 remains open.
+receiving areas needed further work at this milestone: some pool boundaries
+looked angular, especially around cloud-city mechanism courts. The subsequent
+[shoreline correction](receiving-shores.md) addresses those water/terrain edges
+and the disconnected puddles around wind controls.
 
 ## Construction and flow
 
@@ -53,9 +55,10 @@ The cloud-city header reuses the surrounding granite:
 
 ![Cloud-city reservoir with a triangular stone crown](images/cascade-sky-header.webp)
 
-The remaining receiving-area issue is visible here. The darker water and wider
-shallow-edge fade reduce the pale surface, but do not resolve the angular pool
-outline. This needs further terrain and basin construction work:
+The receiving-area issue recorded at this milestone is visible here. The darker
+water and wider shallow-edge fade reduced the pale surface, but did not resolve
+the angular pool outline. The later [shoreline correction](receiving-shores.md)
+addresses its terrain and water bounds:
 
 ![Remaining angular water boundaries in a cloud-city mechanism court](images/cascade-sky-pool-open.webp)
 

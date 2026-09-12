@@ -78,6 +78,9 @@ adds original header reservoirs, regional crowns, bronze risers and open nozzles
 in `src/cascade-header.js`, plus a separate lit three-channel water material.
 It reuses the same credited stone maps and recording, the project bronze shader
 and hydraulic jet material; no external asset or dependency was added.
+The [receiving-pool shoreline correction](receiving-shores.md) is original
+hydrology code using the same terrain, stone, recordings and chapter scores.
+Its documentation images are converted browser captures.
 
 The revised jungle leaf cards and one-time cluster atlas bake are original
 project code in `scripts/preserve-canopy.mjs`, `scripts/rebuild-tree-leaves.mjs`

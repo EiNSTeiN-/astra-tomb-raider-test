@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Receiving pools now meet their surrounding terrain](receiving-shores.md),
+  and dedicated cloud-city cascade basins replace puddles around wind controls.
+  All 610 tests and the build pass. Checks cover 6,060 perimeter samples,
+  54 local movement legs, neighboring puzzle access, complete coastal drainage
+  above sea level and waterfall distance falloff. The review includes 87
+  assisted views and eight production keyboard/touch cases with 16 complete
+  normalized-save reload comparisons apart from timestamps. VA-03 is fixed;
+  repeated court composition and the broader [visual audit](visual-audit.md)
+  remain open.
+
 - The nine [cascades now have visible supply pipes, header reservoirs and three
   lit spill channels](supplied-cascades.md), with regional stonework and buried
   foundations. All 609 tests and the build pass. Reviewed renders cover 69
@@ -27,7 +37,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   amplitude falloff. Six keyboard/touch cases preserve complete normalized saves
   across 12 reload comparisons apart from timestamps. The review also caught
   and repaired an unstable water-normal calculation that corrupted bloom.
-  VA-03 remains open for angular receiving-pool boundaries; the broader
+  VA-03 remained open at that milestone; the subsequent receiving-pool
+  correction above addresses its boundaries. The broader
   [visual audit](visual-audit.md) is unfinished.
 
 - Shared [bronze gates and instruments now use irregular oxidation and pitting](bronze-surfaces.md)

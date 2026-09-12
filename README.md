@@ -19,7 +19,9 @@ closing the measured gaps beneath their footprints.
 Shared [bronze gates and instruments now have irregular oxidation and fine pitting](docs/bronze-surfaces.md),
 replacing the repeating bands visible in close views across six chapters.
 The nine [cascades now have supplied reservoirs and three lit spill channels](docs/supplied-cascades.md),
-with regional masonry and buried foundations. Their receiving-pool outlines remain under review.
+with regional masonry and buried foundations. Their [receiving pools now meet
+the surrounding ground](docs/receiving-shores.md), and the cloud-city wind pads
+no longer have disconnected puddles.
 
 Guardians now have [cast shoulder plates and weathered bronze](docs/guardian-surfaces.md),
 with darker recesses, material-specific pitting and oxidation that changes with

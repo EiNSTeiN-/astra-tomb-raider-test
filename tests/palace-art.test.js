@@ -213,10 +213,16 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
     );
     for (const site of profile.waters.filter((w) => w.room === room))
       for (let a = 0; a < 24; a++) {
+        // The water mesh also extends beneath dry terrain. Architecture reserves
+        // the excavated bank, not that invisible surface margin.
         const px =
-            site.x + Math.cos((a / 24) * Math.PI * 2) * (site.width / 2 + 0.5),
+            site.x +
+            Math.cos((a / 24) * Math.PI * 2) *
+              ((site.bedWidth ?? site.width) / 2 + 0.5),
           pz =
-            site.z + Math.sin((a / 24) * Math.PI * 2) * (site.length / 2 + 0.5);
+            site.z +
+            Math.sin((a / 24) * Math.PI * 2) *
+              ((site.bedLength ?? site.length) / 2 + 0.5);
         assert.ok(
           !game.obstacles.some(
             (o) =>
