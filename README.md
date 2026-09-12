@@ -78,6 +78,11 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+In **The Verdant Veil**, [the Hanging Garden](docs/hanging-garden.md) connects
+three winches through rotating spans, broken gallery jumps and a raised return
+walk. Moving decks carry the player, landing wheels recall them, and the route
+has a live map, local machinery sounds and saved recovery landings.
+
 In **A Silence of Snow**, [the Room of Wind](docs/shutter-house.md) now has
 three elevated wind walks, broken spans and sheltered shutter controls. Brace
 against a gust, stand to jump and close each shutter’s three catches. Every

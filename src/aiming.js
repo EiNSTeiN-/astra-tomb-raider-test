@@ -16,6 +16,7 @@ export function canAim(game) {
     game.diving ||
     game.carrying ||
     game.blockGrip ||
+    game.sunBridge?.turn ||
     game.shutterHouse?.turn ||
     game.fireVault?.operation ||
     game.pressureRelay?.operation ||

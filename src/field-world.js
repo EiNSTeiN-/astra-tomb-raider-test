@@ -1,3 +1,5 @@
+import { buildSunStation } from "./sun-bridge-art.js";
+import { sunFieldAction } from "./sun-bridge.js";
 import { buildShutterStation } from "./shutter-house-art.js";
 import { startShutterTurn, shutterReachable } from "./shutter-house.js";
 import { buildCausewayStation } from "./echo-causeway-art.js";
@@ -26,6 +28,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildSunStation(game, f, group)) return;
   if (buildShutterStation(game, f, group)) return;
   if (buildCausewayStation(game, f, group)) return;
   if (buildCartStation(game, f, group)) return;
@@ -129,7 +132,11 @@ export function updateFieldWorld(game, dt) {
     updateJungleShrine(game, f, done);
     if (f.kind === "lift") f.core.visible = !done;
     if (f.kind === "delivery") f.core.visible = done;
-    if (f.shutterHeight === undefined && ["valve", "winch"].includes(f.kind))
+    if (
+      f.sunHeight === undefined &&
+      f.shutterHeight === undefined &&
+      ["valve", "winch"].includes(f.kind)
+    )
       f.core.rotation.z +=
         ((done ? Math.PI * 1.5 : 0) - f.core.rotation.z) * Math.min(1, dt * 3);
     if (f.kind === "resonance") f.core.rotation.y += dt * (done ? 1.2 : 0.2);
@@ -237,6 +244,7 @@ export function finishFieldTask(game, f) {
       return false;
     }
   }
+  if (f.sunHeight !== undefined && !sunFieldAction(game, f)) return false;
   game.progress.field.push(f.id);
   if (f.causewayHeight !== undefined) soundCausewayRelay(game, f.step);
   game.audio.tone("field");

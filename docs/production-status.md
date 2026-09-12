@@ -20,6 +20,17 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **The Verdant Veil** now has [the Hanging Garden](hanging-garden.md): two
+  rotating spans, three broken gallery jumps, a counterweight lift and a raised
+  return walk joining the sixth mission's three winches. Moving support,
+  handwheel contact, fixed-pier clearance, a live map and saved landing recovery
+  are implemented. All 566 tests, the build, the full assisted route at 100
+  health and eleven production keyboard/touch/reload cases pass. Positioned
+  machinery, distance falloff, three graphics qualities and resource cleanup
+  are verified. The guide records actual views and measurement limits; AAA
+  graphics, one-hour human chapter pacing and broader listening/device
+  acceptance remain unfinished requirements.
+
 - **A Silence of Snow** now has [reconstructed fir sprigs and continuous distant trunks](fir-sprigs.md).
   Shared cutout/normal atlases replace enlarged needle strips. All 557 tests,
   the build, the full assisted wind-house route and six production

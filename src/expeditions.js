@@ -34,9 +34,9 @@ const chapters = {
     ],
     [
       "The hanging garden",
-      "The sun bridge is held by three ancient winches. Follow their cables from the garden to the sanctuary.",
+      "Climb the southern stair and tension the entry cable. Turn the garden span north at its central pier, then jump the broken gallery to raise the counterweight support. Return and align both spans east–west for the gap crossing. Turn the sun span north to reach the final winch and unfold the return walk. Fixed landing controls recall the spans.",
       "Tension the garden cable|Raise the crossing support|Release the bridge winch",
-      "The suspended gate settles onto its supports.",
+      "The sun crossing settles onto its bearings. The northern return walk rises into place.",
     ],
     [
       "A thousand small lights",

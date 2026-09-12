@@ -1,3 +1,4 @@
+import { poseSunTurn } from "./sun-bridge.js";
 import { poseCleft } from "./cleft-pose.js";
 import { CROUCH_DROP } from "./stealth.js";
 import * as THREE from "three";
@@ -358,6 +359,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   }
   poseCausewayWheel(game);
   posePressureOperation(game);
+  poseSunTurn(game);
   poseShutterTurn(game);
   poseOrbitBearing(game);
   poseSkyBalance(game, dt);

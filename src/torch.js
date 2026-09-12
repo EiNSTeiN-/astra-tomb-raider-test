@@ -9,6 +9,7 @@ export function needsCarriedFlame(level, feature) {
 export function torchHandsBusy(game) {
   return !!(
     game.blockGrip ||
+    game.sunBridge?.turn ||
     game.shutterHouse?.turn ||
     game.fireVault?.operation ||
     game.pressureRelay?.operation ||

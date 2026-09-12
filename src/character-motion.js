@@ -1,3 +1,4 @@
+import { sunDeckAt, sunCeiling } from "./sun-bridge-rules.js";
 import { shutterDeckAt, shutterCeiling } from "./shutter-house-rules.js";
 import { causewayDeckAt } from "./echo-causeway-rules.js";
 import { craneDeckAt } from "./astral-crane-rules.js";
@@ -27,6 +28,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const sunDeck = sunDeckAt(game, x, z, maxY);
+  if (sunDeck && sunDeck.height > height) return sunDeck;
   const shutterDeck = shutterDeckAt(game, x, z, maxY);
   if (shutterDeck && shutterDeck.height > height) return shutterDeck;
   const causewayDeck = causewayDeckAt(game, x, z, maxY);
@@ -81,7 +84,13 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
     if (!game.grounded) {
       game.velocityY -= 19 * step;
       p.y += game.velocityY * step;
-      const ceiling = shutterCeiling(game, p.x, p.z, before, p.y);
+      const ceiling = sunCeiling(
+        game,
+        p.x,
+        p.z,
+        before,
+        shutterCeiling(game, p.x, p.z, before, p.y),
+      );
       if (ceiling < p.y) {
         p.y = ceiling;
         game.velocityY = 0;

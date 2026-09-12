@@ -530,3 +530,11 @@ settings and a character interaction in `src/shutter-motion.js`. It reuses the
 credited Vesper mesh, original calibrated hand solver and existing environment
 materials. No external assets or dependencies were introduced. Images are
 captures of the running game.
+
+The [Hanging Garden](hanging-garden.md) adds original timber spans, masonry
+landings, bronze handwheels, mounted signs, counterweights, cables and map
+artwork in `src/sun-bridge*.js`. It reuses the credited monastery timber, stone
+and bark maps, the existing Vesper mesh and hand solver, and original hoist
+synthesis. No new external models, textures, recordings or dependencies were
+introduced. Documentation images are captures of the running game converted
+to WebP.
