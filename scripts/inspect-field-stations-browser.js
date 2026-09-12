@@ -168,21 +168,42 @@ export function inspectFieldStations(game) {
   return records;
 }
 
-export function stationView(game, id, { rear = false, quality = "high" } = {}) {
+export function stationView(
+  game,
+  id,
+  { rear = false, quality = "high", completed = false, detail = false } = {},
+) {
   const f = game.items.find((f) => f.id === id),
-    target = f.group.position.clone().add(new THREE.Vector3(0, 1.6, 0));
+    target = f.group.position
+      .clone()
+      .add(new THREE.Vector3(0, detail ? 1.2 : 2.65, 0));
   prepareStation(game, f);
+  if (detail) game.progress.torch = false;
+  if (completed) {
+    game.progress.field.push(f.id);
+    updateFieldWorld(game, 10);
+  }
   let eye;
-  for (const radius of [6, 8, 10])
-    for (const angle of rear ? [2.6, 3.5, 2.9] : [0.5, -0.5, 0]) {
+  search: for (const radius of detail
+    ? [2.2, 2.45]
+    : f.yOffset
+      ? [6, 8, 10, 2.2]
+      : [6, 8, 10])
+    for (const angle of rear
+      ? [2.6, 3.5, 2.9, 2.0, 4.1]
+      : [0.5, -0.5, 0, 1.2, -1.2]) {
       const x = target.x + Math.sin(angle) * radius,
         z = target.z + Math.cos(angle) * radius;
       const y = supportAt(game, x, z, f.group.position.y).height;
       if (!game.canMove(x, z, y - game.groundHeight(x, z))) continue;
       const p = new THREE.Vector3(x, y + 2.1, z);
-      if (game.cameraSurfaces.entry(p, target, 0) < 0.98) continue;
+      // A detail view deliberately ends on the control's surface. Only its
+      // final 90 cm may meet the pictured object; earlier obstructions reject
+      // the view. The observer must still occupy a clear supported position.
+      const limit = detail ? 1 - 0.9 / p.distanceTo(target) : 0.98;
+      if (game.cameraSurfaces.entry(p, target, 0) < limit) continue;
       eye = p;
-      break;
+      break search;
     }
   if (!eye) return { id, rear, quality, blocked: true };
   game.player.position.copy(eye).y -= 2.1;
@@ -202,6 +223,8 @@ export function stationView(game, id, { rear = false, quality = "high" } = {}) {
     id,
     rear,
     quality,
+    completed,
+    detail,
     eye: eye.toArray(),
     target: target.toArray(),
     linked: game.renderer.info.programs.every((p) =>

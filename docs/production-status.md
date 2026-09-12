@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional field stations](regional-field-stations.md) replace the shared
+  primitive furniture at 169 installations with eight regional crown styles,
+  jointed masonry, mounted wheels, instrument tablets, carried cartridges,
+  caged resonators and open bowls. Planar cap mapping removes radial texture
+  wedges found during close inspection. All 625 tests and the build pass.
+  Evidence includes 477 assisted renders, all 169 station checks, all 21
+  climbing routes, six fire-source distance checks and 13 production keyboard/
+  touch cases preserving complete normalized saves across 26 reloads apart from
+  timestamps. VA-12 remains open for repeated footprints and sparse surroundings;
+  the broader playable-world audit is incomplete.
+
 - [Field-station clearance](field-station-clearance.md) makes all 169 generic
   pedestals and controls solid, preserves working positions, and protects the
   21 climbing routes and their return cables. Older occupied saves recover on

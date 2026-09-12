@@ -25,6 +25,9 @@ no longer have disconnected puddles.
 The [169 generic field stations now have solid bases and controls](docs/field-station-clearance.md),
 with clear mantle and cable approaches, safe recovery from occupied saves,
 and item placement that leaves room for the explorer.
+These stations now also have [regional crowns, assembled controls and carved
+instrument faces](docs/regional-field-stations.md), with close inspection
+covering their ground and climbing installations.
 
 Guardians now have [cast shoulder plates and weathered bronze](docs/guardian-surfaces.md),
 with darker recesses, material-specific pitting and oxidation that changes with

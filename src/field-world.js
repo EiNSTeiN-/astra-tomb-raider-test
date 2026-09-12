@@ -17,7 +17,6 @@ import { buildReflectorStation } from "./eastern-reflector.js";
 import { buildCoralStation } from "./coral-pump-art.js";
 import { PUMP_FIELD, PUMP_SETTLE_SECONDS } from "./coral-pump-rules.js";
 import { buildFrozenStation } from "./frozen-stair.js";
-import * as THREE from "three";
 import { needsCarriedFlame, torchHandsBusy } from "./torch.js";
 import { buildJungleShrine, updateJungleShrine } from "./jungle-shrines.js";
 import {
@@ -30,7 +29,8 @@ import {
   updateSanctuaryGate,
 } from "./sanctuary-gates.js";
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
-import { stationSolid, stationBlocked } from "./field-station-solids.js";
+import { stationBlocked } from "./field-station-solids.js";
+import { buildRegionalStation } from "./field-station-art.js";
 import { safeArrival } from "./character-motion.js";
 
 export function buildFieldStation(game, f, group) {
@@ -46,97 +46,8 @@ export function buildFieldStation(game, f, group) {
   if (buildCoralStation(game, f, group)) return;
   if (buildFrozenStation(game, f, group)) return;
   if (buildJungleShrine(game, f, group)) return;
-  const { stoneMat: stone, darkMat: dark, goldMat: gold } = game;
   if (hasTraversalCourse(game.level, f)) buildTraversalCourse(game, f, group);
-  const solid = (size, position, options) =>
-    stationSolid(game, f, group, size, position, options);
-  game.cylinder(0.85, 1.1, 0.7, dark, 0, 0.35, 0, group, 12);
-  solid([2.2, 0.7, 2.2], [0, 0.35, 0], { radius: 1.1 });
-  game.cylinder(0.94, 0.94, 0.14, gold, 0, 0.74, 0, group, 16);
-  solid([1.88, 0.14, 1.88], [0, 0.74, 0], { radius: 0.94 });
-  const core = new THREE.Group();
-  group.add(core);
-  f.core = core;
-  if (["valve", "winch"].includes(f.kind)) {
-    game.box(0.22, 1.2, 0.22, gold, 0, 1.3, 0, group);
-    solid([0.22, 1.2, 0.22], [0, 1.3, 0]);
-    solid([1.57, 1.57, 0.17], [0, 1.7, 0]);
-    const wheel = new THREE.Mesh(
-      new THREE.TorusGeometry(0.7, 0.085, 8, 28),
-      gold,
-    );
-    core.add(wheel);
-    core.position.y = 1.7;
-    for (let i = 0; i < 6; i++) {
-      const spoke = game.box(0.06, 1.4, 0.06, gold, 0, 0, 0, core);
-      spoke.rotation.z = (i * Math.PI) / 3;
-    }
-    for (const side of [-1, 1]) {
-      game.box(0.35, 1.5, 0.35, stone, side * 1.45, 0.75, 0, group);
-      solid([0.35, 1.5, 0.35], [side * 1.45, 0.75, 0]);
-    }
-  } else if (f.kind === "brazier") {
-    game.cylinder(0.7, 0.28, 0.6, gold, 0, 1.1, 0, group, 12);
-    solid([1.4, 0.6, 1.4], [0, 1.1, 0], { radius: 0.7 });
-    const fire = new THREE.Mesh(
-      new THREE.ConeGeometry(0.24, 1.1, 7),
-      new THREE.MeshBasicMaterial({ color: 0xffbb6a, toneMapped: false }),
-    );
-    fire.position.y = 1.95;
-    group.add(fire);
-    f.fire = fire;
-    game.flames.push(fire);
-  } else if (["lift", "delivery", "resonance"].includes(f.kind)) {
-    const gem = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.5, 1),
-      f.kind === "resonance" ? game.glowMat : gold,
-    );
-    core.add(gem);
-    core.position.y = 1.2;
-    const done =
-      f.stage < game.progress.stage || game.progress.field.includes(f.id);
-    if (f.kind === "lift") core.visible = !done;
-    if (f.kind === "delivery") core.visible = done;
-    solid([1, 1, 1], [0, 1.2, 0], { node: core });
-    if (f.kind === "delivery") {
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.72, 0.06, 8, 24),
-        gold,
-      );
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = 0.83;
-      group.add(ring);
-    }
-  } else {
-    const tablet = game.box(1.3, 1.05, 0.16, stone, 0, 1.3, 0, group);
-    tablet.rotation.x = -0.25;
-    solid([1.3, 1.06, 0.43], [0, 1.3, 0]);
-    for (let i = 0; i < 4; i++)
-      game.box(
-        0.75 - i * 0.1,
-        0.035,
-        0.06,
-        gold,
-        0,
-        1.1 + i * 0.14,
-        0.12,
-        group,
-      );
-  }
-  // A raised control already sits in the course's masonry and cable frame.
-  // The freestanding ground arch would overhang its five-meter landing and
-  // obstruct the mantle and walking ring.
-  if (f.yOffset === 8.4) return;
-  const span = 2.7,
-    frameZ = -1.5;
-  for (const side of [-1, 1]) {
-    game.box(0.65, 3.4, 0.7, stone, side * span, 1.7, frameZ, group);
-    solid([0.65, 3.4, 0.7], [side * span, 1.7, frameZ]);
-    game.box(0.82, 0.2, 0.9, gold, side * span, 3.45, frameZ, group);
-    solid([0.82, 0.2, 0.9], [side * span, 3.45, frameZ]);
-  }
-  game.box(span * 2 + 0.8, 0.45, 0.8, stone, 0, 3.765, frameZ, group);
-  solid([span * 2 + 0.8, 0.45, 0.8], [0, 3.765, frameZ]);
+  buildRegionalStation(game, f, group);
 }
 
 export function buildFieldGates(game) {
