@@ -64,7 +64,7 @@ export async function loadForest(game) {
     game.groundHeight(x, z),
   );
   game.woodland = layout;
-  const [bundles, leafMask] = await Promise.all([
+  const [bundles, leafMask, firMaps] = await Promise.all([
     Promise.all(
       names.map((name) =>
         Promise.all(
@@ -79,11 +79,26 @@ export async function loadForest(game) {
           "/assets/textures/island-tree-leaves-alpha.png",
         )
       : Promise.resolve(null),
+    game.level.biome === "snow"
+      ? Promise.all(
+          ["color", "normal"].map((kind) =>
+            new THREE.TextureLoader(game.assetBatch?.manager).loadAsync(
+              `/assets/textures/fir-sprigs-${kind}.png`,
+            ),
+          ),
+        )
+      : Promise.resolve(null),
   ]);
   if (world !== game.world) {
     leafMask?.dispose();
+    firMaps?.forEach((map) => map.dispose());
     return;
   }
+  firMaps?.forEach((map, index) => {
+    map.flipY = false;
+    map.colorSpace = index === 0 ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+    map.anisotropy = 8;
+  });
   if (leafMask) {
     // Match glTF UV orientation. The PNG is linear coverage, not color.
     leafMask.flipY = false;
@@ -144,6 +159,9 @@ export async function loadForest(game) {
         material.alphaTest = leaf ? 0.35 : 0;
         material.roughness = 0.95;
         if (leaf) {
+          if (firMaps) {
+            [material.map, material.normalMap] = firMaps;
+          }
           if (game.level.biome === "jungle") {
             material.color.multiply(new THREE.Color(0xc9e6ba));
             material.userData.leafTiles = [1, 2, 4][tier];

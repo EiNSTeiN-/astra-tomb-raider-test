@@ -284,17 +284,28 @@ node scripts/optimize-tree.mjs
 node scripts/build-vegetation-lods.mjs
 python3 scripts/download-tree-leaves.py
 node scripts/rebuild-tree-leaves.mjs
+node scripts/rebuild-fir-sprigs.mjs
 python3 scripts/download-forest-floor.py
 python3 scripts/download-temple-stone.py
 ```
 
 Mesh optimization uses glTF Transform and Meshoptimizer. The current shrub contains 21,598 triangles, the fern set 4,360, and the rock set 12,614. Their source assets contain 156,012, 6,232, and 63,127 triangles respectively. Increased foliage retention and shorter draw distances replace the earlier, overly sparse shrub and fern conversions.
 
-Additional distant tiers now contain 3,075 triangles for Island Tree 01, 2,016 for Island Tree 02, and 7,566 for the combined fir specimens. Shrub middle/distant tiers contain 5,394/1,310 triangles; the distant fern set contains 2,428. The conversions reuse the same locally credited assets and textures. See [rendering workload notes](rendering-budget.md) for the conversion, crossfades, and measured limits.
+Additional distant tiers now contain 3,075 triangles for Island Tree 01, 2,016 for Island Tree 02, and 8,057 for the combined fir specimens. Shrub middle/distant tiers contain 5,394/1,310 triangles; the distant fern set contains 2,428. The conversions reuse the same locally credited assets and textures. See [rendering workload notes](rendering-budget.md) for the conversion, crossfades, and measured limits.
 
 The current broadleaf tiers are Island Tree 01 (114,941 near / 15,646 middle triangles) and Island Tree 02 (77,148 near / 10,293 middle triangles). Tree 01's source has 1,599,403 triangles. `preserve-canopy.mjs` fits full rectangular leaf cards; sampled tiers expand their area and use baked leaf clusters. The original mask defines their silhouettes. See [the reconstruction and geometry comparison](jungle-leaves.md). The jungle combines both species. Tree detail is selected per instance, preserving all tree placements when quality or distance changes.
 
-Fir Tree 01 includes three tree specimens. Its source has 6,982,937 triangles; the bundled versions have 363,598 and 46,025. `preserve-needles.mjs` samples whole disconnected needles and increases their area for distant coverage. This avoids the nearly bare trunks produced by ordinary triangle simplification. These conversions trade some leaf and needle shape accuracy for rendering cost; they are not production-quality vegetation LODs.
+Fir Tree 01 includes three tree specimens. Its source has 6,982,937 triangles.
+The current [sprig reconstruction](fir-sprigs.md) contains 20,689 near / 14,373
+middle / 8,057 distant triangles. Seven repeated source sprigs are projected
+into the shared `textures/fir-sprigs-color.png` and `textures/fir-sprigs-normal.png`
+atlases. These derivatives use the existing CC0 geometry, normals and color
+texture; no additional asset source is introduced. All 3,158 sprigs remain in
+the first two tiers, with a deterministic half retained in the distant tier.
+All tiers use the small near-detail woody meshes to avoid broken trunk outlines.
+`rebuild-fir-sprigs.mjs` replaces the older enlarged-needle conversion after the
+other vegetation scripts run. Input/output hashes, the reference bounds and
+license record are retained in `asset-sources/fir-sprigs/`.
 
 The desert's three Aerial Beach 01 maps are unmodified 2K JPEGs totaling
 1,826,595 bytes. Their shader adapts the tint and scale to the fictional desert.

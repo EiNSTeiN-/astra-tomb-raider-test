@@ -1,0 +1,78 @@
+{
+  "source": "https://polyhaven.com/a/fir_tree_01",
+  "license": "CC0-1.0",
+  "derivation": "Seven repeated source sprigs, fitted by four corresponding vertices and validated against every vertex, UV and triangle. Three orthographic color/normal bakes per template; 1536x1024 shared atlases. Near uses three crossed cards per sprig; middle uses two; distant retains one deterministically chosen sprig per pair at sqrt(2) size. All tiers retain the near woody geometry and the original normalization bounds.",
+  "templates": 7,
+  "sprigs": [
+    {
+      "name": "NurbsPath.001",
+      "count": 1716
+    },
+    {
+      "name": "NurbsPath.004",
+      "count": 1024
+    },
+    {
+      "name": "NurbsPath.006",
+      "count": 418
+    }
+  ],
+  "maximumResidual": 0.0000033374815437066176,
+  "referenceBounds": {
+    "min": [
+      -3.275482177734375,
+      -0.09093312174081802,
+      -3.5825860500335693
+    ],
+    "max": [
+      15.603840112686157,
+      18.92057228088379,
+      2.997894525527954
+    ]
+  },
+  "inputs": [
+    {
+      "path": "asset-sources/models/fir_tree_01/scene.gltf",
+      "sha256": "72e49eefb4ed4db6a8ca5e17fb10980f8463dd300d94589ac774cde95ade7709"
+    },
+    {
+      "path": "asset-sources/models/fir_tree_01/fir_tree_01.bin",
+      "sha256": "ba2ef15a1061a84c73b0a74643e88c118f801ce1664ca7a25a6a79bcc2c63790"
+    },
+    {
+      "path": "asset-sources/models/fir_tree_01/textures/fir_tree_01_twig_diff_1k.jpg",
+      "sha256": "8c0833a10e4fd44498d848cf9e659fe250a3813984cbd679f42430eb98c61fb8"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "public/assets/models/fir_tree_01/near.glb",
+      "planes": 3,
+      "stride": 1,
+      "triangles": 20689,
+      "sha256": "efe8059e9f1bdbfe33c2df6d9b8809b32d46f7111ce6b579b920f10df7551834"
+    },
+    {
+      "path": "public/assets/models/fir_tree_01/optimized.glb",
+      "planes": 2,
+      "stride": 1,
+      "triangles": 14373,
+      "sha256": "60a1f2e4770d211bb528e051de88d0e05c4302d5362f21627e7b2e5f9f4bffe6"
+    },
+    {
+      "path": "public/assets/models/fir_tree_01/distant.glb",
+      "planes": 2,
+      "stride": 2,
+      "triangles": 8057,
+      "sha256": "ccd15dc71ca79976abc0d02f1a6589a54bde1ed081c47142caf5fc6d6b411088"
+    },
+    {
+      "path": "public/assets/textures/fir-sprigs-color.png",
+      "sha256": "91f63bfa281cf5c2aa97a2e7f0954e0448c6e2a2d498c68ae63c46b8112baf8d"
+    },
+    {
+      "path": "public/assets/textures/fir-sprigs-normal.png",
+      "sha256": "8535b4a0e9feea6fe5ca973dd2111f780b7543494b43c384d440e36ae9f89322"
+    }
+  ]
+}

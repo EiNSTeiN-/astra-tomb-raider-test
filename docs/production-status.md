@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **A Silence of Snow** now has [reconstructed fir sprigs and continuous distant trunks](fir-sprigs.md).
+  Shared cutout/normal atlases replace enlarged needle strips. All 557 tests,
+  the build, the full assisted wind-house route and six production
+  keyboard/touch/movement/reload cases pass. Three graphics qualities,
+  positioned audio and resource cleanup pass. The fir delivery is about
+  16 MB smaller; the bounded Radeon 780M comparison adds about 1.42 ms on High
+  and 0.87 ms on Low. Matched browser images and measurement limits are recorded
+  in the guide. AAA graphics, human pacing and broader audio/device acceptance
+  remain unfinished requirements.
+
 - **A Silence of Snow** now has [uneven snow shoulders, exposed rock and snow-dusted boulders](snow-banks.md).
   All walking cells, monastery footings, ice edges and moving structure
   foundations retain their previous heights. All 554 tests, the build, assisted

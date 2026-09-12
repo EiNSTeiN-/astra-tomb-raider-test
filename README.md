@@ -90,6 +90,8 @@ rock faces and snow shelves, with full distant silhouettes and a clearer
 objective panel. The guide includes matching views and measured rendering cost.
 Its [nearby snow banks](docs/snow-banks.md) now vary their shoulders and rock
 exposure, with snow-dusted boulders and verified walking/foundation heights.
+The [fir canopy reconstruction](docs/fir-sprigs.md) replaces enlarged needle strips
+with fitted sprig silhouettes and retains continuous trunks at every distance.
 
 In **The Night Below**, [the Echo Causeway](docs/echo-causeway.md) turns
 **The echo that returns** into two timed stone crossings. Sound each relay,
