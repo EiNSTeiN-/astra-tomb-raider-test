@@ -5,6 +5,7 @@ import { fieldComplete } from "./expeditions.js";
 import { counterweightsReady } from "./counterweights.js";
 import { mergeArchitecture } from "./visuals.js";
 import { boxEntry } from "./camera-collision.js";
+import { addSolarWheelMount } from "./solar-mounts.js";
 
 export function solarReady(game, site) {
   if (!site) return false;
@@ -200,6 +201,7 @@ export function buildSolarChambers(game) {
       );
       wheel.rotation.y = Math.PI / 2;
       wheel.userData.animated = true;
+      addSolarWheelMount(group, wheel, bronze);
       for (let spoke = 0; spoke < 4; spoke++) {
         const bar = game.box(0.04, 0.62, 0.04, bronze, 0, 0, 0, wheel);
         bar.rotation.z = (spoke * Math.PI) / 4;

@@ -19,6 +19,14 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- All 68 desert mirror handwheels now have [bearing housings, axles and rotating
+  hubs](solar-mounts.md), closing the confirmed gaps beside their stands. All 603
+  tests and the production build pass. Seventeen reviewed views, all 77 assisted
+  solar-court routes and native keyboard/touch turning, movement and exact reload
+  checks verify the change. Production input checks use a post-combat fixture.
+  VA-04 is fixed; a cramped resume-camera view at one control is recorded as VA-09
+  and remains open alongside the broader visual audit.
+
 - The jungle's [54 large climbing roots now taper into the soil](ruin-roots.md),
   replacing exposed blunt ends. The terrain investigation corrected the initial
   floating-root diagnosis: all old end rings touched the soil along an edge,

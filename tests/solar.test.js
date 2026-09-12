@@ -213,6 +213,53 @@ test("all nine built chambers retain clear controls and their solved beams reach
   }
 });
 
+test("all 68 mirror handwheels retain a solid axle and centered hub throughout rotation", (t) => {
+  const { game: g } = fixture(t),
+    ray = new THREE.Raycaster(),
+    direction = new THREE.Vector3(0, 0, -1);
+  let checked = 0;
+  for (const site of g.solarSites) {
+    for (const mirror of site.mirrors) {
+      const group = mirror.wheel.parent,
+        origin = group.getWorldPosition(new THREE.Vector3()),
+        center = mirror.wheel.getWorldPosition(new THREE.Vector3());
+      for (const angle of [0, Math.PI / 4, Math.PI / 2, Math.PI]) {
+        mirror.wheel.rotation.z = angle;
+        g.world.updateMatrixWorld(true);
+        assert(
+          mirror.wheel
+            .getWorldPosition(new THREE.Vector3())
+            .distanceTo(center) < 1e-8,
+        );
+        const axis = new THREE.Vector3(0, 0, 1).transformDirection(
+          mirror.wheel.matrixWorld,
+        );
+        assert(axis.distanceTo(new THREE.Vector3(1, 0, 0)) < 1e-8);
+        // Test the actual batched meshes, including the moving hub, across
+        // the old air gap between the column and the handwheel's center.
+        for (const x of [0.28, 0.4, 0.55, 0.7, 0.85, 0.95, 1.04]) {
+          ray.set(
+            origin.clone().add(new THREE.Vector3(x, 1.03, 0.4)),
+            direction,
+          );
+          ray.far = 0.8;
+          const hits = ray.intersectObject(site.root, true);
+          assert(
+            hits.length,
+            `missing mount at ${site.stage}/${mirror.feature.index}, x=${x}, angle=${angle}`,
+          );
+          assert(
+            hits.some((hit) => hit.distance > 0.04 && hit.distance < 0.34),
+            `missing shaft or hub behind rim at ${site.stage}/${mirror.feature.index}, x=${x}, angle=${angle}`,
+          );
+        }
+      }
+      checked++;
+    }
+  }
+  assert.equal(checked, 68);
+});
+
 test("world controls require restored field work and counterweights, save each turn, and activate only a lit receiver", (t) => {
   const { game: g, storage } = fixture(t),
     site = g.solarSites[0],
