@@ -275,7 +275,12 @@ test("nine built forge halls preserve approaches and camera headroom, and share 
   world.traverse((o) => o.geometry?.dispose());
 });
 
-test("cooled lava restores safe dark crust immediately while ignition work does not cool its pool", () => {
+test("cooled lava restores safe dark crust immediately while ignition work does not cool its pool", (t) => {
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
   const game = {
     level: LEVELS[4],
     progress: { stage: 0, field: [] },

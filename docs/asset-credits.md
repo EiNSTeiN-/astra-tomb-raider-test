@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [volcanic slag pools](lava-shores.md) use original shoreline profiles and
+shader code in `src/hydrology.js` and `src/lava-surface.js`. Their basalt maps
+reuse the existing credited CC0 forge-rock assets. No new external asset or
+dependency was introduced. The documentation images are actual browser
+captures converted losslessly to WebP, with decoded pixel identity verified.
+
 The [regional chamber walls](chamber-walls.md) are original procedural geometry
 in `src/chamber-walls.js`, using existing credited palace plaster, stone and
 forge maps, the project bronze shader and original shell relief geometry.

@@ -73,6 +73,17 @@ export function waterSites(map, level) {
       });
     }
   return sites.map((site) => {
+    if (site.kind === "lava")
+      return {
+        ...site,
+        bedWidth: site.width,
+        bedLength: site.length,
+        width: site.width + 3.5,
+        length: site.length + 3.5,
+        depth: 0.42,
+        baseOffset: -0.08,
+        slagBasin: true,
+      };
     if (
       !["jungle", "water", "sky"].includes(level.biome) ||
       site.depth <= 0 ||
@@ -99,7 +110,36 @@ export function basinDepression(site, x, z) {
     length = site.bedLength ?? site.length,
     dx = width / 2 - Math.abs(x - site.x),
     dz = length / 2 - Math.abs(z - site.z);
+  if (site.slagBasin) {
+    const px = (x - site.x) / (width / 2);
+    const pz = (z - site.z) / (length / 2);
+    const angle = Math.atan2(pz, px);
+    const phase = (site.stage || 0) * 1.7;
+    const radius = Math.hypot(px, pz);
+    const edge =
+      0.86 +
+      Math.sin(angle * 3 + phase) * 0.055 +
+      Math.cos(angle * 5 - phase) * 0.035;
+    return site.depth * (1 - smooth(0.45, edge, radius));
+  }
   return site.depth * smooth(0, Math.min(2.8, width * 0.28), Math.min(dx, dz));
+}
+
+// The visible terrain intersection defines the dangerous part of each pool.
+// Its rectangular render bounds include buried margins and are not a hazard.
+export function hotLavaAt(game, x, z) {
+  for (const water of game.waterMeshes || []) {
+    const site = water.userData;
+    if (
+      site.kind === "lava" &&
+      !site.cooled &&
+      Math.abs(x - water.position.x) < site.width / 2 &&
+      Math.abs(z - water.position.z) < site.length / 2 &&
+      water.position.y - game.groundHeight(x, z) > 0.008
+    )
+      return water;
+  }
+  return null;
 }
 export function protectedGround(map, x, z, biome) {
   let keep = 0;

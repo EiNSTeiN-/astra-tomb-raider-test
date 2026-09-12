@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The volcanic chapter's four [lava pools now meet their surrounding terrain](lava-shores.md)
+  with irregular shores, textured slag and varied molten seams. Dry corners
+  are safe and cooled crust supports the explorer's feet. All 615 tests and
+  the build pass, with 1,296 border checks, 110 local routes and eight production
+  keyboard/touch cases preserving complete normalized saves across 16 reloads
+  apart from timestamps. The lava boundary defect is fixed as VA-10. Native
+  valve movement exposed existing generic pedestal clipping, now tracked as
+  VA-11; the broader visual audit remains open.
+
 - [Regional chamber walls](chamber-walls.md) replace 105 plain faces across
   35 palace, furnace, crystal and eclipse chambers with 320 recessed bays,
   dressed surrounds, buried footings and framed interior panels. All 612 tests

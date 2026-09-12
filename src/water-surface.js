@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { EXPEDITIONS, fieldComplete } from "./expeditions.js";
 import { waterAt } from "./hydrology.js";
-import { moltenMaterial } from "./forge-effects.js";
+import { lavaMaterial } from "./lava-surface.js";
 import { updateCoastalWater } from "./coastal-material.js";
 import { waterRipples } from "./water-ripples.js";
 
@@ -163,9 +163,18 @@ export function createWaterSurface(game, site) {
         ? site.baseY - (site.sea ? 15 : 0.2)
         : game.groundHeight(site.x + p.getX(i), site.z - p.getY(i));
   geometry.setAttribute("bedHeight", new THREE.BufferAttribute(bed, 1));
+  if (site.kind === "lava") {
+    const uv = geometry.attributes.uv;
+    for (let i = 0; i < p.count; i++)
+      uv.setXY(i, (site.x + p.getX(i)) / 2.5, (site.z - p.getY(i)) / 2.5);
+  }
   let material;
   if (site.kind === "lava")
-    material = moltenMaterial({ value: game.elapsed || 0 }, { value: 1 }, true);
+    material = lavaMaterial(
+      { value: game.elapsed || 0 },
+      { value: 1 },
+      game.waterMeshes.find((w) => w.userData.kind === "lava")?.material,
+    );
   else material = waterMaterial(game, site);
   let surfaceGeometry = geometry;
   const exclusions = site.sea ? seaExclusions(game.terrainProfile, site) : [];

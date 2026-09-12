@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { waterAt } from "./hydrology.js";
+import { waterAt, hotLavaAt } from "./hydrology.js";
 import { clearSegment } from "./navigation.js";
 
 // Guardians can walk on dry, gently sloping ground. They cannot jump a stair,
@@ -9,17 +9,7 @@ export function guardianFooting(game, enemy, x, z) {
   const y = game.groundHeight(x, z);
   if (!Number.isFinite(y) || (waterAt(game, x, z)?.depth || 0) > 0.4)
     return false;
-  for (const water of game.waterMeshes || []) {
-    const d = water.userData;
-    if (
-      d.kind === "lava" &&
-      !d.cooled &&
-      Math.abs(x - water.position.x) < d.width / 2 &&
-      Math.abs(z - water.position.z) < d.length / 2 &&
-      y < water.position.y + 0.05
-    )
-      return false;
-  }
+  if (hotLavaAt(game, x, z)) return false;
   for (const [dx, dz] of [
     [0.4, 0],
     [-0.4, 0],

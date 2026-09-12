@@ -389,7 +389,7 @@ import {
   restoreWaterArrival,
   wadingDepth,
 } from "./water-motion.js";
-import { waterAt } from "./hydrology.js";
+import { waterAt, hotLavaAt } from "./hydrology.js";
 import { prepareGuardianPatrols } from "./guardian-patrols.js";
 import { resetDiving, divingHint, updateDiveView, DIVE_AIR } from "./diving.js";
 import {
@@ -733,7 +733,24 @@ export class Adventure {
     return m;
   }
   groundHeight(x, z) {
-    if (this.terrainProfile) return this.terrainProfile.height(x, z);
+    if (this.terrainProfile) {
+      let ground = this.terrainProfile.height(x, z);
+      // Restored slag is a solid crust above the excavated bed. Standing and
+      // resuming here must place the explorer on that surface, not ankle-deep
+      // inside it. Hot pools still use the bed for their damage intersection.
+      if (this.level?.biome === "volcano")
+        for (const water of this.waterMeshes || []) {
+          const site = water.userData;
+          if (
+            site.kind === "lava" &&
+            site.cooled &&
+            Math.abs(x - water.position.x) < site.width / 2 &&
+            Math.abs(z - water.position.z) < site.length / 2
+          )
+            ground = Math.max(ground, water.position.y);
+        }
+      return ground;
+    }
     return (
       Math.sin(x * 0.017) * 1.8 +
       Math.cos(z * 0.02) * 1.6 +
@@ -1804,18 +1821,13 @@ export class Adventure {
         playerFootstep(this, this.level.biome, sprint, p);
       this.stepDistance = 0;
     }
-    if (this.level.biome === "volcano" && this.jumpY < 0.3) {
-      for (const w of this.waterMeshes)
-        if (
-          !w.userData.cooled &&
-          Math.abs(p.x - w.position.x) < 7 &&
-          Math.abs(p.z - w.position.z) < 7 &&
-          this.hitTimer <= 0
-        ) {
-          this.damage(9);
-          break;
-        }
-    }
+    if (
+      this.level.biome === "volcano" &&
+      this.jumpY < 0.3 &&
+      this.hitTimer <= 0 &&
+      hotLavaAt(this, p.x, p.z)
+    )
+      this.damage(9);
     this.survey();
     let nearest = null,
       dist = 5;
