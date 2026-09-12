@@ -45,7 +45,6 @@ function fixture(t, index, saved = null, all = false) {
     world,
     store,
     progress,
-    groundHeight: terrain.height,
     terrainProfile: terrain,
     player: new THREE.Group(),
     obstacles: [],
@@ -183,6 +182,81 @@ test("coastal sluice footings meet the terrain across their full width and prote
   assert.ok(immersed >= 5, "all five sounding wells exercise a submerged jamb");
 });
 
+test("all 105 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
+  const ray = new THREE.Raycaster();
+  let walls = 0,
+    niches = 0,
+    feet = 0;
+  for (const index of [3, 4, 6, 7]) {
+    const { game } = fixture(t, index, null, true);
+    game.world.updateMatrixWorld(true);
+    for (const gate of game.fieldGates) {
+      assert.equal(gate.walls.length, 3);
+      for (const wall of gate.walls) {
+        walls++;
+        const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
+        matrix.setPosition(
+          new THREE.Vector3(...wall.position).add(gate.root.position),
+        );
+        const point = (x, y, z) =>
+          new THREE.Vector3(x, y, z).applyMatrix4(matrix);
+        const direction = new THREE.Vector3(0, 0, -1).transformDirection(
+          matrix,
+        );
+        for (const cx of wall.bays) {
+          let deepest = 0,
+            cameraDepth = 0;
+          for (const dx of [-0.32, 0.12, 0.42])
+            for (const t of [0.24, 0.46, 0.68]) {
+              const y = wall.bottom + (wall.top - wall.bottom) * t;
+              const start = point(cx + wall.radius * dx, y, 2);
+              ray.set(start, direction);
+              const hit = ray.intersectObject(gate.root, true)[0];
+              assert.ok(
+                hit && hit.distance < 2.5,
+                `${index}/${gate.stage}/${wall.side}: sealed inset`,
+              );
+              deepest = Math.max(deepest, hit.distance);
+              cameraDepth = Math.max(
+                cameraDepth,
+                3 *
+                  game.cameraSurfaces.entry(
+                    start,
+                    point(cx + wall.radius * dx, y, -1),
+                    0,
+                  ),
+              );
+            }
+          assert.ok(
+            deepest > 1.9,
+            `${index}/${gate.stage}/${wall.side}: actual masonry recess`,
+          );
+          assert.ok(
+            cameraDepth > 1.9 && cameraDepth < 2.5,
+            "camera retains recess and closed backing after batching",
+          );
+          niches++;
+        }
+        for (const t of [-0.47, -0.22, 0, 0.22, 0.47])
+          for (const d of [-0.7, 0, 0.7]) {
+            const sample = point(wall.length * t, -30, d);
+            ray.set(sample, new THREE.Vector3(0, 1, 0));
+            const hit = ray.intersectObject(gate.root, true)[0];
+            assert.ok(hit, "support exists below full moulding footprint");
+            assert.ok(
+              hit.point.y < game.groundHeight(sample.x, sample.z) - 0.06,
+              `${index}/${gate.stage}/${wall.side}: footing below terrain`,
+            );
+            feet++;
+          }
+      }
+    }
+  }
+  assert.equal(walls, 105);
+  assert.ok(niches > 300);
+  assert.equal(feet, 1575);
+});
+
 test("hinged collision bounds contain the transformed door corners throughout the inward swing", () => {
   for (const side of [-1, 1])
     for (let i = 0; i <= 20; i++) {
@@ -201,6 +275,50 @@ test("hinged collision bounds contain the transformed door corners throughout th
         assert.ok(b.z + b.d <= 6.8);
       }
     }
+});
+
+test("open bronze leaves never show through the exterior side-wall recesses", (t) => {
+  const ray = new THREE.Raycaster();
+  let rays = 0;
+  for (const index of [3, 7]) {
+    const { game } = fixture(t, index, null, true);
+    for (const gate of game.fieldGates) {
+      for (const amount of [0, 0.5, 1]) {
+        gate.amount = amount;
+        updateSanctuaryGate(game, gate, 0);
+        game.world.updateMatrixWorld(true);
+        for (const wall of gate.walls.filter((w) => w.side !== 0)) {
+          const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
+          matrix.setPosition(
+            new THREE.Vector3(...wall.position).add(gate.root.position),
+          );
+          const direction = new THREE.Vector3(0, 0, -1).transformDirection(
+            matrix,
+          );
+          for (const cx of wall.bays)
+            for (const dx of [-0.4, 0, 0.4])
+              for (const t of [0.25, 0.5, 0.75]) {
+                const origin = new THREE.Vector3(
+                  cx + wall.radius * dx,
+                  wall.bottom + (wall.top - wall.bottom) * t,
+                  2,
+                ).applyMatrix4(matrix);
+                ray.set(origin, direction);
+                const hit = ray.intersectObject(gate.root, true)[0];
+                assert.ok(hit && hit.distance < 2.1);
+                for (let parent = hit.object; parent; parent = parent.parent)
+                  assert.notEqual(
+                    parent,
+                    gate.door,
+                    `${index}/${gate.stage}/${wall.side}/${amount}: door exposed through masonry`,
+                  );
+                rays++;
+              }
+        }
+      }
+    }
+  }
+  assert.ok(rays > 2700);
 });
 
 test("both door motions carry camera collision and hardware through opening without stale closed bounds", (t) => {

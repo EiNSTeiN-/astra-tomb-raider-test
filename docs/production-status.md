@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional chamber walls](chamber-walls.md) replace 105 plain faces across
+  35 palace, furnace, crystal and eclipse chambers with 320 recessed bays,
+  dressed surrounds, buried footings and framed interior panels. All 612 tests
+  and the production build pass. The review covers 214 assisted views,
+  1,575 footing samples, every changed bay's physical and camera depth,
+  218 nearby movement legs and reachable listening positions for all 70 gate
+  drives. Eight production keyboard/touch cases retain full health and preserve
+  complete normalized saves across 16 reload comparisons apart from timestamps.
+  VA-05 remains open for repeated court composition and sparse
+  surroundings; broader playable-world coverage is still required.
+
 - [Receiving pools now meet their surrounding terrain](receiving-shores.md),
   and dedicated cloud-city cascade basins replace puddles around wind controls.
   All 610 tests and the build pass. Checks cover 6,060 perimeter samples,

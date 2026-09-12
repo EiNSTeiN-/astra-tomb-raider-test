@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [regional chamber walls](chamber-walls.md) are original procedural geometry
+in `src/chamber-walls.js`, using existing credited palace plaster, stone and
+forge maps, the project bronze shader and original shell relief geometry.
+No external asset or dependency was added. Their documentation images are
+actual browser captures converted losslessly to WebP, with decoded pixel
+identity checked against the originals.
+
 The [guardian shoulder castings and surface weathering](guardian-surfaces.md)
 are original procedural geometry and shader code in `src/guardian-surfaces.js`,
 integrated with the existing original guardian kit. They reuse the credited

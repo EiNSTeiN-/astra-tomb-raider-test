@@ -19,6 +19,8 @@ import { softParticleMaterial } from "./effects.js";
 import { weatherSkyStone } from "./sky-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { buildSluiceFoundation } from "./sluice-foundations.js";
+import { footprintMinimum } from "./masonry-foundations.js";
+import { CHAMBER_WALL_BIOMES, buildChamberWall } from "./chamber-walls.js";
 import {
   skyGateWallGeometry,
   skyTimberSurface,
@@ -79,6 +81,22 @@ export function gateMaterials(level) {
     color: 0xffffff,
     toneMapped: false,
   });
+  const chamberInset = CHAMBER_WALL_BIOMES.has(level.biome)
+    ? pbrMaterial(
+        level.biome === "water" ? "palace-plaster" : design.wall,
+        level.biome === "water"
+          ? 0x85aaa6
+          : level.biome === "volcano"
+            ? 0x454b49
+            : level.biome === "crystal"
+              ? 0x55697d
+              : 0x4d6979,
+      )
+    : null;
+  if (chamberInset) {
+    chamberInset.name = `${design.name}: recessed chamber panels`;
+    chamberInset.normalScale.set(0.3, 0.3);
+  }
   const dust = softParticleMaterial({
     color:
       level.biome === "snow"
@@ -101,6 +119,7 @@ export function gateMaterials(level) {
     snow,
     dark,
     inlay,
+    chamberInset,
     seal,
     dust,
   };
@@ -218,7 +237,9 @@ export function buildSanctuaryGate(game, feature, materials) {
     );
     return mesh;
   };
-  // Staggered courses, darker footings and a coping course replace each flat wall.
+  const regionalWalls = CHAMBER_WALL_BIOMES.has(game.level.biome);
+  gate.walls = [];
+  // Regional chambers retain the gate's footprint and working space.
   for (const side of [-1, 0, 1]) {
     const back = side === 0,
       length = back ? 13.0 : 13.8;
@@ -229,6 +250,20 @@ export function buildSanctuaryGate(game, feature, materials) {
       floor = Math.min(floor, game.groundHeight(x + p.x, z + p.z) - y - 0.12);
     }
     const center = point(0);
+    if (regionalWalls)
+      floor = Math.min(
+        floor,
+        footprintMinimum(
+          (px, pz) => game.groundHeight(px, pz),
+          x + center.x,
+          z + center.z,
+          back ? length : 1.6,
+          back ? 1.6 : length,
+          game.terrainProfile?.step || 1.75,
+        ) -
+          y -
+          0.18,
+      );
     if (floor < -0.05) {
       if (design.panel === "sluice")
         gate.foundations.push(
@@ -239,21 +274,23 @@ export function buildSanctuaryGate(game, feature, materials) {
             {
               x: center.x,
               z: center.z,
-              width: back ? length : 0.9,
-              depth: back ? 0.9 : length,
+              width: back ? length : regionalWalls ? 1.6 : 0.9,
+              depth: back ? (regionalWalls ? 1.6 : 0.9) : length,
             },
             ++serial,
           ),
         );
       else
         block(
-          back ? length : 0.9,
+          back ? length : regionalWalls ? 1.6 : 0.9,
           -floor + 0.13,
-          back ? 0.9 : length,
+          back ? (regionalWalls ? 1.6 : 0.9) : length,
           m.trim,
           center.x,
           (floor + 0.13) / 2,
           center.z,
+          root,
+          regionalWalls,
         );
     }
     if (design.panel === "lattice") {
@@ -277,7 +314,9 @@ export function buildSanctuaryGate(game, feature, materials) {
           stone.rotation.y = angle;
         }
       }
-    } else
+    } else if (regionalWalls)
+      gate.walls.push(buildChamberWall(game, gate, m, { length, side, floor }));
+    else
       for (let row = 0; row < 7; row++) {
         const start = -length / 2,
           end = length / 2,
@@ -309,6 +348,8 @@ export function buildSanctuaryGate(game, feature, materials) {
         p.x,
         7.13,
         p.z,
+        root,
+        regionalWalls,
       );
     }
     if (m.snow)
@@ -321,14 +362,15 @@ export function buildSanctuaryGate(game, feature, materials) {
         7.32,
         center.z,
       );
-    cameraBox(
-      back ? length : 1.0,
-      7.38 - floor,
-      back ? 1.0 : length,
-      center.x,
-      (floor + 7.38) / 2,
-      center.z,
-    );
+    if (!regionalWalls)
+      cameraBox(
+        back ? length : 1.0,
+        7.38 - floor,
+        back ? 1.0 : length,
+        center.x,
+        (floor + 7.38) / 2,
+        center.z,
+      );
     game.obstacles.push({
       x: x + center.x,
       z: z + center.z,
