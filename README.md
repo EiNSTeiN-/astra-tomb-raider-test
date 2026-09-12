@@ -9,6 +9,8 @@ The [visual audit](docs/visual-audit.md) now records front/rear overviews of all
 [stone foundations beneath monastery columns on slopes](docs/monastery-foundations.md)
 and [grounded court bases in the jungle, desert and coast](docs/court-foundations.md).
 The desert's pier shafts also now meet their base slabs.
+The jungle's [54 large climbing roots now taper into the soil](docs/ruin-roots.md),
+removing the exposed blunt cuts at their lower ends.
 
 Guardians now have [cast shoulder plates and weathered bronze](docs/guardian-surfaces.md),
 with darker recesses, material-specific pitting and oxidation that changes with

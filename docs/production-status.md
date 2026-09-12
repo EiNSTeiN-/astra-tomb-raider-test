@@ -19,19 +19,28 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The jungle's [54 large climbing roots now taper into the soil](ruin-roots.md),
+  replacing exposed blunt ends. The terrain investigation corrected the initial
+  floating-root diagnosis: all old end rings touched the soil along an edge,
+  while their exposed portions reached 28 cm above it. The new closed rings sit
+  at least 17.3 cm below the rendered terrain. All 602 tests and the production
+  build pass; 22 reviewed placement views and keyboard/portrait touch checks
+  verify the repair and exact saved-state restoration apart from timestamps.
+  VA-08 is fixed; the broader [visual audit](visual-audit.md) remains open.
+
 - [Court foundations and desert pier joints](court-foundations.md) now close
   confirmed gaps across the jungle, desert and coastal chapters. The investigation
   checked 338 support footprints across 29 courts, finding 48 gaps over 10 cm,
   and a separate approximately 17 cm slab-to-shaft gap at all 108 desert piers.
   The new stonework and camera bounds extend into the terrain. All 600 tests and
   the production build pass; 94 updated browser views and six native production
-  keyboard/touch reload cases verify the change. The review also records floating
-  jungle root ends as VA-08. The [visual audit](visual-audit.md) remains open.
+  keyboard/touch reload cases verify the change. The review also identified the
+  jungle root ends subsequently investigated and repaired as VA-08.
 
 - The [playable-world visual audit](visual-audit.md) records 154 reviewed High
   overviews of all 77 main courts, with explicit gaps in route, interior and
   smaller-area coverage. It found floating monastery bases and six additional
-  construction or composition issues that remain open. The
+  construction or composition issues tracked in its findings table. The
   [monastery foundation repair](monastery-foundations.md) adds stone courses
   and camera collision down into the terrain. All 597 tests and the production
   build pass. Eighteen snow-court recaptures and nine close views across the

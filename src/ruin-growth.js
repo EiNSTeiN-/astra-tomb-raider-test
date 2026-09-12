@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
+import { createRuinRoot } from "./ruin-roots.js";
 
 function leafGeometry() {
   const vertices = [],
@@ -78,6 +79,7 @@ export function buildRuinGrowth(game) {
     color = new THREE.Color();
   for (const room of game.map.rooms) {
     const rootGroup = new THREE.Group(),
+      roots = [],
       leaves = [],
       x = room.x * 7,
       z = room.z * 7;
@@ -100,7 +102,7 @@ export function buildRuinGrowth(game) {
       for (let root = 0; root < 3; root++) {
         const a = root * 2.1 + side * 0.4,
           reach = 3.3 + rng() * 1.5;
-        const curve = new THREE.CatmullRomCurve3([
+        const points = [
           new THREE.Vector3(
             px + Math.cos(a) * reach,
             game.groundHeight(
@@ -129,11 +131,16 @@ export function buildRuinGrowth(game) {
             y + 8.8,
             pz + Math.sin(a + 0.3) * 1.5,
           ),
-        ]);
-        const mesh = new THREE.Mesh(
-          new THREE.TubeGeometry(curve, 24, 0.12 + rng() * 0.09, 6, false),
-          wood,
-        );
+        ];
+        const radius = 0.12 + rng() * 0.09,
+          { curve, geometry, ring } = createRuinRoot(
+            points,
+            radius,
+            (px, pz) => game.groundHeight(px, pz),
+            game.terrainProfile?.step,
+          ),
+          mesh = new THREE.Mesh(geometry, wood);
+        roots.push({ ring, radius });
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         rootGroup.add(mesh);
@@ -183,6 +190,7 @@ export function buildRuinGrowth(game) {
     game.world.add(canopy);
     game.growthPatches.push({
       rootGroup,
+      roots,
       canopy,
       center: new THREE.Vector3(x, y + 5, z - 15),
     });

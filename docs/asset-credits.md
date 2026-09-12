@@ -565,6 +565,12 @@ and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
 
+The [jungle root repair](ruin-roots.md) adds original closed, tapered geometry in
+`src/ruin-roots.js`, used by `src/ruin-growth.js`. It retains the existing credited
+bark and climbing-leaf materials. No external assets, recordings or dependencies
+were added. The four comparison images are actual game captures converted
+losslessly to WebP, with decoded pixel identity checked against the originals.
+
 The [court foundation and desert joint repair](court-foundations.md) adds original
 procedural stonework in `src/masonry-footings.js` and the three chapter
 architecture builders. It reuses the credited temple, sandstone and palace-stone
