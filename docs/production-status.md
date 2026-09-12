@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The final chapter's [observatory foundations now meet the terrain](observatory-foundations.md).
+  Eleven pedestal footings close measured gaps up to 1.31 m; 88 column bases also
+  use a conservative full-footprint terrain bound. Pedestal stone mapping has
+  a consistent scale. All 608 tests and the build pass. The review covers 17,688
+  terrain samples, 56 updated views, 31 valid assisted routes, 63 approaches,
+  22 sound paths and four production keyboard/touch movement cases. Reloads
+  preserve progress; one verified camera obstruction correction is documented.
+  VA-07 is fixed; the broader [visual audit](visual-audit.md) remains open.
+
 - Chapters now [save look angles and choose a clear camera orbit on arrival](arrival-camera.md).
   The reproduced solar-control resume improves from 0.81 m of camera clearance
   with a hidden character to a visible 5.33 m view. All 607 tests, the build,

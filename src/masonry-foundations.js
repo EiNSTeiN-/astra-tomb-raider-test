@@ -1,7 +1,7 @@
 // Terrain is rendered on a regular grid. Sampling every vertex of the cells
 // touched by a footing gives a conservative lower bound for their triangles,
 // including diagonal slopes that a center or corner-only query can miss.
-export function masonryFoundation(
+export function footprintMinimum(
   groundHeight,
   x,
   z,
@@ -18,6 +18,19 @@ export function masonryFoundation(
   for (let px = minX; px <= maxX + 1e-6; px += gridStep)
     for (let pz = minZ; pz <= maxZ + 1e-6; pz += gridStep)
       lowest = Math.min(lowest, groundHeight(px, pz));
+  return lowest;
+}
+
+export function masonryFoundation(
+  groundHeight,
+  x,
+  z,
+  width,
+  depth,
+  gridStep = 1.75,
+) {
+  const center = groundHeight(x, z),
+    lowest = footprintMinimum(groundHeight, x, z, width, depth, gridStep);
   if (center - lowest < 0.08) return null;
   const bottom = lowest - 0.18,
     top = center + 0.035,

@@ -6,6 +6,10 @@ The bronze shells have outer and inner surfaces and sealed cut edges. They hinge
 
 The visible sky includes sparse stars, a faint galactic band, an eclipsed disk, and a slowly changing corona. Its reflection capture lights the metalwork, with cool ambient light and warm local torches. The saved chapter-completion state reveals the sun and shifts the sky toward dawn. This is a stylized original shader, not an astronomical simulation.
 
+A later [foundation repair](observatory-foundations.md) measures and closes gaps
+beneath the eleven pedestals and 88 column bases, and corrects the pedestal stone
+mapping. Its comparison images and checks record the updated terrain contact.
+
 ## Field work and the physical puzzle
 
 Each site's opening and harmonic activity follow its sector's three field actions. The lunar sector starts fully closed; its three shutter stations open it in thirds. Other sectors leave a small initial aperture and open further as their survey, transport, fire, winch, or resonance work is completed. The entrance and first mechanism court share the first sector's restoration state. Earlier completed sectors restore correctly from the main stage in an older save, even when its field list is empty.

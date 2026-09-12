@@ -565,6 +565,12 @@ and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
 
+The [observatory foundation repair](observatory-foundations.md) adds original
+stone footing geometry and corrected pedestal texture coordinates. It reuses
+the existing credited stone maps and introduces no external assets, recordings
+or dependencies. Four actual before/after game captures were converted losslessly
+to WebP, with decoded pixel identity checked against their source images.
+
 The [arrival camera and saved look angles](arrival-camera.md) use original project
 code and introduce no models, textures, recordings or external dependencies.
 The four comparison images are actual game captures converted losslessly to

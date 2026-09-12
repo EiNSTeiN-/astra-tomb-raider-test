@@ -42,7 +42,7 @@ function fixture(t) {
     map,
     world,
     terrainProfile: terrain,
-    groundHeight: terrain.height,
+    groundHeight: Adventure.prototype.groundHeight,
     progress: { stage: 0, field: [], alignments: {}, time: 12 },
     player: { position: new THREE.Vector3(385, 0, 210) },
     obstacles: [],
@@ -103,6 +103,66 @@ test("curved bronze panels are closed, outward facing shells with a real open oc
   assert.ok(inner?.face.normal.y < 0);
   g.dispose();
   mesh.material.dispose();
+});
+
+test("all observatory footings bury their complete footprints and close the old pedestal gaps after batching", (t) => {
+  const game = fixture(t),
+    ray = new THREE.Raycaster();
+  game.world.updateMatrixWorld(true);
+  let foundations = 0,
+    exposedRays = 0;
+  for (const patch of game.observatories)
+    for (const footing of patch.foundations) {
+      const x = patch.root.position.x + footing.x,
+        z = patch.root.position.z + footing.z;
+      foundations++;
+      if (footing.kind === "pedestal") {
+        const oldBottom = game.groundHeight(x, z);
+        assert.equal(footing.top, oldBottom + 0.035);
+        for (let i = 0; i < 128; i++) {
+          const a = (i * Math.PI) / 64,
+            dx = Math.sin(a),
+            dz = Math.cos(a),
+            ground = game.groundHeight(x + dx * 4, z + dz * 4);
+          assert(footing.bottom <= ground - 0.18);
+          if (oldBottom - ground < 0.08) continue;
+          for (const fraction of [0.15, 0.5, 0.85]) {
+            const y = ground + (oldBottom - ground) * fraction;
+            ray.set(
+              new THREE.Vector3(x + dx * 5, y, z + dz * 5),
+              new THREE.Vector3(-dx, 0, -dz),
+            );
+            const hit = ray.intersectObject(patch.root, true)[0];
+            assert(hit && hit.distance < 1.08, `open pedestal ${patch.index}`);
+            exposedRays++;
+          }
+        }
+      } else {
+        for (let ix = -5; ix <= 5; ix++)
+          for (let iz = -5; iz <= 5; iz++)
+            assert(
+              footing.bottom <=
+                game.groundHeight(x + ix * 0.25, z + iz * 0.25) - 0.18,
+              `column ${patch.index}/${footing.column}`,
+            );
+      }
+      const half = footing.radius || footing.width / 2,
+        y = footing.bottom + 0.12;
+      ray.set(
+        new THREE.Vector3(x + half + 1, y, z),
+        new THREE.Vector3(-1, 0, 0),
+      );
+      const hit = ray.intersectObject(patch.root, true)[0];
+      assert(hit && hit.distance < 1.12, `missing foundation ${patch.index}`);
+      assert(
+        game.cameraSurfaces.entry(
+          new THREE.Vector3(x + half + 1, y, z),
+          new THREE.Vector3(x, y, z),
+        ) < 1,
+      );
+    }
+  assert.equal(foundations, 99);
+  assert(exposedRays > 100);
 });
 
 test("partial orbital saves are bounded, independent and survive normalization without modifying targets", () => {

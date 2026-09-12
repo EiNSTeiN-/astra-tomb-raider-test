@@ -4,6 +4,11 @@ import { stoneBlockGeometry } from "./temple-architecture.js";
 import { flutedColumnGeometry, vaultStoneGeometry } from "./palace-geometry.js";
 import { domePanelGeometry, patinatedBronze } from "./observatory-geometry.js";
 import { observatoryState } from "./observatory-state.js";
+import { footprintMinimum } from "./masonry-foundations.js";
+import {
+  pedestalFootingGeometry,
+  pedestalStoneUV,
+} from "./observatory-footings.js";
 
 export function buildObservatory(game) {
   game.observatories = [];
@@ -11,6 +16,7 @@ export function buildObservatory(game) {
   game.orreryFocus = null;
   game.observatoryMaterials = null;
   if (game.level.biome !== "eclipse") return false;
+  const groundHeight = (x, z) => game.groundHeight(x, z);
   const stone = pbrMaterial("temple", 0xc0c4bf),
     bronze = patinatedBronze();
   const dark = pbrMaterial("palace-stone", 0x606e78);
@@ -51,6 +57,7 @@ export function buildObservatory(game) {
       rings: [],
       instruments: [],
       targets: [],
+      foundations: [],
       aperture: state.aperture,
       motion: 0,
     };
@@ -90,7 +97,21 @@ export function buildObservatory(game) {
         ),
       );
       const ground = Math.max(...samples),
-        floor = Math.min(...samples) - 0.2;
+        floor =
+          Math.min(
+            ...samples,
+            footprintMinimum(groundHeight, x + p.x, z + p.z, 2.5, 2.5) - base,
+          ) - 0.2;
+      patch.foundations.push({
+        kind: "column",
+        column: i,
+        x: p.x,
+        z: p.z,
+        bottom: base + floor,
+        top: base + ground + 0.8,
+        width: 2.5,
+        depth: 2.5,
+      });
       block(
         2.5,
         ground - floor + 0.8,
@@ -183,8 +204,29 @@ export function buildObservatory(game) {
       });
     }
     const ground = game.groundHeight(x, z) - base;
+    const bottom = footprintMinimum(groundHeight, x, z, 8, 8) - 0.2;
     add(
-      new THREE.CylinderGeometry(3.15, 4, 3 - ground, 32),
+      pedestalFootingGeometry(bottom - base, ground + 0.035),
+      dark,
+      0,
+      0,
+      0,
+      root,
+      true,
+    );
+    patch.foundations.push({
+      kind: "pedestal",
+      x: 0,
+      z: 0,
+      bottom,
+      top: base + ground + 0.035,
+      radius: 4,
+    });
+    add(
+      pedestalStoneUV(
+        new THREE.CylinderGeometry(3.15, 4, 3 - ground, 32),
+        (ground + 3) / 2,
+      ),
       dark,
       0,
       (ground + 3) / 2,
