@@ -1,3 +1,4 @@
+import { normalizeArcadeLock } from "./arcade-lock-rules.js";
 import { normalizeSunBridge } from "./sun-bridge-rules.js";
 import { normalizeShutterHouse } from "./shutter-house-rules.js";
 import { normalizeEchoCauseway } from "./echo-causeway-rules.js";
@@ -138,6 +139,13 @@ export function normalizeSave(value) {
           : null,
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
+      arcadeLock:
+        key === "tides"
+          ? normalizeArcadeLock(v.arcadeLock, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       sunBridge:
         key === "verdant"
           ? normalizeSunBridge(v.sunBridge, {
@@ -289,6 +297,10 @@ export class SaveStore {
       gallery: id === "tides" ? normalizeGallery(null) : null,
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
+      arcadeLock:
+        id === "tides"
+          ? normalizeArcadeLock(null, { stage: 0, field: [] })
+          : null,
       sunBridge:
         id === "verdant"
           ? normalizeSunBridge(null, { stage: 0, field: [] })

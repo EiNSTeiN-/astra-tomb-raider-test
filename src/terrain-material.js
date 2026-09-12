@@ -309,7 +309,10 @@ export function terrainMaterial(game) {
     });
   }
   if (biome === "water") {
-    material.defines = { TERRAIN_COASTAL: 1 };
+    material.defines = {
+      TERRAIN_COASTAL: 1,
+      COASTAL_BASIN_COUNT: game.terrainProfile.waters.length,
+    };
     Object.assign(uniforms, coastalUniforms(game), {
       coastalSlabMap: { value: load("palace-stone", "color") },
       coastalSlabNormal: { value: load("palace-stone", "normal") },

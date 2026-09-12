@@ -1,3 +1,5 @@
+import { buildArcadeStation } from "./arcade-lock-art.js";
+import { arcadeFieldAction } from "./arcade-lock.js";
 import { buildSunStation } from "./sun-bridge-art.js";
 import { sunFieldAction } from "./sun-bridge.js";
 import { buildShutterStation } from "./shutter-house-art.js";
@@ -28,6 +30,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildArcadeStation(game, f, group)) return;
   if (buildSunStation(game, f, group)) return;
   if (buildShutterStation(game, f, group)) return;
   if (buildCausewayStation(game, f, group)) return;
@@ -133,6 +136,7 @@ export function updateFieldWorld(game, dt) {
     if (f.kind === "lift") f.core.visible = !done;
     if (f.kind === "delivery") f.core.visible = done;
     if (
+      f.arcadeHeight === undefined &&
       f.sunHeight === undefined &&
       f.shutterHeight === undefined &&
       ["valve", "winch"].includes(f.kind)
@@ -244,6 +248,7 @@ export function finishFieldTask(game, f) {
       return false;
     }
   }
+  if (f.arcadeHeight !== undefined && !arcadeFieldAction(game, f)) return false;
   if (f.sunHeight !== undefined && !sunFieldAction(game, f)) return false;
   game.progress.field.push(f.id);
   if (f.causewayHeight !== undefined) soundCausewayRelay(game, f.step);

@@ -1,4 +1,5 @@
 import { addSunBridge } from "./sun-bridge-rules.js";
+import { addArcadeLock } from "./arcade-lock-rules.js";
 import { addShutterHouse } from "./shutter-house-rules.js";
 import { addEchoCauseway } from "./echo-causeway-rules.js";
 import { addAstralCrane } from "./astral-crane-rules.js";
@@ -565,11 +566,14 @@ export function createMap(level) {
     ),
     level,
   );
-  return addSunBridge(
-    addEchoCauseway(
-      addShutterHouse(
-        addAstralCrane(
-          addTemperingCart(addRainGarden(map, level), level),
+  return addArcadeLock(
+    addSunBridge(
+      addEchoCauseway(
+        addShutterHouse(
+          addAstralCrane(
+            addTemperingCart(addRainGarden(map, level), level),
+            level,
+          ),
           level,
         ),
         level,

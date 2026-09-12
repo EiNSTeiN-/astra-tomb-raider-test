@@ -1,3 +1,4 @@
+import { poseArcadeTurn } from "./arcade-lock.js";
 import { poseSunTurn } from "./sun-bridge.js";
 import { poseCleft } from "./cleft-pose.js";
 import { CROUCH_DROP } from "./stealth.js";
@@ -359,6 +360,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   }
   poseCausewayWheel(game);
   posePressureOperation(game);
+  poseArcadeTurn(game);
   poseSunTurn(game);
   poseShutterTurn(game);
   poseOrbitBearing(game);

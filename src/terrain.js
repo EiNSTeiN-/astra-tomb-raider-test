@@ -1,4 +1,5 @@
 import { SUN_SITE, sunFoundationWeight } from "./sun-bridge-rules.js";
+import { ARCADE_SITE, arcadeFoundationWeight } from "./arcade-lock-rules.js";
 import { refineSnowTerrain } from "./snow-geology.js";
 import { shutterFoundationWeight } from "./shutter-house-rules.js";
 import { refineCavernTerrain } from "./cavern-geology.js";
@@ -162,6 +163,11 @@ export function createTerrainProfile(map, level) {
         const weight = sunFoundationWeight(x, z);
         height = height * (1 - weight) + raw(SUN_SITE.x, SUN_SITE.z) * weight;
       }
+      if (map.arcadeLock) {
+        const weight = arcadeFoundationWeight(x, z);
+        height =
+          height * (1 - weight) + raw(ARCADE_SITE.x, ARCADE_SITE.z) * weight;
+      }
       if (map.shutterHouse) {
         const weight = shutterFoundationWeight(x, z);
         height = height * (1 - weight) + raw(175, 238) * weight;
@@ -248,6 +254,7 @@ export function createTerrainProfile(map, level) {
   const profile = {
     extent,
     sunY: map.sunBridge ? raw(SUN_SITE.x, SUN_SITE.z) : null,
+    arcadeY: map.arcadeLock ? raw(ARCADE_SITE.x, ARCADE_SITE.z) : null,
     causewayY: map.echoCauseway ? raw(CAUSEWAY_SITE.x, CAUSEWAY_SITE.z) : null,
     craneY: map.astralCrane ? raw(182, 217) : null,
     temperingY: map.temperingCart ? raw(119, 392) : null,

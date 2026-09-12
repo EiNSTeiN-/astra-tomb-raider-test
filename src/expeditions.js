@@ -190,9 +190,9 @@ const chapters = {
     ],
     [
       "The sunken arcade",
-      "The arcade’s doors share a cable drive. Wind the supports in order to pull its shattered entrance open.",
+      "Open the covered inspection passage and raise its counterweight. Return to the lower dock, board the floating platform and fill the lock. Cross the broken upper galleries to release the gate and its return stair.",
       "Tension the arcade support|Raise the flooded counterweight|Winch the arcade gate clear",
-      "The arcade doors swing clear of the dark water.",
+      "The upper grille rises, opening the return stair. Follow the coastal path to the arcade sanctuary.",
     ],
     [
       "The queen’s reservoir",

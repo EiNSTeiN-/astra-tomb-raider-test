@@ -866,6 +866,9 @@ kbd {
 .map-layout aside > .small-copy {
   font-size: 10px;
 }
+.map-layout .small-copy.arcade-route-instructions {
+  display: block;
+}
 .map-layout .secondary-button {
   margin-top: 20px;
   width: 100%;

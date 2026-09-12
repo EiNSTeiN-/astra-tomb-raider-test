@@ -163,6 +163,7 @@ export function buildHazards(game) {
       !f ||
       f.causewayHeight !== undefined ||
       f.shutterHeight !== undefined ||
+      f.arcadeHeight !== undefined ||
       f.sunHeight !== undefined
     )
       continue;

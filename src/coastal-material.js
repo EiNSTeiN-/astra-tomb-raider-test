@@ -3,8 +3,8 @@ import * as THREE from "three";
 export const coastalDeclarations = /* glsl */ `
 #ifdef TERRAIN_COASTAL
 varying vec3 vCoastal;
-uniform vec4 coastalBasins[8];
-uniform float coastalWaterHeight[8];
+uniform vec4 coastalBasins[COASTAL_BASIN_COUNT];
+uniform float coastalWaterHeight[COASTAL_BASIN_COUNT];
 uniform sampler2D coastalSlabMap, coastalSlabNormal, coastalSlabRoughness;
 
 vec3 coastalStone(vec2 p) {
@@ -81,7 +81,7 @@ export const coastalColor = /* glsl */ `
   cliffColor*=mix(.86,1.12,bankVariation);
   // Recent water height controls darkening; old salt remains after drainage.
   float tidalWet=1.0-smoothstep(-2.4,-1.65,vTerrainPosition.y);
-  for(int i=0;i<8;i++) {
+  for(int i=0;i<COASTAL_BASIN_COUNT;i++) {
     vec4 basin=coastalBasins[i];
     vec2 q=abs(vTerrainPosition.xz-basin.xy)-basin.zw;
     float bank=1.0-smoothstep(.05,1.8,max(q.x,q.y));

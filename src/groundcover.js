@@ -1,3 +1,4 @@
+import { arcadeFoundationDistance } from "./arcade-lock-rules.js";
 import * as THREE from "three";
 import { random } from "./campaign.js";
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
@@ -180,6 +181,8 @@ export function buildGroundCover(game) {
         (inWindCourt(game.map, px, pz) ||
           !skyGroundSupported(game.terrainProfile, px, pz))
       )
+        continue;
+      if (game.map.arcadeLock && arcadeFoundationDistance(px, pz) < 0.5)
         continue;
       const key = `${Math.floor(px / 32)},${Math.floor(pz / 32)}`;
       if (!chunks.has(key)) chunks.set(key, []);

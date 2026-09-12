@@ -30,7 +30,7 @@ test("eight chapter hazards have warning, active, and usable clear intervals", (
     }
   }
 });
-test("ordinary sectors have station traps while connected wind, echo and garden crossings supply their own hazards", () => {
+test("ordinary sectors have station traps while connected wind, echo, garden and flood-lock crossings supply their own hazards", () => {
   let count = 0;
   for (const level of LEVELS) {
     const map = createMap(level),
@@ -48,11 +48,11 @@ test("ordinary sectors have station traps while connected wind, echo and garden 
     assert.equal(
       game.hazards.length,
       level.mechanisms -
-        (["crystal", "frost", "verdant"].includes(level.id) ? 1 : 0),
+        (["crystal", "frost", "verdant", "tides"].includes(level.id) ? 1 : 0),
     );
     if (level.id === "crystal")
       assert(!game.hazards.some((h) => h.stage === 3));
-    if (["frost", "verdant"].includes(level.id))
+    if (["frost", "verdant", "tides"].includes(level.id))
       assert(!game.hazards.some((h) => h.stage === 5));
     for (const hazard of game.hazards) {
       const field = map.features.find((f) => f.id === hazard.fieldId);
@@ -75,7 +75,7 @@ test("ordinary sectors have station traps while connected wind, echo and garden 
       count++;
     }
   }
-  assert.equal(count, 66);
+  assert.equal(count, 65);
 });
 test("ice locks its impact point, beams can be jumped, and ground pulses have a safe airborne interval", () => {
   const ice = {

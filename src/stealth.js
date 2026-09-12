@@ -13,6 +13,7 @@ export function canCrouch(game) {
     game.diving ||
     game.carrying ||
     game.blockGrip ||
+    game.arcadeLock?.turn ||
     game.sunBridge?.turn ||
     game.shutterHouse?.turn ||
     game.fireVault?.operation ||

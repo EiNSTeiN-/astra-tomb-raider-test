@@ -1,4 +1,5 @@
 import { galleryWaterAt } from "./sunken-gallery-layout.js";
+import { ARCADE_SITE, ARCADE_POOL } from "./arcade-lock-rules.js";
 
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
@@ -6,6 +7,16 @@ const smooth = (a, b, v) => {
 };
 export function waterSites(map, level) {
   const sites = [];
+  if (map.arcadeLock)
+    sites.push({
+      id: "arcade-lock",
+      kind: "water",
+      ...ARCADE_POOL,
+      depth: 3.2,
+      baseOffset: 0.6,
+      arcade: true,
+      room: { x: ARCADE_SITE.x / 7, z: ARCADE_SITE.z / 7 },
+    });
   if (map.fireVault)
     sites.push({
       id: "rainkeeper-pool",

@@ -1,3 +1,4 @@
+import { arcadeDeckAt, arcadeCeiling } from "./arcade-lock-rules.js";
 import { sunDeckAt, sunCeiling } from "./sun-bridge-rules.js";
 import { shutterDeckAt, shutterCeiling } from "./shutter-house-rules.js";
 import { causewayDeckAt } from "./echo-causeway-rules.js";
@@ -28,6 +29,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const arcadeDeck = arcadeDeckAt(game, x, z, maxY);
+  if (arcadeDeck && arcadeDeck.height > height) return arcadeDeck;
   const sunDeck = sunDeckAt(game, x, z, maxY);
   if (sunDeck && sunDeck.height > height) return sunDeck;
   const shutterDeck = shutterDeckAt(game, x, z, maxY);
@@ -89,7 +92,13 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         p.x,
         p.z,
         before,
-        shutterCeiling(game, p.x, p.z, before, p.y),
+        shutterCeiling(
+          game,
+          p.x,
+          p.z,
+          before,
+          arcadeCeiling(game, p.x, p.z, before, p.y),
+        ),
       );
       if (ceiling < p.y) {
         p.y = ceiling;

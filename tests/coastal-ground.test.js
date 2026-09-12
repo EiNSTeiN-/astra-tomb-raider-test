@@ -171,20 +171,44 @@ test("damp terrain follows actual draining water, including waterfall basins sha
   const h =
     game.terrainMeshes[0].material.userData.terrainUniforms.coastalWaterHeight
       .value;
-  assert.equal(h.length, 8);
+  assert.equal(h.length, game.terrainProfile.waters.length);
+  assert.equal(
+    game.terrainMeshes[0].material.defines.COASTAL_BASIN_COUNT,
+    h.length,
+  );
+  const index = (id) =>
+    game.terrainProfile.waters.findIndex((w) => w.id === id);
+  const well1 = index("reservoir-1"),
+    well3 = index("reservoir-3"),
+    well5 = index("reservoir-5"),
+    well9 = index("reservoir-9"),
+    fall0 = index("basin-0"),
+    fall3 = index("basin-3"),
+    fall9 = index("basin-9"),
+    lock = index("arcade-lock");
   const original = Array.from(h);
   game.progress.stage = 3;
   updateWaterSurfaces(game, 100);
-  assert.ok(Math.abs(h[0] - (original[0] - 1.8)) < 0.000001);
-  assert.ok(Math.abs(h[1] - (original[1] - 1.8)) < 0.000001);
-  assert.equal(h[6], h[1], "the contained waterfall uses its reservoir level");
-  assert.equal(h[7], h[4]);
+  assert.ok(Math.abs(h[well1] - (original[well1] - 1.8)) < 0.000001);
+  assert.ok(Math.abs(h[well3] - (original[well3] - 1.8)) < 0.000001);
   assert.equal(
-    h[5],
-    original[5],
+    h[fall3],
+    h[well3],
+    "the contained waterfall uses its reservoir level",
+  );
+  assert.equal(h[fall9], h[well9]);
+  assert.equal(
+    h[fall0],
+    original[fall0],
     "independent first waterfall retains its water level",
   );
-  assert.equal(h[2], original[2], "locked reservoir is not drained");
+  assert.equal(h[well5], original[well5], "locked reservoir is not drained");
+  game.progress.arcadeLock = { level: 0.6 };
+  updateWaterSurfaces(game, 0);
+  assert(
+    Math.abs(h[lock] - original[lock] - 5.6 * 0.6) < 1e-6,
+    "lock shoreline tracks its live flood level",
+  );
   const saved = Array.from(h);
   updateWaterSurfaces(game, 0);
   assert.deepEqual(Array.from(h), saved);

@@ -547,3 +547,13 @@ original shader over the existing credited temple stone maps. It also reuses
 the monastery wood, bark maps and project bronze/iron materials. No new
 external assets, recordings or dependencies were introduced. Comparison
 images are actual game renders converted losslessly to WebP.
+
+
+The [Sunken Arcade](sunken-arcade.md) adds original flood-lock masonry, segmented
+arches, dock shutters, a floating timber platform with bronze flotation tanks,
+handwheel placements, an inspection passage, return stair and map artwork in
+`src/arcade-lock*.js`. It reuses the credited palace plaster, stone, monastery
+wood and bark maps, the project's bronze/iron materials, the existing character
+and hand solver, original hoist synthesis and the already credited waterfall
+buffer. No new external models, images, recordings or dependencies were added.
+Documentation images are actual running-game captures converted to WebP.

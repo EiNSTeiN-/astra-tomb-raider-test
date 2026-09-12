@@ -1,3 +1,4 @@
+import { ARCADE_RISE } from "./arcade-lock-rules.js";
 import * as THREE from "three";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { EXPEDITIONS, fieldComplete } from "./expeditions.js";
@@ -228,7 +229,9 @@ export function updateWaterSurfaces(game, dt) {
     const target = game.level.biome === "water" && restored ? 1.8 : 0;
     data.drain =
       (data.drain || 0) + (target - (data.drain || 0)) * Math.min(1, dt * 0.4);
-    water.position.y = data.baseY - data.drain;
+    water.position.y = data.arcade
+      ? data.baseY + ARCADE_RISE * (game.progress.arcadeLock?.level || 0)
+      : data.baseY - data.drain;
     const u = water.material.userData.waterUniforms;
     if (u) u.waterTime.value = game.elapsed;
     if (data.kind === "lava") {

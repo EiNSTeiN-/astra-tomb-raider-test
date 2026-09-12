@@ -78,6 +78,12 @@ Deploy `dist/` to a static host. There is no game server, login, API key, or dat
 
 Playable milestones are committed and pushed to [EiNSTeiN-/astra-tomb-raider-test](https://github.com/EiNSTeiN-/astra-tomb-raider-test). See [CONTRIBUTING.md](CONTRIBUTING.md) for validation and publication rules.
 
+In **The Drowned Kingdom**, [the Sunken Arcade](docs/sunken-arcade.md) links
+its three winches through a covered inspection passage, a floodable lock and
+broken upper galleries. Ride the pontoon with the rising water, recall it from
+either landing, and open the return stair. The route includes moving machinery
+sounds, a live map, keyboard/touch actions and saved recovery landings.
+
 In **The Verdant Veil**, [the Hanging Garden](docs/hanging-garden.md) connects
 three winches through rotating spans, broken gallery jumps and a raised return
 walk. Moving decks carry the player, landing wheels recall them, and the route

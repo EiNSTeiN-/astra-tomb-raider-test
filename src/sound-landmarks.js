@@ -84,6 +84,7 @@ export function buildSoundLandmarks(game) {
   game.soundSources.push(...(game.thermalSources || []).map((s) => ({ ...s })));
   game.soundSources.push(...(game.fireVault?.sources || []));
   game.soundSources.push(...(game.bellHoist?.sources || []));
+  game.soundSources.push(...(game.arcadeLock?.sources || []));
   game.soundSources.push(...(game.sunBridge?.sources || []));
   game.soundSources.push(...(game.shutterHouse?.sources || []));
   game.soundSources.push(...(game.frozenStair?.sources || []));
