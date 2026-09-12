@@ -26,6 +26,7 @@ import { normalizeSolar } from "./solar-rules.js";
 import { normalizeBells } from "./bell-rules.js";
 import { normalizeGallery } from "./sunken-gallery-record.js";
 import { normalizeFireVault } from "./fire-vault-rules.js";
+import { normalizeCamera } from "./camera-state.js";
 export const SAVE_KEY = "vesper-expedition-v1";
 export const defaults = () => ({
   version: 1,
@@ -221,6 +222,7 @@ export function normalizeSave(value) {
       health: Math.max(1, Math.min(100, Number(v.health) || 100)),
       medkits: Math.max(0, Math.min(20, Number(v.medkits) || 0)),
       position: position(v.position),
+      camera: normalizeCamera(v.camera),
       checkpoint: position(v.checkpoint),
       traversal:
         v.traversal &&
@@ -343,6 +345,7 @@ export class SaveStore {
       health: 100,
       medkits: 3,
       position: null,
+      camera: null,
       checkpoint: null,
       traversal: null,
       lastPlayed: Date.now(),

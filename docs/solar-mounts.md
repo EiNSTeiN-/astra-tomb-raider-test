@@ -58,10 +58,10 @@ without a development hook, failed requests, browser errors or warnings. They
 verify local control use and persistence, not combat or a full chapter playthrough.
 
 The native-input setup also exposed a separate camera limitation: resuming beside
-the last mirror in chamber 5 can put the camera close behind the handwheel or
-the adjacent receiver column. The view needs orbiting or movement into the aisle.
-This is tracked as VA-09 for a follow-up on control approaches and restored camera
-orientation; repairing the wheel mounts does not resolve that issue.
+the last mirror in chamber 5 put the camera close behind the handwheel or the
+adjacent receiver column. The subsequent [arrival-camera repair](arrival-camera.md)
+resolves VA-09 by saving look angles and choosing a clear nearby orbit when the
+requested view is obstructed.
 
 This repairs VA-04 in the [visual audit](visual-audit.md). The broader world
 review remains open. No audio assets, source positions, attenuation rules or

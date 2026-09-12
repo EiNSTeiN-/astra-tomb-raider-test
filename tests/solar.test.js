@@ -260,6 +260,42 @@ test("all 68 mirror handwheels retain a solid axle and centered hub throughout r
   assert.equal(checked, 68);
 });
 
+test("all 77 solar control arrivals start with a clear full orbit and preserve saved clear headings", (t) => {
+  const { game: g } = fixture(t);
+  g.camera = new THREE.PerspectiveCamera(58, 1.6, 0.1, 450);
+  g.avatar = new THREE.Group();
+  let checked = 0;
+  for (const site of g.solarSites) {
+    ready(g, site.stage);
+    for (const f of [...site.mirrors.map((m) => m.feature), site.receiver]) {
+      stand(g, f);
+      g.progress.position = { x: g.player.position.x, z: g.player.position.z };
+      g.progress.camera = null;
+      // The old fallback aimed toward room 1 after field tasks were complete.
+      g.restoreCamera(g.map.rooms[1]);
+      const target = g.player.position
+        .clone()
+        .add(new THREE.Vector3(0, 1.3, 0));
+      assert(g.camera.position.distanceTo(target) > 5.1, f.id);
+      assert(g.avatar.visible, f.id);
+      assert(g.cameraSpace(g.camera.position), f.id);
+      assert(g.cameraSurfaces.entry(target, g.camera.position) > 0.999, f.id);
+      const view = { yaw: g.yaw, pitch: g.pitch },
+        camera = g.camera.position.clone();
+      g.save();
+      g.progress.camera = new SaveStore(g.store.storage).level(
+        g.level.id,
+      ).camera;
+      g.restoreCamera(site.feature);
+      assert(Math.abs(Math.sin(g.yaw - view.yaw)) < 1e-10);
+      assert.equal(g.pitch, view.pitch);
+      assert(g.camera.position.distanceTo(camera) < 1e-8);
+      checked++;
+    }
+  }
+  assert.equal(checked, 77);
+});
+
 test("world controls require restored field work and counterweights, save each turn, and activate only a lit receiver", (t) => {
   const { game: g, storage } = fixture(t),
     site = g.solarSites[0],

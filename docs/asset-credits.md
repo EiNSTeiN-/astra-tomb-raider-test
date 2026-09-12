@@ -565,6 +565,11 @@ and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
 
+The [arrival camera and saved look angles](arrival-camera.md) use original project
+code and introduce no models, textures, recordings or external dependencies.
+The four comparison images are actual game captures converted losslessly to
+WebP, with decoded pixel identity checked against their source captures.
+
 The [solar handwheel mounts](solar-mounts.md) are original profiled castings in
 `src/solar-mounts.js`, using the existing procedural bronze material. They add no
 external assets, recordings or dependencies. The four comparison images are

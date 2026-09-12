@@ -19,13 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- Chapters now [save look angles and choose a clear camera orbit on arrival](arrival-camera.md).
+  The reproduced solar-control resume improves from 0.81 m of camera clearance
+  with a hidden character to a visible 5.33 m view. All 607 tests, the build,
+  154 solar-control checks and 409 sampled approaches/ledges across eight chapters
+  pass. Ten production keyboard/touch cases retain their complete saved state
+  apart from timestamps; a separate blocked-angle check verifies the expected
+  correction without changing other save fields. Reviewed renders cover 36
+  assisted views and 22 production views. VA-09 is fixed; the broader
+  [visual audit](visual-audit.md) remains open.
+
 - All 68 desert mirror handwheels now have [bearing housings, axles and rotating
   hubs](solar-mounts.md), closing the confirmed gaps beside their stands. All 603
   tests and the production build pass. Seventeen reviewed views, all 77 assisted
   solar-court routes and native keyboard/touch turning, movement and exact reload
   checks verify the change. Production input checks use a post-combat fixture.
-  VA-04 is fixed; a cramped resume-camera view at one control is recorded as VA-09
-  and remains open alongside the broader visual audit.
+  VA-04 is fixed; the cramped resume-camera view found at one control was
+  subsequently repaired as VA-09 in the arrival-camera milestone above.
 
 - The jungle's [54 large climbing roots now taper into the soil](ruin-roots.md),
   replacing exposed blunt ends. The terrain investigation corrected the initial

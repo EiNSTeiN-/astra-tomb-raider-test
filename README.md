@@ -12,6 +12,8 @@ The desert's pier shafts also now meet their base slabs.
 The jungle's [54 large climbing roots now taper into the soil](docs/ruin-roots.md),
 removing the exposed blunt cuts at their lower ends.
 The desert's [68 mirror handwheels now have connecting axles and bearing housings](docs/solar-mounts.md).
+Chapters now [remember the camera view and find a clear orbit on arrival](docs/arrival-camera.md),
+including when a saved position is close to machinery.
 
 Guardians now have [cast shoulder plates and weathered bronze](docs/guardian-surfaces.md),
 with darker recesses, material-specific pitting and oxidation that changes with

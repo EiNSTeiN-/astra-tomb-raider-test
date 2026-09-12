@@ -1,3 +1,5 @@
+import { arrivalCamera } from "./camera-arrival.js";
+import { normalizeCamera } from "./camera-state.js";
 import {
   buildDesertSurvey,
   updateDesertSurvey,
@@ -1038,19 +1040,13 @@ export class Adventure {
     const next =
       this.items.find(
         (f) => f.id === currentFieldTask(level, this.progress)?.id,
-      ) || this.map.rooms[1];
-    this.yaw = Math.atan2(start.x - next.x * CELL, start.z - next.z * CELL);
-    this.pitch = 0.15;
-    this.avatar.rotation.y = this.yaw + Math.PI;
-    this.camera.position
-      .copy(this.player.position)
-      .add(
-        new THREE.Vector3(
-          Math.sin(this.yaw) * 5.3,
-          2.5,
-          Math.cos(this.yaw) * 5.3,
-        ),
-      );
+      ) ||
+      this.items.find(
+        (f) => f.type === "mechanism" && f.stage === this.progress.stage,
+      ) ||
+      this.items.find((f) => f.type === "exit") ||
+      this.map.rooms[1];
+    this.restoreCamera(next);
     this.checkpoint = this.progress.checkpoint || {
       x: this.map.spawn.x * CELL,
       z: this.map.spawn.z * CELL,
@@ -1988,6 +1984,44 @@ export class Adventure {
     toggleCrouch(this);
     this.cb.update?.(this.state());
   }
+  cameraSpace(p) {
+    return galleryAt(this, p.x, p.y, p.z)
+      ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
+      : this.walkable(p.x, p.z) &&
+          cavernClear(this, p.x, p.y, p.z, 0.28) &&
+          p.y >=
+            Math.max(
+              this.groundHeight(p.x, p.z) + 0.28,
+              this.swimming && !this.diving
+                ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
+                : -Infinity,
+            );
+  }
+  restoreCamera(next) {
+    const p = this.player.position,
+      saved = this.progress.position,
+      preferred = (saved && Math.hypot(p.x - saved.x, p.z - saved.z) < 0.25
+        ? normalizeCamera(this.progress.camera)
+        : null) || {
+        yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
+        pitch: 0.15,
+      },
+      target = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
+      view = arrivalCamera(
+        target,
+        preferred,
+        this.cameraSurfaces,
+        (point) => this.cameraSpace(point),
+        this.diving ? 3.4 : 5.3,
+      );
+    this.yaw = view.yaw;
+    this.pitch = view.pitch;
+    this.avatar.rotation.y = this.yaw + Math.PI;
+    this.avatar.visible = view.length > 0.85;
+    this.camera.position.copy(view.position);
+    this.camera.lookAt(target);
+    this.camera.updateMatrixWorld();
+  }
   updateCamera(dt) {
     if (frameSurveyScope(this)) {
       updateAtmosphere(this, this.player.position);
@@ -2044,18 +2078,7 @@ export class Adventure {
       Math.sin(this.pitch) * distance + 0.2 * (1 - blend),
       Math.cos(this.yaw) * Math.cos(this.pitch) * distance,
     );
-    const canOccupy = (p) =>
-      galleryAt(this, p.x, p.y, p.z)
-        ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
-        : this.walkable(p.x, p.z) &&
-          cavernClear(this, p.x, p.y, p.z, 0.28) &&
-          p.y >=
-            Math.max(
-              this.groundHeight(p.x, p.z) + 0.28,
-              this.swimming && !this.diving
-                ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
-                : -Infinity,
-            );
+    const canOccupy = (p) => this.cameraSpace(p);
     // Sweep the lateral shoulder shift as well as the arm behind it.
     if (blend > 0.001) {
       const center = this.player.position.clone().setY(target.y);
@@ -2824,6 +2847,10 @@ export class Adventure {
           : 0,
     };
     this.progress.traversal = captureTraversal(this);
+    this.progress.camera = normalizeCamera({
+      yaw: this.yaw,
+      pitch: this.pitch,
+    });
     this.progress.checkpoint = this.checkpoint;
     captureGallery(this);
     this.progress.lastPlayed = Date.now();

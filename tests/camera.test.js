@@ -8,6 +8,9 @@ import {
   followCamera,
 } from "../src/camera-collision.js";
 import { mergeArchitecture } from "../src/visuals.js";
+import { arrivalCamera } from "../src/camera-arrival.js";
+import { normalizeCamera } from "../src/camera-state.js";
+import { SaveStore, normalizeSave } from "../src/storage.js";
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 function fixture() {
@@ -98,4 +101,95 @@ test("actors and distant structures do not obstruct or inflate a nearby camera q
   assert.equal(surfaces.count, 100);
   assert.equal(surfaces.entry(v(0, 2, 0), v(0, 2, 5)), 1);
   assert.equal(surfaces.lastCandidates, 0);
+});
+
+test("arrival preserves a clear chosen view and finds a nearby clear orbit behind a blocked wall", () => {
+  const { surfaces, add } = fixture();
+  add(4, 7, 0.3, 0, 3.5, 1);
+  surfaces.rebuild();
+  const target = v(0, 1.3, 0),
+    canOccupy = (p) => p.y >= 0.28;
+  const clear = arrivalCamera(
+    target,
+    { yaw: Math.PI, pitch: 0.31 },
+    surfaces,
+    canOccupy,
+  );
+  assert.equal(clear.yaw, Math.PI);
+  assert.equal(clear.pitch, 0.31);
+  const blocked = arrivalCamera(
+    target,
+    { yaw: 0, pitch: 0.15 },
+    surfaces,
+    canOccupy,
+  );
+  assert(blocked.length > 5.2);
+  assert(Math.abs(blocked.yaw) < Math.PI);
+  assert.equal(blocked.pitch, 0.15);
+  assert(surfaces.entry(target, blocked.position) >= 0.999);
+});
+
+test("arrival sweeps terrain and ceiling space and returns a bounded view when no full arm fits", () => {
+  const target = v(0, 1.3, 0),
+    corridor = (p) =>
+      p.y >= 0.28 && p.y <= 2 && Math.abs(p.x) < 0.7 && Math.abs(p.z) < 2;
+  const view = arrivalCamera(
+    target,
+    { yaw: Math.PI / 2, pitch: 0.6 },
+    null,
+    corridor,
+  );
+  assert(view.length > 1 && view.length < 3);
+  assert(corridor(view.position));
+  for (let i = 1; i <= 100; i++)
+    assert(corridor(target.clone().lerp(view.position, i / 100)));
+  const bank = arrivalCamera(
+    target,
+    { yaw: 0, pitch: 0.15 },
+    null,
+    (p) => p.z < 0.6 && p.y >= 0.28,
+  );
+  assert(bank.length > 5.2);
+  assert(bank.position.z < 0.6);
+});
+
+test("camera angles survive independent chapter saves and malformed or legacy records stay compatible", () => {
+  for (const value of [
+    null,
+    {},
+    [],
+    { yaw: "1", pitch: 0 },
+    { yaw: NaN, pitch: 0 },
+    { yaw: 0, pitch: Infinity },
+  ])
+    assert.equal(normalizeCamera(value), null);
+  assert.deepEqual(normalizeCamera({ yaw: 0.37, pitch: 0.22 }), {
+    yaw: 0.37,
+    pitch: 0.22,
+  });
+  assert.equal(normalizeCamera({ yaw: 1, pitch: 20 }).pitch, 1.05);
+  assert.equal(normalizeCamera({ yaw: 1, pitch: -20 }).pitch, -0.65);
+  assert(
+    Math.abs(normalizeCamera({ yaw: Math.PI * 4 + 0.5, pitch: 0 }).yaw - 0.5) <
+      1e-12,
+  );
+  const memory = new Map(),
+    storage = {
+      getItem: (k) => memory.get(k),
+      setItem: (k, v) => memory.set(k, v),
+    },
+    store = new SaveStore(storage);
+  store.level("sands").camera = { yaw: -0.45, pitch: 0.26 };
+  store.level("frost").camera = { yaw: 2.2, pitch: -0.3 };
+  store.save();
+  const restored = new SaveStore(storage);
+  assert.deepEqual(restored.level("sands").camera, store.level("sands").camera);
+  assert.deepEqual(restored.level("frost").camera, store.level("frost").camera);
+  assert.equal(
+    normalizeSave({
+      version: 1,
+      levels: { sands: { position: { x: 58.35, z: 221.15 } } },
+    }).levels.sands.camera,
+    null,
+  );
 });
