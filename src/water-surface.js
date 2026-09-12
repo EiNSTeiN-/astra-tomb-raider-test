@@ -14,7 +14,8 @@ const common = `uniform float waterTime; uniform float waveScale; varying vec3 v
 ${waveCode}`;
 
 export function waterMaterial(game, site) {
-  const ice = site.kind === "ice";
+  const ice = site.kind === "ice",
+    mountainWater = game.level.biome === "sky" && !ice;
   const material = new THREE.MeshPhysicalMaterial({
     color: ice ? 0xa7c7ce : game.level.water,
     roughness: ice ? 0.27 : 0.2,
@@ -95,7 +96,11 @@ export function waterMaterial(game, site) {
       vec2 foamDelta=vWaterWorld.xz-impactCenter;foamDelta.x-=clamp(foamDelta.x,-impactHalfWidth,impactHalfWidth);
       foam+=exp(-length(foamDelta)*1.3)*impactAmount*.5;
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.7,.78,.72),foam*.6);
-      diffuseColor.a=smoothstep(.005,.075,waterDepth)*mix(.34,.91,deep)+foam*.15;`,
+      ${
+        mountainWater
+          ? "float shoreline=smoothstep(.005,.22,waterDepth);diffuseColor.a=shoreline*(mix(.34,.91,deep)+foam*.15);"
+          : "diffuseColor.a=smoothstep(.005,.075,waterDepth)*mix(.34,.91,deep)+foam*.15;"
+      }`,
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <opaque_fragment>",
@@ -112,7 +117,8 @@ export function waterMaterial(game, site) {
       #include <opaque_fragment>`,
     );
   };
-  material.customProgramCacheKey = () => `vesper-water-3-${ice}`;
+  material.customProgramCacheKey = () =>
+    `vesper-water-4-${ice}-${mountainWater}`;
   return material;
 }
 

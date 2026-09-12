@@ -59,11 +59,12 @@ export function waterSites(map, level) {
       sites.push({
         id: `basin-${index}`,
         kind: "water",
-        x: room.x * 7 - 9,
+        // Keep the cascade west of the cipher drums and wind intake controls.
+        x: room.x * 7 - 12,
         z: room.z * 7 + 9.4,
         width: 5,
         length: 6.2,
-        depth: 0.62,
+        depth: 0.85,
         room,
         fall: index,
       });

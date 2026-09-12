@@ -242,12 +242,18 @@ export function createTerrainProfile(map, level) {
     for (let ix = 0; ix < width; ix++) {
       const x = ix * step,
         z = iz * step;
-      let depression = 0;
-      for (const site of waters)
+      let depression = 0,
+        cascadeDepth = 0;
+      for (const site of waters) {
         depression = Math.max(depression, basinDepression(site, x, z));
+        if (site.fall !== undefined)
+          cascadeDepth = Math.max(cascadeDepth, basinDepression(site, x, z));
+      }
       if (depression > 0)
-        heights[iz * width + ix] -=
-          depression * (1 - protectedGround(map, x, z, biome));
+        heights[iz * width + ix] -= Math.max(
+          depression * (1 - protectedGround(map, x, z, biome)),
+          cascadeDepth,
+        );
       for (const bridge of bridges) {
         const cut = bridgeCut(bridge, x, z);
         if (cut <= 0) continue;

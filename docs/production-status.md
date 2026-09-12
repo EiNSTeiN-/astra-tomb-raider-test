@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The nine [cascades now have visible supply pipes, header reservoirs and three
+  lit spill channels](supplied-cascades.md), with regional stonework and buried
+  foundations. All 609 tests and the build pass. Reviewed renders cover 69
+  assisted views and 12 production movement views. Checks verify 3,267 footing
+  samples, 54 local movement legs, neighboring puzzle access and actual HRTF
+  amplitude falloff. Six keyboard/touch cases preserve complete normalized saves
+  across 12 reload comparisons apart from timestamps. The review also caught
+  and repaired an unstable water-normal calculation that corrupted bloom.
+  VA-03 remains open for angular receiving-pool boundaries; the broader
+  [visual audit](visual-audit.md) is unfinished.
+
 - Shared [bronze gates and instruments now use irregular oxidation and pitting](bronze-surfaces.md)
   across six chapters, replacing the periodic bands visible in close views.
   All 608 tests and the build pass. Reviewed High/Low views, 30 gate positions,

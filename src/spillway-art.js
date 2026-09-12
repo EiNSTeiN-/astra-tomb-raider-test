@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { footprintMinimum } from "./masonry-foundations.js";
+import { stoneBlockGeometry } from "./temple-architecture.js";
 
 // Coordinates are relative to the original waterfall's x/baseY/z reference.
 // The channel's open front meets the falling curtain at y=7.05, z=-3.15.
@@ -43,6 +45,27 @@ export function spillwayGeometry(seed = 0, footings = []) {
   // Recessed backing closes mortar joints, while individual courses form the
   // exposed sides. Alternating bonds avoid a stack of continuous vertical seams.
   block(0, 3.35, -4.6, 5.25, 6.8, 1.75, 0.56, 0.01);
+  // The rear courses support a real header reservoir, giving the cascade
+  // depth and a service face instead of a freestanding thin water wall.
+  add(new THREE.BoxGeometry(5.25, 6.96, 2.04), 0, 3.45, -6.46, 0.66);
+  for (let row = 0; row < 9; row++) {
+    const edges =
+      row % 2 ? [-2.65, -1.4, 0.3, 1.8, 2.65] : [-2.65, -0.9, 0.9, 2.65];
+    for (let i = 0; i < edges.length - 1; i++)
+      add(
+        stoneBlockGeometry(
+          edges[i + 1] - edges[i] - 0.014,
+          0.741,
+          2.08,
+          seed + row * 19 + i,
+          0.018,
+        ),
+        (edges[i] + edges[i + 1]) / 2,
+        0.332 + row * 0.755,
+        -6.46,
+        0.86 + (row % 3) * 0.045,
+      );
+  }
   for (let row = 0; row < 9; row++) {
     const edges =
       row % 2 ? [-2.65, -1.9, -0.45, 1, 2.65] : [-2.65, -1.2, 0.3, 1.8, 2.65];
@@ -70,8 +93,7 @@ export function spillwayGeometry(seed = 0, footings = []) {
   // A shallow upper trough has a recessed bed, raised sides/back and a lower
   // front sill. Water can reach the sill without intersecting the capstone.
   block(0, 6.82, -4.3, 5.8, 0.14, 2.3, 0.85);
-  // Three recessed feed mouths interrupt the rear wall above the waterline.
-  // Their dark backs keep a view through the structure from showing empty sky.
+  // Three open feed mouths join the supplied reservoir to the overflow trough.
   for (const [a, b] of [
     [-2.9, -1.98],
     [-1.42, -0.28],
@@ -82,7 +104,6 @@ export function spillwayGeometry(seed = 0, footings = []) {
   block(0, 7.21, -5.33, 5.8, 0.08, 0.24, 1.03);
   block(0, 6.86, -5.33, 5.8, 0.06, 0.24, 0.78);
   for (const mouth of [-1.7, 0, 1.7]) {
-    block(mouth, 7.03, -5.435, 0.56, 0.28, 0.02, 0.22, 0.003);
     block(mouth, 7.163, -5.315, 0.58, 0.025, 0.26, 0.87, 0.003);
     for (const dx of [-0.14, 0.14])
       block(mouth + dx, 7.03, -5.3, 0.018, 0.28, 0.04, 0.43, 0.003);
@@ -92,12 +113,17 @@ export function spillwayGeometry(seed = 0, footings = []) {
     for (let i = 0; i < 3; i++)
       block(side * 2.66, 7.22, -5.0 + i * 0.73, 0.48, 0.06, 0.71, 1.1, 0.007);
   }
-  for (let i = 0; i < 8; i++) {
-    const x = -2.275 + i * 0.65;
-    block(x, 6.96, -3.27, 0.638, 0.14, 0.24, 0.94, 0.012);
-    // Narrow overflow grooves articulate the lip without stopping the sheet.
-    block(x, 6.824, -3.215, 0.035, 0.115, 0.022, 0.43, 0.003);
-  }
+  for (const x of [-1.55, 0, 1.55])
+    block(x, 6.96, -3.27, 0.84, 0.14, 0.32, 0.94, 0.012);
+  // Three lower spill notches take the flow; raised crests keep the intervening
+  // masonry dry instead of producing a single rectangular sheet of white water.
+  for (const [a, b] of [
+    [-2.6, -1.97],
+    [-1.13, -0.42],
+    [0.42, 1.13],
+    [1.97, 2.6],
+  ])
+    block((a + b) / 2, 7.04, -3.27, b - a, 0.3, 0.32, 0.96, 0.012);
   // Low basin banks retain the exact old climbable bounds and top height.
   for (const side of [-1, 1]) {
     block(side * 2.8, 0.05, -1.5, 0.52, 0.45, 6.48, 0.58, 0.008);
@@ -138,7 +164,7 @@ export function buildSpillwayArt(game, index, x, y, z) {
   root.position.set(x, y, z);
   game.world.add(root);
   const footings = [
-    { x: 0, z: -4.6, w: 5.28, d: 1.78, top: -0.03 },
+    { x: 0, z: -5.58, w: 5.28, d: 3.74, top: -0.03 },
     ...[-1, 1].map((side) => ({
       x: side * 2.8,
       z: -1.5,
@@ -149,20 +175,25 @@ export function buildSpillwayArt(game, index, x, y, z) {
   ].map((f) => ({
     ...f,
     bottom:
-      Math.min(
-        ...[-0.5, 0, 0.5].flatMap((dx) =>
-          [-0.5, 0, 0.5].map(
-            (dz) =>
-              game.groundHeight(x + f.x + dx * f.w, z + f.z + dz * f.d) - y,
-          ),
-        ),
-      ) - 0.18,
+      footprintMinimum(
+        (px, pz) => game.groundHeight(px, pz),
+        x + f.x,
+        z + f.z,
+        f.w,
+        f.d,
+        game.terrainProfile?.step,
+      ) -
+      y -
+      0.18,
   }));
   const { geometry, blocks } = spillwayGeometry(
     game.level.seed + index * 19,
     footings,
   );
-  const source = game.stoneMat,
+  const source =
+      (game.level.biome === "jungle" && game.templeMaterial) ||
+      (game.level.biome === "sky" && game.skyMasonry) ||
+      game.stoneMat,
     material = source.clone();
   material.name = "Wet spillway stone";
   material.vertexColors = true;

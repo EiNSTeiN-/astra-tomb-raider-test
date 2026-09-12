@@ -1,5 +1,10 @@
 # Waterfall spillways
 
+This page records the earlier spillway milestone. The later
+[supplied-cascade work](supplied-cascades.md) replaces the implied source with
+visible header reservoirs and risers, moves the landmarks west, separates the
+flow into three lit channels and extends their foundation camera bounds.
+
 The jungle, coastal and sky chapters each have three waterfalls. Their water
 previously started beneath a solid cap on a plain stone block. The structures
 now have bonded stone courses, recessed jambs, wet staining, three feed mouths

@@ -68,8 +68,10 @@ export function weatherSkyStone(material) {
 export function buildSkyArchitecture(game) {
   game.skyCitadels = [];
   game.skyBirdPerches = {};
+  game.skyMasonry = null;
   if (game.level.biome !== "sky") return false;
   const stone = pbrMaterial("rock", 0xc3c9c4);
+  game.skyMasonry = stone;
   stone.name = "Cloud-city fitted granite";
   stone.vertexColors = true;
   stone.normalScale.set(0.32, 0.32);

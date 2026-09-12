@@ -62,7 +62,83 @@ export function curtainMaterial(time, height, seed, level) {
   });
 }
 
-export function impactMaterial(time, level) {
+// Three physical spill notches use a lit, separated flow; narrow wheel feeds
+// keep the continuous curtain material above.
+export function cascadeCurtainMaterial(time, height, seed, level) {
+  const material = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(level.water).lerp(new THREE.Color(0xa6c5bd), 0.52),
+    roughness: 0.23,
+    metalness: 0.03,
+    transparent: true,
+    opacity: 1,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    forceSinglePass: true,
+  });
+  material.name = "Lit cascade channels";
+  material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, {
+      fallTime: time,
+      fallHeight: height,
+      fallSeed: { value: seed },
+    });
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        "#include <common>",
+        "#include <common>\nuniform float fallTime; uniform float fallSeed; varying vec2 vFall;",
+      )
+      .replace(
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+        vFall=uv;float fallDrop=1.-uv.y;
+        transformed.z+=.10+.07*sqrt(fallDrop)+sin(fallDrop*16.-fallTime*5.+fallSeed+uv.x*8.)*.025*fallDrop;`,
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+        uniform float fallTime;uniform float fallHeight;uniform float fallSeed;varying vec2 vFall;
+        ${waterfallNoise}`,
+      )
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+        vec2 fp=vFall;float fd=1.-fp.y;
+        float travel=(sqrt(1.44+19.62*fd*fallHeight)-1.2)/9.81;
+        float clock=(travel-fallTime)*5.;
+        float streams=fallFbm(vec2(fp.x*15.+fallSeed,clock));
+        float fine=fallFbm(vec2(fp.x*49.+fallSeed,clock*3.1));
+        float sideways=(streams-.5)*.10*fd;
+        float channelDistance=abs(mod((fp.x-.5)*4.6+sideways+.775,1.55)-.775);
+        float channelWidth=.405+fd*.09;
+        float channel=1.-smoothstep(channelWidth-.035,channelWidth+.025,channelDistance);
+        float foam=smoothstep(.38,.86,streams*.6+fine*.4);
+        float foot=smoothstep(.7,1.,fd);
+        float edge=smoothstep(0.,.025,fp.x)*smoothstep(0.,.025,1.-fp.x);
+        diffuseColor.a*=channel*edge*(.20+foam*.50+foot*.09);
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.80,.89,.84),foam*.76+foot*.08);`,
+      )
+      .replace(
+        "#include <roughnessmap_fragment>",
+        "#include <roughnessmap_fragment>\nroughnessFactor=mix(.13,.62,foam);",
+      )
+      .replace(
+        "#include <normal_fragment_maps>",
+        `#include <normal_fragment_maps>
+        float fallBump=(streams-.5)*.014+(fine-.5)*.002;
+        vec3 fx=dFdx(-vViewPosition),fy=dFdy(-vViewPosition);
+        vec3 f1=cross(fy,normal),f2=cross(normal,fx);float det=dot(fx,f1);
+        // Keep the normal at unit scale: tiny screen derivatives can otherwise
+        // collapse during normalization and contaminate the HDR bloom buffers.
+        vec3 slope=sign(det)*(dFdx(fallBump)*f1+dFdy(fallBump)*f2)/max(abs(det),1.e-5);
+        normal=normalize(normal-clamp(slope,vec3(-.25),vec3(.25)));`,
+      );
+  };
+  material.customProgramCacheKey = () => "lit-cascade-channels-v1";
+  return material;
+}
+
+export function impactMaterial(time, level, { channels = false } = {}) {
   return new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -86,7 +162,7 @@ export function impactMaterial(time, level) {
       #include <common>
       #include <fog_pars_fragment>
       ${waterfallNoise}
-      void main(){vec2 p=(vUv-.5)*vec2(5.4,2.4);float x=max(0.,abs(p.x)-1.85);
+      void main(){vec2 p=(vUv-.5)*vec2(5.4,2.4);float x=${channels ? "abs(mod(p.x+.775,1.55)-.775)" : "max(0.,abs(p.x)-1.85)"};
         float r=length(vec2(x,p.y*1.6));float n=fallFbm(vec2(p.x*6.,p.y*7.-time*1.4));
         float core=(1.-smoothstep(.1,.68,r))*(.12+smoothstep(.25,.7,n)*.36);
         float rings=pow(.5+.5*sin(r*20.-time*4.),5.)*exp(-r*3.)*.17;

@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { random } from "./campaign.js";
 import { buildSpillwayArt } from "./spillway-art.js";
+import { buildCascadeHeader } from "./cascade-header.js";
 import {
-  curtainMaterial,
+  cascadeCurtainMaterial,
   impactMaterial,
   flumeMaterial,
   waterfallNoise,
@@ -32,7 +33,7 @@ function spray(time, seed, mist = false) {
       #include <fog_pars_vertex>
       void main(){float velocity=1.8+seed.y*2.4;float duration=2.*velocity/9.81;
         float life=fract(time/duration+seed.w),t=life*duration;vLife=life;
-        vec3 p=vec3((seed.x-.5)*4.5+(seed.x-.5)*t*.8,.035+velocity*t-4.905*t*t,seed.z*.2+t*(.35+seed.z*.55));
+        vec3 p=vec3((floor(seed.x*3.)-1.)*1.55+(fract(seed.x*3.)-.5)*.76+(seed.x-.5)*t*.8,.035+velocity*t-4.905*t*t,seed.z*.2+t*(.35+seed.z*.55));
         if(mist>.5){life=fract(time/(2.3+seed.z)+seed.w);vLife=life;
           p=vec3((seed.x-.5)*4.6+life*.2,.08+life*(.3+seed.y*.6),seed.z*.2+life*.4);}
         vec4 mvPosition=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mvPosition;
@@ -75,26 +76,28 @@ export function buildWaterfall(game, index, basin) {
     height = { value: 6.9 };
   group.name = "Waterfall flow and spray";
   game.world.add(group);
-  // Preserve the existing navigation and pre-batching camera bounds. The new
-  // masonry replaces their visible geometry, including an open overflow top.
+  const art = buildSpillwayArt(game, index, x, y, z);
+  // Capture the deep cistern support and its banks before batching the art.
   const collider = (w, h, d, px, py, pz) => {
     const proxy = game.box(w, h, d, game.stoneMat, px, py, pz);
     proxy.removeFromParent();
     proxy.geometry.dispose();
   };
-  collider(5.3, 7.1, 1.8, x, y + 3.5, z - 4.6);
+  const bodyBottom = art.footings[0].bottom;
+  collider(5.3, 7.1 - bodyBottom, 3.9, x, y + (7.1 + bodyBottom) / 2, z - 5.6);
   collider(5.8, 0.5, 2.3, x, y + 7, z - 4.3);
   game.obstacles.push({
     x,
-    z: z - 4.6,
+    z: z - 5.6,
     w: 2.65,
-    d: 0.9,
-    h: y + 7.1 - game.groundHeight(x, z - 4.6),
+    d: 1.95,
+    h: y + 10.45 - game.groundHeight(x, z - 5.6),
   });
   for (const side of [-1, 1]) {
     const px = x + side * 2.8,
-      pz = z - 1.5;
-    collider(0.55, 0.75, 6.5, px, y + 0.2, pz);
+      pz = z - 1.5,
+      bottom = art.footings[side < 0 ? 1 : 2].bottom;
+    collider(0.55, 0.575 - bottom, 6.5, px, y + (0.575 + bottom) / 2, pz);
     game.obstacles.push({
       x: px,
       z: pz,
@@ -104,7 +107,12 @@ export function buildWaterfall(game, index, basin) {
       climbable: true,
     });
   }
-  const art = buildSpillwayArt(game, index, x, y, z);
+  art.header = buildCascadeHeader(
+    game,
+    art,
+    time,
+    game.level.seed + index * 37,
+  );
   const flume = new THREE.Mesh(
     new THREE.PlaneGeometry(4.6, 2.03),
     flumeMaterial(time, game.level),
@@ -119,7 +127,7 @@ export function buildWaterfall(game, index, basin) {
   for (let layer = 0; layer < 2; layer++) {
     const mesh = new THREE.Mesh(
       new THREE.PlaneGeometry(4.6, 6.9, 18, 32),
-      curtainMaterial(time, height, index * 3 + layer * 9, game.level),
+      cascadeCurtainMaterial(time, height, index * 3 + layer * 9, game.level),
     );
     mesh.position.set(x, y + 3.6, z - 3.25 - layer * 0.06);
     group.add(mesh);
@@ -138,7 +146,7 @@ export function buildWaterfall(game, index, basin) {
   }
   const impact = new THREE.Mesh(
     new THREE.PlaneGeometry(5.4, 2.4),
-    impactMaterial(time, game.level),
+    impactMaterial(time, game.level, { channels: true }),
   );
   impact.rotation.x = -Math.PI / 2;
   impact.position.set(x, basin.position.y + 0.035, z - 3.08);
@@ -179,5 +187,12 @@ export function updateWaterfalls(game) {
     f.group.visible =
       f.center.distanceTo(game.player.position) <
       (game.store.data.settings.quality === "low" ? 70 : 105);
+    if (f.art.header)
+      for (const mesh of [
+        f.art.header.water,
+        f.art.header.jet,
+        ...f.art.header.feeds,
+      ])
+        mesh.visible = f.group.visible;
   }
 }

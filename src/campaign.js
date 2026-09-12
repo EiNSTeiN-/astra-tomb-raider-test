@@ -211,7 +211,7 @@ export const LEVELS = [
     fog: 0xc1cecc,
     ground: 0x82906a,
     stone: 0x9a9b82,
-    water: 0x7eabbc,
+    water: 0x397f91,
     seed: 6488,
     layout: "bridges",
     mechanisms: 9,

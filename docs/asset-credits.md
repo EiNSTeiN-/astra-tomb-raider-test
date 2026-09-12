@@ -73,7 +73,11 @@ streaks, impact foam and spray in `src/spillway-art.js`,
 `src/waterfall-material.js` and `src/waterfall-effects.js` are original project
 code. They reuse the existing chapter stone textures, waterfall recording and
 chapter scores. No external image, model, audio or dependency was added. See
-[spillway comparisons and checks](waterfall-spillways.md).
+[spillway comparisons and checks](waterfall-spillways.md). The later [supplied cascade construction](supplied-cascades.md)
+adds original header reservoirs, regional crowns, bronze risers and open nozzles
+in `src/cascade-header.js`, plus a separate lit three-channel water material.
+It reuses the same credited stone maps and recording, the project bronze shader
+and hydraulic jet material; no external asset or dependency was added.
 
 The revised jungle leaf cards and one-time cluster atlas bake are original
 project code in `scripts/preserve-canopy.mjs`, `scripts/rebuild-tree-leaves.mjs`
