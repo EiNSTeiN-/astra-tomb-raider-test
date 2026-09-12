@@ -16,6 +16,8 @@ Chapters now [remember the camera view and find a clear orbit on arrival](docs/a
 including when a saved position is close to machinery.
 The final chapter's [observatory plinths and column bases now extend into the terrain](docs/observatory-foundations.md),
 closing the measured gaps beneath their footprints.
+Shared [bronze gates and instruments now have irregular oxidation and fine pitting](docs/bronze-surfaces.md),
+replacing the repeating bands visible in close views across six chapters.
 
 Guardians now have [cast shoulder plates and weathered bronze](docs/guardian-surfaces.md),
 with darker recesses, material-specific pitting and oxidation that changes with

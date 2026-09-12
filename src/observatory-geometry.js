@@ -74,29 +74,48 @@ export function patinatedBronze() {
         "#include <common>",
         `#include <common>
         varying vec3 bronzePosition;
-        float bronzeHash(vec3 p) { return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
+        float bronzeHash(vec3 p) {
+          p=fract(p*.1031);p+=dot(p,p.yzx+33.33);return fract((p.x+p.y)*p.z);
+        }
         float bronzeNoise(vec3 p) {
           vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
           return mix(mix(mix(bronzeHash(i),bronzeHash(i+vec3(1,0,0)),f.x),mix(bronzeHash(i+vec3(0,1,0)),bronzeHash(i+vec3(1,1,0)),f.x),f.y),
             mix(mix(bronzeHash(i+vec3(0,0,1)),bronzeHash(i+vec3(1,0,1)),f.x),mix(bronzeHash(i+vec3(0,1,1)),bronzeHash(i+vec3(1,1,1)),f.x),f.y),f.z);
+        }
+        float bronzeFilteredNoise(vec3 p) {
+          float footprint=max(length(dFdx(p)),length(dFdy(p)));
+          return mix(bronzeNoise(p),.5,smoothstep(.35,1.1,footprint));
         }`,
       )
       .replace(
         "#include <color_fragment>",
         `#include <color_fragment>
-        float tarnish=smoothstep(.38,.7,bronzeNoise(bronzePosition*.8)*.65+bronzeNoise(bronzePosition*3.7)*.25+bronzeNoise(bronzePosition*14.)*.1);
-        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.12,.24,.2),tarnish*.6);
-        diffuseColor.rgb*=.93+.07*sin(bronzePosition.y*80.+bronzePosition.x*14.);`,
+        float bronzeCloud=bronzeFilteredNoise(bronzePosition*.85);
+        float bronzeMottle=bronzeFilteredNoise(bronzePosition*6.3);
+        float bronzeGrain=bronzeFilteredNoise(bronzePosition*92.);
+        float tarnish=smoothstep(.32,.73,bronzeCloud*.7+bronzeMottle*.3);
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.085,.18,.14),tarnish*.68);
+        diffuseColor.rgb*=mix(.91,1.04,bronzeMottle)*mix(.985,1.015,bronzeGrain);`,
       )
       .replace(
         "#include <roughnessmap_fragment>",
-        "float roughnessFactor=mix(roughness,.76,tarnish*.7);",
+        "float roughnessFactor=clamp(mix(roughness,.86,tarnish*.9)+(bronzeGrain-.5)*.13,.3,.95);",
       )
       .replace(
         "#include <metalnessmap_fragment>",
-        "float metalnessFactor=mix(metalness,.28,tarnish*.8);",
+        "float metalnessFactor=mix(metalness,.18,tarnish*.85);",
+      )
+      .replace(
+        "#include <normal_fragment_maps>",
+        `#include <normal_fragment_maps>
+        float bronzePit=(bronzeGrain-.5)*.0009+smoothstep(.46,.7,bronzeMottle)*.00075;
+        vec3 bronzeDx=dFdx(-vViewPosition),bronzeDy=dFdy(-vViewPosition);
+        vec3 bronzeR1=cross(bronzeDy,normal),bronzeR2=cross(normal,bronzeDx);
+        float bronzeDet=dot(bronzeDx,bronzeR1);
+        vec3 bronzeGrad=sign(bronzeDet)*(dFdx(bronzePit)*bronzeR1+dFdy(bronzePit)*bronzeR2);
+        normal=normalize(max(abs(bronzeDet),1.e-9)*normal-bronzeGrad);`,
       );
   };
-  m.customProgramCacheKey = () => "observatory-bronze-v1";
+  m.customProgramCacheKey = () => "observatory-bronze-v2";
   return m;
 }

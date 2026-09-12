@@ -565,6 +565,13 @@ and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
 
+The [bronze surface repair](bronze-surfaces.md) updates the shared procedural
+shader in `src/observatory-geometry.js`. It adds no external models, images,
+recordings or dependencies. The four comparison images are actual game captures
+converted losslessly to WebP, with decoded pixel identity checked against their
+source images. The separate material-review helper uses Three.js's bundled
+`RoomEnvironment` for controlled lighting.
+
 The [observatory foundation repair](observatory-foundations.md) adds original
 stone footing geometry and corrected pedestal texture coordinates. It reuses
 the existing credited stone maps and introduces no external assets, recordings

@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- Shared [bronze gates and instruments now use irregular oxidation and pitting](bronze-surfaces.md)
+  across six chapters, replacing the periodic bands visible in close views.
+  All 608 tests and the build pass. Reviewed High/Low views, 30 gate positions,
+  camera shifts and direct fitting views show the updated surface. A controlled
+  panel has 85.5% less signal at the old stripe frequency; measured additional
+  GPU cost is about 1.6 ms on High and 0.5 ms on Low in a fixed gate scene.
+  Production keyboard/touch cases restore pump flow and preserve full normalized
+  saves across four reload comparisons apart from timestamps. VA-06 is fixed;
+  the broader [visual audit](visual-audit.md) remains open.
+
 - The final chapter's [observatory foundations now meet the terrain](observatory-foundations.md).
   Eleven pedestal footings close measured gaps up to 1.31 m; 88 column bases also
   use a conservative full-footprint terrain bound. Pedestal stone mapping has
