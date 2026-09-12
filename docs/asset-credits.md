@@ -565,6 +565,12 @@ and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
 
+The [monastery foundation repair](monastery-foundations.md) adds original
+procedural stone courses and recessed backing in `src/masonry-foundations.js`
+and `src/monastery-architecture.js`. It reuses the existing credited temple
+stone maps. No external assets, recordings or dependencies were introduced.
+The comparison images are actual game renders converted losslessly to WebP.
+
 The [desert survey mission](desert-survey.md) adds original lookout platforms,
 optical instruments, carved monument silhouettes, paired door seals, cable-guided
 stone leaves and chart artwork in `src/desert-survey*.js`. It reuses the already

@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [playable-world visual audit](visual-audit.md) records 154 reviewed High
+  overviews of all 77 main courts, with explicit gaps in route, interior and
+  smaller-area coverage. It found floating monastery bases and six additional
+  construction or composition issues that remain open. The
+  [monastery foundation repair](monastery-foundations.md) adds stone courses
+  and camera collision down into the terrain. All 597 tests and the production
+  build pass. Eighteen snow-court recaptures and nine close views across the
+  graphics settings verify the repair; keyboard and portrait touch movement
+  retain full health and reload their exact saved state. The guide records the
+  assisted inspection and short native-input checks' limits.
+
 - The four guardian types now have [cast shoulder plates and weathered surfaces](guardian-surfaces.md).
   Closed armor geometry replaces the stacked shoulder spheres; oxidation changes
   the bronze's color, roughness and reflectivity. All 595 tests and the production

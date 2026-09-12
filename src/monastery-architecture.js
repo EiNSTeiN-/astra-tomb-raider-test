@@ -3,6 +3,7 @@ import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { monasteryRoofGeometry } from "./monastery-roof.js";
 import { buildBannerLine } from "./monastery-cloth.js";
+import { masonryFoundation } from "./masonry-foundations.js";
 
 export function monasteryPlan(room) {
   const i = room.index % 9;
@@ -143,7 +144,8 @@ export function buildMonasteryArchitecture(game) {
     root.name = `Monastery court ${room.index}`;
     game.world.add(root, detail);
     const ground = (px, pz) => game.groundHeight(x + px, z + pz) - base;
-    const roofs = [],
+    const foundations = [],
+      roofs = [],
       bells = [];
     const add = (
       g,
@@ -231,6 +233,46 @@ export function buildMonasteryArchitecture(game) {
         // block faces. Keep its upper end at the existing beam joint.
         timberBottom = floor + 1.46,
         timberTop = post.top - 0.15;
+      const foundation = masonryFoundation(
+        (px, pz) => game.groundHeight(px, pz),
+        x + post.x,
+        z + post.z,
+        foot,
+        foot,
+        game.terrainProfile?.step,
+      );
+      if (foundation) {
+        foundations.push({ ...foundation, x: post.x, z: post.z });
+        // Recessed solid backing closes the small chipped course joints.
+        add(
+          new THREE.BoxGeometry(
+            foot * 0.82,
+            foundation.top - foundation.bottom,
+            foot * 0.82,
+          ),
+          stone,
+          post.x,
+          (foundation.top + foundation.bottom) / 2 - base,
+          post.z,
+        );
+        for (const [index, course] of foundation.courses.entries())
+          add(
+            stoneBlockGeometry(
+              foundation.width,
+              course.height,
+              foundation.depth,
+              game.level.seed +
+                room.index * 101 +
+                post.x * 13 +
+                post.z * 17 +
+                index,
+            ),
+            stone,
+            post.x,
+            course.y - base,
+            post.z,
+          );
+      }
       game.obstacles.push({
         x: x + post.x,
         z: z + post.z,
@@ -239,7 +281,17 @@ export function buildMonasteryArchitecture(game) {
         h,
         monastery: true,
       });
-      cameraBox(foot, h + 0.08, foot, post.x, floor + h / 2 - 0.04, post.z);
+      const supportBottom = foundation
+        ? foundation.bottom - base
+        : floor - 0.08;
+      cameraBox(
+        foot,
+        post.top - supportBottom,
+        foot,
+        post.x,
+        (post.top + supportBottom) / 2,
+        post.z,
+      );
       block(foot, 0.35, foot, stone, post.x, floor + 0.12, post.z);
       for (let row = 0; row < 3; row++)
         block(
@@ -445,6 +497,7 @@ export function buildMonasteryArchitecture(game) {
       root,
       detail,
       detailBounds,
+      foundations,
       roofs,
       bells,
       flags,
