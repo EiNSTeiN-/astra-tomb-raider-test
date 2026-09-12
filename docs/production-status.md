@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- **Beneath the Sands** now opens with [a two-lookout observation mission](desert-survey.md).
+  Mounted optics identify distant monuments; their bearings locate three doorways,
+  and paired symbols distinguish the entrance. It includes keyboard/mouse/touch
+  aiming, a survey chart, guarded field completion, supported reloads and positional
+  instrument/door sounds. All 592 tests and the production build pass. The assisted
+  route retains 100 health, and four production input/reload cases preserve exact
+  earned progress. Twelve graphics views and measured audio falloff pass their
+  checks. Human chapter pacing, modern AAA graphics and listening acceptance
+  remain unfinished.
+
 - The Hanging Garden's [nearby depth drawing](hanging-garden-rendering.md)
   reduces repeated shading of hidden stone and timber. Twenty-one camera/quality
   comparisons retain identical pixels, including moving spans and lifts.

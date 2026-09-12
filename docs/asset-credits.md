@@ -557,3 +557,11 @@ wood and bark maps, the project's bronze/iron materials, the existing character
 and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
+
+The [desert survey mission](desert-survey.md) adds original lookout platforms,
+optical instruments, carved monument silhouettes, paired door seals, cable-guided
+stone leaves and chart artwork in `src/desert-survey*.js`. It reuses the already
+credited temple stone maps, project bronze/iron shaders, original mechanical
+audio and the desert survey score. No external models, recordings, images or
+dependencies were added. Documentation images are actual game captures converted
+to WebP.

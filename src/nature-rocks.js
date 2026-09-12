@@ -1,3 +1,4 @@
+import { surveyReservedDistance } from "./desert-survey-rules.js";
 import { arcadeFoundationDistance } from "./arcade-lock-rules.js";
 import { sunFoundationDistance } from "./sun-bridge-rules.js";
 import { shutterFoundationDistance } from "./shutter-house-rules.js";
@@ -35,6 +36,8 @@ export function rockGroundHeight(profile, x, z) {
 // Bounds include the actual rotated footprint, not only the instance's origin.
 export function natureRockAllowed(game, x, z, radius) {
   const { map, terrainProfile } = game;
+  if (map.desertSurvey && surveyReservedDistance(x, z) < radius + 1)
+    return false;
   if (map.arcadeLock && arcadeFoundationDistance(x, z) < radius + 1)
     return false;
   if (map.sunBridge && sunFoundationDistance(x, z) < radius + 1) return false;

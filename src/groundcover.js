@@ -1,3 +1,4 @@
+import { surveyReservedDistance } from "./desert-survey-rules.js";
 import { arcadeFoundationDistance } from "./arcade-lock-rules.js";
 import * as THREE from "three";
 import { random } from "./campaign.js";
@@ -181,6 +182,8 @@ export function buildGroundCover(game) {
         (inWindCourt(game.map, px, pz) ||
           !skyGroundSupported(game.terrainProfile, px, pz))
       )
+        continue;
+      if (game.map.desertSurvey && surveyReservedDistance(px, pz) < 0.5)
         continue;
       if (game.map.arcadeLock && arcadeFoundationDistance(px, pz) < 0.5)
         continue;

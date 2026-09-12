@@ -3683,3 +3683,16 @@ body:has(.cipher-focus) #game-screen > :not(#game-canvas) { visibility: hidden; 
   letter-spacing: 0.08em;
   font-size: 12px;
 }
+
+/* The mounted optic leaves touch controls and the pause button accessible. */
+.survey-scope { position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at center, transparent 0, transparent 30vmin, #18140ac9 43vmin, #0e100df2 60vmin); }
+.survey-reticle { position:absolute; top:50%; left:50%; width:38vmin; height:38vmin; transform:translate(-50%,-50%); border:1px solid #e6dcb754; border-radius:50%; }
+.survey-reticle::before, .survey-reticle::after { content:""; position:absolute; background:#f4e8c9a8; }
+.survey-reticle::before { height:1px; width:100%; top:50%; }
+.survey-reticle::after { width:1px; height:100%; left:50%; }
+.survey-optic-label { position:absolute; top:22%; left:50%; transform:translateX(-50%); display:grid; gap:6px; text-align:center; width:min(90%,550px); color:#efdfb7; font-size:12px; text-shadow:0 2px 4px #000; }
+.survey-optic-label strong { letter-spacing:.18em; font:600 17px Georgia; }
+.survey-looking .crosshair, .survey-looking #waypoint, .survey-looking #aim-status { visibility:hidden; }
+.survey-looking [data-touch="aim"], .survey-looking [data-touch="fire"], .survey-looking [data-touch="dodge"], .survey-looking [data-touch="crouch"] { visibility:hidden; }
+.map-layout .small-copy.survey-route-instructions { display:block; }
+@media(max-width:700px) { .survey-optic-label { top:27%; font-size:11px; } .survey-optic-label strong { font-size:14px; } }

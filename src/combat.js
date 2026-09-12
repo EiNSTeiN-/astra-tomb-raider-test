@@ -513,6 +513,7 @@ export function hitGuardian(game, enemy) {
 
 export function startDodge(game) {
   if (
+    game.desertSurvey?.focus ||
     game.blockGrip ||
     game.dodge ||
     game.dodgeCooldown > 0 ||

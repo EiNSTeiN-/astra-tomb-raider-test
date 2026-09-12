@@ -1,3 +1,4 @@
+import { surveyDeckAt, surveyCeiling } from "./desert-survey-rules.js";
 import { arcadeDeckAt, arcadeCeiling } from "./arcade-lock-rules.js";
 import { sunDeckAt, sunCeiling } from "./sun-bridge-rules.js";
 import { shutterDeckAt, shutterCeiling } from "./shutter-house-rules.js";
@@ -29,6 +30,8 @@ export function supportAt(game, x, z, maxY = Infinity) {
       surface = o;
     }
   }
+  const surveyDeck = surveyDeckAt(game, x, z, maxY);
+  if (surveyDeck && surveyDeck.height > height) return surveyDeck;
   const arcadeDeck = arcadeDeckAt(game, x, z, maxY);
   if (arcadeDeck && arcadeDeck.height > height) return arcadeDeck;
   const sunDeck = sunDeckAt(game, x, z, maxY);
@@ -97,7 +100,13 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
           p.x,
           p.z,
           before,
-          arcadeCeiling(game, p.x, p.z, before, p.y),
+          arcadeCeiling(
+            game,
+            p.x,
+            p.z,
+            before,
+            surveyCeiling(game, p.x, p.z, before, p.y),
+          ),
         ),
       );
       if (ceiling < p.y) {

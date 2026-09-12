@@ -1,3 +1,5 @@
+import { buildSurveyStation } from "./desert-survey-art.js";
+import { surveyFieldAction } from "./desert-survey.js";
 import { buildArcadeStation } from "./arcade-lock-art.js";
 import { arcadeFieldAction } from "./arcade-lock.js";
 import { buildSunStation } from "./sun-bridge-art.js";
@@ -30,6 +32,7 @@ import {
 import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 
 export function buildFieldStation(game, f, group) {
+  if (buildSurveyStation(game, f, group)) return;
   if (buildArcadeStation(game, f, group)) return;
   if (buildSunStation(game, f, group)) return;
   if (buildShutterStation(game, f, group)) return;
@@ -129,7 +132,8 @@ export function updateFieldWorld(game, dt) {
     const done =
       f.stage < game.progress.stage || game.progress.field.includes(f.id);
     f.group.visible = true;
-    f.marker.visible = current?.id === f.id;
+    f.marker.visible =
+      current?.id === f.id && !(f.surveyHeight !== undefined && f.step === 2);
     if (f.fire) f.fire.visible = done;
     if (f.frozenIce) f.frozenIce.visible = !done;
     updateJungleShrine(game, f, done);
@@ -248,6 +252,7 @@ export function finishFieldTask(game, f) {
       return false;
     }
   }
+  if (f.surveyHeight !== undefined && !surveyFieldAction(game, f)) return false;
   if (f.arcadeHeight !== undefined && !arcadeFieldAction(game, f)) return false;
   if (f.sunHeight !== undefined && !sunFieldAction(game, f)) return false;
   game.progress.field.push(f.id);

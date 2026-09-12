@@ -1,4 +1,20 @@
 import {
+  buildDesertSurvey,
+  updateDesertSurvey,
+  controlSurveyScope,
+  frameSurveyScope,
+  leaveSurveyScope,
+  surveyInteract,
+  surveyHint,
+  surveyObjective,
+} from "./desert-survey.js";
+import {
+  surveyBlocked,
+  surveyOccludes,
+  surveySavePosition,
+  restoreSurveyArrival,
+} from "./desert-survey-rules.js";
+import {
   buildArcadeLock,
   updateArcadeLock,
   advanceArcadeTurn,
@@ -573,7 +589,11 @@ export class Adventure {
         document.pointerLockElement === this.renderer.domElement ||
         this.dragging
       ) {
-        const precision = this.aiming ? 0.55 : 1;
+        const precision = this.desertSurvey?.focus
+          ? 0.3
+          : this.aiming
+            ? 0.55
+            : 1;
         this.yaw -=
           (e.movementX *
             0.003 *
@@ -619,7 +639,11 @@ export class Adventure {
       if (this.paused || this.lookTouch?.id !== e.pointerId) return;
       const dx = e.clientX - this.lookTouch.x,
         dy = e.clientY - this.lookTouch.y;
-      const scale = this.aiming ? 0.002 : 0.004;
+      const scale = this.desertSurvey?.focus
+        ? 0.0012
+        : this.aiming
+          ? 0.002
+          : 0.004;
       this.yaw -= (dx * scale * this.store.data.settings.sensitivity) / 50;
       this.pitch = THREE.MathUtils.clamp(
         this.pitch + dy * scale * (this.store.data.settings.invertY ? -1 : 1),
@@ -929,6 +953,7 @@ export class Adventure {
     buildFireVault(this);
     buildBellHoist(this);
     buildFrozenStair(this);
+    buildDesertSurvey(this);
     buildArcadeLock(this);
     buildSunBridge(this);
     buildShutterHouse(this);
@@ -991,6 +1016,7 @@ export class Adventure {
     restorePressureArrival(this);
     restoreOrbitArrival(this);
     restoreCausewayArrival(this);
+    restoreSurveyArrival(this);
     restoreArcadeArrival(this);
     restoreSunArrival(this);
     restoreShutterArrival(this);
@@ -1453,6 +1479,7 @@ export class Adventure {
       return false;
     if (vaultBridgeBlocked(this, x, z, worldY)) return false;
     if (hoistBlocked(this, x, z, worldY, clearance)) return false;
+    if (surveyBlocked(this, x, z, worldY, clearance)) return false;
     if (arcadeBlocked(this, x, z, worldY, clearance)) return false;
     if (sunBlocked(this, x, z, worldY, clearance)) return false;
     if (shutterBlocked(this, x, z, worldY, clearance)) return false;
@@ -1486,6 +1513,7 @@ export class Adventure {
     const from = { x: a.x, y: a.y + fromHeight, z: a.z },
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (hoistOccludes(this, from, to)) return false;
+    if (surveyOccludes(this, from, to)) return false;
     if (arcadeOccludes(this, from, to)) return false;
     if (sunOccludes(this, from, to)) return false;
     if (shutterOccludes(this, from, to)) return false;
@@ -1596,6 +1624,7 @@ export class Adventure {
     this.actualMoveSpeed = null;
     updateBellHoist(this, dt);
     updateFrozenStair(this, dt);
+    updateDesertSurvey(this, dt);
     updateArcadeLock(this, dt);
     updateSunBridge(this, dt);
     updateShutterHouse(this, dt);
@@ -1615,12 +1644,18 @@ export class Adventure {
     const length = Math.max(1, Math.hypot(x, z));
     x /= length;
     z /= length;
-    if (this.keys.has("KeyZ")) this.yaw += dt * 1.5;
-    if (this.keys.has("KeyC")) this.yaw -= dt * 1.5;
+    const cameraRate = this.desertSurvey?.focus ? 0.2 : 1;
+    if (this.keys.has("KeyZ")) this.yaw += dt * 1.5 * cameraRate;
+    if (this.keys.has("KeyC")) this.yaw -= dt * 1.5 * cameraRate;
     if (this.keys.has("KeyI"))
-      this.pitch = Math.max(-0.65, this.pitch - dt * 0.65);
+      this.pitch = Math.max(-0.65, this.pitch - dt * 0.65 * cameraRate);
     if (this.keys.has("KeyK"))
-      this.pitch = Math.min(1.05, this.pitch + dt * 0.65);
+      this.pitch = Math.min(1.05, this.pitch + dt * 0.65 * cameraRate);
+    if (controlSurveyScope(this, dt, x, z)) {
+      this.nearest = null;
+      this.survey();
+      return;
+    }
     const input = {
       x: x * Math.cos(this.yaw) + z * Math.sin(this.yaw),
       z: -x * Math.sin(this.yaw) + z * Math.cos(this.yaw),
@@ -1799,6 +1834,7 @@ export class Adventure {
               f.cartHeight !== undefined ||
               f.craneHeight !== undefined ||
               f.causewayHeight !== undefined ||
+              f.surveyHeight !== undefined ||
               f.arcadeHeight !== undefined ||
               f.sunHeight !== undefined ||
               f.shutterHeight !== undefined) &&
@@ -1953,6 +1989,10 @@ export class Adventure {
     this.cb.update?.(this.state());
   }
   updateCamera(dt) {
+    if (frameSurveyScope(this)) {
+      updateAtmosphere(this, this.player.position);
+      return;
+    }
     frameCleftCamera(this);
     this.crouchCamera = THREE.MathUtils.damp(
       this.crouchCamera || 0,
@@ -2144,6 +2184,7 @@ export class Adventure {
   }
   interact() {
     clearAim(this);
+    if (surveyInteract(this)) return;
     if (arcadeInteract(this)) return;
     if (sunInteract(this)) return;
     if (causewayInteract(this)) return;
@@ -2307,6 +2348,7 @@ export class Adventure {
       this.paused ||
       this.active === false ||
       this.carrying ||
+      this.desertSurvey?.focus ||
       this.arcadeLock?.turn ||
       this.sunBridge?.turn ||
       this.shutterHouse?.turn ||
@@ -2393,6 +2435,7 @@ export class Adventure {
     this.audio.tone("hurt");
     this.cb.damage?.();
     if (this.health <= 0) {
+      leaveSurveyScope(this);
       this.crouching = false;
       this.playerNoises = [];
       clearAim(this);
@@ -2420,6 +2463,7 @@ export class Adventure {
     }
   }
   returnToCheckpoint() {
+    leaveSurveyScope(this);
     this.crouching = false;
     this.playerNoises = [];
     clearAim(this);
@@ -2519,6 +2563,7 @@ export class Adventure {
       gallery: !!gallery,
       fireVault: vault,
       causeway,
+      desertSurvey: surveyObjective(this),
       arcadeLock: arcadeObjective(this),
       sunBridge: sunObjective(this),
       shutterHouse: shutterObjective(this),
@@ -2602,7 +2647,8 @@ export class Adventure {
                   : `LISTEN · ${play.active + 1} / ${play.notes.length} · ${this.level.symbols[play.notes[play.active]]}`,
             };
           })()
-        : arcadeHint(this) ||
+        : surveyHint(this) ||
+          arcadeHint(this) ||
           sunHint(this) ||
           shutterHint(this) ||
           causewayHint(this) ||
@@ -2642,8 +2688,9 @@ export class Adventure {
       stage: this.progress.stage,
       underwater: this.diving,
       listenerHeight: this.swimming ? 0.3 : this.crouching ? 1.2 : 1.6,
-      task:
-        this.arcadeLock?.turn || this.sunBridge?.turn
+      task: this.desertSurvey?.focus
+        ? "survey"
+        : this.arcadeLock?.turn || this.sunBridge?.turn
           ? "winch"
           : arcadeObjective(this) || sunObjective(this)
             ? "climb"
@@ -2753,6 +2800,7 @@ export class Adventure {
     this.progress.health = this.health;
     this.progress.explored = [...this.explored];
     const hoistPosition =
+      surveySavePosition(this) ||
       arcadeSavePosition(this) ||
       sunSavePosition(this) ||
       shutterSavePosition(this) ||
@@ -2784,6 +2832,7 @@ export class Adventure {
   }
   setPaused(value) {
     if (value) {
+      leaveSurveyScope(this);
       clearAim(this);
       this.dragging = false;
       this.lookTouch = null;
@@ -2804,6 +2853,7 @@ export class Adventure {
     updateFireVault(this, 0);
     updateBellHoist(this, 0);
     updateFrozenStair(this, 0);
+    updateDesertSurvey(this, 0);
     updateArcadeLock(this, 0);
     updateSunBridge(this, 0);
     updateShutterHouse(this, 0);

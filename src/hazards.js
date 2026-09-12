@@ -158,11 +158,12 @@ export function buildHazards(game) {
     const f = [fields[1], fields[2], fields[0]].find(
       (f) => f && f.kind !== "climb",
     );
-    // These connected routes supply their own moving-platform or wind hazards.
+    // Observation needs a stable instrument; traversal routes supply their own hazards.
     if (
       !f ||
       f.causewayHeight !== undefined ||
       f.shutterHeight !== undefined ||
+      f.surveyHeight !== undefined ||
       f.arcadeHeight !== undefined ||
       f.sunHeight !== undefined
     )

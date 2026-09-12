@@ -12,6 +12,8 @@ that follows animated soles and nearby supports on all graphics settings.
 Outdoor [sun shadows sit closer to objects and stay steadier during travel](docs/sun-shadows.md).
 High uses a larger shadow map; the notes record its GPU and memory costs.
 
+The desert opener now has [two survey lookouts and a hidden threshold](docs/desert-survey.md). Sight distant monuments through mounted instruments, chart their bearings, and match the recorded symbols to a doorway. Keyboard, mouse and touch controls share saved observation progress.
+
 The desert now has [calibrated daylight and sky reflections](docs/desert-daylight.md),
 with cooler ambient fill and clearer separation between sunlight and shade.
 

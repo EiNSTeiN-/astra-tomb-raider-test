@@ -1,5 +1,9 @@
 import { SUN_SITE, sunFoundationWeight } from "./sun-bridge-rules.js";
 import { ARCADE_SITE, arcadeFoundationWeight } from "./arcade-lock-rules.js";
+import {
+  SURVEY_FOUNDATIONS,
+  surveyFoundationAt,
+} from "./desert-survey-rules.js";
 import { refineSnowTerrain } from "./snow-geology.js";
 import { shutterFoundationWeight } from "./shutter-house-rules.js";
 import { refineCavernTerrain } from "./cavern-geology.js";
@@ -172,6 +176,12 @@ export function createTerrainProfile(map, level) {
         const weight = shutterFoundationWeight(x, z);
         height = height * (1 - weight) + raw(175, 238) * weight;
       }
+      if (map.desertSurvey) {
+        const site = surveyFoundationAt(x, z);
+        if (site)
+          height =
+            height * (1 - site.weight) + raw(site.x, site.z) * site.weight;
+      }
       heights[iz * width + ix] = height;
       if (map.echoGallery) {
         const dx = Math.max(7 - x, 0, x - 42),
@@ -255,6 +265,9 @@ export function createTerrainProfile(map, level) {
     extent,
     sunY: map.sunBridge ? raw(SUN_SITE.x, SUN_SITE.z) : null,
     arcadeY: map.arcadeLock ? raw(ARCADE_SITE.x, ARCADE_SITE.z) : null,
+    surveyBases: map.desertSurvey
+      ? SURVEY_FOUNDATIONS.map((p) => raw(p.x, p.z))
+      : null,
     causewayY: map.echoCauseway ? raw(CAUSEWAY_SITE.x, CAUSEWAY_SITE.z) : null,
     craneY: map.astralCrane ? raw(182, 217) : null,
     temperingY: map.temperingCart ? raw(119, 392) : null,

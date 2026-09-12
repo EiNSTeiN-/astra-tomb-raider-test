@@ -94,6 +94,8 @@ test("local saves survive a new store and preserve all independent chapter progr
     height: 4.2,
     seated: true,
   };
+  // The desert fixture has already passed the observation mission.
+  a.level("sands").desertSurvey.recorded = [true, true];
   a.data.currentLevel = 3;
   a.data.createdAt = 1700000000000;
   a.data.settings.volume = 0;

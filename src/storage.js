@@ -1,3 +1,4 @@
+import { normalizeDesertSurvey } from "./desert-survey-rules.js";
 import { normalizeArcadeLock } from "./arcade-lock-rules.js";
 import { normalizeSunBridge } from "./sun-bridge-rules.js";
 import { normalizeShutterHouse } from "./shutter-house-rules.js";
@@ -139,6 +140,13 @@ export function normalizeSave(value) {
           : null,
       fireVault: key === "verdant" ? normalizeFireVault(v.fireVault) : null,
       bellHoist: key === "frost" ? normalizeBellHoist(v.bellHoist) : null,
+      desertSurvey:
+        key === "sands"
+          ? normalizeDesertSurvey(v.desertSurvey, {
+              stage: Number.isFinite(v.stage) ? Math.floor(v.stage) : 0,
+              field: strings(v.field),
+            })
+          : null,
       arcadeLock:
         key === "tides"
           ? normalizeArcadeLock(v.arcadeLock, {
@@ -297,6 +305,10 @@ export class SaveStore {
       gallery: id === "tides" ? normalizeGallery(null) : null,
       fireVault: id === "verdant" ? normalizeFireVault(null) : null,
       bellHoist: id === "frost" ? normalizeBellHoist(null) : null,
+      desertSurvey:
+        id === "sands"
+          ? normalizeDesertSurvey(null, { stage: 0, field: [] })
+          : null,
       arcadeLock:
         id === "tides"
           ? normalizeArcadeLock(null, { stage: 0, field: [] })

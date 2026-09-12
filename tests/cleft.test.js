@@ -246,7 +246,11 @@ test("cleft save normalization gates the record and leaves other chapters unchan
 test("cleft map connects to the western survey path, keeps features clear, and levels the footing", () => {
   const m = createMap(LEVELS[1]);
   assert(m.cleft);
-  const path = m.paths.at(-1);
+  const path = m.paths.find((p) => p[0]?.x === 22 && p[0]?.z === 35);
+  assert(
+    path,
+    "The cleft approach remains connected after new chapter routes are added.",
+  );
   assert.deepEqual(path[0], { x: 22, z: 35 });
   for (const p of path) assert(m.grid[p.z][p.x]);
   for (const f of m.features)

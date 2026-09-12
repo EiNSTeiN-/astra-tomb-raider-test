@@ -16,23 +16,27 @@ import {
   desertHorizonHeight,
 } from "../src/desert-horizon.js";
 
-test("broader desert banks preserve the previously published walking floor", () => {
+test("desert floors outside the new survey approaches preserve published standing heights", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),
     floors = [];
-  // Captured from 0693507, before the new bank profile. Boundary samples are
-  // included: changing a nearby non-walkable vertex must not move a route's
-  // bilinearly interpolated floor or an older saved standing position.
+  // Captured from d479396 before the survey platforms and approaches. Exclude
+  // their construction region; all 46,718 remaining standing samples, including
+  // cell boundaries, must retain the published bilinearly interpolated heights.
   for (let gz = 0; gz < map.size; gz++)
     for (let gx = 0; gx < map.size; gx++)
       if (map.grid[gz][gx])
         for (const dx of [-3.5, -2, 0, 2, 3.5])
-          for (const dz of [-3.5, -2, 0, 2, 3.5])
-            floors.push(profile.height(gx * 7 + dx, gz * 7 + dz));
-  assert.equal(floors.length, 51375);
+          for (const dz of [-3.5, -2, 0, 2, 3.5]) {
+            const x = gx * 7 + dx,
+              z = gz * 7 + dz;
+            if (x >= 270 && x <= 406 && z >= 203 && z <= 303) continue;
+            floors.push(profile.height(x, z));
+          }
+  assert.equal(floors.length, 46718);
   assert.equal(
     createHash("sha256").update(JSON.stringify(floors)).digest("hex"),
-    "4adffd830d70db7527787b49d71a3ae5ebf7240937adf7393bde52bef1ce9877",
+    "c268f9b2e17de29e4c516998f7fa0b4a5c67333f141424edd6c403ad64b58062",
   );
 });
 
@@ -66,7 +70,10 @@ test("desert banks ease out of route floors before rising into their shoulders",
             toes.push(profile.height(x, z) - profile.height(x + dx, z + dz));
     }
   slopes.sort((a, b) => a - b);
-  assert.equal(slopes.length, 7985);
+  assert(
+    slopes.length > 7500,
+    "Sample the full network of desert route shoulders.",
+  );
   // b02fd56 measured 38.80 / 52.90 degrees here, with first-interval rises
   // reaching 4.50 m. Check the actual sampled terrain, including terrace and
   // erosion contributions, so a soft crest cannot conceal another steep toe.

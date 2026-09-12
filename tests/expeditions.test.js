@@ -50,7 +50,8 @@ test("all 69 sectors have three ordered field actions, with a destination for ev
             Math.hypot(feature.x - other.x, feature.z - other.z) >=
               (feature.craneHeight !== undefined
                 ? 1
-                : feature.cartHeight !== undefined
+                : feature.cartHeight !== undefined ||
+                    feature.surveyHeight !== undefined
                   ? 2
                   : 4),
           );

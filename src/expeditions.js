@@ -54,9 +54,9 @@ const chapters = {
   sands: [
     [
       "A door in the dunes",
-      "The visible entrance is a decoy. Three survey marks describe a buried doorway below the wind line.",
-      "Read the survey obelisk|Find the lee-side inscription|Mark the buried threshold",
-      "The survey lines meet at the entrance to the buried city.",
+      "Climb the eastern lookout and use its instrument to sight the Split Crown. Record its bearing, then sight the Pierced Sun from the western lookout. Your chart shows where the bearings cross. Find the doorway bearing both signs, in that order, and open its seal.",
+      "Record the Split Crown|Record the Pierced Sun|Open the matching threshold",
+      "The paired seals release the buried threshold. Follow the sanctuary marker to its counterweight chamber.",
     ],
     [
       "The dawn collectors",
