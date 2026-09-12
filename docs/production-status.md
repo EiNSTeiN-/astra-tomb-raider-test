@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Court foundations and desert pier joints](court-foundations.md) now close
+  confirmed gaps across the jungle, desert and coastal chapters. The investigation
+  checked 338 support footprints across 29 courts, finding 48 gaps over 10 cm,
+  and a separate approximately 17 cm slab-to-shaft gap at all 108 desert piers.
+  The new stonework and camera bounds extend into the terrain. All 600 tests and
+  the production build pass; 94 updated browser views and six native production
+  keyboard/touch reload cases verify the change. The review also records floating
+  jungle root ends as VA-08. The [visual audit](visual-audit.md) remains open.
+
 - The [playable-world visual audit](visual-audit.md) records 154 reviewed High
   overviews of all 77 main courts, with explicit gaps in route, interior and
   smaller-area coverage. It found floating monastery bases and six additional

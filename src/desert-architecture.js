@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
+import { addMasonryFooting } from "./masonry-footings.js";
 
 // The court's two crossing axes and the sanctuary approach remain open. Structure
 // occupies the perimeter; each room gets an authored gallery and ruin pattern.
@@ -201,6 +202,7 @@ export function buildDesertArchitecture(game) {
     detail.position.copy(root.position);
     game.world.add(root, detail);
     const ground = (px, pz) => game.groundHeight(x + px, z + pz) - base;
+    const foundations = [];
     let triangles = 0,
       blocks = 0;
     const add = (
@@ -281,6 +283,20 @@ export function buildDesertArchitecture(game) {
       const py = ground(pier.x, pier.z),
         width = pier.width,
         top = pier.perch ? 9.1 : plan.spring + 0.15;
+      const foundation = addMasonryFooting(game, root, {
+        x: pier.x,
+        z: pier.z,
+        width: width + 0.25,
+        material,
+        blockGeometry: stoneBlockGeometry,
+        seed: game.level.seed + room.index * 101 + pier.x * 13 + pier.z * 17,
+        color: [0.76, 0.745, 0.707],
+      });
+      if (foundation) {
+        foundations.push(foundation);
+        blocks += foundation.parts;
+        triangles += foundation.triangles;
+      }
       game.obstacles.push({
         x: x + pier.x,
         z: z + pier.z,
@@ -289,12 +305,13 @@ export function buildDesertArchitecture(game) {
         h: top,
         desert: true,
       });
+      const bottom = foundation ? foundation.bottom - base : py - 0.06;
       cameraBox(
         width + 0.25,
-        top + 0.06,
+        py + top - bottom,
         width + 0.25,
         pier.x,
-        py + (top - 0.06) / 2,
+        (py + top + bottom) / 2,
         pier.z,
       );
       if (pier.perch && pier.x > 0)
@@ -332,10 +349,11 @@ export function buildDesertArchitecture(game) {
         else
           block(
             w,
-            h - 0.018,
+            h - 0.018 + (row === 0 ? 0.2 : 0),
             w,
             pier.x,
-            py + 0.5 + (row + 0.5) * h,
+            // Seat the first course inside the cap while retaining its top.
+            py + 0.5 + (row + 0.5) * h - (row === 0 ? 0.1 : 0),
             pier.z,
             0,
             1,
@@ -483,6 +501,7 @@ export function buildDesertArchitecture(game) {
       root,
       detail,
       plan,
+      foundations,
       blocks,
       triangles,
       detailBounds,

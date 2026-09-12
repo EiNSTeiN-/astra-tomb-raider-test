@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { addPierFacings, templeGrowthMaterials } from "./temple-facings.js";
+import { addMasonryFooting } from "./masonry-footings.js";
 
 // Chamfered blocks use flat faces and narrow bevels, rather than six subdivided
 // grids. The disconnected faces retain sharp masonry edges after batching.
@@ -332,10 +333,25 @@ export function buildTempleArchitecture(game) {
         );
       }
     };
+    const foundations = [];
     let rootedPiers = 0;
     for (const [pierIndex, pier] of plan.piers.entries()) {
       const py = game.groundHeight(x + pier.x, z + pier.z) - base,
         w = pier.width;
+      const foundation = addMasonryFooting(game, root, {
+        x: pier.x,
+        z: pier.z,
+        width: w + 0.25,
+        material,
+        blockGeometry: stoneBlockGeometry,
+        seed: game.level.seed + room.index * 101 + pier.x * 13 + pier.z * 17,
+        color: [0.72, 0.72, 0.68],
+      });
+      if (foundation) {
+        foundations.push(foundation);
+        blocks += foundation.parts;
+        triangles += foundation.triangles;
+      }
       // The broad base sits inside its navigation footprint, and the capital stays
       // at the old bird-perch height on the two forward piers.
       const footprint = w / 2 + 0.13;
@@ -347,7 +363,15 @@ export function buildTempleArchitecture(game) {
         h: 9.1,
         temple: true,
       });
-      cameraBox(w + 0.26, 9.1, w + 0.26, pier.x, py + 4.55, pier.z);
+      const bottom = foundation ? foundation.bottom - base : py;
+      cameraBox(
+        w + 0.26,
+        py + 9.1 - bottom,
+        w + 0.26,
+        pier.x,
+        (py + 9.1 + bottom) / 2,
+        pier.z,
+      );
       for (const [width, height, y] of [
         [w + 0.25, 0.3, 0.1],
         [w + 0.1, 0.22, 0.35],
@@ -538,6 +562,7 @@ export function buildTempleArchitecture(game) {
       blocks,
       triangles,
       plan,
+      foundations,
       rootedPiers,
       facings: plan.piers.length * 4,
       detailBounds: new THREE.Box3()

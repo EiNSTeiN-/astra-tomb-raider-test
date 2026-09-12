@@ -8,6 +8,7 @@ import {
   vaultCellPresent,
 } from "./palace-geometry.js";
 import { weatherPalaceStone } from "./palace-material.js";
+import { addMasonryFooting } from "./masonry-footings.js";
 
 export function palacePlan(room) {
   const i = room.index % 10;
@@ -130,12 +131,23 @@ export function buildPalaceArchitecture(game) {
       root.remove(mesh);
       geometry.dispose();
     };
+    const foundations = [];
     for (const column of plan.columns) {
       const { x: px, z: pz, width } = column,
         ground = game.groundHeight(x + px, z + pz) - base;
       const top = plan.spring,
         shaftHeight = top - ground - 1.3;
       const radius = width * 0.365;
+      const foundation = addMasonryFooting(game, root, {
+        x: px,
+        z: pz,
+        width,
+        material: dark,
+        blockGeometry: stoneBlockGeometry,
+        seed: game.level.seed + room.index * 101 + px * 13 + pz * 17,
+        color: [0.85, 0.845, 0.833],
+      });
+      if (foundation) foundations.push(foundation);
       game.obstacles.push({
         x: x + px,
         z: z + pz,
@@ -144,10 +156,13 @@ export function buildPalaceArchitecture(game) {
         h: top - ground + 0.36,
         palace: true,
       });
+      const bottom = foundation
+        ? Math.min(ground - 0.2, foundation.bottom - base)
+        : ground - 0.2;
       capture(
-        new THREE.BoxGeometry(width, top - ground + 0.4, width),
+        new THREE.BoxGeometry(width, top + 0.2 - bottom, width),
         px,
-        ground + (top - ground) / 2,
+        (top + 0.2 + bottom) / 2,
         pz,
       );
       block(width, 0.36, width, dark, px, ground + 0.12, pz);
@@ -404,6 +419,7 @@ export function buildPalaceArchitecture(game) {
       root,
       detail,
       plan,
+      foundations,
       vaults,
       triangles,
       center: new THREE.Vector3(x, base + 6, z),

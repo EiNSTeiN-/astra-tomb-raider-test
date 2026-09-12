@@ -565,6 +565,12 @@ and hand solver, original hoist synthesis and the already credited waterfall
 buffer. No new external models, images, recordings or dependencies were added.
 Documentation images are actual running-game captures converted to WebP.
 
+The [court foundation and desert joint repair](court-foundations.md) adds original
+procedural stonework in `src/masonry-footings.js` and the three chapter
+architecture builders. It reuses the credited temple, sandstone and palace-stone
+materials. No external assets, recordings or dependencies were added. The six
+comparison images are actual game captures converted losslessly to WebP.
+
 The [monastery foundation repair](monastery-foundations.md) adds original
 procedural stone courses and recessed backing in `src/masonry-foundations.js`
 and `src/monastery-architecture.js`. It reuses the existing credited temple
