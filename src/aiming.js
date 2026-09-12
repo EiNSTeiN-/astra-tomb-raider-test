@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { boxEntry } from "./camera-collision.js";
 import { cavernClear } from "./cavern-profile.js";
 import { guardianRaycast } from "./guardian-ray.js";
+import { stationEntry } from "./field-station-solids.js";
 
 export const SHOT_RANGE = 45;
 export const aimShoulder = (camera) => Math.min(0.7, camera.aspect * 0.64);
@@ -80,6 +81,11 @@ export function updateAim(game) {
 export function shotCover(game, from, to) {
   let fraction = game.cameraSurfaces?.entry(from, to, 0) ?? 1;
   for (const o of game.obstacles || []) {
+    if (o.fieldStation) {
+      const entry = stationEntry(o, from, to);
+      if (entry !== null) fraction = Math.min(fraction, entry);
+      continue;
+    }
     if (o.h <= 0.2) continue;
     const y = game.groundHeight(o.x, o.z);
     const entry = boxEntry(

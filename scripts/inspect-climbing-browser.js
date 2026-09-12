@@ -5,7 +5,10 @@ import {
   predictedRopeLanding,
   traversalInteract,
   updateTraversal,
+  cableApproachClear,
 } from "../src/traversal.js";
+import { stationBlocked } from "../src/field-station-solids.js";
+import { searchRoute } from "../src/navigation.js";
 
 // Assisted full-world route check. It bypasses field work and known-answer
 // deductions, but uses the delivered movement, collision and rope simulation.
@@ -58,7 +61,24 @@ export function exerciseClimbing(game) {
       const mantle = (x, z) => {
         const d = input(x, z);
         check(game.tryClimb(d.x, d.z), "mantle unavailable");
-        game.updateClimb(1);
+        for (let i = 0; i < 52; i++) {
+          if (game.climb) game.updateClimb(1 / 60);
+          const p = game.player.position;
+          check(
+            !game.obstacles.some(
+              (o) => o.fieldStation && stationBlocked(o, p.x, p.y, p.z),
+            ),
+            "mantle intersects station",
+          );
+        }
+        check(
+          game.canMove(
+            game.player.position.x,
+            game.player.position.z,
+            game.jumpY,
+          ),
+          "mantle ends inside solid",
+        );
         trackTraversalSupport(game);
       };
       mantle(0, -1);
@@ -112,7 +132,42 @@ export function exerciseClimbing(game) {
       step(center.clone().normalize(), center.length() / 6);
       game.progress.field.push(c.id);
       phase = "return cable";
+      if (!cableApproachClear(game, c)) {
+        const outward = game.player.position
+          .clone()
+          .sub(new THREE.Vector3(last.x, last.y, last.z))
+          .setY(0)
+          .normalize();
+        step(outward, 0.35 / 6);
+        const target = c.launch
+            .clone()
+            .lerp(new THREE.Vector3(last.x, last.y, last.z), 0.15),
+          canStand = (x, z) =>
+            Math.abs(x - last.x) < last.w &&
+            Math.abs(z - last.z) < last.d &&
+            game.canMove(x, z, last.y - game.groundHeight(x, z)),
+          search = searchRoute(canStand, game.player.position, target, {
+            cell: 0.2,
+            margin: 3,
+            maxVisited: 1800,
+            maxDistance: 8,
+          });
+        let route;
+        do {
+          route = search.next();
+        } while (!route.done);
+        check(route.value.status === "complete", "walking approach to cable");
+        for (const point of route.value.points) {
+          const delta = new THREE.Vector3(
+            point.x - game.player.position.x,
+            0,
+            point.z - game.player.position.z,
+          );
+          step(delta.clone().normalize(), delta.length() / 6);
+        }
+      }
       check(traversalInteract(game), "cable launch");
+      check(game.zipRide, "cable boarded");
       for (let i = 0; i < 185; i++) {
         updateTraversal(game, 1 / 60, { x: 0, z: 0 });
         check(

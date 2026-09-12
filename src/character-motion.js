@@ -15,6 +15,7 @@ import { orbitDeckAt } from "./orbit-rules.js";
 import { hoistDeckAt } from "./bell-hoist-rules.js";
 import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
+import { stationContains } from "./field-station-solids.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
 // support, and crossing uneven ground in the air must not lift the jump arc.
@@ -22,6 +23,20 @@ export function supportAt(game, x, z, maxY = Infinity) {
   let height = game.groundHeight(x, z),
     surface = null;
   for (const o of game.obstacles) {
+    if (o.fieldStation) {
+      if (
+        o.supportable &&
+        // Landing uses the same body footprint as horizontal collision so a
+        // descent beside a cap or control cannot settle inside its volume.
+        stationContains(o, x, z, 0.4) &&
+        o.bounds.max.y <= maxY + 0.2 &&
+        o.bounds.max.y > height
+      ) {
+        height = o.bounds.max.y;
+        surface = o;
+      }
+      continue;
+    }
     if (!o.climbable || Math.abs(x - o.x) >= o.w || Math.abs(z - o.z) >= o.d)
       continue;
     const top = game.groundHeight(o.x, o.z) + o.h;
@@ -174,15 +189,21 @@ export function safeArrival(game, position) {
   const clear = (x, y, z) => game.canMove(x, z, y - game.groundHeight(x, z));
   if (clear(position.x, position.y, position.z))
     return { x: position.x, y: position.y, z: position.z };
-  for (let radius = 0.75; radius <= 15; radius += 0.75) {
-    const count = Math.ceil((radius * Math.PI * 2) / 0.65);
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2,
-        x = position.x + Math.cos(angle) * radius,
-        z = position.z + Math.sin(angle) * radius,
-        y = game.groundHeight(x, z);
-      if (clear(x, y, z)) return { x, y, z };
+  // Try the saved elevation first: a newly solid pedestal on a climbing
+  // landing must not send an earned elevated arrival back to the ground.
+  for (const elevated of [true, false])
+    for (let radius = 0.75; radius <= 15; radius += 0.75) {
+      const count = Math.ceil((radius * Math.PI * 2) / 0.65);
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2,
+          x = position.x + Math.cos(angle) * radius,
+          z = position.z + Math.sin(angle) * radius,
+          y = elevated
+            ? supportAt(game, x, z, position.y).height
+            : game.groundHeight(x, z);
+        if (elevated && Math.abs(y - position.y) > 0.3) continue;
+        if (clear(x, y, z)) return { x, y, z };
+      }
     }
-  }
   return null;
 }

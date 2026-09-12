@@ -201,7 +201,7 @@ test("a sentry bolt sweeps against cover instead of tunneling through it", () =>
   game.player.position.set(0, 0, 12);
   enemy.aim.copy(game.player.position);
   spawnBolt(game, enemy);
-  game.canMove = (x, z) => z < 5 || z > 6;
+  game.obstacles = [{ x: 0, z: 5.5, w: 2, d: 0.02, h: 4 }];
   updateProjectiles(game, 1);
   assert.equal(game.health, 100);
   assert.equal(game.projectiles.length, 0);

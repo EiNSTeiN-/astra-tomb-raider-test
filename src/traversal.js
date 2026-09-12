@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { updateReturnCable } from "./return-cable.js";
-import { supportAt } from "./character-motion.js";
+import { supportAt, safeArrival } from "./character-motion.js";
 import { ropeGrip, updateCourseVisual } from "./traversal-courses.js";
 
 const HAND_HEIGHT = 2.15;
@@ -39,7 +39,19 @@ export function restoreTraversal(game) {
     c = game.traversalCourses.find((c) => c.id === saved?.id);
   if (c && Number.isInteger(saved.ledge) && c.ledges[saved.ledge]) {
     const l = c.ledges[saved.ledge];
-    game.player.position.set(l.x, l.y, l.z);
+    const p = game.progress.position,
+      y = p && game.groundHeight(p.x, p.z) + (p.height || 0),
+      floor = p && supportAt(game, p.x, p.z, y),
+      retained =
+        p &&
+        floor.surface?.courseId === c.id &&
+        floor.surface?.ledge === saved.ledge &&
+        Math.abs(floor.height - y) < 0.25 &&
+        game.canMove(p.x, p.z, y - game.groundHeight(p.x, p.z));
+    const arrival = retained
+      ? { x: p.x, y: floor.height, z: p.z }
+      : safeArrival(game, { x: l.x, y: l.y, z: l.z });
+    if (arrival) game.player.position.set(arrival.x, arrival.y, arrival.z);
     game.courseAnchor = { id: c.id, ledge: saved.ledge };
   } else if (Number.isFinite(game.progress.position?.height)) {
     const p = game.player.position,
@@ -90,11 +102,13 @@ export function trackTraversalSupport(game) {
     const c = game.traversalCourses.find((c) => c.id === game.courseAnchor.id);
     if (c && !done(game, c) && game.motionLanding?.drop > 2) {
       const l = c.ledges[game.courseAnchor.ledge];
-      p.set(l.x, l.y, l.z);
-      game.jumpY = l.y - game.groundHeight(l.x, l.z);
+      const arrival = safeArrival(game, { x: l.x, y: l.y, z: l.z });
+      if (!arrival) return;
+      p.set(arrival.x, arrival.y, arrival.z);
+      game.jumpY = p.y - game.groundHeight(p.x, p.z);
       game.velocityY = 0;
       game.airVelocity = null;
-      game.fallPeak = l.y;
+      game.fallPeak = p.y;
       game.stamina = Math.max(25, game.stamina - 12);
       game.audio.noiseHit?.(0.025, 0.3, 600, p);
       game.cb.toast?.(
@@ -189,11 +203,31 @@ function zipCandidate(game) {
       ) < 2.7,
   );
 }
+// Boarding is a short step toward the trolley. Never pull the explorer
+// through the station from its opposite side; the landing has a walking ring.
+export function cableApproachClear(game, course) {
+  const start = game.player.position,
+    end = course.launch,
+    steps = Math.max(1, Math.ceil(start.distanceTo(end) / 0.08));
+  for (let i = 0; i <= steps; i++) {
+    const p = start.clone().lerp(end, i / steps);
+    if (!game.canMove(p.x, p.z, p.y - game.groundHeight(p.x, p.z)))
+      return false;
+  }
+  return true;
+}
 export function traversalInteract(game) {
   if (game.ropeRide || game.zipRide) return true;
   if (tryGrabRope(game)) return true;
   const c = zipCandidate(game);
   if (c) {
+    if (!cableApproachClear(game, c)) {
+      game.cb.toast?.(
+        "Walk around the pedestal toward the return-cable trolley before boarding.",
+        4500,
+      );
+      return true;
+    }
     game.zipRide = {
       course: c,
       time: 0,
@@ -245,7 +279,11 @@ export function traversalHint(game) {
     };
   if (game.zipRide)
     return { key: "", label: "Returning along the service cable" };
-  if (zipCandidate(game)) return { key: "E", label: "Ride the return cable" };
+  const cable = zipCandidate(game);
+  if (cable)
+    return cableApproachClear(game, cable)
+      ? { key: "E", label: "Ride the return cable" }
+      : { key: "", label: "Walk around the pedestal toward the return cable" };
   if (grabCandidate(game)) return { key: "E", label: "Catch the rope" };
   const c = game.traversalCourses.find(
     (c) =>

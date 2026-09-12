@@ -10,6 +10,7 @@ import {
 
 import { ENEMY_TYPES } from "./encounters.js";
 import { perceivePlayer, playerNoise, guardianEngaged } from "./stealth.js";
+import { shotCover } from "./aiming.js";
 export {
   ENEMY_TYPES,
   ENCOUNTER_PALETTES,
@@ -435,13 +436,14 @@ export function updateProjectiles(game, dt) {
     let remove = bolt.life <= 0;
     const steps = Math.max(1, Math.ceil((bolt.speed * dt) / 0.35));
     for (let i = 0; i < steps && !remove; i++) {
+      const from = bolt.mesh.position.clone();
       bolt.mesh.position.addScaledVector(
         bolt.direction,
         (bolt.speed * dt) / steps,
       );
       const p = bolt.mesh.position,
         height = p.y - game.groundHeight(p.x, p.z);
-      if (height < 0.1 || !game.canMove(p.x, p.z, height)) remove = true;
+      if (height < 0.1 || shotCover(game, from, p) < 1) remove = true;
       else if (
         Math.hypot(p.x - player.x, p.z - player.z) < 0.65 &&
         p.y > player.y + 0.15 &&

@@ -390,6 +390,11 @@ import {
   wadingDepth,
 } from "./water-motion.js";
 import { waterAt, hotLavaAt } from "./hydrology.js";
+import {
+  stationBlocked,
+  stationEntry,
+  stationMantleEnd,
+} from "./field-station-solids.js";
 import { prepareGuardianPatrols } from "./guardian-patrols.js";
 import { resetDiving, divingHint, updateDiveView, DIVE_AIR } from "./diving.js";
 import {
@@ -1511,7 +1516,11 @@ export class Adventure {
     for (const dx of [-0.45, 0.45])
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
-    for (const o of this.obstacles)
+    for (const o of this.obstacles) {
+      if (o.fieldStation) {
+        if (stationBlocked(o, x, worldY, z, clearance)) return false;
+        continue;
+      }
       if (
         o.h > 0 &&
         Math.abs(x - o.x) < o.w &&
@@ -1520,6 +1529,7 @@ export class Adventure {
           this.groundHeight(o.x, o.z) + o.h - 0.2
       )
         return false;
+    }
     return true;
   }
   lineOfSight(a, b, fromHeight = 1.4, toHeight = 1.4) {
@@ -1543,6 +1553,10 @@ export class Adventure {
     if (orbitOccludes(this, from, to)) return false;
     if (courierOccludes(this, from, to)) return false;
     for (const o of this.obstacles || []) {
+      if (o.fieldStation) {
+        if (stationEntry(o, from, to) !== null) return false;
+        continue;
+      }
       if (o.h <= 0.2) continue;
       const base = this.groundHeight(o.x, o.z);
       if (
@@ -1935,10 +1949,11 @@ export class Adventure {
       const tx = p.x + direction.x * 1.5,
         tz = p.z + direction.z * 1.5;
       if (Math.abs(tx - o.x) < o.w + 0.35 && Math.abs(tz - o.z) < o.d + 0.35) {
-        this.climb = {
-          time: 0,
-          start: p.clone(),
-          end: new THREE.Vector3(
+        const end = stationMantleEnd(
+          this,
+          o,
+          p,
+          new THREE.Vector3(
             Math.max(
               o.x - o.w + 0.7,
               Math.min(o.x + o.w - 0.7, tx + direction.x),
@@ -1949,6 +1964,12 @@ export class Adventure {
               Math.min(o.z + o.d - 0.7, tz + direction.z),
             ),
           ),
+        );
+        if (!end) continue;
+        this.climb = {
+          time: 0,
+          start: p.clone(),
+          end,
           height: o.h,
         };
         this.avatar.rotation.y = Math.atan2(direction.x, direction.z);

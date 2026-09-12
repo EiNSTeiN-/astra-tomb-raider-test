@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Field-station clearance](field-station-clearance.md) makes all 169 generic
+  pedestals and controls solid, preserves working positions, and protects the
+  21 climbing routes and their return cables. Older occupied saves recover on
+  a supported surface, and installing an item leaves room for the explorer.
+  All 624 tests and the build pass. Evidence includes 41 representative rendered
+  views, six fire-source listening checks, 13 production keyboard/touch cases
+  and 26 complete normalized-save reload comparisons apart from timestamps.
+  VA-11 is fixed. Repeated station art is tracked as VA-12, and the broader
+  playable-world visual audit remains open.
+
 - The volcanic chapter's four [lava pools now meet their surrounding terrain](lava-shores.md)
   with irregular shores, textured slag and varied molten seams. Dry corners
   are safe and cooled crust supports the explorer's feet. All 615 tests and

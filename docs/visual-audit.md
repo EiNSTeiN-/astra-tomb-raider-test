@@ -33,7 +33,10 @@ The source helper is [inspect-world-courts-browser.js](../scripts/inspect-world-
 | The Last Meridian | 11 / 22 | 30 | 18 | 74 |
 | Total | **77 / 154** | **207** | **144** | **512** |
 
-Field stations, optional discoveries, connecting routes, elevated structures,
+The [field-station clearance pass](field-station-clearance.md) adds mechanical
+checks at 169 generic controls, complete assisted routes through all 21 climbing
+courses, and representative rendered views of 16 installations. Field-station
+appearance, optional discoveries, connecting routes, other elevated structures,
 water interiors and return paths still need systematic current coverage.
 Earlier local milestone checks provide useful references, but do not replace
 this review. Each moving mechanism also needs inspection in its relevant open,
@@ -53,7 +56,8 @@ closed and intermediate states.
 | VA-08 | Jungle pier roots have blunt, partly exposed ends at the soil. | Rendered-terrain measurements refined the initial floating-root diagnosis: every old endpoint ring touched the ground along at least one edge, but exposed portions reached 28 cm above it. All 54 roots now taper into the ground, with their entire end rings buried at least 17.3 cm. [Root construction and comparisons](ruin-roots.md) record 22 reviewed views and production keyboard/touch save checks. | Fixed |
 | VA-09 | Resuming at a close solar control can leave the camera obscured by a handwheel or adjacent receiver column. | Chapters now retain saved look angles and select a clear nearby orbit when the requested view is blocked. The reproduced view improves from 0.81 m to 5.33 m. [Camera comparisons and checks](arrival-camera.md) record all 77 solar controls in both formats, 409 sampled approaches/ledges, ten production input/reload cases and preservation of other save fields during an obstruction correction. | Fixed |
 | VA-10 | Volcanic lava pools appear as glowing square sheets above the ground. | All 1,296 sampled points on the four old mesh borders stood 12 cm above the terrain. [Slag pools and shoreline repairs](lava-shores.md) add buried borders, shallow irregular basins, textured crust, damage that follows the exposed surface and solid cooled footing. Verification covers all 615 tests, local routes, visual states, sound-source access and production movement/cooling/reload cases. | Fixed |
-| VA-11 | The explorer can walk into a generic field-valve pedestal. | The production cooling-valve case at volcanic `field-0-2` reaches the pedestal center while remaining at ground height; its 81 cm tall base intersects the lower body. `buildFieldStation` builds the generic pedestal without a movement obstacle. [The recorded native view](lava-shores.md#cost-and-remaining-scope) and the next systematic field-station pass should guide a correction that preserves interaction and saved arrivals. | Open |
+| VA-11 | The explorer can walk into a generic field-valve pedestal. | [Field-station clearance](field-station-clearance.md) adds bounded physical solids at all 169 generic stations, preserves control access, recovers occupied saves on a supported surface and protects mantle/cable approaches. Empty sockets retain their saved collision state and delivery makes room for an installed component. | Fixed |
+| VA-12 | Generic field stations repeat simple frames, pedestals, wheels and tablets across distinct environments, often on sparse paving. | The [station review](field-station-clearance.md) provides representative ground and elevated views in every chapter. Give the shared installations stronger regional construction and surroundings, then expand inspection to every station and its approach/return path. Preserve the verified collision, working positions and traversal routes during the art changes. | Open |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,
