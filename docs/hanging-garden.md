@@ -4,6 +4,11 @@ The sixth field mission in **The Verdant Veil** now joins its three winches
 into a connected elevated route. Two rotating timber spans, a broken weight
 gallery and a lifting return walk replace the three scattered interactions.
 
+The later [construction refinement](hanging-garden-construction.md) adds fitted
+piers, arches, trusses, mounted handwheels and rope rails. Its guide contains
+current comparison images and validation; the images and measurements below
+record the original traversal milestone.
+
 ![The connected route with the northern return walk raised](images/hanging-garden/overview.webp)
 
 Climb the southern stair and tension the entry cable. Walk to the central

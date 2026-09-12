@@ -353,3 +353,83 @@ test("turning side rails sweep around the fixed pier without passing through its
       );
   }
 });
+
+test("garden trusses remain under walking decks and construction surfaces retain finite coordinates through batching", () => {
+  const g = fixture(completed),
+    h = g.sunBridge;
+  assert.equal(h.construction.piers.length, 12);
+  assert.equal(h.construction.arches.length, 4);
+  assert.equal(h.construction.trusses.length, 3);
+  for (const b of h.bridges) assert.equal(b.deck.thickness, 1.2);
+  assert.equal(h.returnDeck.thickness, 1.2);
+  for (const root of [h.root, ...g.items.map((f) => f.group)])
+    root.traverse((mesh) => {
+      if (!mesh.geometry) return;
+      for (const attribute of Object.values(mesh.geometry.attributes))
+        assert([...attribute.array].every(Number.isFinite));
+      if (mesh.material.userData.windMetal) {
+        assert(mesh.geometry.attributes.windCoord);
+        assert(mesh.geometry.attributes.windCavity);
+      }
+    });
+  // Corbelled galleries and moving timber still leave ground-level headroom.
+  assert(!sunBlocked(g, h.x - 4, h.z, h.y, 1.8));
+  assert(sunCeiling(g, h.x - 4, h.z, h.y + 3, h.y + 5) <= h.y + 3.01);
+});
+test("winch construction keeps its calibrated handle axes and leaves a supported front approach", () => {
+  const g = fixture(completed),
+    h = g.sunBridge;
+  const controls = [...h.controls, ...g.items.map((f) => f.sunControl)];
+  for (const c of controls) {
+    assert.deepEqual(c.wheel.position.toArray(), [0, 1.35, 0.12]);
+    assert.equal(c.grips.length, 2);
+    for (const [i, grip] of c.grips.entries())
+      assert.deepEqual(grip.position.toArray(), [
+        i === 0 ? -0.23 : 0.23,
+        0,
+        0.16,
+      ]);
+  }
+  for (const [x, y, z] of [
+    [-24, 6, 0.78],
+    [-17, 9.2, -23.22],
+    [16, 6, -13.22],
+    [-10, 6, 0.28],
+    [16, 6, 0.28],
+    [-10, 6, -13.82],
+  ]) {
+    place(g, x, y, z);
+    assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+    assert.equal(
+      supportAt(
+        g,
+        g.player.position.x,
+        g.player.position.z,
+        g.player.position.y,
+      ).height,
+      g.player.position.y,
+    );
+  }
+});
+
+test("coursed shafts and individual arch stones still obstruct the following camera after batching", () => {
+  const g = fixture(completed),
+    h = g.sunBridge;
+  for (const p of h.construction.piers) {
+    const a = new THREE.Vector3(h.x + p.x - 3, h.y + p.base + 2, h.z + p.z),
+      b = a.clone().add(new THREE.Vector3(6, 0, 0));
+    assert(
+      g.cameraSurfaces.entry(a, b, 0.03) < 1,
+      `Camera missed shaft ${p.x},${p.z}`,
+    );
+  }
+  for (const arch of h.construction.arches) {
+    const a = new THREE.Vector3(h.x + arch.x, h.y + arch.y + 0.2, h.z + arch.z),
+      b = a.clone();
+    b.y = h.y + arch.y + arch.outer + 0.3;
+    assert(
+      g.cameraSurfaces.entry(a, b, 0.03) < 0.85,
+      "Camera missed the underside of a masonry arch",
+    );
+  }
+});

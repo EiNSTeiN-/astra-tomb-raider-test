@@ -20,6 +20,16 @@ The user also added distance-sensitive environmental audio and quiet background 
 
 ## Verification performed
 
+- The Hanging Garden now has [coursed piers, stone arches, timber trusses,
+  mounted winches and fitted rope rails](hanging-garden-construction.md).
+  Camera obstruction covers the rebuilt shafts and arches, and the old blade
+  trap beneath the gallery is removed. All 569 tests, the build, the complete
+  assisted route at 100 health and nine production input/reload cases pass.
+  The guide records matching browser views,
+  positional audio, resource cleanup and approximately 5.0 ms High / 4.6 ms Low
+  of additional GPU time in the measured close view. Chapter pacing, modern
+  AAA graphics and subjective listening acceptance remain unfinished.
+
 - **The Verdant Veil** now has [the Hanging Garden](hanging-garden.md): two
   rotating spans, three broken gallery jumps, a counterweight lift and a raised
   return walk joining the sixth mission's three winches. Moving support,

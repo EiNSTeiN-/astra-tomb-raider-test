@@ -5,7 +5,16 @@ import {
   gardenPavingGeometry,
   prepareGardenGeometry,
 } from "./rain-garden-art.js";
-import { pbrMaterial, mergeArchitecture } from "./visuals.js";
+import { mergeArchitecture } from "./visuals.js";
+import {
+  sunConstructionMaterials,
+  buildSunWinch,
+  sunPierCourses,
+  sunArchStone,
+  sunRopeGeometry,
+  buildSunTruss,
+  buildSunRail,
+} from "./sun-bridge-construction.js";
 import { SUN_FIELDS, SUN_LANDINGS, SUN_PIVOTS } from "./sun-bridge-rules.js";
 
 function sign(text, width = 2.8) {
@@ -35,54 +44,7 @@ function sign(text, width = 2.8) {
   );
 }
 export function sunWheel(game, group, label) {
-  const bronze = game.goldMat,
-    iron = game.darkMat;
-  game.box(1.25, 0.8, 0.65, iron, 0, 0.4, 0, group);
-  game.box(1.4, 0.15, 0.8, game.stoneMat, 0, 0.85, 0, group);
-  const wheel = new THREE.Group();
-  wheel.position.set(0, 1.35, 0.12);
-  wheel.rotation.z = Math.PI / 4;
-  wheel.userData.animated = true;
-  group.add(wheel);
-  wheel.add(
-    new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.043, 8, 32), bronze),
-  );
-  for (let i = 0; i < 3; i++)
-    game.box(0.045, 0.72, 0.045, bronze, 0, 0, 0, wheel).rotation.z =
-      (i * Math.PI) / 3;
-  const grips = [-1, 1].map((side) => {
-    const grip = new THREE.Object3D();
-    grip.position.set(side * 0.23, 0, 0.16);
-    wheel.add(grip);
-    const bar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.019, 0.019, 0.2, 16),
-      iron,
-    );
-    bar.rotation.z = Math.PI / 2;
-    grip.add(bar);
-    for (const x of [-0.1, 0.1])
-      game.box(0.025, 0.04, 0.16, bronze, side * 0.23 + x, 0, 0.08, wheel);
-    return grip;
-  });
-  const axle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.09, 0.4, 12),
-    bronze,
-  );
-  axle.rotation.x = Math.PI / 2;
-  axle.position.set(0, 1.35, -0.03);
-  group.add(axle);
-  const panel = sign(label, 2.5);
-  game.box(2.65, 0.8, 0.13, iron, 0, 2.1, -0.06, group);
-  for (const x of [-1.3, 1.3])
-    game.box(0.055, 0.84, 0.18, bronze, x, 2.1, -0.025, group);
-  for (const y of [1.71, 2.49])
-    game.box(2.65, 0.045, 0.18, bronze, 0, y, -0.025, group);
-  for (const x of [-0.75, 0.75])
-    game.box(0.065, 1.3, 0.09, iron, x, 1.4, -0.08, group);
-  panel.position.set(0, 2.1, 0.04);
-  group.add(panel);
-  mergeArchitecture(wheel);
-  return { wheel, grips, group };
+  return buildSunWinch(game, group, label, sign);
 }
 export function buildSunStation(game, f, group) {
   if (f.sunHeight === undefined) return false;
@@ -95,11 +57,9 @@ export function buildSunStation(game, f, group) {
 }
 export function buildSunBridgeArt(game, h) {
   const root = h.root,
-    stone = game.stoneMat,
-    dark = game.darkMat,
-    bronze = game.goldMat,
-    wood = pbrMaterial("monastery-wood", 0xa99c78, 0.55),
-    rope = pbrMaterial("bark", 0x807452, 1);
+    materials = sunConstructionMaterials(game),
+    { stone, bronze, wood, rope } = materials,
+    dark = game.darkMat;
   let seed = 38640;
   const add = (g, m, x, y, z, parent = root) => {
     const mesh = new THREE.Mesh(prepareGardenGeometry(g, m), m);
@@ -156,26 +116,82 @@ export function buildSunBridgeArt(game, h) {
     h.decks.push(data);
     return data;
   };
+  h.construction = { piers: [], arches: [], trusses: [] };
   function pier(x, z, height) {
     const base = game.groundHeight(h.x + x, h.z + z) - h.y - 0.12;
-    block(2.5, 0.5, 2.5, x, base + 0.25, z, dark);
-    block(
-      1.75,
-      height - base - 0.35,
-      1.75,
-      x,
-      (height + base - 0.35) / 2,
-      z,
+    h.construction.piers.push({ x, z, base, top: height - 0.35 });
+    block(2.05, 0.23, 2.05, x, base + 0.115, z, dark);
+    block(1.88, 0.19, 1.88, x, base + 0.325, z, stone);
+    solid(x, z, 2.05, 2.05, base, base + 0.42);
+    for (const c of sunPierCourses(base, height)) {
+      const segment = (c.width - 0.01) / 2;
+      for (const side of [-1, 1])
+        block(
+          c.split ? c.width : segment,
+          c.height,
+          c.split ? segment : c.width,
+          x + (c.split ? 0 : (side * (segment + 0.01)) / 2),
+          c.y,
+          z + (c.split ? (side * (segment + 0.01)) / 2 : 0),
+          stone,
+        );
+    }
+    solid(x, z, 1.7, 1.7, base + 0.42, height - 0.35);
+    // Individual ashlar blocks are below the generic camera-detail threshold.
+    // Capture the continuous shaft before releasing this non-rendered proxy.
+    const shaft = new THREE.Mesh(
+      new THREE.BoxGeometry(1.7, height - base - 0.77, 1.7),
       stone,
     );
-    solid(x, z, 1.75, 1.75, base, height - 0.35);
-    for (const y of [base + 0.6, height - 1, height - 0.3])
-      block(2.05, 0.22, 2.05, x, y, z, dark);
+    shaft.position.set(x, (base + 0.42 + height - 0.35) / 2, z);
+    root.add(shaft);
+    game.cameraSurfaces?.capture(shaft);
+    root.remove(shaft);
+    shaft.geometry.dispose();
+    for (let i = 0; i < 3; i++)
+      block(
+        1.65 + i * 0.19,
+        0.18,
+        1.65 + i * 0.19,
+        x,
+        height - 0.8 + i * 0.18,
+        z,
+        stone,
+      );
   }
   for (const [i, d] of SUN_LANDINGS.entries()) {
     deck(d.x, d.z, d.w, d.d, d.height);
-    for (const side of [-1, 1])
-      pier(d.x + side * (d.w / 2 - 0.4), d.z - 0.25, d.height);
+    const offsets = d.w < 4 ? [0] : [-(d.w / 2 - 0.85), d.w / 2 - 0.85];
+    for (const offset of offsets) pier(d.x + offset, d.z - 0.25, d.height);
+    block(d.w - 0.08, 0.32, 1.9, d.x, d.height - 0.5, d.z - 0.25, stone);
+    if (offsets.length === 2) {
+      const radius = offsets[1] - 0.5,
+        outer = radius + 0.3,
+        y = d.height - 0.6 - outer;
+      h.construction.arches.push({
+        x: d.x,
+        z: d.z - 0.25,
+        y,
+        inner: radius,
+        outer,
+      });
+      for (let j = 0; j < 9; j++) {
+        const arch = add(
+          sunArchStone(
+            radius,
+            outer,
+            (j * Math.PI) / 9 + 0.004,
+            Math.PI / 9 - 0.008,
+            1.25,
+          ),
+          stone,
+          d.x,
+          y,
+          d.z - 0.25,
+        );
+        game.cameraSurfaces?.capture(arch, { small: true });
+      }
+    }
     if (i === 0 || i === 4 || i === 5) {
       for (const side of [-1, 1]) {
         block(
@@ -196,6 +212,25 @@ export function buildSunBridgeArt(game, h) {
           d.height + 3.8,
         );
       }
+      for (const side of [-1, 1]) {
+        const x = d.x + side * (d.w / 2 - 0.25);
+        block(0.43, 0.11, 0.43, x, d.height + 0.085, d.z - 1.1, bronze);
+        block(0.44, 0.12, 0.44, x, d.height + 3.35, d.z - 1.1, bronze);
+        beam(
+          [x, d.height + 3.05, d.z - 1.1],
+          [x - side * 0.6, d.height + 3.6, d.z - 1.1],
+          0.14,
+          wood,
+        );
+        solid(
+          x - side * 0.3,
+          d.z - 1.1,
+          0.74,
+          0.2,
+          d.height + 3,
+          d.height + 3.67,
+        );
+      }
       beam(
         [d.x - d.w / 2, d.height + 3.6, d.z - 1.1],
         [d.x + d.w / 2, d.height + 3.6, d.z - 1.1],
@@ -213,22 +248,27 @@ export function buildSunBridgeArt(game, h) {
   }
   deck(-24, 1.2, 2.8, 2.4, 6);
   for (const side of [-1, 1]) {
-    beam(
-      [-24 + side * 1.55, 0.9, 16.2],
-      [-24 + side * 1.55, 7, 1.5],
-      0.12,
-      rope,
-    );
-    for (let i = 0; i < 5; i++)
-      block(
-        0.16,
-        1.1,
-        0.16,
-        -24 + side * 1.55,
-        1.1 + i * 1.4,
-        15 - i * 3.25,
-        wood,
+    const x = -24 + side * 1.52,
+      ropeY = (z) => 0.9 + ((16.2 - z) * 6.1) / 14.7;
+    beam([x, -0.24, 16.2], [x, 5.86, 1.5], 0.27, wood);
+    const posts = [16.2, 15, 11.75, 8.5, 5.25, 2, 1.5];
+    for (let i = 0; i < posts.length - 1; i++)
+      add(
+        sunRopeGeometry(
+          [x, ropeY(posts[i]), posts[i]],
+          [x, ropeY(posts[i + 1]), posts[i + 1]],
+          0.041,
+          0.075,
+        ),
+        rope,
+        0,
+        0,
+        0,
       );
+    for (const z of posts.slice(1, -1)) {
+      block(0.16, 1.1, 0.16, x, ropeY(z) - 0.47, z, wood);
+      block(0.2, 0.08, 0.21, x, ropeY(z) - 0.98, z, bronze);
+    }
   }
   const intro = sign(
     "THE HANGING GARDEN\nClimb the southern stair · M shows the spans",
@@ -277,13 +317,6 @@ export function buildSunBridgeArt(game, h) {
         block(0.13, 1.15, 0.13, x, 0.58, side * 1.5, wood, moving);
       }
       for (const end of [-1, 1]) {
-        beam(
-          [end * 3.5, 1.08, side * 1.5],
-          [end * 12, 1.08, side * 1.5],
-          0.085,
-          rope,
-          moving,
-        );
         const rail = {
           bridge,
           offsetX: end * 7.75,
@@ -297,6 +330,41 @@ export function buildSunBridgeArt(game, h) {
         bridge.rails.push(rail);
       }
     }
+    buildSunRail({
+      add,
+      block,
+      root: moving,
+      side: -1,
+      wood,
+      rope,
+      metal: materials.iron,
+    });
+    buildSunRail({
+      add,
+      block,
+      root: moving,
+      side: 1,
+      wood,
+      rope,
+      metal: materials.iron,
+    });
+    buildSunTruss({
+      add,
+      block,
+      beam,
+      root: moving,
+      length: 23.8,
+      width: 1.08,
+      wood,
+      metal: materials.iron,
+      rope,
+    });
+    h.construction.trusses.push({
+      root: moving,
+      bottom: -1.2,
+      width: 2.65,
+      length: 24,
+    });
     const bearing = add(
       new THREE.CylinderGeometry(1.35, 1.55, 0.36, 24),
       bronze,
@@ -306,7 +374,7 @@ export function buildSunBridgeArt(game, h) {
       moving,
     );
     bearing.name = "Rotating bronze bearing";
-    const surface = { bridge, w: 12, d: 1.33, y: h.y + 6, thickness: 0.4 };
+    const surface = { bridge, w: 12, d: 1.33, y: h.y + 6, thickness: 1.2 };
     h.decks.push(surface);
     bridge.deck = surface;
     const controls = new THREE.Group();
@@ -315,7 +383,7 @@ export function buildSunBridgeArt(game, h) {
     const control = sunWheel(
       game,
       controls,
-      `${index === 0 ? "GARDEN" : "SUN"} SPAN\nUse to turn 90°`,
+      `${index === 0 ? "A · GARDEN" : "B · SUN"} SPAN\nUse to turn 90°`,
     );
     control.pivot = index;
     control.world = { x: h.x + p.x, z: h.z + p.z - 0.5, y: h.y + 6 };
@@ -376,6 +444,23 @@ export function buildSunBridgeArt(game, h) {
       wood,
       returnRoot,
     );
+  buildSunTruss({
+    add,
+    block,
+    beam,
+    root: returnRoot,
+    length: 25.8,
+    width: 0.68,
+    wood,
+    metal: materials.iron,
+    rope,
+  });
+  h.construction.trusses.push({
+    root: returnRoot,
+    bottom: -1.2,
+    width: 1.8,
+    length: 26,
+  });
   h.returnPlatform = { x: h.x + 3, z: h.z - 14, angle: 0, y: h.y + 2 };
   h.returnDeck = {
     bridge: h.returnPlatform,
@@ -384,7 +469,7 @@ export function buildSunBridgeArt(game, h) {
     w: 13,
     d: 0.9,
     y: h.y + 2,
-    thickness: 0.4,
+    thickness: 1.2,
   };
   h.decks.push(h.returnDeck);
   mergeArchitecture(returnRoot);

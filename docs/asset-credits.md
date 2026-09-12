@@ -538,3 +538,12 @@ and bark maps, the existing Vesper mesh and hand solver, and original hoist
 synthesis. No new external models, textures, recordings or dependencies were
 introduced. Documentation images are captures of the running game converted
 to WebP.
+
+The garden's [construction refinement](hanging-garden-construction.md) adds
+original coursed shafts, segmented arches, timber trusses, handwheel plinths,
+metal fittings, curved rope rails and lashings in `src/sun-bridge-art.js` and
+`src/sun-bridge-construction.js`. Its vertex-based masonry weathering is an
+original shader over the existing credited temple stone maps. It also reuses
+the monastery wood, bark maps and project bronze/iron materials. No new
+external assets, recordings or dependencies were introduced. Comparison
+images are actual game renders converted losslessly to WebP.

@@ -158,8 +158,13 @@ export function buildHazards(game) {
     const f = [fields[1], fields[2], fields[0]].find(
       (f) => f && f.kind !== "climb",
     );
-    // The echo causeway has timed moving stones and safe relay galleries.
-    if (!f || f.causewayHeight !== undefined || f.shutterHeight !== undefined)
+    // These connected routes supply their own moving-platform or wind hazards.
+    if (
+      !f ||
+      f.causewayHeight !== undefined ||
+      f.shutterHeight !== undefined ||
+      f.sunHeight !== undefined
+    )
       continue;
     const x = f.x * 7,
       z = f.z * 7,

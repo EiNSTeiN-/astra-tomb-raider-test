@@ -82,6 +82,9 @@ In **The Verdant Veil**, [the Hanging Garden](docs/hanging-garden.md) connects
 three winches through rotating spans, broken gallery jumps and a raised return
 walk. Moving decks carry the player, landing wheels recall them, and the route
 has a live map, local machinery sounds and saved recovery landings.
+Its [construction refinement](docs/hanging-garden-construction.md) adds coursed
+stone shafts, arches, timber trusses, mounted winches and fitted rope rails.
+The comparison records the visual changes, camera checks and added GPU cost.
 
 In **A Silence of Snow**, [the Room of Wind](docs/shutter-house.md) now has
 three elevated wind walks, broken spans and sheltered shutter controls. Brace
