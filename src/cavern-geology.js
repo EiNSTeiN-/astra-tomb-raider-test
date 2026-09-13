@@ -84,10 +84,10 @@ export function refineCavernTerrain(profile, map, seed) {
           rectangleDistance(
             x,
             z,
-            w.x - w.width / 2,
-            w.x + w.width / 2,
-            w.z - w.length / 2,
-            w.z + w.length / 2,
+            w.x - (w.bedWidth ?? w.width) / 2,
+            w.x + (w.bedWidth ?? w.width) / 2,
+            w.z - (w.bedLength ?? w.length) / 2,
+            w.z + (w.bedLength ?? w.length) / 2,
           ),
         );
       exposure[index] = mask;

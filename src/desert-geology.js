@@ -78,7 +78,11 @@ export function refineDesertTerrain(profile, map, seed) {
       // untouched, so bilinear interpolation cannot alter a path or foundation.
       let mask = smooth(2 * step, 9, distance);
       for (const water of profile.waters) {
-        const r = Math.hypot(water.width, water.length) / 2;
+        const r =
+          Math.hypot(
+            water.bedWidth ?? water.width,
+            water.bedLength ?? water.length,
+          ) / 2;
         mask *= smooth(r + 5, r + 12, Math.hypot(x - water.x, z - water.z));
       }
       if (!mask) continue;

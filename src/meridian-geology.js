@@ -63,8 +63,14 @@ export function refineMeridianTerrain(profile, map, seed) {
         );
       for (const water of profile.waters) {
         const d = Math.hypot(
-          Math.max(0, Math.abs(x - water.x) - water.width / 2),
-          Math.max(0, Math.abs(z - water.z) - water.length / 2),
+          Math.max(
+            0,
+            Math.abs(x - water.x) - (water.bedWidth ?? water.width) / 2,
+          ),
+          Math.max(
+            0,
+            Math.abs(z - water.z) - (water.bedLength ?? water.length) / 2,
+          ),
         );
         mask *= smooth(4, 10, d);
       }

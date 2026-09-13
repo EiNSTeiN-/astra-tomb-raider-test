@@ -21,6 +21,9 @@ The jungle's [eight gate chambers now have carved recesses and stepped stone sur
 following the [initial approach-and-return route review](docs/initial-court-routes.md).
 The snow chapter’s [firs now plant individually against the terrain](docs/fir-grounding.md),
 removing the suspended trunks exposed by that survey.
+The desert, crystal and eclipse courts now have [fourteen pools with buried
+mesh borders and regional shore shapes](docs/court-pools.md), retaining swimming,
+nearby control access and positioned water sounds.
 The submerged gallery's [air-bell ceilings now sit below their stone backing,
 with fitted bronze lamp mounts](docs/air-bell-ceilings.md), removing the
 overlapping surfaces visible in close ceiling views.

@@ -85,6 +85,19 @@ export function waterSites(map, level) {
         slagBasin: true,
       };
     if (
+      ["desert", "crystal", "eclipse"].includes(level.biome) &&
+      site.id.startsWith("reservoir-")
+    )
+      return {
+        ...site,
+        bedWidth: site.width,
+        bedLength: site.length,
+        width: site.width + 3.5,
+        length: site.length + 3.5,
+        baseOffset: -0.18,
+        shore: level.biome,
+      };
+    if (
       !["jungle", "water", "sky"].includes(level.biome) ||
       site.depth <= 0 ||
       site.baseOffset !== undefined
@@ -122,7 +135,36 @@ export function basinDepression(site, x, z) {
       Math.cos(angle * 5 - phase) * 0.035;
     return site.depth * (1 - smooth(0.45, edge, radius));
   }
-  return site.depth * smooth(0, Math.min(2.8, width * 0.28), Math.min(dx, dz));
+  const rectangular =
+    site.depth * smooth(0, Math.min(2.8, width * 0.28), Math.min(dx, dz));
+  if (!site.shore) return rectangular;
+  const px = (x - site.x) / (width / 2),
+    pz = (z - site.z) / (length / 2),
+    phase = (site.stage || 0) * 0.73,
+    angle = Math.atan2(pz, px);
+  let radius = Math.hypot(px, pz),
+    edge;
+  if (site.shore === "desert") {
+    // A broad sandy pocket with small, uneven lobes along its receiving bank.
+    radius = Math.hypot(px * 0.92, pz * 1.1);
+    edge =
+      0.88 +
+      Math.sin(angle * 3 + phase) * 0.055 +
+      Math.cos(angle * 5 - phase) * 0.025;
+  } else if (site.shore === "crystal") {
+    // Fractured mineral shelves give each pool five, six or seven major faces.
+    const sides = 5 + (Math.floor((site.stage || 0) / 2) % 3),
+      sector = (Math.PI * 2) / sides,
+      turn = ((((angle + phase) % sector) + sector) % sector) - sector / 2;
+    edge = (0.94 * Math.cos(Math.PI / sides)) / Math.cos(turn);
+  } else {
+    // Rounded reflecting pools echo the observatory's orbital construction.
+    radius = Math.hypot(px * 1.04, pz * 0.96);
+    edge = 0.9 + Math.sin(angle * 4 + phase) * 0.025;
+  }
+  // Never excavate beyond the former basin. The enlarged render bounds only
+  // cover interpolation at its edge, and remain buried beneath the dry terrace.
+  return Math.min(rectangular, site.depth * (1 - smooth(0.38, edge, radius)));
 }
 
 // The visible terrain intersection defines the dangerous part of each pool.

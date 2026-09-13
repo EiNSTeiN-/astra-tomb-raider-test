@@ -231,11 +231,40 @@ export function createTerrainProfile(map, level) {
     gaps: bridgeGaps(bridge),
   }));
   const waters = waterSites(map, level);
-  for (const site of waters)
+  for (const site of waters) {
     site.baseY =
       sample(heights, site.room.x * 7, site.room.z * 7) +
       (site.baseOffset ??
         (site.kind === "ice" ? 0.025 : biome === "sky" ? -0.08 : 0.12));
+    if (!site.shore) continue;
+    // A neighbouring terrace can be lower than the room's centre. Fit the
+    // entire water border below its terrain triangles, leaving wave clearance.
+    for (let i = 0; i <= 100; i++)
+      for (const [x, z] of [
+        [site.x - site.width / 2, site.z + site.length * (i / 100 - 0.5)],
+        [site.x + site.width / 2, site.z + site.length * (i / 100 - 0.5)],
+        [site.x + site.width * (i / 100 - 0.5), site.z - site.length / 2],
+        [site.x + site.width * (i / 100 - 0.5), site.z + site.length / 2],
+      ]) {
+        const ix = Math.floor(x / step),
+          iz = Math.floor(z / step),
+          tx = x / step - ix,
+          tz = z / step - iz,
+          a = heights[iz * width + ix],
+          b = heights[iz * width + ix + 1],
+          c = heights[(iz + 1) * width + ix],
+          d = heights[(iz + 1) * width + ix + 1],
+          drawn =
+            tx + tz <= 1
+              ? a + tx * (b - a) + tz * (c - a)
+              : d + (1 - tx) * (c - d) + (1 - tz) * (b - d);
+        site.baseY = Math.min(
+          site.baseY,
+          drawn - 0.08,
+          sample(heights, x, z) - 0.08,
+        );
+      }
+  }
   // Excavate after terrace sampling. Preserve every field-station working pad and
   // nearby discoveries so their authored foundations retain the same heights.
   for (let iz = 0; iz < width; iz++)

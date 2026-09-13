@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional court pools](court-pools.md) replace exposed rectangular water
+  borders at fourteen desert, crystal and eclipse courts with fitted water
+  levels and varied banks. All 636 tests and the build pass. The review covers
+  5,656 rendered-terrain rays, 42 surface views, fourteen collision-aware swim
+  exits, 118 nearby control routes and all fourteen positioned water voices.
+  Eight native production cases retain health and saved progress across sixteen
+  reloads, with one independently verified camera-only obstruction correction.
+  A separate obstructed swimming view is recorded as VA-18; world polish remains
+  incomplete.
+
 - [Individual snow fir placement](fir-grounding.md) separates the source model
   collection and seats 269 accepted trees beneath the rendered terrain. All 634
   tests and the build pass. The review includes 164,956 root-contact rays, 25

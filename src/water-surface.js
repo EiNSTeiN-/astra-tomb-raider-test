@@ -17,7 +17,11 @@ export function waterMaterial(game, site) {
   const ice = site.kind === "ice",
     mountainWater = game.level.biome === "sky" && !ice;
   const material = new THREE.MeshPhysicalMaterial({
-    color: ice ? 0xa7c7ce : game.level.water,
+    color: ice
+      ? 0xa7c7ce
+      : ({ desert: 0x427774, crystal: 0x384654, eclipse: 0x314450 }[
+          site.shore
+        ] ?? game.level.water),
     roughness: ice ? 0.27 : 0.2,
     metalness: 0,
     transparent: true,

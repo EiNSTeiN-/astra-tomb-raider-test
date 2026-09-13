@@ -16,13 +16,13 @@ import {
   desertHorizonHeight,
 } from "../src/desert-horizon.js";
 
-test("desert floors outside the new survey approaches preserve published standing heights", () => {
+test("desert floors outside the survey approaches and reshaped pools preserve published standing heights", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),
     floors = [];
-  // Captured from d479396 before the survey platforms and approaches. Exclude
-  // their construction region; all 46,718 remaining standing samples, including
-  // cell boundaries, must retain the published bilinearly interpolated heights.
+  // The survey construction region and five reshaped pool beds are intentional
+  // terrain changes. The remaining 45,738 samples match the pre-pool heightfield
+  // from 87b33d8 exactly, including bilinearly interpolated cell boundaries.
   for (let gz = 0; gz < map.size; gz++)
     for (let gx = 0; gx < map.size; gx++)
       if (map.grid[gz][gx])
@@ -31,12 +31,21 @@ test("desert floors outside the new survey approaches preserve published standin
             const x = gx * 7 + dx,
               z = gz * 7 + dz;
             if (x >= 270 && x <= 406 && z >= 203 && z <= 303) continue;
+            if (
+              profile.waters.some(
+                (w) =>
+                  w.shore &&
+                  Math.abs(x - w.x) <= w.width / 2 &&
+                  Math.abs(z - w.z) <= w.length / 2,
+              )
+            )
+              continue;
             floors.push(profile.height(x, z));
           }
-  assert.equal(floors.length, 46718);
+  assert.equal(floors.length, 45738);
   assert.equal(
     createHash("sha256").update(JSON.stringify(floors)).digest("hex"),
-    "c268f9b2e17de29e4c516998f7fa0b4a5c67333f141424edd6c403ad64b58062",
+    "4de626e1456edbbb044b79a255ade4153cd30412243e6071a6f2c00d0306fdb9",
   );
 });
 
