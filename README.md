@@ -19,6 +19,8 @@ aligned during a wall slide](docs/close-camera.md), with matched equipment
 coverage and preserved torch light, audio and water reflections.
 The jungle's [eight gate chambers now have carved recesses and stepped stone surrounds](docs/jungle-chambers.md),
 following the [initial approach-and-return route review](docs/initial-court-routes.md).
+The snow chapter’s [firs now plant individually against the terrain](docs/fir-grounding.md),
+removing the suspended trunks exposed by that survey.
 The submerged gallery's [air-bell ceilings now sit below their stone backing,
 with fitted bronze lamp mounts](docs/air-bell-ceilings.md), removing the
 overlapping surfaces visible in close ceiling views.

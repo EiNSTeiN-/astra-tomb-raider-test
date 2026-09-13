@@ -53,6 +53,9 @@ geometry, terrain contact and visibility transitions before deciding the cause.
 
 ![A tree base appears suspended above the snow approach](images/initial-court-routes/tree-base.webp)
 
+The subsequent [individual fir placement repair](fir-grounding.md) resolves
+VA-16. The image above preserves the original observation.
+
 **VA-17: rectangular pool edges.** The first crystal and eclipse court views
 expose conspicuous straight water-sheet boundaries against the terrain. Inspect
 the full perimeter heights and basin geometry, then repair the affected shores.

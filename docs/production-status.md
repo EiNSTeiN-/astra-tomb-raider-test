@@ -19,6 +19,13 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Individual snow fir placement](fir-grounding.md) separates the source model
+  collection and seats 269 accepted trees beneath the rendered terrain. All 634
+  tests and the build pass. The review includes 164,956 root-contact rays, 25
+  detail/regression views, 34 snow-route captures and four native input cases.
+  Eight reloads preserve saved state and camera angles apart from timestamps.
+  Chapter switching and completed progress retain the same woodland layout.
+
 - [Jungle chamber walls](jungle-chambers.md) add 56 carved recesses across all
   24 side/rear faces, with closed stone plaques and full-width foundations.
   All 632 tests and the build pass. The review includes 56 rendered views,

@@ -24,6 +24,7 @@ import { stoneFootprint } from "./stone-grounding.js";
 import { placeNatureRock } from "./nature-rocks.js";
 import { FRINGE_RANGES } from "./jungle-fringe.js";
 import { bakeLeafClusters } from "./leaf-atlas.js";
+import { firSpecimens, plantFirTrees } from "./fir-grounding.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -119,21 +120,31 @@ export async function loadForest(game) {
       specimen.geometry.getAttribute("_leaf_bounds"),
     );
   }
-  for (let variant = 0; variant < bundles.length; variant++) {
-    const assets = bundles[variant];
-    assets[0].scene.updateMatrixWorld(true);
-    const reference = assets[0].scene.userData.vesperTreeBounds;
-    const bounds = reference
-      ? new THREE.Box3(
-          new THREE.Vector3().fromArray(reference.min),
-          new THREE.Vector3().fromArray(reference.max),
-        )
-      : new THREE.Box3().setFromObject(assets[0].scene);
-    const center = bounds.getCenter(new THREE.Vector3()),
-      height = bounds.max.y - bounds.min.y;
-    const tiers = assets.map((asset, tier) => {
+  const models =
+    game.level.biome === "snow"
+      ? firSpecimens(bundles[0].map((asset) => asset.scene))
+      : bundles.map((assets) => {
+          assets[0].scene.updateMatrixWorld(true);
+          const reference = assets[0].scene.userData.vesperTreeBounds;
+          const bounds = reference
+            ? new THREE.Box3(
+                new THREE.Vector3().fromArray(reference.min),
+                new THREE.Vector3().fromArray(reference.max),
+              )
+            : new THREE.Box3().setFromObject(assets[0].scene);
+          return {
+            sources: assets.map((asset) => meshSources(asset.scene)),
+            origin: bounds.getCenter(new THREE.Vector3()).setY(bounds.min.y),
+            scale: 15 / (bounds.max.y - bounds.min.y),
+          };
+        });
+  const planted =
+    game.level.biome === "snow" ? plantFirTrees(game, layout, models) : layout;
+  game.woodland = planted;
+  for (const [variant, model] of models.entries()) {
+    const tiers = model.sources.map((sources, tier) => {
       const groups = new Map();
-      for (const source of meshSources(asset.scene)) {
+      for (const source of sources) {
         let geometry = source.geometry.clone().applyMatrix4(source.matrixWorld);
         if (geometry.index) {
           const expanded = geometry.toNonIndexed();
@@ -150,8 +161,8 @@ export async function loadForest(game) {
       return [...groups.values()].map(({ material, parts }) => {
         const geometry = mergeGeometries(parts, false);
         parts.forEach((part) => part.dispose());
-        geometry.translate(-center.x, -bounds.min.y, -center.z);
-        geometry.scale(15 / height, 15 / height, 15 / height);
+        geometry.translate(-model.origin.x, -model.origin.y, -model.origin.z);
+        geometry.scale(model.scale, model.scale, model.scale);
         const leaf = /leaves|twig/.test(material.name);
         material.side = leaf ? THREE.DoubleSide : THREE.FrontSide;
         material.transparent = false;
@@ -172,14 +183,17 @@ export async function loadForest(game) {
               material.alphaMap = null;
             } else material.alphaMap = leafMask;
           }
-          forestWind(material, game.forestWind);
+          // Fir specimens share their twig material; retain its LOD wrapper
+          // after the first specimen has installed wind and coverage shaders.
+          if (!material.userData.instanceLod)
+            forestWind(material, game.forestWind);
         }
         return { geometry, material };
       });
     });
     const chunks = new Map(),
       dummy = new THREE.Object3D();
-    for (const tree of layout.filter((tree) => tree.variant === variant)) {
+    for (const tree of planted.filter((tree) => tree.variant === variant)) {
       const key = `${Math.floor(tree.x / 32)},${Math.floor(tree.z / 32)}`;
       if (!chunks.has(key)) chunks.set(key, { matrices: [], positions: [] });
       dummy.position.set(tree.x, tree.y, tree.z);
