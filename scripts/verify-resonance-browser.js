@@ -2,6 +2,101 @@ import * as THREE from "three";
 import { findRoute } from "../src/navigation.js";
 import { advanceCharacter } from "../src/character-motion.js";
 import { updateResonanceCourts } from "../src/resonance-courts.js";
+// Run with the real inspection controls open. Inspect rendered vertices rather
+// than the cached box used by the lens, and retain pixel-space evidence.
+export function inspectResonanceFrame(game) {
+  const site = game.resonanceSites[game.resonanceFocus],
+    canvas = game.renderer.domElement,
+    width = canvas.clientWidth,
+    height = canvas.clientHeight,
+    panel = canvas.ownerDocument.querySelector(".resonance-focus .modal"),
+    rect = panel.getBoundingClientRect(),
+    compact = width <= 600 || (width <= 900 && height >= width),
+    limit = {
+      left: 16,
+      top: 16,
+      right: compact ? width - 16 : rect.left - 16,
+      bottom: compact ? rect.top - 16 : height - 16,
+    },
+    range = {
+      left: Infinity,
+      top: Infinity,
+      right: -Infinity,
+      bottom: -Infinity,
+    },
+    point = new THREE.Vector3();
+  let vertices = 0,
+    outside = 0;
+  site.root.updateWorldMatrix(true, true);
+  game.camera.updateMatrixWorld();
+  site.root.traverse((mesh) => {
+    const position = mesh.geometry?.attributes.position;
+    if (!position) return;
+    for (let i = 0; i < position.count; i++) {
+      point
+        .fromBufferAttribute(position, i)
+        .applyMatrix4(mesh.matrixWorld)
+        .project(game.camera);
+      const x = ((point.x + 1) * width) / 2,
+        y = ((1 - point.y) * height) / 2;
+      range.left = Math.min(range.left, x);
+      range.right = Math.max(range.right, x);
+      range.top = Math.min(range.top, y);
+      range.bottom = Math.max(range.bottom, y);
+      vertices++;
+      if (
+        x < limit.left ||
+        x > limit.right ||
+        y < limit.top ||
+        y > limit.bottom ||
+        Math.abs(point.z) >= 1
+      )
+        outside++;
+    }
+  });
+  let roofClearance = Infinity;
+  for (const dx of [-0.35, 0, 0.35])
+    for (const dz of [-0.35, 0, 0.35])
+      roofClearance = Math.min(
+        roofClearance,
+        game.cavernProfile.height(
+          game.camera.position.x + dx,
+          game.camera.position.z + dz,
+        ) - game.camera.position.y,
+      );
+  const title = panel.querySelector("h2"),
+    close = panel.querySelector(".modal-close").getBoundingClientRect(),
+    text = canvas.ownerDocument.createRange();
+  text.selectNodeContents(title);
+  const titleOverlapsClose = [...text.getClientRects()].some(
+    (r) =>
+      r.left < close.right &&
+      r.right > close.left &&
+      r.top < close.bottom &&
+      r.bottom > close.top,
+  );
+  return {
+    stage: site.stage,
+    width,
+    height,
+    vertices,
+    outside,
+    range,
+    limit,
+    panel: {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      scrollWidth: panel.scrollWidth,
+      clientWidth: panel.clientWidth,
+    },
+    roofClearance,
+    titleOverlapsClose,
+    eye: game.camera.position.toArray(),
+    fov: game.camera.fov,
+  };
+}
 export function resonanceView(game, stage = 5) {
   const site = game.resonanceSites[stage],
     c = site.root.position;

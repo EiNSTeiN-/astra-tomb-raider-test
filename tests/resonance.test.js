@@ -376,12 +376,20 @@ test("pause and reload restore exact marks and use the existing four cavern ligh
     ),
   );
 });
-test("focused cameras stay under the vault with visible arrays, and another biome releases their references", (t) => {
+test("focused cameras fit every array vertex outside the controls and below the vault, then restore the follow lens", (t) => {
   const { game } = fixture(t);
   game.paused = true;
   for (const [width, height] of [
     [900, 650],
+    [320, 480],
+    [320, 568],
+    [360, 640],
     [390, 844],
+    [540, 900],
+    [600, 900],
+    [601, 900],
+    [768, 1024],
+    [1280, 800],
     [844, 390],
   ])
     for (const site of game.resonanceSites) {
@@ -405,6 +413,14 @@ test("focused cameras stay under the vault with visible arrays, and another biom
               0.3999,
             "inspection eye and near plane stay below the vault",
           );
+      for (const x of [-1, 0, 1])
+        for (const y of [-1, 0, 1]) {
+          const near = new THREE.Vector3(x, y, -1).unproject(game.camera);
+          assert.ok(
+            near.y < game.cavernProfile.height(near.x, near.z),
+            "the shifted lens's actual near plane stays inside the vault",
+          );
+        }
       for (const n of site.nodes) {
         const p = n.center
           .clone()
@@ -417,6 +433,39 @@ test("focused cameras stay under the vault with visible arrays, and another biom
         if (width === 390)
           assert.ok(p.y > 0, "portrait array above its controls");
       }
+      const compact = width <= 600 || (width <= 900 && height >= width),
+        right = compact ? width - 16 : width - (height <= 560 ? 352 : 428) - 16,
+        bottom = compact ? height * 0.41 - 28 : height - 16;
+      // Inspect actual built geometry, independently of the cached fitting box.
+      // Exercise turned collars and the largest ring pulse as well as rest.
+      for (const mark of [0, 5, 11]) {
+        for (const n of site.nodes) {
+          n.collar.rotation.y = (mark * Math.PI) / 6;
+          n.wheel.rotation.z = (-mark * Math.PI) / 6;
+          n.rings.forEach((r) => r.scale.setScalar(1.18));
+        }
+        site.root.updateWorldMatrix(true, true);
+        site.root.traverse((mesh) => {
+          const positions = mesh.geometry?.attributes.position;
+          if (!positions) return;
+          const p = new THREE.Vector3();
+          for (let i = 0; i < positions.count; i++) {
+            p.fromBufferAttribute(positions, i)
+              .applyMatrix4(mesh.matrixWorld)
+              .project(game.camera);
+            const x = ((p.x + 1) * width) / 2,
+              y = ((1 - p.y) * height) / 2;
+            assert.ok(
+              x >= 16 &&
+                x <= right &&
+                y >= 16 &&
+                y <= bottom &&
+                Math.abs(p.z) < 1,
+              `array ${site.stage}, ${width}×${height}, mark ${mark}, vertex ${i}: ${x}, ${y}`,
+            );
+          }
+        });
+      }
     }
   game.resonanceFocus = null;
   game.yaw = 0;
@@ -424,6 +473,12 @@ test("focused cameras stay under the vault with visible arrays, and another biom
   game.updateCamera(0.1);
   assert.equal(game.camera.fov, 58);
   assert.equal(game.camera.filmOffset, 0);
+  assert.equal(game.camera.view.enabled, false);
+  const restored = new THREE.PerspectiveCamera(58, 844 / 390, 0.1, 1000);
+  assert.deepEqual(
+    game.camera.projectionMatrix.elements,
+    restored.projectionMatrix.elements,
+  );
   game.level = LEVELS[4];
   buildResonanceCourts(game);
   assert.deepEqual(game.resonanceSites, []);

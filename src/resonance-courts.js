@@ -367,6 +367,12 @@ export function buildResonanceCourts(game) {
       resonator: true,
     });
     mergeArchitecture(root);
+    // Cache the complete array silhouette, including bases and inscriptions.
+    // Padding covers the small collar turns and pulsing wave rings.
+    root.updateWorldMatrix(true, true);
+    site.inspectionBounds = new THREE.Box3()
+      .setFromObject(root, true)
+      .expandByScalar(0.12);
   }
   settleResonance(game);
   return true;
@@ -546,9 +552,10 @@ export function focusResonance(game) {
   const site = game.resonanceSites?.[game.resonanceFocus];
   if (!site || !game.paused) return false;
   const c = site.root.position,
-    compact =
-      game.renderer.domElement.clientWidth < 600 &&
-      game.renderer.domElement.clientHeight > 560;
+    canvas = game.renderer.domElement,
+    width = canvas.clientWidth,
+    height = canvas.clientHeight,
+    compact = width <= 600 || (width <= 900 && height >= width);
   game.camera.position.set(
     c.x,
     c.y + (compact ? 18 : 15),
@@ -566,20 +573,48 @@ export function focusResonance(game) {
           game.cavernProfile.height(eye.x + dx, eye.z + dz) - 0.4,
         );
   }
-  // Widen and shift the inspection lens while keeping its eye inside the vault.
-  // The normal follow camera restores its lens on leaving this view.
-  game.camera.fov = compact ? 115 : 90;
-  game.camera.filmOffset = compact
-    ? 0
-    : 0.46 *
-      game.camera.getFilmWidth() *
-      Math.tan((game.camera.fov * Math.PI) / 360) *
-      game.camera.aspect;
-  game.camera.updateProjectionMatrix();
   game.camera.lookAt(
     c.x,
     c.y + (compact ? -10 : 3),
     c.z + (compact ? 25.9 : 14),
   );
+  game.camera.updateMatrixWorld();
+  // Fit the whole array into the space beside/above its actual controls.
+  // Observer captures without a panel reserve its largest CSS footprint.
+  const panel = canvas.ownerDocument
+      ?.querySelector(".resonance-focus .modal")
+      ?.getBoundingClientRect(),
+    inset = 16,
+    right = compact
+      ? width - inset
+      : (panel?.left ?? width - (height <= 560 ? 352 : 428)) - inset,
+    bottom = compact
+      ? (panel?.top ?? height * 0.41 - 12) - inset
+      : height - inset,
+    availableWidth = Math.max(1, right - inset),
+    availableHeight = Math.max(1, bottom - inset),
+    min = new THREE.Vector2(Infinity, Infinity),
+    max = new THREE.Vector2(-Infinity, -Infinity),
+    point = new THREE.Vector3(),
+    bounds = site.inspectionBounds;
+  for (const x of [bounds.min.x, bounds.max.x])
+    for (const y of [bounds.min.y, bounds.max.y])
+      for (const z of [bounds.min.z, bounds.max.z]) {
+        point.set(x, y, z).applyMatrix4(game.camera.matrixWorldInverse);
+        const slope = new THREE.Vector2(point.x / -point.z, point.y / -point.z);
+        min.min(slope);
+        max.max(slope);
+      }
+  const scale = Math.min(
+      availableWidth / (max.x - min.x),
+      availableHeight / (max.y - min.y),
+    ),
+    offsetX = width / 2 + ((min.x + max.x) * scale) / 2 - (inset + right) / 2,
+    offsetY = height / 2 - ((min.y + max.y) * scale) / 2 - (inset + bottom) / 2;
+  game.camera.fov = THREE.MathUtils.radToDeg(
+    2 * Math.atan(height / (2 * scale)),
+  );
+  game.camera.filmOffset = 0;
+  game.camera.setViewOffset(width, height, offsetX, offsetY, width, height);
   return true;
 }

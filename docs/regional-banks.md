@@ -61,7 +61,8 @@ All eight arrays were captured in three browser formats: 1280×800, 390×844 and
 844×390. These 24 reviewed views retain the array layout and clear the roof.
 The [portrait view of array 5](images/regional-banks/portrait-array.webp) still
 clips part of the outermost crystal at the right edge; fitting the complete
-object silhouettes remains a separate camera framing task, recorded as VA-20.
+object silhouettes was recorded as VA-20 and is repaired in the subsequent
+[array-framing pass](resonance-framing.md).
 
 ## Verification
 

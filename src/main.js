@@ -274,8 +274,22 @@ function bind() {
     if (document.hidden && inGame && !game?.paused) showPause();
   });
   const heldTouchControls = new Map();
+  const handledControlPointers = new Set();
+  // Actions happen on press so held levers and climbing still work. Opening a
+  // dialog can release capture and retarget this gesture's generated click to
+  // a new button (including Reset). Consume that click, not the next user tap.
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (!handledControlPointers.delete(event.pointerId)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },
+    true,
+  );
   clearTouchControls = () => {
     heldTouchControls.clear();
+    handledControlPointers.clear();
     if (game) {
       game.keys.clear();
       game.touchMove = { x: 0, z: 0 };
@@ -301,11 +315,13 @@ function bind() {
   };
   window.addEventListener("blur", () => {
     heldTouchControls.clear();
+    handledControlPointers.clear();
     updateTouchControls();
   });
   document.querySelectorAll("[data-touch]").forEach((b) => {
     b.addEventListener("pointerdown", (e) => {
       e.preventDefault();
+      handledControlPointers.add(e.pointerId);
       b.setPointerCapture(e.pointerId);
       if (!game || game.paused) return;
       const k = b.dataset.touch;
@@ -329,6 +345,9 @@ function bind() {
     };
     b.addEventListener("pointerup", release);
     b.addEventListener("pointercancel", release);
+    b.addEventListener("pointercancel", (e) =>
+      handledControlPointers.delete(e.pointerId),
+    );
     b.addEventListener("lostpointercapture", release);
   });
 }

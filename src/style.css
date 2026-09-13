@@ -3547,7 +3547,7 @@ body:has(.thermal-focus) #game-screen > :not(#game-canvas) { visibility: hidden;
 
 body:has(.resonance-focus) #game-screen > :not(#game-canvas) { visibility: hidden; }
 .resonance-focus .modal { width: 400px; padding: 20px; }
-.resonance-focus .modal h2 { font-size: 26px; margin: 8px 0; }
+.resonance-focus .modal h2 { font-size: 26px; margin: 8px 0; padding-right: 44px; }
 .resonance-focus .modal-description { display: none; }
 .resonance-focus .mechanism-instructions { margin: 10px 0; line-height: 1.45; }
 .resonance-controls { display: flex; flex-direction: column; gap: 6px; }
@@ -3597,16 +3597,6 @@ body:has(.wind-focus) #game-screen > :not(#game-canvas) { visibility: hidden; }
   .wind-grid .pipe-tile:disabled { padding: 0; }
   .wind-focus .puzzle-feedback { font-size: 10px; margin: 5px 0; min-height: 24px; }
 }
-@media (max-width: 600px) and (min-height: 561px) {
-  .resonance-focus .modal { width: 100%; padding: 12px; max-height: 59dvh; }
-  .resonance-focus .modal > .eyebrow { display: none; }
-  .resonance-focus .modal h2 { font-size: 22px; }
-  .resonance-focus .mechanism-instructions { font-size: 10px; margin: 7px 0; }
-  .resonance-controls { gap: 3px; }
-  .resonance-controls .resonator { padding: 2px 6px; min-height: 48px; }
-  .resonance-focus .puzzle-feedback { font-size: 10px; margin-top: 6px; min-height: 26px; }
-  .resonance-focus .puzzle-actions, .resonance-focus .puzzle-state-row { margin-top: 6px; }
-}
 @media (max-height: 560px) {
   .resonance-focus .modal { width: 340px; padding: 12px; }
   .resonance-focus .modal > .eyebrow { display: none; }
@@ -3616,6 +3606,18 @@ body:has(.wind-focus) #game-screen > :not(#game-canvas) { visibility: hidden; }
   .resonance-controls .resonance-dial button { width: 40px; height: 32px; }
   .resonance-controls .resonator > small { display: none; }
   .resonance-stone > b { font-size: 16px; }
+}
+
+@media (max-width: 600px), (max-width: 900px) and (orientation: portrait) {
+  .modal-backdrop.resonance-focus { align-items: flex-end; padding: 12px; background: linear-gradient(#05091008 25%, #050910bb); }
+  .resonance-focus .modal { width: 100%; padding: 12px; max-height: 59dvh; }
+  .resonance-focus .modal > .eyebrow { display: none; }
+  .resonance-focus .modal h2 { font-size: 22px; }
+  .resonance-focus .mechanism-instructions { font-size: 10px; margin: 7px 0; }
+  .resonance-controls { gap: 3px; }
+  .resonance-controls .resonator { padding: 2px 6px; min-height: 48px; }
+  .resonance-focus .puzzle-feedback { font-size: 10px; margin-top: 6px; min-height: 26px; }
+  .resonance-focus .puzzle-actions, .resonance-focus .puzzle-state-row { margin-top: 6px; }
 }
 
 .covenant-clues { border-left: 2px solid #b9a36c; padding: 2px 0 2px 14px; margin: 16px 0; }

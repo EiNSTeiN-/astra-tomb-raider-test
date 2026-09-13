@@ -2061,6 +2061,9 @@ export class Adventure {
     this.camera.updateMatrixWorld();
   }
   updateCamera(dt) {
+    // Resonance inspection shifts its lens around the controls. Clear that
+    // shift before any other camera mode, including the survey scope.
+    if (this.camera.view?.enabled) this.camera.clearViewOffset();
     this.rig?.visibility?.set();
     this.avatar.visible = true;
     if (frameSurveyScope(this)) {
