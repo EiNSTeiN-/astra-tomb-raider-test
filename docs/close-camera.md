@@ -102,8 +102,9 @@ crowded desert backing-up view. The tested JavaScript bundles are
 This resolves the reproduced camera framing defect VA-13. It does not complete
 the broader [playable-world visual audit](visual-audit.md): repeated court and
 station composition, continuous approaches and return routes still need work.
-The Low air-bell ceiling capture also exposes a rectangular, banded highlight
-near the lamp; VA-14 records that separate rendering investigation.
+The Low air-bell ceiling capture also exposed a rectangular, banded highlight
+near the lamp. The subsequent [air-bell ceiling repair](air-bell-ceilings.md)
+resolves VA-14 by separating the bronze liner from its stone backing.
 The checks do not establish consumer-device performance, human chapter duration,
 subjective audio quality or AAA parity. Raw captures, logs and disposable save
 fixtures remain in ignored local staging. No external assets were added; the

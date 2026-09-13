@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Air-bell ceilings and lamp mounts](air-bell-ceilings.md) separate both bronze
+  liners from their stone backing, removing the overlapping ceiling faces
+  responsible for the banded highlight. Fitted flanges, tapered housings and
+  retaining rims support the glass, with clearance following the finished
+  ceiling and circular lamp footprint. All 632 tests and the build pass.
+  Verification includes 96 ceiling rays, 28 rendered views, six positioned
+  drip-source checks, complete gallery routes before and after drainage,
+  four keyboard/touch production cases and eight full-save reload comparisons
+  apart from timestamps. VA-14 is fixed; the wider visual audit remains open.
+
 - [Close-camera framing](close-camera.md) corrects the crowded face/torso view
   and sideways swing reproduced beside a courtyard pier. A short camera orbit
   follows player translation directly and fades the explorer, gear and carried
@@ -28,8 +38,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   ten native production cases cover the change. Twenty reloads preserve every
   normalized save field apart from timestamps and two independently validated
   camera-only arrival corrections. VA-13 is fixed; the gallery review records
-  a separate Low air-bell ceiling highlight as VA-14. The wider visual audit
-  remains open.
+  a separate Low air-bell ceiling highlight as VA-14, resolved by the subsequent
+  ceiling repair above. The wider visual audit remains open.
 
 - [Regional field courtyards](field-courtyards.md) add broken masonry corners,
   regional furnishings and worn terrain-conforming paving at 148 ground sites.

@@ -89,6 +89,52 @@ export function galleryStep(
   }
 }
 
+test("air-bell liners sit below the stone roof and clearance follows the rendered underside", () => {
+  const g = galleryGame(),
+    ray = new THREE.Raycaster();
+  g.sunkenGallery.root.updateMatrixWorld(true);
+  for (const bell of g.terrainProfile.gallery.bells) {
+    for (const radius of [0.8, 1.6, 2.7])
+      for (let i = 0; i < 16; i++) {
+        const angle = (i * Math.PI) / 8,
+          x = bell.x + Math.cos(angle) * radius,
+          z = bell.z + Math.sin(angle) * radius;
+        ray.set(
+          new THREE.Vector3(x, bell.ceiling - 0.4, z),
+          new THREE.Vector3(0, 1, 0),
+        );
+        const hits = ray
+            .intersectObject(g.sunkenGallery.root, true)
+            .filter((h) => h.object.isMesh && h.face.normal.y < -0.9),
+          bronze = hits.find(
+            (h) => h.object.material.name === "Patinated air-bell bronze",
+          ),
+          backing = hits.find((h) => h.object.material === g.darkMat);
+        assert(
+          bronze && backing,
+          "both the liner and its backing cover the ceiling",
+        );
+        assert(Math.abs(bronze.point.y - bell.ceiling) < 0.00002);
+        assert(
+          backing.point.y - bronze.point.y > 0.07,
+          "coplanar roof surfaces",
+        );
+        assert(galleryClear(g, x, bronze.point.y - 0.12, z, 0.1, 0.02));
+        assert(!galleryClear(g, x, bronze.point.y - 0.08, z, 0.1, 0.02));
+      }
+    ray.set(
+      new THREE.Vector3(bell.x, bell.ceiling - 0.4, bell.z),
+      new THREE.Vector3(0, 1, 0),
+    );
+    const lens = ray
+      .intersectObject(g.sunkenGallery.root, true)
+      .find((h) => h.object.isMesh);
+    assert(lens.point.y < bell.ceiling - 0.12);
+    assert(galleryClear(g, bell.x, lens.point.y - 0.17, bell.z, 0.15, 0.22));
+    assert(!galleryClear(g, bell.x, lens.point.y - 0.12, bell.z, 0.15, 0.22));
+  }
+});
+
 export function swimTo(game, x, y, z) {
   const origin = game.terrainProfile.gallery.origin,
     target = new THREE.Vector3(origin.x + x, origin.y + y, origin.z + z);

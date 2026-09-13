@@ -13,6 +13,7 @@ import {
   galleryAt,
   gallerySection,
   galleryBellAt,
+  BELL_LAMP,
 } from "./sunken-gallery-layout.js";
 import { normalizeGallery, GALLERY_RECORD } from "./sunken-gallery-record.js";
 
@@ -310,14 +311,47 @@ export function buildSunkenGallery(game) {
       length: bell.radius * 2,
     };
     gallery.waterById.set(bell.id, water);
+    // The flange embeds in the liner; the tapered canopy overlaps the glass
+    // and its rolled retaining rim. The lens is supported on every side.
+    add(
+      new THREE.CylinderGeometry(BELL_LAMP.radius, BELL_LAMP.radius, 0.05, 48),
+      trim,
+      bell.x,
+      bell.ceiling - 0.015,
+      bell.z,
+    );
+    add(
+      new THREE.CylinderGeometry(0.64, 0.56, 0.12, 48),
+      bronze,
+      bell.x,
+      bell.ceiling - 0.04,
+      bell.z,
+    );
     const lens = add(
-      new THREE.CylinderGeometry(0.5, 0.5, 0.08, 24),
+      new THREE.CylinderGeometry(0.48, 0.48, 0.06, 48),
       glass,
       bell.x,
-      bell.ceiling - 0.05,
+      bell.ceiling - 0.105,
       bell.z,
     );
     lens.name = "Phosphor glass lamp";
+    add(
+      new THREE.TorusGeometry(0.49, 0.035, 12, 48),
+      trim,
+      bell.x,
+      bell.ceiling - 0.095,
+      bell.z,
+    ).rotation.x = Math.PI / 2;
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3;
+      add(
+        new THREE.CylinderGeometry(0.024, 0.024, 0.04, 6),
+        trim,
+        bell.x + Math.cos(angle) * 0.62,
+        bell.ceiling - 0.05,
+        bell.z + Math.sin(angle) * 0.62,
+      );
+    }
     const light = new THREE.PointLight(0x94d9c5, 9, 16, 2);
     light.position.set(bell.x, bell.ceiling - 0.3, bell.z);
     root.add(light);

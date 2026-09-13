@@ -17,6 +17,9 @@ including when a saved position is close to machinery.
 During play, [close wall views now fade the explorer and keep the camera
 aligned during a wall slide](docs/close-camera.md), with matched equipment
 coverage and preserved torch light, audio and water reflections.
+The submerged gallery's [air-bell ceilings now sit below their stone backing,
+with fitted bronze lamp mounts](docs/air-bell-ceilings.md), removing the
+overlapping surfaces visible in close ceiling views.
 The final chapter's [observatory plinths and column bases now extend into the terrain](docs/observatory-foundations.md),
 closing the measured gaps beneath their footprints.
 Shared [bronze gates and instruments now have irregular oxidation and fine pitting](docs/bronze-surfaces.md),

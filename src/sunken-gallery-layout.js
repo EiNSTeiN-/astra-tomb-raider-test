@@ -1,5 +1,7 @@
 // A separate interior beneath the western harbor court. Coordinates are relative
 // to its sounding well; the surface terrain remains the support for the palace.
+export const BELL_LAMP = { radius: 0.67, depth: 0.135 };
+
 export function createSunkenGallery(terrain, biome) {
   if (biome !== "water") return null;
   const well = terrain.waters.find((site) => site.id === "reservoir-1");
@@ -44,14 +46,16 @@ export function createSunkenGallery(terrain, biome) {
         ...point(-29, -2.8, 12),
         radius: 3.25,
         rim: origin.y - 4.3,
-        ceiling: origin.y - 1,
+        // The bronze liner sits below the stone room ceiling. Coincident
+        // undersides made the two materials fight across the lamp highlight.
+        ceiling: origin.y - 1.08,
       },
       {
         id: "bell-b",
         ...point(-8, -2.8, 34),
         radius: 3.25,
         rim: origin.y - 4.3,
-        ceiling: origin.y - 1,
+        ceiling: origin.y - 1.08,
       },
     ],
     gates: [
@@ -134,6 +138,15 @@ export function galleryClear(game, x, y, z, clearance = 0.8, radius = 0.45) {
     }
   for (const bell of profile.bells) {
     const distance = Math.hypot(x - bell.x, z - bell.z);
+    if (
+      distance < BELL_LAMP.radius + radius &&
+      y + clearance > bell.ceiling - BELL_LAMP.depth
+    )
+      return false;
+    // Include the cap's flange and the querying body/camera radius. The
+    // finished bronze ceiling is lower than the surrounding stone backing.
+    if (distance < bell.radius + 0.08 + radius && y + clearance > bell.ceiling)
+      return false;
     if (
       Math.abs(distance - bell.radius) < radius + 0.12 &&
       y + clearance > bell.rim
