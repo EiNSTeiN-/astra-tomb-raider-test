@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Jungle chamber walls](jungle-chambers.md) add 56 carved recesses across all
+  24 side/rear faces, with closed stone plaques and full-width foundations.
+  All 632 tests and the build pass. The review includes 56 rendered views,
+  eight restored thresholds, 54 feature approaches, 16 gate sound-source
+  approaches and the complete 14-move counterweight solution. Four native
+  production cases and eight reloads preserve saved state apart from timestamps
+  and one independently verified camera-only arrival correction.
+  The [initial court route survey](initial-court-routes.md) adds 164 reviewed
+  views across 14 assisted legs in seven chapters. It records further terrain,
+  tree-contact and pool-edge findings; the sky traversal review remains pending.
+
 - [Air-bell ceilings and lamp mounts](air-bell-ceilings.md) separate both bronze
   liners from their stone backing, removing the overlapping ceiling faces
   responsible for the banded highlight. Fitted flanges, tapered housings and

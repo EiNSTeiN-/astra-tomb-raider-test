@@ -1,9 +1,14 @@
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { mergeArchitecture } from "./visuals.js";
-import { stoneBlockGeometry } from "./temple-architecture.js";
+import {
+  stoneBlockGeometry,
+  carvedPanelGeometry,
+} from "./temple-architecture.js";
 import { vaultStoneGeometry, shellReliefGeometry } from "./palace-geometry.js";
 
 export const CHAMBER_WALL_BIOMES = new Set([
+  "jungle",
   "water",
   "volcano",
   "crystal",
@@ -13,12 +18,12 @@ export const CHAMBER_WALL_BIOMES = new Set([
 export function chamberWallPlan(biome, length, stage, side) {
   const variant = (((stage + side + 3) % 3) + 3) % 3;
   const count =
-    biome === "eclipse"
+    biome === "eclipse" || biome === "jungle"
       ? 2 + (variant === 1 ? 1 : 0)
       : 3 + (variant === 1 ? 1 : 0);
   const step = length / count;
   const radius =
-    biome === "eclipse"
+    biome === "eclipse" || biome === "jungle"
       ? Math.min(1.6, step * 0.29)
       : Math.min(1.22, step * 0.27);
   const bottom = biome === "eclipse" ? 3.7 - radius : 1.2;
@@ -27,7 +32,7 @@ export function chamberWallPlan(biome, length, stage, side) {
       ? 3.8 + radius
       : biome === "eclipse"
         ? 3.7 + radius
-        : biome === "crystal"
+        : biome === "crystal" || biome === "jungle"
           ? 5.7
           : 5.35;
   return {
@@ -48,6 +53,25 @@ export function chamberWallPlan(biome, length, stage, side) {
 // use that same polygon for the masonry and inset; joints cannot expose sky.
 function aperture(plan) {
   const { biome, radius: r, bottom, top } = plan;
+  if (biome === "jungle") {
+    const right = [
+      [r, bottom],
+      [r, 4.15],
+      [r * 0.76, 4.15],
+      [r * 0.76, 4.65],
+      [r * 0.48, 4.65],
+      [r * 0.48, 5.12],
+      [r * 0.22, 5.12],
+      [0, top],
+    ];
+    return [
+      ...right,
+      ...right
+        .slice(0, -1)
+        .toReversed()
+        .map(([x, y]) => [-x, y]),
+    ];
+  }
   if (biome === "eclipse")
     return Array.from({ length: 49 }, (_, i) => {
       const a = (i / 48) * Math.PI * 2;
@@ -111,6 +135,53 @@ function prism(points, depth) {
   return g;
 }
 
+function carvedPlaque(w, h, variant, segments) {
+  const face = carvedPanelGeometry(w, h, variant, segments).scale(1, 1, 0.4);
+  face.deleteAttribute("color");
+  const [nx, ny] = segments,
+    position = face.attributes.position,
+    rim = [],
+    points = [],
+    uvs = [];
+  for (let x = 0; x < nx; x++) rim.push(x);
+  for (let y = 0; y < ny; y++) rim.push(y * (nx + 1) + nx);
+  for (let x = nx; x > 0; x--) rim.push(ny * (nx + 1) + x);
+  for (let y = ny; y > 0; y--) rim.push(y * (nx + 1));
+  const quad = (a, b, c, d) => {
+    for (const p of [a, b, c, a, c, d]) {
+      points.push(...p);
+      uvs.push(p[0] / 2, p[1] / 2);
+    }
+  };
+  // The carved face closes along every perimeter sample to a back embedded
+  // in the wall core. Recessed parts of the carving remain visible from below.
+  for (let i = 0; i < rim.length; i++) {
+    const a = new THREE.Vector3()
+        .fromBufferAttribute(position, rim[i])
+        .toArray(),
+      b = new THREE.Vector3()
+        .fromBufferAttribute(position, rim[(i + 1) % rim.length])
+        .toArray();
+    quad(b, a, [a[0], a[1], -0.16], [b[0], b[1], -0.16]);
+  }
+  quad(
+    [-w / 2, 0, -0.16],
+    [-w / 2, h, -0.16],
+    [w / 2, h, -0.16],
+    [w / 2, 0, -0.16],
+  );
+  const sides = new THREE.BufferGeometry();
+  sides.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+  sides.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  sides.computeVertexNormals();
+  const expanded = face.toNonIndexed(),
+    result = mergeGeometries([expanded, sides]);
+  face.dispose();
+  expanded.dispose();
+  sides.dispose();
+  return result;
+}
+
 // Regional blind bays replace the generic outer face. The closed backing is
 // at z=-.13 (.04 beside hinged leaves), the coursed face at .43, and the largest
 // cornice at .74. All remain inside the existing .85 m movement half-width;
@@ -127,6 +198,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
   gate.root.add(group);
   let seed = game.level.seed + gate.stage * 557 + (side + 1) * 103;
   const add = (g, mat, x = 0, y = 0, z = 0, capture = true) => {
+    if (g.attributes.color && !mat.vertexColors) g.deleteAttribute("color");
     const mesh = new THREE.Mesh(g, mat);
     mesh.position.set(x, y, z);
     mesh.castShadow = mesh.receiveShadow = true;
@@ -249,7 +321,46 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
       -0.106 + insetOffset,
       false,
     );
-    if (biome === "water") {
+    if (biome === "jungle") {
+      // Stepped blind doors echo the temple's corbelled galleries. Their
+      // inset botanical relief stays in front of the backing, below the
+      // projecting stone frame, and inside the existing wall clearance.
+      for (const sign of [-1, 1]) {
+        const px = cx + sign * (r + 0.2);
+        for (let row = 0; row < 6; row++)
+          block(0.34, 0.47, 0.32, m.trim, px, 1.44 + row * 0.48, 0.47);
+        for (const y of [1.26, 3.96, 4.16])
+          block(0.51, 0.15, 0.4, m.trim, px, y, 0.48);
+        for (const offset of [-0.08, 0.08])
+          block(0.035, 2.35, 0.045, m.wall, px + offset, 2.62, 0.64);
+      }
+      for (let j = 0; j < contour.length; j++)
+        bar(
+          [cx + contour[j][0], contour[j][1]],
+          [
+            cx + contour[(j + 1) % contour.length][0],
+            contour[(j + 1) % contour.length][1],
+          ],
+          0.15,
+          m.trim,
+          0.48,
+        );
+      for (const [width, y] of [
+        [r * 1.56, 4.52],
+        [r * 1.01, 5],
+        [r * 0.58, 5.49],
+      ])
+        block(width, 0.14, 0.27, m.trim, cx, y, 0.52);
+      add(
+        carvedPlaque(r * 1.63, 2.55, gate.stage + i, [30, 48]),
+        m.trim,
+        cx,
+        1.4,
+        -0.039,
+        false,
+      );
+      block(r * 1.88, 0.16, 0.4, m.trim, cx, 1.22, 0.45);
+    } else if (biome === "water") {
       for (let j = 0; j < 13; j++)
         add(
           vaultStoneGeometry(
@@ -423,6 +534,16 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
           cx,
           3.3,
           -0.435,
+          false,
+        );
+        relief.rotation.y = Math.PI;
+      } else if (biome === "jungle") {
+        const relief = add(
+          carvedPlaque(r * 1.15, 1.84, gate.stage + i, [24, 40]),
+          m.trim,
+          cx,
+          1.6,
+          -0.5,
           false,
         );
         relief.rotation.y = Math.PI;

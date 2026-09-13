@@ -182,12 +182,12 @@ test("coastal sluice footings meet the terrain across their full width and prote
   assert.ok(immersed >= 5, "all five sounding wells exercise a submerged jamb");
 });
 
-test("all 105 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
+test("all 129 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
   const ray = new THREE.Raycaster();
   let walls = 0,
     niches = 0,
     feet = 0;
-  for (const index of [3, 4, 6, 7]) {
+  for (const index of [0, 3, 4, 6, 7]) {
     const { game } = fixture(t, index, null, true);
     game.world.updateMatrixWorld(true);
     for (const gate of game.fieldGates) {
@@ -252,9 +252,9 @@ test("all 105 regional chamber walls have sealed deep recesses and buried full-w
       }
     }
   }
-  assert.equal(walls, 105);
+  assert.equal(walls, 129);
   assert.ok(niches > 300);
-  assert.equal(feet, 1575);
+  assert.equal(feet, 1935);
 });
 
 test("hinged collision bounds contain the transformed door corners throughout the inward swing", () => {

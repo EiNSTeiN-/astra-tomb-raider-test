@@ -86,11 +86,13 @@ export function gateMaterials(level) {
         level.biome === "water" ? "palace-plaster" : design.wall,
         level.biome === "water"
           ? 0x85aaa6
-          : level.biome === "volcano"
-            ? 0x454b49
-            : level.biome === "crystal"
-              ? 0x55697d
-              : 0x4d6979,
+          : level.biome === "jungle"
+            ? 0x858c68
+            : level.biome === "volcano"
+              ? 0x454b49
+              : level.biome === "crystal"
+                ? 0x55697d
+                : 0x4d6979,
       )
     : null;
   if (chamberInset) {

@@ -17,6 +17,8 @@ including when a saved position is close to machinery.
 During play, [close wall views now fade the explorer and keep the camera
 aligned during a wall slide](docs/close-camera.md), with matched equipment
 coverage and preserved torch light, audio and water reflections.
+The jungle's [eight gate chambers now have carved recesses and stepped stone surrounds](docs/jungle-chambers.md),
+following the [initial approach-and-return route review](docs/initial-court-routes.md).
 The submerged gallery's [air-bell ceilings now sit below their stone backing,
 with fitted bronze lamp mounts](docs/air-bell-ceilings.md), removing the
 overlapping surfaces visible in close ceiling views.
