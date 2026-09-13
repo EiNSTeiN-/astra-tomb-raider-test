@@ -34,6 +34,7 @@ import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { buildJungleFringe } from "./jungle-fringe.js";
 import { regionalBankRise } from "./terrain-banks.js";
+import { courtTerrain } from "./court-terrain.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -51,6 +52,7 @@ export function createTerrainProfile(map, level) {
   const heights = new Float32Array(width * width),
     courts = new Float32Array(width * width);
   const biome = level.biome;
+  const waters = waterSites(map, level);
   const upperHeights = biome === "sky" ? new Float32Array(width * width) : null;
   const coastal = biome === "water" ? coastalLayout(map) : null;
   const trail = ["jungle", "sky"].includes(biome) ? trailSampler(map) : () => 0;
@@ -89,8 +91,18 @@ export function createTerrainProfile(map, level) {
     radius: r.r * 7,
     y: raw(r.x * 7, r.z * 7),
     main: map.rooms.includes(r),
+    field: (map.fieldSites || []).includes(r),
     flat: !!r.fireVault || !!r.bellHoist || !!r.cleft || !!r.pressureRelay,
   }));
+  const joinedCourts = [
+    "jungle",
+    "snow",
+    "volcano",
+    "crystal",
+    "eclipse",
+  ].includes(biome)
+    ? courtTerrain(width, step, terraces, raw, waters)
+    : null;
   for (let iz = 0; iz < width; iz++)
     for (let ix = 0; ix < width; ix++) {
       const x = ix * step,
@@ -98,7 +110,7 @@ export function createTerrainProfile(map, level) {
         gx = Math.round(x / 7),
         gz = Math.round(z / 7);
       const base = raw(x, z);
-      let height = base,
+      let height = joinedCourts ? joinedCourts[iz * width + ix] : base,
         strongest = 0,
         paving = 0;
       for (const terrace of terraces) {
@@ -106,16 +118,18 @@ export function createTerrainProfile(map, level) {
           Math.abs(x - terrace.x),
           Math.abs(z - terrace.z),
         );
-        const weight =
-          1 -
-          smooth(
-            terrace.radius * (terrace.flat ? 1 : 0.9),
-            terrace.radius + 6,
-            distance,
-          );
-        if (weight > strongest) {
-          height = base * (1 - weight) + terrace.y * weight;
-          strongest = weight;
+        if (!joinedCourts) {
+          const weight =
+            1 -
+            smooth(
+              terrace.radius * (terrace.flat ? 1 : 0.9),
+              terrace.radius + 6,
+              distance,
+            );
+          if (weight > strongest) {
+            height = base * (1 - weight) + terrace.y * weight;
+            strongest = weight;
+          }
         }
         const inner = terrace.main ? 8.5 : 3;
         const organicEdge =
@@ -225,7 +239,6 @@ export function createTerrainProfile(map, level) {
     by: sample(foundationHeights, bridge.bx, bridge.bz),
     gaps: bridgeGaps(bridge),
   }));
-  const waters = waterSites(map, level);
   for (const site of waters) {
     site.baseY =
       sample(heights, site.room.x * 7, site.room.z * 7) +

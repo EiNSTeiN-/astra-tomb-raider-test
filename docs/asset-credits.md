@@ -114,6 +114,12 @@ their previous values. [Bark provenance](../asset-sources/tree-bark/sources.json
 and its [license record](../asset-sources/tree-bark/LICENSE.md) retain input and
 delivery hashes and the source coverage validation fixture.
 
+The [court terrain repair](court-terrain.md) is original heightfield code in
+`src/court-terrain.js`. It grades overlapping pads while retaining working
+floors and complete basin footprints. It reuses the existing regional terrain
+meshes, textures, foundation code, recordings and chapter scores. No external
+asset or dependency was added.
+
 The outer jungle bank and deterministic planting in `src/jungle-fringe.js` are
 original project code. They reuse the existing credited Island Tree 01 and
 Island Tree 02 tiers, forest ground textures, canopy wind and distance fades.

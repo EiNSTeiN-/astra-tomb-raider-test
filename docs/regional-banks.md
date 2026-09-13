@@ -8,9 +8,11 @@ and uneven crests. Snow, cavern and meridian rock treatments use broader slopes
 and three masked smoothing passes where neighbouring ridges meet.
 
 This improves VA-15, while **the terrain and world-composition audit remains
-open**. Fixed court terraces still make conspicuous cuts at some sites. Sparse
-surroundings, repeated station footprints and tree-root margins need further
-work; the screenshots below do not establish that an entire chapter is finished.
+open**. The subsequent [court terrain pass](court-terrain.md) grades overlapping
+pads while retaining working floors and basins; one protected discovery-pad
+overlap near snow court 7 still shows a sharp bank. Sparse surroundings and
+repeated station footprints also need further work. The tree-root margins below
+were repaired in the later [jungle root pass](jungle-roots.md).
 
 ## Terrain and save footing
 
@@ -18,7 +20,9 @@ The comparison against `6911d07` changed 127,308 terrain vertices outside the
 walking grid across the five affected chapters. All **172,803 walking vertices**
 in those chapters remain exactly equal to the baseline. Cell boundaries align
 with the terrain samples, preserving the complete interpolated walking surface,
-not just room centres. Regression checks retain the baseline walking digests.
+not just room centres. That pass retained baseline walking digests. The later
+[court terrain pass](court-terrain.md) intentionally changes walking terrain at
+the terrace joins and replaces those digests with working-core regressions.
 All water-site records remain identical, and the desert, coastal and sky height
 fields are unchanged.
 
@@ -114,8 +118,10 @@ folder. Runtime assets and their attribution are unchanged.
 The broader bank slopes expose the distinction between the landscape and the
 fixed flat court pads.
 [Rear views of snow courts 5–7](images/regional-banks/snow-terrace.webp) and front
-views of crystal courts 2 and 6 still show abrupt terrace cuts. Those transitions
-need their own layout and foundation review under VA-15.
+views of crystal courts 2 and 6 recorded abrupt terrace cuts. The subsequent
+[court terrain pass](court-terrain.md) repairs the shared joins and documents
+movement, foundation and save checks. A protected discovery-pad overlap beside
+snow court 7 remains open under VA-15.
 
 Jungle route views also show exposed margins on the scanned tree bases. A
 screening measurement of the lower trunk vertices finds a margin more than
