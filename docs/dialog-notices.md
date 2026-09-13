@@ -46,11 +46,15 @@ resonance camera can follow changes in the panel's height while paused.
 These checks use disposable progress to isolate layout, input and persistence.
 They do not establish complete chapter playthroughs or subjective audio quality.
 
-The chapter review also exposed an obstructed view behind the snow bell controls
-in the assisted setup. Its [capture](images/dialog-notices/bell-obstruction.webp)
-is retained as VA-23 for camera and native-interaction follow-up; the notice
-itself is correctly placed. The 48 chapter cases verify notice layout, not the
-framing of every instrument.
+The chapter review initially recorded an obstructed snow bell view as VA-23.
+Follow-up identified a setup error: assigning field progress and moving the
+player inside a court while pausing its animation left the sanctuary doors shut.
+The [original capture](images/dialog-notices/bell-obstruction.webp) shows those
+doors. Reloading that progress constructs them fully open, and native keyboard
+interaction shows [all four bells clearly](images/dialog-notices/bells-after-reload.webp).
+Camera-to-bell rays then reach the instrument without the intervening doors.
+VA-23 is closed as a capture-state error; no camera change was needed. The 48
+chapter cases verify notice layout, not the framing of every instrument.
 
 This is a dialog-layout repair. The [world audit](visual-audit.md) remains open
 for court terraces, jungle tree placement, repeated court forms and sparse
