@@ -441,6 +441,7 @@ import { buildAtmosphere, updateAtmosphere } from "./atmosphere.js";
 import { configureSunShadow } from "./sun-shadows.js";
 import {
   CameraSurfaces,
+  faceCameraTarget,
   followCamera,
   constrainCamera,
   boxEntry,
@@ -2056,7 +2057,7 @@ export class Adventure {
     this.rig?.visibility?.set(view.length);
     this.cameraFollowTarget = target.clone();
     this.camera.position.copy(view.position);
-    this.camera.lookAt(target);
+    faceCameraTarget(this.camera, target, view.desired);
     this.camera.updateMatrixWorld();
   }
   updateCamera(dt) {
@@ -2142,7 +2143,7 @@ export class Adventure {
     );
     this.cameraFollowTarget = target.clone();
     this.rig?.visibility?.set(this.camera.position.distanceTo(target));
-    this.camera.lookAt(target);
+    faceCameraTarget(this.camera, target, desired);
     if (this.aiming)
       this.aimPoint = this.camera
         .getWorldDirection(new THREE.Vector3())

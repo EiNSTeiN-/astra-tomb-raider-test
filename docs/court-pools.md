@@ -70,6 +70,9 @@ obscuring the explorer during ordinary play. This is recorded as **VA-18** for a
 separate camera-obstruction repair; the successful reload correction above does
 not resolve that view.
 
+The subsequent [swimming-camera repair](swimming-camera.md) resolves VA-18 with
+correct handling of the camera margin and a smooth fully retracted view.
+
 ![Remaining swimming-camera obstruction beside a crystal instrument](images/court-pools/swimming-camera.webp)
 
 The [reusable surface-view helper](../scripts/inspect-reservoirs-browser.js)
@@ -80,6 +83,5 @@ is retained.
 
 This resolves the exposed water borders in VA-17. The
 [world audit](visual-audit.md) remains open. Repeated court composition, sparse
-surroundings, abrupt terrain forms and the swimming-camera view still need
-work. These pool checks do not establish complete chapter playthroughs or
-overall graphics completion.
+surroundings and abrupt terrain forms still need work. These pool checks do not
+establish complete chapter playthroughs or overall graphics completion.

@@ -19,6 +19,14 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Swimming camera clearance](swimming-camera.md) distinguishes a prop's solid
+  bounds from its expanded camera margin, preventing the instrument at the last
+  crystal pool from hiding the explorer. Fully retracted views retain a smooth
+  chosen heading. All 638 tests and the build pass. Verification includes 3,040
+  pool movement frames, 58 pool views, eight chapter camera regressions, 48
+  related views and four native production cases. Eight reloads preserve save
+  state apart from timestamps and five independently verified camera corrections.
+
 - [Regional court pools](court-pools.md) replace exposed rectangular water
   borders at fourteen desert, crystal and eclipse courts with fitted water
   levels and varied banks. All 636 tests and the build pass. The review covers

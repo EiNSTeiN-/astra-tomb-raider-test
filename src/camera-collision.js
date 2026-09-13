@@ -5,11 +5,13 @@ import * as THREE from "three";
 export function boxEntry(a, b, box, padding = 0, allowInside = false) {
   let near = 0,
     far = 1,
-    inside = true;
+    inside = true,
+    insideSolid = true;
   for (const axis of ["x", "y", "z"]) {
     const lo = box.min[axis] - padding,
       hi = box.max[axis] + padding;
     inside &&= a[axis] >= lo && a[axis] <= hi;
+    insideSolid &&= a[axis] >= box.min[axis] && a[axis] <= box.max[axis];
     const delta = b[axis] - a[axis];
     if (Math.abs(delta) < 1e-9) {
       if (a[axis] < lo || a[axis] > hi) return null;
@@ -22,6 +24,11 @@ export function boxEntry(a, b, box, padding = 0, allowInside = false) {
       if (near > far) return null;
     }
   }
+  // A target beside a prop can overlap the camera margin without occupying
+  // the prop itself. It may escape that margin, but must not see through the
+  // solid just because the padded segment starts inside its expanded box.
+  if (inside && !insideSolid && !allowInside)
+    return boxEntry(a, b, box, 0, true) === null ? null : 0;
   return (inside && !allowInside) || near < 0 || near > 1 ? null : near;
 }
 
@@ -195,6 +202,25 @@ export function constrainCamera(start, end, surfaces, canOccupy) {
   return start
     .clone()
     .lerp(end, Math.max(0, t - (t < 1 ? 0.03 / Math.max(distance, 0.001) : 0)));
+}
+
+export function faceCameraTarget(camera, target, desired) {
+  // A fully retracted arm has no look-at direction. Keep the chosen heading
+  // instead of allowing Object3D.lookAt's coincident-point fallback to turn it.
+  // Blend before reaching that point so a lateral retraction cannot snap the view.
+  const distance = camera.position.distanceTo(target);
+  camera.lookAt(
+    distance < 0.0001 ? target.clone().multiplyScalar(2).sub(desired) : target,
+  );
+  if (distance >= 0.0001 && distance < 0.6) {
+    const heading = new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().lookAt(desired, target, camera.up),
+    );
+    camera.quaternion.slerp(
+      heading,
+      1 - THREE.MathUtils.smoothstep(distance, 0.05, 0.6),
+    );
+  }
 }
 
 export function followCamera(

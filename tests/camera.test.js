@@ -5,6 +5,7 @@ import {
   CameraSurfaces,
   boxEntry,
   constrainCamera,
+  faceCameraTarget,
   followCamera,
 } from "../src/camera-collision.js";
 import { mergeArchitecture } from "../src/visuals.js";
@@ -32,6 +33,72 @@ test("camera clearance catches thin and overhead walls, permits looking out of a
   assert.ok(boxEntry(v(0, 0, 0), v(0, 4, 5), box, 0.28) < 0.5);
   assert.equal(boxEntry(v(0, 0, 0), v(0, 0, 5), box), null);
   assert.equal(boxEntry(v(0, 2.1, 2.5), v(0, 0, 0), box), null);
+});
+test("a target in the camera margin can escape but cannot look through the adjacent solid", () => {
+  const box = new THREE.Box3(v(-1, 0, 2), v(1, 4, 4)),
+    target = v(0, 2, 1.99);
+  assert.equal(boxEntry(target, v(0, 3, 7), box, 0.28), 0);
+  assert.equal(boxEntry(target, v(0, 3, -3), box, 0.28), null);
+  assert.equal(boxEntry(target, v(5, 2, 1.99), box, 0.28), null);
+  // Preserve escape when the authored camera target really is inside a prop.
+  assert.equal(boxEntry(v(0, 2, 2.1), v(0, 3, 7), box, 0.28), null);
+
+  const { surfaces, add } = fixture();
+  add(2, 4, 2, 0, 2, 3);
+  surfaces.rebuild();
+  let current = v(0, 3, 7),
+    previous = null;
+  for (const z of [1.5, 1.7, 1.73, 1.8, 1.9, 1.99, 1.8, 1.5, 0, -3]) {
+    const p = v(0, 2, z);
+    current = followCamera(
+      current,
+      p,
+      p.clone().add(v(0, 1, 5.3)),
+      1 / 60,
+      surfaces,
+      () => true,
+      previous,
+    );
+    assert(current.z < 2, "camera crossed the solid as its target approached");
+    assert.equal(surfaces.entry(p, current, 0), 1);
+    previous = p;
+  }
+  const restored = arrivalCamera(
+    target,
+    { yaw: 0, pitch: 0.2 },
+    surfaces,
+    () => true,
+  );
+  assert(restored.length > 5.2);
+  assert.equal(surfaces.entry(target, restored.position, 0), 1);
+});
+test("a fully retracted camera retains its chosen heading and pitch through all quadrants", () => {
+  const camera = new THREE.PerspectiveCamera(),
+    target = v(190, 11.7, 304);
+  for (const yaw of [0, 0.52, 1.8, -2.4, Math.PI])
+    for (const pitch of [-0.5, 0.2, 1]) {
+      const offset = v(
+          Math.sin(yaw) * Math.cos(pitch) * 5.3,
+          Math.sin(pitch) * 5.3 + 0.2,
+          Math.cos(yaw) * Math.cos(pitch) * 5.3,
+        ),
+        desired = target.clone().add(offset),
+        expected = offset.clone().normalize().negate();
+      for (const amount of [1, 0.1, 0.00001, 0, 0.1, 1]) {
+        camera.position.copy(target).addScaledVector(offset, amount);
+        faceCameraTarget(camera, target, desired);
+        assert(camera.getWorldDirection(v()).dot(expected) > 0.999999);
+      }
+    }
+  let previous;
+  const desired = target.clone().add(v(0, 0, 5.3));
+  for (let i = 60; i >= 0; i--) {
+    camera.position.copy(target).add(v(i / 100, 0, 0));
+    faceCameraTarget(camera, target, desired);
+    if (previous) assert(previous.angleTo(camera.quaternion) < 0.045);
+    previous = camera.quaternion.clone();
+  }
+  assert(camera.getWorldDirection(v()).dot(v(0, 0, -1)) > 0.999999);
 });
 test("camera surfaces survive render batching without treating gaps between columns as a wall", () => {
   const { world, surfaces, add } = fixture();

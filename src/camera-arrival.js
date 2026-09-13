@@ -26,6 +26,7 @@ export function arrivalCamera(
       yaw,
       pitch,
       position,
+      desired,
       length,
       clear: length >= desired.distanceTo(target) * 0.96,
       score: length - deviation * 0.25,

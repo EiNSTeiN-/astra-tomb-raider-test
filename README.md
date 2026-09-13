@@ -24,6 +24,8 @@ removing the suspended trunks exposed by that survey.
 The desert, crystal and eclipse courts now have [fourteen pools with buried
 mesh borders and regional shore shapes](docs/court-pools.md), retaining swimming,
 nearby control access and positioned water sounds.
+The [swimming camera now retracts correctly beside submerged instruments](docs/swimming-camera.md),
+with a smooth close view and clear recovery when moving away or resuming a save.
 The submerged gallery's [air-bell ceilings now sit below their stone backing,
 with fitted bronze lamp mounts](docs/air-bell-ceilings.md), removing the
 overlapping surfaces visible in close ceiling views.
