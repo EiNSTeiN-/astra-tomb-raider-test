@@ -1,3 +1,4 @@
+import { buildStationYards } from "./station-yards.js";
 import { arrivalCamera } from "./camera-arrival.js";
 import { normalizeCamera } from "./camera-state.js";
 import {
@@ -996,6 +997,7 @@ export class Adventure {
     buildSoundLandmarks(this);
     buildTideArchive(this);
     buildSunkenGallery(this);
+    buildStationYards(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();

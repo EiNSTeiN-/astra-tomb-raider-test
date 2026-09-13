@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional field courtyards](field-courtyards.md) add broken masonry corners,
+  regional furnishings and worn terrain-conforming paving at 148 ground sites.
+  Placement reserves walking lanes, climbing spans and cable landings; the
+  review caught and removed a pier intersecting a neighboring return cable.
+  All 628 tests and the build pass. Evidence includes 352 reviewed assisted
+  views, 32,226 preserved route positions, 1,187 occupied-position recoveries,
+  all 169 controls and 21 climbing routes, and stable layouts across progress
+  states. Ten native keyboard/touch cases cover all eight chapters, with 20
+  reloads retaining all normalized save fields apart from timestamps and two
+  independently validated camera-only obstruction corrections. A close
+  ordinary-play camera transition beside a desert pier needs follow-up.
+  The wider playable-world audit remains open.
+
 - [Regional field stations](regional-field-stations.md) replace the shared
   primitive furniture at 169 installations with eight regional crown styles,
   jointed masonry, mounted wheels, instrument tablets, carried cartridges,

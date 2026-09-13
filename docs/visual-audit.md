@@ -38,8 +38,12 @@ checks at 169 generic controls, complete assisted routes through all 21 climbing
 courses, and representative rendered views of 16 installations. The
 [regional construction pass](regional-field-stations.md) adds front/rear views
 of all 169 shared stations, 44 completed states, 16 Low views and 79 close-ups,
-including both sides of all 21 climbing controls. Optional discoveries,
-connecting routes, other elevated structures, water interiors and return paths
+including both sides of all 21 climbing controls.
+The [field-courtyard pass](field-courtyards.md) adds 352 views of all 148 shared
+ground courtyards and their regional fixtures, plus 32,226 sampled approach-lane
+positions, occupied-position recovery and stable layout checks across progress
+states. Optional discoveries, connecting routes, other elevated structures,
+water interiors and return paths
 still need systematic current coverage.
 Earlier local milestone checks provide useful references, but do not replace
 this review. Each moving mechanism also needs inspection in its relevant open,
@@ -60,7 +64,8 @@ closed and intermediate states.
 | VA-09 | Resuming at a close solar control can leave the camera obscured by a handwheel or adjacent receiver column. | Chapters now retain saved look angles and select a clear nearby orbit when the requested view is blocked. The reproduced view improves from 0.81 m to 5.33 m. [Camera comparisons and checks](arrival-camera.md) record all 77 solar controls in both formats, 409 sampled approaches/ledges, ten production input/reload cases and preservation of other save fields during an obstruction correction. | Fixed |
 | VA-10 | Volcanic lava pools appear as glowing square sheets above the ground. | All 1,296 sampled points on the four old mesh borders stood 12 cm above the terrain. [Slag pools and shoreline repairs](lava-shores.md) add buried borders, shallow irregular basins, textured crust, damage that follows the exposed surface and solid cooled footing. Verification covers all 615 tests, local routes, visual states, sound-source access and production movement/cooling/reload cases. | Fixed |
 | VA-11 | The explorer can walk into a generic field-valve pedestal. | [Field-station clearance](field-station-clearance.md) adds bounded physical solids at all 169 generic stations, preserves control access, recovers occupied saves on a supported surface and protects mantle/cable approaches. Empty sockets retain their saved collision state and delivery makes room for an installed component. | Fixed |
-| VA-12 | Generic field stations repeat simple frames, pedestals, wheels and tablets across distinct environments, often on sparse paving. | [Regional field stations](regional-field-stations.md) now add eight crown styles, jointed masonry, mounted wheels, route diagrams, carried cartridges, caged resonators and open bowls at all 169 shared installations. The review covers 477 assisted views while preserving every working position and all 21 climbing routes. Repeated footprints and sparse surrounding paving still need composition and landscape work, followed by approach/return inspection. | Open; station construction improved |
+| VA-12 | Generic field stations repeat simple frames, pedestals, wheels and tablets across distinct environments, often on sparse paving. | [Regional field stations](regional-field-stations.md) now add eight crown styles, jointed masonry, mounted wheels, route diagrams, carried cartridges, caged resonators and open bowls at all 169 shared installations. The review covers 477 assisted views while preserving every working position and all 21 climbing routes. The subsequent [field courtyards](field-courtyards.md) add broken corner masonry, regional furnishings and worn paving at all 148 ground sites, with 352 reviewed views, preserved approach lanes and stable layouts across progress states. Central footprints and modular corners still repeat; continuous approach/return and landscape review remain open. | Open; station construction and courtyards improved |
+| VA-13 | Backing toward a courtyard pier can crowd the explorer against the camera. | A desert touch movement capture in the [courtyard review](field-courtyards.md) shows a close face/torso view. The subsequent reload correctly selects a full 5.33 m orbit from an obstructed 0.12 m requested arm, preserving all other save fields. Reproduce the ordinary-play transition and assess avatar visibility and camera framing beside low walls and piers. | Open; transition needs investigation |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,

@@ -28,6 +28,9 @@ and item placement that leaves room for the explorer.
 These stations now also have [regional crowns, assembled controls and carved
 instrument faces](docs/regional-field-stations.md), with close inspection
 covering their ground and climbing installations.
+Their [148 ground courtyards now include broken corner walls, regional
+furnishings and worn paving](docs/field-courtyards.md), with placement that
+preserves walking lanes, climbing spans and cable landings.
 
 Guardians now have [cast shoulder plates and weathered bronze](docs/guardian-surfaces.md),
 with darker recesses, material-specific pitting and oxidation that changes with
