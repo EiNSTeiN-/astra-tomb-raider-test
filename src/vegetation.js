@@ -25,6 +25,12 @@ import { placeNatureRock } from "./nature-rocks.js";
 import { FRINGE_RANGES } from "./jungle-fringe.js";
 import { bakeLeafClusters } from "./leaf-atlas.js";
 import { firSpecimens, plantFirTrees } from "./fir-grounding.js";
+import {
+  jungleSpecimen,
+  jungleTreeAllowed,
+  plantJungleTrees,
+} from "./jungle-grounding.js";
+import { rockGroundHeight } from "./nature-rocks.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -123,23 +129,28 @@ export async function loadForest(game) {
   const models =
     game.level.biome === "snow"
       ? firSpecimens(bundles[0].map((asset) => asset.scene))
-      : bundles.map((assets) => {
-          assets[0].scene.updateMatrixWorld(true);
-          const reference = assets[0].scene.userData.vesperTreeBounds;
-          const bounds = reference
-            ? new THREE.Box3(
-                new THREE.Vector3().fromArray(reference.min),
-                new THREE.Vector3().fromArray(reference.max),
-              )
-            : new THREE.Box3().setFromObject(assets[0].scene);
-          return {
-            sources: assets.map((asset) => meshSources(asset.scene)),
-            origin: bounds.getCenter(new THREE.Vector3()).setY(bounds.min.y),
-            scale: 15 / (bounds.max.y - bounds.min.y),
-          };
-        });
+      : bundles.map((assets) =>
+          jungleSpecimen(assets.map((asset) => asset.scene)),
+        );
   const planted =
-    game.level.biome === "snow" ? plantFirTrees(game, layout, models) : layout;
+    game.level.biome === "snow"
+      ? plantFirTrees(game, layout, models)
+      : plantJungleTrees(layout, models, {
+          height: (x, z) => rockGroundHeight(game.terrainProfile, x, z),
+          allowed: (x, z, radius) => jungleTreeAllowed(game, x, z, radius),
+        });
+  if (game.jungleFringe) {
+    const extent = game.map.size * 7;
+    game.jungleFringe.trees = plantJungleTrees(
+      game.jungleFringe.trees,
+      models,
+      {
+        height: game.jungleFringe.height,
+        allowed: (x, z, radius) =>
+          Math.max(0, -x, -z, x - extent, z - extent) > radius + 4,
+      },
+    );
+  }
   game.woodland = planted;
   for (const [variant, model] of models.entries()) {
     const tiers = model.sources.map((sources, tier) => {

@@ -124,4 +124,6 @@ baseline measurement found 476. This is a candidate list for individual root
 inspection, not a claim that every candidate is visible from a walking route.
 The [near-route tree](images/regional-banks/jungle-root-margin.webp) at
 approximately (101.67, 66.01) has a sampled lower margin 1.09 m above the ground.
-VA-19 records this unresolved placement issue.
+VA-19 recorded this placement issue. The subsequent [jungle root repair](jungle-roots.md)
+seats a common footprint across all tree detail tiers and verifies the resulting
+contacts, route views and native movement.

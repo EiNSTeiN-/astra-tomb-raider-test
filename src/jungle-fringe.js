@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { random } from "./campaign.js";
 
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+const RINGS = [0, 1.75, 3.5, 7, 14, 23, 34, 48, 65, 86, 110, 140];
 const smooth = (a, b, x) => {
   const t = clamp((x - a) / (b - a), 0, 1);
   return t * t * (3 - 2 * t);
@@ -54,7 +55,7 @@ export function jungleFringeGeometry(map, profile, side) {
   const fringe = jungleFringeProfile(map, profile),
     extent = fringe.extent,
     segments = Math.round(extent / profile.step),
-    rings = [0, 1.75, 3.5, 7, 14, 23, 34, 48, 65, 86, 110, 140],
+    rings = RINGS,
     vertices = [],
     uv = [],
     indices = [],
@@ -106,6 +107,52 @@ export function jungleFringeGeometry(map, profile, side) {
   return geometry;
 }
 
+// Locate the bank's trapezoid directly, then intersect its two delivered
+// triangles. Full root-footprint queries should not raycast every bank face.
+function fringeGroundSampler(root, map, profile) {
+  const extent = map.size * 7,
+    segments = Math.round(extent / profile.step),
+    ray = new THREE.Ray(new THREE.Vector3(), new THREE.Vector3(0, -1, 0)),
+    a = new THREE.Vector3(),
+    b = new THREE.Vector3(),
+    c = new THREE.Vector3(),
+    hit = new THREE.Vector3();
+  return (x, z) => {
+    const d = Math.max(0, -x, -z, x - extent, z - extent);
+    if (
+      d > RINGS.at(-1) ||
+      (d === 0 && x > 0 && z > 0 && x < extent && z < extent)
+    )
+      return NaN;
+    const side = d === -z ? 0 : d === x - extent ? 1 : d === z - extent ? 2 : 3,
+      along = [x, z, extent - x, extent - z][side],
+      column = clamp(
+        Math.floor(((along + d) / (extent + 2 * d)) * segments),
+        0,
+        segments - 1,
+      ),
+      row = Math.max(0, RINGS.findIndex((r, i) => i > 0 && r >= d) - 1),
+      geometry = root.children[side].geometry,
+      p = geometry.attributes.position,
+      index = geometry.index;
+    ray.origin.set(x, 10000, z);
+    // A float-rounded shared edge can fall in either adjacent column.
+    for (
+      let col = Math.max(0, column - 1);
+      col <= Math.min(segments - 1, column + 1);
+      col++
+    )
+      for (let triangle = 0; triangle < 2; triangle++) {
+        const i = (row * segments + col) * 6 + triangle * 3;
+        a.fromBufferAttribute(p, index.getX(i));
+        b.fromBufferAttribute(p, index.getX(i + 1));
+        c.fromBufferAttribute(p, index.getX(i + 2));
+        if (ray.intersectTriangle(a, b, c, false, hit)) return hit.y;
+      }
+    return NaN;
+  };
+}
+
 export function buildJungleFringe(game) {
   game.jungleFringe = null;
   if (game.level.biome !== "jungle") return;
@@ -123,21 +170,18 @@ export function buildJungleFringe(game) {
   game.world.add(root);
   game.jungleFringe = {
     root,
+    height: fringeGroundSampler(root, game.map, game.terrainProfile),
     trees: jungleFringeLayout(game.map, game.level, game.terrainProfile),
     patches: [],
   };
   // Match the rendered triangles, including the widening outer rows. Sampling
   // only the analytic bank would leave roots floating above its coarser mesh.
   root.updateMatrixWorld(true);
-  const ray = new THREE.Raycaster(
-    new THREE.Vector3(),
-    new THREE.Vector3(0, -1, 0),
-  );
   for (const tree of game.jungleFringe.trees) {
-    ray.ray.origin.set(tree.x, tree.y + 100, tree.z);
-    const hit = ray.intersectObjects(root.children, false)[0];
-    if (!hit) throw new Error("Jungle tree has no supporting bank");
-    tree.y = hit.point.y - 0.2;
+    const ground = game.jungleFringe.height(tree.x, tree.z);
+    if (!Number.isFinite(ground))
+      throw new Error("Jungle tree has no supporting bank");
+    tree.y = ground - 0.2;
   }
 }
 
