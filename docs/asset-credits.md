@@ -106,6 +106,14 @@ and Rob Tuytel, distributed by Poly Haven under CC0. The shared, unmodified
 [license record](../asset-sources/tree-leaves/LICENSE.md) retain source URLs,
 hashes and derivation details. See [leaf comparisons and costs](jungle-leaves.md).
 
+The later [bark repair](jungle-bark.md) derives reduced trunks from the same
+CC0 original meshes. It preserves UV chart boundaries and atlas coverage, with
+9,931 trunk triangles for Tree 01 and 5,836 for Tree 02 in every distance tier.
+Leaf/branch geometry, all texture images and normalization metadata retain
+their previous values. [Bark provenance](../asset-sources/tree-bark/sources.json)
+and its [license record](../asset-sources/tree-bark/LICENSE.md) retain input and
+delivery hashes and the source coverage validation fixture.
+
 The outer jungle bank and deterministic planting in `src/jungle-fringe.js` are
 original project code. They reuse the existing credited Island Tree 01 and
 Island Tree 02 tiers, forest ground textures, canopy wind and distance fades.
@@ -318,9 +326,9 @@ python3 scripts/download-temple-stone.py
 
 Mesh optimization uses glTF Transform and Meshoptimizer. The current shrub contains 21,598 triangles, the fern set 4,360, and the rock set 12,614. Their source assets contain 156,012, 6,232, and 63,127 triangles respectively. Increased foliage retention and shorter draw distances replace the earlier, overly sparse shrub and fern conversions.
 
-Additional distant tiers now contain 3,075 triangles for Island Tree 01, 2,016 for Island Tree 02, and 8,057 for the combined fir specimens. Shrub middle/distant tiers contain 5,394/1,310 triangles; the distant fern set contains 2,428. The conversions reuse the same locally credited assets and textures. See [rendering workload notes](rendering-budget.md) for the conversion, crossfades, and measured limits.
+The current distant tiers contain 12,702 triangles for Island Tree 01, 7,706 for Island Tree 02, and 8,057 for the combined fir specimens. Shrub middle/distant tiers contain 5,394/1,310 triangles; the distant fern set contains 2,428. The conversions reuse the same locally credited assets and textures. See [rendering workload notes](rendering-budget.md) for the conversion, crossfades, and measured limits.
 
-The current broadleaf tiers are Island Tree 01 (114,941 near / 15,646 middle triangles) and Island Tree 02 (77,148 near / 10,293 middle triangles). Tree 01's source has 1,599,403 triangles. `preserve-canopy.mjs` fits full rectangular leaf cards; sampled tiers expand their area and use baked leaf clusters. The original mask defines their silhouettes. See [the reconstruction and geometry comparison](jungle-leaves.md). The jungle combines both species. Tree detail is selected per instance, preserving all tree placements when quality or distance changes.
+The current broadleaf tiers are Island Tree 01 (122,960 near / 24,905 middle triangles) and Island Tree 02 (81,484 near / 15,915 middle triangles). Tree 01's source has 1,599,403 triangles. `preserve-canopy.mjs` fits full rectangular leaf cards; sampled tiers expand their area and use baked leaf clusters. The original mask defines their silhouettes. See [the reconstruction and geometry comparison](jungle-leaves.md). The jungle combines both species. Tree detail is selected per instance, preserving all tree placements when quality or distance changes.
 
 Fir Tree 01 includes three tree specimens. Its source has 6,982,937 triangles.
 The current [sprig reconstruction](fir-sprigs.md) contains 20,689 near / 14,373

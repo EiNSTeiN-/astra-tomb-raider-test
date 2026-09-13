@@ -64,6 +64,7 @@ recordings, score and [asset attribution](asset-credits.md) are retained.
 
 The [outer-bank close view](images/jungle-roots/outer-bank.webp) shows a narrow
 strip of horizontally stretched bark beside the main trunk on `island_tree_01`.
-VA-24 records this texture defect for a separate asset review. Court terraces,
+The subsequent [bark repair](jungle-bark.md) resolves VA-24 by preserving the
+original trunk UV chart boundaries and root shape through reduction. Court terraces,
 repeated court forms and sparse surroundings also remain in the
 [world audit](visual-audit.md).

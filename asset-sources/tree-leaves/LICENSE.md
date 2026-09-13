@@ -9,7 +9,7 @@ The source asset credits name Rico Cilliers and Rob Tuytel.
 The shared 1K leaf alpha mask is delivered without modification. Both assets
 publish the same PNG. `sources.json` records its download URL and SHA-256 hash.
 
-The six revised GLBs retain this project's existing trunk/branch geometry,
+The leaf reconstruction retained this project's existing trunk/branch geometry,
 texture images and node transforms. Leaf geometry is replaced with fitted cards
 using the original connected leaves' UV bounds. Normalization bounds retain the
 existing world size and origin. At jungle load, a one-time GPU bake places small
@@ -20,3 +20,7 @@ The reconstruction and shader are original project code. Source file hashes,
 normalization bounds and delivery hashes are recorded in `sources.json`.
 Raw downloads, conversion intermediates and comparison copies remain excluded
 from publication.
+
+The subsequent [trunk repair](../tree-bark/LICENSE.md) rebuilds only bark geometry
+from the same source meshes. Current delivery hashes include that repair; the
+leaf cards, branches and texture images retain their prior values.

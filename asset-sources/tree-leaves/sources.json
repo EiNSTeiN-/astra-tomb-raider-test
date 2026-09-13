@@ -38,7 +38,7 @@
       "outputs": [
         {
           "path": "public/assets/models/island_tree_01/near.glb",
-          "sha256": "1dc508ee88e0cdb5686e07684ec1664254b03db7f2b576f78a2f6d10e73de69a",
+          "sha256": "2a2e2e88c0fe5ce01d57a7863f356f3a8f8ce6285f6e48d265615d6942ff44d0",
           "leaves": [
             {
               "original": 44168,
@@ -49,7 +49,7 @@
         },
         {
           "path": "public/assets/models/island_tree_01/optimized.glb",
-          "sha256": "4558365e8f56d8490e877327f83cc0559683ebd3008fbc1c18fc84565350a5b4",
+          "sha256": "ed03148869eaf3e2882b2b9450d7c46ab2163299a56736dbd7a087b8ef5d15d6",
           "leaves": [
             {
               "original": 44168,
@@ -60,7 +60,7 @@
         },
         {
           "path": "public/assets/models/island_tree_01/distant.glb",
-          "sha256": "b07f0f887a8fbd85fda167f109445ea4ae5a5b64a98c7644bb5f2b7766e533ee",
+          "sha256": "41289fe8b04ac8dbb5424a089f7ceed904a9ba45f8139b405ff37520d70b54b4",
           "leaves": [
             {
               "original": 44168,
@@ -99,7 +99,7 @@
       "outputs": [
         {
           "path": "public/assets/models/island_tree_02/near.glb",
-          "sha256": "bd5c8e601170aad129f3f3c6146661a3ee9b1bfa31e12843aaedebb8d269ff1c",
+          "sha256": "9e270c7bceef6b6f7a354b5a604654ee810e0c3d3b86fa3e16eed5eb444c145a",
           "leaves": [
             {
               "original": 29781,
@@ -110,7 +110,7 @@
         },
         {
           "path": "public/assets/models/island_tree_02/optimized.glb",
-          "sha256": "284020d6dab22407fb31af7f9a14d75660a0a0fe97ab77653121830b11634d28",
+          "sha256": "3fe7aa5d0ab8fb464943b197745909d930c2f6ea1815acf4e9036870b54ba350",
           "leaves": [
             {
               "original": 29781,
@@ -121,7 +121,7 @@
         },
         {
           "path": "public/assets/models/island_tree_02/distant.glb",
-          "sha256": "07fe20b6c1a70eeacc6ccedf618afb03b5658eba4a8299201a44e17df5f80722",
+          "sha256": "a70cb398eb7f539f0908585154a9e126943f6e751fc0fb31c89922e5c3cdf680",
           "leaves": [
             {
               "original": 29781,
@@ -133,5 +133,6 @@
       ]
     }
   },
-  "derivation": "Two-triangle UV-bounds leaf cards fitted to the source leaf vertices; original sampling strides 1/8/48, with area compensation. Existing non-leaf geometry and images retained. Original near-tier bounds retain tree normalization. Runtime supplies the shared unmodified alpha map and bakes middle/distant leaf clusters into shared color, normal and roughness atlases once per jungle load. Ordinary foliage and depth materials sample those atlases each frame."
+  "derivation": "Two-triangle UV-bounds leaf cards fitted to the source leaf vertices; original sampling strides 1/8/48, with area compensation. Existing non-leaf geometry and images retained. Original near-tier bounds retain tree normalization. Runtime supplies the shared unmodified alpha map and bakes middle/distant leaf clusters into shared color, normal and roughness atlases once per jungle load. Ordinary foliage and depth materials sample those atlases each frame.",
+  "trunkFollowup": "Trunks subsequently rebuilt from the same originals by scripts/rebuild-tree-bark.mjs; current output hashes include that repair. Leaf and branch geometry and texture image bytes remain unchanged. See asset-sources/tree-bark/sources.json."
 }
