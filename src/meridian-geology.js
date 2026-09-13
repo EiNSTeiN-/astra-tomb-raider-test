@@ -1,3 +1,4 @@
+import { regionalBankRise, relaxBankCrests } from "./terrain-banks.js";
 import { desertNoise as rockNoise } from "./desert-geology.js";
 import { craneFoundationDistance } from "./astral-crane-rules.js";
 
@@ -76,15 +77,10 @@ export function refineMeridianTerrain(profile, map, seed) {
       }
       exposure[index] = mask;
       if (!mask) continue;
-      const oldRise =
-        (1 - Math.exp(-distance * 0.72)) *
-          (5.5 +
-            Math.sin(x * 0.087 + z * 0.071) * 1.6 +
-            Math.sin(x * 0.22 - z * 0.16) * 0.5) +
-        Math.max(0, distance - 5) * 0.35;
+      const oldRise = regionalBankRise(x, z, distance, seed, "eclipse");
       const broad = rockNoise(x * 0.037, z * 0.052, seed + 41);
       const fracture = rockNoise(x * 0.19 + broad * 2, z * 0.11, seed + 97);
-      const toe = 1 - Math.exp(-Math.pow(distance / (2.9 + broad * 2.8), 1.35));
+      const toe = 1 - Math.exp(-Math.pow(distance / (10 + broad * 6), 1.8));
       const rise =
         toe * (5.2 + broad * 9.4 + (fracture - 0.5) * 3.4) +
         Math.max(0, distance - 11) * 0.22;
@@ -98,6 +94,7 @@ export function refineMeridianTerrain(profile, map, seed) {
       const target = shelf + (fracture - 0.5) * 0.85 * toe;
       heights[index] += (target - heights[index]) * mask;
     }
+  relaxBankCrests(heights, width, exposure);
   const sample = (data, x, z) => {
     const fx = Math.max(0, Math.min(width - 1.001, x / step)),
       fz = Math.max(0, Math.min(width - 1.001, z / step)),

@@ -1,3 +1,4 @@
+import { regionalBankRise, relaxBankCrests } from "./terrain-banks.js";
 import {
   desertNoise as rockNoise,
   desertRouteDistance,
@@ -81,18 +82,13 @@ export function refineSnowTerrain(profile, map, seed) {
         );
       exposure[index] = mask;
       if (!mask) continue;
-      // Remove the old uniform rise before sculpting the new shoulder. The
+      // Replace the base bank with the regional shoulder. The
       // protected foundations above also cover terrain overrides and water cuts.
-      const oldRise =
-        (1 - Math.exp(-distance * 0.72)) *
-          (5.5 +
-            Math.sin(x * 0.087 + z * 0.071) * 1.6 +
-            Math.sin(x * 0.22 - z * 0.16) * 0.5) +
-        Math.max(0, distance - 5) * 0.35;
+      const oldRise = regionalBankRise(x, z, distance, seed, "snow");
       const warp = (rockNoise(x * 0.022, z * 0.028, seed + 181) - 0.5) * 8,
         broad = rockNoise(x * 0.043 + warp * 0.08, z * 0.057, seed + 397),
         fracture = rockNoise(x * 0.18 + warp * 0.09, z * 0.13, seed + 733),
-        toe = 1 - Math.exp(-Math.pow(distance / (2.8 + broad * 3.8), 1.5)),
+        toe = 1 - Math.exp(-Math.pow(distance / (12 + broad * 8), 1.8)),
         rise =
           toe * (4.8 + broad * 5.8 + (fracture - 0.5) * 2) +
           Math.max(0, distance - 11) * 0.22,
@@ -105,6 +101,7 @@ export function refineSnowTerrain(profile, map, seed) {
       heights[index] +=
         mask * (ledge + (fracture - 0.5) * 0.45 * toe - heights[index]);
     }
+  relaxBankCrests(heights, width, exposure);
   const sample = (data, x, z) => {
     const fx = Math.max(0, Math.min(width - 1.001, x / step)),
       fz = Math.max(0, Math.min(width - 1.001, z / step)),

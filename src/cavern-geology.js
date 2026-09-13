@@ -1,3 +1,4 @@
+import { regionalBankRise, relaxBankCrests } from "./terrain-banks.js";
 import { desertNoise as rockNoise } from "./desert-geology.js";
 import { causewayFoundationDistance } from "./echo-causeway-rules.js";
 
@@ -92,15 +93,10 @@ export function refineCavernTerrain(profile, map, seed) {
         );
       exposure[index] = mask;
       if (!mask) continue;
-      const oldRise =
-        (1 - Math.exp(-distance * 0.72)) *
-          (5.5 +
-            Math.sin(x * 0.087 + z * 0.071) * 1.6 +
-            Math.sin(x * 0.22 - z * 0.16) * 0.5) +
-        Math.max(0, distance - 5) * 0.35;
+      const oldRise = regionalBankRise(x, z, distance, seed, "crystal");
       const broad = rockNoise(x * 0.036, z * 0.044, seed + 731),
         breakage = rockNoise(x * 0.14 + broad * 2, z * 0.12, seed + 917),
-        toe = 1 - Math.exp(-Math.pow(distance / (2.8 + broad * 3.7), 1.4)),
+        toe = 1 - Math.exp(-Math.pow(distance / (9 + broad * 7), 1.8)),
         rise =
           toe * (5 + broad * 8.2 + (breakage - 0.5) * 2.2) +
           Math.max(0, distance - 10) * 0.2,
@@ -113,6 +109,7 @@ export function refineCavernTerrain(profile, map, seed) {
       heights[index] +=
         (shelf + (breakage - 0.5) * 0.65 * toe - heights[index]) * mask;
     }
+  relaxBankCrests(heights, width, exposure);
   const sample = (data, x, z) => {
     const fx = Math.max(0, Math.min(width - 1.001, x / step)),
       fz = Math.max(0, Math.min(width - 1.001, z / step)),

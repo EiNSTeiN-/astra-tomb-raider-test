@@ -394,14 +394,17 @@ test("focused cameras stay under the vault with visible arrays, and another biom
       game.resonanceFocus = site.stage;
       assert.ok(focusResonance(game));
       game.camera.updateMatrixWorld();
-      assert.ok(
-        game.camera.position.y <
-          game.cavernProfile.height(
-            game.camera.position.x,
-            game.camera.position.z,
-          ),
-        "camera inside cavern",
-      );
+      for (const dx of [-0.35, 0, 0.35])
+        for (const dz of [-0.35, 0, 0.35])
+          assert.ok(
+            game.cavernProfile.height(
+              game.camera.position.x + dx,
+              game.camera.position.z + dz,
+            ) -
+              game.camera.position.y >=
+              0.3999,
+            "inspection eye and near plane stay below the vault",
+          );
       for (const n of site.nodes) {
         const p = n.center
           .clone()

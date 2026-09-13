@@ -554,6 +554,18 @@ export function focusResonance(game) {
     c.y + (compact ? 18 : 15),
     c.z + (compact ? 26 : 27),
   );
+  // The vault follows the surrounding ground. A fixed inspection eye can
+  // breach a lower shoulder, especially with the portrait view's steep lens.
+  // Leave clearance across the eye's footprint, including the near plane.
+  if (game.cavernProfile) {
+    const eye = game.camera.position;
+    for (const dx of [-0.35, 0, 0.35])
+      for (const dz of [-0.35, 0, 0.35])
+        eye.y = Math.min(
+          eye.y,
+          game.cavernProfile.height(eye.x + dx, eye.z + dz) - 0.4,
+        );
+  }
   // Widen and shift the inspection lens while keeping its eye inside the vault.
   // The normal follow camera restores its lens on leaving this view.
   game.camera.fov = compact ? 115 : 90;

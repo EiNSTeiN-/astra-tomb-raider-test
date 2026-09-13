@@ -33,6 +33,7 @@ import { refineSkyTerrain } from "./sky-geology.js";
 import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { buildJungleFringe } from "./jungle-fringe.js";
+import { regionalBankRise } from "./terrain-banks.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -147,13 +148,7 @@ export function createTerrainProfile(map, level) {
         else if (biome === "water") height -= rise * 7;
         else if (biome === "desert")
           height += desertBankRise(x, z, distance, level.seed);
-        else
-          height +=
-            rise *
-              (5.5 +
-                Math.sin(x * 0.087 + z * 0.071) * 1.6 +
-                Math.sin(x * 0.22 - z * 0.16) * 0.5) +
-            Math.max(0, distance - 5) * 0.35;
+        else height += regionalBankRise(x, z, distance, level.seed, biome);
       }
       if (map.temperingCart) {
         const weight = temperingFoundationWeight(x, z);
