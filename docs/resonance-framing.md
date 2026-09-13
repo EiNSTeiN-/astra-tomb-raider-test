@@ -76,7 +76,8 @@ unchanged; their existing attribution remains in place.
 VA-20 is resolved by this framing repair. The broader
 [visual audit](visual-audit.md) remains open for court terraces, jungle tree
 placement, repeated court forms and sparse surroundings. The production review
-also records VA-22: a transient chapter-narration toast can cover part of the
+also recorded VA-22: a transient chapter-narration toast could cover part of the
 array or its controls shortly after a reload. The
 [small-phone capture](images/resonance-framing/narration-overlap.webp) preserves
-that unresolved overlay issue; it is separate from the repaired viewport clipping.
+that overlay issue before the subsequent [dialog notice repair](dialog-notices.md).
+Narration now occupies the panel's normal text flow below its title.

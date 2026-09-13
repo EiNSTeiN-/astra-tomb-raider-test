@@ -392,8 +392,22 @@ function updateProgress() {
     ? "LOCAL SAVE ACTIVE"
     : "SAVING UNAVAILABLE";
 }
+function restoreToastHome() {
+  const el = document.querySelector("#toast"),
+    root = document.querySelector("#modal-root");
+  if (root.contains(el)) root.after(el);
+}
 function positionToast() {
   const el = document.querySelector("#toast");
+  const modalPanel = document.querySelector("#modal-root .modal");
+  if (modalPanel) {
+    if (el.parentElement !== modalPanel) {
+      modalPanel.querySelector("h2").after(el);
+      if (game) game.renderOnce = true;
+    }
+    return;
+  }
+  restoreToastHome();
   if (
     el.classList.contains("hidden") ||
     !matchMedia("(max-width: 550px)").matches
@@ -411,7 +425,12 @@ function toast(message, duration = 3500) {
   el.textContent = message;
   el.classList.remove("hidden");
   positionToast();
-  toastTimer = setTimeout(() => el.classList.add("hidden"), duration);
+  if (game) game.renderOnce = true;
+  toastTimer = setTimeout(() => {
+    el.classList.add("hidden");
+    // A focused camera may fit the available space around this panel.
+    if (game) game.renderOnce = true;
+  }, duration);
 }
 function finishLoadingUI() {
   document.querySelector("#loading").classList.add("hidden");
@@ -981,6 +1000,8 @@ function modal(
     );
   }
   currentModal = type;
+  // Preserve the live status node and its timer when replacing a dialog.
+  restoreToastHome();
   document.querySelector("#modal-root").innerHTML =
     `<div class="modal-backdrop"><section class="modal ${wide ? "modal-wide" : ""} modal-${type}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close icon-button" aria-label="Close dialog">${icon("X")}</button><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2>${body}</section></div>`;
   icons();
@@ -990,6 +1011,7 @@ function modal(
     .forEach((b) => (b.onclick = () => closeModal()));
   document.querySelector(".modal-close").focus();
   const panel = document.querySelector(".modal");
+  positionToast();
   panel.addEventListener("keydown", (e) => {
     if (e.code !== "Tab") return;
     const nodes = [
@@ -1009,7 +1031,9 @@ function modal(
 function closeModal(resume = true) {
   mountedPuzzle?.dispose();
   mountedPuzzle = null;
+  restoreToastHome();
   document.querySelector("#modal-root").innerHTML = "";
+  positionToast();
   currentModal = null;
   if (game?.cipherFocus != null) {
     game.cipherFocus = null;

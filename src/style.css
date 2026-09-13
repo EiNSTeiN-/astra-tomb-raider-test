@@ -1837,6 +1837,20 @@ kbd {
   width: max-content;
   animation: fade-in 0.25s;
 }
+.modal .toast {
+  position: static;
+  inset: auto;
+  transform: none;
+  width: auto;
+  max-width: none;
+  margin: 12px 0;
+  padding: 10px 12px;
+  box-shadow: none;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
 .loading-screen {
   position: fixed;
   inset: 0;
