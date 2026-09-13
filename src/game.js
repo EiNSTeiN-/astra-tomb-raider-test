@@ -2052,13 +2052,19 @@ export class Adventure {
     this.yaw = view.yaw;
     this.pitch = view.pitch;
     this.avatar.rotation.y = this.yaw + Math.PI;
-    this.avatar.visible = view.length > 0.85;
+    this.avatar.visible = true;
+    this.rig?.visibility?.set(view.length);
+    this.cameraFollowTarget = target.clone();
     this.camera.position.copy(view.position);
     this.camera.lookAt(target);
     this.camera.updateMatrixWorld();
   }
   updateCamera(dt) {
+    this.rig?.visibility?.set();
+    this.avatar.visible = true;
     if (frameSurveyScope(this)) {
+      this.avatar.visible = false;
+      this.cameraFollowTarget = null;
       updateAtmosphere(this, this.player.position);
       return;
     }
@@ -2095,6 +2101,7 @@ export class Adventure {
       focusWind(this) ||
       focusCipher(this)
     ) {
+      this.cameraFollowTarget = null;
       updateAtmosphere(this, this.player.position);
       return;
     }
@@ -2130,9 +2137,11 @@ export class Adventure {
         dt,
         this.cameraSurfaces,
         canOccupy,
+        this.cameraFollowTarget,
       ),
     );
-    this.avatar.visible = this.camera.position.distanceTo(target) > 0.85;
+    this.cameraFollowTarget = target.clone();
+    this.rig?.visibility?.set(this.camera.position.distanceTo(target));
     this.camera.lookAt(target);
     if (this.aiming)
       this.aimPoint = this.camera

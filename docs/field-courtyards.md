@@ -97,8 +97,9 @@ recoveries are allowed to correct only position and camera.
 The checks confirm the final production bundle names, no development hook, no
 viewport overflow and no browser warnings, errors or failed requests. All twenty
 production movement screenshots were reviewed. One desert backing-up view
-crowds the explorer against the camera before the arrival correction; this
-ordinary-play camera transition needs follow-up in the wider audit.
+crowds the explorer against the camera before the arrival correction. The
+subsequent [close-camera pass](close-camera.md) reproduces and corrects that
+ordinary-play transition with shared character fading and stable wall following.
 
 The reusable helper is
 [inspect-station-yards-browser.js](../scripts/inspect-station-yards-browser.js).

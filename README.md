@@ -14,6 +14,9 @@ removing the exposed blunt cuts at their lower ends.
 The desert's [68 mirror handwheels now have connecting axles and bearing housings](docs/solar-mounts.md).
 Chapters now [remember the camera view and find a clear orbit on arrival](docs/arrival-camera.md),
 including when a saved position is close to machinery.
+During play, [close wall views now fade the explorer and keep the camera
+aligned during a wall slide](docs/close-camera.md), with matched equipment
+coverage and preserved torch light, audio and water reflections.
 The final chapter's [observatory plinths and column bases now extend into the terrain](docs/observatory-foundations.md),
 closing the measured gaps beneath their footprints.
 Shared [bronze gates and instruments now have irregular oxidation and fine pitting](docs/bronze-surfaces.md),

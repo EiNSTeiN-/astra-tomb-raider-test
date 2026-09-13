@@ -204,9 +204,19 @@ export function followCamera(
   dt,
   surfaces,
   canOccupy,
+  previousTarget = null,
 ) {
   const safe = constrainCamera(target, desired, surfaces, canOccupy);
-  const smoothed = current.clone().lerp(safe, 1 - Math.exp(-8 * dt));
+  const attached = current.clone();
+  if (previousTarget) {
+    // At a short arm, world-space lag can leave the camera on the wrong side
+    // of a moving player and swing the view across their face. Follow target
+    // translation more directly as obstruction retracts the camera.
+    const near =
+      1 - THREE.MathUtils.smoothstep(safe.distanceTo(target), 1.8, 3.2);
+    attached.addScaledVector(target.clone().sub(previousTarget), near);
+  }
+  const smoothed = attached.lerp(safe, 1 - Math.exp(-8 * dt));
   // Resolve again after smoothing: an orbit around a corner must never interpolate
   // through the wall. Inward correction is immediate; outward recovery is gentle.
   return constrainCamera(target, smoothed, surfaces, canOccupy);

@@ -232,6 +232,7 @@ test("the ocean remains above a lower basin and agrees with the sampled water le
 });
 test("one reflection capture is budgeted every three active frames and restores hidden water even after a render error", () => {
   const g = liquidGame();
+  g.rig = { visibility: { uniform: { value: 0.35 } } };
   g.player.position.set(0, 0, 3);
   g.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
   g.camera.position.set(0, 3, 5);
@@ -243,10 +244,12 @@ test("one reflection capture is budgeted every three active frames and restores 
   mirror.reflector.onBeforeRender = () => {
     captures++;
     assert.equal(g.waterMeshes[0].visible, false);
+    assert.equal(g.rig.visibility.uniform.value, 1);
   };
   for (let i = 0; i < 9; i++) mirror.render();
   assert.equal(captures, 4);
   assert.equal(g.waterMeshes[0].visible, true);
+  assert.equal(g.rig.visibility.uniform.value, 0.35);
   mirror.reflector.onBeforeRender = () => {
     throw Error("render failed");
   };
@@ -254,6 +257,7 @@ test("one reflection capture is budgeted every three active frames and restores 
   assert.throws(() => mirror.render(), /render failed/);
   assert.equal(g.waterMeshes[0].visible, true);
   assert.equal(g.avatar.visible, true);
+  assert.equal(g.rig.visibility.uniform.value, 0.35);
   mirror.dispose();
 });
 

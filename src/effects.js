@@ -63,7 +63,10 @@ export function buildFireEffects(game) {
     flame.geometry.dispose();
     flame.material.dispose();
     flame.geometry = new THREE.PlaneGeometry(width, height);
-    flame.material = material;
+    // Carried fire shares the explorer's close-camera mask. Give it its own
+    // material so fading the torch cannot fade stationary world fires.
+    flame.material = flame === game.torch?.flame ? material.clone() : material;
+    flame.material.uniforms.time = game.fireTime;
     flame.castShadow = false;
   }
   game.fireLights = Array.from({ length: 4 }, () => {

@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Close-camera framing](close-camera.md) corrects the crowded face/torso view
+  and sideways swing reproduced beside a courtyard pier. A short camera orbit
+  follows player translation directly and fades the explorer, gear and carried
+  flame together, retaining torch lighting/audio and full water reflections.
+  All 631 tests and the production build pass. Eight chapter movement traces,
+  carried-fire/aiming/crouching/scope/reflection checks, eight gallery views and
+  ten native production cases cover the change. Twenty reloads preserve every
+  normalized save field apart from timestamps and two independently validated
+  camera-only arrival corrections. VA-13 is fixed; the gallery review records
+  a separate Low air-bell ceiling highlight as VA-14. The wider visual audit
+  remains open.
+
 - [Regional field courtyards](field-courtyards.md) add broken masonry corners,
   regional furnishings and worn terrain-conforming paving at 148 ground sites.
   Placement reserves walking lanes, climbing spans and cable landings; the
@@ -29,7 +41,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   states. Ten native keyboard/touch cases cover all eight chapters, with 20
   reloads retaining all normalized save fields apart from timestamps and two
   independently validated camera-only obstruction corrections. A close
-  ordinary-play camera transition beside a desert pier needs follow-up.
+  ordinary-play camera transition beside a desert pier is resolved by the
+  subsequent close-camera pass above.
   The wider playable-world audit remains open.
 
 - [Regional field stations](regional-field-stations.md) replace the shared

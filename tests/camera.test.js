@@ -103,6 +103,33 @@ test("actors and distant structures do not obstruct or inflate a nearby camera q
   assert.equal(surfaces.lastCandidates, 0);
 });
 
+test("a retracted camera follows a moving target without swinging across it and remains outside walls", () => {
+  const { surfaces, add } = fixture();
+  add(30, 7, 0.3, 0, 3.5, 0.7);
+  surfaces.rebuild();
+  let previous = v(0, 1.3, 0),
+    camera = constrainCamera(previous, v(0, 2.1, 5.3), surfaces, () => true);
+  const offset = v(0, 0.8, 5.3);
+  for (let i = 1; i <= 120; i++) {
+    // Slide along the wall, then walk away and recover the normal orbit.
+    const target = i <= 60 ? v(i * 0.1, 1.3, 0) : v(6, 1.3, -(i - 60) * 0.1);
+    camera = followCamera(
+      camera,
+      target,
+      target.clone().add(offset),
+      1 / 60,
+      surfaces,
+      () => true,
+      previous,
+    );
+    assert(Math.abs(camera.x - target.x) < 0.015, "sideways camera swing");
+    assert(camera.z > target.z, "camera crossed the target");
+    assert(surfaces.entry(target, camera) >= 0.999, "camera crossed the wall");
+    previous = target;
+  }
+  assert(camera.distanceTo(previous) > 4.5, "camera did not recover");
+});
+
 test("arrival preserves a clear chosen view and finds a nearby clear orbit behind a blocked wall", () => {
   const { surfaces, add } = fixture();
   add(4, 7, 0.3, 0, 3.5, 1);

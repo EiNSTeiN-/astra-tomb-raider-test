@@ -19,6 +19,7 @@ import { poseHands, poseFeet } from "./pose.js";
 import { groundExplorer } from "./explorer-grounding.js";
 import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
 import { strideRate } from "./stride.js";
+import { ExplorerVisibility } from "./explorer-visibility.js";
 
 function equipmentSurface(material) {
   const canvas = /canvas|bottle/.test(material.name);
@@ -130,6 +131,11 @@ export async function loadExplorer(game) {
   actions.Idle.play();
   mixer.update(0.1);
   game.rig = { model, mixer, actions, state: "Idle", weapon: sidearm(game) };
+  game.rig.visibility = new ExplorerVisibility([
+    avatar,
+    game.torch?.root,
+    game.rig.weapon.group,
+  ]);
   game.renderOnce = true;
 }
 
