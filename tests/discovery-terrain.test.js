@@ -4,22 +4,25 @@ import { createHash } from "node:crypto";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 
-// All 18 pickup-centre elevations in each affected chapter, recorded from the
-// shipped ae0ef6d terrain. Discovery ids and the main/field floors stay fixed.
+// Pickup-centre elevations recorded from the shipped ae0ef6d terrain. The later
+// tempering-track repair changes note 2's bank; the other 17 volcanic centres
+// retain their recorded elevations. Discovery ids remain unchanged.
 const centres = {
   verdant: "47a897f8198dfd1a5f9e3c11d95880c3c1e54ef7804b7b7f16c19079b2f0a176",
   frost: "ba0e7cec781bce4162da74ed5bb6a3fb20d1208b145554d10d3b8e2d666a54d7",
-  embers: "35a6adbf242cf3d389a1a27a296ead4d7044f3496dd194c70cdf4ad3d3a36643",
+  embers: "fe799eaa38f42c8405ffd0a4ba854b6a3f0800416bc6deed2a7507adfe028472",
   crystal: "9841f049ba4587754fead41219728c6c732392ff52d9786e25e0c7e3520f4149",
   eclipse: "69be535230ec7852729f0e7fce303ec10f8dd681341af59bcb5e80b282ae627f",
 };
 for (const [id, digest] of Object.entries(centres))
-  test(`${id} discovery landings retain every pickup elevation`, () => {
+  test(`${id} discovery landings retain unaffected pickup elevations`, () => {
     const level = LEVELS.find((l) => l.id === id),
       map = createMap(level),
       profile = createTerrainProfile(map, level),
-      values = map.sideRooms.map((r) => profile.height(r.x * 7, r.z * 7));
-    assert.equal(values.length, 18);
+      values = map.sideRooms
+        .filter((r) => id !== "embers" || r.index !== 2)
+        .map((r) => profile.height(r.x * 7, r.z * 7));
+    assert.equal(values.length, id === "embers" ? 17 : 18);
     assert.equal(
       createHash("sha256")
         .update(Buffer.from(new Float32Array(values).buffer))

@@ -44,6 +44,11 @@ zero-based discovery IDs.
 | Crystal cache 16 | 189, 315 | 189, 316.75 | 1.75 m |
 | Eclipse cache 12 | 245, 217 | 243.25, 217 | 1.75 m |
 
+These coordinates record this construction milestone. The later
+[tempering approach repair](tempering-approaches.md) grades the volcanic bank
+and selects a new clear foundation for note 2 at (159.25, 343), preserving its
+identity and verifying collection again.
+
 Crystal note 4 previously occupied a permanent chamber side wall; its plinth
 also overlapped the closed gate corner. Embers note 2 intersected the steep
 tempering-track bank. Eclipse cache 12 stood in the orbit-vault depression.

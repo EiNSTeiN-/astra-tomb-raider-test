@@ -16,7 +16,7 @@ import { refineMeridianTerrain } from "./meridian-geology.js";
 import { buildMeridianEscarpment } from "./meridian-escarpment.js";
 import { craneFoundationWeight } from "./astral-crane-rules.js";
 import { refineVolcanicTerrain } from "./volcanic-geology.js";
-import { temperingFoundationWeight } from "./tempering-cart-rules.js";
+import { temperingTerrainWeight } from "./tempering-terrain.js";
 import { courierFoundationWeight } from "./courier-rules.js";
 import { desertBankRise, refineDesertTerrain } from "./desert-geology.js";
 import { buildDesertHorizon } from "./desert-horizon.js";
@@ -165,7 +165,7 @@ export function createTerrainProfile(map, level) {
         else height += regionalBankRise(x, z, distance, level.seed, biome);
       }
       if (map.temperingCart) {
-        const weight = temperingFoundationWeight(x, z);
+        const weight = temperingTerrainWeight(map, waters, x, z);
         height = height * (1 - weight) + raw(119, 392) * weight;
       }
       if (map.astralCrane) {

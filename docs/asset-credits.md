@@ -664,3 +664,9 @@ materials and project bronze shader. No external models, images, recordings or
 dependencies were added. Its four documentation images are actual game renders
 converted losslessly to WebP, with decoded pixel identity checked against the
 source captures.
+
+The [tempering approach repair](tempering-approaches.md) adds original terrain
+weighting code and reuses existing credited ground and railway materials. It
+introduces no external assets or dependencies. Its four documentation images
+are actual game renders converted losslessly to WebP, with decoded pixel
+identity checked against their source captures.

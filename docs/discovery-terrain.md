@@ -122,6 +122,11 @@ crystal note 4's chamber overlap. The observations below describe this terrain
 milestone's remaining work; the surrounding special banks and vault edges
 continue under VA-15.
 
+The subsequent [tempering approach repair](tempering-approaches.md) widens the
+volcanic railway join while keeping its authored floor. It also inspects the
+eclipse rise as part of the orrery's constructed deep well; broader terrain and
+outer-edge coverage remain open.
+
 VA-15 stays open for the special terrain around volcanic note 2 and eclipse
 cache 12. Their sampled landing variations remain **3.19 m and 0.53 m**,
 respectively, unchanged from the baseline. The volcanic views show the note

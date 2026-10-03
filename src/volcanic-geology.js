@@ -3,6 +3,7 @@ import {
   desertRouteDistance,
 } from "./desert-geology.js";
 import { temperingFoundationDistance } from "./tempering-cart-rules.js";
+import { TRACK_APPROACH_WIDTH } from "./tempering-terrain.js";
 
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
@@ -22,7 +23,11 @@ export function refineVolcanicTerrain(profile, map, seed) {
         index = iz * width + ix;
       let mask = smooth(step * 2, 10, desertRouteDistance(map, x, z));
       if (map.temperingCart)
-        mask *= smooth(4, 8, temperingFoundationDistance(x, z));
+        mask *= smooth(
+          TRACK_APPROACH_WIDTH,
+          TRACK_APPROACH_WIDTH + 4,
+          temperingFoundationDistance(x, z),
+        );
       for (const water of profile.waters) {
         const distance = Math.hypot(
           Math.max(0, Math.abs(x - water.x) - water.width / 2),
