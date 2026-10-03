@@ -105,14 +105,14 @@ profiles, logs and disposable saves remain in the ignored local staging folder.
 
 ## Remaining observations
 
-VA-15 remains open. The crossing beside snow court 7 still exposes a sharp bank
-where its terrace overlaps discovery pad 16. At (322, 267.75), toward increasing
-z, the ground rises **4.34 m over 1.75 m**, equal to the previous terrain. That
-interval lies inside the protected discovery core; the shared grading mask
-cannot change it. Its floor priorities and surrounding layout need a separate
-repair. Passing the nearby walking line does not resolve the visible bank.
+This milestone left a sharp bank beside snow court 7 where its terrace overlaps
+discovery pad 16. At (322, 267.75), toward increasing z, the ground rose
+**4.34 m over 1.75 m**, inside the protected discovery core. The subsequent
+[discovery-landing repair](discovery-terrain.md) reduces that interval to 1.01 m
+while preserving the pickup centre, and verifies crossing, collection and
+reloads. VA-15 remains open for later special-terrain cuts recorded there.
 
-![Remaining sharp bank beside the discovery pad near snow court 7](images/court-terrain/snow-remaining-bank.webp)
+![Sharp bank left open by this milestone, before the discovery-landing repair](images/court-terrain/snow-remaining-bank.webp)
 
 This is a terrain-joining repair. Repeated chamber and station forms and sparse
 surroundings remain in the [world visual audit](visual-audit.md); the review does

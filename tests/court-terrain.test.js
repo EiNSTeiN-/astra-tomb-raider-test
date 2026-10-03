@@ -5,7 +5,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { courtTerrain } from "../src/court-terrain.js";
 
-test("overlapping pads join gradually while their working cores and remote ground remain fixed", () => {
+test("overlapping discovery pads join gradually while their small landings and remote ground remain fixed", () => {
   const terraces = [
       { x: 24, z: 32, radius: 14, y: 0 },
       { x: 44, z: 32, radius: 14, y: 6 },
@@ -16,8 +16,8 @@ test("overlapping pads join gradually while their working cores and remote groun
     heights,
     courtTerrain(70, 1, terraces, () => 0),
   );
-  for (let x = 20; x <= 28; x++) assert.equal(heights[32 * 70 + x], 0);
-  for (let x = 40; x <= 48; x++) assert.equal(heights[32 * 70 + x], 6);
+  for (let x = 23; x <= 25; x++) assert.equal(heights[32 * 70 + x], 0);
+  for (let x = 43; x <= 45; x++) assert.equal(heights[32 * 70 + x], 6);
   for (let x = 24; x < 44; x++) {
     const rise = heights[32 * 70 + x + 1] - heights[32 * 70 + x];
     assert(rise >= 0 && rise < 1, `Abrupt join at ${x}: ${rise}`);

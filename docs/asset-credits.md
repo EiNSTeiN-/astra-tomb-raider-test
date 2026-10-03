@@ -648,3 +648,10 @@ credited temple stone maps, project bronze/iron shaders, original mechanical
 audio and the desert survey score. No external models, recordings, images or
 dependencies were added. Documentation images are actual game captures converted
 to WebP.
+
+The [discovery terrain repair](discovery-terrain.md) adds original height-field
+code in `src/court-terrain.js` and an observer helper. It reuses the already
+credited environment materials and introduces no external assets, recordings
+or dependencies. The three documentation images are actual game captures
+converted losslessly to WebP, with decoded pixel identity checked against their
+source captures.
