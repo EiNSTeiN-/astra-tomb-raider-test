@@ -1,4 +1,5 @@
 import { buildStationYards } from "./station-yards.js";
+import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
 import { arrivalCamera } from "./camera-arrival.js";
 import { normalizeCamera } from "./camera-state.js";
 import {
@@ -999,6 +1000,7 @@ export class Adventure {
     buildTideArchive(this);
     buildSunkenGallery(this);
     buildStationYards(this);
+    buildDiscoveryProps(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();
@@ -1374,7 +1376,7 @@ export class Adventure {
         }
       } else if (f.type === "camp") {
         buildCamp(this, f, group);
-      } else {
+      } else if (!["note", "treasure"].includes(f.type)) {
         const mat = f.type === "relic" ? this.glowMat : this.goldMat;
         const geo =
           f.type === "note"
@@ -1898,8 +1900,9 @@ export class Adventure {
           (hasCounterweights(f) && counterweightsReady(this, f) ? -5 : 0) -
           this.player.position.z,
       );
-      const range =
-        hasCounterweights(f) && counterweightsReady(this, f)
+      const range = f.discovery
+        ? 3
+        : hasCounterweights(f) && counterweightsReady(this, f)
           ? 2.4
           : f.type === "field"
             ? 2.6
@@ -1916,7 +1919,11 @@ export class Adventure {
                 : f.type === "bell"
                   ? 1.35
                   : 5;
-      if (d < dist && d < range) {
+      if (
+        d < dist &&
+        d < range &&
+        (!f.discovery || discoveryReachable(this, f, p))
+      ) {
         nearest = f;
         dist = d;
       }
@@ -2186,13 +2193,18 @@ export class Adventure {
 
     for (const f of this.items) {
       const found = this.progress.found.includes(f.id);
-      f.group.visible = !found;
+      f.group.visible = f.discovery ? true : !found;
+      if (f.discovery) {
+        f.core.visible = !found;
+        f.marker.visible = !found;
+      }
       if (f.type === "mechanism") {
         f.marker.visible = f.stage === this.progress.stage;
         f.core.rotation.y = this.elapsed;
         f.core.visible = f.stage >= this.progress.stage;
       } else if (
         f.core &&
+        !f.discovery &&
         ![
           "field",
           "solar",

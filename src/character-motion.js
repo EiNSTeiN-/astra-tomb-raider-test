@@ -28,12 +28,13 @@ export function supportAt(game, x, z, maxY = Infinity) {
         o.supportable &&
         // Landing uses the same body footprint as horizontal collision so a
         // descent beside a cap or control cannot settle inside its volume.
-        stationContains(o, x, z, 0.4) &&
-        o.bounds.max.y <= maxY + 0.2 &&
-        o.bounds.max.y > height
+        stationContains(o, x, z, 0.4)
       ) {
-        height = o.bounds.max.y;
-        surface = o;
+        const top = o.surfaceHeight?.(x, z) ?? o.bounds.max.y;
+        if (top <= maxY + 0.2 && top > height) {
+          height = top;
+          surface = o;
+        }
       }
       continue;
     }

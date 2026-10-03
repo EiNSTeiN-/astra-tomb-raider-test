@@ -46,8 +46,11 @@ states. Optional discoveries, connecting routes, other elevated structures,
 water interiors and return paths still need systematic current coverage. The
 [discovery terrain pass](discovery-terrain.md) adds 285 reviewed observer views
 across 143 of the 144 discovery sites, seven additional volcanic-bank views and
-twelve direct crossings. Crystal note 4 remains without a clear observer view.
-The survey records the pickup construction and placement findings below.
+twelve direct crossings. That pass left crystal note 4 without a clear observer view.
+The survey records the pickup construction and placement findings below. The
+[grounded discovery pass](discovery-props.md) adds views and collection checks
+at all 144 sites, with regional construction and a repair to crystal note 4's
+wall overlap. Surrounding scenery and continuous routes remain under review.
 Earlier local milestone checks provide useful references, but do not replace
 this review. Each moving mechanism also needs inspection in its relevant open,
 closed and intermediate states.
@@ -86,8 +89,8 @@ adds 24 carved exterior faces and their detailed opening/clearance review.
 | VA-22 | A transient chapter-narration toast overlaps the resonance scene or controls soon after a reload. | The [dialog notice repair](dialog-notices.md) places narration below the title in the panel's text flow and preserves its element and expiry timer through dialog changes. Review covers 32 resonance views, 48 chapter layouts, notice expiry and six production tuning/save/reload cases. | Fixed |
 | VA-23 | The assisted snow bell-control view is obstructed by timber above the instrument. | The [follow-up](dialog-notices.md) identifies closed sanctuary doors in the setup: progress was assigned while the opening animation remained paused. Reloading that progress opens the doors; native keyboard inspection and camera rays confirm a clear view of all four bells. | Closed; capture-state error |
 | VA-24 | A jungle trunk has a narrow band of visibly stretched bark texture. | The [bark repair](jungle-bark.md) preserves source UV chart boundaries and restores root flares in both species and all three tiers. Atlas checks detect no padding crossings; 651 tests, 48 forest/trunk views, two assisted route legs and production keyboard/touch save checks pass. The added geometry and measured workload are documented. | Fixed; trunk atlas reduction |
-| VA-25 | Notes and caches repeat simple plinths and floating gold shapes across all chapters, often on sparse paving; the explorer can enter the plinth footprint. | The [discovery survey](discovery-terrain.md) reviews 285 views across 143 sites, plus seven volcanic-bank views and movement/collection setups. Add physical clearance, grounded pickup construction and regional surroundings while preserving discovery IDs, rewards and access. | Open |
-| VA-26 | Crystal note 4 has no clear observer view in fresh progress, and its centre is not walkable beside main court 4. | Both requested views and eight additional radial attempts are blocked in the [discovery survey](discovery-terrain.md). Inspect the actual obstacle overlap in open progress and verify native collection before classifying or repairing access. | Open; placement and coverage investigation |
+| VA-25 | Notes and caches repeat simple plinths and floating gold shapes across all chapters, often on sparse paving; the explorer can enter the plinth footprint. | The [grounded discovery pass](discovery-props.md) replaces all 144 pickups with regional construction and finite solids, preserves IDs/rewards, and verifies collection. Sparse surrounding paving, repeated arrangements and nearby clusters still need composition work. | Partly fixed; surroundings open |
+| VA-26 | Crystal note 4 has no clear observer view in fresh progress, and its centre is not walkable beside main court 4. | The [grounded discovery pass](discovery-props.md) confirms the old wall/plinth overlap and moves the note 7 m onto clear ground. Observer, direct interaction, native keyboard/touch collection, open-gate layout and full reload checks pass while preserving its ID and text. | Fixed; placement |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,

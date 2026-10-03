@@ -4,13 +4,12 @@ import * as THREE from "three";
 import { updateAtmosphere } from "../src/atmosphere.js";
 
 export function discoveryView(game, index, angle = 0) {
-  const room = game.map.sideRooms[index],
-    feature = game.items.find(
+  const feature = game.items.find(
       (f) => f.id === `${index < 12 ? "note" : "treasure"}-${index}`,
     ),
-    x = room.x * 7,
-    z = room.z * 7,
-    target = new THREE.Vector3(x, game.groundHeight(x, z) + 1, z);
+    x = feature.x * 7,
+    z = feature.z * 7,
+    target = new THREE.Vector3(x, game.groundHeight(x, z) + 1.45, z);
   let eye;
   for (const radius of [12, 10, 8, 6]) {
     for (const offset of [0, 0.2, -0.2, 0.4, -0.4]) {

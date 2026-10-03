@@ -655,3 +655,12 @@ credited environment materials and introduces no external assets, recordings
 or dependencies. The three documentation images are actual game captures
 converted losslessly to WebP, with decoded pixel identity checked against their
 source captures.
+
+The [grounded discovery pass](discovery-props.md) adds original regional reading
+stands, scrolls, books, tablets, cache containers and their fittings in
+`src/discovery-props.js`, along with original placement and mesh-support code.
+It reuses the already credited masonry, monastery timber/roof maps, camp
+materials and project bronze shader. No external models, images, recordings or
+dependencies were added. Its four documentation images are actual game renders
+converted losslessly to WebP, with decoded pixel identity checked against the
+source captures.

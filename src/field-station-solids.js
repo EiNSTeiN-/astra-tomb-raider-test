@@ -24,6 +24,7 @@ export function stationSolid(
     fieldStation: feature.id,
     radius: options.radius,
     supportable: options.support !== false,
+    surfaceHeight: options.surfaceHeight,
     node: options.node,
     bounds: {
       min: { x: cx - w / 2, y: cy - h / 2, z: cz - d / 2 },
@@ -46,7 +47,7 @@ export function stationContains(solid, x, z, padding = 0) {
 export function stationBlocked(solid, x, y, z, clearance = 1.8, padding = 0.4) {
   return (
     stationContains(solid, x, z, padding) &&
-    y < solid.bounds.max.y - 0.015 &&
+    y < (solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y) - 0.015 &&
     y + clearance > solid.bounds.min.y + 0.015
   );
 }
