@@ -14,6 +14,7 @@ import {
 } from "../src/sanctuary-gates.js";
 import { GATE_DESIGNS, gateLeafBounds } from "../src/gate-designs.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
+import { buildChamberWall } from "../src/chamber-walls.js";
 import {
   skyGateWallGeometry,
   hingeStrapGeometry,
@@ -182,12 +183,12 @@ test("coastal sluice footings meet the terrain across their full width and prote
   assert.ok(immersed >= 5, "all five sounding wells exercise a submerged jamb");
 });
 
-test("all 129 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
+test("all 180 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
   const ray = new THREE.Raycaster();
   let walls = 0,
     niches = 0,
     feet = 0;
-  for (const index of [0, 3, 4, 6, 7]) {
+  for (const index of [0, 1, 2, 3, 4, 6, 7]) {
     const { game } = fixture(t, index, null, true);
     game.world.updateMatrixWorld(true);
     for (const gate of game.fieldGates) {
@@ -252,9 +253,62 @@ test("all 129 regional chamber walls have sealed deep recesses and buried full-w
       }
     }
   }
-  assert.equal(walls, 129);
-  assert.ok(niches > 300);
-  assert.equal(feet, 1935);
+  assert.equal(walls, 180);
+  assert.ok(niches > 400);
+  assert.equal(feet, 2700);
+});
+
+test("monastery blind-bay lattice is seated against its plaster backing", () => {
+  const material = () =>
+      new THREE.MeshStandardMaterial({ side: THREE.DoubleSide }),
+    m = Object.fromEntries(
+      ["wall", "trim", "wood", "snow", "metal", "chamberInset"].map((name) => [
+        name,
+        material(),
+      ]),
+    ),
+    gate = { root: new THREE.Group(), stage: 0, design: GATE_DESIGNS.snow },
+    game = { level: LEVELS[2] },
+    wall = buildChamberWall(game, gate, m, {
+      length: 13.8,
+      side: 1,
+      floor: -0.18,
+    }),
+    matrix = new THREE.Matrix4().makeRotationY(wall.angle),
+    ray = new THREE.Raycaster();
+  matrix.setPosition(new THREE.Vector3(...wall.position));
+  gate.root.updateMatrixWorld(true);
+  const inverse = matrix.clone().invert(),
+    direction = new THREE.Vector3(0, 0, -1).transformDirection(matrix),
+    wood = gate.root.children.filter((mesh) => mesh.material === m.wood),
+    plaster = gate.root.children.filter(
+      (mesh) => mesh.material === m.chamberInset,
+    );
+  for (const cx of wall.bays)
+    for (const offset of [-0.66, 0, 0.66]) {
+      ray.set(
+        new THREE.Vector3(cx + offset * wall.radius, 2.35, 2).applyMatrix4(
+          matrix,
+        ),
+        direction,
+      );
+      const panel = ray.intersectObjects(plaster)[0],
+        lattice = ray.intersectObjects(wood);
+      assert(
+        panel && lattice.length >= 2,
+        "rendered plaster and both lattice faces exist",
+      );
+      const backingZ = panel.point.clone().applyMatrix4(inverse).z;
+      assert(
+        lattice.some((hit) => {
+          const z = hit.point.clone().applyMatrix4(inverse).z;
+          return z <= backingZ && z > backingZ - 0.15;
+        }),
+        "wood embeds in plaster rather than floating in front of it",
+      );
+    }
+  gate.root.traverse((mesh) => mesh.geometry?.dispose());
+  Object.values(m).forEach((mat) => mat.dispose());
 });
 
 test("hinged collision bounds contain the transformed door corners throughout the inward swing", () => {
@@ -277,10 +331,10 @@ test("hinged collision bounds contain the transformed door corners throughout th
     }
 });
 
-test("open bronze leaves never show through the exterior side-wall recesses", (t) => {
+test("open leaves never show through the exterior side-wall recesses", (t) => {
   const ray = new THREE.Raycaster();
   let rays = 0;
-  for (const index of [3, 7]) {
+  for (const index of [2, 3, 7]) {
     const { game } = fixture(t, index, null, true);
     for (const gate of game.fieldGates) {
       for (const amount of [0, 0.5, 1]) {

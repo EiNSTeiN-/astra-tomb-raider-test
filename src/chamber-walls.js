@@ -6,9 +6,13 @@ import {
   carvedPanelGeometry,
 } from "./temple-architecture.js";
 import { vaultStoneGeometry, shellReliefGeometry } from "./palace-geometry.js";
+import { solarPanelGeometry } from "./desert-architecture.js";
+import { timberGeometry } from "./monastery-architecture.js";
 
 export const CHAMBER_WALL_BIOMES = new Set([
   "jungle",
+  "desert",
+  "snow",
   "water",
   "volcano",
   "crystal",
@@ -17,22 +21,20 @@ export const CHAMBER_WALL_BIOMES = new Set([
 
 export function chamberWallPlan(biome, length, stage, side) {
   const variant = (((stage + side + 3) % 3) + 3) % 3;
-  const count =
-    biome === "eclipse" || biome === "jungle"
-      ? 2 + (variant === 1 ? 1 : 0)
-      : 3 + (variant === 1 ? 1 : 0);
+  const count = ["eclipse", "jungle", "desert"].includes(biome)
+    ? 2 + (variant === 1 ? 1 : 0)
+    : 3 + (variant === 1 ? 1 : 0);
   const step = length / count;
-  const radius =
-    biome === "eclipse" || biome === "jungle"
-      ? Math.min(1.6, step * 0.29)
-      : Math.min(1.22, step * 0.27);
+  const radius = ["eclipse", "jungle", "desert"].includes(biome)
+    ? Math.min(1.6, step * 0.29)
+    : Math.min(1.22, step * 0.27);
   const bottom = biome === "eclipse" ? 3.7 - radius : 1.2;
   const top =
     biome === "water"
       ? 3.8 + radius
       : biome === "eclipse"
         ? 3.7 + radius
-        : biome === "crystal" || biome === "jungle"
+        : ["crystal", "jungle", "desert"].includes(biome)
           ? 5.7
           : 5.35;
   return {
@@ -53,6 +55,20 @@ export function chamberWallPlan(biome, length, stage, side) {
 // use that same polygon for the masonry and inset; joints cannot expose sky.
 function aperture(plan) {
   const { biome, radius: r, bottom, top } = plan;
+  if (biome === "desert")
+    return [
+      [-r, bottom],
+      [r, bottom],
+      [r * 0.78, top],
+      [-r * 0.78, top],
+    ];
+  if (biome === "snow")
+    return [
+      [-r, bottom],
+      [r, bottom],
+      [r, top],
+      [-r, top],
+    ];
   if (biome === "jungle") {
     const right = [
       [r, bottom],
@@ -137,6 +153,10 @@ function prism(points, depth) {
 
 function carvedPlaque(w, h, variant, segments) {
   const face = carvedPanelGeometry(w, h, variant, segments).scale(1, 1, 0.4);
+  return closedPlaque(face, w, h, segments);
+}
+
+function closedPlaque(face, w, h, segments) {
   face.deleteAttribute("color");
   const [nx, ny] = segments,
     position = face.attributes.position,
@@ -208,7 +228,15 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
     return mesh;
   };
   const block = (w, h, d, mat, x, y, z) =>
-    add(stoneBlockGeometry(w, h, d, ++seed, 0.025), mat, x, y, z);
+    add(
+      mat === m.wood && m.wood
+        ? timberGeometry(w, h, d, ++seed)
+        : stoneBlockGeometry(w, h, d, ++seed, 0.025),
+      mat,
+      x,
+      y,
+      z,
+    );
   const bar = (a, b, width, mat, z) => {
     const dx = b[0] - a[0],
       dy = b[1] - a[1];
@@ -306,8 +334,9 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
       cx = (x + end) / 2;
     block(end - x - 0.015, 0.22, 1.16, m.trim, cx, 0.14, 0.08);
     block(end - x - 0.015, 0.16, 0.34, m.trim, cx, 1.08, 0.43);
-    block(end - x - 0.015, 0.2, 0.5, m.trim, cx, 6.48, 0.49);
-    block(end - x - 0.015, 0.13, 0.38, m.trim, cx, 6.76, 0.48);
+    const crown = plan.biome === "snow" ? m.wood : m.trim;
+    block(end - x - 0.015, 0.2, 0.5, crown, cx, 6.48, 0.49);
+    block(end - x - 0.015, 0.13, 0.38, crown, cx, 6.76, 0.48);
   }
   for (const [i, cx] of plan.bays.entries()) {
     const { radius: r, biome, bottom, top } = plan;
@@ -360,6 +389,116 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
         false,
       );
       block(r * 1.88, 0.16, 0.4, m.trim, cx, 1.22, 0.45);
+    } else if (biome === "desert") {
+      // Splayed jambs and a layered lintel echo the solar temple's pylons.
+      // The closed carving joins the inset backing instead of floating in it.
+      for (const sign of [-1, 1]) {
+        const low = [cx + sign * (r + 0.15), bottom],
+          high = [cx + sign * (r * 0.78 + 0.15), top];
+        bar(low, high, 0.3, m.trim, 0.49);
+        for (let row = 0; row < 5; row++) {
+          const t = (row + 0.5) / 5,
+            px = low[0] + (high[0] - low[0]) * t;
+          block(
+            0.32,
+            0.075,
+            0.32,
+            m.trim,
+            px,
+            bottom + (top - bottom) * t,
+            0.49,
+          );
+        }
+        block(0.55, 0.18, 0.43, m.trim, low[0], bottom + 0.04, 0.47);
+      }
+      for (const [width, y, depth] of [
+        [r * 1.9 + 0.38, top + 0.05, 0.39],
+        [r * 2.08 + 0.4, top + 0.25, 0.46],
+        [r * 2.18 + 0.4, top + 0.43, 0.48],
+      ])
+        block(width, 0.16, depth, m.trim, cx, y, 0.45);
+      add(
+        closedPlaque(
+          solarPanelGeometry(r * 1.45, 2.45, gate.stage + i),
+          r * 1.45,
+          2.45,
+          [40, 40],
+        ),
+        m.trim,
+        cx,
+        1.54,
+        0.015,
+        false,
+      );
+      block(r * 1.8, 0.17, 0.39, m.trim, cx, bottom + 0.02, 0.46);
+      // Short carved marks sit in a joined frieze above the solar medallion.
+      block(r * 1.4, 0.4, 0.07, m.trim, cx, 4.67, -0.005);
+      for (let mark = -2; mark <= 2; mark++) {
+        const px = cx + mark * r * 0.235;
+        block(0.036, 0.21, 0.028, m.dark, px, 4.67, 0.042);
+        block(
+          0.115,
+          0.025,
+          0.028,
+          m.dark,
+          px,
+          4.63 + ((mark + i) % 2) * 0.05,
+          0.042,
+        );
+      }
+    } else if (biome === "snow") {
+      // Blind timber-framed bays have sealed plaster backs. They echo nearby
+      // galleries without adding inaccessible rooms or open window voids.
+      for (const sign of [-1, 1]) {
+        const px = cx + sign * (r + 0.13);
+        block(
+          0.23,
+          top - bottom + 0.12,
+          0.29,
+          m.wood,
+          px,
+          (top + bottom) / 2,
+          0.48,
+        );
+        block(0.37, 0.18, 0.38, m.trim, px, bottom + 0.01, 0.46);
+        block(0.33, 0.14, 0.37, m.wood, px, top - 0.08, 0.47);
+        bar(
+          [px, top - 0.63],
+          [cx + sign * (r - 0.28), top + 0.16],
+          0.15,
+          m.wood,
+          0.47,
+        );
+      }
+      block(r * 2 + 0.48, 0.22, 0.34, m.wood, cx, top + 0.06, 0.49);
+      block(r * 2 + 0.43, 0.16, 0.33, m.wood, cx, bottom + 0.02, 0.48);
+      block(r * 2 + 0.46, 0.05, 0.35, m.snow, cx, bottom + 0.123, 0.48);
+      // Lattice bars sit against the plaster backing and embed their ends
+      // in the masonry around the bay, leaving its recess visible between.
+      const recessed = -0.04 + insetOffset;
+      for (const dx of [-0.66, 0, 0.66])
+        block(
+          0.07,
+          top - bottom + 0.1,
+          0.1,
+          m.wood,
+          cx + dx * r,
+          (top + bottom) / 2,
+          recessed,
+        );
+      for (const y of [bottom + 0.21, 3.13, top - 0.17])
+        block(r * 2 + 0.18, 0.1, 0.1, m.wood, cx, y, recessed);
+      for (const sign of [-1, 1])
+        for (const y of [bottom + 0.24, top - 0.18])
+          block(
+            0.14,
+            0.055,
+            0.038,
+            m.metal,
+            cx + sign * r * 0.66,
+            y,
+            recessed + 0.06,
+          );
     } else if (biome === "water") {
       for (let j = 0; j < 13; j++)
         add(
@@ -511,18 +650,19 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
     // Relief on the inner rear face is shallow enough to preserve chamber
     // working space. Side walls are left clear of the inward-swinging leaves.
     if (side === 0) {
+      const interiorTrim = biome === "snow" ? m.wood : m.trim;
       const inner = contour.map(([x, y]) => [
         cx + x * 0.72,
         1.45 + (y - 1.2) * 0.76,
       ]);
       add(prism(inner, 0.055), m.chamberInset, 0, 0, -0.438);
       for (let j = 0; j < inner.length; j++)
-        bar(inner[j], inner[(j + 1) % inner.length], 0.12, m.trim, -0.47);
+        bar(inner[j], inner[(j + 1) % inner.length], 0.12, interiorTrim, -0.47);
       block(
         r * 1.5,
         0.13,
         0.2,
-        m.trim,
+        interiorTrim,
         cx,
         1.41 + (bottom - 1.2) * 0.76,
         -0.47,

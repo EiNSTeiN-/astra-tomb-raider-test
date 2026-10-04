@@ -678,3 +678,10 @@ timber, mosaic and paving maps, camp materials and project bronze shader. No
 external assets, recordings or dependencies were introduced. The four
 documentation images are actual final game captures converted losslessly to
 WebP, with decoded pixel identity checked against their source captures.
+
+The [solar and monastery chamber walls](desert-snow-chambers.md) extend original
+project geometry in `src/chamber-walls.js`, reusing the existing solar relief
+and timber builders. The sandstone, plaster, timber, temple stone, snow and
+bronze retain their existing attribution above. No external assets, recordings
+or dependencies were added. Four actual before/after game captures are converted
+losslessly to WebP, with matching observer positions and decoded pixels checked.

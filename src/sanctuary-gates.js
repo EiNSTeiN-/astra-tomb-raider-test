@@ -88,11 +88,15 @@ export function gateMaterials(level) {
           ? 0x85aaa6
           : level.biome === "jungle"
             ? 0x858c68
-            : level.biome === "volcano"
-              ? 0x454b49
-              : level.biome === "crystal"
-                ? 0x55697d
-                : 0x4d6979,
+            : level.biome === "desert"
+              ? 0x9d8865
+              : level.biome === "snow"
+                ? 0xc9c6b7
+                : level.biome === "volcano"
+                  ? 0x454b49
+                  : level.biome === "crystal"
+                    ? 0x55697d
+                    : 0x4d6979,
       )
     : null;
   if (chamberInset) {
