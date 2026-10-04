@@ -9,8 +9,11 @@ and no teleporting between route waypoints. The survey was captured at commit
 Seven chapters complete both legs at health 100. Their **14 legs cover 2,341.6 m**
 of measured character travel and **164 reviewed High captures** at 1280 × 800.
 The path finder does not find a complete ground route for the sky chapter. Its
-raised bridges need a traversal-aware review; this result alone does not show
-that its playable route is blocked.
+raised bridges needed a traversal-aware review; this result alone did not show
+that its playable route was blocked. The later [sky continuation](sky-first-route.md)
+completes the lookout, return cable, both first-sector bridges and the approach
+to the wind court, then returns to arrival. Its 562.4 m and 63 High captures are
+separate from the original seven-chapter figures below.
 
 | Chapter | Outward travel | Return travel | Reviewed captures |
 | --- | ---: | ---: | ---: |

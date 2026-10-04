@@ -12,6 +12,7 @@ import {
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { Soundscape } from "../src/audio.js";
+import { CLIMBING_STYLES } from "../src/traversal-art.js";
 
 function world(t, level) {
   t.mock.method(
@@ -139,6 +140,69 @@ test("all anchor yokes track the real pendulum and leave the rope swept path cle
         );
       }
   }
+});
+
+test("climbing pier wall and coping joints have continuous bearing behind their recessed edges", (t) => {
+  const misses = [];
+  let rays = 0,
+    wallRays = 0;
+  for (const level of LEVELS) {
+    const g = world(t, level),
+      style = CLIMBING_STYLES[level.biome],
+      bands = style.bands,
+      ray = new THREE.Raycaster();
+    for (const c of g.traversalCourses)
+      for (const l of c.ledges) {
+        const height = c.art.piers[l.index].height,
+          wallHeight = height - 0.18 - bands * 0.13,
+          rows = Math.min(10, Math.max(1, Math.ceil(wallHeight / style.row))),
+          recess = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
+        const joints = Array.from({ length: bands + 1 }, (_, i) => ({
+          y: l.y - 0.18 - i * 0.13,
+          offsets: [0.1, 0.14],
+          kind: `coping ${i}`,
+        }));
+        for (let row = 1; row < rows; row++) {
+          const inset = Math.max(recess(row - 1), recess(row));
+          joints.push({
+            y: l.y - height + (row * wallHeight) / rows,
+            offsets: [inset + 0.03, inset + 0.06],
+            kind: `wall ${row}`,
+          });
+        }
+        for (const joint of joints)
+          for (const axis of ["x", "z"])
+            for (const side of [-1, 1])
+              for (const offset of joint.offsets) {
+                const across = axis === "x" ? "z" : "x",
+                  half = axis === "x" ? l.w : l.d,
+                  acrossHalf = axis === "x" ? l.d : l.w,
+                  origin = new THREE.Vector3(l.x, joint.y, l.z),
+                  direction = new THREE.Vector3();
+                origin[axis] += half + 0.1;
+                origin[across] += side * (acrossHalf - offset);
+                direction[axis] = -1;
+                ray.set(origin, direction);
+                ray.far = half * 2 + 0.2;
+                if (joint.kind.startsWith("wall")) wallRays++;
+                else rays++;
+                if (!ray.intersectObject(c.art.fixed, true).length)
+                  misses.push(
+                    `${level.id}/${c.id}/${l.index}: ${joint.kind}, ${axis}, ${side}, ${offset}`,
+                  );
+              }
+      }
+  }
+  assert.ok(wallRays > 5000, `${wallRays} wall bearing rays`);
+  assert.equal(rays, 3360, `${rays} coping bearing rays`);
+  t.diagnostic(
+    `${wallRays} wall and ${rays} coping bearing rays across 105 piers`,
+  );
+  assert.equal(
+    misses.length,
+    0,
+    `${misses.length}/${rays + wallRays} open joints: ${misses.slice(0, 6).join("; ")}`,
+  );
 });
 
 test("anchor sound uses world coordinates, follows speed, and is silent at rest or after a chapter change", (t) => {

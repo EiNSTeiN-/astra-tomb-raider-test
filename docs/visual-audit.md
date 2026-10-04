@@ -60,9 +60,12 @@ this review. Each moving mechanism also needs inspection in its relevant open,
 closed and intermediate states.
 
 The [initial approach/return survey](initial-court-routes.md) adds 164 reviewed
-High views from 14 continuous assisted legs in seven chapters. The sky ground
-search is incomplete and needs a traversal-aware continuation. The survey
-records VA-15 through VA-17 below. The subsequent [jungle chamber pass](jungle-chambers.md)
+High views from 14 continuous assisted legs in seven chapters. The original sky
+ground search was incomplete; the [traversal-aware continuation](sky-first-route.md)
+adds a 562.4 m approach/return run and 63 High views through the lookout, cable,
+first-sector bridges and wind-court approach. Its joint repair adds 84 High/Low
+close observer views and native movement, field interaction and reload checks.
+The original survey records VA-15 through VA-17 below. The subsequent [jungle chamber pass](jungle-chambers.md)
 adds 24 carved exterior faces and their detailed opening/clearance review.
 The [solar and monastery chambers](desert-snow-chambers.md) add another 51
 regional exterior faces, with 104 reviewed wall/interior/door-state views,
@@ -104,6 +107,7 @@ recovery. The broader composition target remains open.
 | VA-26 | Crystal note 4 has no clear observer view in fresh progress, and its centre is not walkable beside main court 4. | The [grounded discovery pass](discovery-props.md) confirms the old wall/plinth overlap and moves the note 7 m onto clear ground. Observer, direct interaction, native keyboard/touch collection, open-gate layout and full reload checks pass while preserving its ID and text. | Fixed; placement |
 | VA-27 | Raised bell feet extend beyond their plinths; the outer bell clips a post, rope falls pass through pulley centres and nameplates float beneath the loops. | The [bell-rack pass](bell-racks.md) widens seven supported landings, fits eight timber frames and suspension assemblies, and joins moving ropes and labels. Rendered support and swing tests, 70 final views, local circulation, positional audio and native keyboard/touch reload checks pass. | Fixed; bell construction |
 | VA-28 | Restoring occupied generic raised feet loses the earned elevation before nearby arrival recovery. | The [native occupied-save check](bell-racks.md) reproduces the height loss. Generic restoration now searches at the supported saved elevation first, retains clear feet exactly and rejects unsupported air. Regression and six native occupied recoveries pass, followed by exact reloads apart from timestamps. | Fixed; raised arrival recovery |
+| VA-29 | A close sky route view exposes daylight through an outer climbing-pier wall joint; coping joints also lack outer bearing. | The [pier joint repair](sky-first-route.md) fits stepped wall backing and a continuous inset coping bed at all 105 piers. All 9,192 sampled joint rays, 695 tests, 63 continuous-route views, 84 High/Low close-ups and native keyboard/touch save checks pass. Broader sky composition remains under review. | Fixed; pier joint backing |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,

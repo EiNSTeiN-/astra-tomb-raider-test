@@ -161,17 +161,6 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       height = top - ground,
       width = ledge.w * 2,
       depth = ledge.d * 2;
-    const core = block(
-      width - 0.34,
-      height - 0.18,
-      depth - 0.34,
-      ledge.x,
-      ground + (height - 0.18) / 2,
-      ledge.z,
-      materials.stone,
-      fixed,
-      0.7,
-    );
     // One full pier proxy preserves the camera's solid envelope through joints.
     const proxy = new THREE.Mesh(
       new THREE.BoxGeometry(width, height, depth),
@@ -186,9 +175,32 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       wallHeight = height - capHeight,
       rows = Math.min(10, Math.max(1, Math.ceil(wallHeight / style.row))),
       rowH = wallHeight / rows;
+    const recessAt = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
+    // Fit the backing to the widened foot/head courses and recessed middle.
+    // At most three closed blocks carry every horizontal mortar joint; using
+    // one narrow centre core left the ends of the wider joints open to the sky.
+    for (let first = 0; first < rows;) {
+      const recess = recessAt(first);
+      let end = first + 1;
+      while (end < rows && recessAt(end) === recess) end++;
+      mesh(
+        new THREE.BoxGeometry(
+          width - recess * 2 - 0.01,
+          (end - first) * rowH + 0.02,
+          depth - recess * 2 - 0.01,
+        ),
+        materials.stone,
+        ledge.x,
+        ground + ((first + end) * rowH) / 2,
+        ledge.z,
+        fixed,
+        0.7,
+      );
+      first = end;
+    }
     for (let row = 0; row < rows; row++) {
       const y = ground + (row + 0.5) * rowH,
-        recess = row > 1 && row < rows - 2 ? style.inset : 0.03;
+        recess = recessAt(row);
       for (let face = 0; face < 4; face++) {
         const along = face % 2 ? depth : width,
           count = Math.ceil(along / style.block),
@@ -236,6 +248,24 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         0.85 + band * 0.06,
       );
     }
+    // Chamfered coping courses need bearing at their outer edges as well as
+    // the recessed central core. A continuous inset bed closes the sightline
+    // through each joint without changing the visible stepped profile.
+    const bearingInset = (style.bands - 1) * 0.055 + 0.01,
+      bearingHeight = style.bands * 0.13;
+    mesh(
+      new THREE.BoxGeometry(
+        width - bearingInset,
+        bearingHeight + 0.08,
+        depth - bearingInset,
+      ),
+      materials.stone,
+      ledge.x,
+      top - 0.18 - bearingHeight / 2,
+      ledge.z,
+      fixed,
+      0.7,
+    );
     // The final slab has an exact flat top at the physical support height.
     block(
       width,

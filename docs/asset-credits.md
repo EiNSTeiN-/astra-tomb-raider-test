@@ -694,3 +694,10 @@ shader, rope material and original bell synthesis. No external assets,
 recordings or dependencies were added. The four comparison images are actual
 High game captures converted losslessly to WebP, with matching observer
 positions and decoded pixel identity checked.
+
+The [climbing-pier joint repair and cloud-citadel route review](sky-first-route.md)
+use original project backing geometry in `src/traversal-art.js` and the existing
+credited regional masonry materials. The route retains the existing original
+hoist, wind synthesis and sky score. No external assets, recordings, music or
+dependencies were added. The four documentation images are actual running-game
+captures converted losslessly to WebP.
