@@ -517,6 +517,112 @@ test("fitted gate walls remain solid across niche heads and retain deep stone ba
   material.dispose();
 });
 
+test("all 27 cloud chamber faces have varied sealed recesses, grounded bands and protected outer camera approaches", (t) => {
+  const { game } = fixture(t, 5, null, true),
+    ray = new THREE.Raycaster(),
+    arrangements = new Set();
+  game.world.updateMatrixWorld(true);
+  let walls = 0,
+    niches = 0,
+    footings = 0;
+  for (const gate of game.fieldGates) {
+    assert.equal(gate.walls.length, 3);
+    for (const wall of gate.walls) {
+      walls++;
+      arrangements.add(wall.plan.niches.length);
+      const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
+      matrix.setPosition(
+        new THREE.Vector3(...wall.position).add(gate.root.position),
+      );
+      const point = (x, y, z) =>
+          new THREE.Vector3(x, y, z).applyMatrix4(matrix),
+        direction = new THREE.Vector3(0, 0, -1).transformDirection(matrix);
+      for (const niche of wall.plan.niches) {
+        niches++;
+        for (const f of [0.27, 0.52, 0.76]) {
+          ray.set(
+            point(
+              niche.x + niche.head * 0.76,
+              niche.bottom + (niche.top - niche.bottom) * f,
+              2,
+            ),
+            direction,
+          );
+          const hit = ray.intersectObject(gate.root, true)[0];
+          assert.ok(
+            hit &&
+              hit.distance > (niche.backing > 0 ? 1.8 : 2.04) &&
+              hit.distance < 2.5,
+            "deep sealed backing remains beside the inset carving",
+          );
+        }
+      }
+      for (const x of [-0.47, -0.22, 0, 0.22, 0.47])
+        for (const z of [-0.7, 0, 0.7]) {
+          const p = point(x * wall.length, -30, z);
+          ray.set(p, new THREE.Vector3(0, 1, 0));
+          const hit = ray.intersectObject(gate.root, true)[0];
+          assert.ok(
+            hit && hit.point.y < game.groundHeight(p.x, p.z) - 0.06,
+            "buried support under the full band footprint",
+          );
+          footings++;
+        }
+      const eye = point(wall.length * 0.2, 6.63, 3),
+        target = point(wall.length * 0.2, 6.63, 0.54);
+      assert.ok(
+        game.cameraSurfaces.entry(eye, target, 0) < 1,
+        "camera envelope catches the outer band",
+      );
+    }
+  }
+  assert.deepEqual([...arrangements].sort(), [2, 3, 4]);
+  assert.equal(walls, 27);
+  assert.equal(niches, 81);
+  assert.equal(footings, 405);
+});
+
+test("folded cloud doors remain hidden behind the exterior blind-bay backs", (t) => {
+  const { game } = fixture(t, 5, { completed: true }, true),
+    ray = new THREE.Raycaster();
+  game.world.updateMatrixWorld(true);
+  let samples = 0;
+  for (const gate of game.fieldGates)
+    for (const wall of gate.walls) {
+      const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
+      matrix.setPosition(
+        new THREE.Vector3(...wall.position).add(gate.root.position),
+      );
+      const point = (x, y, z) =>
+          new THREE.Vector3(x, y, z).applyMatrix4(matrix),
+        direction = new THREE.Vector3(0, 0, -1).transformDirection(matrix);
+      for (const niche of wall.plan.niches)
+        for (const dx of [-0.6, 0.05, 0.6])
+          for (const f of [0.25, 0.5, 0.75]) {
+            ray.set(
+              point(
+                niche.x + niche.head * dx,
+                niche.bottom + (niche.top - niche.bottom) * f,
+                2,
+              ),
+              direction,
+            );
+            const hit = ray.intersectObject(gate.root, true)[0];
+            assert.ok(hit, "blind bay is sealed");
+            let part = hit.object;
+            while (part && !gate.leaves.some((l) => l.group === part))
+              part = part.parent;
+            assert.equal(
+              part,
+              null,
+              `folded door shows through ${gate.stage}/${wall.side}/${niche.x}`,
+            );
+            samples++;
+          }
+    }
+  assert.equal(samples, 729);
+});
+
 test("sky hinges retain a clear pin bore and outward mirrored straps, and batched materials follow their leaves", (t) => {
   const barrel = hingeBarrelGeometry(),
     material = new THREE.MeshStandardMaterial(),

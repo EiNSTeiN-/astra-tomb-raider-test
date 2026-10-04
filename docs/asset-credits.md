@@ -701,3 +701,11 @@ credited regional masonry materials. The route retains the existing original
 hoist, wind synthesis and sky score. No external assets, recordings, music or
 dependencies were added. The four documentation images are actual running-game
 captures converted losslessly to WebP.
+
+The [cloud chamber walls](sky-chamber-walls.md) add original jointed bands,
+recessed tablets and bird, crosswind and terrace reliefs in
+`src/sky-chamber-walls.js` and extend the project's fitted stone wall geometry.
+They reuse the existing credited rock and temple maps, weathered wind bronze,
+wind synthesis and sky score. No external assets, recordings, music or
+dependencies were added. The four documentation images are actual game captures
+converted losslessly to WebP, with normalized decoded pixel identity checked.

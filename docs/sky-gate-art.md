@@ -1,5 +1,9 @@
 # Cloud-city wind-screen gates
 
+This page records the original gate-art milestone. The later
+[cloud chamber walls](sky-chamber-walls.md) vary the fitted exterior faces and
+verify the folded-door backing, footings, nearby routes and native reloads.
+
 The sky chapter's nine mechanism chambers now use fitted stone walls, recessed niches, timber lintels and a corbelled crown that matches the surrounding citadels. Paired timber screens have pitched laths, framed panels, diagonal braces, tapered bronze straps, washers, bolts and wooden pegs. Bronze wind emblems mark the headers.
 
 The L-shaped jambs expose the hinge recess while retaining the established chamber footprint. Fixed and moving hinge barrels share the door axis, with a clear bore around the pin. Recessed backing closes the masonry joints. Crossrails sit beneath the hinge straps so every bolt has timber behind it; brace ends meet the outer frame and have bronze shoes.

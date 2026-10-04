@@ -22,13 +22,13 @@ import { buildSluiceFoundation } from "./sluice-foundations.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { CHAMBER_WALL_BIOMES, buildChamberWall } from "./chamber-walls.js";
 import {
-  skyGateWallGeometry,
   skyTimberSurface,
   weatherGateTimber,
   buildSkyGateLeaf,
   buildSkyGateJamb,
   buildSkyGateCrown,
 } from "./sky-gate-art.js";
+import { buildSkyChamberWall } from "./sky-chamber-walls.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -244,6 +244,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     return mesh;
   };
   const regionalWalls = CHAMBER_WALL_BIOMES.has(game.level.biome);
+  const fittedSkyWalls = design.panel === "lattice";
   gate.walls = [];
   // Regional chambers retain the gate's footprint and working space.
   for (const side of [-1, 0, 1]) {
@@ -256,7 +257,7 @@ export function buildSanctuaryGate(game, feature, materials) {
       floor = Math.min(floor, game.groundHeight(x + p.x, z + p.z) - y - 0.12);
     }
     const center = point(0);
-    if (regionalWalls)
+    if (regionalWalls || fittedSkyWalls)
       floor = Math.min(
         floor,
         footprintMinimum(
@@ -288,38 +289,30 @@ export function buildSanctuaryGate(game, feature, materials) {
         );
       else
         block(
-          back ? length : regionalWalls ? 1.6 : 0.9,
+          back ? length : regionalWalls || fittedSkyWalls ? 1.6 : 0.9,
           -floor + 0.13,
-          back ? (regionalWalls ? 1.6 : 0.9) : length,
+          back ? (regionalWalls || fittedSkyWalls ? 1.6 : 0.9) : length,
           m.trim,
           center.x,
           (floor + 0.13) / 2,
           center.z,
           root,
-          regionalWalls,
+          regionalWalls || fittedSkyWalls,
         );
     }
     if (design.panel === "lattice") {
-      const angle = back ? Math.PI : (side * Math.PI) / 2;
-      const wall = add(
-        skyGateWallGeometry(length, floor, serial++),
-        m.wall,
-        center.x,
-        0,
-        center.z,
+      gate.walls.push(
+        buildSkyChamberWall({
+          gate,
+          side,
+          length,
+          floor,
+          m,
+          add,
+          block,
+          seed: serial++,
+        }),
       );
-      wall.rotation.y = angle;
-      for (const offset of wall.geometry.userData.niches) {
-        const nx = center.x + offset * Math.cos(angle),
-          nz = center.z - offset * Math.sin(angle);
-        for (const [height, width, py] of [
-          [0.2, 1.45, 1.65],
-          [0.28, 1.45, 4.78],
-        ]) {
-          const stone = block(width, height, 0.96, m.trim, nx, py, nz);
-          stone.rotation.y = angle;
-        }
-      }
     } else if (regionalWalls)
       gate.walls.push(buildChamberWall(game, gate, m, { length, side, floor }));
     else
@@ -370,12 +363,12 @@ export function buildSanctuaryGate(game, feature, materials) {
       );
     if (!regionalWalls)
       cameraBox(
-        back ? length : 1.0,
+        back ? length : fittedSkyWalls ? 1.3 : 1.0,
         7.38 - floor,
-        back ? 1.0 : length,
-        center.x,
+        back ? (fittedSkyWalls ? 1.3 : 1.0) : length,
+        center.x + (fittedSkyWalls ? side * 0.15 : 0),
         (floor + 7.38) / 2,
-        center.z,
+        center.z - (fittedSkyWalls && back ? 0.15 : 0),
       );
     game.obstacles.push({
       x: x + center.x,

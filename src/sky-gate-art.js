@@ -2,57 +2,97 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { fittedWallGeometry } from "./sky-masonry.js";
 
-export function skyGateWallGeometry(length, floor, seed) {
+export function skyChamberWallPlan(length, stage = 0, side = 0) {
+  const variant = (((stage + side + 3) % 3) + 3) % 3;
+  const count = [2, 3, 4][variant],
+    radius = [1.08, 0.68, 0.57][variant],
+    bottom = [1.35, 1.6, 1.3][variant],
+    top = [5.1, 4.7, 4.15][variant];
+  return {
+    variant,
+    bottom,
+    top,
+    radius,
+    niches: Array.from({ length: count }, (_, i) => ({
+      x: ((i + 0.5) * length) / count - length / 2,
+      bottom,
+      top,
+      radius,
+      head: radius * 0.73,
+      // A fully folded leaf occupies the front half of each side wall. Keep
+      // its exterior blind-bay backing outside the timber and rear brace.
+      backing:
+        side !== 0 &&
+        -side * (((i + 0.5) * length) / count - length / 2) + radius > 0.15
+          ? 0.02
+          : -0.32,
+    })),
+  };
+}
+
+export function skyGateWallGeometry(length, floor, seed, plan = null) {
   const parts = [];
   const panel = (points, depth = 0.82, z = 0) => {
     const g = fittedWallGeometry(points, depth, ++seed, 1.2);
     g.translate(0, 0, z);
     parts.push(g);
   };
+  // The optional plan retains compatibility with the earlier gate helper.
+  plan ??= {
+    bottom: 1.6,
+    top: 4.7,
+    niches: [-length / 3, 0, length / 3].map((x) => ({
+      x,
+      bottom: 1.6,
+      top: 4.7,
+      radius: 0.62,
+      head: 0.45,
+    })),
+  };
   const half = length / 2,
-    step = length / 3;
+    step = length / plan.niches.length;
   panel([
     [-half, floor],
     [half, floor],
-    [half, 1.6],
-    [-half, 1.6],
+    [half, plan.bottom],
+    [-half, plan.bottom],
   ]);
-  for (let i = 0; i < 3; i++) {
-    const cx = (i - 1) * step,
+  for (const niche of plan.niches) {
+    const { x: cx, bottom, top, radius, head } = niche,
       left = cx - step / 2,
       right = cx + step / 2;
     panel([
-      [left, 1.6],
-      [cx - 0.62, 1.6],
-      [cx - 0.45, 4.7],
-      [left, 4.7],
+      [left, bottom],
+      [cx - radius, bottom],
+      [cx - head, top],
+      [left, top],
     ]);
     panel([
-      [cx + 0.62, 1.6],
-      [right, 1.6],
-      [right, 4.7],
-      [cx + 0.45, 4.7],
+      [cx + radius, bottom],
+      [right, bottom],
+      [right, top],
+      [cx + head, top],
     ]);
     panel(
       [
-        [cx - 0.62, 1.6],
-        [cx + 0.62, 1.6],
-        [cx + 0.45, 4.7],
-        [cx - 0.45, 4.7],
+        [cx - radius, bottom],
+        [cx + radius, bottom],
+        [cx + head, top],
+        [cx - head, top],
       ],
       0.18,
-      -0.32,
+      niche.backing ?? -0.32,
     );
   }
   panel([
-    [-half, 4.7],
-    [half, 4.7],
+    [-half, plan.top],
+    [half, plan.top],
     [half, 7],
     [-half, 7],
   ]);
   const geometry = mergeGeometries(parts, false);
   parts.forEach((g) => g.dispose());
-  geometry.userData.niches = [-step, 0, step];
+  geometry.userData.niches = plan.niches.map((n) => n.x);
   return geometry;
 }
 
