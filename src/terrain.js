@@ -91,6 +91,7 @@ export function createTerrainProfile(map, level) {
     radius: r.r * 7,
     y: raw(r.x * 7, r.z * 7),
     main: map.rooms.includes(r),
+    discovery: map.sideRooms.includes(r),
     field: (map.fieldSites || []).includes(r),
     flat: !!r.fireVault || !!r.bellHoist || !!r.cleft || !!r.pressureRelay,
   }));
@@ -131,12 +132,17 @@ export function createTerrainProfile(map, level) {
             strongest = weight;
           }
         }
-        const inner = terrace.main ? 8.5 : 3;
+        const inner = terrace.main ? 8.5 : terrace.discovery ? 1.2 : 3;
         const organicEdge =
           Math.sin(x * 0.63 + z * 0.39) * 1.5 + Math.sin(z * 0.86) * 0.75;
         paving = Math.max(
           paving,
-          1 - smooth(inner, inner + 8, distance + organicEdge),
+          1 -
+            smooth(
+              inner,
+              inner + (terrace.discovery ? 3.6 : 8),
+              distance + organicEdge,
+            ),
         );
       }
       if (map.courierFerry) {

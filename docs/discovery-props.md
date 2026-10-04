@@ -122,13 +122,12 @@ poses from closed to fully open, with no overlaps or browser errors.
 
 ## Continuing world review
 
-VA-25's floating pickup and missing collision findings are repaired. Its
-surrounding scenery work remains open: many discoveries still stand alone on
-broad repeated paving or terrain, and some neighboring discoveries repeat the
-same arrangement. The [world visual audit](visual-audit.md) continues to track
-those areas, repeated courts and sparse connecting routes. Moving these three
-pickups clear of special terrain does not repair every surrounding bank or
-vault edge in VA-15.
+VA-25's floating pickup and missing collision findings are repaired. The later
+[discovery settings](discovery-settings.md) add regional surroundings, smaller
+paving and shared architecture for neighboring pickups. The [world visual
+audit](visual-audit.md) continues to track repeated compositions, broader courts
+and sparse connecting routes. Moving these three pickups clear of special
+terrain does not repair every surrounding bank or vault edge in VA-15.
 
 These bounded checks do not establish complete journey coverage, human
 playthrough duration, consumer hardware performance, subjective audio quality

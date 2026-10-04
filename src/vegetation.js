@@ -31,6 +31,7 @@ import {
   plantJungleTrees,
 } from "./jungle-grounding.js";
 import { rockGroundHeight } from "./nature-rocks.js";
+import { discoveryFoliageClear } from "./discovery-setting-plan.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -457,6 +458,16 @@ export async function loadNature(game) {
           dummy.position.set(p.x, game.groundHeight(p.x, p.z) - 0.12, p.z);
           dummy.rotation.set(0, rng() * Math.PI * 2, 0);
           dummy.scale.setScalar(p.scale || 0.6 + rng() * 0.8);
+          if (
+            !rock &&
+            !discoveryFoliageClear(
+              game,
+              p.x,
+              p.z,
+              (Math.hypot(size.x, size.z) * scale * dummy.scale.x) / 2,
+            )
+          )
+            continue;
           if (rock) {
             game.rockGrounding.candidates++;
             const placed = placeNatureRock(game, footprint, {

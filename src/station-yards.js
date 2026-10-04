@@ -15,7 +15,7 @@ import { STATION_STYLES } from "./field-station-art.js";
 import { stationSolid } from "./field-station-solids.js";
 import { mergeArchitecture, pbrMaterial } from "./visuals.js";
 
-function pavingMaterial(biome) {
+export function pavingMaterial(biome) {
   const name =
     {
       jungle: "moss",

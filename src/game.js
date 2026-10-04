@@ -1,5 +1,6 @@
 import { buildStationYards } from "./station-yards.js";
 import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
+import { buildDiscoverySettings } from "./discovery-settings.js";
 import { arrivalCamera } from "./camera-arrival.js";
 import { normalizeCamera } from "./camera-state.js";
 import {
@@ -1001,6 +1002,7 @@ export class Adventure {
     buildSunkenGallery(this);
     buildStationYards(this);
     buildDiscoveryProps(this);
+    buildDiscoverySettings(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();

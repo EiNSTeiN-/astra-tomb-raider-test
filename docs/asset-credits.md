@@ -670,3 +670,11 @@ weighting code and reuses existing credited ground and railway materials. It
 introduces no external assets or dependencies. Its four documentation images
 are actual game renders converted losslessly to WebP, with decoded pixel
 identity checked against their source captures.
+
+The [regional discovery settings](discovery-settings.md) add original broken
+masonry, storage racks, sorting troughs, benches, pottery and column fragments
+in `src/discovery-setting-art.js`. They reuse the existing credited stone,
+timber, mosaic and paving maps, camp materials and project bronze shader. No
+external assets, recordings or dependencies were introduced. The four
+documentation images are actual final game captures converted losslessly to
+WebP, with decoded pixel identity checked against their source captures.

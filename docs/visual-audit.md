@@ -50,7 +50,11 @@ twelve direct crossings. That pass left crystal note 4 without a clear observer 
 The survey records the pickup construction and placement findings below. The
 [grounded discovery pass](discovery-props.md) adds views and collection checks
 at all 144 sites, with regional construction and a repair to crystal note 4's
-wall overlap. Surrounding scenery and continuous routes remain under review.
+wall overlap. The [discovery settings](discovery-settings.md) add 397 regional
+scenery modules across 138 settings, shared surroundings for neighboring
+pickups, smaller paving and 160 reviewed final views. Native collection and
+older-save recovery checks cover all eight chapters. Repeated compositions,
+broader scenery and continuous routes remain under review.
 Earlier local milestone checks provide useful references, but do not replace
 this review. Each moving mechanism also needs inspection in its relevant open,
 closed and intermediate states.
@@ -89,7 +93,7 @@ adds 24 carved exterior faces and their detailed opening/clearance review.
 | VA-22 | A transient chapter-narration toast overlaps the resonance scene or controls soon after a reload. | The [dialog notice repair](dialog-notices.md) places narration below the title in the panel's text flow and preserves its element and expiry timer through dialog changes. Review covers 32 resonance views, 48 chapter layouts, notice expiry and six production tuning/save/reload cases. | Fixed |
 | VA-23 | The assisted snow bell-control view is obstructed by timber above the instrument. | The [follow-up](dialog-notices.md) identifies closed sanctuary doors in the setup: progress was assigned while the opening animation remained paused. Reloading that progress opens the doors; native keyboard inspection and camera rays confirm a clear view of all four bells. | Closed; capture-state error |
 | VA-24 | A jungle trunk has a narrow band of visibly stretched bark texture. | The [bark repair](jungle-bark.md) preserves source UV chart boundaries and restores root flares in both species and all three tiers. Atlas checks detect no padding crossings; 651 tests, 48 forest/trunk views, two assisted route legs and production keyboard/touch save checks pass. The added geometry and measured workload are documented. | Fixed; trunk atlas reduction |
-| VA-25 | Notes and caches repeat simple plinths and floating gold shapes across all chapters, often on sparse paving; the explorer can enter the plinth footprint. | The [grounded discovery pass](discovery-props.md) replaces all 144 pickups with regional construction and finite solids, preserves IDs/rewards, and verifies collection. Sparse surrounding paving, repeated arrangements and nearby clusters still need composition work. | Partly fixed; surroundings open |
+| VA-25 | Notes and caches repeat simple plinths and floating gold shapes across all chapters, often on sparse paving; the explorer can enter the plinth footprint. | The [grounded discovery pass](discovery-props.md) replaces all 144 pickups with regional construction and finite solids, preserves IDs/rewards, and verifies collection. The later [regional settings](discovery-settings.md) add 397 scenery modules across 138 settings, group nearby discoveries, reduce repeated paving and reserve full collection approaches. All 160 final views, eight native collection/reload cases and eight older-save recoveries are reviewed. Many stops still share the same basic wall/rack, stand and furnishing composition; broader landscape integration remains open. | Partly fixed; regional surroundings added |
 | VA-26 | Crystal note 4 has no clear observer view in fresh progress, and its centre is not walkable beside main court 4. | The [grounded discovery pass](discovery-props.md) confirms the old wall/plinth overlap and moves the note 7 m onto clear ground. Observer, direct interaction, native keyboard/touch collection, open-gate layout and full reload checks pass while preserving its ID and text. | Fixed; placement |
 
 A view with no recorded finding is not a declaration that its entire area is
