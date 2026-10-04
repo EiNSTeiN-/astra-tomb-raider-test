@@ -1,5 +1,11 @@
 # Cloud-city banks and ravines
 
+The later [bank-shoulder pass](sky-bank-shoulders.md) widens the upper cliff caps
+while preserving all walking-grid vertices, working-pad samples and bridge/water
+metadata. Its current captures and checks supplement the historical erosion
+evidence below. The [alpine meadow](sky-meadow.md) also replaces the shared ferns
+and shrubs described in this earlier pass.
+
 The playable cloud-city terrain now has eroded rock ribs, shelves and smaller broken edges below its walking surfaces. Seeded displacement only removes material, is bounded to 5.6 m, and fades out before reaching the upper banks. The original foundation sampler remains authoritative wherever erosion is zero, so refinement does not introduce floating-point height drift at bridge joins or objective foundations. Reservoir and bridge metadata retain their original heights.
 
 The sky chapter uses a 0.875 m terrain grid, with 476,288 triangles across the existing 81 chunks. Other chapters retain their 1.75 m grid. Mesh vertices and character ground queries use the same refined profile; shared chunk borders use identical heights, normals and material coordinates.

@@ -89,7 +89,9 @@ export function inspectSkyBanks(game) {
         ? depart
           ? { x: course.exit.x, z: course.exit.z }
           : course.entry
-        : { x: f.x * 7, z: f.z * 7 };
+        // The delivered station has a solid pedestal at its centre. Approach
+        // its working side, as the continuous route and interaction checks do.
+        : { x: f.x * 7, z: f.z * 7 + 2.2 };
     };
     for (let stage = 0; stage < 9; stage++) {
       const stations = game.items.filter(

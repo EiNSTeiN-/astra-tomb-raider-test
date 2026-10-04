@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [cloud-bank shoulders](sky-bank-shoulders.md) use original heightfield code
+in `src/sky-banks.js`, the existing sky erosion and the already credited rock/soil
+maps and alpine plants. No external asset, recording or dependency was added.
+Their documentation images are actual game captures converted losslessly to
+WebP, with decoded pixel identity verified.
+
 The [cloud-terrace meadow](sky-meadow.md) uses original procedural geometry,
 vertex colors and wind shader code in `src/sky-meadow.js`. Its bunchgrasses,
 seed heads and cushion plants require no external model, texture, recording or

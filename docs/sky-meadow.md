@@ -1,5 +1,10 @@
 # Alpine ground cover on the cloud terraces
 
+The subsequent [bank-shoulder pass](sky-bank-shoulders.md) reshapes the outer
+cliffs and regenerates this planting on broader supported ground. Its current
+layout has 12,375 plants; the 10,766-plant evidence below records this meadow's
+original published milestone.
+
 The sky chapter now uses original bunchgrasses and low cushion plants in place
 of the shared sparse grass, jungle ferns and broadleaf shrubs. Irregular patches
 of green and dry-gold foliage give the open terrace ground more texture around

@@ -30,6 +30,7 @@ import { terrainMaterial } from "./terrain-material.js";
 import { trailSampler } from "./habitat.js";
 import { coastalLayout } from "./coastal-layout.js";
 import { refineSkyTerrain } from "./sky-geology.js";
+import { skyBankDrop } from "./sky-banks.js";
 import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { buildJungleFringe } from "./jungle-fringe.js";
@@ -164,7 +165,7 @@ export function createTerrainProfile(map, level) {
             );
           }
         const rise = 1 - Math.exp(-distance * 0.72);
-        if (biome === "sky") height -= rise * (24 + Math.min(40, distance * 2));
+        if (biome === "sky") height -= skyBankDrop(x, z, distance, level.seed);
         else if (biome === "water") height -= rise * 7;
         else if (biome === "desert")
           height += desertBankRise(x, z, distance, level.seed);
