@@ -24,7 +24,7 @@ export function pbrMaterial(name, color = 0xffffff, repeat = 1) {
   });
 }
 
-export function mergeArchitecture(world) {
+export function mergeArchitecture(world, minimumParts = 3) {
   const groups = new Map();
   world.updateMatrixWorld(true);
   for (const child of [...world.children]) {
@@ -49,7 +49,7 @@ export function mergeArchitecture(world) {
     g.originals.push(child);
   }
   for (const group of groups.values()) {
-    if (group.parts.length < 3) {
+    if (group.parts.length < minimumParts) {
       group.parts.forEach((g) => g.dispose());
       continue;
     }

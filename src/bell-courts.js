@@ -14,6 +14,16 @@ import {
 } from "./bell-rules.js";
 import { fieldComplete } from "./expeditions.js";
 import { counterweightsReady } from "./counterweights.js";
+import {
+  buildBellFrame,
+  buildBellFittings,
+  buildBellGrip,
+  buildBellTablet,
+  positionBellWrap,
+  BELL_GRIP_JOIN,
+  BELL_ROPE_Z,
+  BELL_TABLET_Z,
+} from "./bell-rack-art.js";
 
 export function bellReady(game, site) {
   return (
@@ -59,6 +69,13 @@ export function buildBellCourts(game) {
     color: 0xc9b99a,
     roughness: 0.95,
   });
+  const materials = {
+    bronze,
+    wood,
+    rope: ropeMaterial,
+    stone: game.monasteryMaterials?.stone || game.stoneMat,
+    snow: game.monasteryMaterials?.snow || game.stoneMat,
+  };
   for (const feature of game.items.filter((f) => f.type === "mechanism")) {
     if (feature.stage > 0) {
       const retired = new Set(
@@ -87,6 +104,7 @@ export function buildBellCourts(game) {
       bells: [],
       playback: null,
       visualTime: 0,
+      furniture: { id: `bell-court-${feature.stage}` },
     };
     game.bellSites.push(site);
     const add = (
@@ -105,44 +123,7 @@ export function buildBellCourts(game) {
       if (capture) game.cameraSurfaces?.capture(mesh);
       return mesh;
     };
-    for (const x of [-2.72, 2.72]) {
-      add(
-        new THREE.BoxGeometry(0.28, 4.75, 0.35),
-        wood,
-        x,
-        2.4,
-        -1.25,
-        root,
-        true,
-      );
-      add(
-        new THREE.CylinderGeometry(0.28, 0.36, 0.3, 12),
-        game.stoneMat,
-        x,
-        0.16,
-        -1.25,
-      );
-      game.obstacles.push({
-        x: root.position.x + x,
-        z: root.position.z - 1.25,
-        w: 0.23,
-        d: 0.27,
-        h:
-          root.position.y -
-          game.groundHeight(root.position.x + x, root.position.z - 1.25) +
-          4.8,
-      });
-    }
-    add(
-      new THREE.BoxGeometry(5.95, 0.35, 0.48),
-      wood,
-      0,
-      4.68,
-      -1.25,
-      root,
-      true,
-    );
-    add(new THREE.BoxGeometry(5.8, 0.14, 0.61), game.goldMat, 0, 4.9, -1.25);
+    buildBellFrame(game, site, materials);
     const controls = (kind, index, x, z, label) => {
       const group = new THREE.Group();
       group.position.set(
@@ -227,16 +208,7 @@ export function buildBellCourts(game) {
         hinge,
       );
       lip.rotation.x = Math.PI / 2;
-      // A forward pulley lets the explorer pull clear of the swinging bronze.
-      add(new THREE.BoxGeometry(0.12, 0.15, 2.2), wood, x, 4.45, -0.25);
-      const pulley = add(
-        new THREE.TorusGeometry(0.14, 0.035, 6, 16),
-        bronze,
-        x,
-        4.29,
-        0.9,
-      );
-      pulley.rotation.y = Math.PI / 2;
+      const { wrap } = buildBellFittings(game, site, x, materials);
       const diagonal = add(
         new THREE.CylinderGeometry(0.018, 0.018, 1, 6),
         ropeMaterial,
@@ -245,22 +217,19 @@ export function buildBellCourts(game) {
         0,
       );
       const vertical = add(
-        new THREE.CylinderGeometry(0.025, 0.025, 1, 6),
+        new THREE.CylinderGeometry(0.018, 0.018, 1, 6),
         ropeMaterial,
         x,
         2.8,
-        0.9,
+        BELL_ROPE_Z,
       );
-      const grip = add(
-        new THREE.TorusGeometry(0.18, 0.044, 7, 18),
-        ropeMaterial,
+      const grip = buildBellGrip(
+        game,
+        site,
         x,
-        1.3,
-        0.9,
+        materials,
+        plaque(game.level.symbols[i], 0.64),
       );
-      const name = plaque(game.level.symbols[i]);
-      name.position.set(x, 1.02, 0.96);
-      root.add(name);
       const control = controls(
         "rope",
         i,
@@ -277,6 +246,7 @@ export function buildBellCourts(game) {
         glow,
         diagonal,
         vertical,
+        wrap,
         grip,
         control,
         scale,
@@ -288,22 +258,12 @@ export function buildBellCourts(game) {
         ),
       });
     }
-    const tablet = add(
-      new THREE.BoxGeometry(1.1, 0.85, 0.22),
-      game.stoneMat,
-      0,
-      0.48,
-      2.3,
-    );
-    tablet.rotation.x = -0.15;
-    const inscription = plaque("LISTEN · ANSWER", 1.06);
-    inscription.position.set(0, 0.67, 2.46);
-    root.add(inscription);
+    buildBellTablet(game, site, materials, plaque("LISTEN · ANSWER", 1.06));
     site.tablet = controls(
       "tablet",
       0,
-      0,
-      2.55,
+      (site.stage % 3 === 2 ? -1 : 1) * 1.25,
+      BELL_TABLET_Z,
       "Read the bellkeeper's lesson",
     );
     mergeArchitecture(root);
@@ -425,14 +385,14 @@ export function updateBellCourts(game, dt) {
       bell.grip.position.y = gripY;
       bell.vertical.position.set(
         bell.hinge.position.x,
-        (4.29 + gripY) / 2,
-        0.9,
+        (4.29 + gripY + BELL_GRIP_JOIN) / 2,
+        BELL_ROPE_Z,
       );
-      bell.vertical.scale.y = 4.29 - gripY;
+      bell.vertical.scale.y = 4.29 - gripY - BELL_GRIP_JOIN;
       const start = new THREE.Vector3(0, -0.6, 0)
         .applyEuler(bell.hinge.rotation)
         .add(bell.hinge.position);
-      const end = new THREE.Vector3(bell.hinge.position.x, 4.29, 0.9),
+      const end = positionBellWrap(bell, start),
         delta = end.clone().sub(start);
       bell.diagonal.position.copy(start).add(end).multiplyScalar(0.5);
       bell.diagonal.quaternion.setFromUnitVectors(

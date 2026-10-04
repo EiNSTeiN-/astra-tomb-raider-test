@@ -685,3 +685,12 @@ and timber builders. The sandstone, plaster, timber, temple stone, snow and
 bronze retain their existing attribution above. No external assets, recordings
 or dependencies were added. Four actual before/after game captures are converted
 losslessly to WebP, with matching observer positions and decoded pixels checked.
+
+The [monastery bell racks](bell-racks.md) add original masonry landings,
+timber frames, bearing and pulley construction, moving rope wraps, braided
+hand loops, attached nameplates and lesson stands in `src/bell-rack-art.js`.
+They reuse the existing credited stone, timber and snow maps, project bronze
+shader, rope material and original bell synthesis. No external assets,
+recordings or dependencies were added. The four comparison images are actual
+High game captures converted losslessly to WebP, with matching observer
+positions and decoded pixel identity checked.

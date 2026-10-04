@@ -235,6 +235,39 @@ test("elevated solids preserve an older arrival on its earned landing and leave 
   assert.equal(f.stationSolids[0].bounds.min.y, 8.4);
 });
 
+test("restoring a generic raised save moves clear of furniture at the saved elevation, retains valid feet, and rejects unsupported air", () => {
+  const { g } = fixture("valve", 8.4);
+  g.obstacles.push({ x: 0, z: 0, w: 2.5, d: 2.5, h: 8.4, climbable: true });
+  g.traversalCourses = [];
+  g.progress.position = { x: 0, z: 0, height: 8.4 };
+  const progress = structuredClone(g.progress);
+  restoreTraversal(g);
+  assert.equal(g.player.position.y, 8.4);
+  assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+  assert(g.player.position.length() > 8.4, "occupied feet move aside");
+  assert.deepEqual(
+    g.progress,
+    progress,
+    "restoration does not rewrite objectives",
+  );
+  const clear = g.player.position.clone();
+  g.progress.position = { x: clear.x, z: clear.z, height: 8.4 };
+  g.player.position.y = 0;
+  restoreTraversal(g);
+  assert(
+    g.player.position.equals(clear),
+    "clear raised save retains exact feet",
+  );
+  g.progress.position.height = 12;
+  g.player.position.y = 0;
+  restoreTraversal(g);
+  assert.equal(
+    g.player.position.y,
+    0,
+    "unsupported air is not a saved landing",
+  );
+});
+
 test("round bases have round ray bounds, hide no empty corners, and support a free cap", () => {
   const { g } = fixture("delivery");
   const base = g.obstacles[0],

@@ -423,6 +423,7 @@ import {
   traversalTarget,
 } from "./traversal.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { buildBellPlatform } from "./bell-rack-art.js";
 import { createMap, random } from "./campaign.js";
 import {
   createTerrainProfile,
@@ -1332,15 +1333,19 @@ export class Adventure {
         !hasCounterweights(f)
       ) {
         f.yOffset = 2.8 + (f.stage % 3) * 0.3;
-        this.box(6, f.yOffset, 6, this.stoneMat, x, y + f.yOffset / 2, z);
-        this.obstacles.push({
-          x,
-          z,
-          w: 3,
-          d: 3,
-          h: f.yOffset,
-          climbable: true,
-        });
+        if (this.level.biome === "snow") {
+          buildBellPlatform(this, f, x, y, z, f.yOffset);
+        } else {
+          this.box(6, f.yOffset, 6, this.stoneMat, x, y + f.yOffset / 2, z);
+          this.obstacles.push({
+            x,
+            z,
+            w: 3,
+            d: 3,
+            h: f.yOffset,
+            climbable: true,
+          });
+        }
         group.position.y += f.yOffset;
         for (let rung = 0; rung < 6; rung++)
           this.box(

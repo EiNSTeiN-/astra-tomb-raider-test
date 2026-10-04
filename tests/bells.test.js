@@ -325,7 +325,18 @@ test("bell focus leaves the player still and moving ropes follow the actual clap
   assert.ok(focusBells(game));
   updateBellCourts(game, 100);
   assert.ok(Math.abs(bell.hinge.rotation.z) < 0.00001);
-  assert.equal(bell.vertical.scale.y, 4.29 - 1.3);
+  assert.ok(
+    Math.abs(
+      bell.vertical.position.y -
+        bell.vertical.scale.y / 2 -
+        (bell.grip.position.y + 0.22),
+    ) < 1e-8,
+  );
+  assert.ok(
+    Math.abs(bell.vertical.position.y + bell.vertical.scale.y / 2 - 4.29) <
+      1e-8,
+  );
+  assert.equal(bell.vertical.position.z, bell.grip.position.z);
 });
 
 test("changing chapters cancels the phrase and releases all bell court and focus references", (t) => {

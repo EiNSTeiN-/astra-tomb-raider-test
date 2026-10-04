@@ -57,11 +57,12 @@ export function restoreTraversal(game) {
     const p = game.player.position,
       y = game.groundHeight(p.x, p.z) + game.progress.position.height;
     const floor = supportAt(game, p.x, p.z, y);
-    if (
-      Math.abs(floor.height - y) < 0.25 &&
-      game.canMove(p.x, p.z, y - game.groundHeight(p.x, p.z))
-    )
-      p.y = floor.height;
+    if (Math.abs(floor.height - y) < 0.25) {
+      // Preserve the saved landing while moving clear of newly solid furniture.
+      // Passing the initial ground height here would discard earned elevation.
+      const arrival = safeArrival(game, { x: p.x, y: floor.height, z: p.z });
+      if (arrival) p.set(arrival.x, arrival.y, arrival.z);
+    }
   }
   game.jumpY = Math.max(
     0,
