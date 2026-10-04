@@ -3,8 +3,6 @@ import { arcadeFoundationDistance } from "./arcade-lock-rules.js";
 import * as THREE from "three";
 import { random } from "./campaign.js";
 import { createLodPatch, updateLodPatch } from "./instance-lod.js";
-import { inWindCourt } from "./wind-rules.js";
-import { skyGroundSupported } from "./sky-geology.js";
 
 export const GRASS_RANGES = {
   high: [24, 48, 85],
@@ -69,7 +67,7 @@ export function buildGroundCover(game) {
   game.grassPatches = [];
   game.grassWind = null;
   game.grassRange = null;
-  if (!["jungle", "water", "sky"].includes(game.level.biome)) return;
+  if (!["jungle", "water"].includes(game.level.biome)) return;
   const jungle = game.level.biome === "jungle";
   const rng = random(game.level.seed + 8347);
   const geometries = createGrassGeometries(rng, jungle);
@@ -175,14 +173,6 @@ export function buildGroundCover(game) {
         0.32 + rng() * 0.16,
         0.075 + rng() * 0.065,
       );
-      // Consume the same random samples first, preserving grass everywhere
-      // else. The wind courts' working lanes and foundations stay clear.
-      if (
-        game.level.biome === "sky" &&
-        (inWindCourt(game.map, px, pz) ||
-          !skyGroundSupported(game.terrainProfile, px, pz))
-      )
-        continue;
       if (game.map.desertSurvey && surveyReservedDistance(px, pz) < 0.5)
         continue;
       if (game.map.arcadeLock && arcadeFoundationDistance(px, pz) < 0.5)

@@ -8,50 +8,6 @@ import {
   createGrassGeometries,
   updateGroundCover,
 } from "../src/groundcover.js";
-import { inWindCourt } from "../src/wind-rules.js";
-
-test("sky machinery clears its grass footprint without moving surrounding plants", () => {
-  const make = (features) => ({
-    level: { biome: "sky", seed: 43 },
-    world: new THREE.Group(),
-    map: {
-      grid: Array.from({ length: 12 }, () => Array(12).fill(1)),
-      fieldSites: [],
-      features,
-    },
-    terrainProfile: {
-      extent: 70,
-      court: () => 0,
-      height: () => 0,
-      geology: { depth: () => 0 },
-    },
-    groundHeight: () => 0,
-  });
-  const before = make([]),
-    after = make([{ type: "mechanism", x: 5, z: 4 }]);
-  buildGroundCover(before);
-  buildGroundCover(after);
-  const positions = (g) =>
-    g.grassPatches
-      .flatMap((p) => p.positions.map((v) => v.toArray()))
-      .sort((a, b) => a[0] - b[0] || a[2] - b[2]);
-  const original = positions(before),
-    retained = positions(after);
-  assert.ok(
-    retained.length < original.length,
-    "plants intersecting the court are removed",
-  );
-  assert.deepEqual(
-    retained,
-    original.filter(([x, , z]) => !inWindCourt(after.map, x, z)),
-  );
-  for (const g of [before, after])
-    g.world.traverse((o) => {
-      if (o.isInstancedMesh) o.dispose();
-      o.geometry?.dispose();
-      o.material?.dispose();
-    });
-});
 
 test("grass detail preserves blade heights and wind coordinates with bounded distant geometry", () => {
   for (const jungle of [true, false]) {

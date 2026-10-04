@@ -815,6 +815,7 @@ export class Adventure {
     this.naturePatches = [];
     this.rockGrounding = null;
     this.desertScatter = null;
+    this.skyMeadow = null;
     this.forestPatches = [];
     this.explored = new Set(this.progress.explored || []);
     this.lastSurvey = null;

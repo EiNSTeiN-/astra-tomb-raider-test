@@ -32,6 +32,7 @@ import {
 } from "./jungle-grounding.js";
 import { rockGroundHeight } from "./nature-rocks.js";
 import { discoveryFoliageClear } from "./discovery-setting-plan.js";
+import { buildSkyMeadow, updateSkyMeadow } from "./sky-meadow.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -287,7 +288,7 @@ export async function loadNature(game) {
     biome = game.level.biome,
     rng = random(game.level.seed + 777);
   const jobs = ["rock_moss_set_01"];
-  if (["jungle", "sky"].includes(biome)) jobs.push("fern_02", "shrub_01");
+  if (biome === "jungle") jobs.push("fern_02", "shrub_01");
   if (biome === "water") jobs.push("shrub_01");
   const assets = await Promise.all(
     jobs.map(async (name) => ({
@@ -499,6 +500,7 @@ export async function loadNature(game) {
     }
   }
   buildVolcanicScree(game);
+  buildSkyMeadow(game);
   updateNature(game);
   game.renderOnce = true;
 }
@@ -509,6 +511,7 @@ const NATURE_RANGES = {
   low: { rock: [91], gravel: [28], fern: [10, 40], shrub: [5, 16, 48] },
 };
 export function updateNature(game, dt = 0) {
+  updateSkyMeadow(game, dt);
   for (const patch of game.naturePatches || [])
     updateLodPatch(
       patch,

@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [cloud-terrace meadow](sky-meadow.md) uses original procedural geometry,
+vertex colors and wind shader code in `src/sky-meadow.js`. Its bunchgrasses,
+seed heads and cushion plants require no external model, texture, recording or
+dependency. The documentation images are lossless WebP conversions of actual
+game captures, with decoded pixel identity verified.
+
 The [volcanic slag pools](lava-shores.md) use original shoreline profiles and
 shader code in `src/hydrology.js` and `src/lava-surface.js`. Their basalt maps
 reuse the existing credited CC0 forge-rock assets. No new external asset or
