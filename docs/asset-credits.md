@@ -728,3 +728,10 @@ They reuse the existing credited rock and temple maps, weathered wind bronze,
 wind synthesis and sky score. No external assets, recordings, music or
 dependencies were added. The four documentation images are actual game captures
 converted losslessly to WebP, with normalized decoded pixel identity checked.
+
+The [wind camera-clearance repair](wind-camera-clearance.md) adds original
+capped-cylinder camera queries and component registrations in
+`src/camera-collision.js` and `src/wind-courts.js`. It retains the credited
+environment maps, original wind geometry, synthesis and sky score. No external
+assets or dependencies were added. Its three documentation images are actual
+game captures converted losslessly to WebP, with decoded RGBA identity checked.

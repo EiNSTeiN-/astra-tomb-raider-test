@@ -2,6 +2,11 @@
 
 The cloud-city engines now have a dedicated bronze material and a more detailed mechanical kit. This follows the instance-batching and working-ground work in [wind rendering notes](wind-rendering.md).
 
+The later [camera-clearance repair](wind-camera-clearance.md) replaces oversized
+pedestal bounds, guards the fan envelopes and tablets, and verifies the third
+engine's continuous route and native keyboard/touch saves. The measurements
+below describe the earlier material and geometry milestone.
+
 ## Surfaces and construction
 
 Cast bronze, worn bronze and dark bearing metal share a shader with mottled oxidation, varying roughness and metalness, and fine casting grain. Screen derivatives fade the smallest grain at a distance. The old observatory material's regular stripe pattern is no longer used on these engines. Per-vertex casting coordinates survive static merging and instancing, so the patina stays attached to a wheel or duct as it turns. This shader is specific to the wind machinery.

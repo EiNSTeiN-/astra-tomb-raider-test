@@ -5,7 +5,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
-import { CameraSurfaces } from "../src/camera-collision.js";
+import { CameraSurfaces, constrainCamera } from "../src/camera-collision.js";
 import { buildFieldGates } from "../src/field-world.js";
 import { buildCounterweights } from "../src/counterweights.js";
 import {
@@ -139,6 +139,76 @@ function use(game, site, index) {
   game.keys.clear();
   return windInteract(game);
 }
+
+test("wind-camera bounds preserve diagonal working views and guard receiver blades and tablets", (t) => {
+  const { game } = fixture(t),
+    site = game.windSites[2];
+  ready(game, 2);
+  for (const index of [6, 9, 11]) {
+    game.player.position.copy(site.nodes[index].control.group.position);
+    updateWindCourts(game, 0);
+    assert.equal(site.detail.visible, true);
+    const target = site.nodes[index].control.group.position
+        .clone()
+        .add(new THREE.Vector3(0, 1.3, 0)),
+      yaw = 2.2,
+      offset = new THREE.Vector3(
+        Math.sin(yaw) * Math.cos(0.13) * 5.3,
+        Math.sin(0.13) * 5.3 + 0.2,
+        Math.cos(yaw) * Math.cos(0.13) * 5.3,
+      ),
+      camera = constrainCamera(
+        target,
+        target.clone().add(offset),
+        game.cameraSurfaces,
+        (p) => game.cameraSpace(p),
+      );
+    assert.ok(
+      camera.distanceTo(target) > 2.2,
+      `node ${index}: retains a third-person view`,
+    );
+    assert.ok(
+      game.cameraSurfaces.entry(target, camera, 0) >= 0.999,
+      `node ${index}: no casting crossed`,
+    );
+  }
+  const fan = site.fans.find((fan) => fan.receiver).spinner.parent;
+  fan.updateWorldMatrix(true, false);
+  const a = fan.localToWorld(new THREE.Vector3(0.5, 0.3, -2)),
+    b = fan.localToWorld(new THREE.Vector3(0.5, 0.3, 2));
+  assert.ok(
+    game.cameraSurfaces.entry(a, b, 0) < 0.5,
+    "camera cannot pass through the spinning blade envelope",
+  );
+  const outsideA = fan.localToWorld(new THREE.Vector3(1.02, 1.02, -2)),
+    outsideB = fan.localToWorld(new THREE.Vector3(1.02, 1.02, 2));
+  assert.equal(
+    game.cameraSurfaces.entry(outsideA, outsideB, 0),
+    1,
+    "empty corner outside the circular frame remains clear",
+  );
+  for (const other of game.windSites) {
+    game.player.position.copy(other.tablet.group.position);
+    updateWindCourts(game, 0);
+    const a = other.root.localToWorld(
+        new THREE.Vector3(
+          -10.5,
+          game.groundHeight(
+            other.root.position.x - 10.5,
+            other.root.position.z + 21.5,
+          ) -
+            other.root.position.y +
+            0.65,
+          20.1,
+        ),
+      ),
+      b = a.clone().add(new THREE.Vector3(0, 0, 3));
+    assert.ok(
+      game.cameraSurfaces.entry(a, b, 0) < 1,
+      `stage ${other.stage}: inscription blocks the camera`,
+    );
+  }
+});
 
 test("every wind control stays usable through water arrival and swimming updates", (t) => {
   const { game } = fixture(t);

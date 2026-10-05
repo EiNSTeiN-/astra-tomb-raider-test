@@ -32,6 +32,79 @@ export function boxEntry(a, b, box, padding = 0, allowInside = false) {
   return (inside && !allowInside) || near < 0 || near > 1 ? null : near;
 }
 
+// Rounded clearance around a capped circular casting. Expanding its box or
+// cylinder independently along each axis also blocks the empty corners beside
+// wheels. This distance is to the solid cylinder, with a spherical margin.
+export function cylinderEntry(
+  a,
+  b,
+  box,
+  padding = 0,
+  axis = "y",
+  allowInside = false,
+) {
+  const radial = ["x", "y", "z"].filter((name) => name !== axis),
+    center = box.getCenter(new THREE.Vector3()),
+    radius =
+      Math.max(
+        box.max[radial[0]] - box.min[radial[0]],
+        box.max[radial[1]] - box.min[radial[1]],
+      ) / 2,
+    half = (box.max[axis] - box.min[axis]) / 2,
+    distanceTo = (p) => {
+      const r =
+          Math.hypot(
+            p[radial[0]] - center[radial[0]],
+            p[radial[1]] - center[radial[1]],
+          ) - radius,
+        h = Math.abs(p[axis] - center[axis]) - half;
+      return (
+        Math.hypot(Math.max(r, 0), Math.max(h, 0)) + Math.min(Math.max(r, h), 0)
+      );
+    },
+    initial = distanceTo(a);
+  if (initial <= 0 && !allowInside) return null;
+  if (initial < padding && !allowInside)
+    return cylinderEntry(a, b, box, 0, axis, true) === null ? null : 0;
+  const entry = boxEntry(a, b, box, padding, true);
+  if (entry === null) return null;
+  const length = a.distanceTo(b);
+  if (length < 1e-9) return initial <= padding ? 0 : null;
+  const p = new THREE.Vector3();
+  let t = entry;
+  // The signed distance is Lipschitz: stepping by it cannot cross the rounded
+  // surface. Grazing contacts converge more slowly than direct intersections.
+  for (let i = 0; i < 96 && t <= 1; i++) {
+    p.copy(a).lerp(b, t);
+    const clearance = distanceTo(p) - padding;
+    if (clearance < 1e-5) return t;
+    t += clearance / length;
+  }
+  if (t > 1) return null;
+  // An almost tangent segment may exhaust the march before reaching its rim.
+  // Distance along the remaining segment is convex. Locate its minimum, then
+  // bisect the first contact instead of dropping a shallow intersection.
+  const clearanceAt = (amount) =>
+    distanceTo(p.copy(a).lerp(b, amount)) - padding;
+  let lo = t,
+    hi = 1;
+  for (let i = 0; i < 40; i++) {
+    const left = (2 * lo + hi) / 3,
+      right = (lo + 2 * hi) / 3;
+    if (clearanceAt(left) <= clearanceAt(right)) hi = right;
+    else lo = left;
+  }
+  hi = (lo + hi) / 2;
+  if (clearanceAt(hi) > 1e-5) return null;
+  lo = t;
+  for (let i = 0; i < 32; i++) {
+    const middle = (lo + hi) / 2;
+    if (clearanceAt(middle) <= 1e-5) hi = middle;
+    else lo = middle;
+  }
+  return hi;
+}
+
 // Capture primitive bounds before architecture is merged for rendering. Static
 // surfaces use a spatial index; the few moving gate parts retain parent transforms.
 export class CameraSurfaces {
@@ -47,7 +120,7 @@ export class CameraSurfaces {
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
   }
-  capture(mesh, { small = false, thin = false } = {}) {
+  capture(mesh, { small = false, thin = false, cylinderAxis = null } = {}) {
     if (
       !this.capturing ||
       !mesh.material.isMeshStandardMaterial ||
@@ -63,7 +136,7 @@ export class CameraSurfaces {
       (!thin && Math.min(size.x, size.y, size.z) < 0.12)
     )
       return;
-    this.pending.push({ mesh, parent: mesh.parent, box });
+    this.pending.push({ mesh, parent: mesh.parent, box, cylinderAxis });
   }
   rebuild() {
     this.world.updateMatrixWorld(true);
@@ -77,6 +150,7 @@ export class CameraSurfaces {
         parent: entry.parent,
         local: entry.mesh.matrix.clone(),
         box: entry.box,
+        cylinderAxis: entry.cylinderAxis,
         matrix: new THREE.Matrix4(),
         inverse: new THREE.Matrix4(),
         bounds: new THREE.Box3(),
@@ -175,12 +249,16 @@ export class CameraSurfaces {
         continue;
       this.a.copy(start).applyMatrix4(surface.inverse);
       this.b.copy(end).applyMatrix4(surface.inverse);
-      const t = boxEntry(
-        this.a,
-        this.b,
-        surface.box,
-        radius / Math.max(0.001, surface.scale),
-      );
+      const padding = radius / Math.max(0.001, surface.scale),
+        t = surface.cylinderAxis
+          ? cylinderEntry(
+              this.a,
+              this.b,
+              surface.box,
+              padding,
+              surface.cylinderAxis,
+            )
+          : boxEntry(this.a, this.b, surface.box, padding);
       if (t !== null) result = Math.min(result, t);
     }
     return result;

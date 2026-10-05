@@ -78,6 +78,11 @@ export function skyRouteSnapshot(game, state) {
     largeSteps: state.largeSteps || [],
     player: game.player.position.toArray(),
     camera: game.camera.position.toArray(),
+    yaw: game.yaw,
+    pitch: game.pitch,
+    cameraArm: game.camera.position.distanceTo(
+      game.player.position.clone().add(new THREE.Vector3(0, 1.3, 0)),
+    ),
     health: game.health,
     grounded: game.grounded,
     climbing: !!game.climb,

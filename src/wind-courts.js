@@ -111,6 +111,23 @@ export function buildWindCourts(game) {
       parent.add(m);
       return m;
     };
+    const casting = (
+      geometry,
+      material,
+      x,
+      y,
+      z,
+      parent = root,
+      axis = "y",
+    ) => {
+      const mesh = add(geometry, material, x, y, z, parent);
+      game.cameraSurfaces?.capture(mesh, {
+        small: true,
+        thin: true,
+        cylinderAxis: axis,
+      });
+      return mesh;
+    };
     const box = (w, h, d, material, x, y, z, parent = root) =>
       add(new THREE.BoxGeometry(w, h, d), material, x, y, z, parent);
     const control = (kind, index, x, z) => {
@@ -178,13 +195,13 @@ export function buildWindCourts(game) {
         body = new THREE.Group();
       body.position.set(x, y, z);
       detail.add(body);
-      add(kit.plinth, stone, x, y, z);
-      add(kit.housing, bronze, x, y, z);
-      add(kit.crown, trim, x, y, z);
+      casting(kit.plinth, stone, x, y, z);
+      casting(kit.housing, bronze, x, y, z);
+      casting(kit.crown, trim, x, y, z);
       const rotor = new THREE.Group();
       rotor.position.set(0, airHeight - y, 0);
       rotor.userData.cameraDynamic = true;
-      add(
+      casting(
         new THREE.CylinderGeometry(0.18, 0.23, airHeight - y - 1.35, 24),
         bronze,
         x,
@@ -247,18 +264,29 @@ export function buildWindCourts(game) {
         });
       if (locked) {
         wheel.visible = false;
-        add(kit.brace, trim, 0, 0, 0, body);
-      }
-      add(kit.bearing, iron, 0, 1.04, 0.65, body);
-      add(
+        game.cameraSurfaces?.capture(add(kit.brace, trim, 0, 0, 0, body), {
+          small: true,
+        });
+      } else
+        game.cameraSurfaces?.capture(wheel, {
+          small: true,
+          thin: true,
+          cylinderAxis: "z",
+        });
+      casting(kit.bearing, iron, 0, 1.04, 0.65, body, "z");
+      casting(
         new THREE.CylinderGeometry(0.048, 0.048, 0.3, 16).rotateX(Math.PI / 2),
         trim,
         0,
         1.04,
         0.82,
         body,
+        "z",
       );
-      add(kit.panel, iron, 0, 0.61, 0.725, body);
+      game.cameraSurfaces?.capture(add(kit.panel, iron, 0, 0.61, 0.725, body), {
+        small: true,
+        thin: true,
+      });
       const plaque = makePlaque(
         `${windName(state, i)}${locked ? " · FIXED" : ""}`,
         1.06,
@@ -316,18 +344,6 @@ export function buildWindCourts(game) {
         h: airHeight - y + 0.3,
         wind: true,
       });
-      const proxy = box(
-        1.9,
-        airHeight - y + 0.3,
-        1.9,
-        bronze,
-        x,
-        (y + airHeight + 0.3) / 2,
-        z,
-      );
-      game.cameraSurfaces?.capture(proxy);
-      root.remove(proxy);
-      proxy.geometry.dispose();
       mergeArchitecture(rotor); // Keep the rotating castings separate from the static supports.
     }
     // Coupler sleeves bridge the small clearance between neighboring castings.
@@ -343,7 +359,7 @@ export function buildWindCourts(game) {
           continue;
         const x = node.x + dx * 1.75,
           z = node.z + dz * 1.75;
-        const sleeve = add(
+        const sleeve = casting(
           new THREE.CylinderGeometry(0.3, 0.3, 0.5, 12, 1, true),
           bronze,
           x,
@@ -361,8 +377,25 @@ export function buildWindCourts(game) {
       frame.position.set(x, airHeight, z);
       frame.rotation.y = Math.PI / 2;
       detail.add(frame);
-      add(new THREE.CylinderGeometry(0.75, 1, 0.3, 12), stone, x, y + 0.15, z);
-      box(0.45, airHeight - y - 1, 0.55, bronze, x, (y + airHeight - 1) / 2, z);
+      casting(
+        new THREE.CylinderGeometry(0.75, 1, 0.3, 12),
+        stone,
+        x,
+        y + 0.15,
+        z,
+      );
+      game.cameraSurfaces?.capture(
+        box(
+          0.45,
+          airHeight - y - 1,
+          0.55,
+          bronze,
+          x,
+          (y + airHeight - 1) / 2,
+          z,
+        ),
+        { small: true },
+      );
       add(kit.frame, bronze, 0, 0, 0, frame);
       add(kit.spider, iron, 0, 0, 0, frame);
       const spinner = new THREE.Group();
@@ -370,7 +403,37 @@ export function buildWindCourts(game) {
       add(kit.hub, trim, 0, 0, 0, spinner);
       add(kit.vanes, bronze, 0, 0, 0, spinner);
       mergeArchitecture(spinner);
-      const duct = add(
+      // The entire spinning envelope blocks the camera. Its circular disk
+      // follows the frame's orientation without filling the empty box corners.
+      const fanBounds = new THREE.Box3();
+      let radius = 0;
+      for (const geometry of [kit.frame, kit.spider, kit.hub, kit.vanes]) {
+        geometry.computeBoundingBox();
+        fanBounds.union(geometry.boundingBox);
+        const positions = geometry.attributes.position;
+        for (let i = 0; i < positions.count; i++)
+          radius = Math.max(
+            radius,
+            Math.hypot(positions.getX(i), positions.getY(i)),
+          );
+      }
+      const proxy = casting(
+        new THREE.CylinderGeometry(
+          radius,
+          radius,
+          fanBounds.max.z - fanBounds.min.z,
+          32,
+        ).rotateX(Math.PI / 2),
+        bronze,
+        0,
+        0,
+        (fanBounds.min.z + fanBounds.max.z) / 2,
+        frame,
+        "z",
+      );
+      frame.remove(proxy);
+      proxy.geometry.dispose();
+      const duct = casting(
         new THREE.CylinderGeometry(0.29, 0.29, 1.7, 12, 1, true),
         bronze,
         x + (receiver ? -0.85 : 0.85),
@@ -404,7 +467,10 @@ export function buildWindCourts(game) {
     const tx = -10.5,
       tz = 21.5,
       ty = floor(tx, tz);
-    box(1.8, 1.1, 0.28, stone, tx, ty + 0.65, tz);
+    game.cameraSurfaces?.capture(
+      box(1.8, 1.1, 0.28, stone, tx, ty + 0.65, tz),
+      { small: true, thin: true },
+    );
     const label = makePlaque("WIND ENGINE", 1.65);
     label.position.set(tx, ty + 1.01, tz - 0.15);
     label.rotation.y = Math.PI;

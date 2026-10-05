@@ -4,6 +4,7 @@ import * as THREE from "three";
 import {
   CameraSurfaces,
   boxEntry,
+  cylinderEntry,
   constrainCamera,
   faceCameraTarget,
   followCamera,
@@ -14,6 +15,97 @@ import { normalizeCamera } from "../src/camera-state.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
+
+test("circular castings retain rounded camera clearance without blocking empty box corners", () => {
+  const cylinder = new THREE.Box3(v(-1, -1, -1), v(1, 1, 1)),
+    a = v(0.95, 0, 1.55),
+    b = v(1.55, 0, 0.95);
+  assert.notEqual(boxEntry(a, b, cylinder, 0.28), null);
+  assert.equal(cylinderEntry(a, b, cylinder, 0.28), null);
+  for (const axis of ["x", "y", "z"]) {
+    const radial = ["x", "y", "z"].find((name) => name !== axis),
+      start = v(),
+      end = v();
+    start[radial] = 3;
+    end[radial] = -3;
+    assert.ok(
+      Math.abs(cylinderEntry(start, end, cylinder, 0.28, axis) - 1.72 / 6) <
+        1e-5,
+    );
+    start.set(0, 0, 0);
+    assert.equal(
+      cylinderEntry(start, end, cylinder, 0.28, axis),
+      null,
+      "target inside the solid can look out",
+    );
+    start[radial] = 1.1;
+    end[radial] = 3;
+    assert.equal(
+      cylinderEntry(start, end, cylinder, 0.28, axis),
+      null,
+      "target can escape the camera margin",
+    );
+    end[radial] = -3;
+    assert.equal(
+      cylinderEntry(start, end, cylinder, 0.28, axis),
+      0,
+      "target in the margin cannot look through the solid",
+    );
+  }
+  // A sphere's clearance at the rim differs from an independently expanded
+  // cylinder radius and cap: the diagonal distance here is greater than 28 cm.
+  assert.equal(
+    cylinderEntry(v(1.5, 1.22, -0.1), v(1.22, 1.22, 0.1), cylinder, 0.28),
+    null,
+  );
+  assert.notEqual(
+    cylinderEntry(v(1.5, 1.19, -0.1), v(1.19, 1.19, 0.1), cylinder, 0.28),
+    null,
+  );
+  const grazing = cylinderEntry(
+    v(1.27999, 0, -100),
+    v(1.27999, 0, 100),
+    cylinder,
+    0.28,
+  );
+  assert.ok(
+    grazing !== null && grazing < 0.5,
+    "long almost-tangent ray retains its shallow rim contact",
+  );
+  assert.equal(
+    cylinderEntry(v(1.281, 0, -100), v(1.281, 0, 100), cylinder, 0.28),
+    null,
+  );
+});
+
+test("rounded casting queries survive merging and follow rotated and scaled parents", () => {
+  const world = new THREE.Group(),
+    surfaces = new CameraSurfaces(world),
+    parent = new THREE.Group(),
+    mesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(1, 1, 2, 32),
+      new THREE.MeshStandardMaterial(),
+    );
+  parent.userData.cameraDynamic = true;
+  parent.add(mesh);
+  world.add(parent);
+  surfaces.capture(mesh, { cylinderAxis: "y" });
+  mergeArchitecture(parent);
+  surfaces.rebuild();
+  for (const angle of [0, 0.8, 1.7]) {
+    parent.position.set(10, 4, -8);
+    parent.rotation.z = angle;
+    parent.scale.setScalar(2);
+    parent.updateWorldMatrix(true, true);
+    const worldPoint = (p) => p.applyMatrix4(parent.matrixWorld),
+      a = worldPoint(v(0.95, 0, 1.55)),
+      b = worldPoint(v(1.55, 0, 0.95));
+    assert.equal(surfaces.entry(a, b), 1);
+    const start = worldPoint(v(3, 0, 0)),
+      end = worldPoint(v(-3, 0, 0));
+    assert.ok(surfaces.entry(start, end) < 0.34);
+  }
+});
 function fixture() {
   const world = new THREE.Group(),
     surfaces = new CameraSurfaces(world),

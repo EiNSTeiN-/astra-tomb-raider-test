@@ -98,6 +98,13 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [wind camera-clearance pass](wind-camera-clearance.md) fixes false pedestal
+obstructions and missing fan/tablet bounds. It checks 952 camera orbits at all
+119 controls, 24 High/Low observers, 60 captures from the continuous third-sector
+route and eight native production views. The route completes its three field
+tasks, two crosswind bridges and 16 physical turns. Native wheel poses also
+expose a boot-contact issue on a sloped bank, recorded as VA-32 for follow-up.
+
 | ID | Observation | Evidence and next action | Status |
 | --- | --- | --- | --- |
 | VA-01 | Monastery column bases stand above parts of the sloping ground beneath them. | Especially clear behind courts 5–7. Footprint measurements found gaps over 10 cm at 48 of 147 supports, with a largest measured gap of 1.58 m. Center-only foundation placement caused the gaps. [Foundation courses, comparisons and checks](monastery-foundations.md) document the repair, rendered-terrain sampling and production input/reload verification. | Fixed |
@@ -130,6 +137,8 @@ and reload checks pass. Later sectors and broader court composition remain open.
 | VA-28 | Restoring occupied generic raised feet loses the earned elevation before nearby arrival recovery. | The [native occupied-save check](bell-racks.md) reproduces the height loss. Generic restoration now searches at the supported saved elevation first, retains clear feet exactly and rejects unsupported air. Regression and six native occupied recoveries pass, followed by exact reloads apart from timestamps. | Fixed; raised arrival recovery |
 | VA-29 | A close sky route view exposes daylight through an outer climbing-pier wall joint; coping joints also lack outer bearing. | The [pier joint repair](sky-first-route.md) fits stepped wall backing and a continuous inset coping bed at all 105 piers. All 9,192 sampled joint rays, 695 tests, 63 continuous-route views, 84 High/Low close-ups and native keyboard/touch save checks pass. Broader sky composition remains under review. | Fixed; pier joint backing |
 | VA-30 | The first cloud chamber retains generic stone blocks and floating labels, its entrance inscription faces a wind pedestal, and its small stones lack explicit camera bounds. | The [counterweight pass](sky-counterweights.md) adds fitted granite/metal construction, backed labels, moving camera solids and a seated inscription in a clear aisle. Verification covers 707 tests, 40 chamber observers, 116 continuous assisted route captures and native keyboard/touch interaction and reload checks. The other seven chamber interiors and wider composition remain under review. | Fixed for the first cloud chamber; wider art review open |
+| VA-31 | Third-engine handwheel views retract to about 60 cm beside round castings; some fan and tablet solids have no camera bounds. | The [camera-clearance repair](wind-camera-clearance.md) replaces the oversized pedestal boxes with separate round casting bounds, registers complete fan envelopes and small tablet backings, and verifies 710 tests, 952 independent camera samples, the 330.345 m continuous route and native keyboard/touch saves. | Fixed; wind camera surfaces |
+| VA-32 | Native D3 wind-handwheel turns lift the boots above the sloped ground during the hand pose. | The [third-engine production views](wind-camera-clearance.md) expose the stance change in both High desktop and Low touch captures. Measure sole support through the turn and inspect the ordering of wind-facing and foot-contact updates; preserve controller position and handwheel operation. | Open; foot-contact investigation |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,
