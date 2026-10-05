@@ -796,3 +796,10 @@ and existing worn bronze shader, with original material colors. Environmental
 audio, mechanical sounds and themed scores are retained; no external asset or
 dependency was added. Their eleven documentation images are actual runtime
 captures converted losslessly to WebP, with decoded RGBA identity checked.
+
+The [relic plate and crown bearing repair](relic-plate-bearing.md) adjusts that
+original stand geometry and its physical support heights. It reuses the same
+credited chapter masonry maps and worn bronze shader. Positioned sounds and
+themed scores are retained; no external asset or dependency was added. Its
+three documentation images are actual runtime captures converted losslessly
+to WebP, with decoded RGBA identity checked.

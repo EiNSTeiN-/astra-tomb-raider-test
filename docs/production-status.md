@@ -19,6 +19,14 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Relic plate and crown bearings](relic-plate-bearing.md) separate the bronze
+  and masonry faces that caused spoke-shaped depth fighting, and close the
+  unsupported crown joins in all eight stands. Eighteen targeted tests and the
+  production build pass. All 68 updated High/Low state and close views are
+  reviewed. Four native collection/older-completion/reload cases pass, with
+  sixteen reviewed production captures and exact saved data across reload apart
+  from `lastPlayed`. VA-42 is repaired; the broader visual audit remains open.
+
 - [Individual chapter relics](chapter-relics.md) replace the eight shared
   floating rewards with named artifact models on solid, terrain-fitted stands.
   All 735 named tests and the production build pass. Verification includes 64

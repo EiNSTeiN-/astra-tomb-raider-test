@@ -7,6 +7,7 @@ import { CameraSurfaces } from "../src/camera-collision.js";
 import { stationBlocked } from "../src/field-station-solids.js";
 import { buildRelicArtwork, updateRelicArtwork } from "../src/relic-art.js";
 import { SaveStore } from "../src/storage.js";
+import { supportAt } from "../src/character-motion.js";
 
 // Terrain construction is expensive. These profiles are read-only; each
 // fixture gets its own feature, meshes, physics, progress and camera index.
@@ -146,6 +147,69 @@ test("the complete foundation footprint is buried on each chapter's actual terra
       game.obstacles.some((o) => stationBlocked(o, p.x, p.y, p.z)),
       "an empty stand remains solid",
     );
+  }
+});
+
+test("relic plates separate their visible faces from masonry and retain a continuous crown bearing", (t) => {
+  for (const level of LEVELS) {
+    const { game, feature } = fixture(t, level, { completed: true }),
+      art = feature.relicArt,
+      centre = feature.group.position,
+      seat = centre.y + art.seat,
+      ray = new THREE.Raycaster();
+    feature.group.updateWorldMatrix(true, true);
+    for (let i = 0; i < 32; i++) {
+      const a = (i * Math.PI) / 16,
+        x = centre.x + Math.sin(a) * 0.55,
+        z = centre.z + Math.cos(a) * 0.55;
+      ray.set(new THREE.Vector3(x, seat + 1, z), new THREE.Vector3(0, -1, 0));
+      const hits = ray.intersectObject(art.construction, true),
+        plate = hits.find(
+          (hit) => hit.object.material.name === "Relic worn bronze",
+        ),
+        stone = hits.find(
+          (hit) => hit.object.material.name === "Relic stand masonry",
+        );
+      assert(plate && stone, `${level.id}: both actual surfaces exist`);
+      assert(
+        Math.abs(plate.point.y - seat) < 1e-6,
+        "artifact seat stays fixed",
+      );
+      assert(
+        plate.point.y - stone.point.y > 0.02,
+        "exposed faces cannot depth fight",
+      );
+      assert(
+        plate.point.y - stone.point.y < 0.03,
+        "the plate remains seated on a thin bearing",
+      );
+    }
+    // The old crown floated above the neck/collar by 4.25 cm. Sweep actual
+    // rendered side walls throughout that join, rather than checking boxes.
+    for (let i = 0; i <= 32; i++) {
+      const y = seat - 0.21 + (i * 0.16) / 32;
+      ray.set(
+        new THREE.Vector3(centre.x - 2, y, centre.z),
+        new THREE.Vector3(1, 0, 0),
+      );
+      assert(
+        ray
+          .intersectObject(art.construction, true)
+          .some((hit) => hit.distance < 3),
+        `${level.id}: no unsupported crown gap at ${y}`,
+      );
+    }
+    for (const offset of [0.5, 0.66]) {
+      const x = centre.x,
+        z = centre.z + offset;
+      ray.set(new THREE.Vector3(x, seat + 1, z), new THREE.Vector3(0, -1, 0));
+      const top = ray.intersectObject(art.construction, true)[0];
+      assert(top);
+      assert(
+        Math.abs(supportAt(game, x, z).height - top.point.y) < 1e-6,
+        "feet follow the plate or its lower stone rim",
+      );
+    }
   }
 });
 

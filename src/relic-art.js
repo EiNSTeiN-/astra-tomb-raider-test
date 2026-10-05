@@ -145,8 +145,29 @@ export function buildRelicArtwork(game, feature, root) {
   );
   for (const y of [foot + 0.17, foot + 0.84])
     cylinder(0.59, 0.075, bronze, 0, y, 0, construction, sides);
-  cylinder(0.7, 0.12, stone, 0, seat - 0.06, 0, construction, sides);
-  cylinder(0.64, 0.025, bronze, 0, seat - 0.0125, 0, construction);
+  // The bronze plate bears on the crown instead of sharing its exposed face.
+  // Extend the crown down into the neck and upper collar so it cannot float.
+  const plateThickness = 0.025,
+    crownThickness = 0.17;
+  cylinder(
+    0.7,
+    crownThickness,
+    stone,
+    0,
+    seat - plateThickness - crownThickness / 2,
+    0,
+    construction,
+    sides,
+  );
+  cylinder(
+    0.64,
+    plateThickness,
+    bronze,
+    0,
+    seat - plateThickness / 2,
+    0,
+    construction,
+  );
   // Small inset panels are part of the shaft; none stand apart from its face.
   for (let i = 0; i < sides; i++) {
     const angle = ((i + 0.5) * Math.PI * 2) / sides,
@@ -498,7 +519,16 @@ export function buildRelicArtwork(game, feature, root) {
     root,
     [1.4, seat - foot, 1.4],
     [0, (seat + foot) / 2, 0],
-    { radius: 0.7, node: construction },
+    {
+      radius: 0.7,
+      node: construction,
+      surfaceHeight: (x, z) =>
+        root.position.y +
+        seat -
+        (Math.hypot(x - root.position.x, z - root.position.z) > 0.64
+          ? plateThickness
+          : 0),
+    },
   );
   root.updateWorldMatrix(true, true);
   const bounds = new THREE.Box3().setFromObject(payload),

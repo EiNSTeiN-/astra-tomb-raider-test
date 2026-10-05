@@ -20,6 +20,8 @@ connecting their raised boards while leaving the damaged-span jumps open.
 Grounded crouching also now braces the crosswind hazards at field stations.
 The eight [chapter relics now have individual models on solid, fitted stands](docs/chapter-relics.md),
 with an earned final sky route and inspected unlock/collection states.
+Their [bronze plates now sit above the masonry, with supported stone crowns](docs/relic-plate-bearing.md),
+removing the alternating top-face wedges visible in the first model milestone.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

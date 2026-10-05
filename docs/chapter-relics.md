@@ -6,6 +6,11 @@ the named artifacts. Each rests on a solid, terrain-fitted stand; collecting it
 leaves that stand in the world. The original pickup IDs, locations, mechanism
 requirements, rewards and save format are retained.
 
+The captures and checks below record the original model milestone. A subsequent
+[plate and crown bearing repair](relic-plate-bearing.md) removes the depth
+fighting visible on its stand tops and closes the gap beneath their stone
+crowns. Its notes provide updated close views and verification.
+
 | Chapter | Artifact and construction | Reviewed High capture |
 | --- | --- | --- |
 | The Verdant Veil | The Verdant Compass: a tilted jade instrument with engraved ticks, a bronze needle and a bearing cradle | [Compass](images/chapter-relics/verdant.webp) |
