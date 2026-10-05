@@ -819,3 +819,11 @@ retains the credited explorer, chapter architecture, materials, positional sound
 and themed scores. No external asset or dependency was added. Its five
 documentation images are actual game captures converted losslessly to WebP,
 with decoded RGBA identity verified.
+
+The [wider cloud chamber aisle](cloud-aisle.md) rebuilds original procedural
+walls, longer framed louver leaves, hinge straps and crown bearings for the
+first cloud court. It reuses the credited chapter masonry maps and existing
+wind metal/timber materials. Positional drive emitters follow the moved
+assemblies; environmental sounds and themed scores are retained. No external
+asset or dependency was added. Its four documentation images are actual game
+captures converted losslessly to WebP, with decoded RGBA identity verified.

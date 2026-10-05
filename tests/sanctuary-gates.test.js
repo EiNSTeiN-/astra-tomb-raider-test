@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { SaveStore } from "../src/storage.js";
-import { CameraSurfaces } from "../src/camera-collision.js";
+import { CameraSurfaces, constrainCamera } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
 import { buildFieldGates } from "../src/field-world.js";
 import {
@@ -312,23 +312,24 @@ test("monastery blind-bay lattice is seated against its plaster backing", () => 
 });
 
 test("hinged collision bounds contain the transformed door corners throughout the inward swing", () => {
-  for (const side of [-1, 1])
-    for (let i = 0; i <= 20; i++) {
-      const b = gateLeafBounds(side, i / 20),
-        matrix = new THREE.Matrix4().makeRotationY(b.angle);
-      for (const x of [0, -side * 6.2])
-        for (const z of [-0.3, 0.3]) {
-          const p = new THREE.Vector3(x, 0, z)
-            .applyMatrix4(matrix)
-            .add(new THREE.Vector3(side * 6.2, 0, 6.5));
-          assert.ok(Math.abs(p.x - b.x) <= b.w + 1e-9);
-          assert.ok(Math.abs(p.z - b.z) <= b.d + 1e-9);
+  for (const width of [6.2, 8.7])
+    for (const side of [-1, 1])
+      for (let i = 0; i <= 20; i++) {
+        const b = gateLeafBounds(side, i / 20, width),
+          matrix = new THREE.Matrix4().makeRotationY(b.angle);
+        for (const x of [0, -side * width])
+          for (const z of [-0.3, 0.3]) {
+            const p = new THREE.Vector3(x, 0, z)
+              .applyMatrix4(matrix)
+              .add(new THREE.Vector3(side * width, 0, 6.5));
+            assert.ok(Math.abs(p.x - b.x) <= b.w + 1e-9);
+            assert.ok(Math.abs(p.z - b.z) <= b.d + 1e-9);
+          }
+        if (i === 20) {
+          assert.ok(Math.abs(b.x) - b.w >= width - 0.55);
+          assert.ok(b.z + b.d <= 6.8);
         }
-      if (i === 20) {
-        assert.ok(Math.abs(b.x) - b.w >= 5.65);
-        assert.ok(b.z + b.d <= 6.8);
       }
-    }
 });
 
 test("open leaves never show through the exterior side-wall recesses", (t) => {
@@ -699,8 +700,68 @@ test("sky hinges retain a clear pin bore and outward mirrored straps, and batche
       Math.max(
         Math.abs(bounds.min.x - gate.root.position.x),
         Math.abs(bounds.max.x - gate.root.position.x),
-      ) < 7.35,
+      ) <
+        gate.halfWidth + 0.85,
       "open fittings remain within side-wall footprint",
+    );
+  }
+});
+
+test("the first cloud court retains solid wider doors and clears the recorded counterweight aisle", (t) => {
+  const { game, gate } = fixture(t, 5, null, true),
+    c = gate.root.position;
+  assert.equal(gate.halfWidth, 9);
+  assert.equal(gate.leafWidth, 8.7);
+  for (const other of game.fieldGates.slice(1)) {
+    assert.equal(other.halfWidth, 6.5);
+    assert.equal(other.leafWidth, 6.2);
+  }
+  assert.equal(gate.walls.find((w) => w.side === 0).length, 18);
+  for (const side of [-1, 1]) {
+    assert.equal(gate.walls.find((w) => w.side === side).position[0], side * 9);
+    assert.equal(
+      gate.sources.find((s) => s.id === `gate-drive-${gate.stage}-${side}`).x,
+      c.x + side * 9,
+    );
+  }
+  for (let dx = -8; dx <= 8; dx += 0.5) {
+    assert.equal(
+      game.canMove(c.x + dx, c.z + 6.5, 0),
+      false,
+      `closed door at ${dx}`,
+    );
+    assert.ok(
+      game.cameraSurfaces.entry(
+        new THREE.Vector3(c.x + dx, c.y + 3.7, c.z + 8),
+        new THREE.Vector3(c.x + dx, c.y + 3.7, c.z + 5),
+        0.28,
+      ) < 1,
+      `door camera solid at ${dx}`,
+    );
+  }
+  open(game, gate);
+  game.world.updateMatrixWorld(true);
+  for (let i = 0; i <= 24; i++) {
+    const f = i / 24,
+      x = c.x + 4.3 + (6.1799846 - 4.3) * f,
+      z = c.z - 1.4918639 * f,
+      target = new THREE.Vector3(x, game.groundHeight(x, z) + 1.3, z),
+      desired = target
+        .clone()
+        .add(
+          new THREE.Vector3(
+            Math.sin(0.670796) * Math.cos(1.05) * 5.3,
+            Math.sin(1.05) * 5.3 + 0.2,
+            Math.cos(0.670796) * Math.cos(1.05) * 5.3,
+          ),
+        );
+    assert.equal(game.canMove(x, z, 0), true, `saved aisle position ${i}`);
+    const safe = constrainCamera(target, desired, game.cameraSurfaces, (p) =>
+      game.cameraSpace(p),
+    );
+    assert.ok(
+      safe.distanceTo(desired) < 1e-6,
+      `actual wall and folded door clear the aisle camera ${i}`,
     );
   }
 });

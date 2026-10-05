@@ -87,16 +87,16 @@ export const gateEase = (amount) => {
   return t * t * (3 - 2 * t);
 };
 
-// The full door leaf fits inside the original side-wall collision when open.
-export function gateLeafBounds(side, amount) {
+// The full door leaf fits alongside its chamber wall when open.
+export function gateLeafBounds(side, amount, width = 6.2) {
   const angle = (gateEase(amount) * Math.PI) / 2;
   const c = Math.cos(angle),
     s = Math.sin(angle);
   return {
-    x: side * (6.2 - 3.1 * c),
-    z: 6.5 - 3.1 * s,
-    w: 3.1 * c + 0.3 * s,
-    d: 3.1 * s + 0.3 * c,
+    x: side * (width - (width / 2) * c),
+    z: 6.5 - (width / 2) * s,
+    w: (width / 2) * c + 0.3 * s,
+    d: (width / 2) * s + 0.3 * c,
     angle: -side * angle,
   };
 }

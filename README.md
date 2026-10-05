@@ -26,6 +26,8 @@ The seven other [counterweight chambers now have regional masonry and fitted bro
 with backed labels and a clear crystal inscription approach.
 Accepted [stone grips and slides now select a clear working view](docs/counterweight-camera.md),
 with full camera checks through all eight chamber solutions and native keyboard/touch save recovery.
+The first cloud chamber also now has a [wider walking aisle](docs/cloud-aisle.md),
+with fitted folding doors and a clear view along the recorded post-release walk.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

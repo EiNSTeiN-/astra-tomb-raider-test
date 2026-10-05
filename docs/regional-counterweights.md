@@ -3,6 +3,7 @@
 The later [working-camera repair](counterweight-camera.md) addresses the hidden
 explorer in accepted grips and slides recorded during this milestone. Its notes
 retain the separate cloud aisle walking-view finding beside its wall and folded door.
+The later [wider cloud court](cloud-aisle.md) repairs that recorded walking aisle.
 
 The seven counterweight chambers outside the cloud citadel now have fitted
 stone courses, weathered metal caps, mounted grip rails and backed labels.

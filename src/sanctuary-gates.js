@@ -136,7 +136,11 @@ export function buildSanctuaryGate(game, feature, materials) {
     design = m.design,
     x = feature.x * 7,
     z = feature.z * 7,
-    y = game.groundHeight(x, z);
+    y = game.groundHeight(x, z),
+    // The counterweight court needs a walking aisle beside its fitted board.
+    // Widen its actual construction; leave every puzzle coordinate unchanged.
+    halfWidth = game.level.biome === "sky" && feature.stage === 0 ? 9 : 6.5,
+    leafWidth = halfWidth - 0.3;
   const root = new THREE.Group(),
     detail = new THREE.Group(),
     door = new THREE.Group();
@@ -156,6 +160,8 @@ export function buildSanctuaryGate(game, feature, materials) {
     detail,
     door,
     design,
+    halfWidth,
+    leafWidth,
     open,
     amount: open ? 1 : 0,
     motion: 0,
@@ -165,7 +171,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     sources: [],
     foundations: [],
     seals: null,
-    obstacle: { x, z: z + 6.5, w: 6.5, d: 0.9, h: open ? 0 : 7.5 },
+    obstacle: { x, z: z + 6.5, w: halfWidth, d: 0.9, h: open ? 0 : 7.5 },
   };
   let serial = game.level.seed + feature.stage * 557;
   const add = (
@@ -246,11 +252,14 @@ export function buildSanctuaryGate(game, feature, materials) {
   const regionalWalls = CHAMBER_WALL_BIOMES.has(game.level.biome);
   const fittedSkyWalls = design.panel === "lattice";
   gate.walls = [];
-  // Regional chambers retain the gate's footprint and working space.
+  // Fit wall construction and both kinds of collision to the same room span.
   for (const side of [-1, 0, 1]) {
     const back = side === 0,
-      length = back ? 13.0 : 13.8;
-    const point = (t) => ({ x: back ? t : side * 6.5, z: back ? -6.5 : t });
+      length = back ? 2 * halfWidth : 13.8;
+    const point = (t) => ({
+      x: back ? t : side * halfWidth,
+      z: back ? -6.5 : t,
+    });
     let floor = 0;
     for (let i = 0; i <= 12; i++) {
       const p = point(-length / 2 + (i * length) / 12);
@@ -373,7 +382,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     game.obstacles.push({
       x: x + center.x,
       z: z + center.z,
-      w: back ? 7.2 : 0.85,
+      w: back ? halfWidth + 0.7 : 0.85,
       d: back ? 0.85 : 7.2,
       h: 7.5,
     });
@@ -398,7 +407,8 @@ export function buildSanctuaryGate(game, feature, materials) {
         h: y + 8.5 - game.groundHeight(x + footing.x, z + footing.z),
       });
     }
-    if (design.panel === "lattice") buildSkyGateJamb({ side, m, add, block });
+    if (design.panel === "lattice")
+      buildSkyGateJamb({ side, m, add, block, halfWidth });
     else
       for (let row = 0; row < 8; row++)
         block(
@@ -410,14 +420,14 @@ export function buildSanctuaryGate(game, feature, materials) {
           row + 0.55,
           6.5,
         );
-    block(1.7, 0.3, 1.78, m.trim, side * 6.5, 8.35, 6.5);
-    cameraBox(1.7, 8.5, 1.8, side * 6.5, 4.25, 6.5);
+    block(1.7, 0.3, 1.78, m.trim, side * halfWidth, 8.35, 6.5);
+    cameraBox(1.7, 8.5, 1.8, side * halfWidth, 4.25, 6.5);
     if (design.panel === "sluice")
       add(flutedColumnGeometry(7.55, 0.57), m.trim, side * 6.5, 0.45, 7.05);
     for (const yy of [1.0, 3.4, 6.8])
-      block(0.95, 0.22, 0.2, m.metal, side * 6.5, yy, 7.38);
+      block(0.95, 0.22, 0.2, m.metal, side * halfWidth, yy, 7.38);
     const wheel = new THREE.Group();
-    wheel.position.set(side * 6.5, 3.4, 7.55);
+    wheel.position.set(side * halfWidth, 3.4, 7.55);
     root.add(wheel);
     // Scale the complete profile: the forge generator's tooth depth is fixed,
     // so a directly tiny radius would cut the rim through its hub opening.
@@ -447,7 +457,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     add(
       new THREE.CylinderGeometry(0.12, 0.12, 0.55, 10),
       m.metal,
-      side * 6.5,
+      side * halfWidth,
       3.4,
       7.5,
     ).rotation.x = Math.PI / 2;
@@ -475,7 +485,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     const source = {
       id: `gate-drive-${feature.stage}-${side}`,
       kind: ["snow", "sky"].includes(game.level.biome) ? "rope" : "machine",
-      x: x + side * 6.5,
+      x: x + side * halfWidth,
       y: y + 3.4,
       z: z + 7.85,
       near: 2,
@@ -488,7 +498,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     gate.sources.push(source);
   }
   block(
-    12.9,
+    2 * halfWidth - 0.1,
     0.35,
     1.1,
     design.panel === "lattice" ? m.wood : m.trim,
@@ -499,7 +509,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     true,
   );
   if (design.crown === "wind") {
-    buildSkyGateCrown({ m, add, block, root, detail });
+    buildSkyGateCrown({ m, add, block, root, detail, halfWidth });
   } else if (design.crown === "arch") {
     for (let i = 0; i < 15; i++) {
       const a = (i * Math.PI) / 15 + 0.006,
@@ -660,10 +670,10 @@ export function buildSanctuaryGate(game, feature, materials) {
   }
   for (const side of [-1, 1]) {
     const leaf = new THREE.Group();
-    leaf.position.x = side * 6.2;
+    leaf.position.x = side * leafWidth;
     leaf.userData.cameraDynamic = true;
     door.add(leaf);
-    const cx = -side * 3.1,
+    const cx = (-side * leafWidth) / 2,
       bodyMaterial = ["relief", "crystal"].includes(design.panel)
         ? m.wall
         : design.panel === "timber"
@@ -671,7 +681,7 @@ export function buildSanctuaryGate(game, feature, materials) {
           : m.metal;
     if (design.panel !== "lattice")
       block(6.15, 7.4, 0.48, bodyMaterial, cx, 3.7, 0, leaf);
-    cameraBox(6.2, 7.4, 0.6, cx, 3.7, 0, leaf);
+    cameraBox(leafWidth, 7.4, 0.6, cx, 3.7, 0, leaf);
     const leafDetail = new THREE.Group();
     leaf.add(leafDetail);
     if (design.panel === "lattice") {
@@ -900,12 +910,21 @@ export function buildSanctuaryGate(game, feature, materials) {
     const handle = add(
       new THREE.TorusGeometry(0.25, 0.055, 7, 24),
       m.metal,
-      cx - side * 2.2,
+      cx - side * (leafWidth / 2 - 0.9),
       3.45,
       0.55,
       leafDetail,
     );
-    block(0.22, 0.4, 0.28, m.metal, cx - side * 2.2, 3.7, 0.4, leafDetail);
+    block(
+      0.22,
+      0.4,
+      0.28,
+      m.metal,
+      cx - side * (leafWidth / 2 - 0.9),
+      3.7,
+      0.4,
+      leafDetail,
+    );
     mergeArchitecture(leaf);
     mergeArchitecture(leafDetail);
     const obstacle = { x: 0, z: 0, w: 0, d: 0, h: 7.5 };
@@ -963,7 +982,7 @@ export function updateSanctuaryGate(game, gate, dt) {
   } else {
     gate.obstacle.h = gate.amount > 0.94 ? 0 : 7.5;
     for (const leaf of gate.leaves) {
-      const b = gateLeafBounds(leaf.side, gate.amount);
+      const b = gateLeafBounds(leaf.side, gate.amount, gate.leafWidth);
       leaf.group.rotation.y = b.angle;
       Object.assign(leaf.obstacle, {
         x: c.x + b.x,
@@ -1006,7 +1025,7 @@ export function updateSanctuaryGate(game, gate, dt) {
       const age = (i * 0.618 + t * 0.5) % 1;
       p.setXYZ(
         i,
-        Math.sin(i * 17.13) * 5.9,
+        Math.sin(i * 17.13) * (gate.halfWidth - 0.6),
         0.08 + age * 0.7,
         6.5 + Math.cos(i * 11) * 0.35 + age * 0.45,
       );

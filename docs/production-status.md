@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The first [cloud chamber walking aisle](cloud-aisle.md) now has an 18 m
+  court with fitted longer doors, grounded walls and matching collision. All
+  43 targeted tests and the production build pass. The 92 updated High/Low
+  walking frames keep full character coverage and a 5.474 m camera arm; eight
+  baseline, eight updated and 22 chamber-state views are reviewed. Keyboard
+  High and portrait touch Low stone moves, release, walking and reload pass,
+  with ten native captures reviewed and one independently verified existing
+  arrival-camera correction. A 185.349 m continuous assisted route solves all
+  14 stones and the first wind engine, then returns through the doorway at full
+  health; all 64 route captures are reviewed. The recorded VA-45 aisle is
+  repaired; VA-46 retains close free approach/return views beside the stones
+  and forecourt machinery. A separate stationary replay distinguishes camera
+  extension lag from a remaining wind-bearing obstruction. The observatory
+  VA-39 and broader chapter composition remain under review.
+
 - [Counterweight working views](counterweight-camera.md) predict the moving
   stone and explorer across each accepted slide, retaining a clear current
   view or choosing a nearby working angle. All 51 targeted checks and the
@@ -28,9 +43,10 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   cases preserve saves apart from timestamps and two independently proved
   arrival-camera corrections. Keyboard and touch look remain available while
   gripping. VA-44 is repaired for accepted grips/slides; VA-45 records a cloud
-  aisle walking view that still fades the explorer beside the side wall and
-  folded door leaf. A separate 92-frame movement replay and physical mesh rays
-  confirm that obstruction; all eight diagnostic captures are reviewed.
+  aisle walking view that faded the explorer beside the side wall and folded
+  door leaf before the later wider-court repair. A separate 92-frame movement
+  replay and physical mesh rays confirm that obstruction; all eight diagnostic
+  captures are reviewed.
 
 - [Regional counterweight chambers](regional-counterweights.md) dress the seven
   remaining primitive boards with chapter masonry, regional seals, fitted

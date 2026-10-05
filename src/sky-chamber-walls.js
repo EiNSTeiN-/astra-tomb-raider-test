@@ -87,8 +87,8 @@ export function buildSkyChamberWall({
 }) {
   const group = new THREE.Group(),
     angle = side === 0 ? Math.PI : (side * Math.PI) / 2,
-    position = [side * 6.5, 0, side === 0 ? -6.5 : 0],
-    plan = skyChamberWallPlan(length, gate.stage, side);
+    position = [side * gate.halfWidth, 0, side === 0 ? -6.5 : 0],
+    plan = skyChamberWallPlan(length, gate.stage, side, gate.leafWidth);
   group.name = `Cloud chamber ${gate.stage + 1}: carved outer wall ${side}`;
   group.position.set(...position);
   group.rotation.y = angle;

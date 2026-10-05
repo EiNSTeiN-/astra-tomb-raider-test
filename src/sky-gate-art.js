@@ -2,7 +2,12 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { fittedWallGeometry } from "./sky-masonry.js";
 
-export function skyChamberWallPlan(length, stage = 0, side = 0) {
+export function skyChamberWallPlan(
+  length,
+  stage = 0,
+  side = 0,
+  leafWidth = 6.2,
+) {
   const variant = (((stage + side + 3) % 3) + 3) % 3;
   const count = [2, 3, 4][variant],
     radius = [1.08, 0.68, 0.57][variant],
@@ -19,11 +24,12 @@ export function skyChamberWallPlan(length, stage = 0, side = 0) {
       top,
       radius,
       head: radius * 0.73,
-      // A fully folded leaf occupies the front half of each side wall. Keep
+      // A fully folded leaf occupies a bay alongside each side wall. Keep
       // its exterior blind-bay backing outside the timber and rear brace.
       backing:
         side !== 0 &&
-        -side * (((i + 0.5) * length) / count - length / 2) + radius > 0.15
+        -side * (((i + 0.5) * length) / count - length / 2) + radius >
+          6.5 - leafWidth - 0.15
           ? 0.02
           : -0.32,
     })),
@@ -193,13 +199,27 @@ export function buildSkyGateLeaf({
   detail,
 }) {
   detail.name = "Wind-screen joinery and fasteners";
+  const width = gate.leafWidth,
+    edge = width / 2 - 0.27,
+    columns = Math.ceil(width / 3.1),
+    bay = (2 * edge) / columns,
+    stiles = Array.from({ length: columns + 1 }, (_, i) => -edge + i * bay);
   // Framed half-panels admit wind between pitched laths. The rear diagonal
   // ties the latch rail to the lower hinge; all fittings share the leaf parent.
-  for (const xx of [-2.83, 0, 2.83])
-    block(xx === 0 ? 0.26 : 0.38, 7.3, 0.43, m.wood, cx + xx, 3.7, 0, leaf);
+  for (const [i, xx] of stiles.entries())
+    block(
+      i === 0 || i === columns ? 0.38 : 0.26,
+      7.3,
+      0.43,
+      m.wood,
+      cx + xx,
+      3.7,
+      0,
+      leaf,
+    );
   for (const yy of [0.24, 1, 3.4, 6.8, 7.15])
     block(
-      5.45,
+      width - 0.75,
       yy === 0.24 || yy === 7.15 ? 0.36 : 0.26,
       0.4,
       m.wood,
@@ -208,14 +228,14 @@ export function buildSkyGateLeaf({
       0,
       leaf,
     );
-  for (const col of [-1, 1])
+  for (let col = 0; col < columns; col++)
     for (let row = 0; row < 11; row++) {
       const slat = block(
-        2.49,
+        bay - 0.34,
         0.37,
         0.145,
         m.wood,
-        cx + col * 1.405,
+        cx - edge + (col + 0.5) * bay,
         0.7 + row * 0.595,
         -0.015,
         leaf,
@@ -224,7 +244,7 @@ export function buildSkyGateLeaf({
     }
   const brace = block(
     0.21,
-    Math.hypot(5.56, 6.2),
+    Math.hypot(width - 0.64, 6.2),
     0.13,
     m.wood,
     cx,
@@ -232,23 +252,32 @@ export function buildSkyGateLeaf({
     -0.215,
     leaf,
   );
-  brace.rotation.z = side * Math.atan(5.56 / 6.2);
+  brace.rotation.z = side * Math.atan((width - 0.64) / 6.2);
   for (const end of [-1, 1])
     block(
       0.4,
       0.44,
       0.13,
       m.metal,
-      cx - side * end * 2.78,
+      cx - side * end * (width / 2 - 0.32),
       3.7 + end * 3.1,
       -0.225,
       leaf,
     );
   for (const yy of [1, 3.4, 6.8]) {
-    add(hingeStrapGeometry(side), m.metal, -side * 0.23, yy, 0.255, leaf);
+    add(
+      hingeStrapGeometry(side, width - 0.6),
+      m.metal,
+      -side * 0.23,
+      yy,
+      0.255,
+      leaf,
+    );
     add(hingeBarrelGeometry(), m.metal, 0, yy, 0, leaf);
     block(0.22, 0.22, 0.3, m.metal, -side * 0.17, yy, 0.12, leaf);
-    for (const along of [0.48, 1.25, 2.4, 3.6, 4.85]) {
+    for (const along of [0.48, 1.25, 2.4, 3.6, 4.85, 6.1, 7.35].filter(
+      (x) => x < width - 1,
+    )) {
       const xx = -side * (along + 0.23);
       const washer = add(
         new THREE.CylinderGeometry(0.071, 0.071, 0.02, 12),
@@ -271,7 +300,7 @@ export function buildSkyGateLeaf({
     }
   }
   // Joinery pegs sit on the rails rather than floating in the louver openings.
-  for (const xx of [-2.83, 0, 2.83])
+  for (const xx of stiles)
     for (const yy of [0.24, 1, 3.4, 6.8, 7.15]) {
       const peg = add(
         new THREE.CylinderGeometry(0.055, 0.055, 0.025, 10),
@@ -286,40 +315,77 @@ export function buildSkyGateLeaf({
   return detail;
 }
 
-export function buildSkyGateJamb({ side, m, add, block }) {
+export function buildSkyGateJamb({ side, m, add, block, halfWidth = 6.5 }) {
   // An L-shaped reveal exposes the hinge axis while retaining the existing
   // structural footprint. The returns support both the lintel and drive.
-  block(1.34, 8, 0.35, m.trim, side * 6.5, 4, 6.0);
-  block(0.64, 8, 0.87, m.trim, side * 6.87, 4, 6.78);
+  block(1.34, 8, 0.35, m.trim, side * halfWidth, 4, 6.0);
+  block(0.64, 8, 0.87, m.trim, side * (halfWidth + 0.37), 4, 6.78);
   for (let row = 0; row < 8; row++) {
-    block(1.48, 0.985, 0.53, m.trim, side * 6.5, row + 0.535, 6.0);
-    block(0.78, 0.985, 1.03, m.trim, side * 6.87, row + 0.535, 6.78);
+    block(1.48, 0.985, 0.53, m.trim, side * halfWidth, row + 0.535, 6.0);
+    block(
+      0.78,
+      0.985,
+      1.03,
+      m.trim,
+      side * (halfWidth + 0.37),
+      row + 0.535,
+      6.78,
+    );
   }
   for (const yy of [1, 3.4, 6.8]) {
     for (const dy of [-0.245, 0.245])
-      add(hingeBarrelGeometry(0.18), m.metal, side * 6.2, yy + dy, 6.5);
+      add(
+        hingeBarrelGeometry(0.18),
+        m.metal,
+        side * (halfWidth - 0.3),
+        yy + dy,
+        6.5,
+      );
     add(
       new THREE.CylinderGeometry(0.1, 0.1, 0.72, 16),
       m.metal,
-      side * 6.2,
+      side * (halfWidth - 0.3),
       yy,
       6.5,
     );
     const cap = add(
       new THREE.SphereGeometry(0.14, 16, 10),
       m.metal,
-      side * 6.2,
+      side * (halfWidth - 0.3),
       yy + 0.38,
       6.5,
     );
     cap.scale.y = 0.5;
-    block(0.39, 0.18, 0.18, m.metal, side * 6.38, yy + 0.245, 6.45);
-    block(0.39, 0.18, 0.18, m.metal, side * 6.38, yy - 0.245, 6.45);
+    block(
+      0.39,
+      0.18,
+      0.18,
+      m.metal,
+      side * (halfWidth - 0.12),
+      yy + 0.245,
+      6.45,
+    );
+    block(
+      0.39,
+      0.18,
+      0.18,
+      m.metal,
+      side * (halfWidth - 0.12),
+      yy - 0.245,
+      6.45,
+    );
   }
 }
 
-export function buildSkyGateCrown({ m, add, block, root, detail }) {
-  block(13.45, 0.5, 1.45, m.wood, 0, 8.05, 6.5, root, true);
+export function buildSkyGateCrown({
+  m,
+  add,
+  block,
+  root,
+  detail,
+  halfWidth = 6.5,
+}) {
+  block(2 * halfWidth + 0.45, 0.5, 1.45, m.wood, 0, 8.05, 6.5, root, true);
   for (const side of [-1, 1])
     for (let row = 0; row < 4; row++)
       block(
@@ -327,13 +393,13 @@ export function buildSkyGateCrown({ m, add, block, root, detail }) {
         0.39,
         1.7,
         m.trim,
-        side * (5.8 - row * 0.63),
+        side * (halfWidth - 0.7 - row * 0.63),
         8.5 + row * 0.36,
         6.5,
         root,
         true,
       );
-  block(7.9, 0.48, 1.85, m.trim, 0, 9.93, 6.5, root, true);
+  block(2 * halfWidth - 5.1, 0.48, 1.85, m.trim, 0, 9.93, 6.5, root, true);
   block(2.15, 1.82, 0.85, m.trim, 0, 9.07, 6.55, root, true);
   add(
     new THREE.TorusGeometry(0.69, 0.065, 10, 48),
