@@ -86,6 +86,10 @@ and advances 120 ordinary camera updates. The arm extends from the route's
 bearing in the forecourt remains in the desired camera segment; the chamber
 side wall and folded leaf do not. The extra diagnostic capture is reviewed.
 
+The later [inscription relocation](cloud-inscription.md) clears that recorded
+reading/reset place and final return. Its repeated route retains a visible
+explorer at the new tablet; other free approaches remain under review.
+
 ![Native portrait walking after releasing the stone](images/cloud-aisle/native-touch.webp)
 
 The verified production files are:

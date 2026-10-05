@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cloud forecourt inscription](cloud-inscription.md) moves clear of nearby
+  wind stands. All 14 counterweight tests and the production build pass. A
+  192.687 m continuous assisted route solves all 14 stone moves and the first
+  engine, returning to the tablet with a 5.354 m moving camera arm and full
+  health; all 64 captures are reviewed. High/Low reading and actual reset checks
+  retain full character coverage, supported tablet footing and safe feet.
+  Older keyboard/touch saves still read, walk and reload, with eight native
+  captures and both existing arrival-camera corrections independently proved.
+  VA-46 is partly repaired at the relocated inscription; free stone approaches,
+  older forecourt walking views and broader camera composition remain open.
+
 - The first [cloud chamber walking aisle](cloud-aisle.md) now has an 18 m
   court with fitted longer doors, grounded walls and matching collision. All
   43 targeted tests and the production build pass. The 92 updated High/Low

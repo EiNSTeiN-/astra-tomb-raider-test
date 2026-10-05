@@ -304,10 +304,11 @@ export function buildCounterweightArt(game, chamber, label) {
   );
   feature.core = core;
   // A seated tablet carries lettering at the slab's own tilt. The cloud's
-  // left aisle clears its duct; the crystal's right aisle clears its tall
+  // forecourt keeps the reader and reset stance clear of its wind stands;
+  // the crystal's right aisle clears its tall
   // central resonator. Other chapters retain their original reading location.
-  const tx = sky ? -5 : biome === "crystal" ? 5 : 0,
-    tz = sky ? 8.3 : 8.4,
+  const tx = sky ? -6 : biome === "crystal" ? 5 : 0,
+    tz = sky ? 11.3 : 8.4,
     centreFloor =
       game.groundHeight(group.position.x + tx, group.position.z + tz) -
       group.position.y;

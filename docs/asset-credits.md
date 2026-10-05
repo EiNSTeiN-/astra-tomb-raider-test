@@ -827,3 +827,10 @@ wind metal/timber materials. Positional drive emitters follow the moved
 assemblies; environmental sounds and themed scores are retained. No external
 asset or dependency was added. Its four documentation images are actual game
 captures converted losslessly to WebP, with decoded RGBA identity verified.
+
+The [cloud inscription relocation](cloud-inscription.md) moves the original
+procedural tablet and its existing masonry, backing, metal fittings and bounds
+onto a clear part of the forecourt. It retains the credited explorer, sounds and
+themed scores. No external asset or dependency was added. Its four documentation
+images are actual game captures converted losslessly to WebP, with decoded RGBA
+identity verified.
