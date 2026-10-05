@@ -20,6 +20,7 @@ import { groundExplorer } from "./explorer-grounding.js";
 import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
 import { strideRate } from "./stride.js";
 import { ExplorerVisibility } from "./explorer-visibility.js";
+import { activeWindGrip } from "./wind-pose.js";
 
 function equipmentSurface(material) {
   const canvas = /canvas|bottle/.test(material.name);
@@ -213,6 +214,8 @@ export function animateExplorer(game, dt, moving, sprinting) {
       game.blockGrip.axis[0],
       game.blockGrip.axis[1],
     );
+  } else if (activeWindGrip(game)) {
+    game.avatar.rotation.y = Math.PI;
   } else if (
     game.grounded &&
     !game.swimming &&

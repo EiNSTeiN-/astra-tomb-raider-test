@@ -18,6 +18,7 @@ import {
   windSurface,
 } from "./wind-art.js";
 import { poseHands } from "./pose.js";
+import { activeWindGrip } from "./wind-pose.js";
 import {
   batchWindCourt,
   syncWindCourt,
@@ -607,20 +608,8 @@ export function updateWindCourts(game, dt) {
   const grip = game.windGrip,
     site = game.windSites?.[grip?.stage];
   if (grip && site) {
-    if (
-      game.paused ||
-      site.visualTime > grip.until ||
-      !game.grounded ||
-      game.swimming ||
-      game.blockGrip ||
-      game.climb ||
-      game.ropeRide ||
-      game.dodge ||
-      game.player.position.distanceTo(grip.position) > 0.25
-    )
-      game.windGrip = null;
+    if (!activeWindGrip(game)) game.windGrip = null;
     else if (game.rig) {
-      game.avatar.rotation.y = Math.PI;
       const n = site.nodes[grip.index];
       n.wheel.updateWorldMatrix(true, true);
       poseHands(

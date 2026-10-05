@@ -735,3 +735,10 @@ capped-cylinder camera queries and component registrations in
 environment maps, original wind geometry, synthesis and sky score. No external
 assets or dependencies were added. Its three documentation images are actual
 game captures converted losslessly to WebP, with decoded RGBA identity checked.
+
+The [wind foot-contact repair](wind-foot-contact.md) adds original shared grip
+eligibility code and changes the ordering of the existing explorer's facing and
+terrain fitting. It retains the credited character, materials, wind machinery,
+procedural sounds and sky score. No external assets or dependencies were added.
+Its four comparison images are actual game captures converted losslessly to
+WebP, with matching player/camera positions and decoded RGBA identity checked.

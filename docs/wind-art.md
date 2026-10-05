@@ -7,6 +7,10 @@ pedestal bounds, guards the fan envelopes and tablets, and verifies the third
 engine's continuous route and native keyboard/touch saves. The measurements
 below describe the earlier material and geometry milestone.
 
+The subsequent [foot-contact repair](wind-foot-contact.md) chooses the working
+facing before fitting the boots to sloped ground. It also records an unresolved
+hand-reach problem at some working wheels.
+
 ## Surfaces and construction
 
 Cast bronze, worn bronze and dark bearing metal share a shader with mottled oxidation, varying roughness and metalness, and fine casting grain. Screen derivatives fade the smallest grain at a distance. The old observatory material's regular stripe pattern is no longer used on these engines. Per-vertex casting coordinates survive static merging and instancing, so the patina stays attached to a wheel or duct as it turns. This shader is specific to the wind machinery.
@@ -54,4 +58,4 @@ A paused release reload restored that exact position, health, elapsed time, stag
 
 A live sound check selected eight environmental voices, including the nearby wind collector, within the shared twelve-voice budget. Switching from sky to crystal released all 3,095 expected instance buffers and all three dedicated metal materials. No wind courts, wind sources or wind voices remained. The development console also reported no warnings or errors. Both temporary verification saves were cleared and High quality restored afterward.
 
-The production build succeeds with the existing large Three.js chunk advisory. These additions increase the geometry budget and add surface-detail shading; the earlier batching milestone's workload figures do not describe the current art. Consumer-hardware performance and subjective audio evaluation still need broader testing. The game remains below the requested AAA visual standard, and an hour of unassisted play per chapter remains unverified in [production status](production-status.md).
+The production build succeeds with the existing large Three.js chunk advisory. These additions increase the geometry budget and add surface-detail shading; the earlier batching milestone's workload figures do not describe the current art. Consumer-hardware performance and subjective audio evaluation still need broader testing. The overall playable-world target remains open in [production status](production-status.md); the current scope has no minimum chapter duration.

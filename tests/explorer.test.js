@@ -40,6 +40,8 @@ import {
 import { normalizeFireVault } from "../src/fire-vault-rules.js";
 import { Adventure } from "../src/game.js";
 import { ExplorerContact } from "../src/explorer-contact.js";
+import { activeWindGrip } from "../src/wind-pose.js";
+import { windLayout, windPosition } from "../src/wind-rules.js";
 import {
   buildShutterHouse,
   startShutterTurn,
@@ -1021,6 +1023,99 @@ test("boots fit slopes in either direction while retaining swing clearance and t
         }
       }
     }
+  }
+});
+
+test("wind handwheel facing fits the delivered boots before the first turning frame at every working control", async () => {
+  const game = await groundedActor();
+  game.level = LEVELS[5];
+  game.map = createMap(game.level);
+  game.terrainProfile = createTerrainProfile(game.map, game.level);
+  game.groundHeight = game.terrainProfile.height;
+  game.moveVelocity = { x: 0, z: 0 };
+  game.actualMoveSpeed = 0;
+  game.windSites = Array.from({ length: 9 }, () => ({ visualTime: 0 }));
+  let controls = 0;
+  for (const feature of game.map.features.filter(
+    (f) => f.type === "mechanism",
+  )) {
+    const state = windLayout(feature.stage);
+    for (let index = 0; index < state.values.length; index++) {
+      if (state.fixed.includes(index)) continue;
+      const local = windPosition(state, index),
+        x = feature.x * 7 + local.x,
+        z = feature.z * 7 + local.z + 1.52;
+      game.player.position.set(x, game.groundHeight(x, z), z);
+      const root = game.player.position.clone();
+      for (const yaw of [0, 2.124, 4.748]) {
+        game.windGrip = null;
+        game.rig.grounding = undefined;
+        game.avatar.rotation.y = yaw;
+        animateExplorer(game, 1 / 60, false, false);
+        game.windSites[feature.stage].visualTime = 0;
+        game.windGrip = {
+          stage: feature.stage,
+          index,
+          until: 0.55,
+          position: root.clone(),
+        };
+        for (let frame = 0; frame < 6; frame++) {
+          animateExplorer(game, 1 / 60, false, false);
+          const gaps = soleClearances(game);
+          assert.equal(game.avatar.rotation.y, Math.PI);
+          assert.ok(game.player.position.equals(root));
+          assert.ok(
+            gaps.every((gap) => gap > -0.012 && gap < 0.045),
+            `${feature.stage}/${index}/${yaw}/${frame}: soles ${gaps}`,
+          );
+          game.windSites[feature.stage].visualTime += 1 / 60;
+        }
+      }
+      controls++;
+    }
+  }
+  assert.equal(controls, 110);
+});
+
+test("inactive wind grips do not override the explorer's facing during interruption or release", async () => {
+  const game = await groundedActor(),
+    position = game.player.position.clone(),
+    cases = [
+      { paused: true },
+      { grounded: false },
+      { swimming: true },
+      {
+        climb: {
+          time: 0,
+          start: position.clone(),
+          end: position.clone().add(new THREE.Vector3(0, 1, 1)),
+        },
+      },
+      { ropeRide: {} },
+      { dodge: {} },
+      { blockGrip: { axis: [Math.sin(0.7), Math.cos(0.7)] } },
+      { expired: true },
+      { moved: true },
+    ];
+  for (const interrupted of cases) {
+    Object.assign(game, {
+      paused: false,
+      grounded: true,
+      swimming: false,
+      climb: null,
+      ropeRide: null,
+      dodge: null,
+      blockGrip: null,
+      ...interrupted,
+      windSites: [{ visualTime: interrupted.expired ? 1 : 0 }],
+      windGrip: { stage: 0, until: 0.55, position: position.clone() },
+    });
+    game.player.position.copy(position);
+    if (interrupted.moved) game.player.position.x += 0.26;
+    game.avatar.rotation.y = 0.7;
+    assert.equal(activeWindGrip(game), false);
+    animateExplorer(game, 1 / 60, false, false);
+    assert.equal(game.avatar.rotation.y, 0.7);
   }
 });
 

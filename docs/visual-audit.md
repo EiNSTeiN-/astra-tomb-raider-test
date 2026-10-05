@@ -103,7 +103,9 @@ obstructions and missing fan/tablet bounds. It checks 952 camera orbits at all
 119 controls, 24 High/Low observers, 60 captures from the continuous third-sector
 route and eight native production views. The route completes its three field
 tasks, two crosswind bridges and 16 physical turns. Native wheel poses also
-expose a boot-contact issue on a sloped bank, recorded as VA-32 for follow-up.
+prompt the [foot-contact investigation](wind-foot-contact.md), which reproduces
+and fixes a first-frame facing/grounding mismatch at all 110 working controls.
+Its frame inspection records a separate hand-reach issue as VA-33.
 
 | ID | Observation | Evidence and next action | Status |
 | --- | --- | --- | --- |
@@ -138,7 +140,8 @@ expose a boot-contact issue on a sloped bank, recorded as VA-32 for follow-up.
 | VA-29 | A close sky route view exposes daylight through an outer climbing-pier wall joint; coping joints also lack outer bearing. | The [pier joint repair](sky-first-route.md) fits stepped wall backing and a continuous inset coping bed at all 105 piers. All 9,192 sampled joint rays, 695 tests, 63 continuous-route views, 84 High/Low close-ups and native keyboard/touch save checks pass. Broader sky composition remains under review. | Fixed; pier joint backing |
 | VA-30 | The first cloud chamber retains generic stone blocks and floating labels, its entrance inscription faces a wind pedestal, and its small stones lack explicit camera bounds. | The [counterweight pass](sky-counterweights.md) adds fitted granite/metal construction, backed labels, moving camera solids and a seated inscription in a clear aisle. Verification covers 707 tests, 40 chamber observers, 116 continuous assisted route captures and native keyboard/touch interaction and reload checks. The other seven chamber interiors and wider composition remain under review. | Fixed for the first cloud chamber; wider art review open |
 | VA-31 | Third-engine handwheel views retract to about 60 cm beside round castings; some fan and tablet solids have no camera bounds. | The [camera-clearance repair](wind-camera-clearance.md) replaces the oversized pedestal boxes with separate round casting bounds, registers complete fan envelopes and small tablet backings, and verifies 710 tests, 952 independent camera samples, the 330.345 m continuous route and native keyboard/touch saves. | Fixed; wind camera surfaces |
-| VA-32 | Native D3 wind-handwheel turns lift the boots above the sloped ground during the hand pose. | The [third-engine production views](wind-camera-clearance.md) expose the stance change in both High desktop and Low touch captures. Measure sole support through the turn and inspect the ordering of wind-facing and foot-contact updates; preserve controller position and handwheel operation. | Open; foot-contact investigation |
+| VA-32 | Wind-handwheel facing changes after foot fitting, leaving the first turning frame with one boot above sloped ground and the other penetrating it. | The [foot-contact repair](wind-foot-contact.md) selects facing before fitting the delivered boots. Verification covers all 110 working controls in three initial facings, 712 tests, 324 controlled turning/release frames, 36 comparison captures and native keyboard/touch turns and reloads. Controller position and operation are retained. | Fixed; first-frame foot contact |
+| VA-33 | Some wind-handwheel poses leave a wrist about 0.6 m from its assigned moving handle anchor. | The [foot-contact measurements](wind-foot-contact.md) expose the reach mismatch at third-engine working wheels. Inspect working-floor elevation, wheel mounting, stance and handle assignment through rotation; fit the construction and pose without stretching the rig or moving saved controller positions. | Open; handwheel reach and construction |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,

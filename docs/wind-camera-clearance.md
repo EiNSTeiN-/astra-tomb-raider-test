@@ -86,9 +86,10 @@ have no horizontal page overflow and report no errors, warnings or failed assets
 
 ## Remaining review
 
-The native D3 turning views show the boots lifting above the sloped ground during
-the handwheel pose. This is recorded for a separate foot-contact investigation
-in [VA-32](visual-audit.md), and is not closed by the camera repair. Later sky
+The native D3 turning views prompted the subsequent
+[foot-contact investigation](wind-foot-contact.md). That pass reproduces and
+fixes a first-frame facing/grounding mismatch as VA-32, and records a separate
+hand-reach problem as VA-33 in the [visual audit](visual-audit.md). Later sky
 sectors and the broader court, field and discovery compositions remain open.
 The evidence does not establish consumer hardware performance or the overall
 visual target.
