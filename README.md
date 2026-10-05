@@ -13,6 +13,8 @@ The summit [cable frames now leave the reading and boarding edge clear](docs/sum
 with supported footplates and braced arms.
 Recovered [regional fittings now travel on the explorer's pack](docs/carried-fittings.md),
 with a supported cradle, visible bridge crossings and saved pickup/delivery state.
+Physical [wind-wheel turns now select a clear view beside their rotating grips](docs/wind-working-framing.md),
+with normal look controls and verified keyboard/touch save recovery.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

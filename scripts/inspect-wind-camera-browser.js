@@ -2,7 +2,11 @@
 import * as THREE from "three";
 import { constrainCamera } from "../src/camera-collision.js";
 import { updateWindCourts } from "../src/wind-courts.js";
-import { windCameraStandoff, windCameraSpace } from "../src/wind-camera.js";
+import {
+  windCameraStandoff,
+  windCameraSpace,
+  frameWindControl,
+} from "../src/wind-camera.js";
 
 const offsetFor = (yaw, pitch) =>
   new THREE.Vector3(
@@ -81,7 +85,14 @@ export function inspectWindCameraClearance(game) {
   return { samples, violations };
 }
 
-export function windCameraView(game, stage, index, yaw = 2.2, pitch = 0.13) {
+export function windCameraView(
+  game,
+  stage,
+  index,
+  yaw = 2.2,
+  pitch = 0.13,
+  guide = false,
+) {
   const site = game.windSites[stage],
     control = index < 0 ? site?.tablet : site?.nodes[index]?.control;
   if (!control) throw Error("Choose a wind tablet or working handwheel");
@@ -91,6 +102,7 @@ export function windCameraView(game, stage, index, yaw = 2.2, pitch = 0.13) {
   game.yaw = yaw;
   game.pitch = pitch;
   game.updateDecorations(0);
+  const guided = guide && index >= 0 && frameWindControl(game);
   game.updateCamera(10);
   game.renderScene(0);
   const gl = game.renderer.getContext();
@@ -99,6 +111,17 @@ export function windCameraView(game, stage, index, yaw = 2.2, pitch = 0.13) {
     player: game.player.position.toArray(),
     camera: game.camera.position.toArray(),
     arm: game.camera.position.distanceTo(game.cameraFollowTarget),
+    requested: { yaw, pitch },
+    guided,
+    yaw: game.yaw,
+    pitch: game.pitch,
+    coverage: game.rig.visibility.uniform.value,
+    bodyClear:
+      game.cameraSurfaces.entry(
+        game.player.position.clone().add(new THREE.Vector3(0, 1.3, 0)),
+        game.camera.position,
+        0,
+      ) >= 0.999,
     quality: game.store.data.settings.quality,
     linked: game.renderer.info.programs.every((program) =>
       gl.getProgramParameter(program.program, gl.LINK_STATUS),

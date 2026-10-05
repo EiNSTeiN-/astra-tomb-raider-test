@@ -86,11 +86,12 @@ when those mechanisms handle their component.
 
 ## Remaining visual review
 
-The final wind control in this route still produces an obstructed camera view.
-At engine index 4, duct 11, the approach arm measures 1.349 m and the turning
-arm 0.205 m; explorer coverage is zero in both recorded views. That working
-composition needs a separate repair. Later routes, repeated courtyards and
-terrain shoulders, other chamber interiors and custom component handling
+The final wind control in the carrier verification produced an obstructed
+camera view. At engine index 4, duct 11, the approach arm measures 1.349 m and the turning
+arm 0.205 m; explorer coverage is zero in both recorded views. The subsequent
+[working-view repair](wind-working-framing.md) keeps the explorer visible after
+the turn; the preceding approach remains crowded. Later routes, repeated
+courtyards and terrain shoulders, other chamber interiors and custom component handling
 remain part of the [open visual audit](visual-audit.md).
 
 The carrier uses original construction and existing credited assets. Existing

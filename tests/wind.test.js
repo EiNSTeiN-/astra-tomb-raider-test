@@ -40,7 +40,11 @@ import { buildWaterSurfaces } from "../src/water-surface.js";
 import { waterAt } from "../src/hydrology.js";
 import { advanceSwimming, restoreWaterArrival } from "../src/water-motion.js";
 import { arrivalCamera } from "../src/camera-arrival.js";
-import { windCameraStandoff, windCameraSpace } from "../src/wind-camera.js";
+import {
+  windCameraStandoff,
+  windCameraSpace,
+  frameWindControl,
+} from "../src/wind-camera.js";
 import { NodeIO } from "@gltf-transform/core";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { animateExplorer } from "../src/explorer.js";
@@ -319,6 +323,123 @@ test("wind working views retain camera separation through moving grips and fade 
   assert(
     offsets.slice(1).every((value, i) => Math.abs(value - offsets[i]) < 0.025),
   );
+});
+
+test("accepted wind turns frame all working wheels clear of rotating pegs from both reverse headings", (t) => {
+  const { game } = fixture(t);
+  let wheels = 0,
+    samples = 0,
+    minimum = Infinity;
+  for (const site of game.windSites) {
+    ready(game, site.stage);
+    for (const node of site.nodes) {
+      if (!node.control) continue;
+      for (const heading of [-2.0410355629307175, 2.0410355629307175, 0]) {
+        settleWind(game);
+        // The earned route stops just inside the direct-turn tolerance, rather
+        // than exactly at the mathematical centre of the pad.
+        game.player.position.copy(node.control.group.position);
+        game.player.position.x -= 0.0184024376912;
+        game.player.position.z -= 0.00564002448884;
+        const feet = game.player.position.clone();
+        game.yaw = heading;
+        game.pitch = 0.13;
+        const chest = feet.clone().add(new THREE.Vector3(0, 1.3, 0)),
+          offset = windCameraStandoff(game),
+          rearTarget = chest.clone().add(new THREE.Vector3(0, 0, offset)),
+          clearRear =
+            constrainCamera(
+              rearTarget,
+              rearTarget
+                .clone()
+                .add(
+                  new THREE.Vector3(
+                    0,
+                    Math.sin(0.13) * 5.3 + 0.2,
+                    Math.cos(0.13) * 5.3,
+                  ),
+                ),
+              game.cameraSurfaces,
+              (point) => windCameraSpace(game, point, chest, offset),
+            ).distanceTo(rearTarget) > 5.15;
+        for (let turn = 0; turn < 4; turn++) {
+          game.nearest = node.control;
+          assert(windInteract(game));
+          assert(
+            Math.cos(game.yaw) > 0.3,
+            `${site.stage}/${node.index}: working-side view`,
+          );
+          if (heading === 0 && turn === 0 && clearRear)
+            assert.equal(game.yaw, 0, "clear rear heading retained");
+          for (const dt of [0, 0.15, 0.65]) {
+            updateWindCourts(game, dt);
+            const chest = feet.clone().add(new THREE.Vector3(0, 1.3, 0)),
+              offset = windCameraStandoff(game),
+              target = chest.clone().add(new THREE.Vector3(0, 0, offset)),
+              desired = target
+                .clone()
+                .add(
+                  new THREE.Vector3(
+                    Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+                    Math.sin(game.pitch) * 5.3 + 0.2,
+                    Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+                  ),
+                ),
+              camera = constrainCamera(
+                target,
+                desired,
+                game.cameraSurfaces,
+                (point) => windCameraSpace(game, point, chest, offset),
+              ),
+              arm = camera.distanceTo(target);
+            minimum = Math.min(minimum, arm);
+            assert(
+              arm >= 2.2,
+              `${site.stage}/${node.index}/${heading}/${turn}: explorer remains visible`,
+            );
+            assert(game.cameraSpace(camera));
+            assert(game.cameraSurfaces.entry(chest, camera, 0) >= 0.999);
+            assert(game.cameraSurfaces.entry(target, camera, 0) >= 0.999);
+            assert(game.player.position.equals(feet));
+            samples++;
+          }
+        }
+      }
+      wheels++;
+    }
+  }
+  assert.equal(wheels, 110);
+  assert.equal(samples, 3960);
+  t.diagnostic(`Minimum guided working arm: ${minimum} m`);
+});
+
+test("wind framing leaves rejected interactions and later look input under player control", (t) => {
+  const { game } = fixture(t),
+    site = ready(game, 4),
+    node = site.nodes[11];
+  game.player.position.copy(node.control.group.position);
+  game.nearest = node.control;
+  game.yaw = -2.0410355629307175;
+  game.pitch = 0.13;
+  game.carrying = true;
+  assert(windInteract(game));
+  assert.equal(game.yaw, -2.0410355629307175);
+  assert.equal(game.windGrip, null);
+  game.carrying = false;
+  assert(windInteract(game));
+  assert(game.windGrip);
+  game.yaw = 2.4;
+  game.pitch = -0.2;
+  updateWindCourts(game, 0.15);
+  assert.equal(game.yaw, 2.4);
+  assert.equal(game.pitch, -0.2);
+  assert(windInteract(game));
+  assert.equal(
+    game.yaw,
+    2.4,
+    "repeated Use during a turn cannot reframe the camera",
+  );
+  assert.equal(frameWindControl({ yaw: undefined, pitch: undefined }), false);
 });
 
 test("all working wind wheels fit the delivered hands through four legal turns without stretching the rig or losing planted feet", async (t) => {

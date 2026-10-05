@@ -776,3 +776,10 @@ skeleton and shares the actor's camera coverage mask using independent material
 copies. Existing mechanical audio and themed scores are retained. No external
 assets or dependencies were added. Its three documentation images are actual
 game captures converted losslessly to WebP, with decoded RGBA identity checked.
+
+The [wind working-view repair](wind-working-framing.md) adds original camera
+selection for accepted physical wheel interactions. It retains the credited
+character, machinery, materials, positioned environmental and mechanical audio,
+and themed scores. No external assets or dependencies were added. Its four
+documentation images are actual game captures converted losslessly to WebP,
+with decoded RGBA identity checked.

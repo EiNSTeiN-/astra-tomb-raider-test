@@ -20,6 +20,7 @@ import {
 import { activeWindGrip, poseWindGrip, windHandsFree } from "./wind-pose.js";
 import { advanceCharacter, supportAt } from "./character-motion.js";
 import { extinguishTorch } from "./torch.js";
+import { frameWindControl } from "./wind-camera.js";
 import {
   batchWindCourt,
   syncWindCourt,
@@ -753,6 +754,7 @@ export function windInteract(game) {
       );
       return true;
     }
+    frameWindControl(game);
     game.windApproach = {
       stage: f.stage,
       index: f.index,
@@ -763,6 +765,7 @@ export function windInteract(game) {
     extinguishTorch(game, "Torch put out to turn the wheel with both hands.");
     return true;
   }
+  frameWindControl(game);
   turnWindWheel(game, site, node);
   return true;
 }
