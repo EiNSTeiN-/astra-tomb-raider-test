@@ -82,8 +82,8 @@ playability; it does not establish full character visibility across all of those
 approaches. They remain VA-46 in the wider camera/composition audit. A separate
 stationary replay of that final position keeps its recorded heading and pitch
 and advances 120 ordinary camera updates. The arm extends from the route's
-1.739 m to 2.070 m, with character coverage 0.909. A fixed cylindrical wind
-bearing in the forecourt remains in the desired camera segment; the chamber
+1.739 m to 2.070 m, with character coverage 0.909. A fixed cylindrical coupling
+sleeve between wind castings remains in the desired camera segment; the chamber
 side wall and folded leaf do not. The extra diagnostic capture is reviewed.
 
 The later [inscription relocation](cloud-inscription.md) clears that recorded

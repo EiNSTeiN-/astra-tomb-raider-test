@@ -1,11 +1,11 @@
 # Cloud forecourt inscription
 
-The first cloud chamber's entrance tablet stood close to a wind bearing. On
-returning from the engine, the desired camera segment crossed that bearing and
+The first cloud chamber's entrance tablet stood close to a wind coupling sleeve.
+On returning from the engine, the desired camera segment crossed that sleeve and
 partly faded the explorer. The [wider chamber aisle](cloud-aisle.md) had already
 cleared the side wall; this obstruction belonged to the forecourt machinery.
 
-![Earlier return beside the wind bearing](images/cloud-inscription/before.webp)
+![Earlier return beside the wind coupling](images/cloud-inscription/before.webp)
 
 The tablet now sits 1 m farther left and 3 m farther forward, on the same flat
 forecourt. Its slab, backing, lettering, base, walking solid and camera bounds
@@ -41,7 +41,7 @@ assisted; this does not establish an unassisted playthrough or device performanc
 A separate stationary replay uses the updated route's exact final feet, heading
 and pitch, then advances 120 normal camera updates. Its arm reaches **5.474 m**,
 character coverage is 1, and no actual registered solid intersects the desired
-camera segment. The earlier stationary return retained a wind-bearing
+camera segment. The earlier stationary return retained a wind-coupling
 obstruction at 2.070 m and 0.909 coverage. The additional diagnostic capture is
 reviewed; the two positions differ because the tablet moved.
 
@@ -84,6 +84,30 @@ position also retains close views before the existing arrival correction. Those
 parts of VA-46 remain open, alongside the observatory approach VA-39 and broader
 chapter composition. This change does not establish complete character visibility
 through the whole route, subjective sound quality or supported-device performance.
+
+A follow-up stationary replay identifies the remaining recorded obstacles:
+stone III at the third move's approach, a fixed puzzle pillar at the ninth move's
+approach, and a horizontal coupling sleeve during the chamber return. After 120
+neutral camera updates their arms remain 0.849 m, 1.545 m and 1.307 m. All three
+diagnostic captures are reviewed. These are actual registered solids; the
+coupling sleeve joins neighboring wind castings in `src/wind-courts.js`.
+
+The repeated third-move approach records 50 moving frames and 120 neutral camera
+frames. Its shortest arm is 0.426 m; 30 moving frames and all neutral frames fade
+the explorer fully. All eighteen trace captures are reviewed. The assisted
+steering turns the camera almost 290 degrees during that short leg. A comparison
+retaining the saved heading follows the exact same 50-frame feet trajectory,
+but also settles into a hidden view, at 1.330 m. Its four captures are reviewed;
+the assertion expecting full character coverage fails. Assisted steering alone
+does not explain the obstruction.
+
+An additional native keyboard approach also records a hidden walking view. Its
+first reload changes the heading by 15 degrees, consistent with the existing
+arrival behavior, but a repeat allowing that correction does not finish the
+reload because the browser closes. The two earlier attempt captures are
+reviewed. This experiment adds no passed native case or independently verified
+arrival correction; the production inscription checks above remain the completed
+evidence for this milestone.
 
 The tablet remains original procedural artwork using the credited chapter
 masonry and existing metal materials. No external model, texture, sound or
