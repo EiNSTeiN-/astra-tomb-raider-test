@@ -43,6 +43,7 @@ import {
 } from "../src/traversal.js";
 import { ropeGrip } from "../src/traversal-courses.js";
 import { normalizeSave } from "../src/storage.js";
+import { queueJumpPress } from "../src/jump-input.js";
 
 function motionGame(ground = () => 0, obstacles = []) {
   return Object.assign(Object.create(Adventure.prototype), {
@@ -70,6 +71,36 @@ function motionGame(ground = () => 0, obstacles = []) {
     save() {},
   });
 }
+
+test("a jump released between controller frames still starts once, and resets cancel an unprocessed press", () => {
+  const g = motionGame();
+  g.active = true;
+  assert(queueJumpPress(g));
+  g.keys.delete("Space"); // Native keyup / touch release before the next update.
+  g.updatePlayer(1 / 60);
+  assert(g.player.position.y > 0.1);
+  assert(g.velocityY > 0);
+  assert.equal(g.jumpPressed, false);
+  assert.equal(g.keys.has("Space"), false);
+  const velocity = g.velocityY;
+  g.updatePlayer(1 / 60);
+  assert(g.velocityY < velocity, "the released press cannot repeat the jump");
+
+  resetTraversal(g);
+  g.player.position.set(0, 0, 0);
+  g.grounded = true;
+  assert(queueJumpPress(g));
+  resetTraversal(g);
+  g.updatePlayer(1 / 60);
+  assert.equal(g.player.position.y, 0);
+  assert.equal(g.velocityY, 0);
+  g.paused = true;
+  assert.equal(queueJumpPress(g), false);
+  assert.equal(g.keys.has("Space"), false);
+  g.paused = false;
+  g.active = false;
+  assert.equal(queueJumpPress(g), false);
+});
 const tick = (g, v, seconds, jump = false) => {
   for (let i = 0; i < Math.ceil(seconds * 60); i++)
     advanceCharacter(g, v, 1 / 60, jump && i === 0);
@@ -348,6 +379,29 @@ test("rope catches reject a solid between the explorer and the hanging position"
   assert.equal(g.ropeRide, undefined);
   assert.equal(c.angle, 0);
   assert.equal(c.catching, undefined);
+});
+
+test("a rope release pressed and released between updates reaches the controller exactly once", () => {
+  const level = LEVELS.find((level) => level.id === "sky"),
+    feature = createMap(level).features.find((f) => f.id === "field-3-0"),
+    { g, c } = courseGame(level, feature);
+  g.active = true;
+  g.player.position.copy(ropeGrip(c).add(new THREE.Vector3(0, -2.15, 0)));
+  g.grounded = false;
+  assert(tryGrabRope(g));
+  for (let i = 0; i < 20; i++) g.updatePlayer(1 / 60);
+  assert.equal(c.catching, undefined);
+  assert(queueJumpPress(g));
+  g.keys.delete("Space");
+  g.updatePlayer(1 / 60);
+  assert.equal(g.ropeRide, null);
+  assert(g.velocityY > 0, "the brief release still supplies its upward boost");
+  assert.equal(g.keys.has("Space"), false);
+  assert.equal(g.jumpPressed, false);
+  const velocity = g.velocityY;
+  g.updatePlayer(1 / 60);
+  assert.equal(g.ropeRide, null);
+  assert(g.velocityY < velocity);
 });
 test("secure ledges survive save normalization and invalid platform heights cannot create airborne spawns", () => {
   const level = LEVELS[0],

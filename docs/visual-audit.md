@@ -103,7 +103,9 @@ their swings and return cables, the survey, two damaged spans and the fourth
 engine's 26 physical turns. Its 126 continuous-route captures and native
 keyboard/touch landings, summit interactions and save recovery are reviewed.
 The resulting rope-catch repair removes two observed 1.268 m root snaps.
-Movement-dependent summit framing and instantaneous Jump taps remain open.
+Movement-dependent summit framing remains open. The subsequent
+[jump input repair](jump-input.md) retains short presses until one update,
+verifies instantaneous releases and checks cancellation and held controls.
 
 The [wind camera-clearance pass](wind-camera-clearance.md) fixes false pedestal
 obstructions and missing fan/tablet bounds. It checks 952 camera orbits at all
@@ -152,7 +154,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-34 | A raised rotating grip collapses the camera at the working look point; a scanned mossy rock 13 cm ahead of the D3 camera hides the explorer despite a full camera arm. | The [working-view repair](wind-grips.md) fits component bounds, shifts the look point toward clear ground while retaining the body sight line, and reserves complete rock footprints around the controls. Verification includes 10,560 moving-wheel camera samples, 952 independent stationary samples, 5,712 rock-footprint cases, native keyboard/touch views and the 330.352 m assisted route. Reverse and approach views can still become close or place machinery in front of the explorer. | Fixed for the reproduced working views; wider camera composition open |
 | VA-35 | Both eagle-route catches snap the explorer about 1.268 m onto the rope's swing plane in one frame. | The [continuous catch repair](sky-eagle-route.md) retains the first root and rope angle, sweeps the reach and eases the visual lift. All 21 routes check frame continuity; 719 tests, 126 reviewed route captures, native keyboard/touch landings and interrupted-catch recovery pass. | Fixed; rope catch continuity |
 | VA-36 | Timber supports hide the explorer during the first eagle summit's approach and fill the foreground during a cable approach. | The [eagle-route captures](sky-eagle-route.md) record a 0.400 m arm during the first reading approach, while settled High/Low views from the same feet and heading have a clear 5.330 m arm. Investigate the follow camera's movement and recovery around these supports. | Open; movement-dependent framing |
-| VA-37 | An instantaneous automated touch Jump tap can miss the rope release in Low quality. | The [native eagle checks](sky-eagle-route.md) pass when the press is held through two controller frames. Touch release currently clears Space; verify one-shot input queuing so a short press cannot be lost between updates. | Open; jump input timing |
+| VA-37 | An instantaneous automated touch Jump tap can miss the rope release in Low quality. | The [jump input repair](jump-input.md) retains keyboard/touch press edges until one controller update, cancels them on pause/focus loss/reset and preserves held diving/cart controls. All 723 tests, four native quick-release/landing cases and four synchronous DOM cancellation/reload cases pass. | Fixed; jump input timing |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,

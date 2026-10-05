@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { updateReturnCable } from "./return-cable.js";
 import { supportAt, safeArrival } from "./character-motion.js";
 import { ropeGrip, updateCourseVisual } from "./traversal-courses.js";
+import { clearJumpPress } from "./jump-input.js";
 
 const HAND_HEIGHT = 2.15;
 const done = (game, c) =>
@@ -9,6 +10,7 @@ const done = (game, c) =>
   c.stage < game.progress.stage ||
   game.progress.field.includes(c.id);
 export function resetTraversal(game) {
+  clearJumpPress(game);
   if (game.ropeRide) delete game.ropeRide.catching;
   game.wallGrip = null;
   game.cleftCooldown = 0;

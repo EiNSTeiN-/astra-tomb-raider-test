@@ -95,8 +95,10 @@ does not close it.
 ![Obstructed first-summit view during the continuous approach](images/sky-eagle-route/summit-obstruction.webp)
 
 An instantaneous automated touch Jump tap also failed to release reliably in
-the Low rope case; holding the press through two frames succeeds. Jump input
-queuing needs its own review. Later sectors, repeated courtyard layouts,
+the Low rope case; holding the press through two frames succeeds. The subsequent
+[jump input repair](jump-input.md) queues short keyboard/touch presses and
+verifies instantaneous releases, cancellation and retained held controls.
+Later sectors, repeated courtyard layouts,
 terrain composition and the other chamber interiors remain open in the
 [world audit](visual-audit.md).
 

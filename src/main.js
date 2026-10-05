@@ -1,4 +1,5 @@
 import { drawDesertSurveyMap } from "./desert-survey-map.js";
+import { queueJumpPress } from "./jump-input.js";
 import { drawArcadeLockMap } from "./arcade-lock-map.js";
 import { drawSunBridgeMap } from "./sun-bridge-map.js";
 import { drawShutterMap } from "./shutter-house-map.js";
@@ -327,7 +328,7 @@ function bind() {
       const k = b.dataset.touch;
       heldTouchControls.set(e.pointerId, k);
       updateTouchControls();
-      if (k === "jump") game.keys.add("Space");
+      if (k === "jump") queueJumpPress(game);
       if (k === "interact") game.interact();
       if (k === "aim") game.toggleAim();
       if (k === "fire") game.attack();

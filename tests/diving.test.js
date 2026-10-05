@@ -14,6 +14,7 @@ import { scoreBar } from "../src/audio.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { buildTideArchive, archiveInteract } from "../src/tide-archive.js";
+import { queueJumpPress, advanceWithJumpPress } from "../src/jump-input.js";
 
 function diver() {
   const water = new THREE.Mesh();
@@ -46,6 +47,37 @@ function step(g, seconds, input = { x: 0, z: 0 }, rise = false) {
     advanceSwimming(g, input, 1 / 60, rise);
   }
 }
+
+test("a brief rise press moves a diver once while a held press keeps rising until released", () => {
+  const g = diver();
+  g.active = true;
+  g.keys.add("KeyX");
+  step(g, 1);
+  g.keys.clear();
+  assert(g.diving);
+  const update = () =>
+    advanceWithJumpPress(g, () =>
+      advanceSwimming(g, { x: 0, z: 0 }, 1 / 60, g.keys.has("Space")),
+    );
+  const depth = g.player.position.y;
+  assert(queueJumpPress(g));
+  g.keys.delete("Space");
+  update();
+  assert(g.player.position.y > depth);
+  assert.equal(g.keys.has("Space"), false);
+  const once = g.player.position.y;
+  update();
+  assert.equal(g.player.position.y, once, "a released tap cannot keep rising");
+
+  assert(queueJumpPress(g));
+  for (let i = 0; i < 20; i++) update();
+  assert(g.player.position.y > once + 0.5);
+  assert(g.keys.has("Space"));
+  g.keys.delete("Space");
+  const held = g.player.position.y;
+  update();
+  assert.equal(g.player.position.y, held);
+});
 
 test("diving descends to a bounded floor, holds depth, and rises to a breathable surface", () => {
   const g = diver();

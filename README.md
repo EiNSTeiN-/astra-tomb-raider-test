@@ -12,6 +12,8 @@ The desert's pier shafts also now meet their base slabs.
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
 their return cables, native keyboard/touch landings and local save recovery.
+[Short Jump taps now reach the controller between frames](docs/jump-input.md),
+including rope releases, while pause and focus loss cancel unprocessed presses.
 The jungle's [54 large climbing roots now taper into the soil](docs/ruin-roots.md),
 removing the exposed blunt cuts at their lower ends.
 The desert's [68 mirror handwheels now have connecting axles and bearing housings](docs/solar-mounts.md).

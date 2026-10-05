@@ -9,6 +9,7 @@ import {
   addTemperingCart,
 } from "../src/tempering-cart-rules.js";
 import { LEVELS, createMap } from "../src/campaign.js";
+import { queueJumpPress, advanceWithJumpPress } from "../src/jump-input.js";
 
 test("the freight cart accelerates, brakes and cannot cross an unturned junction", () => {
   const h = { saved: { turned: false }, distance: 0, velocity: 0, docked: 0 };
@@ -197,6 +198,38 @@ function ticks(g, n, input = 0) {
     updateTemperingCart(g, 1 / 60);
   }
 }
+
+test("a brief queued brake stops a cart for one update without latching its held control", () => {
+  const g = fixture(),
+    h = g.temperingCart;
+  g.active = true;
+  h.drive = true;
+  h.saved.loaded = true;
+  ticks(g, 60, 1);
+  const speed = h.velocity;
+  assert(speed > 0);
+  const control = () =>
+    advanceWithJumpPress(g, () => controlTemperingCart(g, 1 / 60, 1));
+  assert(queueJumpPress(g));
+  g.keys.delete("Space");
+  assert(control());
+  assert.equal(h.input, 0);
+  updateTemperingCart(g, 1 / 60);
+  assert(h.velocity < speed);
+  assert.equal(g.keys.has("Space"), false);
+  control();
+  assert.equal(h.input, 1, "the released brake does not remain on");
+
+  assert(queueJumpPress(g));
+  for (let i = 0; i < 8; i++) {
+    control();
+    assert.equal(h.input, 0);
+    updateTemperingCart(g, 1 / 60);
+  }
+  g.keys.delete("Space");
+  control();
+  assert.equal(h.input, 1);
+});
 
 test("the key mission requires cargo, an inspected turntable and a seated cart at the cradle", () => {
   const g = fixture(),

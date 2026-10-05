@@ -425,6 +425,11 @@ import {
   traversalTarget,
 } from "./traversal.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import {
+  queueJumpPress,
+  advanceWithJumpPress,
+  clearJumpPress,
+} from "./jump-input.js";
 import { buildBellPlatform } from "./bell-rack-art.js";
 import { createMap, random } from "./campaign.js";
 import {
@@ -577,6 +582,7 @@ export class Adventure {
         return;
       }
       if (this.paused) return;
+      if (e.code === "Space") queueJumpPress(this);
       if (e.code === "KeyV")
         setAim(this, "toggle", !this.aimSources?.has("toggle"));
       if (e.code === "KeyE") this.interact();
@@ -595,6 +601,7 @@ export class Adventure {
     this.onKeyUp = (e) => this.keys.delete(e.code);
     this.onBlur = () => {
       this.keys.clear();
+      clearJumpPress(this);
       if (this.active && !this.paused) this.cb.pause?.();
     };
     this.onMouse = (e) => {
@@ -1654,6 +1661,9 @@ export class Adventure {
     else this.renderer.render(this.scene, this.camera);
   }
   updatePlayer(dt) {
+    return advanceWithJumpPress(this, () => this.updatePlayerMotion(dt));
+  }
+  updatePlayerMotion(dt) {
     updateAstralCrane(this, dt);
     updateEchoCauseway(this, dt);
     updateTemperingCart(this, dt);
@@ -2971,6 +2981,7 @@ export class Adventure {
     this.renderOnce = true;
     this.keys.clear();
     this.touchMove = { x: 0, z: 0 };
+    clearJumpPress(this);
     if (value) {
       if (document.pointerLockElement) document.exitPointerLock();
       this.save();
