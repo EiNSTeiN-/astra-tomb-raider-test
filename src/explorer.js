@@ -21,6 +21,10 @@ import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
 import { strideRate } from "./stride.js";
 import { ExplorerVisibility } from "./explorer-visibility.js";
 import { activeWindGrip } from "./wind-pose.js";
+import {
+  buildCarriedFittings,
+  updateCarriedFittings,
+} from "./carried-fittings.js";
 
 function equipmentSurface(material) {
   const canvas = /canvas|bottle/.test(material.name);
@@ -125,13 +129,22 @@ export async function loadExplorer(game) {
   }
   materials.forEach((m) => m.dispose());
   avatar.add(model);
+  const carrier = buildCarriedFittings(game, model);
   const mixer = new THREE.AnimationMixer(model),
     actions = {};
   for (const clip of gltf.animations)
     actions[clip.name] = mixer.clipAction(clip);
   actions.Idle.play();
   mixer.update(0.1);
-  game.rig = { model, mixer, actions, state: "Idle", weapon: sidearm(game) };
+  game.rig = {
+    model,
+    mixer,
+    actions,
+    state: "Idle",
+    weapon: sidearm(game),
+    carrier,
+  };
+  updateCarriedFittings(game);
   game.rig.visibility = new ExplorerVisibility([
     avatar,
     game.torch?.root,
@@ -172,6 +185,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   updateTorch(game);
   const rig = game.rig;
   if (!rig) return;
+  updateCarriedFittings(game);
   restoreCableGrip(game);
   restoreCrouchHands(game);
   rig.crouchBlend = THREE.MathUtils.damp(

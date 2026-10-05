@@ -11,6 +11,8 @@ and [grounded court bases in the jungle, desert and coast](docs/court-foundation
 The desert's pier shafts also now meet their base slabs.
 The summit [cable frames now leave the reading and boarding edge clear](docs/summit-cable-frames.md),
 with supported footplates and braced arms.
+Recovered [regional fittings now travel on the explorer's pack](docs/carried-fittings.md),
+with a supported cradle, visible bridge crossings and saved pickup/delivery state.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

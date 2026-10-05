@@ -767,3 +767,12 @@ trolley geometry, procedural mechanical audio and themed scores. The positioned
 winch emitter follows its moved mount. No external assets or dependencies were
 added. Its three documentation images are actual game captures converted
 losslessly to WebP, with decoded RGBA identity checked.
+
+The [recovered fitting carrier](carried-fittings.md) adds original leather bands,
+a metal bearing seat, stays and fitted pack shoes. It copies the existing
+regional station components at their original dimensions, retaining their
+credited materials and shaders. It follows the credited explorer's backpack
+skeleton and shares the actor's camera coverage mask using independent material
+copies. Existing mechanical audio and themed scores are retained. No external
+assets or dependencies were added. Its three documentation images are actual
+game captures converted losslessly to WebP, with decoded RGBA identity checked.

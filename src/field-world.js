@@ -32,6 +32,7 @@ import { fieldComplete, currentFieldTask, EXPEDITIONS } from "./expeditions.js";
 import { stationBlocked } from "./field-station-solids.js";
 import { buildRegionalStation } from "./field-station-art.js";
 import { safeArrival } from "./character-motion.js";
+import { updateCarriedFittings } from "./carried-fittings.js";
 
 export function buildFieldStation(game, f, group) {
   if (buildSurveyStation(game, f, group)) return;
@@ -86,6 +87,7 @@ export function updateFieldWorld(game, dt) {
     if (f.kind === "resonance") f.core.rotation.y += dt * (done ? 1.2 : 0.2);
   }
   for (const gate of game.fieldGates) updateSanctuaryGate(game, gate, dt);
+  updateCarriedFittings(game);
 }
 
 export function finishFieldTask(game, f) {
