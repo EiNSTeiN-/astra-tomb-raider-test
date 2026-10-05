@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Counterweight working views](counterweight-camera.md) predict the moving
+  stone and explorer across each accepted slide, retaining a clear current
+  view or choosing a nearby working angle. All 51 targeted checks and the
+  production build pass. The 992 High/Low first-slide frames and 6,413 full
+  solution camera frames retain full character coverage; all 269 baseline,
+  updated, solution and native captures are reviewed. Four native push/pull
+  cases preserve saves apart from timestamps and two independently proved
+  arrival-camera corrections. Keyboard and touch look remain available while
+  gripping. VA-44 is repaired for accepted grips/slides; VA-45 records a cloud
+  aisle walking view that still fades the explorer beside another wind duct.
+
 - [Regional counterweight chambers](regional-counterweights.md) dress the seven
   remaining primitive boards with chapter masonry, regional seals, fitted
   hardware and backed labels. The crystal inscription moves into a clear aisle.

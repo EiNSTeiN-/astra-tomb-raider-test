@@ -12,6 +12,7 @@ import { poseHands } from "./pose.js";
 import { boxEntry } from "./camera-collision.js";
 import { mergeArchitecture } from "./visuals.js";
 import { buildCounterweightArt } from "./counterweight-art.js";
+import { frameCounterweightGrip } from "./counterweight-camera.js";
 const GRIP_DISTANCE = 1.1;
 
 function label(text, size = 1.3) {
@@ -253,6 +254,7 @@ export function counterweightInteract(game) {
     );
   game.blockGrip = grip;
   game.avatar.rotation.y = Math.atan2(grip.axis[0], grip.axis[1]);
+  frameCounterweightGrip(game, grip.axis);
   game.cb.toast?.(
     "Up pushes; Down pulls. Release with E to walk around the stone.",
     4500,
@@ -314,6 +316,7 @@ export function updateCounterweightGrip(game, dt, direction) {
         playerFrom: game.player.position.clone(),
         playerTo: playerTarget,
       };
+      frameCounterweightGrip(game, grip.axis, grip.move);
       game.audio.noiseHit?.(0.035, 0.55, 850, grip.move.from);
     } else if (!grip.bumpUntil || game.elapsed >= grip.bumpUntil) {
       grip.bumpUntil = game.elapsed + 2;

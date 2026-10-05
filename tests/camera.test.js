@@ -379,3 +379,34 @@ test("camera angles survive independent chapter saves and malformed or legacy re
     null,
   );
 });
+
+test("a predicted camera query excludes only its translated body and retains other moving and fixed solids", () => {
+  const { world, surfaces, add } = fixture(),
+    stone = new THREE.Group(),
+    gate = new THREE.Group();
+  stone.userData.cameraDynamic = gate.userData.cameraDynamic = true;
+  world.add(stone, gate);
+  add(2, 4, 1, 0, 2, 2, stone);
+  add(2, 4, 1, 0, 2, 4, gate);
+  add(2, 4, 1, 5, 2, 2);
+  surfaces.rebuild();
+  const a = v(0, 2, 0),
+    b = v(0, 2, 6),
+    original = surfaces.entry(a, b),
+    withoutStone = surfaces.entry(a, b, 0.28, stone);
+  assert.ok(
+    original < withoutStone && withoutStone < 1,
+    "the other moving gate still blocks",
+  );
+  assert.ok(
+    surfaces.entry(v(5, 2, 0), v(5, 2, 6), 0.28, stone) < 1,
+    "a fixed wall still blocks",
+  );
+  assert.equal(
+    surfaces.entry(a, b),
+    original,
+    "the normal camera still sees the stone",
+  );
+  assert.equal(stone.visible, true);
+  assert.deepEqual(stone.position.toArray(), [0, 0, 0]);
+});

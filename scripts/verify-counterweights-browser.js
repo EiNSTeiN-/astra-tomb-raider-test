@@ -13,7 +13,7 @@ import { solveCounterweights } from "./solve-counterweights.js";
 
 // Development-assisted integration check. Opens the already-tested field gate,
 // then walks between every stone face using the real world collision/terrain.
-export async function verifyCounterweights(indices) {
+export async function verifyCounterweights(indices, { onFrame } = {}) {
   const game = window.__vesper.game,
     results = [];
   for (const index of indices) {
@@ -84,13 +84,21 @@ export async function verifyCounterweights(indices) {
       )
         throw new Error(`${game.level.id}: cannot grip stone ${action.index}`);
       const previous = chamber.saved.moves;
-      for (let tick = 0; tick < 60 && chamber.saved.moves === previous; tick++)
+      onFrame?.(game, { action, tick: 0 });
+      for (
+        let tick = 0;
+        tick < 60 && chamber.saved.moves === previous;
+        tick++
+      ) {
         updateCounterweightGrip(game, 1 / 60, action.pull ? -1 : 1);
+        onFrame?.(game, { action, tick: tick + 1 });
+      }
       if (chamber.saved.moves !== previous + 1)
         throw new Error(
           `${game.level.id}: stone cannot move ${JSON.stringify(action)}`,
         );
       releaseCounterweight(game);
+      onFrame?.(game, { action, released: true });
     }
     game.updateDecorations(2);
     game.yaw = 0;

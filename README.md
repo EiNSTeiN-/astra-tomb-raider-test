@@ -24,6 +24,8 @@ Their [bronze plates now sit above the masonry, with supported stone crowns](doc
 removing the alternating top-face wedges visible in the first model milestone.
 The seven other [counterweight chambers now have regional masonry and fitted bronze hardware](docs/regional-counterweights.md),
 with backed labels and a clear crystal inscription approach.
+Accepted [stone grips and slides now select a clear working view](docs/counterweight-camera.md),
+with full camera checks through all eight chamber solutions and native keyboard/touch save recovery.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

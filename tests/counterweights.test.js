@@ -26,8 +26,13 @@ import { solveCounterweights } from "../scripts/solve-counterweights.js";
 import { buildFieldGates } from "../src/field-world.js";
 import { advanceCharacter } from "../src/character-motion.js";
 import { resetTraversal } from "../src/traversal.js";
-import { CameraSurfaces } from "../src/camera-collision.js";
+import {
+  CameraSurfaces,
+  constrainCamera,
+  followCamera,
+} from "../src/camera-collision.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
+import { frameCounterweightGrip } from "../src/counterweight-camera.js";
 
 function fixture(level = LEVELS[0], groundHeight = () => 0) {
   const memory = new Map(),
@@ -484,6 +489,79 @@ test("gripping preserves a held movement key while consuming Use and Jump", () =
   assert.deepEqual([...game.keys], ["KeyW"]);
 });
 
+test("taking a stone grip frames its close working stance without changing a move or locking the chosen view", () => {
+  const { game } = fixture(),
+    c = game.counterweights,
+    action = solveCounterweights(c.trial).path[0],
+    stone = point(c.saved.positions[action.index]);
+  game.player.position.copy(stone).add(new THREE.Vector3(0, 0, 1.25));
+  game.yaw = (-2 * Math.PI) / 3;
+  game.pitch = 0.4;
+  game.camera = new THREE.PerspectiveCamera();
+  game.cameraSpace = () => true;
+  const desiredAt = (target) =>
+    target
+      .clone()
+      .add(
+        new THREE.Vector3(
+          Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+        ),
+      );
+  const workingChest = stone.clone().add(new THREE.Vector3(0, 1.3, 1.1)),
+    oldView = constrainCamera(
+      workingChest,
+      desiredAt(workingChest),
+      game.cameraSurfaces,
+      game.cameraSpace,
+    );
+  assert.ok(
+    oldView.distanceTo(workingChest) < 1.5,
+    "reproduces the hidden body",
+  );
+  const saved = structuredClone(c.saved);
+  game.keys = new Set(["KeyW", "KeyE", "Space"]);
+  assert.equal(counterweightInteract(game), true);
+  assert.deepEqual(
+    c.saved,
+    saved,
+    "choosing a view does not earn a stone move",
+  );
+  assert.deepEqual([...game.keys], ["KeyW"]);
+  assert.ok(game.camera.position.distanceTo(game.cameraFollowTarget) >= 2.2);
+  assert.ok(Math.abs(game.player.position.z - stone.z - 1.1) < 1e-8);
+  for (let frame = 0; frame < 60 && !c.saved.moves; frame++) {
+    const yaw = game.yaw;
+    updateCounterweightGrip(game, 1 / 60, 1);
+    if (frame > 0)
+      assert.equal(
+        game.yaw,
+        yaw,
+        "the moving controller does not overwrite look input between accepted moves",
+      );
+    const target = game.player.position
+      .clone()
+      .add(new THREE.Vector3(0, 1.3, 0));
+    game.camera.position.copy(
+      followCamera(
+        game.camera.position,
+        target,
+        desiredAt(target),
+        1 / 60,
+        game.cameraSurfaces,
+        game.cameraSpace,
+        game.cameraFollowTarget,
+      ),
+    );
+    game.cameraFollowTarget = target;
+    assert.ok(game.camera.position.distanceTo(target) >= 2.2);
+  }
+  assert.equal(c.saved.moves, 1);
+  assert.deepEqual(c.saved.positions[action.index], action.to);
+  releaseCounterweight(game);
+});
+
 test("pulling a counterweight reverses the walking cycle", () => {
   const game = {
     grounded: true,
@@ -499,4 +577,106 @@ test("pulling a counterweight reverses the walking cycle", () => {
     name: "Walk",
     rate: 0.75,
   });
+});
+
+test("an accepted slide predicts its endpoint wall without moving the stone or changing progress", () => {
+  const world = new THREE.Group(),
+    body = new THREE.Group();
+  body.userData.cameraDynamic = true;
+  world.add(body);
+  const surfaces = new CameraSurfaces(world),
+    material = new THREE.MeshStandardMaterial(),
+    stone = new THREE.Mesh(new THREE.BoxGeometry(1.44, 2.2, 1.44), material),
+    wall = new THREE.Mesh(new THREE.BoxGeometry(1.4, 8, 0.3), material);
+  stone.position.y = 1.1;
+  body.add(stone);
+  wall.position.set(1.4, 4, 1.8);
+  world.add(wall);
+  surfaces.capture(stone);
+  surfaces.capture(wall);
+  surfaces.rebuild();
+  const player = new THREE.Group();
+  player.position.set(-1.1, 0, 0);
+  const game = {
+      player,
+      blockGrip: { block: { group: body } },
+      camera: new THREE.PerspectiveCamera(),
+      cameraSurfaces: surfaces,
+      cameraSpace: () => true,
+      yaw: -Math.PI / 2 + 1.2,
+      pitch: 0.15,
+    },
+    move = {
+      from: new THREE.Vector3(),
+      to: new THREE.Vector3(2.5, 0, 0),
+      playerFrom: player.position.clone(),
+      playerTo: new THREE.Vector3(1.4, 0, 0),
+    },
+    arm = () =>
+      new THREE.Vector3(
+        Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+        Math.sin(game.pitch) * 5.3 + 0.2,
+        Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+      ),
+    endpoint = move.playerTo.clone().add(new THREE.Vector3(0, 1.3, 0));
+  assert.ok(
+    constrainCamera(
+      endpoint,
+      endpoint.clone().add(arm()),
+      surfaces,
+      game.cameraSpace,
+    ).distanceTo(endpoint) < 2.2,
+    "the current view collides at the destination",
+  );
+  const before = {
+    feet: player.position.toArray(),
+    stone: body.position.toArray(),
+    wall: wall.position.toArray(),
+    plan: JSON.stringify(move),
+  };
+  assert.equal(frameCounterweightGrip(game, [1, 0], move), true);
+  assert.deepEqual(
+    {
+      feet: player.position.toArray(),
+      stone: body.position.toArray(),
+      wall: wall.position.toArray(),
+      plan: JSON.stringify(move),
+    },
+    before,
+    "prediction is read only for world and movement state",
+  );
+  for (let i = 0; i <= 60; i++) {
+    const amount = i / 60;
+    body.position.copy(move.from).lerp(move.to, amount);
+    player.position.copy(move.playerFrom).lerp(move.playerTo, amount);
+    const target = player.position.clone().add(new THREE.Vector3(0, 1.3, 0));
+    game.camera.position.copy(
+      followCamera(
+        game.camera.position,
+        target,
+        target.clone().add(arm()),
+        1 / 60,
+        surfaces,
+        game.cameraSpace,
+        game.cameraFollowTarget,
+      ),
+    );
+    game.cameraFollowTarget = target;
+    assert.ok(
+      game.camera.position.distanceTo(target) >= 2.2,
+      `visible working arm at frame ${i}`,
+    );
+  }
+  const yaw = game.yaw,
+    pitch = game.pitch;
+  // The same clear direction on a subsequent slide does not reset the orbit.
+  const next = {
+    from: body.position.clone(),
+    to: body.position.clone().add(new THREE.Vector3(0.1, 0, 0)),
+    playerFrom: player.position.clone(),
+    playerTo: player.position.clone().add(new THREE.Vector3(0.1, 0, 0)),
+  };
+  assert.equal(frameCounterweightGrip(game, [1, 0], next), false);
+  assert.equal(game.yaw, yaw);
+  assert.equal(game.pitch, pitch);
 });

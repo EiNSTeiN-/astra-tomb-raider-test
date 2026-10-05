@@ -204,7 +204,7 @@ export class CameraSurfaces {
       )
         visit(`${x},${z}`);
   }
-  entry(start, end, radius = 0.28) {
+  entry(start, end, radius = 0.28, ignoreParent = null) {
     const candidates = new Set();
     this.eachCell(
       {
@@ -221,6 +221,7 @@ export class CameraSurfaces {
       },
     );
     for (const [parent, group] of this.dynamicGroups) {
+      if (parent === ignoreParent) continue;
       parent.updateWorldMatrix(true, false);
       if (!parent.matrixWorld.equals(group.matrix)) {
         group.bounds.makeEmpty();
@@ -236,6 +237,7 @@ export class CameraSurfaces {
     let result = 1;
     this.lastCandidates = candidates.size;
     for (const surface of candidates) {
+      if (surface.parent === ignoreParent) continue;
       let visible = true;
       for (let p = surface.parent; p; p = p.parent)
         if (!p.visible) {

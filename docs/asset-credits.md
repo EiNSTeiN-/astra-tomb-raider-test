@@ -812,3 +812,10 @@ maps and existing wind metal shaders. Environmental and mechanical sounds and
 themed scores are retained. No external asset or dependency was added. Their
 four documentation images are actual game captures converted losslessly to
 WebP, with decoded RGBA identity verified.
+
+The [counterweight working-camera repair](counterweight-camera.md) adds original
+camera prediction and view selection for accepted stone grips and slides. It
+retains the credited explorer, chapter architecture, materials, positional sounds
+and themed scores. No external asset or dependency was added. Its five
+documentation images are actual game captures converted losslessly to WebP,
+with decoded RGBA identity verified.

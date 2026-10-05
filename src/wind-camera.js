@@ -5,9 +5,9 @@ import { constrainCamera } from "./camera-collision.js";
 // that pad, inside the camera's 28 cm safety margin when an upper peg rotates
 // past chest height. Keep the look point on the clear side of that margin.
 // This moves the view, never the controller, and fades out away from the pad.
-export function windCameraStandoff(game) {
+export function windCameraStandoff(game, position = null) {
   if (!game.windSites?.length || game.swimming || game.diving) return 0;
-  const p = game.player.position;
+  const p = position || game.player.position;
   let offset = 0;
   for (const site of game.windSites)
     for (const node of site.nodes) {
@@ -28,10 +28,16 @@ export function windCameraStandoff(game) {
 
 // A clear ray to a shifted look point can pass beside a casting while the
 // explorer's chest remains behind it. Preserve that body sight line too.
-export function windCameraSpace(game, point, chest, offset) {
+export function windCameraSpace(
+  game,
+  point,
+  chest,
+  offset,
+  surfaces = game.cameraSurfaces,
+) {
   return (
     game.cameraSpace(point) &&
-    (!offset || game.cameraSurfaces.entry(chest, point, 0) >= 0.999)
+    (!offset || surfaces.entry(chest, point, 0) >= 0.999)
   );
 }
 

@@ -1,5 +1,9 @@
 # Regional counterweight chambers
 
+The later [working-camera repair](counterweight-camera.md) addresses the hidden
+explorer in accepted grips and slides recorded during this milestone. Its notes
+retain the separate cloud aisle walking-view finding.
+
 The seven counterweight chambers outside the cloud citadel now have fitted
 stone courses, weathered metal caps, mounted grip rails and backed labels.
 Their fixed pillars carry regional seals: jungle flowers, solar rays, monastery
