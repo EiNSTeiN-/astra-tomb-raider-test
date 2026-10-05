@@ -584,6 +584,109 @@ test("narrow anchor piers retain packed backing through side-view masonry joints
   material.dispose();
 });
 
+test("folding timber frames bridge every missing-board gap and keep rope clearance in all poses", (t) => {
+  const game = fixture(t),
+    ray = new THREE.Raycaster();
+  game.player.position.set(-1000, 0, -1000);
+  updateSkyBridges(game, 0);
+  for (const b of game.skyBridges) {
+    const length = spanCoordinates(b, b.bx, b.bz).length;
+    for (const [half, frame] of b.frames.entries()) {
+      const pivot = b.halves[half],
+        bank = half ? b.by : b.ay;
+      assert.equal(frame.group.parent, pivot);
+      assert(frame.group.visible);
+      assert.equal(frame.group.children.length, 1, "one batch per half");
+      assert(
+        game.cameraSurfaces.dynamicGroups.has(frame.group),
+        "batched frame retains its moving camera surfaces",
+      );
+      const geometry = frame.group.children[0].geometry,
+        p = geometry.attributes.position,
+        uv = geometry.attributes.uv;
+      for (let i = 0; i < p.count; i += 3) {
+        const area =
+          (uv.getX(i + 1) - uv.getX(i)) * (uv.getY(i + 2) - uv.getY(i)) -
+          (uv.getY(i + 1) - uv.getY(i)) * (uv.getX(i + 2) - uv.getX(i));
+        assert(
+          Math.abs(area) > 1e-6,
+          "stock ends and sides retain mapped area",
+        );
+      }
+      for (const pose of [0, 0.45, 1]) {
+        pivot.rotation.x = -(1 - pose) * Math.PI * 0.47;
+        game.world.updateMatrixWorld(true);
+        const direction = new THREE.Vector3(0, -1, 0).transformDirection(
+          pivot.matrixWorld,
+        );
+        const probe = frame.run * 0.31,
+          probeY = bridgeDeckY(b, half ? length - probe : probe) - bank - 0.32,
+          contact = game.cameraSurfaces.entry(
+            pivot.localToWorld(new THREE.Vector3(3, probeY, probe)),
+            pivot.localToWorld(new THREE.Vector3(2.15, probeY, probe)),
+            0,
+          );
+        assert(
+          contact > 0.2 && contact < 0.9,
+          `${b.id}, half ${half}, pose ${pose}: camera contacts the posed chord`,
+        );
+        for (const side of [-1, 1])
+          for (let local = 0.25; local < frame.run; local += 0.31) {
+            const along = half ? length - local : local,
+              floor = bridgeDeckY(b, along) - bank,
+              x = side * (b.width / 2 + 0.02),
+              origin = pivot.localToWorld(
+                new THREE.Vector3(x, floor + 0.1, local),
+              );
+            ray.set(origin, direction);
+            const hit = ray.intersectObject(frame.group, true)[0];
+            assert(
+              hit,
+              `${b.id}, half ${half}, pose ${pose}: continuous chord`,
+            );
+            assert(
+              hit.distance > 0.265 && hit.distance < 0.295,
+              `${b.id}, half ${half}, pose ${pose}: chord seats under boards (${hit.distance})`,
+            );
+          }
+        for (const gap of b.gaps) {
+          const along = (gap.start + gap.end) / 2,
+            local = half ? length - along : along;
+          if (local < 0 || local > frame.run) continue;
+          const floor = bridgeDeckY(b, along) - bank;
+          ray.set(
+            pivot.localToWorld(new THREE.Vector3(0, floor + 0.1, local)),
+            direction,
+          );
+          assert.equal(
+            ray.intersectObject(frame.group, true).length,
+            0,
+            "side frames leave the centre of every jump gap empty",
+          );
+        }
+      }
+      pivot.rotation.x = 0;
+      // Lashings are batched separately and remain inside each narrow chord.
+      const detail = b.deckDetails[half];
+      detail.updateMatrixWorld(true);
+      detail.traverse((o) => {
+        if (!o.isMesh) return;
+        const a = o.geometry.attributes.position;
+        for (let i = 0; i < a.count; i++)
+          assert(
+            Math.abs(a.getX(i)) < b.width / 2 - 0.065,
+            "rope and lashing stock clears the timber side frame",
+          );
+      });
+    }
+    for (const gap of b.gaps) {
+      const s = (gap.start + gap.end) / 2,
+        c = spanCoordinates(b, b.bx, b.bz);
+      assert.equal(skyDeckAt(game, b.ax + c.ux * s, b.az + c.uz * s), null);
+    }
+  }
+});
+
 test("bridge art keeps its GPU attributes after batching and has bounded detail groups", (t) => {
   const game = fixture(t);
   let meshes = 0,
@@ -611,7 +714,8 @@ test("bridge art keeps its GPU attributes after batching and has bounded detail 
       });
   }
   assert.ok(meshes < 650, `bridge mesh budget: ${meshes}`);
-  assert.ok(triangles < 700000, `bridge triangle budget: ${triangles}`);
+  // Continuous structural frames add one batch per half and under 30k triangles.
+  assert.ok(triangles < 725000, `bridge triangle budget: ${triangles}`);
   game.player.position.set(-1000, 0, -1000);
   updateSkyBridges(game, 0);
   assert.ok(

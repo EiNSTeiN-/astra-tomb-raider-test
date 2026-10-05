@@ -783,3 +783,9 @@ character, machinery, materials, positioned environmental and mechanical audio,
 and themed scores. No external assets or dependencies were added. Its four
 documentation images are actual game captures converted losslessly to WebP,
 with decoded RGBA identity checked.
+
+The cloud-city folding deck trusses are original geometry in `src/sky-bridge-art.js`.
+They reuse the credited monastery wood maps and existing bridge timber shader;
+no external model, texture or audio asset was added. The selected images in
+[bridge deck frame notes](bridge-deck-frames.md) are actual runtime captures,
+converted losslessly to WebP.

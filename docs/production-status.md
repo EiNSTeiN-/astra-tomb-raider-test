@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Folding bridge deck frames](bridge-deck-frames.md) connect the raised board
+  patches of all eighteen sky spans while retaining their jump gaps. Grounded
+  crouching also braces station gusts, matching the existing hint and bridge
+  behavior. All 731 tests and the build pass. Verification includes 108 High/Low
+  construction views, 36 directional browser crossings, a 323.373 m earned
+  route to stage 6 and four native winch/deployment/reload cases. All 59 route,
+  36 crossing and 28 native captures are reviewed; exact saved state retains
+  actual combat damage. VA-40 is repaired; crowded wind approaches and wider
+  landscape/geometry review remain open.
+
 - [Swimming camera clearance](swimming-camera.md) distinguishes a prop's solid
   bounds from its expanded camera margin, preventing the instrument at the last
   crystal pool from hiding the explorer. Fully retracted views retain a smooth

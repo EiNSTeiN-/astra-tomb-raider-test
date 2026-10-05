@@ -512,7 +512,9 @@ export function updateHazards(game, dt) {
     }
     if (hazardContact(h, game.player.position, game.jumpY)) {
       if (h.spec.kind === "gust") {
-        const x = game.player.position.x + dt * 3.5;
+        // Grounded crouching braces station gusts just as it braces bridge gusts.
+        const braced = game.crouching && game.grounded,
+          x = game.player.position.x + dt * 3.5 * (braced ? 0.035 : 1);
         if (game.canMove(x, game.player.position.z, game.jumpY)) {
           game.player.position.x = x;
           game.player.position.y =

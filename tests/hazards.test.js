@@ -196,3 +196,63 @@ test("a disabled vent removes its damaging effect and a crosswind respects colli
   assert.equal(game.player.position.x, 0);
   assert.ok(game.stamina < 100);
 });
+
+test("crouching braces a grounded explorer through an entire station gust; airborne bodies still drift", () => {
+  const drift = (crouching, grounded) => {
+    const h = {
+        spec: HAZARD_TYPES.sky,
+        stage: 5,
+        fieldId: "field-5-1",
+        x: 0,
+        y: 0,
+        z: 0,
+        offset: 0,
+        phase: "rest",
+        root: new THREE.Group(),
+        fx: new THREE.Group(),
+        marker: new THREE.Mesh(
+          new THREE.RingGeometry(),
+          new THREE.MeshBasicMaterial(),
+        ),
+      },
+      game = {
+        hazards: [h],
+        progress: { stage: 5, field: [] },
+        player: { position: new THREE.Vector3() },
+        stamina: 100,
+        jumpY: 0,
+        crouching,
+        grounded,
+        hazardTutorials: new Set(),
+        cb: {},
+        audio: {},
+        canMove: () => true,
+        groundHeight: () => 0,
+      };
+    for (let i = 0; i < 150; i++) {
+      game.elapsed = h.spec.warning + 0.01 + i / 60;
+      updateHazards(game, 1 / 60);
+    }
+    const distance = game.player.position.x;
+    game.progress.field.push(h.fieldId);
+    updateHazards(game, 1);
+    assert.equal(
+      game.player.position.x,
+      distance,
+      "restored winch stops the gust",
+    );
+    assert.equal(h.disabled, true);
+    h.marker.geometry.dispose();
+    h.marker.material.dispose();
+    return distance;
+  };
+  assert(
+    drift(true, true) < 0.4,
+    "bracing retains the nearby working position",
+  );
+  assert(drift(false, true) > 5, "standing explorer must counter the gust");
+  assert(
+    drift(true, false) > 5,
+    "airborne crouch cannot brace against a floor",
+  );
+});

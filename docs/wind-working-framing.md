@@ -79,11 +79,12 @@ has a 1.348 m arm and can hide the explorer; general reverse and approach
 framing remains open. Starting a turn from that close view still fades the
 explorer during its first two recovery updates.
 
-Some new observer views also expose distant stone-like fragments suspended
-above later cloud-city courts. Their source geometry and saved gate/animation
-state need inspection before selecting a repair.
+The observer review also exposed distant stone-like fragments suspended
+above later cloud-city courts. The subsequent [folding deck repair](bridge-deck-frames.md)
+identifies them as raised timber bridge halves and adds continuous structural
+frames. The image below retains the earlier construction for comparison.
 
-![Distant suspended fragments above later courts, still under investigation](images/wind-working-framing/distant-court.webp)
+![Distant suspended fragments above later courts before their bridge frames were repaired](images/wind-working-framing/distant-court.webp)
 
 The [broader visual audit](visual-audit.md) remains active, including later
 routes, repeated courtyards, terrain shoulders, other chamber interiors and

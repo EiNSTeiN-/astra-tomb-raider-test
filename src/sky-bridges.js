@@ -15,6 +15,7 @@ import {
   bridgeLashingGeometry,
   buildBridgeAnchor,
   prepareBridgeGeometry,
+  buildBridgeDeckFrame,
 } from "./sky-bridge-art.js";
 import {
   bridgeDeployed,
@@ -51,6 +52,7 @@ export function buildSkyBridges(game) {
       open: Number(bridgeDeployed(game.progress, plan)),
       halves: [],
       deckDetails: [],
+      frames: [],
       drums: [],
       driveActivity: 0,
       lastBank: "a",
@@ -198,6 +200,17 @@ export function buildSkyBridges(game) {
       pivot.rotation.y = half ? Math.PI : 0;
       root.add(pivot);
       bridge.halves.push(pivot);
+      bridge.frames.push(
+        buildBridgeDeckFrame({
+          bridge,
+          length: c.length,
+          half,
+          pivot,
+          game,
+          m: materials,
+          add,
+        }),
+      );
       const deckDetail = new THREE.Group();
       pivot.add(deckDetail);
       bridge.deckDetails.push(deckDetail);

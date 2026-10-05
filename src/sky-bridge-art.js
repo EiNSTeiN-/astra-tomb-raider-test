@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { pbrMaterial } from "./visuals.js";
+import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { random } from "./campaign.js";
 import { fittedWallGeometry, fittedStoneGeometry } from "./sky-masonry.js";
 import { weatherSkyStone } from "./sky-architecture.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
+import { bridgeDeckY } from "./sky-bridge-rules.js";
 
 export function bridgeArtMaterials() {
   const stone = pbrMaterial("rock", 0xc3c9c4);
@@ -156,6 +157,99 @@ export function bridgeLashingGeometry(depth, seed = 1) {
   points.push([0.025, -0.12, -depth / 2 - 0.035]);
   points.push([0.07, -0.22 - rng() * 0.05, -depth / 2 - 0.065]);
   return bridgeRope(points, 0.023, 12, 6);
+}
+
+// Missing deck boards must not divide a folding half into unsupported panels.
+// Two shallow timber trusses carry its boards and turn with the bank pivot.
+// They stay below the walking face and remain present at every view distance.
+export function buildBridgeDeckFrame({
+  bridge,
+  length,
+  half,
+  pivot,
+  game,
+  m,
+  add,
+}) {
+  const frame = new THREE.Group();
+  frame.name = `Folding deck frame ${half + 1}`;
+  pivot.add(frame);
+  const run = length / 2,
+    bank = half ? bridge.by : bridge.ay,
+    floor = (s) => bridgeDeckY(bridge, half ? length - s : s) - bank,
+    bays = Math.max(1, Math.ceil(run / 2.8)),
+    // One chord joint per braced bay follows the shallow sag within 5 mm.
+    segments = bays,
+    beam = (a, b, width, depth, shade) => {
+      const start = new THREE.Vector3(...a),
+        end = new THREE.Vector3(...b),
+        geometry = new THREE.BoxGeometry(
+          width,
+          start.distanceTo(end) + 0.025,
+          depth,
+        ),
+        p = geometry.attributes.position,
+        uv = geometry.attributes.uv,
+        normal = geometry.attributes.normal;
+      // Longitudinal UVs and transverse shader grain follow the stock timber,
+      // including when a diagonal is rotated into its assembled position.
+      for (let i = 0; i < p.count; i++)
+        if (Math.abs(normal.getY(i)) > 0.5)
+          uv.setXY(i, p.getX(i) * 1.8, p.getZ(i) * 1.8);
+        else
+          uv.setXY(
+            i,
+            p.getY(i) * 0.32,
+            (Math.abs(normal.getX(i)) > 0.5 ? p.getZ(i) : p.getX(i)) * 1.8,
+          );
+      bridgeWoodSurface(geometry, shade);
+      const center = start.clone().add(end).multiplyScalar(0.5),
+        object = add(geometry, m.wood, center.x, center.y, center.z, frame);
+      object.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        end.sub(start).normalize(),
+      );
+      game.cameraSurfaces?.capture(object, { small: true, thin: true });
+      return object;
+    };
+  for (const side of [-1, 1]) {
+    // Sit outside the board lashings and cradle ropes. The inner 6 cm of each
+    // upper chord bears against the plank underside; cross-bearers span both.
+    const x = side * (bridge.width / 2 + 0.02);
+    for (const [height, depth, shade] of [
+      [-0.3, 0.24, 0.91],
+      [-1.03, 0.14, 0.79],
+    ])
+      for (let i = 0; i < segments; i++) {
+        const a = (run * i) / segments,
+          b = (run * (i + 1)) / segments;
+        beam(
+          [x, floor(a) + height, a],
+          [x, floor(b) + height, b],
+          0.16,
+          depth,
+          shade,
+        );
+      }
+    for (let i = 0; i <= bays; i++) {
+      const s = (run * i) / bays;
+      beam([x, floor(s) - 0.3, s], [x, floor(s) - 1.03, s], 0.14, 0.14, 0.86);
+      if (i < bays) {
+        const end = (run * (i + 1)) / bays,
+          upper = i % 2 === 0 ? -0.3 : -1.03,
+          lower = i % 2 === 0 ? -1.03 : -0.3;
+        beam(
+          [x, floor(s) + upper, s],
+          [x, floor(end) + lower, end],
+          0.11,
+          0.12,
+          0.83,
+        );
+      }
+    }
+  }
+  mergeArchitecture(frame);
+  return { group: frame, run, bays, segments };
 }
 
 export function bridgeAnchorGeometry(low, top, seed) {
