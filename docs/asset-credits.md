@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [cloud counterweight chamber](sky-counterweights.md) uses original geometry
+in `src/sky-counterweight-art.js`, the existing fitted-stone generator, wind
+reliefs and patina shaders, and the already credited rock and temple maps.
+No external asset, recording, music or dependency was added. Its documentation
+images are actual game captures converted losslessly to WebP, with decoded
+pixel identity verified.
+
 The [cloud-bank shoulders](sky-bank-shoulders.md) use original heightfield code
 in `src/sky-banks.js`, the existing sky erosion and the already credited rock/soil
 maps and alpine plants. No external asset, recording or dependency was added.

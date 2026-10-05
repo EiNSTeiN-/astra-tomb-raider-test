@@ -46,3 +46,10 @@ await (await import('/scripts/verify-counterweights-browser.js')).verifyCounterw
 Run that helper after starting a development expedition. It modifies the selected test chapters' progress. It is excluded from the production bundle.
 
 Blind puzzle testing, difficulty tuning, additional room art, and full chapter timing remain necessary. The chambers still share a masonry kit and do not bring the real-time graphics to AAA quality.
+
+The later [cloud counterweight pass](sky-counterweights.md) gives Where Eagles
+Sleep fitted granite and metal construction, moves its inscription to a clear
+aisle and adds camera bounds for its small stones. It records 707 passing tests,
+40 chamber views, a continuous assisted carrying route and native keyboard/touch
+interaction and reload checks. The other seven chambers retain the earlier art;
+the broader visual audit remains open.

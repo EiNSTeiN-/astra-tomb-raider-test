@@ -89,6 +89,13 @@ views are reviewed, together with the 564.3 m opening route, all 36 bidirectiona
 crosswind crossings and eight native movement/reload views. Broader court
 composition and later continuous sector routes remain open.
 
+The [cloud counterweight pass](sky-counterweights.md) adds fitted stone/metal
+construction to the first chamber and clears its inscription approach. It adds
+40 reviewed chamber observers and 116 reviewed captures from a 467.06 m assisted
+journey through 14 stone moves, both first wind engines and the next sector's
+two carrying crossings. Small camera solids and native keyboard/touch interaction
+and reload checks pass. Later sectors and broader court composition remain open.
+
 ## Findings and follow-up
 
 | ID | Observation | Evidence and next action | Status |
@@ -122,6 +129,7 @@ composition and later continuous sector routes remain open.
 | VA-27 | Raised bell feet extend beyond their plinths; the outer bell clips a post, rope falls pass through pulley centres and nameplates float beneath the loops. | The [bell-rack pass](bell-racks.md) widens seven supported landings, fits eight timber frames and suspension assemblies, and joins moving ropes and labels. Rendered support and swing tests, 70 final views, local circulation, positional audio and native keyboard/touch reload checks pass. | Fixed; bell construction |
 | VA-28 | Restoring occupied generic raised feet loses the earned elevation before nearby arrival recovery. | The [native occupied-save check](bell-racks.md) reproduces the height loss. Generic restoration now searches at the supported saved elevation first, retains clear feet exactly and rejects unsupported air. Regression and six native occupied recoveries pass, followed by exact reloads apart from timestamps. | Fixed; raised arrival recovery |
 | VA-29 | A close sky route view exposes daylight through an outer climbing-pier wall joint; coping joints also lack outer bearing. | The [pier joint repair](sky-first-route.md) fits stepped wall backing and a continuous inset coping bed at all 105 piers. All 9,192 sampled joint rays, 695 tests, 63 continuous-route views, 84 High/Low close-ups and native keyboard/touch save checks pass. Broader sky composition remains under review. | Fixed; pier joint backing |
+| VA-30 | The first cloud chamber retains generic stone blocks and floating labels, its entrance inscription faces a wind pedestal, and its small stones lack explicit camera bounds. | The [counterweight pass](sky-counterweights.md) adds fitted granite/metal construction, backed labels, moving camera solids and a seated inscription in a clear aisle. Verification covers 707 tests, 40 chamber observers, 116 continuous assisted route captures and native keyboard/touch interaction and reload checks. The other seven chamber interiors and wider composition remain under review. | Fixed for the first cloud chamber; wider art review open |
 
 A view with no recorded finding is not a declaration that its entire area is
 finished. The next passes must expand coverage, resolve the observations above,

@@ -88,6 +88,8 @@ export function skyRouteSnapshot(game, state) {
     ropeReleaseSafe: !!predictedRopeLanding(game)?.safe,
     field: [...game.progress.field],
     nearest: game.nearest?.id,
+    calls: game.renderer.info.render.calls,
+    triangles: game.renderer.info.render.triangles,
     linked: game.renderer.info.programs.every((p) =>
       gl.getProgramParameter(p.program, gl.LINK_STATUS),
     ),
@@ -196,6 +198,30 @@ export function finishSkyField(game, state, id) {
   return skyRouteSnapshot(game, state);
 }
 
+export function advanceSkyStone(game, state, index, pull = false) {
+  const chamber = game.counterweights,
+    previous = chamber.saved.moves;
+  game.keys.clear();
+  game.touchMove = { x: 0, z: 0 };
+  game.updatePlayer(0);
+  game.interact();
+  if (game.blockGrip?.block.index !== index)
+    throw Error(`Expected grip on stone ${index}`);
+  game.keys.add(pull ? "ArrowDown" : "ArrowUp");
+  for (let frame = 0; frame < 70 && chamber.saved.moves === previous; frame++)
+    tick(game, state);
+  game.keys.clear();
+  if (chamber.saved.moves !== previous + 1)
+    throw Error(`Stone ${index} did not move`);
+  if (game.blockGrip) game.interact();
+  return {
+    moves: chamber.saved.moves,
+    solved: chamber.saved.solved,
+    positions: chamber.saved.positions.map((cell) => [...cell]),
+    ...skyRouteSnapshot(game, state),
+  };
+}
+
 export function boardSkyReturn(game, state) {
   game.keys.clear();
   game.touchMove = { x: 0, z: 0 };
@@ -231,7 +257,10 @@ export function advanceSkySpan(game, state, id, direction = 1, limit = 120) {
         return d > 0 && d < 1.15;
       });
     if (jump) game.keys.add("Space");
-    tick(game, state, { x: vx / 6, z: vz / 6 });
+    // Carrying lowers the controller's base walking speed. Keep this assisted
+    // crossing at the same measured 4 m/s rather than scaling it down twice.
+    const speed = game.carrying ? 4.6 : 6;
+    tick(game, state, { x: vx / speed, z: vz / speed });
   }
   return { done: false, ...skyRouteSnapshot(game, state) };
 }

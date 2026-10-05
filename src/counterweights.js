@@ -11,6 +11,7 @@ import { fieldComplete } from "./expeditions.js";
 import { poseHands } from "./pose.js";
 import { boxEntry } from "./camera-collision.js";
 import { mergeArchitecture } from "./visuals.js";
+import { buildSkyCounterweightArt } from "./sky-counterweight-art.js";
 const GRIP_DISTANCE = 1.1;
 
 function label(text, size = 1.3) {
@@ -35,6 +36,7 @@ function label(text, size = 1.3) {
     }),
   );
   mesh.userData.animated = true;
+  mesh.userData.counterweightLabel = text;
   return mesh;
 }
 export const hasCounterweights = (feature) =>
@@ -59,6 +61,12 @@ export function buildCounterweights(game, feature, group) {
     plates: [],
     open: game.progress.stage > 0 || saved.solved,
   });
+  if (game.level.biome === "sky") {
+    buildSkyCounterweightArt(game, chamber, label);
+    mergeArchitecture(group);
+    syncCounterweights(game, 0);
+    return;
+  }
   const stone = game.stoneMat,
     gold = game.goldMat,
     dark = game.darkMat;
