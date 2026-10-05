@@ -9,6 +9,9 @@ The [visual audit](docs/visual-audit.md) now records front/rear overviews of all
 [stone foundations beneath monastery columns on slopes](docs/monastery-foundations.md)
 and [grounded court bases in the jungle, desert and coast](docs/court-foundations.md).
 The desert's pier shafts also now meet their base slabs.
+The summit [cable frames now leave the reading and boarding edge clear](docs/summit-cable-frames.md),
+with supported footplates and braced arms.
+
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
 their return cables, native keyboard/touch landings and local save recovery.

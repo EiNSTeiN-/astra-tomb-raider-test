@@ -759,3 +759,11 @@ It retains the credited character, climbing geometry, materials, positioned
 rope synthesis and sky score. No external assets or dependencies were added.
 Its four documentation images are actual game captures converted losslessly
 to WebP, with decoded RGBA identity checked.
+
+The [summit cable-frame repair](summit-cable-frames.md) adds original fitted
+frame placement and splayed, braced arms, relocates the existing winch and seats
+its terminal plates. It retains the credited chapter materials, character,
+trolley geometry, procedural mechanical audio and themed scores. The positioned
+winch emitter follows its moved mount. No external assets or dependencies were
+added. Its three documentation images are actual game captures converted
+losslessly to WebP, with decoded RGBA identity checked.

@@ -9,7 +9,7 @@ import {
   ropeGrip,
   updateCourseVisual,
 } from "../src/traversal-courses.js";
-import { CameraSurfaces } from "../src/camera-collision.js";
+import { CameraSurfaces, followCamera } from "../src/camera-collision.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { Soundscape } from "../src/audio.js";
 import { CLIMBING_STYLES } from "../src/traversal-art.js";
@@ -140,6 +140,75 @@ test("all anchor yokes track the real pendulum and leave the rope swept path cle
         );
       }
   }
+});
+
+test("summit cable frames retain supported feet and clear the observed reading and boarding views on all 21 courses", (t) => {
+  let views = 0;
+  const blocked = [];
+  for (const level of LEVELS) {
+    const g = world(t, level);
+    for (const c of g.traversalCourses) {
+      const summit = c.ledges[4],
+        ray = new THREE.Raycaster();
+      // Test the entire stone footplate, rather than just its centre height.
+      for (const p of c.zipRig.posts.slice(0, 2))
+        for (const x of [-0.21, 0.21])
+          for (const z of [-0.21, 0.21]) {
+            ray.set(
+              new THREE.Vector3(p.x + x, p.floor + 0.1, p.z + z),
+              new THREE.Vector3(0, -1, 0),
+            );
+            const hit = ray.intersectObject(c.art.fixed, true)[0];
+            assert.ok(
+              hit && Math.abs(hit.point.y - summit.y) < 0.001,
+              `${level.id}/${c.id}: supported terminal footplate`,
+            );
+          }
+      // Relative feet/angles from obstructed continuous eagle approaches.
+      // Rotate those real working-edge views through every campaign course.
+      for (const [x, z, heading] of [
+        [0.5624657651637, 2.19656168235463, 2.1029591445476035],
+        [0.78180967001387, 2.2454142891183, 2.264878396865836],
+        [0.01546097382555, 2.19253483461532, 2.2457876265597903],
+        [0.7474637624049, 2.2510970531875, 3.659162828695816],
+        [0.77175901510066, 2.23843278971435, 2.703856569015338],
+      ]) {
+        const p = c.transform(x, z),
+          target = new THREE.Vector3(p.x, summit.y + 1.3, p.z),
+          yaw = heading - Math.atan2(c.axis.z, c.axis.x),
+          offset = new THREE.Vector3(
+            Math.sin(yaw) * Math.cos(0.13) * 5.3,
+            Math.sin(0.13) * 5.3 + 0.2,
+            Math.cos(yaw) * Math.cos(0.13) * 5.3,
+          ),
+          desired = target.clone().add(offset);
+        let camera = target.clone().addScaledVector(offset, 0.06);
+        for (let frame = 0; frame < 60; frame++) {
+          camera = followCamera(
+            camera,
+            target,
+            desired,
+            1 / 60,
+            g.cameraSurfaces,
+            () => true,
+            target,
+          );
+          assert.equal(g.cameraSurfaces.entry(target, camera, 0), 1);
+        }
+        if (camera.distanceTo(target) <= 5.2)
+          blocked.push(
+            `${level.id}/${c.id}: ${x},${z}, ${camera.distanceTo(target)} m`,
+          );
+        ray.set(target, offset.clone().normalize());
+        ray.far = offset.length();
+        if (ray.intersectObject(c.root, true).length)
+          blocked.push(`${level.id}/${c.id}: rendered sight line ${x},${z}`);
+        views++;
+      }
+    }
+  }
+  assert.equal(views, 105);
+  assert.deepEqual(blocked, []);
 });
 
 test("climbing pier wall and coping joints have continuous bearing behind their recessed edges", (t) => {

@@ -85,12 +85,14 @@ remain documented; this pass adds no subjective listening assessment.
 
 ## Remaining observations
 
-The first summit's continuous approach leaves a timber support across
-the camera, hiding the explorer with an arm of about 0.400 m. A settled view
-from the same earned feet and heading has a clear 5.330 m arm in both High and
-Low. The second cable approach also brings a support across the foreground.
-This movement-dependent framing still needs investigation; the rope repair
-does not close it.
+The original first summit approach leaves a timber support across the camera,
+hiding the explorer with an arm of about 0.400 m. The second cable approach also
+brings a support across the foreground. The later [cable-frame repair](summit-cable-frames.md)
+moves and braces those supports and verifies the continuous approaches.
+
+The initially reported clear 5.330 m view used a different heading chosen during
+save restoration. It did not show recovery from the same heading. The follow-up
+corrects that comparison and identifies the obstructing return-cable posts.
 
 ![Obstructed first-summit view during the continuous approach](images/sky-eagle-route/summit-obstruction.webp)
 

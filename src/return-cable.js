@@ -24,6 +24,8 @@ export function buildReturnCable(game, course, materials) {
     carriage = new THREE.Group(),
     hanger = new THREE.Group(),
     frame = cableFrame(course),
+    launchSetback = -3,
+    launchAcross = 1.6,
     wheels = [],
     handles = [],
     posts = [],
@@ -81,11 +83,15 @@ export function buildReturnCable(game, course, materials) {
       )
       .add(new THREE.Vector3(0, height, 0));
   for (const [index, end] of [course.launch, course.exit].entries()) {
-    const side = index === 0 ? -1 : 1;
-    for (const x of [-0.86, 0.86]) {
-      const p = at(end, x, side * 0.95, 0),
+    // Set the upper frame back onto the summit. Posts immediately behind the
+    // trolley cut across the reading and boarding camera angles; longer stayed
+    // arms leave that working edge open while retaining the cable's anchor.
+    const setback = index === 0 ? launchSetback : 0.95,
+      width = index === 0 ? launchAcross : 0.86;
+    for (const x of [-width, width]) {
+      const p = at(end, x, setback, 0),
         floor = index === 0 ? course.launch.y : game.groundHeight(p.x, p.z),
-        head = at(end, x, side * 0.95, 3.0);
+        head = at(end, x, setback, 3.0);
       block(0.42, 0.13, 0.42, fixed, p.x, floor + 0.065, p.z, materials.stone);
       beam(new THREE.Vector3(p.x, floor + 0.12, p.z), head, 0.22, 0.22);
       game.obstacles.push({
@@ -99,12 +105,25 @@ export function buildReturnCable(game, course, materials) {
       posts.push({ x: p.x, z: p.z, floor, head: head.y });
       for (const h of [0.26, 1.3, 2.85])
         block(0.28, 0.09, 0.28, fixed, p.x, end.y + h, p.z);
-      beam(at(end, x, side * 0.95, 2.74), at(end, x, 0, 2.74), 0.17, 0.17);
-      beam(head, at(end, x, 0, 2.74), 0.13, 0.13);
+      const front = Math.sign(x) * 0.86;
+      beam(
+        at(end, x, setback, 2.74),
+        at(end, front, 0, 2.74),
+        index === 0 ? 0.28 : 0.17,
+        index === 0 ? 0.28 : 0.17,
+      );
+      beam(
+        index === 0 ? at(end, x, setback, 1.55) : head,
+        index === 0
+          ? at(end, (x + front) / 2, setback / 2, 2.74)
+          : at(end, front, 0, 2.74),
+        index === 0 ? 0.2 : 0.13,
+        index === 0 ? 0.2 : 0.13,
+      );
     }
     beam(
-      at(end, -1.04, side * 0.95, 2.87),
-      at(end, 1.04, side * 0.95, 2.87),
+      at(end, -width - 0.18, setback, 2.87),
+      at(end, width + 0.18, setback, 2.87),
       0.23,
       0.28,
     );
@@ -123,7 +142,7 @@ export function buildReturnCable(game, course, materials) {
       0.24,
       0.11,
       fixed,
-      ...at(end, 0, side * 0.95, 2.4).toArray(),
+      ...at(end, 0, setback, 2.72).toArray(),
     );
     plate.quaternion.copy(frame.rotation);
   }
@@ -200,7 +219,7 @@ export function buildReturnCable(game, course, materials) {
 
   const winchRoot = new THREE.Group(),
     drum = new THREE.Group(),
-    wp = at(course.launch, 0.86, -0.95, 1.05);
+    wp = at(course.launch, launchAcross, launchSetback, 1.05);
   winchRoot.position.copy(wp);
   winchRoot.quaternion.copy(frame.rotation);
   root.add(winchRoot);
@@ -231,7 +250,7 @@ export function buildReturnCable(game, course, materials) {
     );
   block(0.08, 0.4, 0.08, drum, 0.35, -0.1, 0);
   block(0.23, 0.07, 0.07, drum, 0.44, -0.28, 0);
-  const lead = at(course.launch, 0.86, -0.95, 2.75);
+  const lead = at(course.launch, launchAcross, launchSetback, 2.75);
   beam(
     wp.clone().addScaledVector(frame.normal, 0.22),
     lead,
