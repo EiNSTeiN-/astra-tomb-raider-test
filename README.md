@@ -22,6 +22,8 @@ The eight [chapter relics now have individual models on solid, fitted stands](do
 with an earned final sky route and inspected unlock/collection states.
 Their [bronze plates now sit above the masonry, with supported stone crowns](docs/relic-plate-bearing.md),
 removing the alternating top-face wedges visible in the first model milestone.
+The seven other [counterweight chambers now have regional masonry and fitted bronze hardware](docs/regional-counterweights.md),
+with backed labels and a clear crystal inscription approach.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

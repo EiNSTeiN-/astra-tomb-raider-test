@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional counterweight chambers](regional-counterweights.md) dress the seven
+  remaining primitive boards with chapter masonry, regional seals, fitted
+  hardware and backed labels. The crystal inscription moves into a clear aisle.
+  Twenty-five targeted tests and the build pass. All 110 updated observers,
+  eight actual-world stone solutions, 32 post-solution views and sixteen native
+  production captures are reviewed. Four keyboard/touch cases preserve saved
+  data apart from timestamps and two independently verified camera corrections.
+  VA-43 is repaired; moved-stone camera framing is recorded as VA-44.
+
 - [Relic plate and crown bearings](relic-plate-bearing.md) separate the bronze
   and masonry faces that caused spoke-shaped depth fighting, and close the
   unsupported crown joins in all eight stands. Eighteen targeted tests and the

@@ -11,7 +11,7 @@ import { fieldComplete } from "./expeditions.js";
 import { poseHands } from "./pose.js";
 import { boxEntry } from "./camera-collision.js";
 import { mergeArchitecture } from "./visuals.js";
-import { buildSkyCounterweightArt } from "./sky-counterweight-art.js";
+import { buildCounterweightArt } from "./counterweight-art.js";
 const GRIP_DISTANCE = 1.1;
 
 function label(text, size = 1.3) {
@@ -61,143 +61,11 @@ export function buildCounterweights(game, feature, group) {
     plates: [],
     open: game.progress.stage > 0 || saved.solved,
   });
-  if (game.level.biome === "sky") {
-    buildSkyCounterweightArt(game, chamber, label);
-    mergeArchitecture(group);
-    syncCounterweights(game, 0);
-    return;
-  }
-  const stone = game.stoneMat,
-    gold = game.goldMat,
-    dark = game.darkMat;
-  // The board sits inside the existing first sanctuary, preserving its entrance.
-  for (let z = 0; z < 5; z++)
-    for (let x = 0; x < 5; x++) {
-      const tile = game.box(
-        TILE - 0.05,
-        0.055,
-        TILE - 0.05,
-        stone,
-        (x - 2) * TILE,
-        0.035,
-        (z - 2) * TILE,
-        group,
-      );
-      tile.receiveShadow = true;
-      for (const turn of [0, 1]) {
-        const line = game.box(
-          1.25,
-          0.015,
-          0.025,
-          gold,
-          (x - 2) * TILE,
-          0.07,
-          (z - 2) * TILE,
-          group,
-        );
-        line.rotation.y = (turn * Math.PI) / 2;
-      }
-    }
-  for (const cell of trial.walls) {
-    const x = (cell[0] - 2) * TILE,
-      z = (cell[1] - 2) * TILE;
-    game.box(1.43, 1.95, 1.43, stone, x, 0.975, z, group);
-    game.box(1.49, 0.16, 1.49, dark, x, 2.03, z, group);
-    game.obstacles.push({
-      x: group.position.x + x,
-      z: group.position.z + z,
-      w: 1.17,
-      d: 1.17,
-      h: 2.15,
-    });
-  }
-  trial.goals.forEach((goal, index) => {
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x807653,
-      metalness: 0.65,
-      roughness: 0.45,
-      emissive: 0x355440,
-      emissiveIntensity: 0,
-    });
-    const plates = goal.cells.map((cell) => {
-      const plate = game.box(
-        1.32,
-        0.065,
-        1.32,
-        material,
-        (cell[0] - 2) * TILE,
-        0.085,
-        (cell[1] - 2) * TILE,
-        group,
-      );
-      plate.userData.animated = true;
-      const name = label(goal.name, 1.24);
-      name.rotation.x = -Math.PI / 2;
-      name.position.y = 0.046;
-      plate.add(name);
-      return plate;
-    });
-    const sign = label(goal.name, 1.55);
-    sign.position.set(-3.5 + index * 2.35, 2.65, -5.95);
-    group.add(sign);
-    chamber.plates.push({ goal, material, meshes: plates, active: false });
-  });
-  trial.stones.forEach((definition, index) => {
-    const block = new THREE.Group();
-    block.userData.cameraDynamic = true;
-    block.name = `${definition.name} counterweight`;
-    group.add(block);
-    game.box(1.16, 1.22, 1.16, stone, 0, 0.66, 0, block);
-    game.box(1.22, 0.12, 1.22, gold, 0, 1.27, 0, block);
-    for (let side = 0; side < 4; side++) {
-      const face = new THREE.Group();
-      face.rotation.y = (side * Math.PI) / 2;
-      block.add(face);
-      const name = label(definition.name, 0.95);
-      name.position.set(0, 0.84, 0.587);
-      face.add(name);
-      game.box(0.72, 0.065, 0.06, gold, 0, 1.1, 0.6, face);
-      for (let mark = 0; mark < definition.weight; mark++)
-        game.box(
-          0.07,
-          0.13,
-          0.035,
-          gold,
-          (mark - (definition.weight - 1) / 2) * 0.14,
-          0.65,
-          0.613,
-          face,
-        );
-    }
-    const obstacle = { x: 0, z: 0, w: 1.03, d: 1.03, h: 1.32 };
-    game.obstacles.push(obstacle);
-    chamber.blocks.push({ definition, group: block, obstacle, index });
-  });
-  // A physical restraint withdraws from the control when the pressure latches.
-  const cage = new THREE.Group();
-  cage.userData.cameraDynamic = true;
-  group.add(cage);
-  cage.position.set(0, 0, -5);
-  for (const x of [-0.9, 0.9]) game.box(0.1, 2.25, 0.1, gold, x, 1.15, 0, cage);
-  game.box(1.9, 0.12, 0.1, gold, 0, 2.28, 0, cage);
-  chamber.cage = cage;
-  const control = new THREE.Group();
-  control.position.z = -5;
-  group.add(control);
-  game.cylinder(0.6, 0.78, 0.7, dark, 0, 0.4, 0, control, 12);
-  const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.36), game.glowMat);
-  core.position.y = 1.2;
-  control.add(core);
-  feature.core = core;
-  const tablet = game.box(1.5, 1.15, 0.25, stone, 0, 0.65, 8.4, group);
-  tablet.rotation.x = -0.14;
-  const name = label("COUNTERWEIGHTS", 1.45);
-  name.position.set(0, 0.94, 8.57);
-  group.add(name);
-  chamber.tablet = group.position.clone().add(new THREE.Vector3(0, 0, 8.4));
+  buildCounterweightArt(game, chamber, label);
   mergeArchitecture(group);
   syncCounterweights(game, 0);
 }
+
 function worldCell(chamber, cell) {
   return new THREE.Vector3(
     chamber.group.position.x + (cell[0] - 2) * TILE,

@@ -6,22 +6,112 @@ import { weatherSkyStone } from "./sky-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { skyWindReliefGeometry } from "./sky-chamber-walls.js";
 
+function masonryCopy(source) {
+  const material = source.clone();
+  material.onBeforeCompile = source.onBeforeCompile;
+  material.customProgramCacheKey = source.customProgramCacheKey;
+  return material;
+}
+
+// Shallow, closed regional seals sit on the fixed pillar's packed face.
+// They decorate the chamber without occupying a stone track or grip stance.
+function regionalMotifGeometry(biome, variant) {
+  let points;
+  if (biome === "jungle")
+    points = Array.from({ length: 40 }, (_, i) => {
+      const a = (i * Math.PI * 2) / 40,
+        r = 0.19 + 0.045 * Math.cos((5 + (variant % 2)) * a);
+      return [Math.cos(a) * r, Math.sin(a) * r];
+    });
+  else if (biome === "desert")
+    points = Array.from({ length: 48 }, (_, i) => {
+      const a = (i * Math.PI * 2) / 48,
+        r = i % 4 === 0 ? 0.25 : 0.17;
+      return [Math.cos(a) * r, Math.sin(a) * r];
+    });
+  else if (biome === "snow")
+    points = [
+      [-0.23, -0.19],
+      [0.23, -0.19],
+      [0.15, -0.11],
+      [0.11, 0.13],
+      [0.06, 0.21],
+      [-0.06, 0.21],
+      [-0.11, 0.13],
+      [-0.15, -0.11],
+    ];
+  else if (biome === "water")
+    points = [
+      [-0.18, -0.19],
+      [0.18, -0.19],
+      ...Array.from({ length: 25 }, (_, i) => {
+        const a = (i * Math.PI) / 24,
+          r = 0.225 + 0.018 * Math.cos(a * 12);
+        return [Math.cos(a) * r, -0.13 + Math.sin(a) * 0.36];
+      }),
+    ];
+  else if (biome === "volcano")
+    points = [
+      [0, -0.24],
+      [0.21, -0.1],
+      [0.23, 0.12],
+      [0.09, 0.02],
+      [0.07, 0.24],
+      [-0.06, 0.1],
+      [-0.15, 0.2],
+      [-0.23, -0.06],
+    ];
+  else if (biome === "crystal")
+    points = [
+      [0, -0.24],
+      [0.22, -0.1],
+      [0.18, 0.12],
+      [0, 0.25],
+      [-0.18, 0.12],
+      [-0.22, -0.1],
+    ];
+  else
+    points = Array.from({ length: 16 }, (_, i) => {
+      const a = (i * Math.PI) / 8,
+        r = i % 2 === 0 ? 0.245 : 0.105;
+      return [Math.cos(a) * r, Math.sin(a) * r];
+    });
+  const shape = new THREE.Shape(
+    points.map(([x, y]) => new THREE.Vector2(x, y)),
+  );
+  shape.closePath();
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.026,
+    steps: 1,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    bevelSize: 0.004,
+    bevelThickness: 0.004,
+  });
+  geometry.userData.counterweightMotif = biome;
+  return geometry;
+}
+
 // Keep the stone tracks, movable footprints and pressure heights of the
 // delivered chamber. Fittings belong to their stone or receiver, including
 // while a stone slides or a loaded plate depresses.
-export function buildSkyCounterweightArt(game, chamber, label) {
+export function buildCounterweightArt(game, chamber, label) {
   const { group, trial, feature } = chamber,
-    stone = pbrMaterial("rock", 0xc3c9c4),
-    trim = pbrMaterial("temple", 0xacaea1),
+    biome = game.level.biome,
+    sky = biome === "sky",
+    stone = sky ? pbrMaterial("rock", 0xc3c9c4) : masonryCopy(game.stoneMat),
+    trim = sky ? pbrMaterial("temple", 0xacaea1) : masonryCopy(game.darkMat),
     bronze = windMetal(),
     worn = windMetal("worn"),
     iron = windMetal("iron");
-  stone.name = "Cloud counterweights: dressed granite";
-  trim.name = "Cloud counterweights: stone caps";
+  stone.name = `${biome} counterweights: dressed masonry`;
+  trim.name = `${biome} counterweights: bearing caps`;
   stone.normalScale.set(0.25, 0.25);
   trim.normalScale.set(0.22, 0.22);
-  weatherSkyStone(stone);
-  weatherSkyStone(trim);
+  if (sky) {
+    weatherSkyStone(stone);
+    weatherSkyStone(trim);
+  }
   let serial = game.level.seed + 6310;
   const add = (geometry, material, x, y, z, parent = group) => {
     if (material.userData.windMetal) windSurface(geometry);
@@ -87,10 +177,12 @@ export function buildSkyCounterweightArt(game, chamber, label) {
       group.add(face);
       block(0.76, 0.48, 0.026, iron, 0, 1.42, 0.722, face);
       const relief = add(
-        skyWindReliefGeometry(i % 3, 0.6),
+        sky
+          ? skyWindReliefGeometry(i % 3, 0.6)
+          : regionalMotifGeometry(biome, i),
         worn,
         0,
-        1.49,
+        sky ? 1.49 : 1.42,
         0.736,
         face,
       );
@@ -211,16 +303,39 @@ export function buildSkyCounterweightArt(game, chamber, label) {
     control,
   );
   feature.core = core;
-  // A seated tablet carries the inscription; its lettering follows the face
-  // tilt instead of hovering in front of the stone at a different angle.
-  // The left aisle provides a direct view instead of facing the first duct's
-  // pedestal, which begins immediately in front of the former central tablet.
-  const tx = -5,
-    tz = 8.3,
-    floor =
+  // A seated tablet carries lettering at the slab's own tilt. The cloud's
+  // left aisle clears its duct; the crystal's right aisle clears its tall
+  // central resonator. Other chapters retain their original reading location.
+  const tx = sky ? -5 : biome === "crystal" ? 5 : 0,
+    tz = sky ? 8.3 : 8.4,
+    centreFloor =
       game.groundHeight(group.position.x + tx, group.position.z + tz) -
       group.position.y;
-  block(1.62, 0.14, 0.46, trim, tx, floor + 0.055, tz);
+  let low = centreFloor,
+    floor = centreFloor;
+  if (!sky) {
+    for (let iz = -3; iz <= 3; iz++)
+      for (let ix = -8; ix <= 8; ix++) {
+        const y =
+          game.groundHeight(
+            group.position.x + tx + ix * 0.11,
+            group.position.z + tz + iz * 0.11,
+          ) - group.position.y;
+        low = Math.min(low, y);
+        floor = Math.max(floor, y);
+      }
+  }
+  const baseTop = floor + 0.125,
+    baseBottom = low - 0.09;
+  block(
+    1.62,
+    sky ? 0.14 : baseTop - baseBottom,
+    sky ? 0.46 : 0.66,
+    trim,
+    tx,
+    sky ? floor + 0.055 : (baseTop + baseBottom) / 2,
+    tz,
+  );
   const tablet = new THREE.Group();
   tablet.position.set(tx, floor + 0.65, tz);
   tablet.rotation.x = -0.14;
@@ -236,7 +351,7 @@ export function buildSkyCounterweightArt(game, chamber, label) {
     z: chamber.tablet.z,
     w: 1.26,
     d: 0.7,
-    h: 1.3,
+    h: floor - centreFloor + 1.3,
     counterweightTablet: true,
   });
 }

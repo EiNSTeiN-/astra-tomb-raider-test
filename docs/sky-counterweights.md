@@ -1,5 +1,10 @@
 # Cloud counterweights and the carrying route
 
+The later [regional counterweight pass](regional-counterweights.md) moves this
+construction into the shared `src/counterweight-art.js` builder and dresses the
+other seven chapters. The following notes and images retain this milestone's
+publication-time evidence.
+
 The first sanctuary in Where Eagles Sleep now uses dressed granite stones,
 weathered bronze caps, fitted grab rails and mounted weight marks. Its fixed
 pillars have two masonry courses with packed backing, and its receivers have

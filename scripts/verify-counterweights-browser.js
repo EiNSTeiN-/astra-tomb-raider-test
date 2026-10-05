@@ -8,6 +8,7 @@ import {
   counterweightsReady,
 } from "../src/counterweights.js";
 import { advanceCharacter } from "../src/character-motion.js";
+import { searchRoute } from "../src/navigation.js";
 import { solveCounterweights } from "./solve-counterweights.js";
 
 // Development-assisted integration check. Opens the already-tested field gate,
@@ -54,6 +55,23 @@ export async function verifyCounterweights(indices) {
         `${game.level.id}: blocked walking to ${target.toArray()} from ${game.player.position.toArray()}`,
       );
     };
+    // Reset starts in front of the inscription. Find a swept walking route
+    // around the solid slab and the chapter's entrance piers or wind ducts.
+    const approach = searchRoute(
+      (x, z) => game.canMove(x, z, 0),
+      game.player.position,
+      point([2, 5]),
+      { cell: 0.35, margin: 8, maxVisited: 5000, maxDistance: 30 },
+    );
+    let route;
+    do {
+      route = approach.next();
+      if (!route.done) await new Promise((resolve) => setTimeout(resolve, 0));
+    } while (!route.done);
+    if (route.value.status !== "complete")
+      throw new Error(`${game.level.id}: no clear inscription approach`);
+    for (const p of route.value.points)
+      walk(new THREE.Vector3(p.x, game.groundHeight(p.x, p.z), p.z));
     for (const action of solution.path) {
       for (const cell of action.walking) walk(point(cell));
       const target = point(chamber.saved.positions[action.index]).add(

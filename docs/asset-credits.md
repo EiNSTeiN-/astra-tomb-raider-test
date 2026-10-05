@@ -1,8 +1,9 @@
 # Asset credits and provenance
 
 The [cloud counterweight chamber](sky-counterweights.md) uses original geometry
-in `src/sky-counterweight-art.js`, the existing fitted-stone generator, wind
-reliefs and patina shaders, and the already credited rock and temple maps.
+in `src/counterweight-art.js` (originally `src/sky-counterweight-art.js`), the
+existing fitted-stone generator, wind reliefs and patina shaders, and the already
+credited rock and temple maps.
 No external asset, recording, music or dependency was added. Its documentation
 images are actual game captures converted losslessly to WebP, with decoded
 pixel identity verified.
@@ -803,3 +804,11 @@ credited chapter masonry maps and worn bronze shader. Positioned sounds and
 themed scores are retained; no external asset or dependency was added. Its
 three documentation images are actual runtime captures converted losslessly
 to WebP, with decoded RGBA identity checked.
+
+The [regional counterweight chambers](regional-counterweights.md) extend that
+original geometry with seven closed regional seals, chapter masonry copies,
+terrain-fitted tablet bases and mounted fittings. They reuse the credited chapter
+maps and existing wind metal shaders. Environmental and mechanical sounds and
+themed scores are retained. No external asset or dependency was added. Their
+four documentation images are actual game captures converted losslessly to
+WebP, with decoded RGBA identity verified.

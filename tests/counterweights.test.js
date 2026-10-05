@@ -29,7 +29,7 @@ import { resetTraversal } from "../src/traversal.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 
-function fixture(level = LEVELS[0]) {
+function fixture(level = LEVELS[0], groundHeight = () => 0) {
   const memory = new Map(),
     storage = {
       getItem: (k) => memory.get(k),
@@ -49,7 +49,7 @@ function fixture(level = LEVELS[0]) {
     darkMat: new THREE.MeshStandardMaterial(),
     goldMat: new THREE.MeshStandardMaterial(),
     glowMat: new THREE.MeshStandardMaterial(),
-    groundHeight: () => 0,
+    groundHeight,
     walkable: () => true,
     obstacles: [],
     keys: new Set(),
@@ -124,119 +124,160 @@ function gripMove(game, action) {
   releaseCounterweight(game);
 }
 
-test("cloud counterweight labels remain attached to physical backing after batching and plate depression", () => {
-  const { game } = fixture(LEVELS[5]),
-    chamber = game.counterweights;
-  for (const solved of [false, true]) {
-    if (solved)
-      chamber.saved.positions = solveCounterweights(chamber.trial).positions;
-    syncCounterweights(game, 0);
-    game.world.updateMatrixWorld(true);
-    const labels = [],
-      solids = [];
-    chamber.group.traverse((mesh) => {
-      if (!mesh.isMesh) return;
-      if (mesh.userData.counterweightLabel) labels.push(mesh);
-      else solids.push(mesh);
-    });
-    assert.equal(
-      labels.length,
-      23,
-      "floor, wall, stone and inscription labels survive batching",
-    );
-    for (const mesh of labels) {
-      const p = mesh.getWorldPosition(new THREE.Vector3()),
-        n = new THREE.Vector3(0, 0, 1).transformDirection(mesh.matrixWorld),
-        hit = new THREE.Raycaster(
-          p.clone().addScaledVector(n, 0.03),
-          n.negate(),
-          0,
-          0.06,
-        ).intersectObjects(
-          mesh.parent.isMesh ? [mesh.parent] : solids,
-          false,
-        )[0];
-      assert.ok(hit, `${mesh.userData.counterweightLabel}: physical backing`);
-      assert.ok(
-        hit.distance >= 0.025 && hit.distance <= 0.05,
-        `${mesh.userData.counterweightLabel}: seated face, distance ${hit.distance}`,
+test("regional counterweight labels remain attached to physical backing after batching and plate depression", () => {
+  for (const level of LEVELS) {
+    const { game } = fixture(level),
+      chamber = game.counterweights;
+    for (const solved of [false, true]) {
+      if (solved)
+        chamber.saved.positions = solveCounterweights(chamber.trial).positions;
+      syncCounterweights(game, 0);
+      game.world.updateMatrixWorld(true);
+      const labels = [],
+        solids = [];
+      chamber.group.traverse((mesh) => {
+        if (!mesh.isMesh) return;
+        if (mesh.userData.counterweightLabel) labels.push(mesh);
+        else solids.push(mesh);
+      });
+      assert.equal(
+        labels.length,
+        4 * chamber.trial.stones.length +
+          chamber.trial.goals.reduce(
+            (sum, goal) => sum + goal.cells.length,
+            0,
+          ) +
+          chamber.trial.goals.length +
+          1,
+        "floor, wall, stone and inscription labels survive batching",
       );
-    }
-  }
-});
-
-test("dressed cloud stones and fittings stay inside the delivered movable footprint", () => {
-  const { game } = fixture(LEVELS[5]);
-  for (const { group } of game.counterweights.blocks) {
-    group.updateWorldMatrix(true, true);
-    const bounds = new THREE.Box3()
-      .setFromObject(group)
-      .translate(group.getWorldPosition(new THREE.Vector3()).negate());
-    assert.ok(bounds.min.x >= -0.635 && bounds.max.x <= 0.635);
-    assert.ok(bounds.min.z >= -0.635 && bounds.max.z <= 0.635);
-    assert.ok(
-      bounds.min.y >= 0.06 && bounds.min.y < 0.065,
-      "shoe bears on the 6 cm paving",
-    );
-    assert.ok(bounds.max.y <= 1.32, "retains the original collision height");
-    const solids = [];
-    group.traverse((mesh) => {
-      if (mesh.isMesh && !mesh.userData.animated) solids.push(mesh);
-    });
-    assert.equal(
-      solids.length,
-      5,
-      "stone, caps and three metal finishes are batched per moving stone",
-    );
-    for (const mesh of solids) {
-      assert.ok(mesh.geometry.attributes.position.array.every(Number.isFinite));
-      if (mesh.material.userData.windMetal) {
-        const coordinates = mesh.geometry.attributes.windCoord;
-        assert.equal(
-          coordinates.count,
-          mesh.geometry.attributes.position.count,
-        );
+      for (const mesh of labels) {
+        const p = mesh.getWorldPosition(new THREE.Vector3()),
+          n = new THREE.Vector3(0, 0, 1).transformDirection(mesh.matrixWorld),
+          hit = new THREE.Raycaster(
+            p.clone().addScaledVector(n, 0.03),
+            n.negate(),
+            0,
+            0.06,
+          ).intersectObjects(
+            mesh.parent.isMesh ? [mesh.parent] : solids,
+            false,
+          )[0];
+        assert.ok(hit, `${mesh.userData.counterweightLabel}: physical backing`);
         assert.ok(
-          coordinates.array.every(Number.isFinite),
-          "patina coordinates survive fitting and merging",
+          hit.distance >= 0.025 && hit.distance <= 0.05,
+          `${mesh.userData.counterweightLabel}: seated face, distance ${hit.distance}`,
         );
       }
     }
   }
 });
 
-test("cloud camera solids follow sliding stones and the relocated inscription has a safe reset stance", () => {
-  const { game } = fixture(LEVELS[5]),
-    c = game.counterweights,
-    body = c.blocks[2].group,
-    surface = game.cameraSurfaces.dynamic.find((s) => s.parent === body);
-  assert.ok(surface, "small moving stones are registered for the camera");
-  const ray = () => {
-    const p = body.getWorldPosition(new THREE.Vector3());
-    return game.cameraSurfaces.entry(
-      p.clone().add(new THREE.Vector3(0.66, 0.8, 2)),
-      p.clone().add(new THREE.Vector3(0.66, 0.8, -2)),
+test("dressed regional stones and fittings stay inside the delivered movable footprint", () => {
+  for (const level of LEVELS) {
+    const { game } = fixture(level);
+    for (const { group } of game.counterweights.blocks) {
+      group.updateWorldMatrix(true, true);
+      const bounds = new THREE.Box3()
+        .setFromObject(group)
+        .translate(group.getWorldPosition(new THREE.Vector3()).negate());
+      assert.ok(bounds.min.x >= -0.635 && bounds.max.x <= 0.635);
+      assert.ok(bounds.min.z >= -0.635 && bounds.max.z <= 0.635);
+      assert.ok(
+        bounds.min.y >= 0.06 && bounds.min.y < 0.065,
+        "shoe bears on the 6 cm paving",
+      );
+      assert.ok(bounds.max.y <= 1.32, "retains the original collision height");
+      const solids = [];
+      group.traverse((mesh) => {
+        if (mesh.isMesh && !mesh.userData.animated) solids.push(mesh);
+      });
+      assert.equal(
+        solids.length,
+        5,
+        "stone, caps and three metal finishes are batched per moving stone",
+      );
+      for (const mesh of solids) {
+        assert.ok(
+          mesh.geometry.attributes.position.array.every(Number.isFinite),
+        );
+        if (mesh.material.userData.windMetal) {
+          const coordinates = mesh.geometry.attributes.windCoord;
+          assert.equal(
+            coordinates.count,
+            mesh.geometry.attributes.position.count,
+          );
+          assert.ok(
+            coordinates.array.every(Number.isFinite),
+            "patina coordinates survive fitting and merging",
+          );
+        }
+      }
+    }
+  }
+});
+
+test("regional camera solids follow sliding stones and the fitted inscriptions have safe reset stances", () => {
+  for (const level of LEVELS) {
+    const { game } = fixture(level),
+      c = game.counterweights,
+      index = c.blocks.length - 1,
+      body = c.blocks[index].group,
+      surface = game.cameraSurfaces.dynamic.find((s) => s.parent === body);
+    assert.ok(surface, "small moving stones are registered for the camera");
+    const ray = () => {
+      const p = body.getWorldPosition(new THREE.Vector3());
+      return game.cameraSurfaces.entry(
+        p.clone().add(new THREE.Vector3(0.66, 0.8, 2)),
+        p.clone().add(new THREE.Vector3(0.66, 0.8, -2)),
+      );
+    };
+    assert.ok(ray() < 1);
+    const before = surface.bounds.clone();
+    const original = c.saved.positions[index],
+      dx = original[0] < 4 ? 1 : -1;
+    c.saved.positions[index] = [original[0] + dx, original[1]];
+    syncCounterweights(game, 0);
+    game.world.updateMatrixWorld(true);
+    assert.ok(ray() < 1);
+    assert.ok(Math.abs(surface.bounds.min.x - before.min.x - dx * TILE) < 1e-8);
+    assert.equal(
+      game.canMove(c.tablet.x, c.tablet.z, 0),
+      false,
+      "tablet has a physical footprint",
     );
-  };
-  assert.ok(ray() < 1);
-  const before = surface.bounds.clone();
-  c.saved.positions[2] = [3, 2];
-  syncCounterweights(game, 0);
+    resetCounterweights(game);
+    assert.equal(
+      game.canMove(game.player.position.x, game.player.position.z, 0),
+      true,
+      "reset returns beside the inscription rather than inside its stone",
+    );
+    assert.ok(game.player.position.distanceTo(c.tablet) < 2.7);
+  }
+});
+
+test("a tablet raised by uneven ground keeps its complete slab within the walking solid", () => {
+  const { game } = fixture(LEVELS[0], (x, z) =>
+    z > 107 ? Math.abs(x - 100) * 0.5 : 0,
+  );
+  const tablet = game.obstacles.find((o) => o.counterweightTablet);
+  const top = game.groundHeight(tablet.x, tablet.z) + tablet.h;
   game.world.updateMatrixWorld(true);
-  assert.ok(ray() < 1);
-  assert.ok(Math.abs(surface.bounds.min.x - before.min.x - TILE) < 1e-8);
+  const solids = [];
+  game.counterweights.group.traverse((mesh) => {
+    if (mesh.isMesh && !mesh.userData.counterweightLabel) solids.push(mesh);
+  });
+  const hit = new THREE.Raycaster(
+    new THREE.Vector3(tablet.x, top + 0.5, tablet.z),
+    new THREE.Vector3(0, -1, 0),
+  ).intersectObjects(solids, false)[0];
+  assert.ok(hit, "the probe intersects the raised slab");
+  assert.ok(hit.point.y <= top && top - hit.point.y < 0.1);
   assert.equal(
-    game.canMove(c.tablet.x, c.tablet.z, 0),
+    game.canMove(tablet.x, tablet.z, hit.point.y - 0.25),
     false,
-    "tablet has a physical footprint",
+    "an airborne body below the slab top cannot pass through it",
   );
-  resetCounterweights(game);
-  assert.equal(
-    game.canMove(game.player.position.x, game.player.position.z, 0),
-    true,
-    "reset returns beside the inscription rather than inside its stone",
-  );
-  assert.ok(game.player.position.distanceTo(c.tablet) < 2.7);
 });
 
 test("all eight authored counterweight chambers solve through walking, gripping and swept stone movement", () => {
