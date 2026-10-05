@@ -213,6 +213,7 @@ import {
   updateShotTraces,
 } from "./aiming.js";
 import { silenceCableMotion } from "./return-cable.js";
+import { windCameraStandoff, windCameraSpace } from "./wind-camera.js";
 import {
   buildCipherCourts,
   updateCipherCourts,
@@ -228,6 +229,7 @@ import {
   updateWindCourts,
   windReady,
   windInteract,
+  advanceWindApproach,
   windTarget,
   saveWindState,
   settleWind,
@@ -1734,6 +1736,7 @@ export class Adventure {
       advanceShutterTurn(this, dt, input) ||
       advanceOrbitBearing(this, dt, input) ||
       advancePressureOperation(this, dt, input) ||
+      advanceWindApproach(this, dt, input) ||
       advanceCausewayWheel(this, dt, input)
     ) {
       animateExplorer(
@@ -2057,12 +2060,14 @@ export class Adventure {
         yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
         pitch: 0.15,
       },
-      target = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
+      chest = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
+      standoff = windCameraStandoff(this),
+      target = chest.clone().add(new THREE.Vector3(0, 0, standoff)),
       view = arrivalCamera(
         target,
         preferred,
         this.cameraSurfaces,
-        (point) => this.cameraSpace(point),
+        (point) => windCameraSpace(this, point, chest, standoff),
         this.diving ? 3.4 : 5.3,
       );
     this.yaw = view.yaw;
@@ -2124,13 +2129,14 @@ export class Adventure {
       updateAtmosphere(this, this.player.position);
       return;
     }
-    const target = this.player.position
+    const standoff = windCameraStandoff(this),
+      target = this.player.position
         .clone()
         .add(
           new THREE.Vector3(
             Math.cos(this.yaw) * blend * aimShoulder(this.camera),
             this.diving ? 0.3 : 1.3 + blend * 0.18 - this.crouchCamera,
-            -Math.sin(this.yaw) * blend * aimShoulder(this.camera),
+            -Math.sin(this.yaw) * blend * aimShoulder(this.camera) + standoff,
           ),
         ),
       distance = this.diving ? 3.4 : THREE.MathUtils.lerp(5.3, 2.7, blend);
@@ -2139,7 +2145,8 @@ export class Adventure {
       Math.sin(this.pitch) * distance + 0.2 * (1 - blend),
       Math.cos(this.yaw) * Math.cos(this.pitch) * distance,
     );
-    const canOccupy = (p) => this.cameraSpace(p);
+    const chest = this.player.position.clone().setY(target.y),
+      canOccupy = (p) => windCameraSpace(this, p, chest, standoff);
     // Sweep the lateral shoulder shift as well as the arm behind it.
     if (blend > 0.001) {
       const center = this.player.position.clone().setY(target.y);

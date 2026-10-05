@@ -36,6 +36,21 @@ export function rockGroundHeight(profile, x, z) {
 // Bounds include the actual rotated footprint, not only the instance's origin.
 export function natureRockAllowed(game, x, z, radius) {
   const { map, terrainProfile } = game;
+  // Wind pads are spread across their courts, away from the map's mechanism
+  // marker. Reserve the 5.3 m camera arm plus the 1.6 m approach and its margin.
+  // Scanned rocks load after camera bounds are built; a clear control alone
+  // does not keep those large footprints out of its working view.
+  for (const site of game.windSites || [])
+    for (const control of [
+      site.tablet,
+      ...site.nodes.map((node) => node.control),
+    ])
+      if (
+        control &&
+        Math.hypot(control.group.position.x - x, control.group.position.z - z) <
+          7.3 + radius
+      )
+        return false;
   if (map.desertSurvey && surveyReservedDistance(x, z) < radius + 1)
     return false;
   if (map.arcadeLock && arcadeFoundationDistance(x, z) < radius + 1)

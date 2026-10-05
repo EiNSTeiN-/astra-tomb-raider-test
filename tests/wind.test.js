@@ -30,6 +30,7 @@ import {
   settleWind,
   windReady,
   windInteract,
+  advanceWindApproach,
   saveWindState,
   focusWind,
 } from "../src/wind-courts.js";
@@ -38,6 +39,14 @@ import { syncWindCourt } from "../src/wind-rendering.js";
 import { buildWaterSurfaces } from "../src/water-surface.js";
 import { waterAt } from "../src/hydrology.js";
 import { advanceSwimming, restoreWaterArrival } from "../src/water-motion.js";
+import { arrivalCamera } from "../src/camera-arrival.js";
+import { windCameraStandoff, windCameraSpace } from "../src/wind-camera.js";
+import { NodeIO } from "@gltf-transform/core";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { animateExplorer } from "../src/explorer.js";
+import { handGeometry } from "../scripts/inspect-hand-geometry.js";
+import { strideSoles, sampleStrideSoles } from "../scripts/inspect-stride.js";
+import { supportAt } from "../src/character-motion.js";
 const level = LEVELS[5];
 function fixture(t, saved = null) {
   t.mock.method(
@@ -152,17 +161,12 @@ test("wind-camera bounds preserve diagonal working views and guard receiver blad
         .clone()
         .add(new THREE.Vector3(0, 1.3, 0)),
       yaw = 2.2,
-      offset = new THREE.Vector3(
-        Math.sin(yaw) * Math.cos(0.13) * 5.3,
-        Math.sin(0.13) * 5.3 + 0.2,
-        Math.cos(yaw) * Math.cos(0.13) * 5.3,
-      ),
-      camera = constrainCamera(
+      camera = arrivalCamera(
         target,
-        target.clone().add(offset),
+        { yaw, pitch: 0.13 },
         game.cameraSurfaces,
         (p) => game.cameraSpace(p),
-      );
+      ).position;
     assert.ok(
       camera.distanceTo(target) > 2.2,
       `node ${index}: retains a third-person view`,
@@ -210,6 +214,479 @@ test("wind-camera bounds preserve diagonal working views and guard receiver blad
   }
 });
 
+test("wind working views retain camera separation through moving grips and fade the look offset away from machinery", (t) => {
+  const { game } = fixture(t);
+  let samples = 0,
+    wheels = 0,
+    minimum = Infinity;
+  for (const site of game.windSites) {
+    ready(game, site.stage);
+    for (const node of site.nodes) {
+      if (!node.control) continue;
+      settleWind(game);
+      game.player.position.copy(node.control.group.position);
+      const root = game.player.position.clone();
+      assert(Math.abs(windCameraStandoff(game) - 0.14) < 1e-10);
+      for (let turn = 0; turn < 4; turn++) {
+        game.nearest = node.control;
+        assert(windInteract(game));
+        for (const dt of [0, 0.15, 0.65]) {
+          updateWindCourts(game, dt);
+          const chest = root.clone().add(new THREE.Vector3(0, 1.3, 0)),
+            standoff = windCameraStandoff(game),
+            target = root
+              .clone()
+              .add(new THREE.Vector3(0, 1.3, windCameraStandoff(game)));
+          for (let orbit = 0; orbit < 8; orbit++) {
+            const yaw = 2.2 + (orbit * Math.PI) / 4,
+              desired = target
+                .clone()
+                .add(
+                  new THREE.Vector3(
+                    Math.sin(yaw) * Math.cos(0.13) * 5.3,
+                    Math.sin(0.13) * 5.3 + 0.2,
+                    Math.cos(yaw) * Math.cos(0.13) * 5.3,
+                  ),
+                ),
+              camera = constrainCamera(
+                target,
+                desired,
+                game.cameraSurfaces,
+                (point) => windCameraSpace(game, point, chest, standoff),
+              );
+            const arm = camera.distanceTo(target);
+            minimum = Math.min(minimum, arm);
+            // Headings toward a close casting can legitimately become a
+            // first-person view, but must not collapse to the look point.
+            assert(
+              arm > 0.05,
+              `${site.stage}/${node.index}/${turn}/${orbit}: view collapses`,
+            );
+            assert(game.cameraSpace(camera));
+            assert(game.cameraSurfaces.entry(target, camera, 0) >= 0.999);
+            assert(game.cameraSurfaces.entry(chest, camera, 0) >= 0.999);
+            samples++;
+          }
+          if (site.stage === 2 && [6, 11].includes(node.index)) {
+            const yaw =
+                node.index === 6 ? 1.600448898838987 : 1.606787818127785,
+              desired = target
+                .clone()
+                .add(
+                  new THREE.Vector3(
+                    Math.sin(yaw) * Math.cos(0.13) * 5.3,
+                    Math.sin(0.13) * 5.3 + 0.2,
+                    Math.cos(yaw) * Math.cos(0.13) * 5.3,
+                  ),
+                ),
+              camera = constrainCamera(
+                target,
+                desired,
+                game.cameraSurfaces,
+                (point) => windCameraSpace(game, point, chest, standoff),
+              );
+            assert(
+              camera.distanceTo(target) > 2.2,
+              `native view ${node.index}/${turn} loses the explorer`,
+            );
+          }
+          assert(game.player.position.equals(root));
+        }
+      }
+      wheels++;
+    }
+  }
+  assert.equal(wheels, 110);
+  assert.equal(samples, 10560);
+  t.diagnostic(`Minimum constrained orbit arm: ${minimum} m`);
+  const pad = game.windSites[2].nodes[6].control.group.position;
+  game.player.position.copy(pad);
+  game.swimming = true;
+  assert.equal(windCameraStandoff(game), 0);
+  game.swimming = false;
+  game.player.position.y += 1.5;
+  assert.equal(windCameraStandoff(game), 0);
+  game.player.position.copy(pad);
+  game.player.position.z += 1.3;
+  assert.equal(windCameraStandoff(game), 0);
+  game.player.position.copy(pad);
+  const offsets = [];
+  for (let dx = 0; dx <= 1.3; dx += 0.05) {
+    game.player.position.x = pad.x + dx;
+    offsets.push(windCameraStandoff(game));
+  }
+  assert(offsets.slice(1).every((value, i) => value <= offsets[i] + 1e-12));
+  assert(
+    offsets.slice(1).every((value, i) => Math.abs(value - offsets[i]) < 0.025),
+  );
+});
+
+test("all working wind wheels fit the delivered hands through four legal turns without stretching the rig or losing planted feet", async (t) => {
+  const { game } = fixture(t),
+    io = new NodeIO(),
+    document = await io.read(
+      new URL("../public/assets/characters/vesper.glb", import.meta.url)
+        .pathname,
+    );
+  for (const texture of document.getRoot().listTextures()) texture.dispose();
+  const bytes = await io.writeBinary(document),
+    { scene, animations } = await new GLTFLoader().parseAsync(
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+      "",
+    );
+  game.player.add(game.avatar);
+  game.avatar.add(scene);
+  game.world.add(game.player);
+  const mixer = new THREE.AnimationMixer(scene),
+    actions = {};
+  for (const clip of animations) actions[clip.name] = mixer.clipAction(clip);
+  actions.Idle.play();
+  game.rig = {
+    model: scene,
+    mixer,
+    actions,
+    state: "Idle",
+    weapon: { group: new THREE.Group() },
+  };
+  game.moveVelocity = { x: 0, z: 0 };
+  game.actualMoveSpeed = 0;
+  const soles = strideSoles(scene),
+    bones = [];
+  scene.traverse((bone) => {
+    if (bone.isBone)
+      bones.push({
+        bone,
+        position: bone.position.clone(),
+        scale: bone.scale.clone(),
+      });
+  });
+  let controls = 0,
+    poses = 0;
+  for (const site of game.windSites) {
+    ready(game, site.stage);
+    for (const node of site.nodes) {
+      if (!node.control) continue;
+      game.player.position.copy(node.control.group.position);
+      const root = game.player.position.clone();
+      game.avatar.rotation.y = 0;
+      game.rig.grounding = undefined;
+      game.windGrip = null;
+      animateExplorer(game, 1 / 60, false, false);
+      for (let turn = 0; turn < 4; turn++) {
+        settleWind(game);
+        game.nearest = node.control;
+        const moves = site.state.moves;
+        assert(windInteract(game));
+        assert.equal(site.state.moves, moves + 1);
+        for (const dt of [1 / 60, 0.05, 0.15, 0.15, 0.15]) {
+          game.elapsed += dt;
+          animateExplorer(game, dt, false, false);
+          updateWindCourts(game, dt);
+          assert(game.player.position.equals(root));
+          for (const { bone, position, scale } of bones) {
+            if (/(?:Arm|ForeArm|Hand.*)$/.test(bone.name))
+              assert(bone.position.distanceTo(position) < 1e-7, bone.name);
+            assert(bone.scale.distanceTo(scale) < 1e-7, bone.name);
+            assert(bone.quaternion.toArray().every(Number.isFinite), bone.name);
+          }
+          for (const hand of handGeometry(game, {
+            handles: game.windGrip.order.map((i) => node.handles[i]),
+            halfLength: 0.08,
+          }))
+            for (const [name, measurement] of Object.entries(hand.fingers)) {
+              assert(
+                measurement.minimum > -0.002,
+                `${site.stage}/${node.index}/${turn}/${name}: enters grip ${measurement.minimum}`,
+              );
+              assert(
+                measurement.minimum < (name === "Palm" ? 0.011 : 0.004),
+                `${site.stage}/${node.index}/${turn}/${name}: loses grip ${measurement.minimum}`,
+              );
+            }
+          for (const points of sampleStrideSoles(soles)) {
+            const clearance = Math.min(
+              ...points.map(
+                (point) =>
+                  point.y -
+                  supportAt(game, point.x, point.z, root.y + 0.45).height,
+              ),
+            );
+            assert(
+              clearance > -0.012 && clearance < 0.045,
+              `${site.stage}/${node.index}: boot ${clearance}`,
+            );
+          }
+          poses++;
+        }
+        updateWindCourts(game, 0.1);
+        assert.equal(game.windGrip, null);
+        animateExplorer(game, 1 / 60, false, false);
+        assert.equal(game.rig.gripBaseActive, false);
+      }
+      controls++;
+    }
+  }
+  assert.equal(controls, 110);
+  assert.equal(poses, 2200);
+
+  // Exercise the real rendered hands after walking into the stance, including
+  // arrivals retained within the ordinary route planner's 2 cm tolerance.
+  const site = ready(game, 2),
+    node = site.nodes[6];
+  for (const offset of [
+    [0, 0.8],
+    [0.6, 0],
+    [-0.6, 0],
+    [0.014, 0.014],
+  ]) {
+    settleWind(game);
+    game.player.position.copy(node.control.group.position);
+    game.player.position.x += offset[0];
+    game.player.position.z += offset[1];
+    game.player.position.y = game.groundHeight(
+      game.player.position.x,
+      game.player.position.z,
+    );
+    const from = game.player.position.clone(),
+      moves = site.state.moves;
+    game.rig.grounding = undefined;
+    game.actualMoveSpeed = 0;
+    animateExplorer(game, 0.3, false, false);
+    game.nearest = node.control;
+    assert(windInteract(game));
+    if (Math.hypot(...offset) > 0.02) {
+      assert(game.windApproach);
+      assert.equal(game.windGrip, null);
+      assert.equal(site.state.moves, moves);
+    } else assert(game.player.position.equals(from));
+    let gripFrames = 0;
+    for (let frame = 0; frame < 90; frame++) {
+      const before = game.player.position.clone();
+      advanceWindApproach(game, 1 / 60, { x: 0, z: 0 });
+      game.elapsed += 1 / 60;
+      animateExplorer(
+        game,
+        1 / 60,
+        Math.hypot(game.moveVelocity.x, game.moveVelocity.z) > 0.1,
+        false,
+      );
+      updateWindCourts(game, 1 / 60);
+      assert(
+        game.player.position.distanceTo(before) < 0.05,
+        "ordinary walking steps",
+      );
+      if (!game.windGrip) continue;
+      assert.equal(site.state.moves, moves + 1);
+      const grip = game.windGrip;
+      game.nearest = node.control;
+      assert(windInteract(game), "repeated input is consumed");
+      assert.equal(
+        game.windGrip,
+        grip,
+        "an ongoing turn keeps its hand assignment",
+      );
+      assert.equal(
+        site.state.moves,
+        moves + 1,
+        "repeated input does not overlap turns",
+      );
+      for (const hand of handGeometry(game, {
+        handles: grip.order.map((i) => node.handles[i]),
+        halfLength: 0.08,
+      }))
+        for (const [name, contact] of Object.entries(hand.fingers)) {
+          assert(
+            contact.minimum > -0.002,
+            `${offset}/${name}: enters grip ${contact.minimum}`,
+          );
+          assert(
+            contact.minimum < (name === "Palm" ? 0.011 : 0.004),
+            `${offset}/${name}: loses grip ${contact.minimum}`,
+          );
+        }
+      for (const points of sampleStrideSoles(soles)) {
+        const gap = Math.min(
+          ...points.map(
+            (point) =>
+              point.y -
+              supportAt(game, point.x, point.z, game.player.position.y + 0.45)
+                .height,
+          ),
+        );
+        assert(gap > -0.012 && gap < 0.045, `${offset}: boot ${gap}`);
+      }
+      gripFrames++;
+    }
+    assert(gripFrames >= 30);
+    assert.equal(site.state.moves, moves + 1);
+    assert.equal(game.windApproach, null);
+    assert.equal(game.windGrip, null);
+    assert(
+      game.player.position.distanceTo(node.control.group.position) < 0.021,
+    );
+    assert(windInteract(game), "settled wheel can turn again");
+    assert.equal(site.state.moves, moves + 2);
+  }
+});
+
+test("all 110 working wheels accept a clear walking approach and commit only after arrival", (t) => {
+  const { game } = fixture(t);
+  let controls = 0;
+  for (const site of game.windSites) {
+    ready(game, site.stage);
+    for (const node of site.nodes) {
+      if (!node.control) continue;
+      settleWind(game);
+      game.player.position.copy(node.control.group.position);
+      game.player.position.z += 0.8;
+      game.player.position.y = game.groundHeight(
+        game.player.position.x,
+        game.player.position.z,
+      );
+      const moves = site.state.moves;
+      game.nearest = node.control;
+      assert(windInteract(game));
+      assert(game.windApproach, `${site.stage}/${node.index}: approach starts`);
+      assert.equal(site.state.moves, moves);
+      assert.equal(game.windGrip, null);
+      for (let i = 0; i < 60 && game.windApproach; i++) {
+        const before = game.player.position.clone();
+        assert(advanceWindApproach(game, 1 / 60, { x: 0, z: 0 }));
+        updateWindCourts(game, 1 / 60);
+        assert(game.player.position.distanceTo(before) < 0.05);
+        assert(
+          game.canMove(
+            game.player.position.x,
+            game.player.position.z,
+            game.jumpY,
+          ),
+        );
+        assert(game.grounded);
+        if (game.windApproach) assert.equal(site.state.moves, moves);
+      }
+      assert.equal(game.windApproach, null);
+      assert.equal(site.state.moves, moves + 1);
+      assert(
+        game.player.position.distanceTo(node.control.group.position) < 0.005,
+      );
+      controls++;
+    }
+  }
+  assert.equal(controls, 110);
+});
+
+test("wind approaches respect solids and interruption, free hands, pause and save boundaries", (t) => {
+  const { game, storage } = fixture(t),
+    site = ready(game, 2),
+    node = site.nodes[6];
+  const start = () => {
+    settleWind(game);
+    game.player.position.copy(node.control.group.position);
+    game.player.position.z += 0.8;
+    game.player.position.y = game.groundHeight(
+      game.player.position.x,
+      game.player.position.z,
+    );
+    game.nearest = node.control;
+    game.keys.clear();
+    assert(windInteract(game));
+    assert(game.windApproach);
+    assert(advanceWindApproach(game, 0.05, { x: 0, z: 0 }));
+  };
+  for (const interruption of [
+    "movement",
+    "jump",
+    "crouch",
+    "carry",
+    "swim",
+    "damage",
+    "stage",
+  ]) {
+    start();
+    const before = game.player.position.clone();
+    if (interruption === "jump") game.keys.add("Space");
+    if (interruption === "crouch") game.crouching = true;
+    if (interruption === "carry") game.carrying = true;
+    if (interruption === "swim") game.swimming = true;
+    if (interruption === "damage") game.health = 0;
+    if (interruption === "stage") game.progress.stage = 3;
+    assert.equal(
+      advanceWindApproach(game, 0.05, {
+        x: interruption === "movement" ? 1 : 0,
+        z: 0,
+      }),
+      false,
+    );
+    assert.equal(game.windApproach, null);
+    assert.equal(game.windGrip, null);
+    assert(game.player.position.equals(before));
+    assert.equal(site.state.moves, 0);
+    Object.assign(game, {
+      health: 100,
+      crouching: false,
+      carrying: false,
+      swimming: false,
+    });
+    game.progress.stage = 2;
+  }
+  start();
+  game.setPaused(true);
+  assert.equal(game.windApproach, null);
+  assert.equal(site.state.moves, 0);
+  game.setPaused(false);
+  const blocker = {
+    x: node.control.group.position.x,
+    z: node.control.group.position.z + 0.4,
+    w: 0.2,
+    d: 0.1,
+    h: 2,
+  };
+  game.obstacles.push(blocker);
+  game.player.position
+    .copy(node.control.group.position)
+    .add(new THREE.Vector3(0, 0, 0.8));
+  assert(windInteract(game));
+  assert.equal(game.windApproach, null);
+  assert.equal(site.state.moves, 0);
+  game.obstacles.pop();
+  start();
+  game.save();
+  const saved = new SaveStore(storage).level("sky");
+  assert.equal(
+    saved.wind?.[2],
+    undefined,
+    "approaching does not save an unperformed turn",
+  );
+  assert.equal(saved.windApproach, undefined);
+  settleWind(game);
+  game.player.position.copy(node.control.group.position);
+  for (const busy of [
+    "crouching",
+    "carrying",
+    "swimming",
+    "diving",
+    "blockGrip",
+    "climb",
+    "ropeRide",
+    "zipRide",
+    "dodge",
+  ]) {
+    game[busy] = true;
+    assert(windInteract(game));
+    assert.equal(site.state.moves, 0, busy);
+    assert.equal(game.windGrip, null, busy);
+    game[busy] = false;
+  }
+  game.progress.torch = true;
+  assert(windInteract(game));
+  assert.equal(
+    game.progress.torch,
+    false,
+    "a lit torch is put out to free both hands",
+  );
+  assert.equal(site.state.moves, 1);
+});
+
 test("every wind control stays usable through water arrival and swimming updates", (t) => {
   const { game } = fixture(t);
   let opened = 0;
@@ -237,8 +714,10 @@ test("every wind control stays usable through water arrival and swimming updates
       );
       game.nearest = f;
       const moves = site.state.moves;
+      game.setPaused(false);
       assert.equal(windInteract(game), true, f.id);
       if (f.kind !== "tablet") assert.equal(site.state.moves, moves + 1, f.id);
+      updateWindCourts(game, 1);
       checked++;
     }
   }

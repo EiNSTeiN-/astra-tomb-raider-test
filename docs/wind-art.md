@@ -8,8 +8,10 @@ engine's continuous route and native keyboard/touch saves. The measurements
 below describe the earlier material and geometry milestone.
 
 The subsequent [foot-contact repair](wind-foot-contact.md) chooses the working
-facing before fitting the boots to sloped ground. It also records an unresolved
-hand-reach problem at some working wheels.
+facing before fitting the boots to sloped ground. The later
+[grip construction and interaction repair](wind-grips.md) fits the working
+mounts and physical hand sleeves, approaches the stance with the player
+controller, and prevents overlapping turns.
 
 ## Surfaces and construction
 

@@ -128,6 +128,35 @@ export async function planSkyWalk(game, target, height = null) {
   return result.value;
 }
 
+// Wait through the ordinary approach and quarter-turn. Advancing only scenery
+// would skip the controller movement required when a route ends off the pad.
+export function finishSkyWindTurn(game, state, stage, index) {
+  game.keys.clear();
+  game.touchMove = { x: 0, z: 0 };
+  game.updatePlayer(0);
+  if (game.nearest?.id !== `wind-${stage}-wheel-${index}`)
+    throw Error(
+      `Expected wind wheel ${stage}/${index}, found ${game.nearest?.id}`,
+    );
+  const site = game.windSites[stage],
+    node = site.nodes[index],
+    moves = site.state.moves;
+  game.interact();
+  for (let frame = 0; frame < 120; frame++) {
+    tick(game, state);
+    if (site.state.moves > moves + 1)
+      throw Error("A single interaction added multiple turns");
+    if (
+      site.state.moves === moves + 1 &&
+      !game.windApproach &&
+      !game.windGrip &&
+      Math.abs(node.angle - node.goal) < 0.002
+    )
+      return skyRouteSnapshot(game, state);
+  }
+  throw Error(`Wind wheel ${stage}/${index} did not finish its turn`);
+}
+
 export function advanceSkyWalk(game, state, limit = 120) {
   game.keys.clear();
   for (let i = 0; i < limit && state.index < state.points.length; i++) {

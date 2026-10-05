@@ -82,6 +82,11 @@ VA-33 for a construction and stance investigation. Fitted feet alone do not
 establish a convincing complete wheel pose. Wider court composition, later sky
 routes and the other chamber interiors remain under review.
 
+The subsequent [grip construction and interaction repair](wind-grips.md) fits
+the working mounts to the stance, gives the hands physical sleeves to grasp,
+and verifies approaching and repeated input. The measurements above describe
+the earlier foot-contact milestone.
+
 The earlier [330.345 m third-sector route](wind-camera-clearance.md) remains a
 reference for unchanged controller, machinery and camera geometry. This pass
 does not establish pacing, consumer hardware frame rates or the overall visual

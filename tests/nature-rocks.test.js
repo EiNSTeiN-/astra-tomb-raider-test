@@ -12,6 +12,7 @@ import {
   placeNatureRock,
   rockGroundHeight,
 } from "../src/nature-rocks.js";
+import { windLayout, windPosition } from "../src/wind-rules.js";
 import { LEVELS, createMap, random } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 
@@ -150,6 +151,87 @@ test("decorative stone footprints leave space around game features, guardians, s
     JSON.stringify(game),
     before,
     "placement must not mutate gameplay state",
+  );
+});
+
+test("delivered stone footprints leave camera and approach room around all wind working pads", () => {
+  const level = LEVELS.find((level) => level.biome === "sky"),
+    map = createMap(level),
+    terrainProfile = createTerrainProfile(map, level),
+    game = { map, terrainProfile, obstacles: [], windSites: [] };
+  for (const feature of map.features.filter(
+    (feature) => feature.type === "mechanism",
+  )) {
+    const layout = windLayout(feature.stage),
+      nodes = [];
+    for (let index = 0; index < layout.values.length; index++) {
+      const p = windPosition(layout, index),
+        x = feature.x * 7 + p.x,
+        z = feature.z * 7 + p.z + 1.52;
+      nodes.push({
+        control: layout.fixed.includes(index)
+          ? null
+          : {
+              group: {
+                position: new THREE.Vector3(x, terrainProfile.height(x, z), z),
+              },
+            },
+      });
+    }
+    game.windSites.push({
+      nodes,
+      tablet: {
+        group: {
+          position: new THREE.Vector3(
+            feature.x * 7 - 10.5,
+            0,
+            feature.z * 7 + 20.1,
+          ),
+        },
+      },
+    });
+  }
+  const controls = game.windSites.flatMap((site) => [
+    site.tablet,
+    ...site.nodes.map((node) => node.control).filter(Boolean),
+  ]);
+  assert.equal(controls.length, 119);
+  let samples = 0;
+  for (const control of controls)
+    for (const shape of shapes) {
+      const b = shape.bounds,
+        radius = Math.hypot(
+          Math.max(Math.abs(b.min.x), Math.abs(b.max.x)),
+          Math.max(Math.abs(b.min.z), Math.abs(b.max.z)),
+        );
+      for (let orbit = 0; orbit < 8; orbit++) {
+        const yaw = (orbit * Math.PI) / 4,
+          x = control.group.position.x + Math.sin(yaw) * 6.9,
+          z = control.group.position.z + Math.cos(yaw) * 6.9;
+        assert.equal(natureRockAllowed(game, x, z, radius), false);
+        assert.equal(
+          placeNatureRock(game, shape, { x, z, size: 1, yaw }).reason,
+          "reserved",
+        );
+        samples++;
+      }
+    }
+  assert.equal(samples, 5712);
+  // Independent observed body-ray hit outside the third court: ordinary
+  // feature/obstacle reservations allowed it, but its working camera must not.
+  const hit = { x: 337.360801366003, z: 170.20697942926014 };
+  assert.equal(
+    natureRockAllowed({ ...game, windSites: [] }, hit.x, hit.z, 0.5),
+    true,
+  );
+  assert.equal(natureRockAllowed(game, hit.x, hit.z, 0.5), false);
+  let remaining = 0;
+  for (let z = 30; z < map.size * 7 - 30; z += 10)
+    for (let x = 30; x < map.size * 7 - 30; x += 10)
+      if (natureRockAllowed(game, x, z, 1)) remaining++;
+  assert(
+    remaining > 100,
+    "rocks can still dress the landscape away from working pads",
   );
 });
 

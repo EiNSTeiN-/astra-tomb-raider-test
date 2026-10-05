@@ -1028,6 +1028,8 @@ test("boots fit slopes in either direction while retaining swing clearance and t
 
 test("wind handwheel facing fits the delivered boots before the first turning frame at every working control", async () => {
   const game = await groundedActor();
+  game.health = 100;
+  game.progress = { stage: 0, field: [] };
   game.level = LEVELS[5];
   game.map = createMap(game.level);
   game.terrainProfile = createTerrainProfile(game.map, game.level);
@@ -1096,9 +1098,18 @@ test("inactive wind grips do not override the explorer's facing during interrupt
       { blockGrip: { axis: [Math.sin(0.7), Math.cos(0.7)] } },
       { expired: true },
       { moved: true },
+      { crouching: true },
+      { carrying: true },
+      { diving: true },
+      { health: 0 },
     ];
   for (const interrupted of cases) {
     Object.assign(game, {
+      health: 100,
+      progress: { stage: 0, field: [] },
+      crouching: false,
+      carrying: false,
+      diving: false,
       paused: false,
       grounded: true,
       swimming: false,

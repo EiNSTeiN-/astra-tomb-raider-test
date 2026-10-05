@@ -17,8 +17,9 @@ import {
   windMetal,
   windSurface,
 } from "./wind-art.js";
-import { poseHands } from "./pose.js";
-import { activeWindGrip } from "./wind-pose.js";
+import { activeWindGrip, poseWindGrip, windHandsFree } from "./wind-pose.js";
+import { advanceCharacter, supportAt } from "./character-motion.js";
+import { extinguishTorch } from "./torch.js";
 import {
   batchWindCourt,
   syncWindCourt,
@@ -60,6 +61,7 @@ export function buildWindCourts(game) {
   game.windSources = [];
   game.windFocus = null;
   game.windGrip = null;
+  game.windApproach = null;
   if (game.level.biome !== "sky") return false;
   const bronze = windMetal(),
     stone = game.darkMat,
@@ -256,10 +258,16 @@ export function buildWindCourts(game) {
       );
       rotor.add(particles);
       const locked = state.fixed.includes(i),
-        wheel = add(kit.wheel, trim, 0, 1.04, 0.94, body),
+        // Sample the ground under the forward part of the planted stance.
+        // The controller pad can be higher than the casting on the bank edge.
+        wheelHeight = locked ? 1.04 : floor(x, z + 1.24) - y + 1.3,
+        wheelDepth = locked ? 0.94 : 1.08,
+        wheel = add(kit.wheel, trim, 0, wheelHeight, wheelDepth, body),
         handles = [-1, 1].map((side) => {
           const h = new THREE.Object3D();
-          h.position.set(side * 0.26, 0, 0.03);
+          h.position.set(side * 0.31, 0, 0.115);
+          h.rotation.y = Math.PI / 2;
+          h.userData.windHandgrip = true;
           wheel.add(h);
           return h;
         });
@@ -268,22 +276,103 @@ export function buildWindCourts(game) {
         game.cameraSurfaces?.capture(add(kit.brace, trim, 0, 0, 0, body), {
           small: true,
         });
-      } else
-        game.cameraSurfaces?.capture(wheel, {
+      } else {
+        const rim = new THREE.Mesh(kit.wheelRim, trim);
+        rim.position.copy(wheel.position);
+        rim.parent = body;
+        game.cameraSurfaces?.capture(rim, {
           small: true,
           thin: true,
           cylinderAxis: "z",
         });
-      casting(kit.bearing, iron, 0, 1.04, 0.65, body, "z");
+        // Separate rotating peg bounds leave the space in front of the wheel
+        // centre available. These query proxies do not submit rendered meshes.
+        const cameraGrips = new THREE.Group();
+        cameraGrips.position.copy(wheel.position);
+        cameraGrips.userData.cameraDynamic = true;
+        body.add(cameraGrips);
+        wheel.userData.cameraGrips = cameraGrips;
+        for (const side of [-1, 1])
+          for (const [radius, depth, z] of [
+            [0.019, 0.16, 0.115],
+            [0.034, 0.016, 0.043],
+          ]) {
+            const peg = new THREE.Mesh(
+              new THREE.CylinderGeometry(radius, radius, depth, 12).rotateX(
+                Math.PI / 2,
+              ),
+              trim,
+            );
+            peg.position.set(side * 0.31, 0, z);
+            peg.parent = cameraGrips;
+            game.cameraSurfaces?.capture(peg, {
+              small: true,
+              thin: true,
+              cylinderAxis: "z",
+            });
+            peg.geometry.dispose();
+          }
+        // A seated front plate carries the raised bearing and two gussets.
+        // The plate intersects the housing/crown rather than floating beside it.
+        game.cameraSurfaces?.capture(
+          box(
+            0.3,
+            wheelHeight - 0.8,
+            0.12,
+            bronze,
+            0,
+            (wheelHeight + 0.98) / 2,
+            0.55,
+            body,
+          ),
+          { small: true, thin: true },
+        );
+        for (const side of [-1, 1]) {
+          const shape = new THREE.Shape();
+          shape.moveTo(0.55, 0.98);
+          shape.lineTo(0.99, wheelHeight - 0.07);
+          shape.lineTo(0.55, wheelHeight - 0.07);
+          shape.closePath();
+          const rib = new THREE.ExtrudeGeometry(shape, {
+            depth: 0.055,
+            bevelEnabled: false,
+          });
+          // Shape x becomes forward z; extrusion z becomes transverse x.
+          rib.rotateY(-Math.PI / 2);
+          game.cameraSurfaces?.capture(
+            add(rib, bronze, side * 0.11 + 0.0275, 0, 0, body),
+            { small: true, thin: true },
+          );
+        }
+      }
       casting(
-        new THREE.CylinderGeometry(0.048, 0.048, 0.3, 16).rotateX(Math.PI / 2),
-        trim,
+        kit.bearing,
+        iron,
         0,
-        1.04,
-        0.82,
+        wheelHeight,
+        locked ? 0.65 : 0.99,
         body,
         "z",
       );
+      casting(
+        new THREE.CylinderGeometry(
+          0.048,
+          0.048,
+          locked ? 0.3 : 0.58,
+          16,
+        ).rotateX(Math.PI / 2),
+        trim,
+        0,
+        wheelHeight,
+        locked ? 0.82 : 0.8,
+        body,
+        "z",
+      );
+      for (const side of [-1, 1])
+        game.cameraSurfaces?.capture(
+          box(0.07, 0.13, 0.3, bronze, side * 0.32, 0.61, 0.58, body),
+          { small: true, thin: true },
+        );
       game.cameraSurfaces?.capture(add(kit.panel, iron, 0, 0.61, 0.725, body), {
         small: true,
         thin: true,
@@ -329,8 +418,8 @@ export function buildWindCourts(game) {
           `${i}-bearing`,
           "machine",
           x,
-          y + 1.04,
-          z + 1.0,
+          y + wheelHeight,
+          z + wheelDepth,
           0.1,
           12,
           { windIndex: i, channel: "bearing" },
@@ -498,6 +587,7 @@ export function buildWindCourts(game) {
     mergeArchitecture(root);
     batchWindCourt(site);
   }
+  kit.wheelRim.dispose();
   updateWindCourts(game, 0);
   return true;
 }
@@ -560,6 +650,8 @@ export function updateWindCourts(game, dt) {
       // Three.js positive Y rotation turns north toward west; negate for clockwise.
       n.rotor.rotation.y = (-n.angle * Math.PI) / 2;
       n.wheel.rotation.z = (-n.angle * Math.PI) / 2;
+      if (n.wheel.userData.cameraGrips)
+        n.wheel.userData.cameraGrips.rotation.z = n.wheel.rotation.z;
       const flowing =
         (active || completed) && fed.has(n.index) && n.motion < 0.08;
       n.flowing = flowing;
@@ -609,18 +701,12 @@ export function updateWindCourts(game, dt) {
     site = game.windSites?.[grip?.stage];
   if (grip && site) {
     if (!activeWindGrip(game)) game.windGrip = null;
-    else if (game.rig) {
-      const n = site.nodes[grip.index];
-      n.wheel.updateWorldMatrix(true, true);
-      poseHands(
-        game,
-        n.handles.map((h) => h.getWorldPosition(new THREE.Vector3())),
-      );
-    }
+    else poseWindGrip(game);
   }
 }
 export function settleWind(game) {
   game.windGrip = null;
+  game.windApproach = null;
   for (const site of game.windSites || [])
     for (const n of site.nodes)
       n.angle = n.goal = orientation(site.state.values[n.index]);
@@ -629,6 +715,7 @@ export function settleWind(game) {
 export function windInteract(game) {
   const f = game.nearest;
   if (f?.type !== "wind") return false;
+  game.keys.delete("KeyE");
   const site = game.windSites?.[f.stage];
   if (
     !windReady(game, site) ||
@@ -644,6 +731,112 @@ export function windInteract(game) {
     game.cb.puzzle?.(site.feature, game.level);
     return true;
   }
+  const node = site.nodes[f.index];
+  if (!windHandsFree(game)) {
+    game.cb.toast?.(
+      "Stand on dry ground with both hands free to turn the wheel.",
+    );
+    return true;
+  }
+  if (
+    game.windApproach ||
+    game.windGrip ||
+    Math.abs(node.goal - node.angle) >= 0.002
+  ) {
+    game.cb.toast?.("Let the wheel settle before taking its grips again.");
+    return true;
+  }
+  if (game.player.position.distanceTo(f.group.position) > 0.02) {
+    if (!clearWindApproach(game, f.group.position)) {
+      game.cb.toast?.(
+        "Approach the two grips from the clear ground in front of the wheel.",
+      );
+      return true;
+    }
+    game.windApproach = {
+      stage: f.stage,
+      index: f.index,
+      target: f.group.position.clone(),
+      last: game.player.position.clone(),
+      settle: 0,
+    };
+    extinguishTorch(game, "Torch put out to turn the wheel with both hands.");
+    return true;
+  }
+  turnWindWheel(game, site, node);
+  return true;
+}
+
+// Sample the same support and solids used by walking. An interaction does not
+// carry the player through a casting, across a gap or onto a different ledge.
+function clearWindApproach(game, target) {
+  const from = game.player.position,
+    count = Math.max(1, Math.ceil(from.distanceTo(target) / 0.08));
+  let height = from.y;
+  for (let i = 0; i <= count; i++) {
+    const p = from.clone().lerp(target, i / count),
+      support = supportAt(game, p.x, p.z, height + 0.45).height;
+    if (
+      Math.abs(support - height) > 0.42 ||
+      !game.canMove(p.x, p.z, support - game.groundHeight(p.x, p.z))
+    )
+      return false;
+    height = support;
+  }
+  return Math.abs(height - target.y) < 0.08;
+}
+
+export function advanceWindApproach(game, dt, input) {
+  const op = game.windApproach;
+  if (!op || game.paused) return false;
+  const site = game.windSites?.[op.stage],
+    node = site?.nodes[op.index];
+  if (
+    !windReady(game, site) ||
+    !windHandsFree(game) ||
+    Math.hypot(input.x, input.z) > 0.05 ||
+    game.keys.has("Space") ||
+    game.player.position.distanceTo(op.last) > 0.2 ||
+    !clearWindApproach(game, op.target)
+  ) {
+    game.windApproach = null;
+    return false;
+  }
+  const p = game.player.position,
+    before = p.clone(),
+    dx = op.target.x - p.x,
+    dz = op.target.z - p.z,
+    distance = Math.hypot(dx, dz),
+    speed = dt > 0 ? Math.min(2.4, distance / dt) : 0;
+  game.moveVelocity =
+    distance > 0.005
+      ? { x: (dx / distance) * speed, z: (dz / distance) * speed }
+      : { x: 0, z: 0 };
+  advanceCharacter(game, game.moveVelocity, dt, false);
+  op.last.copy(p);
+  game.actualMoveSpeed = dt > 0 ? p.distanceTo(before) / dt : 0;
+  game.stepDistance =
+    (game.stepDistance || 0) + Math.hypot(p.x - before.x, p.z - before.z);
+  if (distance > 0.005) {
+    game.avatar.rotation.y = Math.atan2(dx, dz);
+    op.settle = 0;
+    // A blocked controller must not leave an uninterruptible operation behind.
+    if (dt > 0 && p.distanceTo(before) < 0.0001) game.windApproach = null;
+  } else {
+    game.avatar.rotation.y = Math.PI;
+    op.settle += dt;
+    // Let walking settle into the standing pose before taking the two grips.
+    if (op.settle >= 0.2) {
+      game.windApproach = null;
+      turnWindWheel(game, site, node);
+    }
+  }
+  return true;
+}
+
+function turnWindWheel(game, site, node) {
+  const f = node.control;
+  extinguishTorch(game, "Torch put out to turn the wheel with both hands.");
   const state = restorePuzzle(
       game.level,
       f.stage,
@@ -656,6 +849,10 @@ export function windInteract(game) {
     index: f.index,
     until: site.visualTime + 0.55,
     position: game.player.position.clone(),
+    // Choose the side each peg occupies halfway through this turn. At a
+    // vertical starting pair this also resolves which hand takes the upper peg.
+    order:
+      Math.cos(((node.angle + node.goal) * Math.PI) / 4) >= 0 ? [0, 1] : [1, 0],
   };
   game.cb.toast?.(
     isSolved(state)
@@ -663,8 +860,6 @@ export function windInteract(game) {
       : "Follow the silver airflow to its next break.",
     2500,
   );
-  game.keys.delete("KeyE");
-  return true;
 }
 export function windTarget(game) {
   const site = game.windSites?.[game.progress.stage];

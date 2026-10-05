@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { constrainCamera } from "../src/camera-collision.js";
 import { updateWindCourts } from "../src/wind-courts.js";
+import { windCameraStandoff, windCameraSpace } from "../src/wind-camera.js";
 
 const offsetFor = (yaw, pitch) =>
   new THREE.Vector3(
@@ -27,9 +28,11 @@ export function inspectWindCameraClearance(game) {
         game.player.position.copy(control.group.position);
         updateWindCourts(game, 0);
         game.world.updateMatrixWorld(true);
-        const target = game.player.position
+        const chest = game.player.position
             .clone()
             .add(new THREE.Vector3(0, 1.3, 0)),
+          standoff = windCameraStandoff(game),
+          target = chest.clone().add(new THREE.Vector3(0, 0, standoff)),
           meshes = [];
         for (const other of game.windSites)
           other.root.traverseVisible((object) => {
@@ -47,7 +50,7 @@ export function inspectWindCameraClearance(game) {
               target,
               desired,
               game.cameraSurfaces,
-              (point) => game.cameraSpace(point),
+              (point) => windCameraSpace(game, point, chest, standoff),
             ),
             direction = camera.clone().sub(target),
             length = direction.length();
@@ -58,8 +61,9 @@ export function inspectWindCameraClearance(game) {
               control: control.id,
               orbit,
               arm: length,
-              clear: game.cameraSpace(camera),
+              clear: windCameraSpace(game, camera, chest, standoff),
               castingEntry: game.cameraSurfaces.entry(target, camera, 0),
+              actorEntry: game.cameraSurfaces.entry(chest, camera, 0),
               hit: hit
                 ? { mesh: hit.object.name, distance: hit.distance }
                 : null,
@@ -94,9 +98,7 @@ export function windCameraView(game, stage, index, yaw = 2.2, pitch = 0.13) {
     control: control.id,
     player: game.player.position.toArray(),
     camera: game.camera.position.toArray(),
-    arm: game.camera.position.distanceTo(
-      game.player.position.clone().add(new THREE.Vector3(0, 1.3, 0)),
-    ),
+    arm: game.camera.position.distanceTo(game.cameraFollowTarget),
     quality: game.store.data.settings.quality,
     linked: game.renderer.info.programs.every((program) =>
       gl.getProgramParameter(program.program, gl.LINK_STATUS),

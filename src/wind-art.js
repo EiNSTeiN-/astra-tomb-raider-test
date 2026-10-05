@@ -281,6 +281,21 @@ export function windArtKit() {
       roundBox(0.034, 0.23, 0.045, 0.01).translate(0, 0.17, 0).rotateZ(a),
     );
   }
+  const wheelRim = join(wheelParts.map((part) => part.clone()), "handwheel-rim");
+  // Sleeved 38 mm handgrips seat directly in the rim. Their axes face the
+  // working pad; fingers contact these cylinders instead of an invisible point.
+  for (const side of [-1, 1]) {
+    wheelParts.push(
+      new THREE.CylinderGeometry(0.019, 0.019, 0.16, 20)
+        .rotateX(Math.PI / 2)
+        .translate(side * 0.31, 0, 0.115),
+      new THREE.TorusGeometry(0.026, 0.008, 8, 20).translate(
+        side * 0.31,
+        0,
+        0.043,
+      ),
+    );
+  }
   const wheel = join(wheelParts, "handwheel");
   const flangeParts = [
     lathe(
@@ -402,6 +417,7 @@ export function windArtKit() {
     housing,
     crown,
     wheel,
+    wheelRim,
     flange,
     bearing,
     panel,

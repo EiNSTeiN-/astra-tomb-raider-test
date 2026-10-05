@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { supportAt } from "../src/character-motion.js";
 import { strideSoles, sampleStrideSoles } from "./inspect-stride.js";
+import { handGeometry } from "./inspect-hand-geometry.js";
 
 const soles = new WeakMap();
 
@@ -48,13 +49,16 @@ export function windPoseSnapshot(game) {
             .getObjectByName(`mixamorig${side}Hand`)
             .getWorldPosition(new THREE.Vector3())
             .distanceTo(
-              node.handles[index].getWorldPosition(new THREE.Vector3()),
+              node.handles[grip.order?.[index] ?? index].getWorldPosition(
+                new THREE.Vector3(),
+              ),
             ),
         )
       : null,
     grip: grip ? { stage: grip.stage, index: grip.index } : null,
     moves: site?.state.moves,
     camera: game.camera.position.toArray(),
+    cameraTarget: game.cameraFollowTarget?.toArray(),
   };
 }
 
@@ -71,8 +75,17 @@ export function captureWindPose(game) {
   game.cb.update?.(game.state());
   game.renderScene(0);
   const gl = game.renderer.getContext();
+  const grip = game.windGrip,
+    node = grip && game.windSites[grip.stage].nodes[grip.index],
+    handSurface = node?.handles[0].userData.windHandgrip
+      ? handGeometry(game, {
+          handles: (grip.order || [0, 1]).map((index) => node.handles[index]),
+          halfLength: 0.08,
+        }).map(({ side, fingers }) => ({ side, fingers }))
+      : null;
   return {
     ...windPoseSnapshot(game),
+    handSurface,
     linked: game.renderer.info.programs.every((program) =>
       gl.getProgramParameter(program.program, gl.LINK_STATUS),
     ),

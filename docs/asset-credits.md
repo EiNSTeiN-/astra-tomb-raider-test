@@ -742,3 +742,13 @@ terrain fitting. It retains the credited character, materials, wind machinery,
 procedural sounds and sky score. No external assets or dependencies were added.
 Its four comparison images are actual game captures converted losslessly to
 WebP, with matching player/camera positions and decoded RGBA identity checked.
+
+The [wind grip construction and interaction repair](wind-grips.md) adds original
+sleeved handgrips, fitted bearing plates and gussets, nameplate backing tabs,
+component camera queries, a working look-point offset with body sight checks,
+a rock-footprint reservation and a walking approach to the stance. It uses the
+existing cylindrical hand solver and retains the credited character, materials,
+wind synthesis and sky score. The bearing emitter follows its fitted mount.
+No external assets or dependencies were added. Its four comparison images are
+actual game captures converted losslessly to WebP, with paired player/camera
+positions and decoded RGBA identity checked.
