@@ -74,10 +74,15 @@ of the same route. Their camera headings intentionally differ.
 
 ## Remaining review
 
-This repairs the turning view. The continuous route's preceding approach still
+At this milestone, the turning view is repaired. The preceding approach still
 has a 1.348 m arm and can hide the explorer; general reverse and approach
 framing remains open. Starting a turn from that close view still fades the
 explorer during its first two recovery updates.
+
+The later [wind walking-camera repair](wind-walking-camera.md) clears the
+recorded observatory approach and working sequence across 877 camera frames,
+with identical walking feet and saved look angles. Its broader first-engine
+route still records brief free stone-board fades for further review.
 
 The observer review also exposed distant stone-like fragments suspended
 above later cloud-city courts. The subsequent [folding deck repair](bridge-deck-frames.md)

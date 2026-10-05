@@ -32,6 +32,8 @@ Its [entrance inscription now sits clear of the wind stands](docs/cloud-inscript
 with verified reading, reset, older-save access and a repeated engine route.
 Taking a stone grip also now prefers an [elevated board view](docs/counterweight-overview.md),
 clearing the recorded walks around moved cloud stones while retaining normal look controls.
+Walking beside wind machinery now uses [nearby camera clearance](docs/wind-walking-camera.md),
+keeping the explorer visible on the recorded forecourt return and observatory sequence.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

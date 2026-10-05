@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Wind machinery walking views](wind-walking-camera.md) use bounded nearby
+  camera clearance while retaining saved look angles. A 745-test campaign run
+  passes, followed by 17 focused checks of the final contact-distance refinement
+  and the production build. Both recorded wind sequences retain full character
+  opacity across 1,306 frames with identical feet, yaw and pitch; all 26 baseline
+  and 26 final captures are reviewed. The repeated 192.687 m first-engine route
+  clears the recorded coupling return, with all 64 captures reviewed, but its
+  frame observer finds 15 brief fades inside the stone board. Four native
+  keyboard/touch cases pass with 16 reviewed captures and three independently
+  proved existing arrival-camera corrections. VA-39's recorded approach is
+  repaired; VA-46 retains additional free stone approaches and wider review.
+
 - [Elevated counterweight board views](counterweight-overview.md) clear the
   recorded cloud approaches after accepted grips. All 29 targeted tests and the
   production build pass. The repeated 170-frame approach retains identical feet

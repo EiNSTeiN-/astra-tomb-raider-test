@@ -106,6 +106,11 @@ interactions have selected a different pitch by then. Older manually chosen low
 orbits and forecourt walks also remain part of the review. This change does not
 automatically adjust arbitrary free-walking views.
 
+The later [wind walking-camera repair](wind-walking-camera.md) clears that
+recorded coupling return and the observatory approach. Its complete first-engine
+route still records 15 brief fades between stones inside the board, outside the
+wind adjustment area. Those free approaches remain open.
+
 The observatory approach VA-39, broader chapter composition and repeated scenery
 remain open. These checks do not establish subjective audio quality, consumer
 hardware performance or complete visibility at every world position.

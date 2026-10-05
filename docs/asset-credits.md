@@ -840,3 +840,9 @@ original camera preference and regression. Existing credited artwork,
 distance-sensitive sounds and themed scores are retained; no external asset or
 dependency was added. The four documentation images are actual game captures
 converted losslessly to WebP, with decoded RGBA identity verified.
+
+The [wind machinery walking-camera repair](wind-walking-camera.md) adds original
+bounded view-clearance code and physical-camera regressions. It retains the
+credited explorer, chapter art, positional sounds and quiet scores. No external
+asset or dependency was added. Its five documentation images are actual game
+captures converted losslessly to WebP, with decoded RGBA identity verified.

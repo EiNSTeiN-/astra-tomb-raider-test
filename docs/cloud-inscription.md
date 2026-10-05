@@ -107,6 +107,10 @@ approach on the repeated route. Its comparison preserves every recorded foot
 position and horizontal heading while changing the grip pitch. The coupling
 view during the engine return remains obstructed.
 
+The subsequent [wind walking-camera repair](wind-walking-camera.md) clears
+that coupling return while retaining the player-selected look angles. It also
+records additional brief free approaches inside the board for further review.
+
 An additional native keyboard approach also records a hidden walking view. Its
 first reload changes the heading by 15 degrees, consistent with the existing
 arrival behavior, but a repeat allowing that correction does not finish the
