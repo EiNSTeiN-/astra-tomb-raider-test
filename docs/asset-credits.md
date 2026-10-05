@@ -789,3 +789,10 @@ They reuse the credited monastery wood maps and existing bridge timber shader;
 no external model, texture or audio asset was added. The selected images in
 [bridge deck frame notes](bridge-deck-frames.md) are actual runtime captures,
 converted losslessly to WebP.
+
+The eight [chapter relics](chapter-relics.md) and their fitted stands are original
+geometry in `src/relic-art.js`. They reuse the credited chapter stone/rock maps
+and existing worn bronze shader, with original material colors. Environmental
+audio, mechanical sounds and themed scores are retained; no external asset or
+dependency was added. Their eleven documentation images are actual runtime
+captures converted losslessly to WebP, with decoded RGBA identity checked.

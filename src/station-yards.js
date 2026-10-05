@@ -127,7 +127,9 @@ export function buildStationYards(game) {
   inlay.onBeforeCompile = paving.onBeforeCompile;
   inlay.customProgramCacheKey = paving.customProgramCacheKey;
 
-  for (const f of game.items.filter((f) => f.stationSolids && !f.yOffset)) {
+  for (const f of game.items.filter(
+    (f) => f.type === "field" && f.stationSolids && !f.yOffset,
+  )) {
     const plan = stationYardPlan(game.level, f),
       root = new THREE.Group();
     root.name = plan.style.name;

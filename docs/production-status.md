@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Individual chapter relics](chapter-relics.md) replace the eight shared
+  floating rewards with named artifact models on solid, terrain-fitted stands.
+  All 735 named tests and the production build pass. Verification includes 64
+  High/Low state observers, the earned final three sky sectors with 246 reviewed
+  baseline captures, a repeated 361.201 m final objective with 60 reviewed
+  captures, and four native collection/older-completion/reload cases with 16
+  reviewed captures. VA-41 is repaired; wider scenery, chamber interiors and
+  camera composition remain under review.
+
 - [Folding bridge deck frames](bridge-deck-frames.md) connect the raised board
   patches of all eighteen sky spans while retaining their jump gaps. Grounded
   crouching also braces station gusts, matching the existing hint and bridge

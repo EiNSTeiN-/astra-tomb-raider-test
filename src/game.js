@@ -214,6 +214,7 @@ import {
 } from "./aiming.js";
 import { silenceCableMotion } from "./return-cable.js";
 import { windCameraStandoff, windCameraSpace } from "./wind-camera.js";
+import { buildRelicArtwork, updateRelicArtwork } from "./relic-art.js";
 import {
   buildCipherCourts,
   updateCipherCourts,
@@ -1393,6 +1394,8 @@ export class Adventure {
         }
       } else if (f.type === "camp") {
         buildCamp(this, f, group);
+      } else if (f.type === "relic") {
+        buildRelicArtwork(this, f, group);
       } else if (!["note", "treasure"].includes(f.type)) {
         const mat = f.type === "relic" ? this.glowMat : this.goldMat;
         const geo =
@@ -1874,6 +1877,7 @@ export class Adventure {
     for (const f of this.items) {
       if (
         this.progress.found.includes(f.id) ||
+        (f.type === "relic" && this.progress.completed) ||
         (f.type === "field" &&
           (f.stage < this.progress.stage ||
             this.progress.field.includes(f.id) ||
@@ -2223,7 +2227,9 @@ export class Adventure {
         f.core.visible = !found;
         f.marker.visible = !found;
       }
-      if (f.type === "mechanism") {
+      if (f.relicArt) {
+        updateRelicArtwork(this, f);
+      } else if (f.type === "mechanism") {
         f.marker.visible = f.stage === this.progress.stage;
         f.core.rotation.y = this.elapsed;
         f.core.visible = f.stage >= this.progress.stage;
@@ -2248,7 +2254,7 @@ export class Adventure {
       }
       f.marker.position.y = 3.4 + Math.sin(this.elapsed * 2) * 0.15;
       f.marker.scale.setScalar(this.sense > 0 ? 2 : 1);
-      if (f.type === "relic")
+      if (f.type === "relic" && !f.relicArt)
         f.group.visible =
           this.progress.stage >= this.level.mechanisms &&
           !this.progress.completed;
@@ -2376,6 +2382,7 @@ export class Adventure {
         "Base camp · Health restored, supplies replenished, checkpoint saved.",
       );
     } else if (f.type === "relic") {
+      if (this.progress.completed) return;
       if (this.progress.stage < this.level.mechanisms) {
         this.cb.toast?.("Restore every mechanism to release the relic.");
         return;

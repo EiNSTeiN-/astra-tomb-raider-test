@@ -2,10 +2,71 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { terrainInlayGeometry } from "../src/terrain-inlay.js";
+import { buildStationYards } from "../src/station-yards.js";
 import {
   yardRouteClear,
   yardTraversalClear,
 } from "../src/station-yard-plan.js";
+
+test("courtyards surround grounded field stations without treating relic stands as stations", (t) => {
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
+  const field = {
+    id: "field-0-0",
+    type: "field",
+    stage: 0,
+    step: 0,
+    stationSolids: [],
+    group: new THREE.Group(),
+  };
+  const relic = {
+    id: "relic",
+    type: "relic",
+    stationSolids: [],
+    group: new THREE.Group(),
+  };
+  const raised = {
+    ...field,
+    id: "raised-field",
+    yOffset: 4,
+    stationSolids: [],
+  };
+  const world = new THREE.Group();
+  world.add(field.group, relic.group);
+  const game = {
+    level: { biome: "sky", seed: 57 },
+    world,
+    items: [relic, field, raised],
+    obstacles: [],
+    map: { paths: [] },
+    traversalCourses: [],
+    terrainProfile: { height: () => 0, step: 1, waters: [] },
+    groundHeight: () => 0,
+    canMove: () => true,
+    stoneMat: new THREE.MeshStandardMaterial(),
+    darkMat: new THREE.MeshStandardMaterial(),
+  };
+  buildStationYards(game);
+  assert.deepEqual(
+    game.stationYards.map((yard) => yard.id),
+    [field.id],
+  );
+  assert(field.yard.pieces.length > 0);
+  assert(field.yard.root.children.some((node) => node.isMesh));
+  assert(field.stationSolids.length > 0);
+  assert.equal(relic.yard, undefined);
+  assert.equal(raised.yard, undefined);
+  assert.deepEqual(relic.stationSolids, []);
+  world.traverse((node) => {
+    node.geometry?.dispose();
+    node.material?.dispose();
+  });
+  game.stoneMat.dispose();
+  game.darkMat.dispose();
+});
 
 test("court inlays follow rendered terrain triangles instead of bridging a saddle cell", () => {
   const height = (x, z) => x + z * 2 + (x === 1 && z === 1 ? 4 : 0);
