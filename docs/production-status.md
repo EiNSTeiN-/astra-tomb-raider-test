@@ -28,7 +28,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   cases preserve saves apart from timestamps and two independently proved
   arrival-camera corrections. Keyboard and touch look remain available while
   gripping. VA-44 is repaired for accepted grips/slides; VA-45 records a cloud
-  aisle walking view that still fades the explorer beside another wind duct.
+  aisle walking view that still fades the explorer beside the side wall and
+  folded door leaf. A separate 92-frame movement replay and physical mesh rays
+  confirm that obstruction; all eight diagnostic captures are reviewed.
 
 - [Regional counterweight chambers](regional-counterweights.md) dress the seven
   remaining primitive boards with chapter masonry, regional seals, fitted

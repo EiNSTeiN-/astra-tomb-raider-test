@@ -95,12 +95,20 @@ The verified production files are:
 ## Remaining scope
 
 The accepted grip and stone-slide views repair VA-44. Ordinary walking beside
-another wind duct in the cloud chamber's aisle can still retract the camera and
-fade the explorer after release. That observed approach is recorded separately
+the cloud chamber's side wall and folded door leaf can still retract the camera
+and fade the explorer after release. Actual camera-bound queries identify these
+two objects as the blockers in the recorded aisle views.
+That observed approach is recorded separately
 as VA-45; the final observatory's earlier approach finding VA-39 also remains
 open. The grip/move selection does not run while walking freely.
 
 ![Remaining cloud aisle walking view with the explorer faded](images/counterweight-camera/remaining-aisle.webp)
+
+A separate replay starts from each native case's settled two-move save and
+advances 24 ordinary rightward walking ticks followed by 21 idle follow ticks.
+All eight High/Low diagnostic captures are reviewed. Both sequences end beside
+the wall with a 0.266 m camera arm and zero character coverage. Physical mesh
+ray casts also intersect the wall. This approach remains open for layout/framing review.
 
 Nine prediction samples and the recorded routes do not prove every arbitrary
 camera input or world position. The player can deliberately choose an obstructed
