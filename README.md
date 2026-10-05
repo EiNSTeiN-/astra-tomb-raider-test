@@ -30,6 +30,8 @@ The first cloud chamber also now has a [wider walking aisle](docs/cloud-aisle.md
 with fitted folding doors and a clear view along the recorded post-release walk.
 Its [entrance inscription now sits clear of the wind stands](docs/cloud-inscription.md),
 with verified reading, reset, older-save access and a repeated engine route.
+Taking a stone grip also now prefers an [elevated board view](docs/counterweight-overview.md),
+clearing the recorded walks around moved cloud stones while retaining normal look controls.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

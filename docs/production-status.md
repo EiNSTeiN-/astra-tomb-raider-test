@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Elevated counterweight board views](counterweight-overview.md) clear the
+  recorded cloud approaches after accepted grips. All 29 targeted tests and the
+  production build pass. The repeated 170-frame approach retains identical feet
+  and horizontal headings, with full character opacity and a 4.881 m minimum
+  camera arm. All eight stone solutions complete 121 moves across 6,413 observed
+  camera frames. All 18 trace, 32 representative solution and 64 continuous
+  cloud-route captures are reviewed. The 192.687 m route solves the board and
+  first engine with full health; a wind-coupling return view remains obstructed.
+  Four native keyboard/touch cases perform two legal moves, walk and reload with
+  complete saved data unchanged apart from timestamps; all 20 captures are reviewed.
+  VA-46 is partly repaired for the recorded board approaches. Wider free camera
+  views, VA-39 and broader chapter composition remain open.
+
 - The [cloud forecourt inscription](cloud-inscription.md) moves clear of nearby
   wind stands. All 14 counterweight tests and the production build pass. A
   192.687 m continuous assisted route solves all 14 stone moves and the first

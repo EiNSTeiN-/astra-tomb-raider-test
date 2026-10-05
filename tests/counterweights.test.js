@@ -562,6 +562,82 @@ test("taking a stone grip frames its close working stance without changing a mov
   releaseCounterweight(game);
 });
 
+test("walking around a twice-pulled cloud stone retains a visible board view after settling", () => {
+  const { game } = fixture(LEVELS[5]),
+    chamber = game.counterweights,
+    solution = solveCounterweights(chamber.trial);
+  game.camera = new THREE.PerspectiveCamera();
+  game.cameraSpace = () => true;
+  game.yaw = 0;
+  game.pitch = 0.13;
+  for (const action of solution.path.slice(0, 2)) {
+    for (const cell of action.walking) walk(game, point(cell));
+    gripMove(game, action);
+  }
+  assert.equal(chamber.saved.moves, 2);
+  assert.deepEqual(chamber.saved.positions[2], [4, 2]);
+  const saved = structuredClone(chamber.saved);
+  // Retain the recorded horizontal look while walking from the side to the
+  // next gripping face. The old low view settles behind the neighboring stone.
+  game.yaw = 0.6981449455552843;
+  const look = { yaw: game.yaw, pitch: game.pitch },
+    updateView = () => {
+      const target = game.player.position
+          .clone()
+          .add(new THREE.Vector3(0, 1.3, 0)),
+        desired = target
+          .clone()
+          .add(
+            new THREE.Vector3(
+              Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+              Math.sin(game.pitch) * 5.3 + 0.2,
+              Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+            ),
+          );
+      game.camera.position.copy(
+        followCamera(
+          game.camera.position,
+          target,
+          desired,
+          1 / 60,
+          game.cameraSurfaces,
+          game.cameraSpace,
+          game.cameraFollowTarget,
+        ),
+      );
+      game.cameraFollowTarget = target;
+      assert.ok(game.camera.position.distanceTo(target) >= 2.2);
+      assert.equal(
+        game.cameraSurfaces.entry(target, game.camera.position, 0),
+        1,
+      );
+      assert.deepEqual({ yaw: game.yaw, pitch: game.pitch }, look);
+    };
+  for (let frame = 0; frame < 120; frame++) updateView();
+  for (const [x, z] of [
+    [104.85, 100],
+    [104.85, 101.25],
+    [103.2, 101.25],
+  ]) {
+    const target = new THREE.Vector3(x, 0, z);
+    let arrived = false;
+    for (let tick = 0; tick < 240; tick++) {
+      const delta = target.clone().sub(game.player.position),
+        distance = delta.length();
+      if (distance < 0.035) {
+        arrived = true;
+        break;
+      }
+      delta.normalize().multiplyScalar(Math.min(3.8, distance * 60));
+      advanceCharacter(game, delta, 1 / 60);
+      updateView();
+    }
+    assert.ok(arrived, `walking reached ${target.toArray()}`);
+  }
+  for (let frame = 0; frame < 120; frame++) updateView();
+  assert.deepEqual(chamber.saved, saved);
+});
+
 test("pulling a counterweight reverses the walking cycle", () => {
   const game = {
     grounded: true,

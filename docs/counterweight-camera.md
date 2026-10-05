@@ -102,6 +102,10 @@ The later [wider cloud court](cloud-aisle.md) repairs that observed walking aisl
 by moving its walls and folded leaves outward. The final observatory's approach
 finding VA-39 remains open. Grip/move selection does not run while walking freely.
 
+The later [elevated board-view preference](counterweight-overview.md) also clears
+two recorded cloud stone approaches after a grip, with normal look input
+retained. It does not repair every free forecourt view.
+
 ![Earlier cloud aisle walking view before the wider court](images/counterweight-camera/remaining-aisle.webp)
 
 A separate replay starts from each native case's settled two-move save and

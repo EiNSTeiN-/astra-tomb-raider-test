@@ -43,7 +43,8 @@ function slideViews(game, move) {
 
 // Use closes the last 15 cm to a stone. A later slide can carry that stance
 // beside another obstruction. Select once per accepted interaction, testing the
-// complete slide; normal look input stays free between those decisions.
+// complete slide. An elevated first grip also shows the board and leaves room
+// above its neighboring stones; normal look input stays free between decisions.
 export function frameCounterweightGrip(game, axis, move = null) {
   if (
     !game.camera ||
@@ -100,7 +101,10 @@ export function frameCounterweightGrip(game, axis, move = null) {
         yaw,
         pitch,
         minimum,
-        score: Math.min(minimum, 5.3) - deviation * 0.25,
+        score:
+          Math.min(minimum, 5.3) -
+          deviation * 0.25 -
+          (move ? 0 : Math.max(0, 0.85 - pitch) * 0.75),
       };
     };
   // Preserve a player's clear view when it will stay clear throughout a slide.
@@ -126,6 +130,7 @@ export function frameCounterweightGrip(game, axis, move = null) {
         game.pitch,
         Math.min(1.05, game.pitch + 0.25),
         Math.max(-0.65, game.pitch - 0.25),
+        0.85,
         1.05,
       ]),
     ];

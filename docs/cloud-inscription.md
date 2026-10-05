@@ -101,6 +101,12 @@ but also settles into a hidden view, at 1.330 m. Its four captures are reviewed;
 the assertion expecting full character coverage fails. Assisted steering alone
 does not explain the obstruction.
 
+The later [elevated board-view preference](counterweight-overview.md) repairs
+that recorded third-move approach after accepted grips and clears the ninth-move
+approach on the repeated route. Its comparison preserves every recorded foot
+position and horizontal heading while changing the grip pitch. The coupling
+view during the engine return remains obstructed.
+
 An additional native keyboard approach also records a hidden walking view. Its
 first reload changes the heading by 15 degrees, consistent with the existing
 arrival behavior, but a repeat allowing that correction does not finish the

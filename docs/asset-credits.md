@@ -834,3 +834,9 @@ onto a clear part of the forecourt. It retains the credited explorer, sounds and
 themed scores. No external asset or dependency was added. Its four documentation
 images are actual game captures converted losslessly to WebP, with decoded RGBA
 identity verified.
+
+The [elevated counterweight board views](counterweight-overview.md) add an
+original camera preference and regression. Existing credited artwork,
+distance-sensitive sounds and themed scores are retained; no external asset or
+dependency was added. The four documentation images are actual game captures
+converted losslessly to WebP, with decoded RGBA identity verified.
