@@ -9,6 +9,7 @@ const done = (game, c) =>
   c.stage < game.progress.stage ||
   game.progress.field.includes(c.id);
 export function resetTraversal(game) {
+  if (game.ropeRide) delete game.ropeRide.catching;
   game.wallGrip = null;
   game.cleftCooldown = 0;
   if (game.cleft) game.cleft.anchor = 0;
@@ -146,27 +147,30 @@ export function tryGrabRope(game) {
     -1,
     Math.min(1, Math.atan2(projected, c.anchor.y - hand.y)),
   );
-  const old = c.angle;
-  c.angle = angle;
-  const foot = ropeGrip(c);
+  const foot = ropeGrip({ ...c, angle });
   foot.y -= HAND_HEIGHT;
-  if (
-    !game.canMove(foot.x, foot.z, foot.y - game.groundHeight(foot.x, foot.z))
-  ) {
-    c.angle = old;
-    return false;
-  }
+  if (!ropeCatchClear(game, game.player.position, foot)) return false;
   const v = game.moveVelocity || { x: 0, z: 0 };
   c.omega =
     ((v.x * c.axis.x + v.z * c.axis.z) * Math.cos(angle) +
       game.velocityY * Math.sin(angle)) /
     c.length;
   game.ropeRide = c;
+  // Reaching a forgiving grab radius must not teleport the body onto the
+  // rope's swing plane. Bring both the rope angle and the explorer into the
+  // hanging pose over a short, swept catch, retaining the earned first frame.
+  c.catching = {
+    start: game.player.position.clone(),
+    angle: c.angle,
+    targetAngle: angle,
+    time: 0,
+    blend: 0,
+    velocity: { x: v.x, y: game.velocityY, z: v.z },
+  };
   game.grounded = false;
   game.airVelocity = null;
   game.jumpBuffer = 0;
   game.keys.delete("Space");
-  game.player.position.copy(foot);
   game.nearest = null;
   game.audio.noiseHit?.(0.025, 0.2, 1400, foot);
   game.cb.toast?.(
@@ -175,15 +179,33 @@ export function tryGrabRope(game) {
   );
   return true;
 }
+
+function ropeCatchClear(game, start, end) {
+  const steps = Math.max(1, Math.ceil(start.distanceTo(end) / 0.08));
+  for (let i = 0; i <= steps; i++) {
+    const point = start.clone().lerp(end, i / steps),
+      ground = game.groundHeight(point.x, point.z);
+    if (
+      ground > point.y + 0.45 ||
+      !game.canMove(point.x, point.z, point.y - ground)
+    )
+      return false;
+  }
+  return true;
+}
+
 function releaseRope(game, boost = true) {
   const c = game.ropeRide;
   if (!c) return;
-  const speed = c.length * c.omega;
+  const speed = c.length * c.omega,
+    catchVelocity = c.catching?.velocity;
   game.airVelocity = {
-    x: c.axis.x * Math.cos(c.angle) * speed,
-    z: c.axis.z * Math.cos(c.angle) * speed,
+    x: catchVelocity?.x ?? c.axis.x * Math.cos(c.angle) * speed,
+    z: catchVelocity?.z ?? c.axis.z * Math.cos(c.angle) * speed,
   };
-  game.velocityY = Math.sin(c.angle) * speed + (boost ? 2 : 0);
+  game.velocityY =
+    (catchVelocity?.y ?? Math.sin(c.angle) * speed) + (boost ? 2 : 0);
+  delete c.catching;
   game.ropeRide = null;
   game.ropeCooldown = 0.7;
   game.grounded = false;
@@ -246,7 +268,7 @@ export function traversalInteract(game) {
 }
 export function predictedRopeLanding(game) {
   const c = game.ropeRide;
-  if (!c) return null;
+  if (!c || c.catching) return null;
   const p = game.player.position.clone(),
     l = c.ledges[3],
     speed = c.length * c.omega;
@@ -332,10 +354,22 @@ export function updateTraversal(game, dt, input) {
       game.ropeRide === c
         ? (input.x * c.axis.x + input.z * c.axis.z) * 0.95
         : 0;
-    c.omega +=
-      ((-19 / c.length) * Math.sin(c.angle) + drive - c.omega * 0.18) * dt;
-    c.omega = Math.max(-1.6, Math.min(1.6, c.omega));
-    c.angle += c.omega * dt;
+    if (c.catching && game.ropeRide === c) {
+      const catchPose = c.catching;
+      catchPose.time += dt;
+      const t = Math.min(1, catchPose.time / 0.28);
+      catchPose.blend = t * t * (3 - 2 * t);
+      c.angle = THREE.MathUtils.lerp(
+        catchPose.angle,
+        catchPose.targetAngle,
+        catchPose.blend,
+      );
+    } else {
+      c.omega +=
+        ((-19 / c.length) * Math.sin(c.angle) + drive - c.omega * 0.18) * dt;
+      c.omega = Math.max(-1.6, Math.min(1.6, c.omega));
+      c.angle += c.omega * dt;
+    }
     if (Math.abs(c.angle) > 1.15) {
       c.angle = Math.sign(c.angle) * 1.15;
       c.omega *= -0.3;
@@ -404,14 +438,23 @@ export function updateTraversal(game, dt, input) {
   if (!c) return false;
   const foot = ropeGrip(c);
   foot.y -= HAND_HEIGHT;
-  if (
-    !game.canMove(foot.x, foot.z, foot.y - game.groundHeight(foot.x, foot.z))
-  ) {
+  const destination = c.catching
+    ? c.catching.start.clone().lerp(foot, c.catching.blend)
+    : foot;
+  if (!ropeCatchClear(game, game.player.position, destination)) {
     releaseRope(game, false);
     return false;
   }
-  game.player.position.copy(foot);
-  game.jumpY = foot.y - game.groundHeight(foot.x, foot.z);
+  if (c.catching && dt > 0) {
+    const velocity = destination
+      .clone()
+      .sub(game.player.position)
+      .divideScalar(dt);
+    c.catching.velocity = { x: velocity.x, y: velocity.y, z: velocity.z };
+  }
+  game.player.position.copy(destination);
+  game.jumpY = destination.y - game.groundHeight(destination.x, destination.z);
+  if (c.catching?.blend === 1) delete c.catching;
   game.avatar.rotation.y = Math.atan2(
     c.axis.x * Math.sign(c.omega || 1),
     c.axis.z * Math.sign(c.omega || 1),

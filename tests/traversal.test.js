@@ -38,7 +38,10 @@ import {
   traversalInteract,
   updateTraversal,
   predictedRopeLanding,
+  tryGrabRope,
+  resetTraversal,
 } from "../src/traversal.js";
+import { ropeGrip } from "../src/traversal-courses.js";
 import { normalizeSave } from "../src/storage.js";
 
 function motionGame(ground = () => 0, obstacles = []) {
@@ -174,8 +177,15 @@ function frame(g, input, seconds, keys = []) {
   g.keys = new Set(keys);
   g.touchMove = { x: input.x, z: input.z };
   for (let i = 0; i < Math.ceil(seconds * 60); i++) {
+    const before = g.player.position.clone(),
+      wasRiding = !!g.ropeRide;
     g.elapsed += 1 / 60;
     g.updatePlayer(1 / 60);
+    if (wasRiding || g.ropeRide)
+      assert(
+        g.player.position.distanceTo(before) < 0.4,
+        `rope catch or swing jumps ${g.player.position.distanceTo(before)} m`,
+      );
   }
 }
 function walkLocal(g, c, x, z, seconds, keys = []) {
@@ -266,6 +276,78 @@ test("all 21 cable routes across eight chapters can be climbed, jumped, rope-cro
       count++;
     }
   assert.equal(count, 21);
+});
+
+test("an off-plane rope catch retains its first frame, sweeps into reach and releases without retaining a pending catch", () => {
+  const level = LEVELS.find((level) => level.id === "sky"),
+    feature = createMap(level).features.find((f) => f.id === "field-3-0"),
+    { g, c } = courseGame(level, feature);
+  const start = ropeGrip(c).add(new THREE.Vector3(0.2, -2.15 + 0.7, 1));
+  g.player.position.copy(start);
+  g.grounded = false;
+  g.velocityY = -1;
+  g.moveVelocity = { x: 2, z: 0 };
+  assert(tryGrabRope(g));
+  assert(
+    g.player.position.equals(start),
+    "catching does not relocate the first frame",
+  );
+  assert.equal(c.angle, 0, "the rope angle also retains its first frame");
+  assert.equal(
+    predictedRopeLanding(g),
+    null,
+    "a reach is not a safe release cue",
+  );
+  const positions = [start.clone()];
+  for (let i = 0; i < 20; i++) {
+    assert(updateTraversal(g, 1 / 60, { x: 0, z: 0 }));
+    assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+    assert(g.player.position.distanceTo(positions.at(-1)) < 0.4);
+    positions.push(g.player.position.clone());
+  }
+  assert.equal(c.catching, undefined);
+  const expected = ropeGrip(c).add(new THREE.Vector3(0, -2.15, 0));
+  assert(g.player.position.distanceTo(expected) < 1e-10);
+
+  resetTraversal(g);
+  c.angle = 0;
+  c.omega = 0;
+  g.player.position.copy(start);
+  g.grounded = false;
+  g.velocityY = -1;
+  assert(tryGrabRope(g));
+  updateTraversal(g, 1 / 60, { x: 0, z: 0 });
+  g.keys.add("Space");
+  const before = g.player.position.clone();
+  assert.equal(updateTraversal(g, 1 / 60, { x: 0, z: 0 }), false);
+  assert(g.player.position.distanceTo(before) < 0.4);
+  assert.equal(g.ropeRide, null);
+  assert.equal(c.catching, undefined);
+  assert(Object.values(g.airVelocity).every(Number.isFinite));
+  assert(Number.isFinite(g.velocityY));
+});
+
+test("rope catches reject a solid between the explorer and the hanging position", () => {
+  const level = LEVELS.find((level) => level.id === "sky"),
+    feature = createMap(level).features.find((f) => f.id === "field-3-0"),
+    { g, c } = courseGame(level, feature),
+    foot = ropeGrip(c).add(new THREE.Vector3(0, -2.15, 0)),
+    start = foot.clone().add(new THREE.Vector3(0, 0.7, 1)),
+    middle = start.clone().lerp(foot, 0.5);
+  g.player.position.copy(start);
+  g.grounded = false;
+  g.obstacles.push({
+    x: middle.x,
+    z: middle.z,
+    w: 0.1,
+    d: 0.1,
+    h: middle.y + 1 - g.groundHeight(middle.x, middle.z),
+  });
+  assert.equal(tryGrabRope(g), false);
+  assert(g.player.position.equals(start));
+  assert.equal(g.ropeRide, undefined);
+  assert.equal(c.angle, 0);
+  assert.equal(c.catching, undefined);
 });
 test("secure ledges survive save normalization and invalid platform heights cannot create airborne spawns", () => {
   const level = LEVELS[0],

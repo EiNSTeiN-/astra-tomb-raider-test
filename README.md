@@ -9,6 +9,9 @@ The [visual audit](docs/visual-audit.md) now records front/rear overviews of all
 [stone foundations beneath monastery columns on slopes](docs/monastery-foundations.md)
 and [grounded court bases in the jungle, desert and coast](docs/court-foundations.md).
 The desert's pier shafts also now meet their base slabs.
+The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
+retaining the first body position and verifying both climbing crossings,
+their return cables, native keyboard/touch landings and local save recovery.
 The jungle's [54 large climbing roots now taper into the soil](docs/ruin-roots.md),
 removing the exposed blunt cuts at their lower ends.
 The desert's [68 mirror handwheels now have connecting axles and bearing housings](docs/solar-mounts.md).

@@ -752,3 +752,10 @@ wind synthesis and sky score. The bearing emitter follows its fitted mount.
 No external assets or dependencies were added. Its four comparison images are
 actual game captures converted losslessly to WebP, with paired player/camera
 positions and decoded RGBA identity checked.
+
+The [eagle-route catch repair](sky-eagle-route.md) adds original swept catch
+transitions and adjusts the existing explorer's hanging lift and reach target.
+It retains the credited character, climbing geometry, materials, positioned
+rope synthesis and sky score. No external assets or dependencies were added.
+Its four documentation images are actual game captures converted losslessly
+to WebP, with decoded RGBA identity checked.

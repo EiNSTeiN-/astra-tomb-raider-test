@@ -199,7 +199,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   rig.mixer.update(dt);
   const hanging = !!game.ropeRide || !!(game.zipRide && !game.zipRide.approach);
   rig.hangLift = hanging
-    ? 0.4
+    ? 0.4 * (game.ropeRide?.catching?.blend ?? 1)
     : game.wallGrip
       ? 0.4
       : (rig.hangLift || 0) * Math.exp(-dt * 14);
@@ -294,6 +294,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
       poseHands(
         game,
         handles ||
+          game.ropeRide?.grip?.getWorldPosition(new THREE.Vector3()) ||
           game.player.position.clone().add(new THREE.Vector3(0, 2.15, 0)),
       );
     poseFeet(game, [point(0.12, 0.16, 0.02), point(-0.12, 0.28, 0.05)]);

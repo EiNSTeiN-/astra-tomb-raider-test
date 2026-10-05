@@ -1,7 +1,7 @@
 // Assisted route inspection. Uses the delivered player controller,
 // follow camera and mechanisms; enemy AI and combat are not advanced.
 import * as THREE from "three";
-import { searchRoute } from "../src/navigation.js";
+import { searchRoute, clearSegment } from "../src/navigation.js";
 import { supportAt } from "../src/character-motion.js";
 import { spanCoordinates } from "../src/sky-bridge-rules.js";
 import { predictedRopeLanding } from "../src/traversal.js";
@@ -89,6 +89,13 @@ export function skyRouteSnapshot(game, state) {
     height: game.jumpY,
     ledge: game.courseAnchor?.ledge,
     ridingRope: !!game.ropeRide,
+    ropeCatch: game.ropeRide?.catching
+      ? {
+          time: game.ropeRide.catching.time,
+          blend: game.ropeRide.catching.blend,
+        }
+      : null,
+    avatarLift: game.avatar.position.y,
     ridingCable: !!game.zipRide,
     ropeReleaseSafe: !!predictedRopeLanding(game)?.safe,
     field: [...game.progress.field],
@@ -180,8 +187,24 @@ export function advanceSkyWalk(game, state, limit = 120) {
   };
 }
 
-export function stepSkyCourse(game, state, local, seconds, keys = []) {
-  const c = game.traversalCourses.find((c) => c.stage === 0),
+function selectedSkyCourse(game, courseId) {
+  const course = game.traversalCourses.find((c) =>
+    courseId ? c.id === courseId : c.stage === 0,
+  );
+  if (!course)
+    throw Error(`Sky climbing course ${courseId || "first"} not found`);
+  return course;
+}
+
+export function stepSkyCourse(
+  game,
+  state,
+  local,
+  seconds,
+  keys = [],
+  courseId = null,
+) {
+  const c = selectedSkyCourse(game, courseId),
     direction = {
       x: local.x * c.axis.x - local.z * c.axis.z,
       z: local.x * c.axis.z + local.z * c.axis.x,
@@ -192,8 +215,8 @@ export function stepSkyCourse(game, state, local, seconds, keys = []) {
   return skyRouteSnapshot(game, state);
 }
 
-export function approachSkyTakeoff(game, state) {
-  const c = game.traversalCourses.find((c) => c.stage === 0),
+export function approachSkyTakeoff(game, state, courseId = null) {
+  const c = selectedSkyCourse(game, courseId),
     target = c.transform(-10, -0.1);
   game.keys.clear();
   let frames = 0;
@@ -299,21 +322,32 @@ export function advanceSkySpan(game, state, id, direction = 1, limit = 120) {
   return { done: false, ...skyRouteSnapshot(game, state) };
 }
 
-export function skyRouteTargets(game) {
-  const c = game.traversalCourses.find((c) => c.stage === 0),
-    fields = game.items.filter((f) => f.type === "field" && f.stage === 0),
-    spans = game.skyBridges.filter((b) => b.stage === 0);
+export function skyRouteTargets(game, courseId = null) {
+  const c = selectedSkyCourse(game, courseId),
+    fields = game.items.filter(
+      (f) => f.type === "field" && f.stage === c.stage,
+    ),
+    field = fields.find((f) => f.id === c.id),
+    spans = game.skyBridges.filter((b) => b.stage === c.stage),
+    height = c.ledges[4].y,
+    clear = (x, z) =>
+      game.canMove(x, z, height - game.groundHeight(x, z)) &&
+      Math.abs(supportAt(game, x, z, height).height - height) < 0.05,
+    summit = [0, 0.55, -0.55, 1, -1]
+      .map((dx) => ({ x: field.x * 7 + dx, z: field.z * 7 + 2.2, height }))
+      .find((point) => clearSegment(clear, point, point));
+  // A rotated return-cable post can stand beside the nominal reading point.
+  // Choose supported feet with the same corner clearance as the walk planner.
+  if (!summit) throw Error(`No clear reading position at sky course ${c.id}`);
   return {
     // Leave extra mantle reach at the first approach.
     entry: c.transform(-10, 11.7),
     second: { ...c.transform(-10, 6), height: c.ledges[0].y },
     takeoff: c.transform(-10, -0.1),
-    corner: c.transform(3.2, c.pivotLocalZ + 1.82),
-    summit: {
-      x: fields[0].x * 7,
-      z: fields[0].z * 7 + 2.2,
-      height: c.ledges[4].y,
-    },
+    // Odd-stage courses put the far pier one metre farther from the summit.
+    // Use its forward corner inside the delivered 1.5 m mantle reach.
+    corner: c.transform(3.0, c.pivotLocalZ + 2.0),
+    summit,
     launch: c.launch
       .clone()
       .lerp(
@@ -332,8 +366,8 @@ export function skyRouteTargets(game) {
       };
     }),
     tablet: {
-      x: game.windSites[0].tablet.x * 7,
-      z: game.windSites[0].tablet.z * 7,
+      x: game.windSites[c.stage].tablet.x * 7,
+      z: game.windSites[c.stage].tablet.z * 7,
     },
   };
 }
