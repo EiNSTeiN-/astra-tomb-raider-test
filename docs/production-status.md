@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Summit winch-lead camera bounds](climbing-camera-leads.md) remove the
+  oversized foreground strips caused by uncaptured 25 mm leads. Actual
+  triangle replays clear all eight recorded views, while all 42 saved summit
+  cameras retain arms above 3.278 m. The 63-position construction regression,
+  all 782 campaign checks, production build and six native keyboard/High or
+  touch/Low cases pass.
+  All eight baseline, 42 final and twenty native images are reviewed; six
+  arrival-camera corrections are independently proved. The preceding 432-view
+  course review completes 21 assisted crossings, with five ground-navigation
+  exceptions still under investigation. Wider post/winch framing, repeated
+  course forms, continuous routes and listening/device acceptance remain open.
+
 - [Climbing ledge inlays](climbing-inlays.md) seat all 210 edge markers in their
   full paving beds, repairing crouched boot penetration up to 18.275 mm.
   The 13,860-ray construction regression, 128-pose delivered-model check,

@@ -919,3 +919,10 @@ closed marker geometry and retains the existing weathered bronze material,
 regional paving and credited explorer model. No external asset or dependency
 is added. Its four documentation images are actual game captures converted
 losslessly to WebP, with identical decoded RGBA pixels and dimensions.
+
+The [summit winch-lead camera repair](climbing-camera-leads.md) adds original
+camera-bound selection and rendered-geometry regressions. It retains the
+existing cable geometry, regional materials, credited explorer, positioned
+mechanical sounds and quiet themed scores. No external asset or dependency
+is added. Its four documentation images are actual game captures converted
+losslessly to WebP, with identical decoded RGBA pixels and dimensions.

@@ -70,7 +70,14 @@ export function buildReturnCable(game, course, materials) {
       new THREE.Vector3(0, 1, 0),
       b.clone().sub(a).normalize(),
     );
-    if (parent === fixed) game.cameraSurfaces?.capture(m);
+    if (parent === fixed)
+      // The long winch lead is only 25 mm wide, but can cross the summit
+      // camera's near plane. Preserve its oriented bounds through batching;
+      // retain the normal length filter for the short lead beside the drum.
+      game.cameraSurfaces?.capture(
+        m,
+        material === wire ? { thin: true } : undefined,
+      );
     return m;
   };
   const at = (point, across, along, height) =>

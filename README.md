@@ -58,6 +58,9 @@ with bonded paving and masonry that follows the surrounding chapter's materials.
 Their [210 bronze edge markers now sit in the paving bed](docs/climbing-inlays.md),
 clearing the recorded crouched boot intersections and retaining native roof
 walks and saves.
+The [long summit winch leads now have fitted camera bounds](docs/climbing-camera-leads.md),
+clearing the recorded oversized foreground strips while preserving the cable
+construction, ordinary look input and native boarding and save recovery.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

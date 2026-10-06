@@ -10,6 +10,7 @@ import {
   updateCourseVisual,
 } from "../src/traversal-courses.js";
 import { CameraSurfaces, followCamera } from "../src/camera-collision.js";
+import { followClearCamera } from "../src/camera-follow.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { Soundscape } from "../src/audio.js";
 import { CLIMBING_STYLES } from "../src/traversal-art.js";
@@ -66,6 +67,103 @@ function world(t, level) {
   });
   return game;
 }
+
+test("summit reading cameras keep their near-plane margin clear of the actual winch leads", (t) => {
+  let views = 0;
+  const failures = [];
+  for (const level of LEVELS) {
+    const g = world(t, level);
+    for (const c of g.traversalCourses) {
+      for (const [x, z] of [
+        [0.9706530381068319, -1.1817921155800946],
+        [1.32366729583708, -0.94155373525697],
+        [1.76134533940206, -1.0637957853056],
+      ]) {
+        // Reading feet from the obstructed ordinary jungle summit walk, plus
+        // two close boarding feet from the snow route. Rotate these actual
+        // working views through all regional courses.
+        const feet = c.transform(x, z),
+          lens = c.transform(0.9772321406728111, 2.061627035891206),
+          roof = c.ledges[4].y,
+          target = new THREE.Vector3(feet.x, roof + 1.3, feet.z),
+          yaw = -Math.atan2(c.axis.z, c.axis.x),
+          pitch = 0.35,
+          desired = target
+            .clone()
+            .add(
+              new THREE.Vector3(
+                Math.sin(yaw) * Math.cos(pitch) * 5.3,
+                Math.sin(pitch) * 5.3 + 0.2,
+                Math.cos(yaw) * Math.cos(pitch) * 5.3,
+              ),
+            ),
+          game = {
+            camera: new THREE.PerspectiveCamera(),
+            cameraSurfaces: g.cameraSurfaces,
+            cameraFollowTarget: target,
+            yaw,
+            pitch,
+          };
+        game.camera.position.set(lens.x, roof + 2.7236194242538296, lens.z);
+        for (let frame = 0; frame < 60; frame++)
+          game.camera.position.copy(
+            followClearCamera(game, target, desired, 1 / 60, () => true),
+          );
+        // Measure rendered triangles independently of the fitted camera bounds.
+        // The long diagonal lead was excluded by the default thin-part filter.
+        const triangle = new THREE.Triangle(),
+          a = new THREE.Vector3(),
+          b = new THREE.Vector3(),
+          d = new THREE.Vector3(),
+          closest = new THREE.Vector3();
+        let distance = Infinity;
+        c.zipRig.fixed.traverse((o) => {
+          if (!o.isMesh || o.material.name !== "Return cable steel") return;
+          const positions = o.geometry.attributes.position,
+            index = o.geometry.index;
+          for (let i = 0; i < (index?.count ?? positions.count); i += 3) {
+            a.fromBufferAttribute(
+              positions,
+              index ? index.getX(i) : i,
+            ).applyMatrix4(o.matrixWorld);
+            b.fromBufferAttribute(
+              positions,
+              index ? index.getX(i + 1) : i + 1,
+            ).applyMatrix4(o.matrixWorld);
+            d.fromBufferAttribute(
+              positions,
+              index ? index.getX(i + 2) : i + 2,
+            ).applyMatrix4(o.matrixWorld);
+            triangle
+              .set(a, b, d)
+              .closestPointToPoint(game.camera.position, closest);
+            distance = Math.min(
+              distance,
+              closest.distanceTo(game.camera.position),
+            );
+          }
+        });
+        assert.ok(
+          Number.isFinite(distance),
+          `${level.id}/${c.id}: measured actual leads`,
+        );
+        if (
+          distance < 0.28 - 1e-5 ||
+          game.camera.position.distanceTo(target) < 3.2
+        )
+          failures.push({
+            chapter: level.id,
+            course: c.id,
+            distance,
+            arm: game.camera.position.distanceTo(target),
+          });
+        views++;
+      }
+    }
+  }
+  assert.equal(views, 63);
+  assert.deepEqual(failures, []);
+});
 
 test("all 105 climbing piers have finite fitted masonry, bounded batches and flat walking surfaces with shallow joints", (t) => {
   let count = 0;
