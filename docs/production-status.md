@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Supported cipher wheels and stone bases](cipher-footings.md) stop forward
+  walking at the drive, protect working ground from reservoir excavation and
+  fit all 42 pedestal bottoms beneath their terrain footprints. All 756 final
+  campaign checks, 56 focused checks and the build pass. Settled-controller
+  native keyboard input improves from 36 to 42 working wheels. The eight stone
+  solutions still complete 121 moves, with no fades over 15,712 camera frames;
+  all 64 solution captures, eight before and 84 final base views, and 48 control
+  observers are reviewed. Twelve native production cases verify keyboard/touch
+  turns, blocked forward movement, manual look, departure and exact reloads
+  apart from timestamps; both older occupied saves recover 75 cm to clear
+  footing. All 62 native captures are reviewed. VA-49's submerged controls and
+  VA-50's floating pedestal rims are repaired. VA-48 remains open for reverse
+  views and two later approaches; broader visual, route and audio/device
+  acceptance remains open.
+
 - [Cipher component camera bounds](cipher-camera.md) clear the three recorded
   jungle entrance fades. All 752 campaign checks, 26 focused checks and the
   build pass. The repeated 121 stone moves retain full character opacity across

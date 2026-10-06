@@ -38,7 +38,9 @@ That recovery now also [clears walking views around puzzle pillars](docs/counter
 with all eight stone solutions, the complete cloud-engine route and native save checks.
 The jungle's [cipher camera bounds now follow the separate stone and drive components](docs/cipher-camera.md),
 clearing the three recorded entrance fades while protecting the rotating drums and wheel rims.
-Reverse views and close walks at the cipher controls remain under review.
+The [cipher wheels now have protected working ground and fitted stone bases](docs/cipher-footings.md),
+with collision at the drive, recovery from occupied saves and access to all 42 drums.
+Reverse views and two later approaches at the cipher controls remain under review.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

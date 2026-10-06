@@ -128,6 +128,13 @@ drive geometry still to be compared before selecting a repair.
 
 ![Remaining native close view after walking forward from the handwheel](images/cipher-camera/remaining-wheel-walk.webp)
 
+The later [supported-drive and footing repair](cipher-footings.md) diagnoses
+those two native walks as physical handwheel penetration. It adds drive
+collision, preserves dry working ground and fits the pedestal bottoms to the
+soil. Native forward input now stops at the working stance and both older
+occupied saves recover nearby without losing progress. Reverse views and the
+two later approach fades remain open as VA-48.
+
 VA-47's recorded entrance is repaired. Broader camera composition, repeated
 courts, landscape integration and continuous routes across all eight chapters
 remain open. The existing distance-sensitive sources and quiet thematic scores

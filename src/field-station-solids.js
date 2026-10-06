@@ -23,6 +23,7 @@ export function stationSolid(
     h: cy + h / 2 - game.groundHeight(cx, cz),
     fieldStation: feature.id,
     radius: options.radius,
+    bodyPadding: options.bodyPadding,
     supportable: options.support !== false,
     surfaceHeight: options.surfaceHeight,
     node: options.node,
@@ -44,7 +45,14 @@ export function stationContains(solid, x, z, padding = 0) {
         Math.abs(z - solid.z) < solid.d + padding;
 }
 
-export function stationBlocked(solid, x, y, z, clearance = 1.8, padding = 0.4) {
+export function stationBlocked(
+  solid,
+  x,
+  y,
+  z,
+  clearance = 1.8,
+  padding = solid.bodyPadding ?? 0.4,
+) {
   return (
     stationContains(solid, x, z, padding) &&
     y < (solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y) - 0.015 &&

@@ -19,6 +19,7 @@ import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
 import { poseHands } from "./pose.js";
 import { captureCipherRotor } from "./cipher-camera.js";
+import { addCipherDriveSolid, fitCipherPedestal } from "./cipher-solids.js";
 
 export function cipherReady(game, site) {
   return (
@@ -168,7 +169,19 @@ export function buildCipherCourts(game) {
         rotor = new THREE.Group();
       body.position.set(x, y, z);
       detail.add(body);
-      add(pedestalGeometry, stone, x, y, z);
+      add(
+        fitCipherPedestal(
+          game,
+          pedestalGeometry,
+          root.position.x + x,
+          root.position.y + y,
+          root.position.z + z,
+        ),
+        stone,
+        x,
+        y,
+        z,
+      );
       add(
         new THREE.CylinderGeometry(0.38, 0.44, 0.7, 16),
         relief,
@@ -263,6 +276,7 @@ export function buildCipherCourts(game) {
         handles.push(h);
       }
       const f = control("drum", index, x, z + 1.52);
+      addCipherDriveSolid(game, f, root, body, wheel, shaft);
       const sound = {
         id: `cipher-${stage}-${index}`,
         kind: "machine",
@@ -335,6 +349,7 @@ export function buildCipherCourts(game) {
     });
     mergeArchitecture(fixed);
   }
+  pedestalGeometry.dispose();
   settleCipher(game);
   return true;
 }

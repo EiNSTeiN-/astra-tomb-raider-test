@@ -7,6 +7,11 @@ import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { followClearCamera } from "../src/camera-follow.js";
+import {
+  advanceCharacter,
+  safeArrival,
+  supportAt,
+} from "../src/character-motion.js";
 import { buildCounterweights } from "../src/counterweights.js";
 import { buildFieldGates } from "../src/field-world.js";
 import {
@@ -62,7 +67,6 @@ function fixture(t) {
     progress: store.level(level.id),
     world,
     terrainProfile: terrain,
-    groundHeight: terrain.height,
     player: new THREE.Group(),
     avatar: new THREE.Group(),
     items: [],
@@ -206,12 +210,12 @@ test("all physical drum controls stay supported and clear, with bounded relief b
     ready(game, site.stage);
     for (const f of [...site.nodes.map((n) => n.control), site.tablet]) {
       const p = f.group.position;
-      assert.ok(game.canMove(p.x, p.z, 0, 0), `${f.id} is blocked`);
+      assert.ok(game.canMove(p.x, p.z, 0), `${f.id} is blocked`);
       assert.ok(Math.abs(game.groundHeight(p.x, p.z) - p.y) < 0.001);
       for (const dx of [-0.4, 0, 0.4])
         for (const dz of [0, 0.5, 1])
           assert.ok(
-            game.canMove(p.x + dx, p.z + dz, 0, 0),
+            game.canMove(p.x + dx, p.z + dz, 0),
             `${f.id} approach ${dx},${dz}`,
           );
     }
@@ -439,4 +443,134 @@ test("all 42 drum envelopes guard actual rotating stone and wheel rim intersecti
   }
   assert.equal(stoneRays, 2688);
   assert.equal(wheelRays, 336);
+});
+
+test("all 42 drives stop sustained walking before the handwheel while retaining supported control access", (t) => {
+  const { game } = fixture(t);
+  for (const site of game.cipherSites) {
+    ready(game, site.stage);
+    for (const node of site.nodes) {
+      const p = node.control.group.position;
+      const [solid] = node.control.stationSolids;
+      assert.equal(solid.supportable, false);
+      assert(game.canMove(p.x, p.z, 0), "supported control stance");
+      game.player.position.copy(p);
+      game.grounded = true;
+      game.jumpY = game.velocityY = 0;
+      for (let frame = 0; frame < 120; frame++)
+        advanceCharacter(game, { x: 0, z: -3.8 }, 1 / 60);
+      assert(
+        game.player.position.distanceTo(p) < 0.015,
+        "the drive stops the forward stride at its clear stance",
+      );
+      assert(game.canMove(game.player.position.x, game.player.position.z, 0));
+      assert(
+        !game.canMove(solid.x, solid.bounds.max.z + 0.1, 0),
+        "a standing body cannot enter the drive",
+      );
+      assert.equal(
+        supportAt(game, solid.x, solid.z, solid.bounds.max.y + 1).surface,
+        null,
+        "the wheel is not a landing",
+      );
+      assert(turn(game, site, node.index));
+    }
+  }
+});
+
+test("both recorded occupied drive saves recover to clear footing without rewriting puzzle progress", (t) => {
+  const { game } = fixture(t);
+  ready(game, 0);
+  const saved = structuredClone(game.progress);
+  for (const [x, z] of [
+    [205.2275774123926, 60.10761322030798],
+    [205.31788742209707, 60.068343514164624],
+  ]) {
+    const p = new THREE.Vector3(x, game.groundHeight(x, z), z);
+    assert(
+      !game.canMove(x, z, 0),
+      "the old occupied handwheel pose is rejected",
+    );
+    const arrival = safeArrival(game, p);
+    assert(arrival, "nearby clear arrival");
+    assert(
+      game.canMove(
+        arrival.x,
+        arrival.z,
+        arrival.y - game.groundHeight(arrival.x, arrival.z),
+      ),
+    );
+    assert(Math.hypot(arrival.x - x, arrival.z - z) < 1.5);
+    assert(
+      Math.abs(arrival.y - game.groundHeight(arrival.x, arrival.z)) < 0.001,
+    );
+    assert.deepEqual(game.progress, saved);
+  }
+});
+
+test("every cipher stance and front approach remains on its shallow court foundation before activation", (t) => {
+  const { game } = fixture(t),
+    profile = game.terrainProfile;
+  for (const site of game.cipherSites)
+    for (const node of site.nodes) {
+      const p = node.control.group.position;
+      for (const side of [-0.4, 0, 0.4])
+        for (const front of [0, 0.5, 1]) {
+          const x = p.x + side,
+            z = p.z + front,
+            floor = profile.height(x, z);
+          assert(
+            Math.abs(floor - profile.foundationHeight(x, z)) < 1e-5,
+            `${node.control.id}: reservoir excavation must not lower the working ground`,
+          );
+          for (const water of profile.waters) {
+            if (
+              water.kind === "water" &&
+              Math.abs(x - water.x) <= water.width / 2 &&
+              Math.abs(z - water.z) <= water.length / 2
+            )
+              assert(
+                water.baseY - floor < 0.3,
+                "the controller must remain on foot within reach of the drive",
+              );
+          }
+        }
+    }
+});
+
+test("the delivered pedestal bottoms remain below the soil across all 42 complete footprints", (t) => {
+  const { game } = fixture(t),
+    ray = new THREE.Raycaster(),
+    center = new THREE.Vector3();
+  game.world.updateMatrixWorld(true);
+  let samples = 0;
+  for (const site of game.cipherSites)
+    for (const node of site.nodes) {
+      node.body.getWorldPosition(center);
+      for (const radius of [0.25, 0.6, 0.98])
+        for (let angle = 0; angle < 24; angle++) {
+          const yaw = (angle * Math.PI) / 12,
+            x = center.x + Math.sin(yaw) * radius * 1.05,
+            z = center.z + Math.cos(yaw) * radius * 1.05;
+          ray.set(
+            new THREE.Vector3(x, center.y - 4, z),
+            new THREE.Vector3(0, 1, 0),
+          );
+          ray.far = 4.7;
+          const hit = ray
+            .intersectObject(site.fixed, true)
+            .find(
+              (h) =>
+                h.object.material.isMeshStandardMaterial &&
+                !h.object.material.transparent,
+            );
+          assert(hit, "the actual merged stone has a complete bottom");
+          assert(
+            hit.point.y <= game.groundHeight(x, z) + 0.001,
+            `${node.control.id}: the bottom must not float above the slope`,
+          );
+          samples++;
+        }
+    }
+  assert.equal(samples, 3024);
 });

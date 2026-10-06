@@ -860,3 +860,10 @@ the existing credited artwork, positional machinery sources and quiet score;
 no external asset or dependency was added. Its five documentation images are
 actual game captures converted losslessly to WebP, with decoded RGBA identity
 verified. The earlier entrance image remains credited to its preceding milestone.
+
+The [cipher drive and footing repair](cipher-footings.md) adds original geometry
+fitting, physical drive clearance and working-ground protection, with related
+regressions. It retains the credited explorer, jungle art, positional sounds
+and quiet scores; no external asset or dependency was added. Its six
+documentation images are actual game captures converted losslessly to WebP,
+with decoded RGBA identity verified.

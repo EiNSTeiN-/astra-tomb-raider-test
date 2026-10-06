@@ -1,5 +1,6 @@
 import { galleryWaterAt } from "./sunken-gallery-layout.js";
 import { ARCADE_SITE, ARCADE_POOL } from "./arcade-lock-rules.js";
+import { CIPHER_TRIALS } from "./cipher-rules.js";
 
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
@@ -194,6 +195,21 @@ export function protectedGround(map, x, z, biome) {
   }
   for (const f of map.features) {
     if (f.type === "field") continue;
+    if (biome === "jungle" && f.type === "mechanism") {
+      // Keep the drum, supported stance and front approach on their court's
+      // ground. Basin excavation can otherwise put a working wheel below the
+      // swimming surface. Include the terrain cell around the full footprint.
+      const forecourt = smooth(7, 8.75, z - f.z * 7);
+      // Join beyond the existing 14 m working core, retaining its terrain.
+      for (const [dx, dz] of CIPHER_TRIALS[f.stage]?.positions || []) {
+        const outside = Math.max(
+          0,
+          Math.abs(x - f.x * 7 - dx) - 2.8,
+          Math.abs(z - f.z * 7 - dz - 0.8) - 3.6,
+        );
+        keep = Math.max(keep, forecourt * (1 - smooth(0, 2, outside)));
+      }
+    }
     // The wind mechanisms extend into their forecourts. Keep their working
     // ground continuous; excavating a reservoir here strands handwheels below
     // the swimming surface. Blend back into the basin outside the walking lanes.
