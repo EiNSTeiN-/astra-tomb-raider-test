@@ -20,6 +20,7 @@ import { mergeArchitecture } from "./visuals.js";
 import { poseHands } from "./pose.js";
 import { captureCipherRotor } from "./cipher-camera.js";
 import { addCipherDriveSolid, fitCipherPedestal } from "./cipher-solids.js";
+import { frameCipherCourt } from "./cipher-view.js";
 
 export function cipherReady(game, site) {
   return (
@@ -211,7 +212,7 @@ export function buildCipherCourts(game) {
         face.add(label);
       }
       batchCipherDrum(rotor);
-      captureCipherRotor(game, body, rotor, stone);
+      const rotorBounds = captureCipherRotor(game, body, rotor, stone);
       // A square lotus capital and tapered finial retain the temple silhouette.
       add(
         stoneBlockGeometry(1.8, 0.18, 1.8, stage + index),
@@ -299,6 +300,7 @@ export function buildCipherCourts(game) {
         z,
         body,
         rotor,
+        rotorBounds,
         wheel,
         handles,
         control: f,
@@ -348,6 +350,15 @@ export function buildCipherCourts(game) {
       cipher: true,
     });
     mergeArchitecture(fixed);
+    root.updateWorldMatrix(true, true);
+    site.inspectionBounds = new THREE.Box3()
+      .setFromObject(fixed, true)
+      .union(new THREE.Box3().setFromObject(detail, true));
+    for (const node of site.nodes)
+      site.inspectionBounds.union(
+        node.rotorBounds.clone().applyMatrix4(node.body.matrixWorld),
+      );
+    site.inspectionBounds.expandByScalar(0.12);
   }
   pedestalGeometry.dispose();
   settleCipher(game);
@@ -503,23 +514,5 @@ export function cipherTarget(game) {
 export function focusCipher(game) {
   const site = game.cipherSites?.[game.cipherFocus];
   if (!site || !game.paused) return false;
-  const c = site.root.position,
-    compact =
-      game.renderer.domElement.clientWidth < 600 &&
-      game.renderer.domElement.clientHeight > 560;
-  game.camera.position.set(
-    c.x,
-    c.y + (compact ? 10 : 13),
-    c.z + (compact ? 35 : 30),
-  );
-  game.camera.fov = compact ? 100 : 78;
-  game.camera.filmOffset = compact
-    ? 0
-    : 0.46 *
-      game.camera.getFilmWidth() *
-      Math.tan((game.camera.fov * Math.PI) / 360) *
-      game.camera.aspect;
-  game.camera.updateProjectionMatrix();
-  game.camera.lookAt(c.x, c.y + (compact ? -6 : 1), c.z + 15);
-  return true;
+  return frameCipherCourt(game, site);
 }

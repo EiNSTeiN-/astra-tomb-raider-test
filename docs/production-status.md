@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cipher inspection framing](cipher-inspection.md) clears the foreground
+  branches in courts one, three and seven, and fits all eight complete rotating
+  courts outside their actual panels. Desktop, short landscape, phone and
+  portrait-tablet checks cover 32 native inspections, 336 turn-button presses,
+  resets and return to the normal camera. The full geometry envelope includes
+  intermediate drum rotations. All 757 campaign checks, 12 focused cipher
+  checks and the build pass. Six production keyboard/touch cases verify turns,
+  reset, departure and reloads; one arrival-camera correction is independently
+  proved, with every other stored field preserved. All 16 baseline, 32 final
+  inspection and 30 native captures are reviewed. VA-51's recorded inspection
+  obstruction is repaired; VA-48's
+  ordinary reverse views and two later approaches remain open.
+
 - [Supported cipher wheels and stone bases](cipher-footings.md) stop forward
   walking at the drive, protect working ground from reservoir excavation and
   fit all 42 pedestal bottoms beneath their terrain footprints. All 756 final

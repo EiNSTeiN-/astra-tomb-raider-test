@@ -4,7 +4,6 @@ import * as THREE from "three";
 // envelope from the delivered opaque vertices after batching, rather than
 // retaining the empty corners of a box around the entire pillar assembly.
 export function captureCipherRotor(game, body, rotor, material) {
-  if (!game.cameraSurfaces) return;
   let radius = 0,
     low = Infinity,
     high = -Infinity;
@@ -21,6 +20,11 @@ export function captureCipherRotor(game, body, rotor, material) {
       high = Math.max(high, point.y);
     }
   }
+  const bounds = new THREE.Box3(
+    new THREE.Vector3(-radius, low, -radius).add(rotor.position),
+    new THREE.Vector3(radius, high, radius).add(rotor.position),
+  );
+  if (!game.cameraSurfaces) return bounds;
   const geometry = new THREE.CylinderGeometry(radius, radius, high - low, 16),
     proxy = new THREE.Mesh(geometry, material);
   proxy.position
@@ -30,4 +34,5 @@ export function captureCipherRotor(game, body, rotor, material) {
   game.cameraSurfaces.capture(proxy, { small: true, cylinderAxis: "y" });
   body.remove(proxy);
   geometry.dispose();
+  return bounds;
 }

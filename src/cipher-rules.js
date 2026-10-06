@@ -11,6 +11,7 @@ const exclude = (at, value) => ({ kind: "exclude", at, value });
 export const CIPHER_TRIALS = [
   {
     title: "The keeper's first covenant",
+    inspection: { side: 8, lift: 0.5, forward: 6 },
     instruction:
       "Read the four signs around each drum. Follow the named cycle to open the outer sanctuary.",
     positions: [
@@ -35,6 +36,7 @@ export const CIPHER_TRIALS = [
   },
   {
     title: "The rainkeeper's census",
+    inspection: { side: -8, lift: 1.5 },
     instruction:
       "Two roots shelter the channel. Use the census together with the paired drums to recover the lost procession.",
     positions: [
@@ -119,6 +121,7 @@ export const CIPHER_TRIALS = [
   },
   {
     title: "The inner sanctuary's oath",
+    inspection: { side: 8, lift: 3 },
     instruction:
       "Read the matching ends and the opposed inner signs. The second keeper rejected rain, leaving only one complete oath.",
     positions: [
@@ -142,6 +145,7 @@ export const CIPHER_TRIALS = [
   },
   {
     title: "The heart's final covenant",
+    inspection: { side: -8, lift: 3 },
     instruction:
       "The last keeper left no starting sign. Combine the two repeated pairs, the census and the four different witnesses to unseal the heart.",
     positions: [

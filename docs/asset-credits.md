@@ -867,3 +867,9 @@ regressions. It retains the credited explorer, jungle art, positional sounds
 and quiet scores; no external asset or dependency was added. Its six
 documentation images are actual game captures converted losslessly to WebP,
 with decoded RGBA identity verified.
+
+The [cipher inspection framing repair](cipher-inspection.md) adds original
+camera composition and geometry-fitting code. It retains the credited explorer,
+jungle artwork, positional sounds and quiet scores; no external asset or
+dependency was added. Its six documentation images are actual game captures
+converted losslessly to WebP, with decoded RGBA identity verified.

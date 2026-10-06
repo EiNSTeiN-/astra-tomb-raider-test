@@ -36,6 +36,7 @@ import {
   saveCipherState,
 } from "../src/cipher-courts.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
+import { focusCipher } from "../src/cipher-courts.js";
 
 const level = LEVELS[0];
 function fixture(t) {
@@ -573,4 +574,75 @@ test("the delivered pedestal bottoms remain below the soil across all 42 complet
         }
     }
   assert.equal(samples, 3024);
+});
+
+test("inspection frames contain all eight courts and every intermediate drum rotation beside or above the panel", (t) => {
+  const { game } = fixture(t),
+    point = new THREE.Vector3();
+  const formats = [
+    { width: 1280, height: 800, panel: { left: 822, top: 28 } },
+    { width: 960, height: 540, panel: { left: 592, top: 12 } },
+    { width: 540, height: 900, panel: { left: 12, top: 393 } },
+    { width: 820, height: 1180, panel: { left: 12, top: 543 } },
+  ];
+  game.paused = true;
+  let phases = 0,
+    views = 0;
+  for (const site of game.cipherSites) {
+    game.cipherFocus = site.stage;
+    for (let phase = 0; phase < 8; phase++) {
+      for (const node of site.nodes) node.display = phase / 2;
+      updateCipherCourts(game, 0);
+      game.world.updateMatrixWorld(true);
+      site.root.traverse((mesh) => {
+        if (!mesh.geometry?.attributes.position) return;
+        const positions = mesh.geometry.attributes.position;
+        for (let i = 0; i < positions.count; i++) {
+          point
+            .fromBufferAttribute(positions, i)
+            .applyMatrix4(mesh.matrixWorld);
+          assert(
+            site.inspectionBounds.containsPoint(point),
+            "the cached framing envelope contains the actual delivered vertex",
+          );
+        }
+      });
+      phases++;
+    }
+    for (const { width, height, panel } of formats) {
+      Object.assign(game.renderer.domElement, {
+        clientWidth: width,
+        clientHeight: height,
+        ownerDocument: {
+          querySelector: () => ({ getBoundingClientRect: () => panel }),
+        },
+      });
+      game.camera.aspect = width / height;
+      assert(focusCipher(game));
+      const compact = width <= 600 || (width <= 900 && height >= width),
+        right = compact ? width - 16 : panel.left - 16,
+        bottom = compact ? panel.top - 16 : height - 16,
+        bounds = site.inspectionBounds;
+      for (const x of [bounds.min.x, bounds.max.x])
+        for (const y of [bounds.min.y, bounds.max.y])
+          for (const z of [bounds.min.z, bounds.max.z]) {
+            point.set(x, y, z).project(game.camera);
+            const px = ((point.x + 1) * width) / 2,
+              py = ((1 - point.y) * height) / 2;
+            assert(
+              px >= 16 - 1e-7 && px <= right + 1e-7,
+              `${site.stage}: horizontal panel clearance`,
+            );
+            assert(
+              py >= 16 - 1e-7 && py <= bottom + 1e-7,
+              `${site.stage}: vertical panel clearance`,
+            );
+          }
+      views++;
+    }
+  }
+  assert.equal(phases, 64);
+  assert.equal(views, 32);
+  game.paused = false;
+  assert.equal(focusCipher(game), false);
 });

@@ -40,6 +40,8 @@ The jungle's [cipher camera bounds now follow the separate stone and drive compo
 clearing the three recorded entrance fades while protecting the rotating drums and wheel rims.
 The [cipher wheels now have protected working ground and fitted stone bases](docs/cipher-footings.md),
 with collision at the drive, recovery from occupied saves and access to all 42 drums.
+The [cipher inspection views now clear the foreground canopy](docs/cipher-inspection.md),
+fitting the complete rotating court beside desktop controls or above portrait controls.
 Reverse views and two later approaches at the cipher controls remain under review.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
