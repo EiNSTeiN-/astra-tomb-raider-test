@@ -36,7 +36,9 @@ Walking beside wind machinery now uses [nearby camera clearance](docs/wind-walki
 keeping the explorer visible on the recorded forecourt return and observatory sequence.
 That recovery now also [clears walking views around puzzle pillars](docs/counterweight-walking-camera.md),
 with all eight stone solutions, the complete cloud-engine route and native save checks.
-Three jungle entrance frames remain under review beside a cipher drum support.
+The jungle's [cipher camera bounds now follow the separate stone and drive components](docs/cipher-camera.md),
+clearing the three recorded entrance fades while protecting the rotating drums and wheel rims.
+Reverse views and close walks at the cipher controls remain under review.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

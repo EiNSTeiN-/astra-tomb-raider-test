@@ -18,6 +18,7 @@ import { counterweightsReady } from "./counterweights.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
 import { poseHands } from "./pose.js";
+import { captureCipherRotor } from "./cipher-camera.js";
 
 export function cipherReady(game, site) {
   return (
@@ -115,6 +116,18 @@ export function buildCipherCourts(game) {
       m.position.set(x, y, z);
       m.castShadow = m.receiveShadow = true;
       parent.add(m);
+      if (parent === fixed)
+        game.cameraSurfaces?.capture(m, {
+          small: true,
+          thin: true,
+          cylinderAxis: [
+            "LatheGeometry",
+            "CylinderGeometry",
+            "ConeGeometry",
+          ].includes(geometry.type)
+            ? "y"
+            : null,
+        });
       return m;
     };
     const control = (kind, index, x, z) => {
@@ -185,6 +198,7 @@ export function buildCipherCourts(game) {
         face.add(label);
       }
       batchCipherDrum(rotor);
+      captureCipherRotor(game, body, rotor, stone);
       // A square lotus capital and tapered finial retain the temple silhouette.
       add(
         stoneBlockGeometry(1.8, 0.18, 1.8, stage + index),
@@ -222,7 +236,14 @@ export function buildCipherCourts(game) {
       const wheelY = 1.25 + floor(x, z + 1.52) - y,
         wheel = add(wheelGeometry, bronze, 0, wheelY, 1.16, body),
         handles = [];
-      add(
+      // Circular bounds remain valid through every wheel rotation, including
+      // the fitted height on sloping working aprons.
+      game.cameraSurfaces?.capture(wheel, {
+        small: true,
+        thin: true,
+        cylinderAxis: "z",
+      });
+      const shaft = add(
         new THREE.CylinderGeometry(0.065, 0.065, 0.45, 12).rotateX(Math.PI / 2),
         bronze,
         0,
@@ -230,6 +251,11 @@ export function buildCipherCourts(game) {
         0.96,
         body,
       );
+      game.cameraSurfaces?.capture(shaft, {
+        small: true,
+        thin: true,
+        cylinderAxis: "z",
+      });
       for (const side of [-1, 1]) {
         const h = new THREE.Object3D();
         h.position.set(side * 0.27, 0, 0.05);
@@ -273,28 +299,16 @@ export function buildCipherCourts(game) {
         h: 3.55,
         cipher: true,
       });
-      const proxy = add(
-        new THREE.BoxGeometry(2.04, 3.55, 2.08),
-        stone,
-        x,
-        y + 1.775,
-        z,
-      );
-      proxy.visible = false;
-      game.cameraSurfaces?.capture(proxy);
-      fixed.remove(proxy);
-      proxy.geometry.dispose();
     }
     const recordZ = stage === 0 ? 17 : 23,
       recordY = floor(0, recordZ);
-    const tabletBody = add(
+    add(
       stoneBlockGeometry(4.4, 2.8, 0.42, stage + 53),
       stone,
       0,
       recordY + 1.45,
       recordZ,
     );
-    game.cameraSurfaces?.capture(tabletBody);
     add(
       stoneBlockGeometry(4.75, 0.24, 0.75, stage + 59),
       stone,

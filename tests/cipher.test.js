@@ -6,6 +6,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
+import { followClearCamera } from "../src/camera-follow.js";
 import { buildCounterweights } from "../src/counterweights.js";
 import { buildFieldGates } from "../src/field-world.js";
 import {
@@ -287,4 +288,155 @@ test("stone motion drives positional sound, stops at rest and clears references 
   assert.equal(game.cipherFocus, null);
   updateSoundSources(game);
   assert.equal(source.activity, 0);
+});
+
+test("the two recorded jungle entrance views clear the actual drum components without changing look or progress", (t) => {
+  const { game } = fixture(t);
+  game.progress.field = ["field-0-0", "field-0-1", "field-0-2"];
+  const saved = structuredClone(game.progress);
+  for (const pose of [
+    {
+      feet: [206.71978164681306, 3.9901884775392142, 60.21860262188385],
+      yaw: -1.5014610925326943,
+      previous: [201.4928168767206, 6.212320416636965, 60.47701263272937],
+      previousFeet: [206.65708484554784, 3.990249063359883, 60.22755930777888],
+    },
+    {
+      feet: [206.42809589483, 3.990407705307007, 57.638329688485186],
+      yaw: 0.28548845760747604,
+      previous: [207.15577848377774, 6.139021668265054, 62.40537915345804],
+      previousFeet: [206.47028384903118, 3.990407705307007, 57.68556619588602],
+    },
+  ]) {
+    game.player.position.fromArray(pose.feet);
+    game.yaw = pose.yaw;
+    game.pitch = 0.15;
+    game.camera.position.fromArray(pose.previous);
+    game.cameraFollowTarget = new THREE.Vector3()
+      .fromArray(pose.previousFeet)
+      .add(new THREE.Vector3(0, 1.3, 0));
+    updateCipherCourts(game, 0);
+    const feet = game.player.position.clone(),
+      target = feet.clone().add(new THREE.Vector3(0, 1.3, 0)),
+      desired = target
+        .clone()
+        .add(
+          new THREE.Vector3(
+            Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+            Math.sin(game.pitch) * 5.3 + 0.2,
+            Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+          ),
+        );
+    game.world.updateMatrixWorld(true);
+    const ray = new THREE.Raycaster(
+      target,
+      desired.clone().sub(target).normalize(),
+      0,
+      target.distanceTo(desired),
+    );
+    const hits = ray
+      .intersectObjects(
+        game.cipherSites.flatMap((s) => [s.fixed, s.detail]),
+        true,
+      )
+      .filter((hit) => {
+        let visible = true;
+        for (let parent = hit.object; parent; parent = parent.parent)
+          visible &&= parent.visible;
+        return (
+          visible &&
+          hit.object.material.isMeshStandardMaterial &&
+          !hit.object.material.transparent
+        );
+      });
+    assert.equal(
+      hits.length,
+      0,
+      "the recorded central sightline crosses no delivered cipher skin",
+    );
+    // Nearby rim and turning-stone margins remain real obstructions. Recovery
+    // must find room beside them without changing the player's selected look.
+    for (let frame = 0; frame < 120; frame++) {
+      game.camera.position.copy(
+        followClearCamera(game, target, desired, 1 / 60, (p) =>
+          game.cameraSpace(p),
+        ),
+      );
+      game.cameraFollowTarget = target.clone();
+      assert(game.camera.position.distanceTo(target) >= 2.2 - 1e-8);
+      assert.equal(game.cameraSurfaces.entry(target, game.camera.position), 1);
+      assert(game.player.position.equals(feet));
+      assert.deepEqual(
+        { yaw: game.yaw, pitch: game.pitch },
+        { yaw: pose.yaw, pitch: 0.15 },
+      );
+      assert.deepEqual(game.progress, saved);
+    }
+  }
+});
+
+test("all 42 drum envelopes guard actual rotating stone and wheel rim intersections through legal and intermediate turns", (t) => {
+  const { game } = fixture(t),
+    ray = new THREE.Raycaster(),
+    center = new THREE.Vector3(),
+    start = new THREE.Vector3(),
+    direction = new THREE.Vector3();
+  let stoneRays = 0,
+    wheelRays = 0;
+  for (const site of game.cipherSites) {
+    ready(game, site.stage);
+    for (const node of site.nodes) {
+      game.player.position.copy(node.control.group.position);
+      for (let phase = 0; phase < 8; phase++) {
+        node.display = phase / 2;
+        updateCipherCourts(game, 0);
+        game.world.updateMatrixWorld(true);
+        node.body.getWorldPosition(center).y += node.rotor.position.y;
+        for (let angle = 0; angle < 8; angle++) {
+          const yaw = (angle * Math.PI) / 4;
+          start
+            .copy(center)
+            .add(
+              new THREE.Vector3(Math.sin(yaw) * 2.3, 0, Math.cos(yaw) * 2.3),
+            );
+          ray.set(start, direction.copy(center).sub(start).normalize());
+          ray.near = 0;
+          ray.far = 2.3;
+          const hit = ray
+            .intersectObject(node.rotor, true)
+            .find(
+              (h) =>
+                h.object.material.isMeshStandardMaterial &&
+                !h.object.material.transparent,
+            );
+          assert(
+            hit,
+            `stone skin ${site.stage}/${node.index}/${phase}/${angle}`,
+          );
+          assert(
+            game.cameraSurfaces.entry(start, center, 0) <=
+              hit.distance / 2.3 + 1e-6,
+            "the camera stops before the delivered rotating stone",
+          );
+          stoneRays++;
+        }
+        node.wheel.getWorldPosition(center);
+        center.x += 0.32;
+        start.copy(center).z += 1;
+        const end = center.clone();
+        end.z -= 0.5;
+        ray.set(start, direction.copy(end).sub(start).normalize());
+        ray.far = 1.5;
+        const hit = ray.intersectObject(node.wheel, false)[0];
+        assert(hit, "delivered wheel rim");
+        assert(
+          game.cameraSurfaces.entry(start, end, 0) <= hit.distance / 1.5 + 1e-6,
+          "the working wheel is protected independently of the taller drum",
+        );
+        wheelRays++;
+      }
+    }
+  }
+  assert.equal(stoneRays, 2688);
+  assert.equal(wheelRays, 336);
 });

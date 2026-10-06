@@ -1,5 +1,12 @@
 # The jungle's keeper covenants
 
+The later [component camera-bound pass](cipher-camera.md) clears the recorded
+entrance fades, protects the delivered handwheel rims through every turn and
+repeats all eight stone solutions. Wider reverse and close working-control
+views remain under review. The evidence below describes the earlier court
+construction milestone; the current acceptance criteria are in
+[production status](production-status.md).
+
 The jungle's eight main mechanisms now have authored deduction puzzles and
 physical carved drums. The former four-ring dialog sequence has been replaced by
 42 four-faced drums across eight different forecourt layouts. Every court has an

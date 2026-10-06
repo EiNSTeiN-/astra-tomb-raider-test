@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cipher component camera bounds](cipher-camera.md) clear the three recorded
+  jungle entrance fades. All 752 campaign checks, 26 focused checks and the
+  build pass. The repeated 121 stone moves retain full character opacity across
+  15,706 camera frames, with identical feet, look and solved records; all 64
+  captures are reviewed. Geometry regressions guard 2,688 rotating-stone and
+  336 wheel-rim intersections. The wider 50-control observer samples 16,188
+  frames and turns all 42 drums; its 2,688 turning frames remain visible, but
+  reverse views and two later approaches still fade. Six native keyboard/touch
+  cases verify look, turns, walking and reloads, with two independently proved
+  arrival corrections and 26 reviewed captures. VA-47's recorded entrance is
+  repaired; VA-48 records the remaining close views. Wider visual, route and
+  audio/device acceptance remains open.
+
 - [Walking views around puzzle pillars](counterweight-walking-camera.md) extend
   nearby clearance to ordinary campaign walking, with a wider yaw fallback when
   the small neighborhood is blocked. All 750 final campaign checks, 37 focused
@@ -30,7 +43,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   support; all 70 intermediate and 65 final captures are reviewed. Four native
   keyboard/touch cases preserve complete stores apart from timestamps, with
   no arrival correction and 16 reviewed captures. VA-46's recorded cloud route
-  is clear; VA-47 records the remaining jungle entrance views. Wider camera,
+  is clear; VA-47 recorded the jungle entrance views later repaired by the
+  component-bound pass above. Wider camera,
   scenery and audio/device evaluation remain open.
 
 - [Wind machinery walking views](wind-walking-camera.md) use bounded nearby

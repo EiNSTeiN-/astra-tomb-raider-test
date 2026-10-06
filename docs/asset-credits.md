@@ -853,3 +853,10 @@ a walking observer to the browser verifier. It retains the credited artwork,
 distance-sensitive sources and quiet scores; no external asset or dependency
 was added. Its five documentation images are actual game captures converted
 losslessly to WebP, with decoded RGBA identity verified.
+
+The [cipher component camera-bound repair](cipher-camera.md) adds original
+clearance code derived from the delivered stone and bronze geometry. It retains
+the existing credited artwork, positional machinery sources and quiet score;
+no external asset or dependency was added. Its five documentation images are
+actual game captures converted losslessly to WebP, with decoded RGBA identity
+verified. The earlier entrance image remains credited to its preceding milestone.

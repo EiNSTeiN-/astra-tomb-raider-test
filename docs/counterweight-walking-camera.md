@@ -104,7 +104,7 @@ so the completed cases do not establish startup reliability across devices.
 
 ## Remaining observation
 
-Three jungle walking frames still retract beside the first cipher court's drum
+At this milestone, three jungle walking frames still retract beside the first cipher court's drum
 support on the initial inscription-to-board approach, before any stone move.
 Independent actual-world replays reproduce both episodes exactly and identify
 the existing **2.04 × 3.55 × 2.08 m cipher camera proxy**. No view within the
@@ -114,6 +114,12 @@ The camera remains constrained and the route still solves, but this approach
 does not retain continuous character visibility.
 
 ![Remaining jungle entrance view beside the cipher drum support](images/counterweight-walking-camera/jungle-remaining.webp)
+
+The subsequent [cipher component-bound repair](cipher-camera.md) compares those
+bounds with the delivered meshes and clears all three recorded entrance fades.
+The repeated eight stone solutions retain full character opacity over 15,706
+frames. VA-47 is fixed for this entrance; VA-48 records reverse and closer
+working-control views found during the wider inspection.
 
 VA-46's recorded complete cloud route is clear. Wider camera composition,
 repeated scenery and the full eight-chapter visual audit remain open. The
