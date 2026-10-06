@@ -88,8 +88,8 @@ board to reach the inscriptions. They do not establish an earned campaign
 playthrough, subjective sound quality or consumer-device performance. Existing
 positional machinery sounds and quiet jungle music remain in use.
 
-Ordinary reverse views at the 50 cipher controls and two later approaches
-remain VA-48. A local follow-camera experiment preserved character visibility
-but showed an abrupt side switch during continuous rotation. That experiment
-is not included in this milestone. Broader route composition, repeated spaces,
-placement review and listening/device acceptance remain open.
+The later [cipher walking-view repair](cipher-follow.md) addresses VA-48 at
+all 50 controls and the two narrow rear approaches. Its raised path and body
+framing retain chosen look angles through continuous rotation. Broader route
+composition, repeated spaces, placement review and listening/device acceptance
+remain open.

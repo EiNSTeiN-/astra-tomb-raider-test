@@ -42,7 +42,9 @@ The [cipher wheels now have protected working ground and fitted stone bases](doc
 with collision at the drive, recovery from occupied saves and access to all 42 drums.
 The [cipher inspection views now clear the foreground canopy](docs/cipher-inspection.md),
 fitting the complete rotating court beside desktop controls or above portrait controls.
-Reverse views and two later approaches at the cipher controls remain under review.
+The [cipher walking camera now rises over nearby drums](docs/cipher-follow.md),
+keeping reverse views and the two narrow rear approaches clear while retaining
+chosen look angles and saved progress.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

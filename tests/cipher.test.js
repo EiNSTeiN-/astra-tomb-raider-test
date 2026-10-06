@@ -5,7 +5,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
-import { CameraSurfaces } from "../src/camera-collision.js";
+import { CameraSurfaces, faceCameraTarget } from "../src/camera-collision.js";
 import { followClearCamera } from "../src/camera-follow.js";
 import {
   advanceCharacter,
@@ -37,6 +37,11 @@ import {
 } from "../src/cipher-courts.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { focusCipher } from "../src/cipher-courts.js";
+import {
+  cipherCameraRecovery,
+  cipherCameraSpace,
+  cipherArrivalCamera,
+} from "../src/cipher-follow.js";
 
 const level = LEVELS[0];
 function fixture(t) {
@@ -645,4 +650,358 @@ test("inspection frames contain all eight courts and every intermediate drum rot
   assert.equal(views, 32);
   game.paused = false;
   assert.equal(focusCipher(game), false);
+});
+
+function recoveredStep(game, dt = 1 / 60) {
+  const view = cipherCameraRecovery(game),
+    chest = game.player.position
+      .clone()
+      .add(new THREE.Vector3(0, 1.3 - (game.crouchCamera || 0), 0)),
+    target = chest.clone().add(new THREE.Vector3(0, 0, view.offset)),
+    desired = target
+      .clone()
+      .add(
+        new THREE.Vector3(
+          Math.sin(game.yaw) * Math.cos(view.pitch) * 5.3,
+          Math.sin(view.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(view.pitch) * 5.3,
+        ),
+      );
+  game.camera.position.copy(
+    followClearCamera(
+      game,
+      target,
+      desired,
+      dt,
+      (p) =>
+        game.cameraSpace(p) && cipherCameraSpace(game, p, chest, view.strength),
+      view.pitch,
+    ),
+  );
+  game.cameraFollowTarget = target.clone();
+  faceCameraTarget(game.camera, view.offset ? chest : target, desired);
+  game.camera.updateMatrixWorld();
+  return { view, chest, target };
+}
+
+test("both complete orbits at all 50 cipher controls retain continuous clear body views and saved arrival headings", (t) => {
+  const { game } = fixture(t),
+    ray = new THREE.Raycaster();
+  let frames = 0,
+    bodyRays = 0,
+    arrivalRays = 0,
+    arrivals = 0;
+  for (const site of game.cipherSites) {
+    ready(game, site.stage);
+    for (const f of [...site.nodes.map((n) => n.control), site.tablet])
+      for (const sign of [1, -1]) {
+        game.player.position.copy(f.group.position);
+        game.grounded = true;
+        game.jumpY = game.velocityY = 0;
+        for (let frame = 0; frame < 180; frame++)
+          advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+        updateCipherCourts(game, 0);
+        const feet = game.player.position.clone(),
+          saved = structuredClone(game.progress);
+        game.yaw = 0;
+        game.pitch = 0.15;
+        game.camera.position.copy(feet).add(new THREE.Vector3(0, 2.3, 5.3));
+        game.cameraFollowTarget = feet
+          .clone()
+          .add(new THREE.Vector3(0, 1.3, 0));
+        for (let frame = 0; frame < 120; frame++) recoveredStep(game);
+        let previous = game.camera.position.clone();
+        for (let frame = 0; frame < 240; frame++) {
+          const yaw = (sign * (frame + 1) * Math.PI) / 120;
+          game.yaw = yaw;
+          const { target, chest } = recoveredStep(game);
+          assert(
+            game.camera.position.distanceTo(target) >= 2.2 - 1e-8,
+            f.id + ": visible explorer",
+          );
+          assert(
+            game.camera.position.distanceTo(previous) < 0.65,
+            f.id + ": no abrupt side switch",
+          );
+          assert.equal(
+            game.cameraSurfaces.entry(target, game.camera.position),
+            1,
+          );
+          assert.equal(game.yaw, yaw);
+          assert.equal(game.pitch, 0.15);
+          for (const height of [0, 1.7]) {
+            const point = feet
+              .clone()
+              .add(new THREE.Vector3(0, height, 0))
+              .project(game.camera);
+            assert(
+              Math.abs(point.x) < 0.98 && Math.abs(point.y) < 0.98,
+              f.id + ": feet and head stay inside the view",
+            );
+          }
+          previous.copy(game.camera.position);
+          frames++;
+          if (frame === 119) {
+            game.world.updateMatrixWorld(true);
+            const tangent = new THREE.Vector3(
+              game.camera.position.z - chest.z,
+              0,
+              chest.x - game.camera.position.x,
+            ).normalize();
+            for (const lift of [-0.15, 0, 0.15])
+              for (const lateral of [-0.15, 0, 0.15]) {
+                const body = chest
+                  .clone()
+                  .add(new THREE.Vector3(0, lift, 0))
+                  .addScaledVector(tangent, lateral);
+                ray.set(
+                  game.camera.position,
+                  body.clone().sub(game.camera.position).normalize(),
+                );
+                ray.far = game.camera.position.distanceTo(body) - 0.01;
+                const hits = ray
+                  .intersectObjects([site.fixed, site.detail], true)
+                  .filter(
+                    (h) =>
+                      h.object.material.isMeshStandardMaterial &&
+                      !h.object.material.transparent,
+                  );
+                assert.equal(
+                  hits.length,
+                  0,
+                  f.id + ": delivered body sight ray",
+                );
+                bodyRays++;
+              }
+            const arrival = cipherArrivalCamera(game, chest, {
+              yaw,
+              pitch: 0.15,
+            });
+            assert(arrival, f.id + ": clear recovered arrival");
+            assert.equal(arrival.yaw, yaw);
+            assert.equal(arrival.pitch, 0.15);
+            assert.equal(
+              game.cameraSurfaces.entry(arrival.target, arrival.position),
+              1,
+            );
+            const arrivalTangent = new THREE.Vector3(
+              arrival.position.z - chest.z,
+              0,
+              chest.x - arrival.position.x,
+            ).normalize();
+            for (const lift of [-0.15, 0, 0.15])
+              for (const lateral of [-0.15, 0, 0.15]) {
+                const body = chest
+                  .clone()
+                  .add(new THREE.Vector3(0, lift, 0))
+                  .addScaledVector(arrivalTangent, lateral);
+                ray.set(
+                  arrival.position,
+                  body.clone().sub(arrival.position).normalize(),
+                );
+                ray.far = arrival.position.distanceTo(body) - 0.01;
+                assert.equal(
+                  ray
+                    .intersectObjects([site.fixed, site.detail], true)
+                    .filter(
+                      (h) =>
+                        h.object.material.isMeshStandardMaterial &&
+                        !h.object.material.transparent,
+                    ).length,
+                  0,
+                  f.id + ": delivered arrival body sight ray",
+                );
+                arrivalRays++;
+              }
+            arrivals++;
+          }
+        }
+        assert(game.player.position.equals(feet));
+        assert.deepEqual(game.progress, saved);
+      }
+  }
+  assert.equal(frames, 24000);
+  assert.equal(bodyRays, 900);
+  assert.equal(arrivalRays, 900);
+  assert.equal(arrivals, 100);
+});
+
+test("crouched cipher orbits retain the lower body view within the canvas and clear the delivered stone", (t) => {
+  const { game } = fixture(t),
+    ray = new THREE.Raycaster();
+  game.crouching = true;
+  game.crouchCamera = 0.4;
+  let frames = 0,
+    bodyRays = 0;
+  for (const site of game.cipherSites) {
+    ready(game, site.stage);
+    for (const f of [...site.nodes.map((n) => n.control), site.tablet]) {
+      game.player.position.copy(f.group.position);
+      game.grounded = true;
+      game.jumpY = game.velocityY = 0;
+      for (let frame = 0; frame < 180; frame++)
+        advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+      updateCipherCourts(game, 0);
+      const feet = game.player.position.clone(),
+        saved = structuredClone(game.progress);
+      game.yaw = 0;
+      game.pitch = 0.15;
+      game.camera.position.copy(feet).add(new THREE.Vector3(0, 1.9, 5.3));
+      game.cameraFollowTarget = feet.clone().add(new THREE.Vector3(0, 0.9, 0));
+      for (let frame = 0; frame < 120; frame++) recoveredStep(game);
+      let previous = game.camera.position.clone();
+      for (let frame = 0; frame < 240; frame++) {
+        const yaw = ((frame + 1) * Math.PI) / 120;
+        game.yaw = yaw;
+        const { target, chest } = recoveredStep(game);
+        assert(game.camera.position.distanceTo(target) >= 2.2 - 1e-8);
+        assert(game.camera.position.distanceTo(previous) < 1);
+        assert.equal(
+          game.cameraSurfaces.entry(target, game.camera.position),
+          1,
+        );
+        assert.equal(game.yaw, yaw);
+        assert.equal(game.pitch, 0.15);
+        for (const height of [0, 1.3]) {
+          const point = feet
+            .clone()
+            .add(new THREE.Vector3(0, height, 0))
+            .project(game.camera);
+          assert(
+            Math.abs(point.x) < 0.98 && Math.abs(point.y) < 0.98,
+            f.id + ": crouched feet and head stay inside the view",
+          );
+        }
+        previous.copy(game.camera.position);
+        frames++;
+        if (frame === 119) {
+          game.world.updateMatrixWorld(true);
+          const tangent = new THREE.Vector3(
+            game.camera.position.z - chest.z,
+            0,
+            chest.x - game.camera.position.x,
+          ).normalize();
+          for (const lift of [-0.15, 0, 0.15])
+            for (const lateral of [-0.15, 0, 0.15]) {
+              const body = chest
+                .clone()
+                .add(new THREE.Vector3(0, lift, 0))
+                .addScaledVector(tangent, lateral);
+              ray.set(
+                game.camera.position,
+                body.clone().sub(game.camera.position).normalize(),
+              );
+              ray.far = game.camera.position.distanceTo(body) - 0.01;
+              assert.equal(
+                ray
+                  .intersectObjects([site.fixed, site.detail], true)
+                  .filter(
+                    (h) =>
+                      h.object.material.isMeshStandardMaterial &&
+                      !h.object.material.transparent,
+                  ).length,
+                0,
+                f.id + ": delivered crouched body sight ray",
+              );
+              bodyRays++;
+            }
+        }
+      }
+      assert(game.player.position.equals(feet));
+      assert.deepEqual(game.progress, saved);
+    }
+  }
+  assert.equal(frames, 12000);
+  assert.equal(bodyRays, 450);
+});
+
+test("rear-drum walking approaches and side departures retain visible camera clearance without rewriting progress", (t) => {
+  const { game } = fixture(t);
+  for (const [stage, index] of [
+    [6, 5],
+    [7, 4],
+  ]) {
+    ready(game, stage);
+    const pad = game.cipherSites[stage].nodes[index].control.group.position;
+    game.player.position.copy(pad).z += 1;
+    game.player.position.y = game.groundHeight(
+      game.player.position.x,
+      game.player.position.z,
+    );
+    game.yaw = 0;
+    game.pitch = 0.15;
+    game.grounded = true;
+    game.jumpY = game.velocityY = 0;
+    updateCipherCourts(game, 0);
+    game.camera.position
+      .copy(game.player.position)
+      .add(new THREE.Vector3(0, 2.3, 5.3));
+    game.cameraFollowTarget = null;
+    for (let frame = 0; frame < 120; frame++) recoveredStep(game);
+    const saved = structuredClone(game.progress);
+    for (const [velocity, count] of [
+      [{ x: 0, z: -2 }, 30],
+      [{ x: 2, z: 0 }, 60],
+    ]) {
+      for (let frame = 0; frame < count; frame++) {
+        advanceCharacter(game, velocity, 1 / 60);
+        const { target } = recoveredStep(game);
+        assert(
+          game.camera.position.distanceTo(target) >= 2.2 - 1e-8,
+          "body stays visible along the working approach and departure",
+        );
+        assert.equal(
+          game.cameraSurfaces.entry(target, game.camera.position),
+          1,
+        );
+      }
+    }
+    assert.equal(cipherCameraRecovery(game).strength, 0);
+    assert.equal(cipherCameraRecovery(game).pitch, 0.15);
+    assert.equal(game.yaw, 0);
+    assert.equal(game.pitch, 0.15);
+    assert.deepEqual(game.progress, saved);
+  }
+});
+
+test("cipher recovery leaves other camera modes and remote exploration under their ordinary look controls", (t) => {
+  const { game } = fixture(t);
+  game.player.position.copy(
+    game.cipherSites[0].nodes[0].control.group.position,
+  );
+  game.yaw = Math.PI;
+  game.pitch = 0.15;
+  updateCipherCourts(game, 0);
+  assert(cipherCameraRecovery(game).strength > 0);
+  for (const flag of [
+    "swimming",
+    "diving",
+    "aiming",
+    "climb",
+    "ropeRide",
+    "zipRide",
+    "blockGrip",
+    "aimBlend",
+  ]) {
+    game[flag] = true;
+    assert.deepEqual(
+      cipherCameraRecovery(game),
+      { offset: 0, pitch: 0.15, strength: 0 },
+      flag,
+    );
+    assert.equal(
+      cipherArrivalCamera(game, game.player.position, {
+        yaw: Math.PI,
+        pitch: 0.15,
+      }),
+      null,
+    );
+    game[flag] = false;
+  }
+  game.player.position.set(0, 0, 0);
+  assert.deepEqual(cipherCameraRecovery(game), {
+    offset: 0,
+    pitch: 0.15,
+    strength: 0,
+  });
 });

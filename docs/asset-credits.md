@@ -873,3 +873,11 @@ camera composition and geometry-fitting code. It retains the credited explorer,
 jungle artwork, positional sounds and quiet scores; no external asset or
 dependency was added. Its six documentation images are actual game captures
 converted losslessly to WebP, with decoded RGBA identity verified.
+
+The [cipher walking-view repair](cipher-follow.md) adds original nearby camera
+composition, body-sight clearance and saved-arrival recovery code, with related
+regressions. It retains the credited explorer, jungle artwork, positioned
+machinery sounds and quiet scores; no external asset or dependency was added.
+Its four documentation images are actual game captures converted losslessly
+to WebP, with decoded RGBA identity verified. The earlier reverse view comes
+from the drive and footing milestone's recorded physical-control observer.

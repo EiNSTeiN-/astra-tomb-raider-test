@@ -5,7 +5,14 @@ import { constrainCamera, followCamera } from "./camera-collision.js";
 // even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
 // yaw to .9 only when that neighborhood cannot fit a comfortable view. Keep
 // the player's chosen look in save data throughout collision response.
-export function followClearCamera(game, target, desired, dt, canOccupy) {
+export function followClearCamera(
+  game,
+  target,
+  desired,
+  dt,
+  canOccupy,
+  viewPitch = game.pitch,
+) {
   const follow = (end) =>
       followCamera(
         game.camera.position,
@@ -31,8 +38,8 @@ export function followClearCamera(game, target, desired, dt, canOccupy) {
   // Retain the supplied arm and vertical lift, including the transition out
   // of an aimed view, instead of replacing them with a full-distance orbit.
   const offset = desired.clone().sub(target),
-    distance = Math.hypot(offset.x, offset.z) / Math.cos(game.pitch),
-    lift = offset.y - Math.sin(game.pitch) * distance,
+    distance = Math.hypot(offset.x, offset.z) / Math.cos(viewPitch),
+    lift = offset.y - Math.sin(viewPitch) * distance,
     nearbyCandidates = [
       [0, -0.2],
       [0, 0.2],
@@ -58,7 +65,7 @@ export function followClearCamera(game, target, desired, dt, canOccupy) {
   for (const [index, [yawOffset, pitchOffset]] of candidates.entries()) {
     if (index === nearbyCandidates.length && best) break;
     const yaw = game.yaw + yawOffset,
-      pitch = MathUtils.clamp(game.pitch + pitchOffset, -0.65, 1.05),
+      pitch = MathUtils.clamp(viewPitch + pitchOffset, -0.65, 1.05),
       end = target
         .clone()
         .add(
@@ -75,7 +82,7 @@ export function followClearCamera(game, target, desired, dt, canOccupy) {
       score =
         Math.min(length, 3.2) * 2 +
         Math.min(safe.distanceTo(target), 5.3) -
-        (Math.abs(yawOffset) + Math.abs(pitch - game.pitch)) * 0.5;
+        (Math.abs(yawOffset) + Math.abs(pitch - viewPitch)) * 0.5;
     if (!best || score > best.score) best = { next, safe, score };
     if (length >= 3.2) return next;
   }

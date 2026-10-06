@@ -214,6 +214,11 @@ import {
 } from "./aiming.js";
 import { silenceCableMotion } from "./return-cable.js";
 import { windCameraStandoff, windCameraSpace } from "./wind-camera.js";
+import {
+  cipherCameraRecovery,
+  cipherCameraSpace,
+  cipherArrivalCamera,
+} from "./cipher-follow.js";
 import { followClearCamera } from "./camera-follow.js";
 import { buildRelicArtwork, updateRelicArtwork } from "./relic-art.js";
 import {
@@ -2077,13 +2082,16 @@ export class Adventure {
       chest = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
       standoff = windCameraStandoff(this),
       target = chest.clone().add(new THREE.Vector3(0, 0, standoff)),
-      view = arrivalCamera(
-        target,
-        preferred,
-        this.cameraSurfaces,
-        (point) => windCameraSpace(this, point, chest, standoff),
-        this.diving ? 3.4 : 5.3,
-      );
+      view =
+        cipherArrivalCamera(this, chest, preferred) ||
+        arrivalCamera(
+          target,
+          preferred,
+          this.cameraSurfaces,
+          (point) => windCameraSpace(this, point, chest, standoff),
+          this.diving ? 3.4 : 5.3,
+        );
+    if (view.target) target.copy(view.target);
     this.yaw = view.yaw;
     this.pitch = view.pitch;
     this.avatar.rotation.y = this.yaw + Math.PI;
@@ -2091,7 +2099,7 @@ export class Adventure {
     this.rig?.visibility?.set(view.length);
     this.cameraFollowTarget = target.clone();
     this.camera.position.copy(view.position);
-    faceCameraTarget(this.camera, target, view.desired);
+    faceCameraTarget(this.camera, view.target ? chest : target, view.desired);
     this.camera.updateMatrixWorld();
   }
   updateCamera(dt) {
@@ -2144,23 +2152,28 @@ export class Adventure {
       return;
     }
     const standoff = windCameraStandoff(this),
+      cipherView = cipherCameraRecovery(this),
       target = this.player.position
         .clone()
         .add(
           new THREE.Vector3(
             Math.cos(this.yaw) * blend * aimShoulder(this.camera),
             this.diving ? 0.3 : 1.3 + blend * 0.18 - this.crouchCamera,
-            -Math.sin(this.yaw) * blend * aimShoulder(this.camera) + standoff,
+            -Math.sin(this.yaw) * blend * aimShoulder(this.camera) +
+              standoff +
+              cipherView.offset,
           ),
         ),
       distance = this.diving ? 3.4 : THREE.MathUtils.lerp(5.3, 2.7, blend);
     const offset = new THREE.Vector3(
-      Math.sin(this.yaw) * Math.cos(this.pitch) * distance,
-      Math.sin(this.pitch) * distance + 0.2 * (1 - blend),
-      Math.cos(this.yaw) * Math.cos(this.pitch) * distance,
+      Math.sin(this.yaw) * Math.cos(cipherView.pitch) * distance,
+      Math.sin(cipherView.pitch) * distance + 0.2 * (1 - blend),
+      Math.cos(this.yaw) * Math.cos(cipherView.pitch) * distance,
     );
     const chest = this.player.position.clone().setY(target.y),
-      canOccupy = (p) => windCameraSpace(this, p, chest, standoff);
+      canOccupy = (p) =>
+        windCameraSpace(this, p, chest, standoff) &&
+        cipherCameraSpace(this, p, chest, cipherView.strength);
     // Sweep the lateral shoulder shift as well as the arm behind it.
     if (blend > 0.001) {
       const center = this.player.position.clone().setY(target.y);
@@ -2170,11 +2183,11 @@ export class Adventure {
     }
     const desired = target.clone().add(offset);
     this.camera.position.copy(
-      followClearCamera(this, target, desired, dt, canOccupy),
+      followClearCamera(this, target, desired, dt, canOccupy, cipherView.pitch),
     );
     this.cameraFollowTarget = target.clone();
     this.rig?.visibility?.set(this.camera.position.distanceTo(target));
-    faceCameraTarget(this.camera, target, desired);
+    faceCameraTarget(this.camera, cipherView.offset ? chest : target, desired);
     if (this.aiming)
       this.aimPoint = this.camera
         .getWorldDirection(new THREE.Vector3())

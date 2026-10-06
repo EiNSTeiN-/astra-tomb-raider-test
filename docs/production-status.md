@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cipher walking views](cipher-follow.md) now rise over nearby drums and the
+  two narrow rear inscriptions, retaining chosen look angles and keeping the
+  explorer framed. All 761 campaign checks, 44 focused checks and the build
+  pass. Both complete orbits at all 50 controls cover 24,000 frames with no
+  fades or blocked sampled body sightlines; 50 crouched orbits add 12,000
+  frames. Delivered character bounds fit in all 100 standing reverse views.
+  The repeated physical observer has no fades over 16,188 frames, with all
+  50 approaches, 42 drum turns and positioned listening paths preserved.
+  All 16 standing, 16 crouched and 48 physical observer images are reviewed.
+  Six native motion cases add 2,784 frames without fades; six production cases
+  verify crouch, turns, manual look, departures and exact complete-store reloads
+  apart from timestamps, retaining chosen camera angles. All 18 motion and 36
+  production captures are reviewed. All eight stone-board routes complete
+  121 moves across 15,712 frames without fades, with identical feet, chosen look
+  and solved records. Their 64 captures are reviewed. VA-48 is repaired for the
+  recorded views and approaches; broader visual, route and audio/device
+  acceptance remains open.
+
 - [Cipher inspection framing](cipher-inspection.md) clears the foreground
   branches in courts one, three and seven, and fits all eight complete rotating
   courts outside their actual panels. Desktop, short landscape, phone and
@@ -29,8 +47,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   reset, departure and reloads; one arrival-camera correction is independently
   proved, with every other stored field preserved. All 16 baseline, 32 final
   inspection and 30 native captures are reviewed. VA-51's recorded inspection
-  obstruction is repaired; VA-48's
-  ordinary reverse views and two later approaches remain open.
+  obstruction is repaired; the subsequent walking-view repair above addresses
+  VA-48 at the ordinary reverse views and two later approaches.
 
 - [Supported cipher wheels and stone bases](cipher-footings.md) stop forward
   walking at the drive, protect working ground from reservoir excavation and
@@ -43,9 +61,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   turns, blocked forward movement, manual look, departure and exact reloads
   apart from timestamps; both older occupied saves recover 75 cm to clear
   footing. All 62 native captures are reviewed. VA-49's submerged controls and
-  VA-50's floating pedestal rims are repaired. VA-48 remains open for reverse
-  views and two later approaches; broader visual, route and audio/device
-  acceptance remains open.
+  VA-50's floating pedestal rims are repaired. The subsequent walking-view
+  repair above addresses VA-48 at the reverse views and two later approaches;
+  broader visual, route and audio/device acceptance remains open.
 
 - [Cipher component camera bounds](cipher-camera.md) clear the three recorded
   jungle entrance fades. All 752 campaign checks, 26 focused checks and the
