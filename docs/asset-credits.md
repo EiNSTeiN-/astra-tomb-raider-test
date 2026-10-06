@@ -881,3 +881,11 @@ machinery sounds and quiet scores; no external asset or dependency was added.
 Its four documentation images are actual game captures converted losslessly
 to WebP, with decoded RGBA identity verified. The earlier reverse view comes
 from the drive and footing milestone's recorded physical-control observer.
+
+The [regional court cover pass](court-cover.md) adds original assembled masonry,
+cap fitting, botanical plaques, shell and solar relief reuse, timber ties and
+regional cast markings. It reuses the existing credited stone, sandstone,
+palace, foundry and monastery texture maps and the original patinated bronze
+shader. No external asset or dependency was added. Its six documentation images
+are actual game captures converted losslessly to WebP, with decoded RGBA
+identity verified.

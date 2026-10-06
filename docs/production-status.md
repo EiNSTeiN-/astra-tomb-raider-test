@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional court cover](court-cover.md) replaces the 25 plain low blocks
+  with jointed masonry, fitted bases and eight regional treatments. The roofs
+  cover their existing standing footprints within 5 mm at the mortar joints.
+  Three volcanic walls move clear of valves and three cloud walls move out of
+  the wider gate corners. All 765 campaign checks and the production build pass.
+  Actual worlds pass 2,975 roof rays and 500 footing rays; all 50 High and 16 Low
+  construction captures are reviewed. Eight keyboard climb/crouch/departure
+  cases cover 1,751 frames without fades or solid-camera violations. Eight
+  production keyboard/touch cases retain movement, map reveal and stable
+  complete-store reloads. Six older occupied saves retain horizontal position
+  and non-pose progress; all eight arrival-camera corrections are independently
+  proved to replace obstructed arms with clear ones. All 32 motion and 46
+  production captures are reviewed. The recorded cover defects are repaired;
+  wider world, route and listening/device acceptance remains open.
+
 - [Cipher walking views](cipher-follow.md) now rise over nearby drums and the
   two narrow rear inscriptions, retaining chosen look angles and keeping the
   explorer framed. All 761 campaign checks, 44 focused checks and the build

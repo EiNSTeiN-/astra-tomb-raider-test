@@ -45,6 +45,9 @@ fitting the complete rotating court beside desktop controls or above portrait co
 The [cipher walking camera now rises over nearby drums](docs/cipher-follow.md),
 keeping reverse views and the two narrow rear approaches clear while retaining
 chosen look angles and saved progress.
+The [25 low court walls now have fitted regional masonry](docs/court-cover.md),
+with terrain-supported bases, matching standing surfaces and room around
+volcanic valves and the wider cloud-city gate corners.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

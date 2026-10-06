@@ -1,4 +1,5 @@
 import { buildStationYards } from "./station-yards.js";
+import { buildCourtCover } from "./court-cover.js";
 import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
 import { buildDiscoverySettings } from "./discovery-settings.js";
 import { arrivalCamera } from "./camera-arrival.js";
@@ -1162,6 +1163,8 @@ export class Adventure {
   buildArchitecture() {
     this.templePatches = [];
     this.templeWind = null;
+    this.courtCovers = [];
+    this.courtCoverMaterials = null;
     const hasDesert = buildDesertArchitecture(this);
     const hasMonastery = buildMonasteryArchitecture(this);
     const hasPalace = buildPalaceArchitecture(this);
@@ -1223,17 +1226,7 @@ export class Adventure {
         buildBrazier(this, tx, tz, `court-${i}-${sx}`);
       }
       if (i % 3 === 1) {
-        const bx = x + 12,
-          bz = z + 7;
-        this.box(7, 1.3, 1.4, stone, bx, y + 0.65, bz);
-        this.obstacles.push({
-          x: bx,
-          z: bz,
-          w: 3.8,
-          d: 1,
-          h: 1.3,
-          climbable: true,
-        });
+        buildCourtCover(this, r);
       }
     });
     finishBraziers(this);
