@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { courtWalkingHeight, courtDaisFloor } from "./court-dais-rules.js";
 import { buildGuardianArt, animateGuardian } from "./guardian-art.js";
 import { clearSegment, searchRoute } from "./navigation.js";
 import {
@@ -58,7 +59,7 @@ export function buildGuardian(game, spawn) {
   bar.visible = false;
   group.position.set(
     spawn.x * 7,
-    game.groundHeight(spawn.x * 7, spawn.z * 7),
+    courtWalkingHeight(game, spawn.x * 7, spawn.z * 7),
     spawn.z * 7,
   );
   game.world.add(group);
@@ -125,7 +126,7 @@ function move(
     p.z = z;
     moved += amount;
   }
-  p.y = game.groundHeight(p.x, p.z);
+  p.y = courtWalkingHeight(game, p.x, p.z);
   return moved;
 }
 function recover(enemy) {
@@ -219,7 +220,7 @@ function beginAttack(game, enemy) {
   const marker = enemy.warning;
   marker.position.set(
     enemy.aim.x,
-    game.groundHeight(enemy.aim.x, enemy.aim.z) + 0.08,
+    courtWalkingHeight(game, enemy.aim.x, enemy.aim.z) + 0.08,
     enemy.aim.z,
   );
   const radius =
@@ -514,6 +515,13 @@ export function hitGuardian(game, enemy) {
 }
 
 export function startDodge(game) {
+  const floor = courtDaisFloor(
+      game,
+      game.player.position.x,
+      game.player.position.z,
+    ),
+    onDais =
+      floor.surface && Math.abs(game.player.position.y - floor.height) < 0.025;
   if (
     game.desertSurvey?.focus ||
     game.blockGrip ||
@@ -524,7 +532,7 @@ export function startDodge(game) {
     game.climb ||
     game.ropeRide ||
     game.zipRide ||
-    game.jumpY > 0.25 ||
+    (game.jumpY > 0.25 && !onDais) ||
     game.carrying ||
     game.swimming
   )
@@ -567,13 +575,15 @@ export function updateDodge(game, dt) {
     Math.max(0.2, Math.sin(Math.min(1, dodge.time / dodge.duration) * Math.PI));
   for (let i = 0; i < 3; i++) {
     const x = p.x + (dodge.x * speed * dt) / 3,
-      z = p.z + (dodge.z * speed * dt) / 3;
-    if (game.canMove(x, z, 0)) {
+      z = p.z + (dodge.z * speed * dt) / 3,
+      floor = courtDaisFloor(game, x, z, p.y);
+    if (game.canMove(x, z, floor.height - game.groundHeight(x, z))) {
       p.x = x;
       p.z = z;
+      p.y = floor.height;
     }
   }
-  p.y = game.groundHeight(p.x, p.z);
+  game.jumpY = Math.max(0, p.y - game.groundHeight(p.x, p.z));
   game.avatar.rotation.y = Math.atan2(dodge.x, dodge.z);
   game.avatar.position.y =
     -Math.sin(Math.min(1, dodge.time / dodge.duration) * Math.PI) * 0.45;

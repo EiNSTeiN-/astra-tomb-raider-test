@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { updateReturnCable } from "./return-cable.js";
 import { supportAt, safeArrival } from "./character-motion.js";
+import { courtDaisFloor } from "./court-dais-rules.js";
 import { ropeGrip, updateCourseVisual } from "./traversal-courses.js";
 import { clearJumpPress } from "./jump-input.js";
 
@@ -56,11 +57,23 @@ export function restoreTraversal(game) {
       : safeArrival(game, { x: l.x, y: l.y, z: l.z });
     if (arrival) game.player.position.set(arrival.x, arrival.y, arrival.z);
     game.courseAnchor = { id: c.id, ledge: saved.ledge };
-  } else if (Number.isFinite(game.progress.position?.height)) {
+  } else if (game.progress.position) {
     const p = game.player.position,
-      y = game.groundHeight(p.x, p.z) + game.progress.position.height;
-    const floor = supportAt(game, p.x, p.z, y);
-    if (Math.abs(floor.height - y) < 0.25) {
+      ground = game.groundHeight(p.x, p.z),
+      savedHeight = game.progress.position.height,
+      y = ground + (Number.isFinite(savedHeight) ? savedHeight : 0),
+      dais = courtDaisFloor(game, p.x, p.z),
+      lifted =
+        dais.surface &&
+        y >= ground - 0.025 &&
+        dais.height >= y - 0.025 &&
+        dais.height - y <= 0.516 &&
+        game.canMove(p.x, p.z, dais.height - ground),
+      floor = lifted ? dais : supportAt(game, p.x, p.z, y);
+    if (
+      lifted ||
+      (Number.isFinite(savedHeight) && Math.abs(floor.height - y) < 0.25)
+    ) {
       // Preserve the saved landing while moving clear of newly solid furniture.
       // Passing the initial ground height here would discard earned elevation.
       const arrival = safeArrival(game, { x: p.x, y: floor.height, z: p.z });

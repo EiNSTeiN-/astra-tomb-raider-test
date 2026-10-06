@@ -38,10 +38,14 @@ export function supportAt(game, x, z, maxY = Infinity) {
       }
       continue;
     }
-    if (!o.climbable || Math.abs(x - o.x) >= o.w || Math.abs(z - o.z) >= o.d)
+    if (
+      (!o.climbable && !o.stepSupport) ||
+      Math.abs(x - o.x) >= o.w ||
+      Math.abs(z - o.z) >= o.d
+    )
       continue;
     const top = game.groundHeight(o.x, o.z) + o.h;
-    if (top <= maxY + 0.2 && top > height) {
+    if (top <= maxY + 0.2 + (o.stepSupport ? 1e-6 : 0) && top > height) {
       height = top;
       surface = o;
     }

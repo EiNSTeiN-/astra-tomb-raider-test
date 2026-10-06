@@ -4,6 +4,7 @@ import {
   weatherGuardianMaterial,
 } from "./guardian-surfaces.js";
 import * as THREE from "three";
+import { courtWalkingHeight } from "./court-dais-rules.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { pbrMaterial } from "./visuals.js";
 import { poseFeet } from "./pose.js";
@@ -847,7 +848,8 @@ function updateFeet(game, enemy, dt, distance) {
     const position = model.localToWorld(
       new THREE.Vector3((i ? 1 : -1) * 0.32, 0, 0.02),
     );
-    position.y = game.groundHeight(position.x, position.z) + 0.17 * rig.scale;
+    position.y =
+      courtWalkingHeight(game, position.x, position.z) + 0.17 * rig.scale;
     return position;
   });
   if (!rig.feet || (rig.previous && p.distanceTo(rig.previous) > 4)) {
@@ -869,7 +871,7 @@ function updateFeet(game, enemy, dt, distance) {
           forward,
           moving ? Math.min(1.2, 0.22 + speed * 0.2) * rig.scale : 0,
         );
-      to.y = game.groundHeight(to.x, to.z) + 0.17 * rig.scale;
+      to.y = courtWalkingHeight(game, to.x, to.z) + 0.17 * rig.scale;
       rig.step = {
         index,
         from: rig.feet[index].clone(),

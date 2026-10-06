@@ -1,12 +1,21 @@
 import * as THREE from "three";
 import { waterAt, hotLavaAt } from "./hydrology.js";
 import { clearSegment } from "./navigation.js";
+import { courtWalkingHeight } from "./court-dais-rules.js";
 
-// Guardians can walk on dry, gently sloping ground. They cannot jump a stair,
+// Guardians can walk on dry ground and shallow chamber steps. They cannot jump,
 // swim a basin or use the explorer's suspended traversal equipment.
 export function guardianFooting(game, enemy, x, z) {
-  if (!game.canMove(x, z, 0, 3.5 * (enemy.art?.scale || 1))) return false;
-  const y = game.groundHeight(x, z);
+  const y = courtWalkingHeight(game, x, z);
+  if (
+    !game.canMove(
+      x,
+      z,
+      y - game.groundHeight(x, z),
+      3.5 * (enemy.art?.scale || 1),
+    )
+  )
+    return false;
   if (!Number.isFinite(y) || (waterAt(game, x, z)?.depth || 0) > 0.4)
     return false;
   if (hotLavaAt(game, x, z)) return false;
@@ -16,7 +25,8 @@ export function guardianFooting(game, enemy, x, z) {
     [0, 0.4],
     [0, -0.4],
   ])
-    if (Math.abs(game.groundHeight(x + dx, z + dz) - y) > 0.3) return false;
+    if (Math.abs(courtWalkingHeight(game, x + dx, z + dz) - y) > 0.3)
+      return false;
   return true;
 }
 
@@ -28,13 +38,14 @@ function footingNear(game, enemy, point) {
       { x, z },
     );
   if (clear(point.x, point.z))
-    return { ...point, y: game.groundHeight(point.x, point.z) };
+    return { ...point, y: courtWalkingHeight(game, point.x, point.z) };
   for (const radius of [1.5, 3, 4.5, 6])
     for (let i = 0; i < 16; i++) {
       const angle = (i / 16) * Math.PI * 2,
         x = point.x + Math.sin(angle) * radius,
         z = point.z + Math.cos(angle) * radius;
-      if (clear(x, z)) return { ...point, x, z, y: game.groundHeight(x, z) };
+      if (clear(x, z))
+        return { ...point, x, z, y: courtWalkingHeight(game, x, z) };
     }
   return null;
 }

@@ -889,3 +889,10 @@ palace, foundry and monastery texture maps and the original patinated bronze
 shader. No external asset or dependency was added. Its six documentation images
 are actual game captures converted losslessly to WebP, with decoded RGBA
 identity verified.
+
+The [regional chamber floors](court-dais.md) add original tread assembly, flat
+cap fitting and regional inlay paths, with related walking, guardian, dodge
+and save-recovery code. They reuse the existing credited regional stone maps
+and original patinated bronze shader. No external asset or dependency was
+added. Its six documentation images are actual game captures converted
+losslessly to WebP, with decoded RGBA identity verified.

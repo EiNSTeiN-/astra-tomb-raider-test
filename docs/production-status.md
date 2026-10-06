@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional chamber floors](court-dais.md) replace 61 unsupported sets of
+  thin steps with fitted foundations, regional paving and subdued inlays.
+  All 770 campaign checks and the production build pass. Regression checks
+  cover 38,125 roof rays, 244 complete walks, 732 older/occupied arrivals,
+  guardian footing and dodge grounding. The actual worlds repair all 658
+  unobstructed baseline roof mismatches within 5.001 mm; all 61 High
+  construction captures are reviewed. Eight native walking/crouch cases
+  cover 1,586 frames without fades or camera-solid violations, and all 15
+  existing raised instrument mantles reach their expected roofs. Their 61
+  captures are reviewed. Eight production keyboard/touch cases and 24 older
+  positions retain progress and stable reloads; all 64 production captures
+  are reviewed. Two expected older-save camera adjustments are independently
+  proved to select clear views through the existing policy. Eight assisted
+  guardian and dodge cases add 2,880 and 304 frames with matching floor heights;
+  all 32 pose captures are reviewed. Broader world,
+  route and listening/device acceptance remains open.
+
 - [Regional court cover](court-cover.md) replaces the 25 plain low blocks
   with jointed masonry, fitted bases and eight regional treatments. The roofs
   cover their existing standing footprints within 5 mm at the mortar joints.

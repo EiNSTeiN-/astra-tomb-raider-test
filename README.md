@@ -48,6 +48,8 @@ chosen look angles and saved progress.
 The [25 low court walls now have fitted regional masonry](docs/court-cover.md),
 with terrain-supported bases, matching standing surfaces and room around
 volcanic valves and the wider cloud-city gate corners.
+The [61 chamber daises now support walking on regional paving](docs/court-dais.md),
+with fitted foundations, planted guardian feet and recovery for older ground saves.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

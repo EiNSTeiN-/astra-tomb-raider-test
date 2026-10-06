@@ -1,5 +1,6 @@
 import { buildStationYards } from "./station-yards.js";
 import { buildCourtCover } from "./court-cover.js";
+import { buildCourtDais } from "./court-dais.js";
 import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
 import { buildDiscoverySettings } from "./discovery-settings.js";
 import { arrivalCamera } from "./camera-arrival.js";
@@ -1165,6 +1166,8 @@ export class Adventure {
     this.templeWind = null;
     this.courtCovers = [];
     this.courtCoverMaterials = null;
+    this.courtDaises = [];
+    this.courtDaisMaterials = null;
     const hasDesert = buildDesertArchitecture(this);
     const hasMonastery = buildMonasteryArchitecture(this);
     const hasPalace = buildPalaceArchitecture(this);
@@ -1215,11 +1218,7 @@ export class Adventure {
             z - 18,
           );
       }
-      // Central stair dais is low enough to step onto, with a jumpable final lip.
-      if (i > 1) {
-        for (let k = 0; k < 3; k++)
-          this.box(9 - k * 1.4, 0.23, 9 - k * 1.4, stone, x, y + k * 0.2, z);
-      }
+      if (i > 1) buildCourtDais(this, r);
       for (const sx of [-1, 1]) {
         const tx = x + sx * 8,
           tz = z - 9;
@@ -1549,7 +1548,7 @@ export class Adventure {
         Math.abs(x - o.x) < o.w &&
         Math.abs(z - o.z) < o.d &&
         this.groundHeight(x, z) + height <
-          this.groundHeight(o.x, o.z) + o.h - 0.2
+          this.groundHeight(o.x, o.z) + o.h - 0.2 - (o.stepSupport ? 1e-6 : 0)
       )
         return false;
     }
@@ -1580,14 +1579,14 @@ export class Adventure {
         if (stationEntry(o, from, to) !== null) return false;
         continue;
       }
-      if (o.h <= 0.2) continue;
+      if (o.h <= 0.2 && !o.stepSupport) continue;
       const base = this.groundHeight(o.x, o.z);
       if (
         boxEntry(
           from,
           to,
           {
-            min: { x: o.x - o.w, y: base, z: o.z - o.d },
+            min: { x: o.x - o.w, y: o.bottom ?? base, z: o.z - o.d },
             max: { x: o.x + o.w, y: base + o.h, z: o.z + o.d },
           },
           0,
