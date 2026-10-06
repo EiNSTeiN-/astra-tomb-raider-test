@@ -913,3 +913,9 @@ palace, foundry, cloud granite, cavern rock and observatory materials and the
 original weathered bronze shader. No external asset or dependency is added.
 Its four documentation images are actual game construction captures converted
 losslessly to WebP, with decoded RGBA identity verified.
+
+The [climbing ledge inlay repair](climbing-inlays.md) adds original shallow,
+closed marker geometry and retains the existing weathered bronze material,
+regional paving and credited explorer model. No external asset or dependency
+is added. Its four documentation images are actual game captures converted
+losslessly to WebP, with identical decoded RGBA pixels and dimensions.

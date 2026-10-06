@@ -55,6 +55,9 @@ with fitted granite, bearing marks, anchored ladders and clear ledge mantles.
 Small elbow ducts also now register for camera collision.
 The [105 climbing roofs and 42 hoist bearings now have fitted support](docs/climbing-footings.md),
 with bonded paving and masonry that follows the surrounding chapter's materials.
+Their [210 bronze edge markers now sit in the paving bed](docs/climbing-inlays.md),
+clearing the recorded crouched boot intersections and retaining native roof
+walks and saves.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

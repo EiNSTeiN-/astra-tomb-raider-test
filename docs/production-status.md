@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Climbing ledge inlays](climbing-inlays.md) seat all 210 edge markers in their
+  full paving beds, repairing crouched boot penetration up to 18.275 mm.
+  The 13,860-ray construction regression, 128-pose delivered-model check,
+  eight-world browser contact check and 3,072-frame stride check pass their
+  stated bounds. All 781 campaign checks and the build pass. Eight native
+  keyboard/High and touch/Low roof walks preserve health and complete-store
+  reloads. Wider composition, continuous routes and listening/device acceptance
+  remain open.
+
 - [Climbing roof and footing repairs](climbing-footings.md) fill the standing
   edges of all 105 piers across 21 courses, ground their masonry and 42 hoist
   bearings beneath complete terrain cells, and match the surrounding regional

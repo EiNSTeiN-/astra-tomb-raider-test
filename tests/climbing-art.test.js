@@ -234,6 +234,47 @@ test("pier foundations and all 42 hoist bearings reach the soil beneath their co
   assert.equal(postRays, 378);
 });
 
+test("all 210 bronze ledge markers sit in the paving bed and clear the crouched sole height", (t) => {
+  let marks = 0,
+    rays = 0;
+  for (const level of LEVELS) {
+    const g = world(t, level),
+      ray = new THREE.Raycaster();
+    for (const c of g.traversalCourses)
+      for (const l of c.ledges)
+        for (const side of [-1, 1]) {
+          for (const dx of [-0.022, 0, 0.022])
+            for (let i = 0; i <= 10; i++) {
+              const x = l.x + side * (l.w - 0.17) + dx,
+                z = l.z - l.d + 0.18 + (i * (2 * l.d - 0.36)) / 10;
+              ray.set(
+                new THREE.Vector3(x, l.y + 0.06, z),
+                new THREE.Vector3(0, -1, 0),
+              );
+              ray.far = 0.1;
+              const top = ray.intersectObject(c.art.detail, true)[0];
+              assert(
+                top && Math.abs(top.point.y - l.y - 0.002) <= 0.00001,
+                `${level.id}/${c.id}/${l.index}: raised ledge marker`,
+              );
+              ray.set(
+                new THREE.Vector3(x, l.y - 0.06, z),
+                new THREE.Vector3(0, 1, 0),
+              );
+              const bottom = ray.intersectObject(c.art.detail, true)[0];
+              assert(
+                bottom && Math.abs(bottom.point.y - l.y + 0.005) <= 0.00001,
+                `${level.id}/${c.id}/${l.index}: marker misses the joint bed`,
+              );
+              rays += 2;
+            }
+          marks++;
+        }
+  }
+  assert.equal(marks, 210);
+  assert.equal(rays, 13860);
+});
+
 test("summit cable frames retain supported feet and clear the observed reading and boarding views on all 21 courses", (t) => {
   let views = 0;
   const blocked = [];

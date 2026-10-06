@@ -379,14 +379,16 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         );
     }
     for (const side of [-1, 1]) {
-      block(
-        0.065,
-        0.025,
-        depth - 0.34,
-        ledge.x + side * (ledge.w - 0.17),
-        top + 0.008,
-        ledge.z,
+      // Seat the ledge marker in the full paving bed. The old raised strip
+      // entered crouched boot soles; its new upper face is only 2 mm proud.
+      // Retain the construction seed sequence for all following stone pieces.
+      serial++;
+      mesh(
+        new THREE.BoxGeometry(0.065, 0.007, depth - 0.34),
         materials.metal,
+        ledge.x + side * (ledge.w - 0.17),
+        top - 0.0015,
+        ledge.z,
         detail,
         0.95,
       );
