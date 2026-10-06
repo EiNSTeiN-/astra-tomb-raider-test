@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture, pbrMaterial } from "./visuals.js";
 import { windMetal, windSurface } from "./wind-art.js";
+import { footprintMinimum } from "./masonry-foundations.js";
 
 // Local materials retain the chapter's masonry treatment. The dimensions here
 // describe the visible shell; the course plan remains the traversal authority.
@@ -40,7 +41,12 @@ export const CLIMBING_STYLES = {
 export function climbingMaterials(game) {
   const style = CLIMBING_STYLES[game.level.biome],
     original =
-      (game.level.biome === "jungle" && game.templeMaterial) || game.stoneMat,
+      (game.level.biome === "jungle" && game.templeMaterial) ||
+      (game.level.biome === "snow" && game.monasteryMaterials?.stone) ||
+      (game.level.biome === "sky" && game.skyMasonry) ||
+      (game.level.biome === "crystal" && game.cavernMeshes?.[0]?.material) ||
+      (game.level.biome === "eclipse" && game.observatoryMaterials?.stone) ||
+      game.stoneMat,
     stone = original.clone();
   stone.name = "Climbing pier masonry";
   stone.vertexColors = true;
@@ -79,6 +85,52 @@ function shade(geometry, value = 1) {
   return geometry;
 }
 
+// The flat top keeps a simple closed outline. Slightly tapered lower edges
+// seat in the recessed bed without the extra bevel faces of a wall ashlar.
+function flagGeometry(width, height, depth) {
+  const g = new THREE.BoxGeometry(width, height, depth),
+    p = g.attributes.position,
+    n = g.attributes.normal,
+    uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) {
+    if (p.getY(i) < 0) {
+      p.setX(i, p.getX(i) * (1 - 0.02 / width));
+      p.setZ(i, p.getZ(i) * (1 - 0.02 / depth));
+    }
+    uv.setXY(
+      i,
+      (Math.abs(n.getX(i)) > 0.7 ? p.getZ(i) : p.getX(i)) / 2,
+      (Math.abs(n.getY(i)) > 0.7 ? p.getZ(i) : p.getY(i)) / 2,
+    );
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+// Wall ashlars have a closed core immediately behind their front bevels.
+// Keep the exposed chipped face and discard surfaces buried in that core.
+function facingGeometry(width, height, depth, seed) {
+  const g = stoneBlockGeometry(width, height, depth, seed),
+    normal = g.attributes.normal,
+    attributes = Object.entries(g.attributes),
+    values = attributes.map(() => []);
+  for (let i = 0; i < normal.count; i += 3) {
+    if (normal.getZ(i) <= 0.1) continue;
+    for (let a = 0; a < attributes.length; a++) {
+      const attribute = attributes[a][1];
+      for (let j = 0; j < 3; j++)
+        for (let k = 0; k < attribute.itemSize; k++)
+          values[a].push(attribute.array[(i + j) * attribute.itemSize + k]);
+    }
+  }
+  for (let a = 0; a < attributes.length; a++)
+    g.setAttribute(
+      attributes[a][0],
+      new THREE.Float32BufferAttribute(values[a], attributes[a][1].itemSize),
+    );
+  return g;
+}
+
 export function buildClimbingArt(game, plan, base, root, materials) {
   const style = CLIMBING_STYLES[game.level.biome],
     fixed = new THREE.Group(),
@@ -105,13 +157,14 @@ export function buildClimbingArt(game, plan, base, root, materials) {
     parent = fixed,
     tint = 1,
     flat = false,
+    facing = false,
   ) => {
-    const g = stoneBlockGeometry(w, h, d, ++serial);
-    if (flat) {
-      const p = g.attributes.position;
-      for (let i = 0; i < p.count; i++)
-        if (p.getY(i) > h / 2 - 0.015) p.setY(i, h / 2);
-    }
+    const seed = ++serial,
+      g = flat
+        ? flagGeometry(w, h, d)
+        : facing
+          ? facingGeometry(w, h, d, seed)
+          : stoneBlockGeometry(w, h, d, seed);
     return mesh(g, material, x, y, z, parent, tint);
   };
   const span = (a, b, w, d, material = materials.timber, parent = fixed) => {
@@ -156,11 +209,19 @@ export function buildClimbingArt(game, plan, base, root, materials) {
   };
   const piers = [];
   for (const ledge of plan.ledges) {
-    const ground = game.groundHeight(ledge.x, ledge.z),
-      top = base + ledge.h,
-      height = top - ground,
+    const top = base + ledge.h,
       width = ledge.w * 2,
-      depth = ledge.d * 2;
+      depth = ledge.d * 2,
+      ground =
+        footprintMinimum(
+          (x, z) => game.groundHeight(x, z),
+          ledge.x,
+          ledge.z,
+          width,
+          depth,
+          game.terrainProfile?.step,
+        ) - 0.18,
+      height = top - ground;
     // One full pier proxy preserves the camera's solid envelope through joints.
     const proxy = new THREE.Mesh(
       new THREE.BoxGeometry(width, height, depth),
@@ -229,8 +290,17 @@ export function buildClimbingArt(game, plan, base, root, materials) {
             materials.stone,
             fixed,
             0.86 + ((row * 7 + i * 11 + face * 3) % 9) * 0.027,
+            false,
+            true,
           );
-          if (face % 2) piece.rotation.y = Math.PI / 2;
+          piece.rotation.y =
+            face === 0
+              ? 0
+              : face === 1
+                ? Math.PI / 2
+                : face === 2
+                  ? Math.PI
+                  : -Math.PI / 2;
         }
       }
     }
@@ -266,19 +336,48 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       fixed,
       0.7,
     );
-    // The final slab has an exact flat top at the physical support height.
-    block(
-      width,
-      0.18,
-      depth,
-      ledge.x,
-      top - 0.09,
-      ledge.z,
+    // A full bed fills the complete standing square, including the old empty
+    // chamfered corners. Individual bonded flags retain tapered lower
+    // edges, with flat tops and narrow joints 5 mm below the walking surface.
+    mesh(
+      new THREE.BoxGeometry(width, 0.175, depth),
       materials.stone,
+      ledge.x,
+      top - 0.0925,
+      ledge.z,
       fixed,
-      1.04,
-      true,
+      0.7,
     );
+    const capRows = Math.ceil(depth / style.block),
+      capColumns = Math.ceil(width / style.block),
+      capDepth = depth / capRows,
+      capWidth = width / capColumns;
+    for (let row = 0; row < capRows; row++) {
+      const ends =
+        row % 2
+          ? [
+              0,
+              ...Array.from(
+                { length: capColumns },
+                (_, i) => (i + 0.5) * capWidth,
+              ),
+              width,
+            ]
+          : Array.from({ length: capColumns + 1 }, (_, i) => i * capWidth);
+      for (let i = 1; i < ends.length; i++)
+        block(
+          ends[i] - ends[i - 1] - 0.014,
+          0.18,
+          capDepth - 0.014,
+          ledge.x + (ends[i] + ends[i - 1]) / 2 - width / 2,
+          top - 0.09,
+          ledge.z + (row + 0.5) * capDepth - depth / 2,
+          materials.stone,
+          fixed,
+          1 + ((row * 3 + i * 7 + ledge.index) % 5) * 0.016,
+          true,
+        );
+    }
     for (const side of [-1, 1]) {
       block(
         0.065,
@@ -336,15 +435,60 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         }
       }
     }
-    piers.push({ top, width, depth, height });
+    piers.push({
+      top,
+      width,
+      depth,
+      height,
+      bottom: ground,
+      capRows,
+      capColumns,
+    });
   }
 
   const backZ = plan.pivotLocalZ - 3,
-    top = plan.pivot.h + 0.6;
+    top = plan.pivot.h + 0.6,
+    footings = [];
   for (const x of [-12.8, 7.8]) {
     const p = plan.transform(x, backZ),
       ground = game.groundHeight(p.x, p.z),
       foot = ground - base;
+    const footing = {
+      bottom:
+        footprintMinimum(
+          (x, z) => game.groundHeight(x, z),
+          p.x,
+          p.z,
+          0.96,
+          0.96,
+          game.terrainProfile?.step,
+        ) - 0.18,
+      top: ground + 0.035,
+    };
+    mesh(
+      new THREE.BoxGeometry(0.9, footing.top - footing.bottom, 0.9),
+      materials.stone,
+      p.x,
+      (footing.top + footing.bottom) / 2,
+      p.z,
+      fixed,
+      0.7,
+    );
+    const courses = Math.ceil((footing.top - footing.bottom) / 0.44),
+      courseHeight = (footing.top - footing.bottom) / courses;
+    for (let row = 0; row < courses; row++)
+      block(
+        0.96,
+        courseHeight + 0.018,
+        0.96,
+        p.x,
+        footing.bottom + (row + 0.5) * courseHeight,
+        p.z,
+        materials.stone,
+        fixed,
+        0.83,
+      );
+    footings.push({ x: p.x, z: p.z, ground, footing });
     block(0.96, 0.34, 0.96, p.x, ground + 0.17, p.z, materials.stone);
     for (let row = 0; row < 4; row++)
       block(
@@ -358,6 +502,18 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         fixed,
         0.9 + row * 0.025,
       );
+    // The lower stone bearing is smaller than the ordinary camera threshold.
+    // Retain its finite envelope after the individual pieces are batched.
+    const bottom = footing?.bottom ?? ground - 0.015,
+      proxy = new THREE.Mesh(
+        new THREE.BoxGeometry(0.96, ground + 1.78 - bottom, 0.96),
+        materials.stone,
+      );
+    proxy.position.set(p.x, (ground + 1.78 + bottom) / 2, p.z);
+    fixed.add(proxy);
+    game.cameraSurfaces?.capture(proxy, { small: true });
+    fixed.remove(proxy);
+    proxy.geometry.dispose();
     span(local(x, foot + 1.75, backZ), local(x, top + 2.25, backZ), 0.63, 0.63);
     for (let y = foot + 2; y < top + 1; y += 2.1) {
       const pos = local(x, y, backZ),
@@ -465,7 +621,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
   mergeArchitecture(swing);
   mergeArchitecture(yoke);
   boltGeometry.dispose();
-  return { fixed, detail, swing, piers };
+  return { fixed, detail, swing, piers, footings };
 }
 
 export function updateClimbingArt(course) {

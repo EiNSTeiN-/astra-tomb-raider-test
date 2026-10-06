@@ -53,6 +53,8 @@ with fitted foundations, planted guardian feet and recovery for older ground sav
 The [eight wind-engine record terraces now have full standing roofs](docs/wind-terraces.md),
 with fitted granite, bearing marks, anchored ladders and clear ledge mantles.
 Small elbow ducts also now register for camera collision.
+The [105 climbing roofs and 42 hoist bearings now have fitted support](docs/climbing-footings.md),
+with bonded paving and masonry that follows the surrounding chapter's materials.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

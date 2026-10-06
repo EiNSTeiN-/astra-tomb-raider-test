@@ -905,3 +905,11 @@ and engine inscription atlas. Character movement uses the existing credited
 explorer model. No new external asset or dependency is introduced. Its four
 documentation images are actual native-production or assisted game captures
 converted losslessly to WebP, with decoded RGBA identity verified.
+
+The [climbing roof and footing repair](climbing-footings.md) adds original
+bonded paving, tapered flag geometry, fitted lower courses and backed wall
+facings. It reuses the existing credited sanctuary, sandstone, monastery,
+palace, foundry, cloud granite, cavern rock and observatory materials and the
+original weathered bronze shader. No external asset or dependency is added.
+Its four documentation images are actual game construction captures converted
+losslessly to WebP, with decoded RGBA identity verified.

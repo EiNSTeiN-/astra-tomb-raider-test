@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Climbing roof and footing repairs](climbing-footings.md) fill the standing
+  edges of all 105 piers across 21 courses, ground their masonry and 42 hoist
+  bearings beneath complete terrain cells, and match the surrounding regional
+  stone. All 780 campaign checks and the production build pass. Two new
+  regressions add 46,305 roof rays, 3,003 foundation rays and 42 low-bearing
+  camera checks. Actual browser worlds repair 420 empty corners and 4,620
+  low roof probes; all 17,745 roof points match within 5.002 mm. All 2,625
+  pier-foot probes are buried more than 15 cm, and all 378 hoist-foot probes
+  meet the 15 mm gap tolerance. All 47 baseline and 47 final construction
+  captures are reviewed. All 21 assisted routes complete both early mantles,
+  the jump gap, rope catch/release, summit and return cable. Eight production
+  keyboard/touch revisits preserve roof positions, movement, camera angles
+  and complete-store reloads without arrival corrections. All 56 final
+  production captures are reviewed. Wider composition, continuous routes and
+  listening/device acceptance remain open.
+
 - [Wind-engine record terraces](wind-terraces.md) replace eight rounded blocks
   with fitted granite, flat roofs, anchored ladders and restrained bearing
   markings. All 778 campaign checks and the production build pass. Actual worlds

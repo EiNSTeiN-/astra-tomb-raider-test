@@ -13,6 +13,7 @@ import { CameraSurfaces, followCamera } from "../src/camera-collision.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { Soundscape } from "../src/audio.js";
 import { CLIMBING_STYLES } from "../src/traversal-art.js";
+import { supportAt } from "../src/character-motion.js";
 
 function world(t, level) {
   t.mock.method(
@@ -27,6 +28,7 @@ function world(t, level) {
     world: root,
     map,
     level,
+    terrainProfile: terrain,
     groundHeight: terrain.height,
     obstacles: [],
     stoneMat: new THREE.MeshStandardMaterial(),
@@ -65,7 +67,7 @@ function world(t, level) {
   return game;
 }
 
-test("all 105 climbing piers have finite fitted masonry, bounded batches and exact walking surfaces", (t) => {
+test("all 105 climbing piers have finite fitted masonry, bounded batches and flat walking surfaces with shallow joints", (t) => {
   let count = 0;
   for (const level of LEVELS) {
     const g = world(t, level),
@@ -97,7 +99,7 @@ test("all 105 climbing piers have finite fitted masonry, bounded batches and exa
             );
             const hit = ray.intersectObject(c.art.fixed, true)[0];
             assert.ok(
-              hit && Math.abs(hit.point.y - l.y) < 0.001,
+              hit && Math.abs(hit.point.y - l.y) <= 0.00501,
               `${label}: walking top ${x},${z}: ${hit?.point.y} expected ${l.y}`,
             );
           }
@@ -142,6 +144,96 @@ test("all anchor yokes track the real pendulum and leave the rope swept path cle
   }
 });
 
+test("all 105 climbing roofs fill their standing edges and corners, with at most 5 mm recessed paving joints", (t) => {
+  let rays = 0;
+  for (const level of LEVELS) {
+    const g = world(t, level),
+      ray = new THREE.Raycaster();
+    for (const c of g.traversalCourses)
+      for (const l of c.ledges)
+        for (let ix = 0; ix <= 20; ix++)
+          for (let iz = 0; iz <= 20; iz++) {
+            const x = l.x - l.w + 0.002 + (ix * (2 * l.w - 0.004)) / 20,
+              z = l.z - l.d + 0.002 + (iz * (2 * l.d - 0.004)) / 20;
+            ray.set(
+              new THREE.Vector3(x, l.y + 0.1, z),
+              new THREE.Vector3(0, -1, 0),
+            );
+            const hit = ray.intersectObject(c.art.fixed, true)[0];
+            assert(
+              hit,
+              `${level.id}/${c.id}/${l.index}: empty standing corner`,
+            );
+            assert(
+              Math.abs(hit.point.y - l.y) <= 0.00501,
+              `${level.id}/${c.id}/${l.index}: roof differs from support at ${x},${z}`,
+            );
+            assert.equal(supportAt(g, x, z, l.y).height, l.y);
+            rays++;
+          }
+  }
+  assert.equal(rays, 46305);
+});
+
+test("pier foundations and all 42 hoist bearings reach the soil beneath their complete lower footprints", (t) => {
+  let pierRays = 0,
+    postRays = 0;
+  for (const level of LEVELS) {
+    const g = world(t, level),
+      ray = new THREE.Raycaster();
+    for (const c of g.traversalCourses) {
+      for (const l of c.ledges) {
+        const bottom = c.art.piers[l.index].bottom;
+        for (let ix = 0; ix <= 4; ix++)
+          for (let iz = 0; iz <= 4; iz++) {
+            const x = l.x - l.w + 0.14 + (ix * (2 * l.w - 0.28)) / 4,
+              z = l.z - l.d + 0.14 + (iz * (2 * l.d - 0.28)) / 4,
+              ground = g.groundHeight(x, z);
+            ray.set(
+              new THREE.Vector3(x, bottom - 1, z),
+              new THREE.Vector3(0, 1, 0),
+            );
+            const hit = ray.intersectObject(c.art.fixed, true)[0];
+            assert(
+              hit && hit.point.y < ground - 0.15,
+              `${level.id}/${c.id}/${l.index}: exposed underside at ${x},${z}`,
+            );
+            pierRays++;
+          }
+      }
+      assert.equal(c.art.footings.length, 2);
+      for (const p of c.art.footings) {
+        const bottom = p.footing?.bottom ?? p.ground;
+        for (const dx of [-0.42, 0, 0.42])
+          for (const dz of [-0.42, 0, 0.42]) {
+            const x = p.x + dx,
+              z = p.z + dz;
+            ray.set(
+              new THREE.Vector3(x, bottom - 1, z),
+              new THREE.Vector3(0, 1, 0),
+            );
+            const hit = ray.intersectObject(c.art.fixed, true)[0];
+            assert(
+              hit && hit.point.y <= g.groundHeight(x, z) + 0.015,
+              `${level.id}/${c.id}: unsupported hoist footing at ${x},${z}`,
+            );
+            postRays++;
+          }
+        assert(
+          g.cameraSurfaces.entry(
+            new THREE.Vector3(p.x - 1, p.ground + 0.8, p.z),
+            new THREE.Vector3(p.x + 1, p.ground + 0.8, p.z),
+            0,
+          ) < 1,
+          `${level.id}/${c.id}: camera enters the low hoist bearing`,
+        );
+      }
+    }
+  }
+  assert.equal(pierRays, 2625);
+  assert.equal(postRays, 378);
+});
+
 test("summit cable frames retain supported feet and clear the observed reading and boarding views on all 21 courses", (t) => {
   let views = 0;
   const blocked = [];
@@ -160,7 +252,7 @@ test("summit cable frames retain supported feet and clear the observed reading a
             );
             const hit = ray.intersectObject(c.art.fixed, true)[0];
             assert.ok(
-              hit && Math.abs(hit.point.y - summit.y) < 0.001,
+              hit && Math.abs(hit.point.y - summit.y) <= 0.00501,
               `${level.id}/${c.id}: supported terminal footplate`,
             );
           }
