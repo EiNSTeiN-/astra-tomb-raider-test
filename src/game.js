@@ -1,6 +1,8 @@
 import { buildStationYards } from "./station-yards.js";
 import { buildCourtCover } from "./court-cover.js";
 import { buildCourtDais } from "./court-dais.js";
+import { mantlePoint, mantleEdge } from "./mantle-motion.js";
+import { buildWindTerrace } from "./wind-terraces.js";
 import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
 import { buildDiscoverySettings } from "./discovery-settings.js";
 import { arrivalCamera } from "./camera-arrival.js";
@@ -1168,6 +1170,9 @@ export class Adventure {
     this.courtCoverMaterials = null;
     this.courtDaises = [];
     this.courtDaisMaterials = null;
+    this.windTerraces = [];
+    this.windTerraceMaterials = null;
+    this.windRecordPlaque = null;
     const hasDesert = buildDesertArchitecture(this);
     const hasMonastery = buildMonasteryArchitecture(this);
     const hasPalace = buildPalaceArchitecture(this);
@@ -1344,18 +1349,10 @@ export class Adventure {
         if (this.level.biome === "snow") {
           buildBellPlatform(this, f, x, y, z, f.yOffset);
         } else {
-          this.box(6, f.yOffset, 6, this.stoneMat, x, y + f.yOffset / 2, z);
-          this.obstacles.push({
-            x,
-            z,
-            w: 3,
-            d: 3,
-            h: f.yOffset,
-            climbable: true,
-          });
+          buildWindTerrace(this, f, x, y, z, f.yOffset);
         }
         group.position.y += f.yOffset;
-        for (let rung = 0; rung < 6; rung++)
+        for (let rung = 0; this.level.biome === "snow" && rung < 6; rung++)
           this.box(
             1.1,
             0.08,
@@ -2003,6 +2000,7 @@ export class Adventure {
           start: p.clone(),
           end,
           height: o.h,
+          edge: mantleEdge(p, end, o),
         };
         this.avatar.rotation.y = Math.atan2(direction.x, direction.z);
         this.audio.tone("jump");
@@ -2014,10 +2012,8 @@ export class Adventure {
   updateClimb(dt) {
     const c = this.climb;
     c.time += dt;
-    const t = Math.min(1, c.time / 0.85),
-      ease = t * t * (3 - 2 * t);
-    this.player.position.lerpVectors(c.start, c.end, ease);
-    this.player.position.y += Math.sin(t * Math.PI) * 0.65;
+    const t = Math.min(1, c.time / 0.85);
+    mantlePoint(c.start, c.end, t, this.player.position);
     this.grounded = false;
     animateExplorer(this, dt, false, false);
     this.nearest = null;

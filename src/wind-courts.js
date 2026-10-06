@@ -69,7 +69,7 @@ export function buildWindCourts(game) {
     trim = windMetal("worn"),
     iron = windMetal("iron"),
     kit = windArtKit(),
-    makePlaque = windPlaqueFactory();
+    makePlaque = game.windRecordPlaque || windPlaqueFactory();
   const curves = [ductCurve(true), ductCurve(false)],
     ducts = curves.map(windDuctGeometry);
   const airMaterial = new THREE.PointsMaterial({
@@ -217,6 +217,9 @@ export function buildWindCourts(game) {
         curve = curves[straight ? 0 : 1];
       game.cameraSurfaces?.capture(
         add(ducts[straight ? 0 : 1], bronze, 0, 0, 0, rotor),
+        // An elbow's bounds are under the normal 2 m capture threshold,
+        // but its casting can still obscure an elevated follow view.
+        { small: true },
       );
       // Open mouths and raised ribs retain the channel silhouette in daylight.
       for (const t of [0, 0.18, 0.82, 1]) {

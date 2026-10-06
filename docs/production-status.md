@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Wind-engine record terraces](wind-terraces.md) replace eight rounded blocks
+  with fitted granite, flat roofs, anchored ladders and restrained bearing
+  markings. All 778 campaign checks and the production build pass. Actual worlds
+  repair 384 roof mismatches; all 1,352 points now match support within 5.001 mm.
+  The shared mantle rises outside ledges before crossing, clearing the recorded
+  embedded boots; 1,664 delivered-character regression frames and 408 actual
+  browser frames pass the 15 mm sole tolerance. Legal close approaches remain
+  climbable. Small wind-duct elbows now contribute camera collision, repairing
+  two obscured saved views. Eight native production keyboard/touch cases verify
+  roof climbing, records, turns, reset, descent and complete-store reloads;
+  all 56 captures are reviewed. The final rendered-geometry audit checks 48
+  views over 576 frames without fades or blocked sampled body sightlines;
+  all 48 captures are reviewed. Six expected arrival-camera adjustments are
+  independently proved. Wider composition, continuous routes and listening/
+  device acceptance remain open.
+
 - [Regional chamber floors](court-dais.md) replace 61 unsupported sets of
   thin steps with fitted foundations, regional paving and subdued inlays.
   All 770 campaign checks and the production build pass. Regression checks

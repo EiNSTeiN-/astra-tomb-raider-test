@@ -1215,6 +1215,28 @@ test("batched flow keeps the same material states and moving air positions throu
   }
 });
 
+test("every rendered elbow blocks a camera arm through its casting, including the small corner ducts", (t) => {
+  const { game } = fixture(t);
+  let elbows = 0;
+  for (const site of game.windSites) {
+    game.player.position.copy(site.root.position);
+    updateWindCourts(game, 0);
+    assert(site.detail.visible);
+    for (const node of site.nodes) {
+      if (node.straight) continue;
+      node.rotor.updateWorldMatrix(true, true);
+      const from = node.rotor.localToWorld(new THREE.Vector3(-0.42, 0, -1.42)),
+        to = node.rotor.localToWorld(new THREE.Vector3(0.42, 0, -1.42));
+      assert(
+        game.cameraSurfaces.entry(from, to, 0) < 1,
+        `missing elbow ${site.stage}/${node.index}`,
+      );
+      elbows++;
+    }
+  }
+  assert(elbows > 30);
+});
+
 test("wind inscriptions share one atlas while preserving label resolution, text cells and world quads", (t) => {
   const { game } = fixture(t),
     maps = new Set(),

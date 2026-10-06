@@ -1,4 +1,5 @@
 import { boxEntry } from "./camera-collision.js";
+import { mantlePoint } from "./mantle-motion.js";
 
 // Generic field furniture has finite vertical bounds. In particular, an
 // elevated station must not create an invisible column down to the ground.
@@ -76,11 +77,10 @@ export function stationMantleEnd(game, platform, start, requested) {
     if (!game.canMove(end.x, end.z, end.y - game.groundHeight(end.x, end.z)))
       return false;
     for (let i = 0; i <= 100; i++) {
-      const t = i / 100,
-        ease = t * t * (3 - 2 * t),
-        p = start.clone().lerp(end, ease);
-      p.y += Math.sin(t * Math.PI) * 0.65;
-      if (solids.some((o) => stationBlocked(o, p.x, p.y, p.z, 1.9, 0.45)))
+      const p = mantlePoint(start, end, i / 100);
+      // A held Forward input can reach the normal movement margin before
+      // Jump. Use that same margin rather than rejecting a legal approach.
+      if (solids.some((o) => stationBlocked(o, p.x, p.y, p.z, 1.9)))
         return false;
     }
     return true;

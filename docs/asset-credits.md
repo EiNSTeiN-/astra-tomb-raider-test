@@ -896,3 +896,12 @@ and save-recovery code. They reuse the existing credited regional stone maps
 and original patinated bronze shader. No external asset or dependency was
 added. Its six documentation images are actual game captures converted
 losslessly to WebP, with decoded RGBA identity verified.
+
+The [wind-engine record terraces](wind-terraces.md) add original assembled
+granite faces, flat fitted flags, recessed joints, bearing inlays, cast-feather
+placement and attached ladder construction. They reuse the cloud-city's existing
+credited masonry maps, original wind-metal materials, feather relief geometry
+and engine inscription atlas. Character movement uses the existing credited
+explorer model. No new external asset or dependency is introduced. Its four
+documentation images are actual native-production or assisted game captures
+converted losslessly to WebP, with decoded RGBA identity verified.

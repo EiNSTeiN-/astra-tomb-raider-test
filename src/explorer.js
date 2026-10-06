@@ -3,6 +3,7 @@ import { poseSunTurn } from "./sun-bridge.js";
 import { poseCleft } from "./cleft-pose.js";
 import { CROUCH_DROP } from "./stealth.js";
 import * as THREE from "three";
+import { mantleProgress } from "./mantle-motion.js";
 import { updateTorch, poseTorch } from "./torch.js";
 import { cableHands } from "./return-cable.js";
 import { poseCableGrip, restoreCableGrip } from "./hand-grip.js";
@@ -317,7 +318,8 @@ export function animateExplorer(game, dt, moving, sprinting) {
       t = Math.min(1, c.time / 0.85),
       direction = c.end.clone().sub(c.start).setY(0).normalize();
     rig.model.rotation.x = 0.16 * Math.sin(t * Math.PI);
-    const edge = c.start.clone().addScaledVector(direction, 0.75);
+    const edge =
+      c.edge?.clone() || c.start.clone().addScaledVector(direction, 0.75);
     edge.y = c.end.y + 0.045;
     const release = THREE.MathUtils.smoothstep(t, 0.65, 1);
     poseHands(
@@ -329,9 +331,10 @@ export function animateExplorer(game, dt, moving, sprinting) {
           .lerp(point(side * 0.22, 0.62, 0.25), release),
       ),
     );
+    const crossing = mantleProgress(t).cross;
     poseFeet(game, [
-      point(0.12, 0.15, -0.16),
-      point(-0.12, 0.42 * Math.sin(t * Math.PI), 0.18),
+      point(0.12, 0.15, -0.24 + crossing * 0.08),
+      point(-0.12, 0.09 + 0.42 * Math.sin(t * Math.PI), -0.2 + crossing * 0.38),
     ]);
   } else if (!game.grounded) {
     poseHands(game, [point(0.44, 1.08, 0.12), point(-0.44, 1.17, 0.07)]);

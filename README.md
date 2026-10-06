@@ -50,6 +50,9 @@ with terrain-supported bases, matching standing surfaces and room around
 volcanic valves and the wider cloud-city gate corners.
 The [61 chamber daises now support walking on regional paving](docs/court-dais.md),
 with fitted foundations, planted guardian feet and recovery for older ground saves.
+The [eight wind-engine record terraces now have full standing roofs](docs/wind-terraces.md),
+with fitted granite, bearing marks, anchored ladders and clear ledge mantles.
+Small elbow ducts also now register for camera collision.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
