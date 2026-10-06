@@ -214,7 +214,7 @@ import {
 } from "./aiming.js";
 import { silenceCableMotion } from "./return-cable.js";
 import { windCameraStandoff, windCameraSpace } from "./wind-camera.js";
-import { followWindCamera } from "./wind-walking-camera.js";
+import { followClearCamera } from "./camera-follow.js";
 import { buildRelicArtwork, updateRelicArtwork } from "./relic-art.js";
 import {
   buildCipherCourts,
@@ -2170,7 +2170,7 @@ export class Adventure {
     }
     const desired = target.clone().add(offset);
     this.camera.position.copy(
-      followWindCamera(this, target, desired, dt, canOccupy),
+      followClearCamera(this, target, desired, dt, canOccupy),
     );
     this.cameraFollowTarget = target.clone();
     this.rig?.visibility?.set(this.camera.position.distanceTo(target));

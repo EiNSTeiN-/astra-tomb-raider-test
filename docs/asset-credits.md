@@ -846,3 +846,10 @@ bounded view-clearance code and physical-camera regressions. It retains the
 credited explorer, chapter art, positional sounds and quiet scores. No external
 asset or dependency was added. Its five documentation images are actual game
 captures converted losslessly to WebP, with decoded RGBA identity verified.
+
+The [puzzle-pillar walking-camera repair](counterweight-walking-camera.md) extends
+that original clearance code and adds physical chamber/support regressions and
+a walking observer to the browser verifier. It retains the credited artwork,
+distance-sensitive sources and quiet scores; no external asset or dependency
+was added. Its five documentation images are actual game captures converted
+losslessly to WebP, with decoded RGBA identity verified.

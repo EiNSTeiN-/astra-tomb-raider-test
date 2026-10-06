@@ -13,7 +13,10 @@ import { solveCounterweights } from "./solve-counterweights.js";
 
 // Development-assisted integration check. Opens the already-tested field gate,
 // then walks between every stone face using the real world collision/terrain.
-export async function verifyCounterweights(indices, { onFrame } = {}) {
+export async function verifyCounterweights(
+  indices,
+  { onFrame, onWalkFrame } = {},
+) {
   const game = window.__vesper.game,
     results = [];
   for (const index of indices) {
@@ -50,6 +53,7 @@ export async function verifyCounterweights(indices, { onFrame } = {}) {
         const distance = delta.length();
         delta.normalize().multiplyScalar(Math.min(3.8, distance * 60));
         advanceCharacter(game, delta, 1 / 60);
+        onWalkFrame?.(game, { target, direction: delta, tick });
       }
       throw new Error(
         `${game.level.id}: blocked walking to ${target.toArray()} from ${game.player.position.toArray()}`,

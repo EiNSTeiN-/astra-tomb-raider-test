@@ -1,5 +1,10 @@
 # Walking views beside wind machinery
 
+The later [puzzle-pillar walking-camera pass](counterweight-walking-camera.md)
+extends this recovery to ordinary walking across the campaign and clears the
+fifteen remaining fades on the recorded complete cloud-engine route. The
+verification below records this earlier wind-scoped milestone.
+
 Returning through the first cloud forecourt could hide the explorer beneath an
 overhead coupling. The last observatory wheel's approach also passed close to
 wind castings, briefly retracting the camera before its working view recovered.

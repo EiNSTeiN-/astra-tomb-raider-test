@@ -1,10 +1,11 @@
 import { MathUtils, Vector3 } from "three";
 import { constrainCamera, followCamera } from "./camera-collision.js";
 
-// A wind court has narrow shafts and overhead ducts. Retraction alone can hide
-// the explorer while a nearby orbit is clear. Keep the chosen look in save data;
-// collision response may displace the camera by at most .3 yaw / .4 pitch.
-export function followWindCamera(game, target, desired, dt, canOccupy) {
+// Pillars, shafts and overhead parts can close the interpolated follow path
+// even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
+// yaw to .9 only when that neighborhood cannot fit a comfortable view. Keep
+// the player's chosen look in save data throughout collision response.
+export function followClearCamera(game, target, desired, dt, canOccupy) {
   const follow = (end) =>
       followCamera(
         game.camera.position,
@@ -23,45 +24,48 @@ export function followWindCamera(game, target, desired, dt, canOccupy) {
     game.aiming ||
     game.climb ||
     game.ropeRide ||
-    game.zipRide ||
-    !game.windSites?.some((site) =>
-      site.nodes.some(
-        (node) =>
-          Math.abs(game.player.position.x - site.root.position.x - node.x) <
-            2.6 &&
-          Math.abs(game.player.position.z - site.root.position.z - node.z) <
-            2.6 &&
-          Math.abs(game.player.position.y - site.root.position.y - node.y) <
-            1.4,
-      ),
-    )
+    game.zipRide
   )
     return ordinary;
 
-  const candidates = [
-    [0, -0.2],
-    [0, 0.2],
-    [-0.15, 0],
-    [0.15, 0],
-    [0, -0.4],
-    [0, 0.4],
-    [-0.3, 0],
-    [0.3, 0],
-    ...[-0.15, 0.15, -0.3, 0.3].flatMap((yaw) =>
-      [-0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
-    ),
-  ];
+  // Retain the supplied arm and vertical lift, including the transition out
+  // of an aimed view, instead of replacing them with a full-distance orbit.
+  const offset = desired.clone().sub(target),
+    distance = Math.hypot(offset.x, offset.z) / Math.cos(game.pitch),
+    lift = offset.y - Math.sin(game.pitch) * distance,
+    nearbyCandidates = [
+      [0, -0.2],
+      [0, 0.2],
+      [-0.15, 0],
+      [0.15, 0],
+      [0, -0.4],
+      [0, 0.4],
+      [-0.3, 0],
+      [0.3, 0],
+      ...[-0.15, 0.15, -0.3, 0.3].flatMap((yaw) =>
+        [-0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
+      ),
+    ],
+    candidates = [
+      ...nearbyCandidates,
+      // A close pillar can cover the entire small neighborhood. Try its sides
+      // only if none of those rays provides enough room for the explorer.
+      ...[-0.45, 0.45, -0.6, 0.6, -0.9, 0.9].flatMap((yaw) =>
+        [0, -0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
+      ),
+    ];
   let best;
-  for (const [yawOffset, pitchOffset] of candidates) {
+  for (const [index, [yawOffset, pitchOffset]] of candidates.entries()) {
+    if (index === nearbyCandidates.length && best) break;
     const yaw = game.yaw + yawOffset,
       pitch = MathUtils.clamp(game.pitch + pitchOffset, -0.65, 1.05),
       end = target
         .clone()
         .add(
           new Vector3(
-            Math.sin(yaw) * Math.cos(pitch) * 5.3,
-            Math.sin(pitch) * 5.3 + 0.2,
-            Math.cos(yaw) * Math.cos(pitch) * 5.3,
+            Math.sin(yaw) * Math.cos(pitch) * distance,
+            Math.sin(pitch) * distance + lift,
+            Math.cos(yaw) * Math.cos(pitch) * distance,
           ),
         ),
       safe = constrainCamera(target, end, game.cameraSurfaces, canOccupy);

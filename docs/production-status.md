@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Walking views around puzzle pillars](counterweight-walking-camera.md) extend
+  nearby clearance to ordinary campaign walking, with a wider yaw fallback when
+  the small neighborhood is blocked. All 750 final campaign checks, 37 focused
+  checks and the production build pass. The repeated 192.687 m cloud-engine route
+  retains identical feet, look and stone states over 3,410 frames with no fades;
+  all 64 captures are reviewed. All eight chamber solutions finish 121 moves
+  across 9,293 walking and 6,413 slide/release frames. Walking fades fall from
+  67 in the small-range diagnostic version to three beside a jungle cipher drum
+  support; all 70 intermediate and 65 final captures are reviewed. Four native
+  keyboard/touch cases preserve complete stores apart from timestamps, with
+  no arrival correction and 16 reviewed captures. VA-46's recorded cloud route
+  is clear; VA-47 records the remaining jungle entrance views. Wider camera,
+  scenery and audio/device evaluation remain open.
+
 - [Wind machinery walking views](wind-walking-camera.md) use bounded nearby
   camera clearance while retaining saved look angles. A 745-test campaign run
   passes, followed by 17 focused checks of the final contact-distance refinement

@@ -33,6 +33,7 @@ import {
 } from "../src/camera-collision.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { frameCounterweightGrip } from "../src/counterweight-camera.js";
+import { followClearCamera } from "../src/camera-follow.js";
 
 function fixture(level = LEVELS[0], groundHeight = () => 0) {
   const memory = new Map(),
@@ -636,6 +637,199 @@ test("walking around a twice-pulled cloud stone retains a visible board view aft
   }
   for (let frame = 0; frame < 120; frame++) updateView();
   assert.deepEqual(chamber.saved, saved);
+});
+
+test("a fixed cloud pillar retains a visible walking view without changing chosen angles", () => {
+  const { game } = fixture(LEVELS[5]),
+    solution = solveCounterweights(game.counterweights.trial);
+  for (const action of solution.path.slice(0, 7)) {
+    for (const cell of action.walking) walk(game, point(cell));
+    gripMove(game, action);
+  }
+  assert.deepEqual(game.counterweights.saved.positions, [
+    [0, 4],
+    [2, 2],
+    [4, 1],
+  ]);
+  const saved = structuredClone(game.counterweights.saved),
+    shift = new THREE.Vector3(-229, -5.161680221557617, 23);
+  game.player.position
+    .fromArray([330.8333333333333, 5.161680221557617, 77])
+    .add(shift);
+  game.camera = new THREE.PerspectiveCamera();
+  game.camera.position
+    .fromArray([331.18859096300633, 8.4395888669411, 77.91731525802433])
+    .add(shift);
+  game.cameraFollowTarget = new THREE.Vector3()
+    .fromArray([330.76666666666665, 6.461680221557617, 77])
+    .add(shift);
+  game.yaw = -0.5213475698437574;
+  game.pitch = 1.05;
+  const feet = game.player.position.clone(),
+    look = { yaw: game.yaw, pitch: game.pitch },
+    target = feet.clone().add(new THREE.Vector3(0, 1.3, 0)),
+    desired = target
+      .clone()
+      .add(
+        new THREE.Vector3(
+          Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+        ),
+      );
+  const ordinary = followCamera(
+    game.camera.position,
+    target,
+    desired,
+    1 / 60,
+    game.cameraSurfaces,
+    () => true,
+    game.cameraFollowTarget,
+  );
+  assert(
+    ordinary.distanceTo(target) < 2.2,
+    "recorded ordinary follow fades the explorer",
+  );
+  for (let frame = 0; frame < 120; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, () => true),
+    );
+    game.cameraFollowTarget = target.clone();
+    assert(
+      game.camera.position.distanceTo(target) >= 2.2 - 1e-8,
+      "nearby recovery keeps the explorer visible",
+    );
+    assert.equal(game.cameraSurfaces.entry(target, game.camera.position, 0), 1);
+    assert(game.player.position.equals(feet));
+    assert.deepEqual({ yaw: game.yaw, pitch: game.pitch }, look);
+    assert.deepEqual(game.counterweights.saved, saved);
+  }
+});
+
+test("a clear cloud orbit recovers when its interpolated path crosses a puzzle pillar", () => {
+  const { game } = fixture(LEVELS[5]),
+    solution = solveCounterweights(game.counterweights.trial);
+  for (const action of solution.path.slice(0, 7)) {
+    for (const cell of action.walking) walk(game, point(cell));
+    gripMove(game, action);
+  }
+  assert.deepEqual(game.counterweights.saved.positions, [
+    [0, 4],
+    [2, 2],
+    [4, 1],
+  ]);
+  const saved = structuredClone(game.counterweights.saved),
+    shift = new THREE.Vector3(-229, -5.161680221557617, 23);
+  game.player.position
+    .fromArray([332.0849987455561, 5.161680221557617, 77.59288444830713])
+    .add(shift);
+  game.camera = new THREE.PerspectiveCamera();
+  game.camera.position
+    .fromArray([329.4150320186747, 11.154375792430066, 77.39508883045858])
+    .add(shift);
+  game.cameraFollowTarget = new THREE.Vector3()
+    .fromArray([332.0545139172968, 6.461680221557617, 77.53359600347642])
+    .add(shift);
+  game.yaw = -1.9424162328989552;
+  game.pitch = 1.05;
+  const feet = game.player.position.clone(),
+    look = { yaw: game.yaw, pitch: game.pitch },
+    target = feet.clone().add(new THREE.Vector3(0, 1.3, 0)),
+    desired = target
+      .clone()
+      .add(
+        new THREE.Vector3(
+          Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+        ),
+      );
+  const ordinary = followCamera(
+    game.camera.position,
+    target,
+    desired,
+    1 / 60,
+    game.cameraSurfaces,
+    () => true,
+    game.cameraFollowTarget,
+  );
+  assert(
+    ordinary.distanceTo(target) < 2.2,
+    "recorded ordinary follow fades the explorer",
+  );
+  for (let frame = 0; frame < 120; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, () => true),
+    );
+    game.cameraFollowTarget = target.clone();
+    assert(
+      game.camera.position.distanceTo(target) >= 2.2 - 1e-8,
+      "nearby recovery keeps the explorer visible",
+    );
+    assert.equal(game.cameraSurfaces.entry(target, game.camera.position, 0), 1);
+    assert(game.player.position.equals(feet));
+    assert.deepEqual({ yaw: game.yaw, pitch: game.pitch }, look);
+    assert.deepEqual(game.counterweights.saved, saved);
+  }
+});
+
+test("a wider pillar clearance recovers a desert walking view when every small orbit is blocked", () => {
+  const { game } = fixture(LEVELS[1]),
+    solution = solveCounterweights(game.counterweights.trial);
+  for (const action of solution.path.slice(0, 3)) {
+    for (const cell of action.walking) walk(game, point(cell));
+    gripMove(game, action);
+  }
+  const saved = structuredClone(game.counterweights.saved),
+    shift = new THREE.Vector3(-243, -0.5876420736312866, -208);
+  game.player.position
+    .fromArray([346.2, 0.5876420736312866, 307.74666666666667])
+    .add(shift);
+  game.camera = new THREE.PerspectiveCamera();
+  game.camera.position
+    .fromArray([345.1920864307181, 4.0385297055782505, 308.0726186706492])
+    .add(shift);
+  game.cameraFollowTarget = new THREE.Vector3()
+    .fromArray([346.2, 1.8876420736312866, 307.81])
+    .add(shift);
+  game.yaw = -1.4044635973207735;
+  game.pitch = 1.05;
+  const feet = game.player.position.clone(),
+    look = { yaw: game.yaw, pitch: game.pitch },
+    target = feet.clone().add(new THREE.Vector3(0, 1.3, 0)),
+    desiredAt = (yaw, pitch) =>
+      target
+        .clone()
+        .add(
+          new THREE.Vector3(
+            Math.sin(yaw) * Math.cos(pitch) * 5.3,
+            Math.sin(pitch) * 5.3 + 0.2,
+            Math.cos(yaw) * Math.cos(pitch) * 5.3,
+          ),
+        ),
+    desired = desiredAt(game.yaw, game.pitch);
+  for (const yaw of [-0.3, 0, 0.3])
+    for (const pitch of [-0.4, -0.2, 0])
+      assert(
+        constrainCamera(
+          target,
+          desiredAt(game.yaw + yaw, game.pitch + pitch),
+          game.cameraSurfaces,
+          () => true,
+        ).distanceTo(target) < 2.2,
+        "small neighboring views remain blocked by the actual pillar",
+      );
+  for (let frame = 0; frame < 120; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, () => true),
+    );
+    game.cameraFollowTarget = target.clone();
+    assert(game.camera.position.distanceTo(target) >= 2.2 - 1e-8);
+    assert.equal(game.cameraSurfaces.entry(target, game.camera.position, 0), 1);
+    assert(game.player.position.equals(feet));
+    assert.deepEqual({ yaw: game.yaw, pitch: game.pitch }, look);
+    assert.deepEqual(game.counterweights.saved, saved);
+  }
 });
 
 test("pulling a counterweight reverses the walking cycle", () => {
