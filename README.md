@@ -82,6 +82,10 @@ against rendered terrain across fresh and restored gate states.
 The [cloud bridge posts now reserve body clearance in their rotated frame](docs/bridge-post-clearance.md),
 repairing the recorded shoulder and pack overlap. Small stone trims also join
 camera collision; continuous routes and older-save recovery are verified.
+The [25 cloud climbing piers now have fitted granite and recessed bays](docs/cloud-climbing-piers.md),
+matching the surrounding citadels with backed corners and seated reliefs.
+Complete landing roofs, climbing routes and native keyboard/touch saves are
+verified against the revised construction.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

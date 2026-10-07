@@ -471,6 +471,67 @@ test("all 105 climbing piers have finite fitted masonry, bounded batches and fla
   assert.equal(count, 21);
 });
 
+test("the cloud climbing pier bays have real recessed granite backs on every side", (t) => {
+  const g = world(
+      t,
+      LEVELS.find((l) => l.biome === "sky"),
+    ),
+    ray = new THREE.Raycaster();
+  let sides = 0;
+  for (const c of g.traversalCourses)
+    for (const l of c.ledges.slice(1))
+      for (let face = 0; face < 4; face++) {
+        const angle = (face * Math.PI) / 2,
+          across = l.index % 2 ? 0.95 : 0,
+          normal = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)),
+          tangent = new THREE.Vector3(Math.cos(angle), 0, -Math.sin(angle)),
+          half = face % 2 ? l.w : l.d,
+          point = new THREE.Vector3(l.x, l.y - 1.85, l.z)
+            .addScaledVector(tangent, across)
+            .addScaledVector(normal, half + 0.2);
+        ray.set(point, normal.clone().negate());
+        ray.far = 1;
+        const hit = ray.intersectObject(c.art.fixed, true)[0];
+        assert(hit, `${c.id}/${l.index}/${face}: open niche backing`);
+        assert(
+          hit.distance > 0.45 && hit.distance < 0.7,
+          `${c.id}/${l.index}/${face}: a bay must have physical depth, ${hit.distance} m`,
+        );
+        sides++;
+      }
+  assert.equal(sides, 80);
+});
+
+test("cloud pier outer facing edges have buried support beneath their full footprint", (t) => {
+  const g = world(
+      t,
+      LEVELS.find((l) => l.biome === "sky"),
+    ),
+    ray = new THREE.Raycaster();
+  let samples = 0;
+  for (const c of g.traversalCourses)
+    for (const l of c.ledges) {
+      const bottom = c.art.piers[l.index].bottom;
+      for (let ix = 0; ix <= 10; ix++)
+        for (let iz = 0; iz <= 10; iz++) {
+          const x = l.x - l.w + 0.03 + (ix * (2 * l.w - 0.06)) / 10,
+            z = l.z - l.d + 0.03 + (iz * (2 * l.d - 0.06)) / 10;
+          ray.set(
+            new THREE.Vector3(x, bottom - 1, z),
+            new THREE.Vector3(0, 1, 0),
+          );
+          ray.far = l.y - bottom + 2;
+          const hit = ray.intersectObject(c.art.fixed, true)[0];
+          assert(
+            hit && hit.point.y < g.groundHeight(x, z) + 0.015,
+            `${c.id}/${l.index}: unsupported facing edge at ${x},${z}`,
+          );
+          samples++;
+        }
+    }
+  assert.equal(samples, 3025);
+});
+
 test("all anchor yokes track the real pendulum and leave the rope swept path clear", (t) => {
   for (const level of LEVELS) {
     const g = world(t, level),

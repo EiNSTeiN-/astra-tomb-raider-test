@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cloud climbing piers](cloud-climbing-piers.md) replace the rectangular
+  ashlar grid on all 25 sky piers with fitted granite, backed corner stones,
+  120 tapered bays and seated regional reliefs. A buried full bearing bed
+  also closes the thin facing-edge gap found by denser sampling. The 802-check
+  campaign suite passes, followed by all sixteen climbing checks after the
+  final corner refinement; the production build passes. All 11,025 roof,
+  3,025 foundation and 1,080 bay-backing browser rays pass. Five continuous
+  routes retain health 100 and full opacity across 7,758 updates, with exact
+  captured movement, look and camera poses matching the preceding milestone.
+  Both keyboard/High and touch/Low production climbs, descents and complete
+  reloads pass without arrival corrections. All 115 construction, 131 route,
+  fourteen native and 45 comparison captures are reviewed. The five-pier
+  layout and broader scene composition still repeat; wider visual and
+  subjective listening/device acceptance remain open.
+
 - [Cloud bridge post clearance](bridge-post-clearance.md) repairs the recorded
   body overlap with rotated stone columns and includes 144 small trims in
   camera collision. All 800 checks, the build and five continuous climbing

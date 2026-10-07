@@ -3,6 +3,7 @@ import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture, pbrMaterial } from "./visuals.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { footprintMinimum } from "./masonry-foundations.js";
+import { buildSkyClimbingPier } from "./sky-climbing-piers.js";
 
 // Local materials retain the chapter's masonry treatment. The dimensions here
 // describe the visible shell; the course plan remains the traversal authority.
@@ -237,70 +238,91 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       rows = Math.min(10, Math.max(1, Math.ceil(wallHeight / style.row))),
       rowH = wallHeight / rows;
     const recessAt = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
-    // Fit the backing to the widened foot/head courses and recessed middle.
-    // At most three closed blocks carry every horizontal mortar joint; using
-    // one narrow centre core left the ends of the wider joints open to the sky.
-    for (let first = 0; first < rows;) {
-      const recess = recessAt(first);
-      let end = first + 1;
-      while (end < rows && recessAt(end) === recess) end++;
-      mesh(
-        new THREE.BoxGeometry(
-          width - recess * 2 - 0.01,
-          (end - first) * rowH + 0.02,
-          depth - recess * 2 - 0.01,
-        ),
-        materials.stone,
-        ledge.x,
-        ground + ((first + end) * rowH) / 2,
-        ledge.z,
+    let skyFacade;
+    if (game.level.biome === "sky") {
+      skyFacade = buildSkyClimbingPier({
+        ledge,
+        width,
+        depth,
+        ground,
+        wallHeight,
+        seed: game.level.seed + plan.stage * 113 + ledge.index * 997,
+        materials,
         fixed,
-        0.7,
-      );
-      first = end;
-    }
-    for (let row = 0; row < rows; row++) {
-      const y = ground + (row + 0.5) * rowH,
-        recess = recessAt(row);
-      for (let face = 0; face < 4; face++) {
-        const along = face % 2 ? depth : width,
-          count = Math.ceil(along / style.block),
-          step = along / count;
-        // Alternate bonds use half-stones at each end, with backed mortar seams.
-        const ends =
-          row % 2
-            ? [
-                0,
-                ...Array.from({ length: count }, (_, i) => (i + 0.5) * step),
-                along,
-              ]
-            : Array.from({ length: count + 1 }, (_, i) => i * step);
-        for (let i = 1; i < ends.length; i++) {
-          const u = (ends[i] + ends[i - 1]) / 2 - along / 2,
-            v = (face % 2 ? width : depth) / 2 - 0.13 - recess,
-            x = face % 2 ? (face === 1 ? v : -v) : u,
-            z = face % 2 ? u : face === 0 ? v : -v;
-          const piece = block(
-            ends[i] - ends[i - 1] - 0.018,
-            rowH - 0.016,
-            0.27,
-            ledge.x + x,
-            y,
-            ledge.z + z,
-            materials.stone,
-            fixed,
-            0.86 + ((row * 7 + i * 11 + face * 3) % 9) * 0.027,
-            false,
-            true,
-          );
-          piece.rotation.y =
-            face === 0
-              ? 0
-              : face === 1
-                ? Math.PI / 2
-                : face === 2
-                  ? Math.PI
-                  : -Math.PI / 2;
+        detail,
+        mesh,
+      });
+      // Keep all later paving, frame and bearing seeds stable.
+      for (let row = 0; row < rows; row++)
+        for (let face = 0; face < 4; face++)
+          serial +=
+            Math.ceil((face % 2 ? depth : width) / style.block) + (row % 2);
+    } else {
+      // Fit the backing to the widened foot/head courses and recessed middle.
+      // At most three closed blocks carry every horizontal mortar joint; using
+      // one narrow centre core left the ends of the wider joints open to the sky.
+      for (let first = 0; first < rows;) {
+        const recess = recessAt(first);
+        let end = first + 1;
+        while (end < rows && recessAt(end) === recess) end++;
+        mesh(
+          new THREE.BoxGeometry(
+            width - recess * 2 - 0.01,
+            (end - first) * rowH + 0.02,
+            depth - recess * 2 - 0.01,
+          ),
+          materials.stone,
+          ledge.x,
+          ground + ((first + end) * rowH) / 2,
+          ledge.z,
+          fixed,
+          0.7,
+        );
+        first = end;
+      }
+      for (let row = 0; row < rows; row++) {
+        const y = ground + (row + 0.5) * rowH,
+          recess = recessAt(row);
+        for (let face = 0; face < 4; face++) {
+          const along = face % 2 ? depth : width,
+            count = Math.ceil(along / style.block),
+            step = along / count;
+          // Alternate bonds use half-stones at each end, with backed mortar seams.
+          const ends =
+            row % 2
+              ? [
+                  0,
+                  ...Array.from({ length: count }, (_, i) => (i + 0.5) * step),
+                  along,
+                ]
+              : Array.from({ length: count + 1 }, (_, i) => i * step);
+          for (let i = 1; i < ends.length; i++) {
+            const u = (ends[i] + ends[i - 1]) / 2 - along / 2,
+              v = (face % 2 ? width : depth) / 2 - 0.13 - recess,
+              x = face % 2 ? (face === 1 ? v : -v) : u,
+              z = face % 2 ? u : face === 0 ? v : -v;
+            const piece = block(
+              ends[i] - ends[i - 1] - 0.018,
+              rowH - 0.016,
+              0.27,
+              ledge.x + x,
+              y,
+              ledge.z + z,
+              materials.stone,
+              fixed,
+              0.86 + ((row * 7 + i * 11 + face * 3) % 9) * 0.027,
+              false,
+              true,
+            );
+            piece.rotation.y =
+              face === 0
+                ? 0
+                : face === 1
+                  ? Math.PI / 2
+                  : face === 2
+                    ? Math.PI
+                    : -Math.PI / 2;
+          }
         }
       }
     }
@@ -393,7 +415,8 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         0.95,
       );
       // Recessed carved panels and their paired borders break up tall faces.
-      if (height > 3.7) {
+      if (height > 3.7 && game.level.biome === "sky") serial += 8;
+      else if (height > 3.7) {
         const y = top - 2.0,
           z = ledge.z + side * (ledge.d - style.inset - 0.015);
         block(0.86, 1.72, 0.045, ledge.x, y, z, materials.stone, detail, 0.68);
@@ -445,6 +468,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       bottom: ground,
       capRows,
       capColumns,
+      ...(skyFacade && { skyFacade }),
     });
   }
 

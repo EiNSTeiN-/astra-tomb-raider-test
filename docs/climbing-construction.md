@@ -119,3 +119,9 @@ development and production launchers.
 The construction improves the climbing routes' presentation. The campaign's
 roughly one-hour chapter duration remains unverified, and its real-time graphics
 remain below the requested AAA target.
+
+The later [cloud-pier treatment](cloud-climbing-piers.md) replaces the
+rectangular wall grid on the current 25 sky piers with fitted granite, tapered
+bays and backed corner stones. It preserves the complete landing roofs and
+verifies denser foundation sampling, all five continuous cloud loops and native
+keyboard/touch climbing and reloads. Broader course composition remains open.
