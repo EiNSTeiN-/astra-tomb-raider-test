@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal walking-camera recovery](coastal-walking-camera.md) repairs the
+  recorded canal-edge and column-side fades. Both complete assisted climbing
+  loops retain full character visibility across 7,254 camera updates, with
+  minimum arms of 2.380 m and 2.694 m. All 97 final route captures and all
+  42 before/revised pose images are reviewed. All 787 campaign checks and the
+  production build pass. Two native keyboard/High and touch/Low cases preserve
+  movement, health and complete-store reloads; three arrival corrections are
+  independently proved, and all six native captures are reviewed. Remaining
+  continuous routes, repeated course forms, broader landscape composition and
+  subjective audio/device acceptance remain open.
+
 - [Regional cable terminals](climbing-terminals.md) give all 42 ends fitted
   regional caps and backed carvings. Higher stayed frames clear all 277,200
   sampled sheave vertices along the 21 cable paths. Moving summit posts and

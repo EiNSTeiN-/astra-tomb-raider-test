@@ -3,7 +3,7 @@ import { constrainCamera, followCamera } from "./camera-collision.js";
 
 // Pillars, shafts and overhead parts can close the interpolated follow path
 // even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
-// yaw to .9 only when that neighborhood cannot fit a comfortable view. Keep
+// yaw to 1.5 only when that neighborhood cannot fit a comfortable view. Keep
 // the player's chosen look in save data throughout collision response.
 export function followClearCamera(
   game,
@@ -57,7 +57,10 @@ export function followClearCamera(
       ...nearbyCandidates,
       // A close pillar can cover the entire small neighborhood. Try its sides
       // only if none of those rays provides enough room for the explorer.
-      ...[-0.45, 0.45, -0.6, 0.6, -0.9, 0.9].flatMap((yaw) =>
+      ...[
+        -0.45, 0.45, -0.6, 0.6, -0.9, 0.9, -1.05, 1.05, -1.2, 1.2, -1.35, 1.35,
+        -1.5, 1.5,
+      ].flatMap((yaw) =>
         [0, -0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
       ),
     ];

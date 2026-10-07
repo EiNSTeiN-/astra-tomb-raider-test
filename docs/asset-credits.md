@@ -936,3 +936,12 @@ positioned machine/hoist synthesis and quiet chapter scores. No external
 asset, recording, music or dependency is added. Its four documentation images
 are actual game captures converted losslessly to WebP, with identical decoded
 RGBA pixels and dimensions.
+
+The [coastal walking-camera repair](coastal-walking-camera.md) extends original
+collision-response code and adds a delivered-map regression. Existing coastal
+construction, credited regional materials, explorer model, positioned ambience
+and quiet chapter/objective music are retained. No external asset or dependency
+is added. Its four documentation images are actual game captures converted
+losslessly to WebP, with identical decoded RGBA pixels and dimensions. The
+comparison captions distinguish the original moving frames from stationary
+replays of the same feet and chosen look.

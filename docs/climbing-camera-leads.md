@@ -89,3 +89,9 @@ Repeated course forms, continuous campaign routes and subjective audio/device
 acceptance remain open in the [visual audit](visual-audit.md). These scoped
 repairs do not establish AAA graphics, consumer-device performance or human
 playthrough quality.
+
+The subsequent [coastal walking-camera pass](coastal-walking-camera.md) completes
+both continuous coastal loops and repairs their recorded canal-edge and
+column-side fades. The wider review also completes jungle, desert, snow,
+volcanic and opening cloud loops. Remaining routes and repeated course forms
+still require review.

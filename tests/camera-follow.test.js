@@ -1,4 +1,5 @@
 import test from "node:test";
+import * as THREE from "three";
 import assert from "node:assert/strict";
 import {
   BoxGeometry,
@@ -14,6 +15,10 @@ import {
   constrainCamera,
   followCamera,
 } from "../src/camera-collision.js";
+import { LEVELS, createMap } from "../src/campaign.js";
+import { createTerrainProfile } from "../src/terrain.js";
+import { Adventure } from "../src/game.js";
+import { buildPalaceArchitecture } from "../src/palace-architecture.js";
 import { followClearCamera } from "../src/camera-follow.js";
 
 function fixture(t, wall = false) {
@@ -123,8 +128,9 @@ test("nearby view recovery preserves ordinary follow during aimed, water and tra
   }
 });
 
-test("a wall that closes all nearby orbits retains the safe retracted view", (t) => {
-  const { game, target, desired, space } = fixture(t, true),
+test("an enclosed corridor with no clear escape retains the safe retracted view", (t) => {
+  const { game, target, desired } = fixture(t, true),
+    space = (p) => p.y >= 0.28 && p.y <= 2.8 && Math.abs(p.x - target.x) <= 0.8,
     expected = followCamera(
       game.camera.position,
       target,
@@ -231,5 +237,118 @@ test("a tall entrance support permits wider walking clearance without changing t
     assert.equal(surfaces.entry(target, game.camera.position, 0), 1);
     assert(game.player.position.equals(feet));
     assert.deepEqual({ yaw: game.yaw, pitch: game.pitch }, look);
+  }
+});
+
+// This is the first hidden frame on the continuous coastal canal approach review.
+// Build the delivered court construction and terrain rather than approximating
+// the canal's map boundary with a synthetic wall.
+test("a coastal canal approach keeps a visible safe camera while preserving the chosen look", (t) => {
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
+  const level = LEVELS[3],
+    map = createMap(level),
+    terrain = createTerrainProfile(map, level),
+    world = new Group(),
+    game = Object.assign(Object.create(Adventure.prototype), {
+      level,
+      map,
+      world,
+      terrainProfile: terrain,
+      groundHeight: terrain.height,
+      obstacles: [],
+      cameraSurfaces: new CameraSurfaces(world),
+      stoneMat: new MeshStandardMaterial(),
+      darkMat: new MeshStandardMaterial(),
+      player: new Group(),
+      camera: new PerspectiveCamera(),
+      store: { data: { settings: { quality: "high" } } },
+    });
+  buildPalaceArchitecture(game);
+  game.cameraSurfaces.rebuild();
+  t.after(() => {
+    const geometries = new Set(),
+      materials = new Set(),
+      textures = new Set();
+    world.traverse((o) => {
+      if (o.geometry) geometries.add(o.geometry);
+      for (const m of o.material
+        ? Array.isArray(o.material)
+          ? o.material
+          : [o.material]
+        : []) {
+        materials.add(m);
+        for (const value of Object.values(m))
+          if (value?.isTexture) textures.add(value);
+      }
+    });
+    geometries.forEach((g) => g.dispose());
+    materials.forEach((m) => m.dispose());
+    textures.forEach((x) => x.dispose());
+  });
+  for (const pose of [
+    {
+      feet: [186.01625532830303, 0.21973156187096304, 178.33353153957142],
+      camera: [185.76848424627238, 2.436529240855932, 176.31848741222237],
+      yaw: -1.5880134247460416,
+      step: [0.0016255328303, -0.066646846043],
+    },
+  ]) {
+    game.player.position.fromArray(pose.feet);
+    game.camera.position.fromArray(pose.camera);
+    game.yaw = pose.yaw;
+    game.pitch = 0.35;
+    const target = game.player.position.clone().add(new Vector3(0, 1.3, 0)),
+      desired = target
+        .clone()
+        .add(
+          new Vector3(
+            Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+            Math.sin(game.pitch) * 5.3 + 0.2,
+            Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+          ),
+        ),
+      space = (p) => game.cameraSpace(p),
+      feet = game.player.position.clone();
+    game.cameraFollowTarget = target
+      .clone()
+      .sub(new Vector3(pose.step[0], 0, pose.step[1]));
+    assert(
+      followCamera(
+        game.camera.position,
+        target,
+        desired,
+        1 / 60,
+        game.cameraSurfaces,
+        space,
+        game.cameraFollowTarget,
+      ).distanceTo(target) < 2.2,
+      "ordinary follow reproduces the hidden canal approach",
+    );
+    for (let frame = 0; frame < 120; frame++) {
+      game.camera.position.copy(
+        followClearCamera(game, target, desired, 1 / 60, space),
+      );
+      game.cameraFollowTarget.copy(target);
+      assert(
+        game.camera.position.distanceTo(target) >= 2.2 - 1e-8,
+        "explorer stays outside the fade range",
+      );
+      assert.equal(
+        game.cameraSurfaces.entry(target, game.camera.position, 0),
+        1,
+        "court geometry remains between neither lens nor explorer",
+      );
+      assert(
+        space(game.camera.position),
+        "camera remains within the playable map and above terrain",
+      );
+      assert(game.player.position.equals(feet));
+      assert.equal(game.yaw, pose.yaw);
+      assert.equal(game.pitch, 0.35);
+    }
   }
 });

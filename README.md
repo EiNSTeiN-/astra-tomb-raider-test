@@ -64,6 +64,9 @@ construction, ordinary look input and native boarding and save recovery.
 The [42 return-cable terminals now have regional caps and backed carvings](docs/climbing-terminals.md).
 Higher stayed frames clear the sheaves, and the summit posts and winches sit
 back from the reading edge to retain a clear view of the explorer.
+The [coastal walking camera now recovers around canal edges and columns](docs/coastal-walking-camera.md),
+keeping the explorer visible through both recorded approach, climbing and
+return loops while preserving the chosen look.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
