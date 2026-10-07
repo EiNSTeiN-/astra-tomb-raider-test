@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Supported paths beside cloud bridges](bridge-side-paths.md) grade outer
+  excavations beneath parallel walking cells. All eighteen recorded standing
+  poses and 54,252 sampled body vertices clear the terrain; the continuous
+  return clears queried soles across 92 nearby samples. All 797 checks, the
+  build, 36 crosswind crossings, five complete climbing loops and both native
+  input/reload cases pass. Working pads, deck heights and puzzle/audio access
+  are retained. All 78 bank, 129 loop, 36 crossing and six native captures are
+  reviewed. An overhanging rock silhouette beside span 13 needs further review;
+  broader composition and listening/device acceptance remain open.
+
 - [Cloud-bridge approach steps](bridge-approach-steps.md) use the full permitted
   45 cm grounded rise, repairing the recorded descent through the deck and
   cliff. The actual-world return completes with no embedded queried soles

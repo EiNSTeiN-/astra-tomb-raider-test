@@ -30,7 +30,7 @@ import { terrainMaterial } from "./terrain-material.js";
 import { trailSampler } from "./habitat.js";
 import { coastalLayout } from "./coastal-layout.js";
 import { refineSkyTerrain } from "./sky-geology.js";
-import { skyBankDrop } from "./sky-banks.js";
+import { skyBankDrop, skyBridgePathWeight } from "./sky-banks.js";
 import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { buildJungleFringe } from "./jungle-fringe.js";
@@ -55,6 +55,9 @@ export function createTerrainProfile(map, level) {
   const biome = level.biome;
   const waters = waterSites(map, level);
   const upperHeights = biome === "sky" ? new Float32Array(width * width) : null;
+  const walkingDistances = upperHeights
+    ? new Float32Array(width * width)
+    : null;
   const coastal = biome === "water" ? coastalLayout(map) : null;
   const trail = ["jungle", "sky"].includes(biome) ? trailSampler(map) : () => 0;
   const raw = (x, z) => {
@@ -165,6 +168,7 @@ export function createTerrainProfile(map, level) {
             );
           }
         const rise = 1 - Math.exp(-distance * 0.72);
+        if (walkingDistances) walkingDistances[iz * width + ix] = distance;
         if (biome === "sky") height -= skyBankDrop(x, z, distance, level.seed);
         else if (biome === "water") height -= rise * 7;
         else if (biome === "desert")
@@ -299,7 +303,16 @@ export function createTerrainProfile(map, level) {
           cascadeDepth,
         );
       for (const bridge of bridges) {
-        const cut = bridgeCut(bridge, x, z);
+        const cut =
+          bridgeCut(bridge, x, z) *
+          (walkingDistances
+            ? skyBridgePathWeight(
+                bridge,
+                x,
+                z,
+                walkingDistances[iz * width + ix],
+              )
+            : 1);
         if (cut <= 0) continue;
         const dx = bridge.bx - bridge.ax,
           dz = bridge.bz - bridge.az,

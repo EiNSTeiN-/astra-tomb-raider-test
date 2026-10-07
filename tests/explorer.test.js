@@ -99,6 +99,63 @@ async function groundedActor() {
   };
 }
 
+test("the delivered explorer fits the parallel cloud paths beside bridge excavations in all recorded standing directions", async () => {
+  const level = LEVELS[5],
+    map = createMap(level),
+    terrain = createTerrainProfile(map, level);
+  let vertices = 0;
+  for (const [x, z] of [
+    [150.9333530360556, 250.8682373802884],
+    [141.9149843311697, 250.56885970395996],
+    [272.5664212216975, 285.8801496273359],
+    [150.9333530360556, 252.26823738028838],
+    [145.1503189834919, 252.00110047808104],
+    [142.38249089641008, 252.0046714309708],
+  ]) {
+    const game = await groundedActor(),
+      soles = strideSoles(game.rig.model);
+    Object.assign(game, {
+      level,
+      map,
+      terrainProfile: terrain,
+      groundHeight: terrain.height,
+      actualMoveSpeed: 0,
+      moveVelocity: { x: 0, z: 0 },
+    });
+    game.player.position.set(x, terrain.height(x, z), z);
+    for (const facing of [0, -1.4572976, Math.PI]) {
+      game.rig.mixer.stopAllAction();
+      game.rig.actions.Idle.reset().play();
+      game.rig.state = "Idle";
+      game.rig.grounding = undefined;
+      game.avatar.rotation.y = facing;
+      game.avatar.position.set(0, 0, 0);
+      for (let frame = 0; frame < 60; frame++)
+        animateExplorer(game, 1 / 60, false, false);
+      game.player.updateMatrixWorld(true);
+      for (const point of sampleStrideSoles(soles).flat())
+        assert(
+          point.y - terrain.height(point.x, point.z) >= -0.015,
+          "the rendered outsole stays outside the path ground",
+        );
+      game.rig.model.traverse((o) => {
+        if (!o.isSkinnedMesh) return;
+        for (let i = 0; i < o.geometry.attributes.position.count; i += 16) {
+          const point = o
+            .getVertexPosition(i, new THREE.Vector3())
+            .applyMatrix4(o.matrixWorld);
+          assert(
+            point.y - terrain.height(point.x, point.z) >= -0.015,
+            "sampled body and equipment vertices stay outside the ground",
+          );
+          vertices++;
+        }
+      });
+    }
+  }
+  assert(vertices > 10000);
+});
+
 test("causeway hand contact survives reach, turning and release on the delivered mesh without stretching bones", async (t) => {
   const game = await groundedActor();
   Object.assign(game, {

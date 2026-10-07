@@ -1,5 +1,10 @@
 # Rounded rock shoulders on the cloud terraces
 
+The later [bridge-side path grading](bridge-side-paths.md) intentionally changes
+3,159 walking vertices to repair boot and leg contact beside bridge excavation
+fringes. The exact walking-height retention below describes this earlier
+shoulder milestone.
+
 The sky chapter's banks now descend through wider, uneven rocky shoulders beside
 the walking terraces. The previous bank term removed 19.7 m at the first coarse
 sample 1.75 m outside a walking cell, which left square caps and nearly vertical

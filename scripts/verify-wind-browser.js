@@ -42,6 +42,9 @@ export function inspectWind(game) {
       ...s.nodes.flatMap((n) =>
         [n.air, n.bearing].map((source) => ({
           id: source.id,
+          // Fixed bearings never turn, so their bearing voice stays silent.
+          // Keep its occlusion result, but distinguish it from audible fronts.
+          canEmit: source === n.air || !!n.control,
           clear: game.lineOfSight(
             n.control?.group.position ||
               new THREE.Vector3(n.air.x, n.air.y - 3.05, n.air.z + 1.5),
@@ -51,6 +54,7 @@ export function inspectWind(game) {
       ),
       ...s.fans.map(({ sound: source }) => ({
         id: source.id,
+        canEmit: true,
         clear: game.lineOfSight(
           new THREE.Vector3(
             source.x,

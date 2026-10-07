@@ -73,6 +73,9 @@ keyboard/touch boarding and reloads. Broader visual acceptance remains open.
 [Cloud bridge approaches now use the full permitted step height](docs/bridge-approach-steps.md),
 keeping the recorded return walk on the deck instead of descending through
 the cliff, with verified rendered sole contact and native input/reloads.
+[Parallel paths beside cloud bridges now retain supported walking ground](docs/bridge-side-paths.md),
+clearing the recorded boot and leg intersections while preserving deck heights,
+puzzle access and local saves. Wider visual review continues.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
