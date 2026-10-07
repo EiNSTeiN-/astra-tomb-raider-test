@@ -67,8 +67,10 @@ same with the preceding terrain and the revised surface. Runtime sound sources,
 distance falloff and the themed scores retain their existing behavior.
 
 Bank review also identifies a pointed rock silhouette hanging over the cliff
-beside span 13. Its support and placement need a separate review; the current
-contact measurements concern the explorer and planting.
+beside span 13. The subsequent [cloud-cliff stone fitting](cloud-cliff-stones.md)
+reproduces its unsupported edge and seats the narrow underside into the ridge.
+The contact measurements above concern the explorer and planting at this
+earlier milestone.
 
 ![Recorded return stance with boots and lower legs inside the path](images/bridge-side-paths/return-before.webp)
 

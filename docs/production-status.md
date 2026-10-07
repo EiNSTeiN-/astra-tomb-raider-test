@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Supported cloud-cliff stones](cloud-cliff-stones.md) repair the recorded
+  hanging scan edge beside span 13. All 79 retained stones have buried roots
+  across 36,464 rendered-terrain underside rays per progress state. The regenerated
+  meadow's 3,105,936 root rays also pass, and both layouts remain identical
+  after restoring nine open gates. All 798 checks, the production build and
+  five continuous climbing loops pass across 7,634 updates. Both keyboard/High
+  and touch/Low production cases preserve movement, health and stable reloads.
+  All 78 bank, 129 loop and six native captures are reviewed. Puzzle and
+  potentially audible sound-source approaches remain clear. The loop review
+  records a separate partial body obstruction behind a bridge post as VA-67.
+  Broader visual and listening/device acceptance remain open.
+
 - [Supported paths beside cloud bridges](bridge-side-paths.md) grade outer
   excavations beneath parallel walking cells. All eighteen recorded standing
   poses and 54,252 sampled body vertices clear the terrain; the continuous
@@ -26,8 +38,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   build, 36 crosswind crossings, five complete climbing loops and both native
   input/reload cases pass. Working pads, deck heights and puzzle/audio access
   are retained. All 78 bank, 129 loop, 36 crossing and six native captures are
-  reviewed. An overhanging rock silhouette beside span 13 needs further review;
-  broader composition and listening/device acceptance remain open.
+  reviewed. The subsequent stone-fitting pass above repairs the observed
+  overhanging rock edge. Broader composition and listening/device acceptance
+  remain open.
 
 - [Cloud-bridge approach steps](bridge-approach-steps.md) use the full permitted
   45 cm grounded rise, repairing the recorded descent through the deck and

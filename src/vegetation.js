@@ -445,7 +445,9 @@ export async function loadNature(game) {
         return [{ geometry, material }];
       });
       const chunks = new Map();
-      const footprint = rock ? stoneFootprint(tiers[0][0].geometry) : null;
+      const footprint = rock
+        ? stoneFootprint(tiers[0][0].geometry, { edgeProbes: biome === "sky" })
+        : null;
       for (let i = s; i < spots.length; i += sources.length) {
         const p = spots[i],
           key = `${Math.floor(p.x / 40)},${Math.floor(p.z / 40)}`;

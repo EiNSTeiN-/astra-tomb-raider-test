@@ -47,7 +47,7 @@ const shapes = doc
     geometry.dispose();
     return stoneFootprint(normalized.geometry);
   });
-function gaps(shape, matrix, profile) {
+function gaps(shape, matrix, profile, divisions = 6) {
   const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
     mesh = new THREE.Mesh(shape.geometry, material);
   mesh.matrixAutoUpdate = false;
@@ -57,10 +57,10 @@ function gaps(shape, matrix, profile) {
     ray = new THREE.Raycaster(),
     samples = [];
   // Independent world-space rays do not repeat the local grid used for fitting.
-  for (let iz = 1; iz < 6; iz++)
-    for (let ix = 1; ix < 6; ix++) {
-      const x = THREE.MathUtils.lerp(box.min.x, box.max.x, ix / 6),
-        z = THREE.MathUtils.lerp(box.min.z, box.max.z, iz / 6);
+  for (let iz = 1; iz < divisions; iz++)
+    for (let ix = 1; ix < divisions; ix++) {
+      const x = THREE.MathUtils.lerp(box.min.x, box.max.x, ix / divisions),
+        z = THREE.MathUtils.lerp(box.min.z, box.max.z, iz / divisions);
       ray.set(
         new THREE.Vector3(x, box.min.y - 5, z),
         new THREE.Vector3(0, 1, 0),
@@ -71,6 +71,48 @@ function gaps(shape, matrix, profile) {
   material.dispose();
   return samples;
 }
+
+test("the observed cloud-cliff rock seats its narrow underside against rendered terrain", () => {
+  const shape = shapes.find(
+      (s) =>
+        s.geometry.attributes.position.count === 1305 &&
+        s.geometry.index.count / 3 === 2116,
+    ),
+    profile = createTerrainProfile(createMap(LEVELS[5]), LEVELS[5]),
+    ground = { height: (x, z) => rockGroundHeight(profile, x, z) },
+    // Actual Float32 instance transform from the span 13 approach camera.
+    observed = new THREE.Matrix4().fromArray([
+      -1.2680180072784424, 0, -0.07774396985769272, 0, 0, 1.2703990936279297, 0,
+      0, 0.07774396985769272, 0, -1.2680180072784424, 0, 216.47341918945312,
+      27.934051513671875, 262.4482116699219, 1,
+    ]);
+  assert(shape);
+  assert(
+    shape.underside.every((point) => {
+      const p = point.clone().applyMatrix4(observed);
+      return p.y < ground.height(p.x, p.z);
+    }),
+    "the original coarse fitting samples miss the defect",
+  );
+  const before = gaps(shape, observed, ground, 32);
+  assert(before.length > 600);
+  assert(Math.max(...before) > 0.6, "observed hanging edge must be reproduced");
+  const fitted = stoneFootprint(shape.geometry, { edgeProbes: true }),
+    placed = seatStone(ground, fitted, {
+      x: observed.elements[12],
+      z: observed.elements[14],
+      size: observed.elements[5],
+      yaw: Math.atan2(observed.elements[8], observed.elements[0]),
+    });
+  assert(placed, "a supported part of this scan remains visible");
+  const after = gaps(fitted, placed.matrix, ground, 32);
+  assert(after.length > 600);
+  assert(
+    Math.max(...after) < -0.007,
+    "independent underside rays must meet soil",
+  );
+  assert(placed.exposed > 0.12);
+});
 
 test("the six delivered rock undersides fit shallow slopes without altering their source geometry", () => {
   assert.equal(shapes.length, 6);
