@@ -81,3 +81,8 @@ landscape composition are still under review. Repeated course forms and the
 open findings in the [visual audit](visual-audit.md) remain. This camera repair
 adds no subjective listening evidence, consumer-device benchmark or AAA-quality
 claim.
+
+The subsequent [climbing approach and return-cable pass](climbing-turn-camera.md)
+checks eleven continuous cloud, crystal and eclipse loops and repairs the
+recorded crystal/cloud fades. The milestone above describes its own runtime
+and evidence; wider body contact and visual acceptance remain open.

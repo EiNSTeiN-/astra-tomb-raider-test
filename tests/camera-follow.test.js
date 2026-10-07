@@ -19,6 +19,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { buildPalaceArchitecture } from "../src/palace-architecture.js";
+import { buildSkyBridges } from "../src/sky-bridges.js";
 import { followClearCamera } from "../src/camera-follow.js";
 
 function fixture(t, wall = false) {
@@ -100,7 +101,120 @@ test("an overhead wind coupling can clear a nearby walking camera without rewrit
   assert(Math.abs(pitch - game.pitch) <= 0.4 + 1e-8);
 });
 
-test("nearby view recovery preserves ordinary follow during aimed, water and traversal views", (t) => {
+function terrainFixture(t, chapter, bridge = false) {
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
+  const level = LEVELS[chapter],
+    map = createMap(level),
+    terrain = createTerrainProfile(map, level),
+    world = new Group(),
+    game = Object.assign(Object.create(Adventure.prototype), {
+      level,
+      map,
+      world,
+      terrainProfile: terrain,
+      groundHeight: terrain.height,
+      obstacles: [],
+      cameraSurfaces: new CameraSurfaces(world),
+      player: new Group(),
+      camera: new PerspectiveCamera(),
+      progress: { stage: 9, field: [], routeVersion: 1 },
+      elapsed: 0,
+      stoneMat: new MeshStandardMaterial(),
+      goldMat: new MeshStandardMaterial(),
+      store: { data: { settings: { quality: "high" } } },
+    });
+  if (bridge) buildSkyBridges(game);
+  game.cameraSurfaces.rebuild();
+  t.after(() => {
+    const materials = new Set([game.stoneMat, game.goldMat]);
+    world.traverse((o) => {
+      o.geometry?.dispose();
+      for (const m of o.material ? [o.material].flat() : []) materials.add(m);
+    });
+    for (const m of materials) {
+      for (const value of Object.values(m))
+        if (value?.isTexture) value.dispose();
+      m.dispose();
+    }
+  });
+  return game;
+}
+
+function checkRecordedWalkingView(game, pose, minimum = 2.2) {
+  game.player.position.fromArray(pose.feet);
+  game.camera.position.fromArray(pose.camera);
+  game.yaw = pose.yaw;
+  game.pitch = 0.35;
+  const target = game.player.position.clone().add(new Vector3(0, 1.3, 0)),
+    desired = target
+      .clone()
+      .add(
+        new Vector3(
+          Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+        ),
+      ),
+    space = (p) => game.cameraSpace(p),
+    feet = game.player.position.clone();
+  game.cameraFollowTarget = target.clone();
+  assert(
+    followCamera(
+      game.camera.position,
+      target,
+      desired,
+      1 / 60,
+      game.cameraSurfaces,
+      space,
+      target,
+    ).distanceTo(target) < 2.2,
+    "ordinary follow reproduces the recorded fade",
+  );
+  for (let frame = 0; frame < 120; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, space),
+    );
+    assert(
+      game.camera.position.distanceTo(target) >= minimum - 1e-8,
+      "recovery keeps the explorer outside the fade range",
+    );
+    assert(space(game.camera.position));
+    assert.equal(game.cameraSurfaces.entry(target, game.camera.position, 0), 1);
+    assert(game.player.position.equals(feet));
+    assert.equal(game.yaw, pose.yaw);
+    assert.equal(game.pitch, 0.35);
+  }
+}
+
+test("a crystal slope turn recovers a visible walking view beyond the side neighborhood", (t) => {
+  checkRecordedWalkingView(terrainFixture(t, 6), {
+    feet: [144.0333204806886, 15.830595539541418, 229.199537304783],
+    camera: [143.63657474893444, 17.929487723334116, 230.41142431792628],
+    yaw: -2.2144160504385155,
+  });
+});
+
+test("a cloud terrace turn retains a visible walking view beside its steep bank", (t) => {
+  checkRecordedWalkingView(terrainFixture(t, 5), {
+    feet: [124.49302809827881, 17.82882395520345, 158.17435666724194],
+    camera: [125.83607968509256, 20.720757392466957, 157.60881062189839],
+    yaw: -2.672519111416625,
+  });
+});
+
+test("a cloud return beneath a bridge can use a safe arm shorter than 3.2 m", (t) => {
+  checkRecordedWalkingView(terrainFixture(t, 5, true), {
+    feet: [274.30080774975687, 29.33665148795398, 294.5434672943302],
+    camera: [274.0509741186088, 32.86366622259044, 289.5672847309377],
+    yaw: -10.862638693967446,
+  });
+});
+
+test("nearby view recovery preserves ordinary follow during aimed, water, climbing and rope views", (t) => {
   const { game, target, desired, space } = fixture(t);
   const expected = followCamera(
     game.camera.position,
@@ -111,14 +225,7 @@ test("nearby view recovery preserves ordinary follow during aimed, water and tra
     space,
     game.cameraFollowTarget,
   );
-  for (const flag of [
-    "aiming",
-    "swimming",
-    "diving",
-    "climb",
-    "ropeRide",
-    "zipRide",
-  ]) {
+  for (const flag of ["aiming", "swimming", "diving", "climb", "ropeRide"]) {
     game[flag] = true;
     assert(
       followClearCamera(game, target, desired, 1 / 60, space).equals(expected),
@@ -126,6 +233,22 @@ test("nearby view recovery preserves ordinary follow during aimed, water and tra
     );
     game[flag] = false;
   }
+});
+
+test("a blocked cable camera can recover without changing its ride, feet or selected look", (t) => {
+  const { game, target, desired, space } = fixture(t),
+    ride = { approach: false, time: 0.8 },
+    feet = game.player.position.clone(),
+    look = { yaw: game.yaw, pitch: game.pitch };
+  game.zipRide = ride;
+  const next = followClearCamera(game, target, desired, 1 / 60, space);
+  assert(next.distanceTo(target) >= 2.2 - 1e-8);
+  assert(space(next));
+  assert.equal(game.cameraSurfaces.entry(target, next, 0), 1);
+  assert.equal(game.zipRide, ride);
+  assert.deepEqual(ride, { approach: false, time: 0.8 });
+  assert(game.player.position.equals(feet));
+  assert.deepEqual({ yaw: game.yaw, pitch: game.pitch }, look);
 });
 
 test("an enclosed corridor with no clear escape retains the safe retracted view", (t) => {

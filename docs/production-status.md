@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Climbing approach and return-cable cameras](climbing-turn-camera.md) repair
+  the 24 recorded crystal/cloud fades. Eleven complete assisted loops retain
+  camera opacity across 22,583 updates; all 347 final route captures are reviewed.
+  All 791 campaign checks across 122 files and the build pass. Five native
+  keyboard/High or touch/Low movement and cable cases retain health, progress
+  and stable reloads; all seventeen native images are reviewed. A below-deck
+  save resumes at the nearest bank through the existing recovery policy.
+  Camera opacity and center-ray clearance do not establish full-body visibility
+  or terrain contact. Wider visual, campaign and listening/device acceptance
+  remain open.
+
 - [Coastal walking-camera recovery](coastal-walking-camera.md) repairs the
   recorded canal-edge and column-side fades. Both complete assisted climbing
   loops retain full character visibility across 7,254 camera updates, with

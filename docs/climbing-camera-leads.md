@@ -95,3 +95,8 @@ both continuous coastal loops and repairs their recorded canal-edge and
 column-side fades. The wider review also completes jungle, desert, snow,
 volcanic and opening cloud loops. Remaining routes and repeated course forms
 still require review.
+
+The subsequent [climbing approach and return-cable pass](climbing-turn-camera.md)
+checks eleven continuous cloud, crystal and eclipse loops and repairs the
+recorded crystal/cloud fades. The milestone above describes its own runtime
+and evidence; wider body contact and visual acceptance remain open.

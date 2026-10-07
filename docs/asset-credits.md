@@ -945,3 +945,12 @@ is added. Its four documentation images are actual game captures converted
 losslessly to WebP, with identical decoded RGBA pixels and dimensions. The
 comparison captions distinguish the original moving frames from stationary
 replays of the same feet and chosen look.
+
+The [climbing approach and return-cable camera repair](climbing-turn-camera.md)
+extends original collision-response code and delivered-world regressions. It
+retains existing chapter construction, credited regional materials and explorer
+model, positioned ambience and quiet chapter/objective music. No external
+asset or dependency is added. Its eight documentation images are actual game
+captures converted losslessly to WebP, with identical decoded RGBA pixels and
+dimensions. Captions distinguish moving baseline frames from stationary
+camera replays, settled walking poses and the actual cable grip pose.

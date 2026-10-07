@@ -3,7 +3,7 @@ import { constrainCamera, followCamera } from "./camera-collision.js";
 
 // Pillars, shafts and overhead parts can close the interpolated follow path
 // even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
-// yaw to 1.5 only when that neighborhood cannot fit a comfortable view. Keep
+// yaw to 2.1 only when that neighborhood cannot fit a comfortable view. Keep
 // the player's chosen look in save data throughout collision response.
 export function followClearCamera(
   game,
@@ -30,8 +30,7 @@ export function followClearCamera(
     game.diving ||
     game.aiming ||
     game.climb ||
-    game.ropeRide ||
-    game.zipRide
+    game.ropeRide
   )
     return ordinary;
 
@@ -59,12 +58,12 @@ export function followClearCamera(
       // only if none of those rays provides enough room for the explorer.
       ...[
         -0.45, 0.45, -0.6, 0.6, -0.9, 0.9, -1.05, 1.05, -1.2, 1.2, -1.35, 1.35,
-        -1.5, 1.5,
+        -1.5, 1.5, -1.65, 1.65, -1.8, 1.8, -1.95, 1.95, -2.1, 2.1,
       ].flatMap((yaw) =>
         [0, -0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
       ),
     ];
-  let best;
+  let best, shorter;
   for (const [index, [yawOffset, pitchOffset]] of candidates.entries()) {
     if (index === nearbyCandidates.length && best) break;
     const yaw = game.yaw + yawOffset,
@@ -79,16 +78,24 @@ export function followClearCamera(
           ),
         ),
       safe = constrainCamera(target, end, game.cameraSurfaces, canOccupy);
-    if (safe.distanceTo(target) < 3.2) continue;
+    const safeLength = safe.distanceTo(target);
+    if (safeLength < 2.2) continue;
     const next = follow(end),
       length = next.distanceTo(target),
       score =
         Math.min(length, 3.2) * 2 +
-        Math.min(safe.distanceTo(target), 5.3) -
+        Math.min(safeLength, 5.3) -
         (Math.abs(yawOffset) + Math.abs(pitch - viewPitch)) * 0.5;
+    // A low bridge may leave a visible arm just short of the comfortable
+    // distance. Keep that option only if the full search finds no longer view.
+    if (safeLength < 3.2) {
+      if (!shorter || score > shorter.score) shorter = { next, safe, score };
+      continue;
+    }
     if (!best || score > best.score) best = { next, safe, score };
     if (length >= 3.2) return next;
   }
+  best ||= shorter;
   if (!best) return ordinary;
   if (best.next.distanceTo(target) >= 2.2) return best.next;
   // A narrow shaft may also block the interpolated sweep. Resolve that contact
