@@ -15,6 +15,8 @@ import { updateSoundSources } from "../src/sound-landmarks.js";
 import { Soundscape } from "../src/audio.js";
 import { CLIMBING_STYLES } from "../src/traversal-art.js";
 import { supportAt } from "../src/character-motion.js";
+import { updateReturnCable } from "../src/return-cable.js";
+import { stationBlocked } from "../src/field-station-solids.js";
 
 function world(t, level) {
   t.mock.method(
@@ -30,7 +32,9 @@ function world(t, level) {
     map,
     level,
     terrainProfile: terrain,
-    groundHeight: terrain.height,
+    groundHeight(x, z) {
+      return this.terrainProfile.height(x, z);
+    },
     obstacles: [],
     stoneMat: new THREE.MeshStandardMaterial(),
     goldMat: new THREE.MeshStandardMaterial(),
@@ -67,6 +71,260 @@ function world(t, level) {
   });
   return game;
 }
+
+test("both sheaves clear the actual terminal construction throughout all 21 cable paths", (t) => {
+  const observerMaterial = new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
+    }),
+    direction = new THREE.Vector3(0.314, 0.913, 0.259).normalize(),
+    ray = new THREE.Raycaster(),
+    failures = [];
+  t.after(() => observerMaterial.dispose());
+  let samples = 0;
+  for (const level of LEVELS) {
+    const g = world(t, level);
+    for (const c of g.traversalCourses) {
+      const parents = new Set([
+          c.zipRig.fixed,
+          ...c.zipRig.ornaments.map((o) => o.group),
+        ]),
+        parts = g.cameraSurfaces.pending
+          .filter(
+            (p) => parents.has(p.parent) && p.mesh.material !== c.zip.material,
+          )
+          .map((p) => {
+            // Preserve individual delivered primitives across material batching.
+            p.mesh.updateMatrix();
+            const matrix = new THREE.Matrix4().multiplyMatrices(
+              p.parent.matrixWorld,
+              p.mesh.matrix,
+            );
+            return {
+              mesh: new THREE.Mesh(p.mesh.geometry, observerMaterial),
+              inverse: matrix.clone().invert(),
+              box: p.box.clone().applyMatrix4(matrix),
+            };
+          });
+      c.zip.visible = true;
+      for (let step = 0; step <= 32; step++) {
+        c.zipRig.travel = step / 32;
+        updateReturnCable(g, c, 0);
+        g.world.updateMatrixWorld(true);
+        for (const wheel of c.zipRig.wheels) {
+          const positions = wheel.geometry.attributes.position;
+          for (let i = 0; i < positions.count; i++) {
+            const point = new THREE.Vector3()
+              .fromBufferAttribute(positions, i)
+              .applyMatrix4(wheel.matrixWorld);
+            samples++;
+            for (const part of parts) {
+              if (!part.box.containsPoint(point)) continue;
+              // Bounds only prune work. Odd, deduplicated two-sided triangle
+              // crossings determine whether the real vertex is inside a part.
+              ray.set(point.clone().applyMatrix4(part.inverse), direction);
+              ray.near = 1e-7;
+              ray.far = 100;
+              const hits = ray.intersectObject(part.mesh, false),
+                unique = hits.filter(
+                  (hit, index) =>
+                    !index || hit.distance - hits[index - 1].distance > 1e-6,
+                );
+              if (unique.length % 2) {
+                failures.push(
+                  `${level.id}/${c.id}: travel ${step}/32, vertex ${i}`,
+                );
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  assert.equal(samples, 277200);
+  assert.deepEqual(failures, []);
+});
+
+test("the 63 summit reading views retain clear body sight lines through real static cable geometry", (t) => {
+  let rays = 0;
+  const failures = [];
+  for (const level of LEVELS) {
+    const g = world(t, level);
+    for (const c of g.traversalCourses) {
+      const geometry = [
+          c.zipRig.fixed,
+          c.zipRig.winchRoot,
+          ...c.zipRig.ornaments.map((o) => o.group),
+        ],
+        across = new THREE.Vector3(c.axis.x, 0, c.axis.z),
+        roof = c.ledges[4].y;
+      for (const [x, z] of [
+        [0.9706530381068319, -1.1817921155800946],
+        [1.32366729583708, -0.94155373525697],
+        [1.76134533940206, -1.0637957853056],
+      ]) {
+        const feet = c.transform(x, z),
+          target = new THREE.Vector3(feet.x, roof + 1.3, feet.z),
+          yaw = -Math.atan2(c.axis.z, c.axis.x),
+          pitch = 0.35,
+          desired = target
+            .clone()
+            .add(
+              new THREE.Vector3(
+                Math.sin(yaw) * Math.cos(pitch) * 5.3,
+                Math.sin(pitch) * 5.3 + 0.2,
+                Math.cos(yaw) * Math.cos(pitch) * 5.3,
+              ),
+            ),
+          camera = {
+            camera: new THREE.PerspectiveCamera(),
+            cameraSurfaces: g.cameraSurfaces,
+            cameraFollowTarget: target,
+            yaw,
+            pitch,
+          };
+        camera.camera.position.copy(desired);
+        for (let i = 0; i < 60; i++)
+          camera.camera.position.copy(
+            followClearCamera(camera, target, desired, 1 / 60, () => true),
+          );
+        for (const height of [0.25, 0.5, 0.8, 1.1, 1.3, 1.5, 1.8])
+          for (const offset of [-0.2, 0, 0.2]) {
+            const point = new THREE.Vector3(
+                feet.x,
+                roof + height,
+                feet.z,
+              ).addScaledVector(across, offset),
+              direction = point.clone().sub(camera.camera.position),
+              ray = new THREE.Raycaster(
+                camera.camera.position,
+                direction.clone().normalize(),
+                0,
+                direction.length() - 0.01,
+              );
+            if (ray.intersectObjects(geometry, true).length)
+              failures.push(
+                `${level.id}/${c.id}: ${x},${z}, body ${height}/${offset}`,
+              );
+            rays++;
+          }
+      }
+    }
+  }
+  assert.equal(rays, 1323);
+  assert.deepEqual(failures, []);
+});
+
+test("winch collision contains the rendered crank at every angle and leaves legal summit feet open", (t) => {
+  let sampled = 0;
+  const failures = [];
+  for (const level of LEVELS) {
+    const g = world(t, level);
+    for (const c of g.traversalCourses) {
+      const rig = c.zipRig,
+        solid = g.obstacles.find((o) => o.bounds === rig.winchBounds);
+      assert(solid && !solid.supportable);
+      assert(
+        !stationBlocked(solid, solid.x, solid.bounds.min.y - 1.81, solid.z),
+        "no invisible column below the winch",
+      );
+      assert(
+        stationBlocked(solid, solid.x, solid.bounds.min.y, solid.z),
+        "winch blocks body contact",
+      );
+      for (let angle = 0; angle < 24; angle++) {
+        rig.drum.rotation.x = (angle * Math.PI) / 12;
+        g.world.updateMatrixWorld(true);
+        rig.winchRoot.traverse((o) => {
+          if (!o.isMesh) return;
+          const positions = o.geometry.attributes.position;
+          for (let i = 0; i < positions.count; i++) {
+            const point = new THREE.Vector3()
+              .fromBufferAttribute(positions, i)
+              .applyMatrix4(o.matrixWorld);
+            if (!solid.bounds.clone().expandByScalar(1e-6).containsPoint(point))
+              failures.push(`${level.id}/${c.id}: crank ${angle}, vertex ${i}`);
+            sampled++;
+          }
+        });
+      }
+      const solids = g.obstacles.filter((o) => o.returnCable === c.id);
+      assert.equal(solids.length, 5);
+      for (const [x, z] of [
+        [0.9706530381068319, -1.1817921155800946],
+        [1.32366729583708, -0.94155373525697],
+        [1.76134533940206, -1.0637957853056],
+      ]) {
+        const feet = c.transform(x, z);
+        assert(
+          !solids.some((o) => stationBlocked(o, feet.x, c.launch.y, feet.z)),
+          `${level.id}/${c.id}: reading feet remain clear`,
+        );
+      }
+      assert.deepEqual(
+        [rig.sources[1].x, rig.sources[1].y, rig.sources[1].z],
+        rig.winchRoot.getWorldPosition(new THREE.Vector3()).toArray(),
+      );
+    }
+  }
+  assert(sampled > 1000000);
+  assert.deepEqual(failures, []);
+});
+
+test("all 42 lower cable footplates reach terrain under their whole rendered footprint", (t) => {
+  let rays = 0;
+  for (const level of LEVELS) {
+    const g = world(t, level),
+      ray = new THREE.Raycaster();
+    for (const c of g.traversalCourses)
+      for (const post of c.zipRig.posts.slice(2)) {
+        const original = post.footing,
+          plate = new THREE.Mesh(original.geometry, original.material);
+        original.updateMatrix();
+        plate.matrixWorld.multiplyMatrices(
+          c.zipRig.fixed.matrixWorld,
+          original.matrix,
+        );
+        // The chamfered corners lie outside the nominal square. Sample the
+        // actual skin, including all vertices on lower-facing triangles.
+        const positions = plate.geometry.attributes.position,
+          normals = plate.geometry.attributes.normal;
+        for (let i = 0; i < positions.count; i++)
+          if (normals.getY(i) < -0.1) {
+            const p = new THREE.Vector3()
+              .fromBufferAttribute(positions, i)
+              .applyMatrix4(plate.matrixWorld);
+            assert(
+              p.y < g.groundHeight(p.x, p.z),
+              `${level.id}/${c.id}: exposed footing underside vertex`,
+            );
+          }
+        for (let ix = 0; ix <= 10; ix++)
+          for (let iz = 0; iz <= 10; iz++) {
+            const x = post.x - 0.2 + ix * 0.04,
+              z = post.z - 0.2 + iz * 0.04;
+            ray.set(
+              new THREE.Vector3(x, post.floor + 0.3, z),
+              new THREE.Vector3(0, -1, 0),
+            );
+            ray.far = post.floor + 0.5 - post.bottom;
+            if (!ray.intersectObject(plate, false).length) continue;
+            ray.set(
+              new THREE.Vector3(x, post.bottom - 0.2, z),
+              new THREE.Vector3(0, 1, 0),
+            );
+            const hit = ray.intersectObject(plate, false)[0];
+            assert(
+              hit && hit.point.y < g.groundHeight(x, z),
+              `${level.id}/${c.id}: lower footplate bears on terrain`,
+            );
+            rays++;
+          }
+      }
+  }
+  assert(rays >= 4700, `${rays} rays inside actual footplate footprints`);
+  t.diagnostic(`${rays} underside rays across all 42 lower footplates`);
+});
 
 test("summit reading cameras keep their near-plane margin clear of the actual winch leads", (t) => {
   let views = 0;

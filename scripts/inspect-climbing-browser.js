@@ -4,7 +4,6 @@ import {
   trackTraversalSupport,
   predictedRopeLanding,
   traversalInteract,
-  updateTraversal,
   cableApproachClear,
 } from "../src/traversal.js";
 import { stationBlocked } from "../src/field-station-solids.js";
@@ -168,8 +167,11 @@ export function exerciseClimbing(game) {
       }
       check(traversalInteract(game), "cable launch");
       check(game.zipRide, "cable boarded");
+      game.keys.clear();
+      game.touchMove = { x: 0, z: 0 };
       for (let i = 0; i < 185; i++) {
-        updateTraversal(game, 1 / 60, { x: 0, z: 0 });
+        game.elapsed += 1 / 60;
+        game.updatePlayer(1 / 60);
         check(
           game.canMove(
             game.player.position.x,

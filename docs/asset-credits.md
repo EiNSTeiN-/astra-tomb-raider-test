@@ -926,3 +926,13 @@ existing cable geometry, regional materials, credited explorer, positioned
 mechanical sounds and quiet themed scores. No external asset or dependency
 is added. Its four documentation images are actual game captures converted
 losslessly to WebP, with identical decoded RGBA pixels and dimensions.
+
+The [regional cable-terminal pass](climbing-terminals.md) adds original stayed
+frame construction, anchor fittings, eight regional header/cap treatments,
+backed bronze carvings, frost and mineral materials, and rendered-geometry
+regressions in `src/return-cable.js` and `src/cable-frame-art.js`. It reuses
+the credited regional stone, timber and metal surfaces, explorer model,
+positioned machine/hoist synthesis and quiet chapter scores. No external
+asset, recording, music or dependency is added. Its four documentation images
+are actual game captures converted losslessly to WebP, with identical decoded
+RGBA pixels and dimensions.

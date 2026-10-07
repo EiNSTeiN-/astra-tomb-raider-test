@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Regional cable terminals](climbing-terminals.md) give all 42 ends fitted
+  regional caps and backed carvings. Higher stayed frames clear all 277,200
+  sampled sheave vertices along the 21 cable paths. Moving summit posts and
+  winches back repairs the six recorded snow and crystal body obstructions;
+  the 1,323-ray static construction regression and 4,914 lower-footplate rays
+  pass. All 84 baseline, 84 final, sixteen closer regional views and twelve body
+  comparisons are reviewed. All 21 assisted climbing and animated return-cable
+  routes pass. All 786 campaign checks and the build pass. Ten native production
+  keyboard/High or touch/Low cases retain brief roof movement, boarding,
+  health and complete-store reloads, with eight independently proved arrival
+  corrections. Two occupied saves recover 1.5 m onto their supported roofs;
+  both recoveries and all 36 native captures are reviewed. Wider landscape
+  composition, continuous routes and listening/
+  device acceptance remain open.
+
 - [Summit winch-lead camera bounds](climbing-camera-leads.md) remove the
   oversized foreground strips caused by uncaptured 25 mm leads. Actual
   triangle replays clear all eight recorded views, while all 42 saved summit
@@ -28,8 +43,10 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   All eight baseline, 42 final and twenty native images are reviewed; six
   arrival-camera corrections are independently proved. The preceding 432-view
   course review completes 21 assisted crossings, with five ground-navigation
-  exceptions still under investigation. Wider post/winch framing, repeated
-  course forms, continuous routes and listening/device acceptance remain open.
+  exceptions still under investigation. The subsequent regional-terminal pass
+  above addresses the recorded snow and crystal post/winch obstruction.
+  Repeated course forms, continuous routes and listening/device acceptance
+  remain open.
 
 - [Climbing ledge inlays](climbing-inlays.md) seat all 210 edge markers in their
   full paving beds, repairing crouched boot penetration up to 18.275 mm.

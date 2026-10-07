@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildReturnCable, RETURN_CABLE_HEIGHT } from "./return-cable.js";
+import { buildReturnCable, returnCableEndpoints } from "./return-cable.js";
 import { pbrMaterial } from "./visuals.js";
 import {
   climbingMaterials,
@@ -235,9 +235,6 @@ export function updateCourseVisual(course) {
   const grip = ropeGrip(course);
   span(course.rope, course.anchor, grip);
   course.grip.position.copy(grip);
-  const from = course.launch
-      .clone()
-      .add(new THREE.Vector3(0, RETURN_CABLE_HEIGHT, 0)),
-    to = course.exit.clone().add(new THREE.Vector3(0, RETURN_CABLE_HEIGHT, 0));
+  const [from, to] = course.zipRig?.anchors || returnCableEndpoints(course);
   span(course.zip, from, to);
 }

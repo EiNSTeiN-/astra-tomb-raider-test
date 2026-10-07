@@ -2,8 +2,11 @@ import * as THREE from "three";
 import { mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { windSurface } from "./wind-art.js";
+import { footprintMinimum } from "./masonry-foundations.js";
+import { buildCableFrameArt } from "./cable-frame-art.js";
 
 export const RETURN_CABLE_HEIGHT = 2.55;
+export const RETURN_CABLE_OVERRUN = 0.65;
 export function cableFrame(course) {
   const direction = course.exit.clone().sub(course.launch).normalize(),
     across = new THREE.Vector3(direction.z, 0, -direction.x).normalize(),
@@ -18,14 +21,32 @@ export function cableFrame(course) {
   };
 }
 
+// Stops describe the explorer's motion. The cable continues past both stops
+// so both sheaves remain on steel and clear the terminal clamps.
+export function returnCableEndpoints(course) {
+  const direction = course.exit.clone().sub(course.launch).normalize();
+  return [
+    course.launch
+      .clone()
+      .add(new THREE.Vector3(0, RETURN_CABLE_HEIGHT, 0))
+      .addScaledVector(direction, -RETURN_CABLE_OVERRUN),
+    course.exit
+      .clone()
+      .add(new THREE.Vector3(0, RETURN_CABLE_HEIGHT, 0))
+      .addScaledVector(direction, RETURN_CABLE_OVERRUN),
+  ];
+}
+
 export function buildReturnCable(game, course, materials) {
   const root = new THREE.Group(),
     fixed = new THREE.Group(),
     carriage = new THREE.Group(),
     hanger = new THREE.Group(),
     frame = cableFrame(course),
-    launchSetback = -3,
+    launchSetback = -4.6,
     launchAcross = 1.6,
+    anchors = returnCableEndpoints(course),
+    ornaments = [],
     wheels = [],
     handles = [],
     posts = [],
@@ -53,6 +74,12 @@ export function buildReturnCable(game, course, materials) {
     m.position.set(x, y, z);
     m.castShadow = m.receiveShadow = true;
     parent.add(m);
+    if (parent.userData.cableCamera)
+      game.cameraSurfaces?.capture(m, {
+        small: true,
+        thin: true,
+        cylinderAxis: geometry.userData.cameraCylinderAxis,
+      });
     return m;
   };
   const block = (w, h, d, parent, x, y, z, material = materials.metal) =>
@@ -66,9 +93,18 @@ export function buildReturnCable(game, course, materials) {
       ...a.clone().add(b).multiplyScalar(0.5).toArray(),
       material,
     );
-    m.quaternion.setFromUnitVectors(
-      new THREE.Vector3(0, 1, 0),
-      b.clone().sub(a).normalize(),
+    const along = b.clone().sub(a).normalize(),
+      side = frame.across
+        .clone()
+        .addScaledVector(along, -frame.across.dot(along));
+    if (side.lengthSq() < 1e-8) side.set(0, 1, 0);
+    side.normalize();
+    m.quaternion.setFromRotationMatrix(
+      new THREE.Matrix4().makeBasis(
+        side,
+        along,
+        side.clone().cross(along).normalize(),
+      ),
     );
     if (parent === fixed)
       // The long winch lead is only 25 mm wide, but can cross the summit
@@ -94,49 +130,96 @@ export function buildReturnCable(game, course, materials) {
     // trolley cut across the reading and boarding camera angles; longer stayed
     // arms leave that working edge open while retaining the cable's anchor.
     const setback = index === 0 ? launchSetback : 0.95,
-      width = index === 0 ? launchAcross : 0.86;
+      width = index === 0 ? launchAcross : 0.86,
+      anchor = anchors[index],
+      crosshead = new THREE.Vector3(anchor.x, end.y + 3.5, anchor.z);
     for (const x of [-width, width]) {
       const p = at(end, x, setback, 0),
         floor = index === 0 ? course.launch.y : game.groundHeight(p.x, p.z),
-        head = at(end, x, setback, 3.0);
-      block(0.42, 0.13, 0.42, fixed, p.x, floor + 0.065, p.z, materials.stone);
+        head = at(end, x, setback, 3.7),
+        bottom =
+          index === 0
+            ? floor
+            : footprintMinimum(
+                (x, z) => game.groundHeight(x, z),
+                p.x,
+                p.z,
+                0.42,
+                0.42,
+              ) - 0.08,
+        footing = block(
+          0.42,
+          floor + 0.13 - bottom,
+          0.42,
+          fixed,
+          p.x,
+          (bottom + floor + 0.13) / 2,
+          p.z,
+          materials.stone,
+        );
       beam(new THREE.Vector3(p.x, floor + 0.12, p.z), head, 0.22, 0.22);
       game.obstacles.push({
         x: p.x,
         z: p.z,
-        w: 0.17,
-        d: 0.17,
+        w: 0.14,
+        d: 0.14,
         h: head.y - game.groundHeight(p.x, p.z),
         returnCable: course.id,
+        fieldStation: course.id,
+        bodyPadding: 0.35,
+        supportable: false,
+        bounds: {
+          min: { x: p.x - 0.14, y: floor, z: p.z - 0.14 },
+          max: { x: p.x + 0.14, y: head.y, z: p.z + 0.14 },
+        },
       });
-      posts.push({ x: p.x, z: p.z, floor, head: head.y });
-      for (const h of [0.26, 1.3, 2.85])
+      posts.push({ x: p.x, z: p.z, floor, head: head.y, bottom, footing });
+      for (const h of [0.26, 1.3, 3.55])
         block(0.28, 0.09, 0.28, fixed, p.x, end.y + h, p.z);
       const front = Math.sign(x) * 0.86;
       beam(
-        at(end, x, setback, 2.74),
-        at(end, front, 0, 2.74),
+        at(end, x, setback, 3.45),
+        crosshead.clone().addScaledVector(frame.across, front),
         index === 0 ? 0.28 : 0.17,
         index === 0 ? 0.28 : 0.17,
       );
       beam(
-        index === 0 ? at(end, x, setback, 1.55) : head,
+        index === 0 ? at(end, x, setback, 1.7) : head,
         index === 0
-          ? at(end, (x + front) / 2, setback / 2, 2.74)
-          : at(end, front, 0, 2.74),
+          ? at(end, x, setback, 3.45).lerp(
+              crosshead.clone().addScaledVector(frame.across, front),
+              0.5,
+            )
+          : crosshead.clone().addScaledVector(frame.across, front),
         index === 0 ? 0.2 : 0.13,
         index === 0 ? 0.2 : 0.13,
       );
     }
     beam(
-      at(end, -width - 0.18, setback, 2.87),
-      at(end, width + 0.18, setback, 2.87),
+      at(end, -width - 0.18, setback, 3.57),
+      at(end, width + 0.18, setback, 3.57),
       0.23,
       0.28,
     );
-    beam(at(end, -1.04, 0, 2.74), at(end, 1.04, 0, 2.74), 0.22, 0.26);
-    const anchor = at(end, 0, 0, RETURN_CABLE_HEIGHT);
-    block(0.22, 0.35, 0.17, fixed, anchor.x, anchor.y + 0.16, anchor.z);
+    beam(
+      crosshead.clone().addScaledVector(frame.across, -1.04),
+      crosshead.clone().addScaledVector(frame.across, 1.04),
+      0.22,
+      0.26,
+    );
+    const clampPoint = anchor.clone().addScaledVector(frame.normal, 0.17),
+      clamp = block(0.22, 0.35, 0.17, fixed, ...clampPoint.toArray());
+    clamp.quaternion.copy(frame.rotation);
+    game.cameraSurfaces?.capture(clamp, { small: true });
+    const stem = beam(
+      anchor.clone().addScaledVector(frame.normal, 0.33),
+      crosshead.clone().add(new THREE.Vector3(0, -0.09, 0)),
+      0.12,
+      0.12,
+      fixed,
+      materials.metal,
+    );
+    game.cameraSurfaces?.capture(stem, { small: true });
     const ring = mesh(
       new THREE.TorusGeometry(0.105, 0.027, 8, 20),
       materials.metal,
@@ -144,14 +227,25 @@ export function buildReturnCable(game, course, materials) {
       ...anchor.toArray(),
     );
     ring.quaternion.copy(frame.rotation);
+    game.cameraSurfaces?.capture(ring, { small: true, thin: true });
     const plate = block(
       0.21,
       0.24,
       0.11,
       fixed,
-      ...at(end, 0, setback, 2.72).toArray(),
+      ...at(end, 0, setback, 3.57).toArray(),
     );
     plate.quaternion.copy(frame.rotation);
+    ornaments.push(
+      buildCableFrameArt(
+        game,
+        root,
+        at(end, 0, setback, 3.57),
+        frame,
+        width * 2 + 0.36,
+        materials,
+      ),
+    );
   }
 
   // Two grooved sheaves straddle the taut cable; the crossbar supplies separate
@@ -229,23 +323,24 @@ export function buildReturnCable(game, course, materials) {
     wp = at(course.launch, launchAcross, launchSetback, 1.05);
   winchRoot.position.copy(wp);
   winchRoot.quaternion.copy(frame.rotation);
+  winchRoot.userData.cableCamera = drum.userData.cableCamera = true;
+  drum.userData.animated = true;
   root.add(winchRoot);
   winchRoot.add(drum);
   for (const x of [-0.27, 0.27]) block(0.075, 0.59, 0.61, winchRoot, x, 0, 0);
-  mesh(
-    new THREE.CylinderGeometry(0.19, 0.19, 0.48, 20).rotateZ(Math.PI / 2),
-    materials.metal,
-    drum,
-  );
+  const casting = (radius, length, segments) => {
+    const geometry = new THREE.CylinderGeometry(
+      radius,
+      radius,
+      length,
+      segments,
+    ).rotateZ(Math.PI / 2);
+    geometry.userData.cameraCylinderAxis = "x";
+    return geometry;
+  };
+  mesh(casting(0.19, 0.48, 20), materials.metal, drum);
   for (const x of [-0.2, 0.2])
-    mesh(
-      new THREE.CylinderGeometry(0.27, 0.27, 0.055, 24).rotateZ(Math.PI / 2),
-      materials.metal,
-      drum,
-      x,
-      0,
-      0,
-    );
+    mesh(casting(0.27, 0.055, 24), materials.metal, drum, x, 0, 0);
   for (let i = 0; i < 9; i++)
     mesh(
       new THREE.TorusGeometry(0.203, 0.014, 6, 20).rotateY(Math.PI / 2),
@@ -257,7 +352,7 @@ export function buildReturnCable(game, course, materials) {
     );
   block(0.08, 0.4, 0.08, drum, 0.35, -0.1, 0);
   block(0.23, 0.07, 0.07, drum, 0.44, -0.28, 0);
-  const lead = at(course.launch, launchAcross, launchSetback, 2.75);
+  const lead = at(course.launch, launchAcross, launchSetback, 3.25);
   beam(
     wp.clone().addScaledVector(frame.normal, 0.22),
     lead,
@@ -266,14 +361,50 @@ export function buildReturnCable(game, course, materials) {
     fixed,
     wire,
   );
-  beam(
-    lead,
-    at(course.launch, 0, 0, RETURN_CABLE_HEIGHT),
-    0.025,
-    0.025,
-    fixed,
-    wire,
-  );
+  beam(lead, anchors[0], 0.025, 0.025, fixed, wire);
+  // Include every crank angle in physical clearance. Camera collision retains
+  // the individual castings and their actual animated transforms instead.
+  winchRoot.updateWorldMatrix(true, true);
+  const winchBounds = new THREE.Box3().setFromObject(winchRoot),
+    inverse = drum.matrixWorld.clone().invert();
+  drum.traverse((o) => {
+    if (!o.isMesh) return;
+    const transform = inverse.clone().multiply(o.matrixWorld),
+      positions = o.geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const p = new THREE.Vector3()
+          .fromBufferAttribute(positions, i)
+          .applyMatrix4(transform),
+        radius = Math.hypot(p.y, p.z);
+      for (const axis of ["x", "y", "z"]) {
+        const center = wp[axis] + frame.across[axis] * p.x,
+          extent =
+            radius * Math.hypot(frame.normal[axis], frame.direction[axis]);
+        winchBounds.min[axis] = Math.min(
+          winchBounds.min[axis],
+          center - extent,
+        );
+        winchBounds.max[axis] = Math.max(
+          winchBounds.max[axis],
+          center + extent,
+        );
+      }
+    }
+  });
+  const winchCenter = winchBounds.getCenter(new THREE.Vector3()),
+    winchSize = winchBounds.getSize(new THREE.Vector3());
+  game.obstacles.push({
+    x: winchCenter.x,
+    z: winchCenter.z,
+    w: winchSize.x / 2,
+    d: winchSize.z / 2,
+    h: winchBounds.max.y - game.groundHeight(winchCenter.x, winchCenter.z),
+    bounds: winchBounds,
+    fieldStation: course.id,
+    returnCable: course.id,
+    bodyPadding: 0.35,
+    supportable: false,
+  });
   mergeArchitecture(drum);
   mergeArchitecture(winchRoot);
   mergeArchitecture(fixed);
@@ -318,6 +449,10 @@ export function buildReturnCable(game, course, materials) {
     drum,
     sources,
     posts,
+    anchors,
+    ornaments,
+    winchRoot,
+    winchBounds,
     travel: 0,
     returning: false,
   };

@@ -81,8 +81,11 @@ complete several winding routes, while the cloud-height fixture needs to
 respect raised bridge support. This evidence does not establish 21 complete
 continuous approach/crossing/return routes.
 
-Some snow and crystal summit views still place a post or winch in front of the
-explorer, despite a clear camera arm. Wider framing, repeated course forms,
-continuous campaign routes and subjective audio/device acceptance remain open
-in the [visual audit](visual-audit.md). This scoped repair does not establish
-AAA graphics, consumer-device performance or human playthrough quality.
+This pass also recorded snow and crystal summit views with a post or winch in
+front of the explorer, despite a clear camera arm. The subsequent
+[regional cable-terminal repair](climbing-terminals.md) addresses those six
+recorded standing views and the sheave/frame intersections at both cable ends.
+Repeated course forms, continuous campaign routes and subjective audio/device
+acceptance remain open in the [visual audit](visual-audit.md). These scoped
+repairs do not establish AAA graphics, consumer-device performance or human
+playthrough quality.

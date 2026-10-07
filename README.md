@@ -61,6 +61,9 @@ walks and saves.
 The [long summit winch leads now have fitted camera bounds](docs/climbing-camera-leads.md),
 clearing the recorded oversized foreground strips while preserving the cable
 construction, ordinary look input and native boarding and save recovery.
+The [42 return-cable terminals now have regional caps and backed carvings](docs/climbing-terminals.md).
+Higher stayed frames clear the sheaves, and the summit posts and winches sit
+back from the reading edge to retain a clear view of the explorer.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
