@@ -70,6 +70,45 @@ function fixture(t, stage = 9) {
   return game;
 }
 
+test("the recorded bridge-post shoulder overlap is outside the permitted body path", (t) => {
+  const game = fixture(t),
+    x = 278.3480442859887,
+    z = 292.3359161088071;
+  // The delivered explorer's pack penetrates the post's closed granite backing
+  // by up to 12 cm here, although the preceding root-only collision allowed it.
+  assert.equal(game.canMove(x, z, 0), false);
+  assert.equal(game.canMove(x + 0.65, z, 0), true);
+});
+
+test("the recorded low-body sight line intersects the bridge's actual base trim", (t) => {
+  const game = fixture(t),
+    body = new THREE.Vector3(
+      278.3480442859887,
+      30.765259114205367,
+      292.3359161088071,
+    ),
+    eye = new THREE.Vector3(
+      277.9650758367735,
+      33.13095609135913,
+      295.5948732086612,
+    ),
+    bridge = game.skyBridges.find((b) => b.id === "sky-span-7-1"),
+    ray = new THREE.Raycaster(
+      eye,
+      body.clone().sub(eye).normalize(),
+      0,
+      eye.distanceTo(body) - 0.04,
+    );
+  game.world.updateMatrixWorld(true);
+  const actual = ray.intersectObject(bridge.root, true)[0];
+  assert(actual, "delivered granite blocks this part of the explorer");
+  assert(actual.point.y > 31 && actual.point.y < 31.4);
+  assert(
+    game.cameraSurfaces.entry(body, eye, 0) < 0.99,
+    "the small base trim must participate in camera collision",
+  );
+});
+
 test("sky spans cross real ravines, join their banks exactly, and retain every ordered station", (t) => {
   const game = fixture(t),
     profile = game.terrainProfile;

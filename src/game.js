@@ -365,6 +365,7 @@ import {
   skyBridgeHint,
 } from "./sky-bridges.js";
 import { skySpanCorridor, skyBridgeBlocked } from "./sky-bridge-rules.js";
+import { skyAnchorBlocked } from "./sky-anchor-solids.js";
 import {
   buildForgeArchitecture,
   updateForgeArchitecture,
@@ -1536,6 +1537,10 @@ export class Adventure {
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
     for (const o of this.obstacles) {
+      if (o.skyAnchor) {
+        if (skyAnchorBlocked(o, x, worldY, z, clearance)) return false;
+        continue;
+      }
       if (o.fieldStation) {
         if (stationBlocked(o, x, worldY, z, clearance)) return false;
         continue;

@@ -51,6 +51,9 @@ also receives a closer geometry check: its 444 independent underside rays and
 485 downward-face centers remain below the ground, so it is a seated exposed
 crown. The route review records a separate partial body obstruction behind a
 bridge post as VA-67; camera opacity alone does not establish body visibility.
+The subsequent [post-clearance repair](bridge-post-clearance.md) corrects the
+rotated body bounds and small-trim capture, with repeated continuous routes
+and occupied-save recovery.
 
 Gate checks retain nine clear thresholds, 59 feature approaches, eighteen
 discovery stances and eighteen reachable sound fronts. All 119 wind-control

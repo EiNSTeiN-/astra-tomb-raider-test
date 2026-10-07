@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cloud bridge post clearance](bridge-post-clearance.md) repairs the recorded
+  body overlap with rotated stone columns and includes 144 small trims in
+  camera collision. All 800 checks, the build and five continuous climbing
+  loops pass across 7,758 updates. A repeated last-course route verifies
+  88,044 body/equipment vertex observations without post penetration; ordinary
+  foreground occlusion remains. Both keyboard/High and touch/Low production
+  cases recover an older occupied save by 75 cm, use the independently proved
+  default initial camera, then preserve native movement, health, progress and
+  stable complete-store reloads. All 131 loop, 34 additional route and six
+  native captures are reviewed. Rock/meadow roots, gates, discoveries and
+  potentially audible sound-source approaches remain clear. Broader
+  composition and listening/device acceptance remain open.
+
 - [Supported cloud-cliff stones](cloud-cliff-stones.md) repair the recorded
   hanging scan edge beside span 13. All 79 retained stones have buried roots
   across 36,464 rendered-terrain underside rays per progress state. The regenerated
@@ -28,7 +41,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   and touch/Low production cases preserve movement, health and stable reloads.
   All 78 bank, 129 loop and six native captures are reviewed. Puzzle and
   potentially audible sound-source approaches remain clear. The loop review
-  records a separate partial body obstruction behind a bridge post as VA-67.
+  records a separate partial body obstruction behind a bridge post as VA-67,
+  repaired in the subsequent post-clearance milestone above.
   Broader visual and listening/device acceptance remain open.
 
 - [Supported paths beside cloud bridges](bridge-side-paths.md) grade outer

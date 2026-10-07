@@ -7,6 +7,7 @@ import { weatherSkyStone } from "./sky-architecture.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { bridgeDeckY } from "./sky-bridge-rules.js";
+import { skyAnchorSolid } from "./sky-anchor-solids.js";
 
 export function bridgeArtMaterials() {
   const stone = pbrMaterial("rock", 0xc3c9c4);
@@ -279,22 +280,25 @@ export function buildBridgeAnchor({ bridge, c, end, sign, game, m, add, box }) {
     const worldZ = bridge.az - c.ux * x + c.uz * z;
     const low = game.groundHeight(worldX, worldZ) - bridge.ay;
     const seed = game.level.seed + bridge.stage * 91 + end * 7 + side;
-    const column = bridgeAnchorGeometry(low, bankY + 5.9, seed);
-    add(column, m.stone, x, 0, z, bridge.root, true);
+    const column = bridgeAnchorGeometry(low, bankY + 5.9, seed),
+      parts = [add(column, m.stone, x, 0, z, bridge.root, true)];
     for (const [y, w, h, d] of [
       [0.22, 1.5, 0.32, 1.94],
       [5.84, 1.52, 0.24, 1.96],
       [6.12, 1.7, 0.32, 2.08],
     ])
-      box(w, h, d, m.stone, x, bankY + y, z, bridge.root, true);
-    game.obstacles.push({
-      x: worldX,
-      z: worldZ,
-      w: 0.8,
-      d: 1,
-      h: bankY + 6.28 - low,
-      skyAnchor: true,
-    });
+      parts.push(box(w, h, d, m.stone, x, bankY + y, z, bridge.root, true));
+    game.obstacles.push(
+      skyAnchorSolid(game, parts, {
+        x: worldX,
+        z: worldZ,
+        localX: x,
+        localZ: z,
+        baseY: bridge.ay,
+        ux: c.ux,
+        uz: c.uz,
+      }),
+    );
     // The visible main and hand ropes terminate in embedded bronze sockets.
     for (const y of [1.5, 5.7]) {
       box(

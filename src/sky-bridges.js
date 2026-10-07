@@ -74,7 +74,7 @@ export function buildSkyBridges(game) {
       m.position.set(x, y, z);
       m.castShadow = m.receiveShadow = true;
       parent.add(m);
-      if (capture) game.cameraSurfaces?.capture(m);
+      if (capture) game.cameraSurfaces?.capture(m, { small: true });
       return m;
     };
     const box = (w, h, d, material, x, y, z, parent = root, capture = false) =>
