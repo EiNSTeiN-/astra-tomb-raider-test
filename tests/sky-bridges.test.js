@@ -168,6 +168,79 @@ test("all eighteen spans can be crossed in both directions at carrying speed thr
     }
 });
 
+test("the recorded return walk steps onto its deployed deck instead of descending through the cliff", (t) => {
+  const game = fixture(t),
+    bridge = game.skyBridges.find((b) => b.id === "sky-span-7-1"),
+    x = 276.61373579193463,
+    z = 294.2217665676903;
+  game.player.position.set(x, game.groundHeight(x, z), z);
+  Object.assign(game, {
+    grounded: true,
+    velocityY: 0,
+    jumpY: 0,
+    airVelocity: null,
+    jumpBuffer: 0,
+    coyote: 0,
+  });
+  const direction = new THREE.Vector2(-16.2, 1.9).normalize();
+  let steps = 0,
+    deckFrames = 0;
+  for (let frame = 0; frame < 120; frame++) {
+    const before = game.player.position.y;
+    advanceCharacter(game, { x: direction.x * 4, z: direction.y * 4 }, 1 / 60);
+    const p = spanCoordinates(
+      bridge,
+      game.player.position.x,
+      game.player.position.z,
+    );
+    assert(game.grounded, "the bank-to-deck step retains standing support");
+    if (p.along >= 0 && p.along <= p.length) {
+      assert(Math.abs(p.across) < bridge.width / 2);
+      assert(
+        Math.abs(game.player.position.y - bridgeDeckY(bridge, p.along)) < 0.005,
+        "controller feet remain on the bridge instead of its excavated ground",
+      );
+      deckFrames++;
+    }
+    assert(game.player.position.y - before <= 0.45 + 1e-8);
+    if (game.player.position.y - before > 0.2) steps++;
+    assert.equal(recoverSkyBridgeFall(game), false);
+  }
+  assert.equal(
+    steps,
+    1,
+    "the initial deck edge uses the permitted larger step",
+  );
+  assert(
+    deckFrames > 90,
+    "the recorded descent is replaced by a supported crossing",
+  );
+  assert(game.player.position.x < x - 7.9, "the return walk advances normally");
+});
+
+test("an airborne body below a deployed deck retains its jump height", (t) => {
+  const game = fixture(t),
+    bridge = game.skyBridges.find((b) => b.id === "sky-span-7-1"),
+    x = 275,
+    z = 294.41,
+    floor = game.groundHeight(x, z);
+  game.player.position.set(x, floor, z);
+  Object.assign(game, {
+    grounded: false,
+    velocityY: 2,
+    jumpY: 0,
+    airVelocity: null,
+    jumpBuffer: 0,
+    coyote: 0,
+  });
+  advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+  const p = spanCoordinates(bridge, x, z);
+  assert.equal(game.grounded, false);
+  assert(game.player.position.y > floor);
+  assert(game.player.position.y < bridgeDeckY(bridge, p.along) - 0.2);
+  assert(Math.abs(game.player.position.y - floor - (2 - 19 / 60) / 60) < 1e-8);
+});
+
 test("gusts give advance warning, progress through three patterns and include calm windows", () => {
   const kinds = new Set();
   for (let stage = 0; stage < 9; stage++) {

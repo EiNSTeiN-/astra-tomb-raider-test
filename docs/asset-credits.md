@@ -954,3 +954,12 @@ asset or dependency is added. Its eight documentation images are actual game
 captures converted losslessly to WebP, with identical decoded RGBA pixels and
 dimensions. Captions distinguish moving baseline frames from stationary
 camera replays, settled walking poses and the actual cable grip pose.
+
+The [bridge approach-step repair](bridge-approach-steps.md) extends original
+character movement code and adds delivered-map regressions. Existing bridge
+construction, credited terrain and timber surfaces, explorer model, positioned
+wind/mechanical ambience and quiet chapter scores are retained. No external
+asset or dependency is added. Its four documentation images are actual game
+captures converted losslessly to WebP, with identical decoded RGBA pixels and
+dimensions. The comparison uses normal-controller walks on separate runtimes;
+the revised support changes controller elevation and wind response.

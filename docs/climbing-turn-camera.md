@@ -86,3 +86,8 @@ of skinned-model intersections.
 Before images are captured moving frames. After images are stationary camera
 replays at the recorded controller feet and look, with the pose setup described
 above. They demonstrate camera response; they are not animation-identical pairs.
+
+The subsequent [bridge approach-step repair](bridge-approach-steps.md) addresses
+the body-contact issue observed during this camera review. Its normal-controller
+walk and rendered sole queries identify and repair the bank-to-deck support
+mismatch. Wider visual acceptance remains open.

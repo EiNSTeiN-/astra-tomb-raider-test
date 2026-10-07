@@ -70,6 +70,9 @@ return loops while preserving the chosen look.
 The [approach and return-cable camera now clears the recorded crystal and cloud turns](docs/climbing-turn-camera.md),
 with eleven continuous climbing loops, retained look controls and verified
 keyboard/touch boarding and reloads. Broader visual acceptance remains open.
+[Cloud bridge approaches now use the full permitted step height](docs/bridge-approach-steps.md),
+keeping the recorded return walk on the deck instead of descending through
+the cliff, with verified rendered sole contact and native input/reloads.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

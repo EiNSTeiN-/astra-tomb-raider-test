@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cloud-bridge approach steps](bridge-approach-steps.md) use the full permitted
+  45 cm grounded rise, repairing the recorded descent through the deck and
+  cliff. The actual-world return completes with no embedded queried soles
+  across 142 nearby samples; 4,016 rendered-deck sole rays also remain clear.
+  All 793 checks and the build pass. Both native keyboard/High and touch/Low
+  walks preserve progress and exact reloads apart from timestamps. All five
+  complete cloud climbing loops pass with health 100 and no camera fades
+  across 7,758 updates. All 130 final loop images, 36 contact comparisons and
+  six native images are reviewed. An unbraced observer still invokes the
+  authored safety tether after wind drift; wider composition, route and
+  listening/device acceptance remain open.
+
 - [Climbing approach and return-cable cameras](climbing-turn-camera.md) repair
   the 24 recorded crystal/cloud fades. Eleven complete assisted loops retain
   camera opacity across 22,583 updates; all 347 final route captures are reviewed.

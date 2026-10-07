@@ -154,7 +154,15 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
       momentum.x *= decay;
       momentum.z *= decay;
     }
-    const support = supportAt(game, p.x, p.z, Math.max(before, p.y));
+    // Deck queries include a 20 cm landing tolerance. A grounded step can rise
+    // 45 cm, so search the remaining 25 cm before deciding support is missing.
+    // Airborne feet retain the landing limit and cannot snap onto a deck above.
+    const support = supportAt(
+      game,
+      p.x,
+      p.z,
+      Math.max(before, p.y) + (game.grounded ? 0.25 : 0),
+    );
     if (game.grounded) {
       if (support.height >= p.y - 0.42 && support.height <= p.y + 0.45)
         p.y = support.height;
