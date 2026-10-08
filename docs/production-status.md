@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal climbing piers](coastal-climbing-piers.md) add forty arched bays
+  across ten piers, with blue plaster, fluted stone jambs, closed shell reliefs
+  and seated bronze waves. Shared exact indexing preserves all 5,960,808
+  coastal attribute components and the preceding mountain artwork. All 802
+  campaign checks and the production build pass. Browser rays verify 4,410
+  roof points, 1,210 foundations, 360 panel centers and another 4,840 points
+  across the curved faces without gaps. Isolated shell closure and original
+  front attributes also pass. Both continuous coastal loops retain health 100
+  and full opacity across 7,254 updates, with exact recorded movement/camera
+  states. Keyboard/High and portrait touch/Low climbing, crouch/look, descent
+  and full-store reloads pass without arrival-camera corrections. All 46
+  construction, 97 final route, fourteen native and eighteen comparison
+  captures are reviewed. The repeated five-pier arrangement, sparse coastal banks,
+  broader campaign composition, subjective listening and device acceptance
+  remain open.
+
 - [Mountain climbing piers](snow-climbing-piers.md) add eighty arched bays
   across twenty piers, with fitted painted timber, whitewash backs, seated
   bronze ornament and sill snow. Exact indexing preserves all 8,439,528

@@ -145,3 +145,11 @@ removes duplicate vertex records while preserving every rendered triangle and
 material attribute. All four continuous loops, dense backing samples and
 native keyboard/touch controls and reloads pass. Wider course and landscape
 composition remain open.
+
+The [coastal-pier treatment](coastal-climbing-piers.md) adds forty arched
+tidal bays across ten current piers, with blue plaster, fluted stone jambs,
+closed shell reliefs and seated bronze waves. Shared exact indexing preserves
+all rendered coastal attributes and the preceding mountain artwork. Both
+continuous coastal loops, dense backing samples and native keyboard/touch
+controls and reloads pass. The five-pier layout, sparse coastal banks and wider
+campaign composition remain open.

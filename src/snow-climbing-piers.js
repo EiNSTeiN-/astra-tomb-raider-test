@@ -24,57 +24,7 @@ function painted(geometry, tint = 1) {
   return geometry;
 }
 
-// Batching expands every triangle. Index only exact duplicates, including all
-// material attributes, so hard normals, UV seams and paint edges stay intact.
-export function indexSnowPierGeometry(group) {
-  let before = 0,
-    after = 0;
-  for (const object of group.children) {
-    const geometry = object.geometry;
-    if (!geometry || geometry.index) continue;
-    const attributes = Object.entries(geometry.attributes),
-      values = attributes.map(() => []),
-      vertices = new Map(),
-      indices = [];
-    before += geometry.attributes.position.count;
-    for (let i = 0; i < geometry.attributes.position.count; i++) {
-      const components = attributes.flatMap(([, attribute]) =>
-          Array.from(
-            { length: attribute.itemSize },
-            (_, k) => attribute.array[i * attribute.itemSize + k],
-          ),
-        ),
-        key = components
-          .map((component) => (Object.is(component, -0) ? "-0" : component))
-          .join(",");
-      let index = vertices.get(key);
-      if (index === undefined) {
-        index = vertices.size;
-        vertices.set(key, index);
-        for (let a = 0; a < attributes.length; a++) {
-          const attribute = attributes[a][1];
-          for (let k = 0; k < attribute.itemSize; k++)
-            values[a].push(attribute.array[i * attribute.itemSize + k]);
-        }
-      }
-      indices.push(index);
-    }
-    for (let a = 0; a < attributes.length; a++) {
-      const [name, attribute] = attributes[a];
-      geometry.setAttribute(
-        name,
-        new THREE.BufferAttribute(
-          new attribute.array.constructor(values[a]),
-          attribute.itemSize,
-          attribute.normalized,
-        ),
-      );
-    }
-    geometry.setIndex(indices);
-    after += geometry.attributes.position.count;
-  }
-  return { before, after };
-}
+export { indexPierGeometry as indexSnowPierGeometry } from "./climbing-pier-geometry.js";
 
 // Blind arched monastery bays have complete whitewash backs. Painted timber,
 // seated bronze and sill snow remain within the existing solid pier envelope.

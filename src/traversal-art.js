@@ -6,10 +6,10 @@ import { footprintMinimum } from "./masonry-foundations.js";
 import { buildSkyClimbingPier } from "./sky-climbing-piers.js";
 import { buildJungleClimbingPier } from "./jungle-climbing-piers.js";
 import { buildDesertClimbingPier } from "./desert-climbing-piers.js";
-import {
-  buildSnowClimbingPier,
-  indexSnowPierGeometry,
-} from "./snow-climbing-piers.js";
+import { buildSnowClimbingPier } from "./snow-climbing-piers.js";
+import { buildCoastalClimbingPier } from "./coastal-climbing-piers.js";
+import { indexPierGeometry } from "./climbing-pier-geometry.js";
+import { weatherPalaceStone } from "./palace-material.js";
 
 // Local materials retain the chapter's masonry treatment. The dimensions here
 // describe the visible shell; the course plan remains the traversal authority.
@@ -88,6 +88,14 @@ export function climbingMaterials(game) {
       materials[key].vertexColors = true;
       materials[key].name = `Climbing monastery ${key}`;
     }
+  }
+  if (game.level.biome === "water") {
+    const plaster = pbrMaterial("palace-plaster", 0x729894);
+    plaster.name = "Climbing tidal blue plaster";
+    plaster.vertexColors = true;
+    plaster.normalScale.set(0.35, 0.35);
+    weatherPalaceStone(plaster);
+    materials.plaster = plaster;
   }
   return materials;
 }
@@ -257,7 +265,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       rowH = wallHeight / rows;
     const recessAt = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
     let regionalFacade;
-    if (["sky", "jungle", "desert", "snow"].includes(game.level.biome)) {
+    if (
+      ["sky", "jungle", "desert", "snow", "water"].includes(game.level.biome)
+    ) {
       const build =
         game.level.biome === "sky"
           ? buildSkyClimbingPier
@@ -265,7 +275,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
             ? buildJungleClimbingPier
             : game.level.biome === "desert"
               ? buildDesertClimbingPier
-              : buildSnowClimbingPier;
+              : game.level.biome === "snow"
+                ? buildSnowClimbingPier
+                : buildCoastalClimbingPier;
       regionalFacade = build({
         ledge,
         width,
@@ -445,7 +457,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       // Recessed carved panels and their paired borders break up tall faces.
       if (
         height > 3.7 &&
-        ["sky", "jungle", "desert", "snow"].includes(game.level.biome)
+        ["sky", "jungle", "desert", "snow", "water"].includes(game.level.biome)
       )
         serial += 8;
       else if (height > 3.7) {
@@ -678,9 +690,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
   );
   mergeArchitecture(fixed);
   mergeArchitecture(detail);
-  if (game.level.biome === "snow") {
-    indexSnowPierGeometry(fixed);
-    indexSnowPierGeometry(detail);
+  if (["snow", "water"].includes(game.level.biome)) {
+    indexPierGeometry(fixed);
+    indexPierGeometry(detail);
   }
   mergeArchitecture(swing);
   mergeArchitecture(yoke);
