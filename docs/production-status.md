@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Mountain climbing piers](snow-climbing-piers.md) add eighty arched bays
+  across twenty piers, with fitted painted timber, whitewash backs, seated
+  bronze ornament and sill snow. Exact indexing preserves all 8,439,528
+  expanded material/geometry components while reducing duplicate records.
+  All 802 campaign checks and the production build pass. Browser rays verify
+  8,820 roof points, 2,420 foundations, 720 panel centers and another 9,680
+  points across the curved faces without gaps. Four continuous mountain loops
+  retain health 100 and full opacity across 6,544 updates, with exact recorded
+  movement/camera states. Keyboard/High and touch/Low climbing, crouch/look,
+  descent and full-store reloads pass without arrival corrections. All 92
+  construction, 109 final route, fourteen native, 36 comparison and 206 wider
+  mountain/coastal baseline captures are reviewed. The repeated five-pier
+  arrangement, broader campaign/landscape composition, subjective listening
+  and device acceptance remain open.
+
 - [Desert climbing piers](desert-climbing-piers.md) replace the plain wall
   grid across ten piers with forty tapered surrounds, closed stone tablets
   and seated sun medallions. All 802 campaign checks and the production build

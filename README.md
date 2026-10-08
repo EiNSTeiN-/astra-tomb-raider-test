@@ -93,6 +93,10 @@ behavior are verified.
 The [ten desert climbing piers now have tapered solar surrounds](docs/desert-climbing-piers.md),
 closed sandstone tablets and seated sun medallions. Both complete climbing
 loops and native keyboard/touch roof, ground and reload behavior are verified.
+The [twenty mountain climbing piers now have arched monastery bays](docs/snow-climbing-piers.md),
+with fitted timber borders, whitewash backs, seated bronze ornament and sill
+snow. All four complete loops and native keyboard/touch controls and reloads
+are verified; exact vertex indexing preserves their full facing detail.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

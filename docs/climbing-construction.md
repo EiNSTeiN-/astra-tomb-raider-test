@@ -137,3 +137,11 @@ grid on ten current desert piers with forty tapered solar surrounds and
 seated medallions. It retains the complete standing roofs and verifies dense
 tablet backing, both continuous desert loops and native keyboard/touch
 climbing, ground return and reloads. Broader course composition remains open.
+
+The [mountain-pier treatment](snow-climbing-piers.md) adds eighty arched
+monastery bays across twenty current piers, with whitewash backs, oxide-colored
+timber borders, seated bronze wheels and snow on their sills. Exact indexing
+removes duplicate vertex records while preserving every rendered triangle and
+material attribute. All four continuous loops, dense backing samples and
+native keyboard/touch controls and reloads pass. Wider course and landscape
+composition remain open.
