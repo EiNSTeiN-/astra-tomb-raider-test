@@ -131,3 +131,9 @@ botanical reliefs in dressed stone borders across the five current jungle
 piers. It retains the complete standing roofs and verifies the continuous
 jungle loop, supported foundations, native roof/ground controls and saved
 progress. The shared five-pier layout and wider landscape review remain open.
+
+The [desert-pier treatment](desert-climbing-piers.md) replaces the plain wall
+grid on ten current desert piers with forty tapered solar surrounds and
+seated medallions. It retains the complete standing roofs and verifies dense
+tablet backing, both continuous desert loops and native keyboard/touch
+climbing, ground return and reloads. Broader course composition remains open.

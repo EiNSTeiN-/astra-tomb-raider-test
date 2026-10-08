@@ -90,6 +90,9 @@ The [jungle climbing piers now carry closed botanical reliefs](docs/jungle-climb
 with dressed stone borders and backed masonry joints that match the sanctuary.
 The complete jungle loop and production keyboard/touch roof, ground and save
 behavior are verified.
+The [ten desert climbing piers now have tapered solar surrounds](docs/desert-climbing-piers.md),
+closed sandstone tablets and seated sun medallions. Both complete climbing
+loops and native keyboard/touch roof, ground and reload behavior are verified.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

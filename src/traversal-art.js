@@ -5,6 +5,7 @@ import { windMetal, windSurface } from "./wind-art.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { buildSkyClimbingPier } from "./sky-climbing-piers.js";
 import { buildJungleClimbingPier } from "./jungle-climbing-piers.js";
+import { buildDesertClimbingPier } from "./desert-climbing-piers.js";
 
 // Local materials retain the chapter's masonry treatment. The dimensions here
 // describe the visible shell; the course plan remains the traversal authority.
@@ -240,11 +241,13 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       rowH = wallHeight / rows;
     const recessAt = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
     let regionalFacade;
-    if (["sky", "jungle"].includes(game.level.biome)) {
+    if (["sky", "jungle", "desert"].includes(game.level.biome)) {
       const build =
         game.level.biome === "sky"
           ? buildSkyClimbingPier
-          : buildJungleClimbingPier;
+          : game.level.biome === "jungle"
+            ? buildJungleClimbingPier
+            : buildDesertClimbingPier;
       regionalFacade = build({
         ledge,
         width,
@@ -422,7 +425,10 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         0.95,
       );
       // Recessed carved panels and their paired borders break up tall faces.
-      if (height > 3.7 && ["sky", "jungle"].includes(game.level.biome))
+      if (
+        height > 3.7 &&
+        ["sky", "jungle", "desert"].includes(game.level.biome)
+      )
         serial += 8;
       else if (height > 3.7) {
         const y = top - 2.0,
@@ -477,8 +483,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       capRows,
       capColumns,
       ...(regionalFacade && {
-        [game.level.biome === "sky" ? "skyFacade" : "jungleFacade"]:
-          regionalFacade,
+        [`${game.level.biome}Facade`]: regionalFacade,
       }),
     });
   }

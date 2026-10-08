@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Desert climbing piers](desert-climbing-piers.md) replace the plain wall
+  grid across ten piers with forty tapered surrounds, closed stone tablets
+  and seated sun medallions. All 802 campaign checks and the production build
+  pass. Browser rays verify 4,410 roof points, 1,210 foundations and 360
+  panel-center surfaces; another 4,840 points cover the complete tapered
+  faces without gaps. Both continuous desert loops retain health 100 and full
+  camera opacity across 9,002 updates, with captured movement and camera poses
+  matching the preceding routes. Keyboard/High and touch/Low roof controls,
+  descent and complete-store reloads pass without arrival corrections.
+  All 46 final construction, 117 route, fourteen native and eighteen comparison
+  captures are reviewed. The shared five-pier arrangement and broader
+  campaign/landscape, subjective listening and device acceptance remain open.
+
 - [Jungle climbing piers](jungle-climbing-piers.md) add twenty closed botanical
   panels, dressed borders and backed masonry joints across all five jungle
   piers. All 802 campaign checks and the production build pass. Browser rays
