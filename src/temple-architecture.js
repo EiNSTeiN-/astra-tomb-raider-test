@@ -142,6 +142,7 @@ export function carvedPanelGeometry(
   h = 3.4,
   variant = 0,
   segments = [30, 64],
+  { carvingSpread = 1 } = {},
 ) {
   const p = [],
     uv = [],
@@ -163,16 +164,25 @@ export function carvedPanelGeometry(
         radius = Math.hypot(cx, cy);
       const petals = 5 + (variant % 3),
         contour = 0.45 + 0.14 * Math.cos(angle * petals),
-        lotus = Math.exp(-Math.pow((radius - contour) / 0.075, 2));
+        lotus = Math.exp(
+          -Math.pow((radius - contour) / (0.075 * carvingSpread), 2),
+        );
       const heart = Math.exp((-radius * radius) / 0.05);
       const stem =
         Math.exp(
-          -Math.pow((cx - 0.08 * Math.sin(v * 16 + variant)) / 0.055, 2),
+          -Math.pow(
+            (cx - 0.08 * Math.sin(v * 16 + variant)) / (0.055 * carvingSpread),
+            2,
+          ),
         ) * (v < 0.53 ? Math.sin((v / 0.53) * Math.PI) : 0);
       const leaves =
         Math.max(0, Math.sin(v * 29 + variant)) *
         Math.exp(
-          -Math.pow((Math.abs(cx) - 0.21 - 0.12 * Math.sin(v * 12)) / 0.065, 2),
+          -Math.pow(
+            (Math.abs(cx) - 0.21 - 0.12 * Math.sin(v * 12)) /
+              (0.065 * carvingSpread),
+            2,
+          ),
         ) *
         (v < 0.5 ? 1 : 0);
       const carving = Math.max(lotus * 0.8, heart, stem * 0.75, leaves * 0.65),

@@ -4,6 +4,7 @@ import { mergeArchitecture, pbrMaterial } from "./visuals.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { buildSkyClimbingPier } from "./sky-climbing-piers.js";
+import { buildJungleClimbingPier } from "./jungle-climbing-piers.js";
 
 // Local materials retain the chapter's masonry treatment. The dimensions here
 // describe the visible shell; the course plan remains the traversal authority.
@@ -238,9 +239,13 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       rows = Math.min(10, Math.max(1, Math.ceil(wallHeight / style.row))),
       rowH = wallHeight / rows;
     const recessAt = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
-    let skyFacade;
-    if (game.level.biome === "sky") {
-      skyFacade = buildSkyClimbingPier({
+    let regionalFacade;
+    if (["sky", "jungle"].includes(game.level.biome)) {
+      const build =
+        game.level.biome === "sky"
+          ? buildSkyClimbingPier
+          : buildJungleClimbingPier;
+      regionalFacade = build({
         ledge,
         width,
         depth,
@@ -251,6 +256,8 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         fixed,
         detail,
         mesh,
+        style,
+        facingGeometry,
       });
       // Keep all later paving, frame and bearing seeds stable.
       for (let row = 0; row < rows; row++)
@@ -415,7 +422,8 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         0.95,
       );
       // Recessed carved panels and their paired borders break up tall faces.
-      if (height > 3.7 && game.level.biome === "sky") serial += 8;
+      if (height > 3.7 && ["sky", "jungle"].includes(game.level.biome))
+        serial += 8;
       else if (height > 3.7) {
         const y = top - 2.0,
           z = ledge.z + side * (ledge.d - style.inset - 0.015);
@@ -468,7 +476,10 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       bottom: ground,
       capRows,
       capColumns,
-      ...(skyFacade && { skyFacade }),
+      ...(regionalFacade && {
+        [game.level.biome === "sky" ? "skyFacade" : "jungleFacade"]:
+          regionalFacade,
+      }),
     });
   }
 

@@ -125,3 +125,9 @@ rectangular wall grid on the current 25 sky piers with fitted granite, tapered
 bays and backed corner stones. It preserves the complete landing roofs and
 verifies denser foundation sampling, all five continuous cloud loops and native
 keyboard/touch climbing and reloads. Broader course composition remains open.
+
+The [jungle-pier treatment](jungle-climbing-piers.md) seats twenty closed
+botanical reliefs in dressed stone borders across the five current jungle
+piers. It retains the complete standing roofs and verifies the continuous
+jungle loop, supported foundations, native roof/ground controls and saved
+progress. The shared five-pier layout and wider landscape review remain open.

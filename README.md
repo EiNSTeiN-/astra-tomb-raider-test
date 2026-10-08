@@ -86,6 +86,10 @@ The [25 cloud climbing piers now have fitted granite and recessed bays](docs/clo
 matching the surrounding citadels with backed corners and seated reliefs.
 Complete landing roofs, climbing routes and native keyboard/touch saves are
 verified against the revised construction.
+The [jungle climbing piers now carry closed botanical reliefs](docs/jungle-climbing-piers.md),
+with dressed stone borders and backed masonry joints that match the sanctuary.
+The complete jungle loop and production keyboard/touch roof, ground and save
+behavior are verified.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

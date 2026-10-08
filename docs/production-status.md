@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Jungle climbing piers](jungle-climbing-piers.md) add twenty closed botanical
+  panels, dressed borders and backed masonry joints across all five jungle
+  piers. All 802 campaign checks and the production build pass. Browser rays
+  verify 2,205 roof points, 605 foundations and 180 panel surfaces. The complete
+  jungle loop retains health 100 and full opacity across 4,308 updates, with
+  recorded movement and camera poses matching the preceding construction.
+  Keyboard/High and touch/Low production climbs, crouch/look, descents and
+  complete-store reloads pass; one keyboard departure view selects a nearby
+  orbit on first arrival. All 23 construction, 57 final route, fourteen native
+  and 174 wider jungle/desert baseline captures are reviewed. The common
+  five-pier layout, desert pier repetition and broader landscape composition
+  still need work; subjective listening and device acceptance remain open.
+
 - [Cloud climbing piers](cloud-climbing-piers.md) replace the rectangular
   ashlar grid on all 25 sky piers with fitted granite, backed corner stones,
   120 tapered bays and seated regional reliefs. A buried full bearing bed

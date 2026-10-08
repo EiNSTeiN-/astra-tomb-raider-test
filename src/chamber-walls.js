@@ -151,13 +151,21 @@ function prism(points, depth) {
   return g;
 }
 
-function carvedPlaque(w, h, variant, segments) {
-  const face = carvedPanelGeometry(w, h, variant, segments).scale(1, 1, 0.4);
-  return closedPlaque(face, w, h, segments);
+export function carvedPlaque(
+  w,
+  h,
+  variant,
+  segments,
+  { vertexColors = false, depthScale = 0.4, carvingSpread = 1 } = {},
+) {
+  const face = carvedPanelGeometry(w, h, variant, segments, {
+    carvingSpread,
+  }).scale(1, 1, depthScale);
+  return closedPlaque(face, w, h, segments, vertexColors);
 }
 
-function closedPlaque(face, w, h, segments) {
-  face.deleteAttribute("color");
+function closedPlaque(face, w, h, segments, vertexColors = false) {
+  if (!vertexColors) face.deleteAttribute("color");
   const [nx, ny] = segments,
     position = face.attributes.position,
     rim = [],
@@ -193,6 +201,14 @@ function closedPlaque(face, w, h, segments) {
   const sides = new THREE.BufferGeometry();
   sides.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
   sides.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  if (vertexColors)
+    sides.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(
+        new Float32Array(points.length).fill(0.72),
+        3,
+      ),
+    );
   sides.computeVertexNormals();
   const expanded = face.toNonIndexed(),
     result = mergeGeometries([expanded, sides]);
