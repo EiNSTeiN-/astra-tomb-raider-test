@@ -15,7 +15,6 @@ import { updateSoundSources } from "../src/sound-landmarks.js";
 import { Soundscape } from "../src/audio.js";
 import { CLIMBING_STYLES } from "../src/traversal-art.js";
 import { supportAt } from "../src/character-motion.js";
-import { updateReturnCable } from "../src/return-cable.js";
 import { stationBlocked } from "../src/field-station-solids.js";
 import { astrolabeRingGeometry } from "../src/eclipse-climbing-piers.js";
 
@@ -72,79 +71,6 @@ function world(t, level) {
   });
   return game;
 }
-
-test("both sheaves clear the actual terminal construction throughout all 21 cable paths", (t) => {
-  const observerMaterial = new THREE.MeshBasicMaterial({
-      side: THREE.DoubleSide,
-    }),
-    direction = new THREE.Vector3(0.314, 0.913, 0.259).normalize(),
-    ray = new THREE.Raycaster(),
-    failures = [];
-  t.after(() => observerMaterial.dispose());
-  let samples = 0;
-  for (const level of LEVELS) {
-    const g = world(t, level);
-    for (const c of g.traversalCourses) {
-      const parents = new Set([
-          c.zipRig.fixed,
-          ...c.zipRig.ornaments.map((o) => o.group),
-        ]),
-        parts = g.cameraSurfaces.pending
-          .filter(
-            (p) => parents.has(p.parent) && p.mesh.material !== c.zip.material,
-          )
-          .map((p) => {
-            // Preserve individual delivered primitives across material batching.
-            p.mesh.updateMatrix();
-            const matrix = new THREE.Matrix4().multiplyMatrices(
-              p.parent.matrixWorld,
-              p.mesh.matrix,
-            );
-            return {
-              mesh: new THREE.Mesh(p.mesh.geometry, observerMaterial),
-              inverse: matrix.clone().invert(),
-              box: p.box.clone().applyMatrix4(matrix),
-            };
-          });
-      c.zip.visible = true;
-      for (let step = 0; step <= 32; step++) {
-        c.zipRig.travel = step / 32;
-        updateReturnCable(g, c, 0);
-        g.world.updateMatrixWorld(true);
-        for (const wheel of c.zipRig.wheels) {
-          const positions = wheel.geometry.attributes.position;
-          for (let i = 0; i < positions.count; i++) {
-            const point = new THREE.Vector3()
-              .fromBufferAttribute(positions, i)
-              .applyMatrix4(wheel.matrixWorld);
-            samples++;
-            for (const part of parts) {
-              if (!part.box.containsPoint(point)) continue;
-              // Bounds only prune work. Odd, deduplicated two-sided triangle
-              // crossings determine whether the real vertex is inside a part.
-              ray.set(point.clone().applyMatrix4(part.inverse), direction);
-              ray.near = 1e-7;
-              ray.far = 100;
-              const hits = ray.intersectObject(part.mesh, false),
-                unique = hits.filter(
-                  (hit, index) =>
-                    !index || hit.distance - hits[index - 1].distance > 1e-6,
-                );
-              if (unique.length % 2) {
-                failures.push(
-                  `${level.id}/${c.id}: travel ${step}/32, vertex ${i}`,
-                );
-                break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  assert.equal(samples, 277200);
-  assert.deepEqual(failures, []);
-});
 
 test("the 63 summit reading views retain clear body sight lines through real static cable geometry", (t) => {
   let rays = 0;

@@ -496,6 +496,12 @@ assets, recordings or dependencies were added. The eight documentation images
 are actual game captures converted losslessly to WebP, with identical decoded
 RGBA pixels and dimensions. See [observatory enclosure notes](observatory-enclosures.md).
 
+The [return-cable geometry verification](cable-clearance.md) adds original
+inspection code in `scripts/inspect-cable-parts.js` and two actual Low arrival
+captures. Their lossless WebP conversions preserve decoded RGBA pixels and
+dimensions. The depicted cable construction reuses the existing credited
+materials. No external assets, recordings or dependencies were added.
+
 The surface index, body-disk support and triangle collision queries in
 `src/nature-rock-solids.js` are original project code. They reuse the existing
 credited Rock Moss Set 01 and desert stone geometry, preserving authored

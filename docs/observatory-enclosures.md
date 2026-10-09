@@ -126,10 +126,11 @@ source. The final production build passes with its existing large-bundle
 advisory. These checks do not replace independent geometry/contact review of
 every object in the campaign.
 
-An older climbing-sheave regression reads construction records after the
-camera-surface rebuild clears them; its pass does not establish sheave
-clearance. Correcting that observer and checking the delivered construction
-remain part of the wider acceptance work.
+The older climbing-sheave regression read construction records after the
+camera-surface rebuild cleared them, so its pass did not establish sheave
+clearance. The subsequent [cable geometry verification](cable-clearance.md)
+corrects that observer and independently checks all 21 delivered cable paths.
+Wider geometry and body-contact acceptance remain open.
 
 Verification uses a shared nine-of-sixteen CPU set and lower scheduling
 priority, below the owner's 60% limit, with at most two test workers and one

@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Return-cable geometry verification](cable-clearance.md) repairs a regression
+  that counted wheel vertices while inspecting no terminal pieces after camera
+  rebuild. Independent observation preserves source identity through batching
+  and checks the actual delivered buffers, including small parts, wire leads
+  and winch construction. Both final focused tests and all eight browser worlds
+  pass 277,200 sampled records across 1,923 pieces on 21 paths. Every deliberate
+  overlap control is detected, and all 1,923 temporary observer geometries emit
+  matching disposal events. All sixteen High/Low captures are reviewed. This
+  verification adds no application-source or delivery-asset changes and claims
+  no new full campaign run or production build. Work runs in sequence on the
+  shared nine-of-sixteen CPU set; a host check confirms no leftover verification
+  workers, browsers or servers. Broader body contact, composition and
+  listening/device acceptance remain open.
+
 - [Observatory enclosures](observatory-enclosures.md) give eleven domes distinct
   plans with 33 backed wall bays and 36 real clerestory slots. The corrected
   0.70 m margin clears all 32 sampled standing/crouched poses across 1,539,040

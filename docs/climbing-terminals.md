@@ -41,6 +41,14 @@ Bounds only prune the search; two-sided, deduplicated triangle crossings test
 whether each vertex is inside an individual primitive. Intentional contact with
 the steel cable is excluded from this frame-intersection check.
 
+Verification correction: a later audit found that the regression described
+above read camera records after their rebuild had released them. Its passing
+sample count alone did not prove the stated clearance. The subsequent
+[independent cable observer](cable-clearance.md) verifies the current rendered
+construction across all 21 paths, including small parts and wire leads, with
+277,200 sampled sheave records and 21 deliberate overlap controls in both tests
+and actual browser worlds. Its sampling limits are documented separately.
+
 The six recorded snow and crystal standing poses retain their feet and chosen
 look angles. After ordinary player, decoration and camera updates, each has
 zero blocked sampled body sight lines, compared with eleven of twenty-one
