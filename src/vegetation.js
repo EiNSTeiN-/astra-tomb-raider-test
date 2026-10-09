@@ -33,6 +33,7 @@ import {
 import { rockGroundHeight } from "./nature-rocks.js";
 import { discoveryFoliageClear } from "./discovery-setting-plan.js";
 import { buildSkyMeadow, updateSkyMeadow } from "./sky-meadow.js";
+import { NatureRockSolids } from "./nature-rock-solids.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -322,6 +323,11 @@ export async function loadNature(game) {
   };
   if (biome === "desert") {
     buildDesertScatter(game, assets[0].tiers[0]);
+    world.updateWorldMatrix(true, false);
+    game.natureRockSolids = new NatureRockSolids(
+      game.naturePatches,
+      world.matrixWorld,
+    );
     updateNature(game);
     game.renderOnce = true;
     return;
@@ -502,6 +508,11 @@ export async function loadNature(game) {
     }
   }
   buildVolcanicScree(game);
+  world.updateWorldMatrix(true, false);
+  game.natureRockSolids = new NatureRockSolids(
+    game.naturePatches,
+    world.matrixWorld,
+  );
   buildSkyMeadow(game);
   updateNature(game);
   game.renderOnce = true;

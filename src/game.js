@@ -426,6 +426,7 @@ import {
   updateTempleArchitecture,
 } from "./temple-architecture.js";
 import { advanceCharacter, safeArrival } from "./character-motion.js";
+import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import {
   resetTraversal,
   restoreTraversal,
@@ -833,6 +834,7 @@ export class Adventure {
     this.items = [];
     this.detailPatches = [];
     this.naturePatches = [];
+    this.natureRockSolids = null;
     this.rockGrounding = null;
     this.desertScatter = null;
     this.skyMeadow = null;
@@ -1044,6 +1046,12 @@ export class Adventure {
       loadForest(this),
       loadMemorialArt(this),
     ]).then((results) => {
+      // Scans arrive after the synchronous save restoration. Resolve an older
+      // arrival against their final geometry before the loading screen releases.
+      if (this.assetBatch === batch && this.restoreNatureArrival(start)) {
+        this.restoreCamera(next, { yaw: this.yaw, pitch: this.pitch });
+        this.save();
+      }
       batch.seal(results);
       if (this.assetBatch === batch) this.renderOnce = true;
       return batch.ready;
@@ -1509,6 +1517,16 @@ export class Adventure {
   }
   canMove(x, z, height = this.jumpY, clearance = 1.8) {
     const worldY = this.groundHeight(x, z) + height;
+    if (
+      this.natureRockSolids?.blocked(
+        x,
+        worldY,
+        z,
+        clearance,
+        clearance ? undefined : 0,
+      )
+    )
+      return false;
     if (galleryAt(this, x, worldY, z))
       return galleryClear(this, x, worldY, z, clearance);
     if (!cavernClear(this, x, this.groundHeight(x, z) + height, z, clearance))
@@ -1559,6 +1577,7 @@ export class Adventure {
   lineOfSight(a, b, fromHeight = 1.4, toHeight = 1.4) {
     const from = { x: a.x, y: a.y + fromHeight, z: a.z },
       to = { x: b.x, y: b.y + toHeight, z: b.z };
+    if (this.natureRockSolids?.entry(from, to) != null) return false;
     if (hoistOccludes(this, from, to)) return false;
     if (surveyOccludes(this, from, to)) return false;
     if (arcadeOccludes(this, from, to)) return false;
@@ -2051,6 +2070,8 @@ export class Adventure {
     this.cb.update?.(this.state());
   }
   cameraSpace(p) {
+    if (this.natureRockSolids?.blocked(p.x, p.y - 0.28, p.z, 0.56, 0.28))
+      return false;
     return galleryAt(this, p.x, p.y, p.z)
       ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
       : this.walkable(p.x, p.z) &&
@@ -2063,15 +2084,58 @@ export class Adventure {
                 : -Infinity,
             );
   }
-  restoreCamera(next) {
+  restoreNatureArrival(saved) {
+    if (!this.natureRockSolids) return false;
+    const p = this.player.position,
+      proposed = p.clone();
+    // A save on a scan cannot be restored until the asynchronous geometry is
+    // ready. Keep its earned elevation if the complete body disk is supported.
+    if (
+      saved &&
+      Math.hypot(saved.x - p.x, saved.z - p.z) < 1e-6 &&
+      Number.isFinite(saved.height)
+    ) {
+      const ground = this.groundHeight(p.x, p.z),
+        y = ground + saved.height;
+      const rock = this.natureRockSolids.support(
+        p.x,
+        p.z,
+        y,
+        NATURE_BODY_RADIUS,
+      );
+      if (
+        rock &&
+        rock.height > ground &&
+        Math.abs(rock.height - y) < 0.25 &&
+        this.canMove(p.x, p.z, rock.height - this.groundHeight(p.x, p.z))
+      )
+        proposed.y = rock.height;
+    }
+    const arrival = safeArrival(this, proposed);
+    if (arrival) proposed.set(arrival.x, arrival.y, arrival.z);
+    else {
+      proposed.set(this.map.spawn.x * CELL, 0, this.map.spawn.z * CELL);
+      proposed.y = this.groundHeight(proposed.x, proposed.z);
+      this.courseAnchor = null;
+    }
+    if (proposed.distanceTo(p) < 1e-6) return false;
+    p.copy(proposed);
+    this.jumpY = p.y - this.groundHeight(p.x, p.z);
+    this.velocityY = 0;
+    this.grounded = true;
+    this.fallPeak = p.y;
+    return true;
+  }
+  restoreCamera(next, preferredView = null) {
     const p = this.player.position,
       saved = this.progress.position,
-      preferred = (saved && Math.hypot(p.x - saved.x, p.z - saved.z) < 0.25
-        ? normalizeCamera(this.progress.camera)
-        : null) || {
-        yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
-        pitch: 0.15,
-      },
+      preferred = preferredView ||
+        (saved && Math.hypot(p.x - saved.x, p.z - saved.z) < 0.25
+          ? normalizeCamera(this.progress.camera)
+          : null) || {
+          yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
+          pitch: 0.15,
+        },
       chest = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
       standoff = windCameraStandoff(this),
       target = chest.clone().add(new THREE.Vector3(0, 0, standoff)),

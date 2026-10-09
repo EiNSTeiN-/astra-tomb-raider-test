@@ -80,6 +80,8 @@ export function updateAim(game) {
 // character radius and is allowed above low walls and across open space.
 export function shotCover(game, from, to) {
   let fraction = game.cameraSurfaces?.entry(from, to, 0) ?? 1;
+  const rock = game.natureRockSolids?.entry(from, to);
+  if (rock != null) fraction = Math.min(fraction, rock);
   for (const o of game.obstacles || []) {
     if (o.fieldStation) {
       const entry = stationEntry(o, from, to);

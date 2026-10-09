@@ -19,6 +19,25 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Scanned-rock contact](nature-rock-contact.md) repairs a legal crystal
+  approach that embedded 1,637 delivered body vertex records more than 15 mm
+  inside stone, reaching 298.312 mm. Actual scan surfaces now supply movement,
+  footing, camera clearance, sight/sound occlusion and shot cover. All 28
+  reachable walking/crouched poses clear 1,346,660 delivered vertex records;
+  one inaccessible radial approach is explicitly skipped. All 21 continuous
+  climbing loops across eight chapters complete 51,126 camera updates with
+  health 100 and full opacity; all 754 captures are reviewed. A later save-only
+  guard retains soil above buried scan surfaces. The final 810-test campaign
+  suite, production build and four native keyboard/High or touch/Low older-save
+  and rock-top reload cases pass after that guard; all eighteen native captures
+  are reviewed. Look, progress and supported elevation persist without camera
+  corrections. Six shared triangle kernels serve 330 crystal placements,
+  independently of transient render LOD packing. Verification uses nine of
+  sixteen available CPUs with at most two test workers and one browser; all
+  temporary browsers, preview servers and workers are stopped. Wider body
+  contact, rock placement, landscape/layout composition, listening and device
+  acceptance remain open.
+
 - [Crystal climbing piers](crystal-climbing-piers.md) add eighty six-sided
   limestone niches across twenty piers, with fitted diagonal shoulders,
   closed rock backs, seated calcite reliefs and bronze restraints. Browser

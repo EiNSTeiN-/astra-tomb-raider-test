@@ -16,12 +16,18 @@ import { hoistDeckAt } from "./bell-hoist-rules.js";
 import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
 import { stationContains } from "./field-station-solids.js";
+import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
 // support, and crossing uneven ground in the air must not lift the jump arc.
-export function supportAt(game, x, z, maxY = Infinity) {
+export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
   let height = game.groundHeight(x, z),
     surface = null;
+  const rock = game.natureRockSolids?.support(x, z, maxY, rockRadius);
+  if (rock && rock.height > height) {
+    height = rock.height;
+    surface = rock.surface;
+  }
   for (const o of game.obstacles) {
     if (o.fieldStation) {
       if (
@@ -95,7 +101,7 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
   const count = Math.max(1, Math.ceil(dt / (1 / 60))),
     step = dt / count;
   for (let i = 0; i < count; i++) {
-    const here = supportAt(game, p.x, p.z, p.y);
+    const here = supportAt(game, p.x, p.z, p.y, NATURE_BODY_RADIUS);
     if (game.grounded && Math.abs(p.y - here.height) > 0.25)
       game.grounded = false;
     if (game.jumpBuffer > 0 && (game.grounded || game.coyote > 0)) {
@@ -144,11 +150,28 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         (velocity.z * (hasMomentum ? 0.35 : 1) +
           (hasMomentum ? momentum.z : 0)) *
         step;
-    const free = (x, z) =>
-      game.groundHeight(x, z) <= p.y + 0.45 &&
-      game.canMove(x, z, p.y - game.groundHeight(x, z));
-    if (free(p.x + dx, p.z)) p.x += dx;
-    if (free(p.x, p.z + dz)) p.z += dz;
+    const free = (x, z) => {
+      let y = p.y;
+      if (game.grounded && game.natureRockSolids) {
+        const support = supportAt(game, x, z, p.y + 0.25, NATURE_BODY_RADIUS);
+        if (support.surface?.natureRock && support.height <= p.y + 0.45)
+          y = Math.max(y, support.height);
+      }
+      return game.groundHeight(x, z) <= y + 0.45 &&
+        game.canMove(x, z, y - game.groundHeight(x, z))
+        ? y
+        : null;
+    };
+    const xY = free(p.x + dx, p.z);
+    if (xY !== null) {
+      p.x += dx;
+      p.y = xY;
+    }
+    const zY = free(p.x, p.z + dz);
+    if (zY !== null) {
+      p.z += dz;
+      p.y = zY;
+    }
     if (hasMomentum) {
       const decay = Math.exp(-0.9 * step);
       momentum.x *= decay;
@@ -162,6 +185,7 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
       p.x,
       p.z,
       Math.max(before, p.y) + (game.grounded ? 0.25 : 0),
+      NATURE_BODY_RADIUS,
     );
     if (game.grounded) {
       if (support.height >= p.y - 0.42 && support.height <= p.y + 0.45)
@@ -212,7 +236,7 @@ export function safeArrival(game, position) {
           x = position.x + Math.cos(angle) * radius,
           z = position.z + Math.sin(angle) * radius,
           y = elevated
-            ? supportAt(game, x, z, position.y).height
+            ? supportAt(game, x, z, position.y, NATURE_BODY_RADIUS).height
             : game.groundHeight(x, z);
         if (elevated && Math.abs(y - position.y) > 0.3) continue;
         if (clear(x, y, z)) return { x, y, z };

@@ -108,6 +108,10 @@ view also keeps the explorer visible during the recorded summit mantle.
 The [twenty crystal climbing piers now have angular limestone registers](docs/crystal-climbing-piers.md),
 with closed niche backs, seated calcite reliefs and bronze restraints. All four
 complete routes and native keyboard/touch roof, ground and reload checks pass.
+The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
+clearing a reproduced body intersection while retaining the stone. All 21
+climbing routes complete with the new queries, and native keyboard/touch
+checks verify older-save recovery and earned rock-top elevation across reloads.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,
