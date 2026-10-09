@@ -1,6 +1,6 @@
 # Scanned-rock contact
 
-An ordinary approach to the last crystal climbing course let the explorer
+An ordinary approach to a crystal climbing course let the explorer
 walk into a scanned rock. The controller accepted the position while the
 delivered animated body intersected the stone: 1,637 of 48,095 vertex records
 lay more than 15 mm inside it, with the deepest boot record 298.312 mm inside
