@@ -105,6 +105,9 @@ and the preceding mountain artwork.
 The [volcanic climbing piers now have riveted forge shutters](docs/volcanic-climbing-piers.md),
 with folded heat baffles, fitted basalt and backed joints. A safe nearby camera
 view also keeps the explorer visible during the recorded summit mantle.
+The [twenty crystal climbing piers now have angular limestone registers](docs/crystal-climbing-piers.md),
+with closed niche backs, seated calcite reliefs and bronze restraints. All four
+complete routes and native keyboard/touch roof, ground and reload checks pass.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

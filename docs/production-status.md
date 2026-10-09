@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Crystal climbing piers](crystal-climbing-piers.md) add eighty six-sided
+  limestone niches across twenty piers, with fitted diagonal shoulders,
+  closed rock backs, seated calcite reliefs and bronze restraints. Browser
+  probes verify 8,820 roof points, 2,420 undersides, 720 center rays, 9,680
+  profile-fitted backing rays and 1,680 actual calcite back records without
+  misses. All four continuous loops complete 9,573 camera updates without
+  fades, retaining health 100 and exact recorded movement, look, camera and
+  progress. All 36 baseline/92 final construction, 140 final route, 214
+  crystal/eclipse baseline and fourteen native captures are reviewed. All
+  51 focused checks and the production build pass. Native keyboard/High and
+  portrait touch/Low controls and complete-store reloads pass without camera
+  arrival corrections. Temporary browsers, workers and preview servers are
+  closed afterward. The five-pier layout, sparse cave floor, rock placement,
+  wider body contact, subjective listening and device acceptance remain open.
+
 - [Volcanic climbing piers](volcanic-climbing-piers.md) add twenty closed
   forge shutters across five piers, with folded heat baffles, riveted straps,
   fitted basalt and backed joints. Exact indexing preserves all 933,324

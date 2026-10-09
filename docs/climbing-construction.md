@@ -160,3 +160,10 @@ fitted basalt and stepped lintels. Dense shutter sampling and the complete
 continuous route pass. Nearby camera recovery during a blocked mantle also
 clears the recorded hidden summit frame while retaining movement and chosen
 look. Broader course, landscape and lighting composition remain open.
+
+The [crystal-pier treatment](crystal-climbing-piers.md) adds eighty six-sided
+limestone niches across twenty piers, with fitted diagonal shoulders, closed
+rock backs, seated calcite reliefs and bronze restraints. Dense backing and
+actual mineral seating probes pass, as do all four continuous routes and
+native keyboard/touch controls and reloads. Broader cave floor, rock placement,
+body contact and landscape composition remain open.
