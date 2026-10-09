@@ -8,6 +8,7 @@ import { buildJungleClimbingPier } from "./jungle-climbing-piers.js";
 import { buildDesertClimbingPier } from "./desert-climbing-piers.js";
 import { buildSnowClimbingPier } from "./snow-climbing-piers.js";
 import { buildCoastalClimbingPier } from "./coastal-climbing-piers.js";
+import { buildVolcanicClimbingPier } from "./volcanic-climbing-piers.js";
 import { indexPierGeometry } from "./climbing-pier-geometry.js";
 import { weatherPalaceStone } from "./palace-material.js";
 
@@ -96,6 +97,16 @@ export function climbingMaterials(game) {
     plaster.normalScale.set(0.35, 0.35);
     weatherPalaceStone(plaster);
     materials.plaster = plaster;
+  }
+  if (game.level.biome === "volcano") {
+    const shutter = (game.forgeMetal || materials.timber).clone();
+    shutter.name = "Climbing riveted forge steel";
+    shutter.color.set(0xafb3b5);
+    shutter.vertexColors = true;
+    shutter.normalScale.set(0.42, 0.42);
+    shutter.metalness = 0.85;
+    shutter.roughness = 0.76;
+    materials.shutter = shutter;
   }
   return materials;
 }
@@ -266,7 +277,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
     const recessAt = (row) => (row > 1 && row < rows - 2 ? style.inset : 0.03);
     let regionalFacade;
     if (
-      ["sky", "jungle", "desert", "snow", "water"].includes(game.level.biome)
+      ["sky", "jungle", "desert", "snow", "water", "volcano"].includes(
+        game.level.biome,
+      )
     ) {
       const build =
         game.level.biome === "sky"
@@ -277,7 +290,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
               ? buildDesertClimbingPier
               : game.level.biome === "snow"
                 ? buildSnowClimbingPier
-                : buildCoastalClimbingPier;
+                : game.level.biome === "water"
+                  ? buildCoastalClimbingPier
+                  : buildVolcanicClimbingPier;
       regionalFacade = build({
         ledge,
         width,
@@ -457,7 +472,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
       // Recessed carved panels and their paired borders break up tall faces.
       if (
         height > 3.7 &&
-        ["sky", "jungle", "desert", "snow", "water"].includes(game.level.biome)
+        ["sky", "jungle", "desert", "snow", "water", "volcano"].includes(
+          game.level.biome,
+        )
       )
         serial += 8;
       else if (height > 3.7) {
@@ -690,7 +707,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
   );
   mergeArchitecture(fixed);
   mergeArchitecture(detail);
-  if (["snow", "water"].includes(game.level.biome)) {
+  if (["snow", "water", "volcano"].includes(game.level.biome)) {
     indexPierGeometry(fixed);
     indexPierGeometry(detail);
   }

@@ -21,6 +21,11 @@ import { Adventure } from "../src/game.js";
 import { buildPalaceArchitecture } from "../src/palace-architecture.js";
 import { buildSkyBridges } from "../src/sky-bridges.js";
 import { followClearCamera } from "../src/camera-follow.js";
+import {
+  buildTraversalCourse,
+  hasTraversalCourse,
+} from "../src/traversal-courses.js";
+import { buildRegionalStation } from "../src/field-station-art.js";
 
 function fixture(t, wall = false) {
   const world = new Group(),
@@ -214,7 +219,7 @@ test("a cloud return beneath a bridge can use a safe arm shorter than 3.2 m", (t
   });
 });
 
-test("nearby view recovery preserves ordinary follow during aimed, water, climbing and rope views", (t) => {
+test("nearby view recovery preserves ordinary follow during aimed, water and rope views", (t) => {
   const { game, target, desired, space } = fixture(t);
   const expected = followCamera(
     game.camera.position,
@@ -225,13 +230,102 @@ test("nearby view recovery preserves ordinary follow during aimed, water, climbi
     space,
     game.cameraFollowTarget,
   );
-  for (const flag of ["aiming", "swimming", "diving", "climb", "ropeRide"]) {
+  for (const flag of ["aiming", "swimming", "diving", "ropeRide"]) {
     game[flag] = true;
     assert(
       followClearCamera(game, target, desired, 1 / 60, space).equals(expected),
       flag,
     );
     game[flag] = false;
+  }
+  game.climb = { time: 0.4 };
+  const clearDesired = target.clone().add(new Vector3(0, 0, 5.3));
+  game.camera.position.copy(clearDesired);
+  const ordinary = followCamera(
+    game.camera.position,
+    target,
+    clearDesired,
+    1 / 60,
+    game.cameraSurfaces,
+    space,
+    game.cameraFollowTarget,
+  );
+  assert(ordinary.distanceTo(target) >= 2.2);
+  assert(
+    followClearCamera(game, target, clearDesired, 1 / 60, space).equals(
+      ordinary,
+    ),
+  );
+});
+
+test("the recorded volcanic summit mantle retains a visible safe view without changing climb or look", (t) => {
+  const game = terrainFixture(t, 4);
+  game.cameraSurfaces = new CameraSurfaces(game.world);
+  game.darkMat = game.stoneMat.clone();
+  game.flames = [];
+  t.after(() => game.darkMat.dispose());
+  for (const feature of game.map.features.filter(
+    (f) => f.type === "field" && hasTraversalCourse(game.level, f),
+  )) {
+    const station = new Group();
+    station.position.set(feature.x * 7, 0, feature.z * 7);
+    game.world.add(station);
+    buildTraversalCourse(game, feature, station);
+    buildRegionalStation(game, feature, station);
+  }
+  game.world.updateMatrixWorld(true);
+  game.cameraSurfaces.rebuild();
+  const climb = { time: 0.4, ledge: 4 },
+    feet = new Vector3(
+      392.7972025821405,
+      26.686437304989113,
+      120.58139960671012,
+    );
+  game.player.position.copy(feet);
+  game.camera.position.set(
+    396.8549760303661,
+    29.489536775499595,
+    120.15389565572842,
+  );
+  game.yaw = -4.50525035903769;
+  game.pitch = 0.35;
+  game.climb = climb;
+  const target = feet.clone().add(new Vector3(0, 1.3, 0)),
+    desired = target
+      .clone()
+      .add(
+        new Vector3(
+          Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+        ),
+      ),
+    space = (p) => game.cameraSpace(p);
+  game.cameraFollowTarget = target.clone();
+  assert(
+    followCamera(
+      game.camera.position,
+      target,
+      desired,
+      1 / 60,
+      game.cameraSurfaces,
+      space,
+      target,
+    ).distanceTo(target) < 1.5,
+    "ordinary follow reproduces the hidden summit frame",
+  );
+  for (let frame = 0; frame < 120; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, space),
+    );
+    assert(game.camera.position.distanceTo(target) >= 2.2 - 1e-8);
+    assert.equal(game.cameraSurfaces.entry(target, game.camera.position, 0), 1);
+    assert(space(game.camera.position));
+    assert(game.player.position.equals(feet));
+    assert.equal(game.climb, climb);
+    assert.deepEqual(climb, { time: 0.4, ledge: 4 });
+    assert.equal(game.yaw, -4.50525035903769);
+    assert.equal(game.pitch, 0.35);
   }
 });
 

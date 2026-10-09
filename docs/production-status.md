@@ -19,6 +19,26 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Volcanic climbing piers](volcanic-climbing-piers.md) add twenty closed
+  forge shutters across five piers, with folded heat baffles, riveted straps,
+  fitted basalt and backed joints. Exact indexing preserves all 933,324
+  expanded attribute components and the preceding mountain/coastal artwork.
+  Browser rays verify 2,205 roof points, 605 foundations, 180 shutter centers
+  and another 2,420 points across the chamfered faces without gaps. Nearby
+  mantle camera recovery clears the recorded hidden summit update. The final
+  1,378-update loop retains health 100, full opacity and exact movement, look
+  and progress, with a 3.958 m minimum arm. An exact-frame replay verifies
+  the visible explorer at the same controller pose. All 23 construction,
+  24 final route, 24 baseline, fourteen native and nine comparison views are
+  reviewed. All 803 campaign checks and the production build pass. Native
+  keyboard/High and touch/Low climbs, crouch/look, descent and complete-store
+  reloads pass; two departure headings select independently reproduced clear
+  terrain views on arrival. Verification uses a shared CPU cap within 60%
+  of available CPUs and two test workers, with temporary browsers and preview
+  servers closed afterward.
+  The repeated layout, wider landscape/lighting composition, subjective
+  listening and device acceptance remain open.
+
 - [Coastal climbing piers](coastal-climbing-piers.md) add forty arched bays
   across ten piers, with blue plaster, fluted stone jambs, closed shell reliefs
   and seated bronze waves. Shared exact indexing preserves all 5,960,808

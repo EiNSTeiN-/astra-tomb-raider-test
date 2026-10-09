@@ -102,6 +102,9 @@ with blue plaster, fluted stone jambs, closed shell reliefs and seated bronze
 waves. Both complete loops, dense backing samples and native keyboard/touch
 controls and reloads pass; shared exact indexing preserves the coastal detail
 and the preceding mountain artwork.
+The [volcanic climbing piers now have riveted forge shutters](docs/volcanic-climbing-piers.md),
+with folded heat baffles, fitted basalt and backed joints. A safe nearby camera
+view also keeps the explorer visible during the recorded summit mantle.
 
 The later cloud-city [eagle route now catches ropes with a continuous reach](docs/sky-eagle-route.md),
 retaining the first body position and verifying both climbing crossings,

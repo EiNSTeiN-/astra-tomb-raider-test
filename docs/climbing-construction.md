@@ -153,3 +153,10 @@ all rendered coastal attributes and the preceding mountain artwork. Both
 continuous coastal loops, dense backing samples and native keyboard/touch
 controls and reloads pass. The five-pier layout, sparse coastal banks and wider
 campaign composition remain open.
+
+The [volcanic-pier treatment](volcanic-climbing-piers.md) adds twenty closed
+forge shutters across five piers, with folded heat baffles, riveted straps,
+fitted basalt and stepped lintels. Dense shutter sampling and the complete
+continuous route pass. Nearby camera recovery during a blocked mantle also
+clears the recorded hidden summit frame while retaining movement and chosen
+look. Broader course, landscape and lighting composition remain open.

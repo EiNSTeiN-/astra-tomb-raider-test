@@ -23,16 +23,20 @@ export function followClearCamera(
         canOccupy,
         game.cameraFollowTarget,
       ),
-    ordinary = follow(desired);
+    ordinary = follow(desired),
+    ordinaryLength = ordinary.distanceTo(target);
   if (
-    ordinary.distanceTo(target) >= 3.2 ||
+    ordinaryLength >= 3.2 ||
     game.swimming ||
     game.diving ||
     game.aiming ||
-    game.climb ||
+    (game.climb && ordinaryLength >= 2.2) ||
     game.ropeRide
   )
     return ordinary;
+
+  // Keep an ordinary mantle view unless a casting pushes it into the body
+  // fade range. A safe neighboring view then retains the visible explorer.
 
   // Retain the supplied arm and vertical lift, including the transition out
   // of an aimed view, instead of replacing them with a full-distance orbit.

@@ -10,6 +10,16 @@ puts that installation on `PATH`. Its npm cache, global install prefix and
 temporary files stay under the ignored `local/` directory. Keep downloaded
 toolchains out of commits; a fresh clone can use its own supported Node install.
 
+The owner requires agent verification workloads to use at most 60% of the
+available CPUs in aggregate. On Linux, launch tests, builds and browser helpers
+through `python3 scripts/run-with-cpu-budget.py COMMAND [ARG ...]`; its child
+processes inherit a shared CPU affinity set and lower scheduling priority.
+`npm test` defaults to two concurrent test workers. Use at most two test workers
+and one browser check at a time. Avoid overlapping expensive checks when memory
+is constrained. Close each browser after its check, and stop temporary preview
+servers when verification ends.
+Do not leave unused workers, browsers or servers running between milestones.
+
 Keep temporary scripts, test results, browser profiles, captures and other
 project staging files in `local/staging/` inside this checkout. This directory is
 covered by the `/local/` exclusion in `.gitignore`. Do not use `/tmp` for project
