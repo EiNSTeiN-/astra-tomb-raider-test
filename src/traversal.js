@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { updateReturnCable } from "./return-cable.js";
 import { supportAt, safeArrival } from "./character-motion.js";
+import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import { courtDaisFloor } from "./court-dais-rules.js";
 import { ropeGrip, updateCourseVisual } from "./traversal-courses.js";
 import { clearJumpPress } from "./jump-input.js";
@@ -45,7 +46,7 @@ export function restoreTraversal(game) {
     const l = c.ledges[saved.ledge];
     const p = game.progress.position,
       y = p && game.groundHeight(p.x, p.z) + (p.height || 0),
-      floor = p && supportAt(game, p.x, p.z, y),
+      floor = p && supportAt(game, p.x, p.z, y, NATURE_BODY_RADIUS),
       retained =
         p &&
         floor.surface?.courseId === c.id &&
@@ -69,7 +70,7 @@ export function restoreTraversal(game) {
         dais.height >= y - 0.025 &&
         dais.height - y <= 0.516 &&
         game.canMove(p.x, p.z, dais.height - ground),
-      floor = lifted ? dais : supportAt(game, p.x, p.z, y);
+      floor = lifted ? dais : supportAt(game, p.x, p.z, y, NATURE_BODY_RADIUS);
     if (
       lifted ||
       (Number.isFinite(savedHeight) && Math.abs(floor.height - y) < 0.25)

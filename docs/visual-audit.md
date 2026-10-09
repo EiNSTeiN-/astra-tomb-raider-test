@@ -193,6 +193,8 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 
 | VA-71 | The first new observatory wall margin lets standing toes enter the actual closed masonry by up to 26.070 mm and crouched clothing by 131.147 mm. | [Delivered wall clearance](observatory-enclosures.md) increases the new walls' movement margin to 0.70 m after measuring a 0.631 m crouched reach. All 32 sampled poses clear 1,539,040 delivered body records at the 15 mm threshold; all 16,896 sole samples find actual terrain or masonry. Native keyboard/touch movement and older-save/full-store reloads pass. Older columns, pedestals and raised wall caps still need wider contact review. | Fixed for the sampled new-wall ground approaches; wider contact open |
 
+| VA-72 | A legal jump reaches a column corner and falls into its cap; the first standing repair also embeds crouched knees and traps backward departures on the bevel. | [Observatory cap landings](observatory-cap-landings.md) add actual triangle support, a matching body footprint, preserved earned heights and a finite-edge pose guard. The final 32 legal trials clear 192 poses and 9,234,240 delivered body records at the 15 mm threshold; all return to soil. Local routes, source-front access and all 123 selected checks pass. | Fixed for the sampled column-corner landings, crouches and departures; wider raised caps and contact open |
+
 The [observatory body-clearance pass](observatory-body-clearance.md) adds
 ground-contact coverage at older pedestals and columns. Legal approaches
 originally embedded delivered body records by up to 671.968 and 420.290 mm.

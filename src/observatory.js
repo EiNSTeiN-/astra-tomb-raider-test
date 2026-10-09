@@ -93,7 +93,7 @@ export function buildObservatory(game) {
     const masonrySolid = (mesh, part) => {
       const solid = stationMeshSolid(game, patch, mesh, {
         bodyPadding: 0.7,
-        support: false,
+        support: true,
       });
       solid.observatory = true;
       solid.observatoryPart = part;

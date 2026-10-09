@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Observatory cap landings](observatory-cap-landings.md) repair an ordinary
+  jump that fell into the actual base, a crouched knee intersection and backward
+  departures caught on the bevel. Finite support uses the movement footprint
+  and preserves earned elevation; visual footing rejects steep edge drops.
+  All 32 full-world corner trials clear 192 sampled poses and 9,234,240 delivered
+  body records at the 15 mm threshold, with 2,067 matching observer disposals.
+  Twenty-six reach their exact corner targets; six stop short, and all 32 land
+  legally and return to soil. All 30 local routes, 22 sound fronts, 123 selected
+  checks and the production build pass. Both complete loops retain all 74
+  preceding recorded states across 5,008 camera updates. Native keyboard/High
+  and portrait touch/Low jump/crouch/departure checks, earned-height full-store
+  reloads and older under-cap recovery pass. Final body/route/native contact
+  sheets and full-size comparison witnesses are reviewed; six lossless captures
+  are included. Work runs sequentially within the CPU cap, and a host inspection
+  confirms all verification processes and servers are released. Wider contacts,
+  composition, listening and device acceptance remain open.
+
 - [Observatory body clearance](observatory-body-clearance.md) repairs legal
   ground approaches that embedded the explorer up to 671.968 mm into pedestals
   and 420.290 mm into column bases. All 374 masonry pieces now use their finite

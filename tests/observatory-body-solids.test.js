@@ -160,7 +160,7 @@ test("all 374 observatory masonry kernels agree with the delivered closed parts 
           position = part.mesh.geometry.attributes.position,
           point = new THREE.Vector3();
         assert(cablePartClosed(part));
-        assert.equal(solid.supportable, false);
+        assert.equal(solid.supportable, true);
         for (let i = 0; i < count; i++) {
           point
             .fromBufferAttribute(position, i)

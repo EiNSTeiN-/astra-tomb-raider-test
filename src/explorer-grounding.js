@@ -4,6 +4,7 @@ import { poseFeet } from "./pose.js";
 import { waterAt } from "./hydrology.js";
 import { CROUCH_DROP, playerFootstep } from "./stealth.js";
 import { strideScale } from "./stride.js";
+import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -133,8 +134,20 @@ export function groundExplorer(game, dt, moving, sprinting) {
   state.stride = reset
     ? scale
     : THREE.MathUtils.damp(state.stride ?? 1, scale, 14, dt);
+  const bodySupport = supportAt(
+    game,
+    root.x,
+    root.z,
+    root.y,
+    NATURE_BODY_RADIUS,
+  );
   const support = (x, z) => {
     const result = supportAt(game, x, z, root.y + 0.45);
+    // A boot beside a finite cap can reach its steep bevel while the other
+    // boot stands on top. Lowering the pelvis toward that edge bends the knee
+    // through the cap. Treat a substantial drop as an unsupported foothold.
+    if (bodySupport.surface?.triangles && root.y - result.height > 0.12)
+      return null;
     return Math.abs(result.height - root.y) <= 0.5 ? result : null;
   };
   const plans = state.feet.map((foot) => {

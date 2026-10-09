@@ -124,6 +124,10 @@ The [observatory pedestals and columns now stop the explorer at their rendered s
 and bronze meridian graduations sit within the paving. Actual delivered-body
 checks, both climbing loops, sound-source access and production keyboard/touch
 save recovery pass. Wider airborne contact and landscape review remain open.
+The [observatory column corners now catch jumps on their actual caps](docs/observatory-cap-landings.md),
+with clear crouched knees, ordinary step-downs and preserved earned save heights.
+The final 32 corner trials clear 192 sampled body poses and retain local routes
+and sound-source access; wider contact and landscape review remain open.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch

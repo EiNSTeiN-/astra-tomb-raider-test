@@ -15,7 +15,7 @@ import { orbitDeckAt } from "./orbit-rules.js";
 import { hoistDeckAt } from "./bell-hoist-rules.js";
 import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
-import { stationContains } from "./field-station-solids.js";
+import { stationSupport } from "./field-station-solids.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
@@ -30,17 +30,10 @@ export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
   }
   for (const o of game.obstacles) {
     if (o.fieldStation) {
-      if (
-        o.supportable &&
-        // Landing uses the same body footprint as horizontal collision so a
-        // descent beside a cap or control cannot settle inside its volume.
-        stationContains(o, x, z, 0.4)
-      ) {
-        const top = o.surfaceHeight?.(x, z) ?? o.bounds.max.y;
-        if (top <= maxY + 0.2 && top > height) {
-          height = top;
-          surface = o;
-        }
+      const top = stationSupport(o, x, z, maxY, rockRadius);
+      if (top !== null && top > height) {
+        height = top;
+        surface = o;
       }
       continue;
     }

@@ -102,6 +102,32 @@ export function stationContains(solid, x, z, padding = 0) {
         Math.abs(z - solid.z) < solid.d + padding;
 }
 
+// The movement disk can land on a real cap while boot/contact probes retain
+// their point footprint. A triangle station's highest bounding corner is not
+// a floor beneath every point of its tapered or chipped surface.
+export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
+  if (!solid.supportable || (solid.node && !solid.node.visible)) return null;
+  if (solid.triangles) {
+    // Keep a descending body on the cap until its collision disk clears the
+    // edge. A smaller support disk would lower it into the bevel and then
+    // reject the outward step. Point probes still query the exact surface.
+    const footprint = radius ? Math.max(radius, solid.bodyPadding ?? 0) : 0,
+      b = solid.bounds;
+    if (
+      x + footprint < b.min.x ||
+      x - footprint > b.max.x ||
+      z + footprint < b.min.z ||
+      z - footprint > b.max.z ||
+      b.min.y > maxY + 0.2
+    )
+      return null;
+    return solid.triangles.support(x, z, maxY, footprint)?.height ?? null;
+  }
+  if (!stationContains(solid, x, z, 0.4)) return null;
+  const top = solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y;
+  return top <= maxY + 0.2 ? top : null;
+}
+
 export function stationBlocked(
   solid,
   x,
