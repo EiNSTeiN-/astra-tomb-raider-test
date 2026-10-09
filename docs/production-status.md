@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Observatory enclosures](observatory-enclosures.md) give eleven domes distinct
+  plans with 33 backed wall bays and 36 real clerestory slots. The corrected
+  0.70 m margin clears all 32 sampled standing/crouched poses across 1,539,040
+  delivered body records, with actual sole support and no skipped approaches.
+  All 30 local court routes and both complete climbing loops pass; all 74
+  recorded route states retain their preceding movement, look and progress.
+  All 55 baseline/55 final construction, 32 body and ten native captures are
+  reviewed, with the fixed-observer occlusion and terrain-boundary limits
+  documented. Production keyboard/High and portrait touch/Low wall movement,
+  older-save recovery and complete-store reloads pass. The 820-test campaign
+  suite passes before the final margin correction; all 34 focused checks and
+  the production build pass afterward. Work uses a shared nine-of-sixteen CPU
+  set, at most two test workers and one browser; all temporary processes and
+  preview servers are stopped. Broader layout, physical contact, landscape,
+  listening and device acceptance remain open.
+
 - [Observatory grounds](observatory-grounds.md) add 15,056 original plants in
   three forms and weathered radial paving centered on the eleven actual domes.
   All 3,676,068 delivered root records find terrain without floating roots;

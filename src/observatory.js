@@ -5,6 +5,7 @@ import { flutedColumnGeometry, vaultStoneGeometry } from "./palace-geometry.js";
 import { domePanelGeometry, patinatedBronze } from "./observatory-geometry.js";
 import { observatoryState } from "./observatory-state.js";
 import { footprintMinimum } from "./masonry-foundations.js";
+import { buildObservatoryEnclosure } from "./observatory-enclosures.js";
 import {
   pedestalFootingGeometry,
   pedestalStoneUV,
@@ -344,6 +345,7 @@ export function buildObservatory(game) {
         detail,
       );
     }
+    buildObservatoryEnclosure(game, patch, points, { stone, dark });
     mergeArchitecture(root);
     mergeArchitecture(detail);
     game.observatorySources.push({

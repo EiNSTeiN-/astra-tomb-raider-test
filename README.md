@@ -116,6 +116,10 @@ The [observatory grounds now have three plant forms and weathered radial paving]
 with reserved trails, dome interiors and working spaces. Actual root contact,
 chapter cleanup, both climbing loops and native keyboard/touch saves pass;
 the broader architecture and layout review remains open.
+The [eleven observatory domes now have distinct enclosure plans](docs/observatory-enclosures.md),
+with rear cloisters, side chambers, galleries and low wall remnants. Finite
+rotated walls clear sampled standing/crouched bodies, retain both climbing
+loops and pass native keyboard/touch wall movement and complete-store reloads.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch

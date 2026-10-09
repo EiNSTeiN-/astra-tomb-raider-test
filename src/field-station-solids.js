@@ -16,11 +16,26 @@ export function stationSolid(
   const cx = group.position.x + x,
     cy = group.position.y + y,
     cz = group.position.z + z;
+  const frame =
+    options.angle === undefined
+      ? null
+      : {
+          cos: Math.cos(options.angle),
+          sin: Math.sin(options.angle),
+          w: w / 2,
+          d: d / 2,
+        };
+  const halfW = frame
+      ? (Math.abs(frame.cos) * w + Math.abs(frame.sin) * d) / 2
+      : w / 2,
+    halfD = frame
+      ? (Math.abs(frame.sin) * w + Math.abs(frame.cos) * d) / 2
+      : d / 2;
   const solid = {
     x: cx,
     z: cz,
-    w: w / 2,
-    d: d / 2,
+    w: halfW,
+    d: halfD,
     h: cy + h / 2 - game.groundHeight(cx, cz),
     fieldStation: feature.id,
     radius: options.radius,
@@ -29,10 +44,11 @@ export function stationSolid(
     surfaceHeight: options.surfaceHeight,
     node: options.node,
     bounds: {
-      min: { x: cx - w / 2, y: cy - h / 2, z: cz - d / 2 },
-      max: { x: cx + w / 2, y: cy + h / 2, z: cz + d / 2 },
+      min: { x: cx - halfW, y: cy - h / 2, z: cz - halfD },
+      max: { x: cx + halfW, y: cy + h / 2, z: cz + halfD },
     },
   };
+  if (frame) solid.frame = frame;
   game.obstacles.push(solid);
   (feature.stationSolids ||= []).push(solid);
   return solid;
@@ -40,6 +56,15 @@ export function stationSolid(
 
 export function stationContains(solid, x, z, padding = 0) {
   if (solid.node && !solid.node.visible) return false;
+  if (solid.frame && solid.radius === undefined) {
+    const dx = x - solid.x,
+      dz = z - solid.z,
+      f = solid.frame;
+    return (
+      Math.abs(dx * f.cos - dz * f.sin) < f.w + padding &&
+      Math.abs(dx * f.sin + dz * f.cos) < f.d + padding
+    );
+  }
   return solid.radius !== undefined
     ? Math.hypot(x - solid.x, z - solid.z) < solid.radius + padding
     : Math.abs(x - solid.x) < solid.w + padding &&
@@ -108,7 +133,25 @@ export function stationMantleEnd(game, platform, start, requested) {
 // movement's body margin is not part of a ray's physical surface.
 export function stationEntry(solid, from, to) {
   if (solid.node && !solid.node.visible) return null;
-  const entry = boxEntry(from, to, solid.bounds, 0, true);
+  let entry;
+  if (solid.frame && solid.radius === undefined) {
+    const f = solid.frame,
+      local = (p) => ({
+        x: (p.x - solid.x) * f.cos - (p.z - solid.z) * f.sin,
+        y: p.y,
+        z: (p.x - solid.x) * f.sin + (p.z - solid.z) * f.cos,
+      });
+    entry = boxEntry(
+      local(from),
+      local(to),
+      {
+        min: { x: -f.w, y: solid.bounds.min.y, z: -f.d },
+        max: { x: f.w, y: solid.bounds.max.y, z: f.d },
+      },
+      0,
+      true,
+    );
+  } else entry = boxEntry(from, to, solid.bounds, 0, true);
   if (entry === null || solid.radius === undefined) return entry;
   const dx = to.x - from.x,
     dz = to.z - from.z,

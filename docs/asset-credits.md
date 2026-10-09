@@ -487,6 +487,15 @@ assets, recordings or dependencies were added. The six documentation images
 are actual game captures converted losslessly to WebP, with identical decoded
 RGBA pixels and dimensions. See [observatory ground notes](observatory-grounds.md).
 
+The eleven enclosure plans, 33 closed wall bays, dressed stone on both faces,
+36 real clerestory slots, buried bed courses and caps in
+`src/observatory-enclosures.js` are original project geometry. They reuse the
+existing observatory stone materials and already credited material maps.
+Finite rotated collision queries are original project code. No external
+assets, recordings or dependencies were added. The eight documentation images
+are actual game captures converted losslessly to WebP, with identical decoded
+RGBA pixels and dimensions. See [observatory enclosure notes](observatory-enclosures.md).
+
 The surface index, body-disk support and triangle collision queries in
 `src/nature-rock-solids.js` are original project code. They reuse the existing
 credited Rock Moss Set 01 and desert stone geometry, preserving authored
