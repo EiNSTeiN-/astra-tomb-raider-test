@@ -4,6 +4,7 @@
 export const meridianDeclarations = /* glsl */ `
 #ifdef TERRAIN_MERIDIAN
 varying float vMeridianRock;
+uniform vec4 meridianCourts[MERIDIAN_COURT_COUNT];
 vec3 meridianReliefNormal(vec3 base, float height) {
   vec3 dx=dFdx(-vViewPosition), dy=dFdy(-vViewPosition);
   vec3 rx=cross(dy,base), ry=cross(base,dx);
@@ -42,11 +43,55 @@ export const meridianColor = /* glsl */ `
   float groundGray=dot(earthColor,vec3(.2126,.7152,.0722));
   earthColor=vec3(groundGray)*vec3(.43,.46,.51);
   earthColor=mix(earthColor,vec3(.105,.108,.116),meridianDust*.32);
+  // Wind-polished tracks separate from sheltered mineral soil. Broad oxide
+  // washes interrupt the repeating scan grain without changing ground height.
+  float meridianWash=terrainNoise(mp.xz*vec2(.037,.081)+vec2(weather*3.,19.));
+  float meridianFine=terrainNoise(mp.xz*.31+vec2(7.,37.));
+  earthColor*=mix(.78,1.28,smoothstep(.22,.78,meridianWash));
+  earthColor=mix(earthColor,earthColor*vec3(1.29,1.12,.86),
+    smoothstep(.48,.81,meridianWash)*meridianDust*.66);
+  earthColor=mix(earthColor,earthColor*vec3(.91,1.07,.99),
+    smoothstep(.54,.82,meridianFine)*(1.-meridianWash)*.38);
+  trailWeight=smoothstep(.08,.87,vTrail)*.72;
+  earthColor=mix(earthColor,vec3(groundGray)*vec3(.5,.48,.44),trailWeight);
+  // Concentric dressed courses belong to the dome footprint. Eroded outer
+  // stones blend into the mineral soil rather than stamping a complete disk.
+  float meridianCourtMask=0.;
+  vec2 meridianLocal=vec2(0.);
+  float meridianCourtStyle=0.;
+  for(int i=0;i<MERIDIAN_COURT_COUNT;i++) {
+    vec4 site=meridianCourts[i];
+    vec2 delta=mp.xz-site.xy;
+    float mask=1.-smoothstep(site.z-.65,site.z+.15,length(delta));
+    mask*=smoothstep(.22,.57,terrainNoise(mp.xz*.43+vec2(11.,29.)));
+    if(mask>meridianCourtMask) { meridianCourtMask=mask; meridianLocal=delta; meridianCourtStyle=site.w; }
+  }
+  float courtRadius=length(meridianLocal);
+  float courseWidth=1.2+mod(meridianCourtStyle,3.)*.17;
+  float coursePhase=courtRadius/courseWidth;
+  float courseEdge=abs(fract(coursePhase+.5)-.5)*courseWidth;
+  float courseFootprint=max(.003,fwidth(courtRadius));
+  float circleJoint=1.-smoothstep(.009,.024+courseFootprint,courseEdge);
+  float segmentCount=8.+mod(meridianCourtStyle,3.)*4.;
+  float courseAngle=(atan(meridianLocal.y,meridianLocal.x)/6.2831853+.5)*segmentCount
+    +mod(floor(coursePhase),2.)*.5;
+  float angleEdge=abs(fract(courseAngle+.5)-.5);
+  float radialJoint=(1.-smoothstep(.004,.014+fwidth(courseAngle),angleEdge))*smoothstep(1.8,2.4,courtRadius);
+  float dressedJoint=max(circleJoint,radialJoint);
+  float stoneIdentity=terrainHash(vec2(floor(coursePhase),floor(courseAngle)+meridianCourtStyle*23.));
+  float pavingGray=dot(pavingColor,vec3(.2126,.7152,.0722));
+  vec3 dressedStone=vec3(pavingGray)*vec3(1.1,1.03,.88)*mix(.84,1.15,stoneIdentity);
+  dressedStone*=1.-dressedJoint*.5;
+  pavingColor=mix(pavingColor,dressedStone,meridianCourtMask);
+  // The dome centers sit 17 m behind the old court markers, where the legacy
+  // paving attribute nearly vanishes. Ground the courses at the actual domes.
+  pavingWeight=max(pavingWeight,meridianCourtMask*.86);
   // Exposed horizontal shelves share the cliff surface instead of looking like
   // a pale coating on top of a darker wall. Paving remains on working courts.
   terrainSlope=max(terrainSlope,meridianExposure*.86);
   pavingWeight*=1.-meridianExposure;
   float meridianRelief=(-bedSeam*.021-crossJoint*.014)*meridianExposure*seamSurvival;
+  float courtRelief=-dressedJoint*.008*meridianCourtMask;
 #endif
 `;
 
@@ -54,6 +99,7 @@ export const meridianNormal = /* glsl */ `
 #ifdef TERRAIN_MERIDIAN
   earthN=normalize(mix(normal,earthN,.43-meridianDust*.12));
   cliffN=meridianReliefNormal(normalize(mix(normal,cliffN,.66)),meridianRelief);
+  pavingN=meridianReliefNormal(pavingN,courtRelief);
 #endif
 `;
 

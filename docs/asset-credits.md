@@ -478,6 +478,15 @@ documentation images are actual game captures converted losslessly to WebP,
 with identical decoded RGBA pixels and dimensions. See
 [observatory climbing pier notes](eclipse-climbing-piers.md).
 
+The silver bunchgrass, dry stems and low cushions in
+`src/meridian-groundcover.js` adapt the project's original folded alpine leaves
+from `src/sky-meadow.js`. Plant placement, wind and the dome-centered radial
+paving in `src/meridian-terrain-material.js` are original project code. The
+ground shader reuses the already credited local material maps. No external
+assets, recordings or dependencies were added. The six documentation images
+are actual game captures converted losslessly to WebP, with identical decoded
+RGBA pixels and dimensions. See [observatory ground notes](observatory-grounds.md).
+
 The surface index, body-disk support and triangle collision queries in
 `src/nature-rock-solids.js` are original project code. They reuse the existing
 credited Rock Moss Set 01 and desert stone geometry, preserving authored

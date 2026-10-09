@@ -299,7 +299,34 @@ export function terrainMaterial(game) {
   if (biome === "snow") material.defines = { TERRAIN_SNOW: 1 };
   if (biome === "desert") material.defines = { TERRAIN_DESERT: 1 };
   if (biome === "crystal") material.defines = { TERRAIN_CAVERN: 1 };
-  if (biome === "eclipse") material.defines = { TERRAIN_MERIDIAN: 1 };
+  if (biome === "eclipse") {
+    const rooms = game.map?.rooms || [];
+    material.defines = {
+      TERRAIN_MERIDIAN: 1,
+      MERIDIAN_COURT_COUNT: Math.max(1, rooms.length),
+    };
+    uniforms.meridianCourts = {
+      value: rooms.length
+        ? rooms.map((room) => {
+            const x = room.x * 7,
+              z = room.z * 7 - 17,
+              nearest = Math.min(
+                ...rooms
+                  .filter((other) => other !== room)
+                  .map((other) =>
+                    Math.hypot(x - other.x * 7, z - (other.z * 7 - 17)),
+                  ),
+              );
+            return new THREE.Vector4(
+              x,
+              z,
+              Math.min(8.75 + (room.index % 3) * 0.3, nearest / 2 - 0.5),
+              room.index,
+            );
+          })
+        : [new THREE.Vector4(0, 0, 0, 0)],
+    };
+  }
   if (biome === "volcano") material.defines = { TERRAIN_FORGE: 1 };
   if (biome === "sky") {
     material.defines = { TERRAIN_SKY: 1 };
@@ -353,6 +380,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${biome === "snow" ? 9 : ["desert", "water", "volcano", "eclipse", "crystal"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["snow", "eclipse"].includes(biome) ? 9 : ["desert", "water", "volcano", "crystal"].includes(biome) ? 8 : 7}`;
   return material;
 }

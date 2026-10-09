@@ -112,6 +112,10 @@ The [ten observatory climbing piers now carry recessed astronomical dials](docs/
 with fitted radial stone surrounds, closed backs and seated patinated bronze.
 Both continuous routes retain their recorded movement, look and progress;
 native keyboard/touch climbing, descent and complete-store reloads pass.
+The [observatory grounds now have three plant forms and weathered radial paving](docs/observatory-grounds.md),
+with reserved trails, dome interiors and working spaces. Actual root contact,
+chapter cleanup, both climbing loops and native keyboard/touch saves pass;
+the broader architecture and layout review remains open.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch

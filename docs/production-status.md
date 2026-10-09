@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Observatory grounds](observatory-grounds.md) add 15,056 original plants in
+  three forms and weathered radial paving centered on the eleven actual domes.
+  All 3,676,068 delivered root records find terrain without floating roots;
+  fresh/completed layouts match. All 63 sampled feature-footing positions and
+  22 sound-source fronts pass, and chapter changes retire the full groundcover
+  resource sets. Both complete climbing loops preserve recorded movement,
+  look, camera and progress across 5,008 updates. All 22 baseline/22 final court,
+  74 route and fourteen native captures are reviewed. Native keyboard/High
+  and portrait touch/Low controls and complete-store reloads pass without
+  arrival corrections. All 24 final focused tests and the production build
+  pass; this does not claim a full 817-test campaign run. Costly checks run
+  sequentially on nine of sixteen CPUs, and all temporary browsers, workers
+  and servers are stopped. Repeated architecture/layouts, wider body contact,
+  landscape composition, listening and device acceptance remain open.
+
 - [Observatory climbing piers](eclipse-climbing-piers.md) add forty recessed
   circular stone registers across ten piers, with fitted radial surrounds,
   closed backs and seated bronze astronomical dials. Independent browser
