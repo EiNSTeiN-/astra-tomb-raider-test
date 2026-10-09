@@ -468,6 +468,16 @@ documentation images are actual game captures converted losslessly to WebP,
 with identical decoded RGBA pixels and dimensions. See
 [crystal climbing pier notes](crystal-climbing-piers.md).
 
+The forty circular registers, fitted radial surrounds, continuous bearings,
+graduated bronze circles, orbital ellipses and stars in
+`src/eclipse-climbing-piers.js` are original project geometry. They reuse the
+existing observatory stone materials and original patinated-bronze shader,
+with the already credited stone maps. Exact vertex indexing preserves triangle
+attributes. No external assets, recordings or dependencies were added. The six
+documentation images are actual game captures converted losslessly to WebP,
+with identical decoded RGBA pixels and dimensions. See
+[observatory climbing pier notes](eclipse-climbing-piers.md).
+
 The surface index, body-disk support and triangle collision queries in
 `src/nature-rock-solids.js` are original project code. They reuse the existing
 credited Rock Moss Set 01 and desert stone geometry, preserving authored

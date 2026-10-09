@@ -10,6 +10,8 @@ import { buildSnowClimbingPier } from "./snow-climbing-piers.js";
 import { buildCoastalClimbingPier } from "./coastal-climbing-piers.js";
 import { buildVolcanicClimbingPier } from "./volcanic-climbing-piers.js";
 import { buildCrystalClimbingPier } from "./crystal-climbing-piers.js";
+import { buildEclipseClimbingPier } from "./eclipse-climbing-piers.js";
+import { patinatedBronze } from "./observatory-geometry.js";
 import { indexPierGeometry } from "./climbing-pier-geometry.js";
 import { weatherPalaceStone } from "./palace-material.js";
 
@@ -116,6 +118,23 @@ export function climbingMaterials(game) {
     calcite.onBeforeCompile = stone.onBeforeCompile;
     calcite.customProgramCacheKey = stone.customProgramCacheKey;
     materials.calcite = calcite;
+  }
+  if (game.level.biome === "eclipse") {
+    const original = game.observatoryMaterials?.bronze,
+      astral = original ? original.clone() : patinatedBronze();
+    if (original) {
+      astral.onBeforeCompile = original.onBeforeCompile;
+      astral.customProgramCacheKey = original.customProgramCacheKey;
+    }
+    astral.name = "Climbing observatory astrolabe";
+    astral.vertexColors = true;
+    const back =
+      game.observatoryMaterials?.dark?.clone() ||
+      pbrMaterial("palace-stone", 0x606e78);
+    back.name = "Climbing observatory register stone";
+    back.vertexColors = true;
+    materials.astral = astral;
+    materials.orreryBack = back;
   }
   return materials;
 }
@@ -294,6 +313,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
         "water",
         "volcano",
         "crystal",
+        "eclipse",
       ].includes(game.level.biome)
     ) {
       const build =
@@ -309,7 +329,9 @@ export function buildClimbingArt(game, plan, base, root, materials) {
                   ? buildCoastalClimbingPier
                   : game.level.biome === "volcano"
                     ? buildVolcanicClimbingPier
-                    : buildCrystalClimbingPier;
+                    : game.level.biome === "crystal"
+                      ? buildCrystalClimbingPier
+                      : buildEclipseClimbingPier;
       regionalFacade = build({
         ledge,
         width,
@@ -497,6 +519,7 @@ export function buildClimbingArt(game, plan, base, root, materials) {
           "water",
           "volcano",
           "crystal",
+          "eclipse",
         ].includes(game.level.biome)
       )
         serial += 8;
@@ -730,7 +753,11 @@ export function buildClimbingArt(game, plan, base, root, materials) {
   );
   mergeArchitecture(fixed);
   mergeArchitecture(detail);
-  if (["snow", "water", "volcano", "crystal"].includes(game.level.biome)) {
+  if (
+    ["snow", "water", "volcano", "crystal", "eclipse"].includes(
+      game.level.biome,
+    )
+  ) {
     indexPierGeometry(fixed);
     indexPierGeometry(detail);
   }

@@ -108,6 +108,10 @@ view also keeps the explorer visible during the recorded summit mantle.
 The [twenty crystal climbing piers now have angular limestone registers](docs/crystal-climbing-piers.md),
 with closed niche backs, seated calcite reliefs and bronze restraints. All four
 complete routes and native keyboard/touch roof, ground and reload checks pass.
+The [ten observatory climbing piers now carry recessed astronomical dials](docs/eclipse-climbing-piers.md),
+with fitted radial stone surrounds, closed backs and seated patinated bronze.
+Both continuous routes retain their recorded movement, look and progress;
+native keyboard/touch climbing, descent and complete-store reloads pass.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch

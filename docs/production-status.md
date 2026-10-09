@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Observatory climbing piers](eclipse-climbing-piers.md) add forty recessed
+  circular stone registers across ten piers, with fitted radial surrounds,
+  closed backs and seated bronze astronomical dials. Independent browser
+  probes cover 4,410 roof points, 1,210 undersides, 360 center rays, 3,208
+  circular backing rays and 18,900 actual bronze back records without misses.
+  Both complete loops retain health 100, full opacity and exact recorded
+  movement, camera/look and progress across 5,008 updates. All eighteen
+  baseline/46 final construction, 74 final route and fourteen native captures
+  are reviewed. Native keyboard/High and portrait touch/Low roof, crouch/look,
+  ground descent and complete-store reloads pass without arrival corrections.
+  The 813-test campaign suite passes before the final removal of obsolete
+  rectangular panels; all 43 focused checks and the production build pass
+  afterward. The new 1,320-ray check verifies that those panels no longer cover
+  the dials. Verification uses nine of sixteen CPUs; browsers, workers and
+  development/preview servers are stopped afterward. All eight chapters now
+  have regional pier faces, while repeated layouts, sparse terrain, broader
+  contact/placement, listening and device acceptance remain open.
+
 - [Scanned-rock contact](nature-rock-contact.md) repairs a legal crystal
   approach that embedded 1,637 delivered body vertex records more than 15 mm
   inside stone, reaching 298.312 mm. Actual scan surfaces now supply movement,

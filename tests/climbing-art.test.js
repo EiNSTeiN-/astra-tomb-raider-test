@@ -17,6 +17,7 @@ import { CLIMBING_STYLES } from "../src/traversal-art.js";
 import { supportAt } from "../src/character-motion.js";
 import { updateReturnCable } from "../src/return-cable.js";
 import { stationBlocked } from "../src/field-station-solids.js";
+import { astrolabeRingGeometry } from "../src/eclipse-climbing-piers.js";
 
 function world(t, level) {
   t.mock.method(
@@ -759,6 +760,221 @@ test("summit cable frames retain supported feet and clear the observed reading a
   }
   assert.equal(views, 105);
   assert.deepEqual(blocked, []);
+});
+
+test("indexed astrolabe rings have closed oriented rims and backs while retaining an open center", () => {
+  const geometry = astrolabeRingGeometry(0.68, 0.73, 0.055),
+    position = geometry.attributes.position,
+    index = geometry.index,
+    edges = new Map();
+  for (let i = 0; i < index.count; i += 3) {
+    const triangle = [0, 1, 2].map((j) =>
+        new THREE.Vector3().fromBufferAttribute(position, index.getX(i + j)),
+      ),
+      face = new THREE.Triangle(...triangle),
+      normal = face.getNormal(new THREE.Vector3()),
+      center = face.getMidpoint(new THREE.Vector3());
+    assert(face.getArea() > 1e-9);
+    const outward =
+      Math.abs(normal.z) > 0.9
+        ? new THREE.Vector3(0, 0, center.z < -0.0275 ? -1 : 1)
+        : new THREE.Vector3(center.x, center.y, 0)
+            .normalize()
+            .multiplyScalar(Math.hypot(center.x, center.y) > 0.705 ? 1 : -1);
+    assert(normal.dot(outward) > 0.999);
+    const keys = triangle.map((p) => p.toArray().join(","));
+    for (let j = 0; j < 3; j++) {
+      const key = [keys[j], keys[(j + 1) % 3]].sort().join("|");
+      edges.set(key, (edges.get(key) || 0) + 1);
+    }
+  }
+  assert(
+    [...edges.values()].every((count) => count === 2),
+    "all position-welded edges have two triangle owners",
+  );
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    mesh = new THREE.Mesh(geometry, material),
+    ray = new THREE.Raycaster();
+  for (const side of [-1, 1]) {
+    ray.set(new THREE.Vector3(0, 0, side * 3), new THREE.Vector3(0, 0, -side));
+    assert.equal(ray.intersectObject(mesh).length, 0);
+    ray.set(
+      new THREE.Vector3(0.705, 0, side * 3),
+      new THREE.Vector3(0, 0, -side),
+    );
+    const hit = ray.intersectObject(mesh)[0];
+    assert(Math.abs(hit.point.z - (side === 1 ? 0 : -0.055)) < 1e-7);
+  }
+  geometry.dispose();
+  material.dispose();
+});
+
+test("observatory pier circular registers retain real stone backs and fitted radial shoulders on all forty faces", (t) => {
+  const g = world(t, LEVELS[7]),
+    ray = new THREE.Raycaster(),
+    misses = [];
+  let panels = 0,
+    backRays = 0,
+    shoulderRays = 0;
+  for (const c of g.traversalCourses)
+    for (const l of c.ledges) {
+      const facade = c.art.piers[l.index].eclipseFacade;
+      assert.equal(facade.panels.length, 4);
+      for (const p of facade.panels) {
+        const a = (p.face * Math.PI) / 2,
+          normal = new THREE.Vector3(Math.sin(a), 0, Math.cos(a)),
+          tangent = new THREE.Vector3(Math.cos(a), 0, -Math.sin(a)),
+          half = p.face % 2 ? l.w : l.d,
+          center = new THREE.Vector3(l.x, p.center, l.z);
+        for (let ix = -4; ix <= 4; ix++)
+          for (let iy = -4; iy <= 4; iy++) {
+            const x = (ix * p.radius * 0.98) / 4,
+              y = (iy * p.radius * 0.98) / 4;
+            if (Math.hypot(x, y) > p.radius * 0.98) continue;
+            const from = center
+              .clone()
+              .addScaledVector(tangent, x)
+              .addScaledVector(normal, half + 0.2);
+            from.y += y;
+            ray.set(from, normal.clone().negate());
+            ray.far = 1;
+            const hit = ray.intersectObject(c.art.fixed, true)[0];
+            if (!hit || Math.abs(hit.distance - 0.57) > 2e-5)
+              misses.push(`${c.id}/${l.index}/${p.face}: ${x},${y}`);
+            backRays++;
+          }
+        for (let i = 0; i < p.segments; i++)
+          for (const radial of [
+            p.radius + 0.07,
+            p.radius + 0.24,
+            p.radius + 0.3,
+          ]) {
+            const angle = ((i + 0.5) * Math.PI * 2) / p.segments,
+              x = Math.cos(angle) * radial,
+              y = Math.sin(angle) * radial,
+              from = center
+                .clone()
+                .addScaledVector(tangent, x)
+                .addScaledVector(normal, half + 0.2);
+            from.y += y;
+            ray.set(from, normal.clone().negate());
+            ray.far = 0.65;
+            const hit = ray.intersectObject(c.art.fixed, true)[0];
+            if (!hit || hit.distance > 0.256)
+              misses.push(
+                `${c.id}/${l.index}/${p.face}: radial ${i}/${radial}`,
+              );
+            shoulderRays++;
+          }
+        panels++;
+      }
+    }
+  assert.equal(panels, 40);
+  assert.equal(backRays, 1960);
+  assert.equal(shoulderRays, 3840);
+  assert.deepEqual(misses, []);
+});
+
+test("observatory astrolabe faces remain exposed after retiring the old rectangular wall panels", (t) => {
+  const g = world(t, LEVELS[7]),
+    ray = new THREE.Raycaster(),
+    failures = [];
+  let samples = 0;
+  for (const c of g.traversalCourses)
+    for (const l of c.ledges)
+      for (const p of c.art.piers[l.index].eclipseFacade.panels) {
+        const a = (p.face * Math.PI) / 2,
+          normal = new THREE.Vector3(Math.sin(a), 0, Math.cos(a)),
+          tangent = new THREE.Vector3(Math.cos(a), 0, -Math.sin(a)),
+          half = p.face % 2 ? l.w : l.d;
+        for (let i = -1; i < 32; i++) {
+          const theta = (i * Math.PI) / 16,
+            r = i < 0 ? 0 : p.radius * 0.8,
+            from = new THREE.Vector3(l.x, p.center + Math.sin(theta) * r, l.z)
+              .addScaledVector(tangent, Math.cos(theta) * r)
+              .addScaledVector(normal, half + 0.2);
+          ray.set(from, normal.clone().negate());
+          ray.far = 0.6;
+          const hit = ray.intersectObjects(
+            [c.art.fixed, c.art.detail],
+            true,
+          )[0];
+          if (hit?.object.material.name !== "Climbing observatory astrolabe")
+            failures.push(
+              `${c.id}/${l.index}/${p.face}/${i}: ${hit?.object.material.name}`,
+            );
+          samples++;
+        }
+      }
+  assert.equal(samples, 1320);
+  assert.deepEqual(failures, []);
+});
+
+test("every delivered observatory astrolabe back vertex is seated inside its circular register after batching", (t) => {
+  const g = world(t, LEVELS[7]),
+    ray = new THREE.Raycaster(),
+    failures = [];
+  let samples = 0,
+    min = Infinity,
+    max = -Infinity;
+  for (const c of g.traversalCourses) {
+    const panels = c.ledges.flatMap((l) =>
+      c.art.piers[l.index].eclipseFacade.panels.map((p) => ({
+        ...p,
+        l,
+        normal: new THREE.Vector3(
+          Math.sin((p.face * Math.PI) / 2),
+          0,
+          Math.cos((p.face * Math.PI) / 2),
+        ),
+        tangent: new THREE.Vector3(
+          Math.cos((p.face * Math.PI) / 2),
+          0,
+          -Math.sin((p.face * Math.PI) / 2),
+        ),
+      })),
+    );
+    for (const o of c.art.detail.children.filter(
+      (o) => o.material.name === "Climbing observatory astrolabe",
+    )) {
+      const position = o.geometry.attributes.position,
+        normals = o.geometry.attributes.normal;
+      for (let i = 0; i < position.count; i++) {
+        const point = new THREE.Vector3()
+            .fromBufferAttribute(position, i)
+            .applyMatrix4(o.matrixWorld),
+          normal = new THREE.Vector3()
+            .fromBufferAttribute(normals, i)
+            .transformDirection(o.matrixWorld);
+        const p = panels.find((p) => {
+          if (normal.dot(p.normal) > -0.999) return false;
+          const delta = point
+            .clone()
+            .sub(new THREE.Vector3(p.l.x, p.center, p.l.z));
+          return (
+            Math.hypot(delta.dot(p.tangent), delta.y) < p.radius * 0.9 &&
+            Math.abs(delta.dot(p.normal) - p.plane) < 0.025
+          );
+        });
+        if (!p) continue;
+        ray.set(
+          point.clone().addScaledVector(p.normal, 0.2),
+          p.normal.clone().negate(),
+        );
+        ray.far = 0.3;
+        const hit = ray.intersectObject(c.art.fixed, true)[0],
+          burial = hit ? 0.2 - hit.distance : -Infinity;
+        if (burial < 0.0139 || burial > 0.0231)
+          failures.push(`${c.id}/${p.l.index}/${p.face}: ${burial}`);
+        min = Math.min(min, burial);
+        max = Math.max(max, burial);
+        samples++;
+      }
+    }
+  }
+  assert(samples > 10000, `${samples} actual back vertex records`);
+  assert.deepEqual(failures, []);
+  t.diagnostic(`${samples} delivered astrolabe backs; burial ${min}–${max}m`);
 });
 
 test("climbing pier wall and coping joints have continuous bearing behind their recessed edges", (t) => {
