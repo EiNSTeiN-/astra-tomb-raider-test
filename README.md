@@ -120,6 +120,10 @@ The [eleven observatory domes now have distinct enclosure plans](docs/observator
 with rear cloisters, side chambers, galleries and low wall remnants. Finite
 rotated walls clear sampled standing/crouched bodies, retain both climbing
 loops and pass native keyboard/touch wall movement and complete-store reloads.
+The [observatory pedestals and columns now stop the explorer at their rendered stone](docs/observatory-body-clearance.md),
+and bronze meridian graduations sit within the paving. Actual delivered-body
+checks, both climbing loops, sound-source access and production keyboard/touch
+save recovery pass. Wider airborne contact and landscape review remain open.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch

@@ -193,6 +193,15 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 
 | VA-71 | The first new observatory wall margin lets standing toes enter the actual closed masonry by up to 26.070 mm and crouched clothing by 131.147 mm. | [Delivered wall clearance](observatory-enclosures.md) increases the new walls' movement margin to 0.70 m after measuring a 0.631 m crouched reach. All 32 sampled poses clear 1,539,040 delivered body records at the 15 mm threshold; all 16,896 sole samples find actual terrain or masonry. Native keyboard/touch movement and older-save/full-store reloads pass. Older columns, pedestals and raised wall caps still need wider contact review. | Fixed for the sampled new-wall ground approaches; wider contact open |
 
+The [observatory body-clearance pass](observatory-body-clearance.md) adds
+ground-contact coverage at older pedestals and columns. Legal approaches
+originally embedded delivered body records by up to 671.968 and 420.290 mm.
+Finite triangle queries and seated bronze inlays clear all 122 reachable
+sampled poses at the 15 mm threshold, with three inaccessible column directions
+listed separately. Both complete loops, native input/saves and the selected
+97 checks pass. Raised caps, airborne contact, broader placement/composition and
+listening/device acceptance remain open.
+
 The [independent cable geometry observer](cable-clearance.md) corrects an
 empty sheave-clearance regression after camera rebuild. Both tests and actual
 worlds now inspect 277,200 records across 1,923 terminal pieces on all 21 paths,

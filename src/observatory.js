@@ -6,9 +6,11 @@ import { domePanelGeometry, patinatedBronze } from "./observatory-geometry.js";
 import { observatoryState } from "./observatory-state.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { buildObservatoryEnclosure } from "./observatory-enclosures.js";
+import { stationMeshSolid } from "./field-station-solids.js";
 import {
   pedestalFootingGeometry,
   pedestalStoneUV,
+  seatMeridianMark,
 } from "./observatory-footings.js";
 
 export function buildObservatory(game) {
@@ -51,6 +53,8 @@ export function buildObservatory(game) {
       root,
       detail,
       index: room.index,
+      id: `observatory-${room.index}`,
+      stationSolids: [],
       base,
       center: new THREE.Vector3(x, base + 7.8, z),
       state,
@@ -59,6 +63,7 @@ export function buildObservatory(game) {
       instruments: [],
       targets: [],
       foundations: [],
+      meridianMarks: [],
       aperture: state.aperture,
       motion: 0,
     };
@@ -85,6 +90,15 @@ export function buildObservatory(game) {
         parent,
         capture,
       );
+    const masonrySolid = (mesh, part) => {
+      const solid = stationMeshSolid(game, patch, mesh, {
+        bodyPadding: 0.7,
+        support: false,
+      });
+      solid.observatory = true;
+      solid.observatoryPart = part;
+      return solid;
+    };
     const spring = 7.4,
       domeY = spring + Math.sin(Math.PI / 8) * radius + 0.35;
     const points = Array.from({ length: 8 }, (_, i) => {
@@ -113,36 +127,37 @@ export function buildObservatory(game) {
         width: 2.5,
         depth: 2.5,
       });
-      block(
-        2.5,
-        ground - floor + 0.8,
-        2.5,
-        stone,
-        p.x,
-        (ground + floor + 0.8) / 2,
-        p.z,
-        root,
-        true,
+      masonrySolid(
+        block(
+          2.5,
+          ground - floor + 0.8,
+          2.5,
+          stone,
+          p.x,
+          (ground + floor + 0.8) / 2,
+          p.z,
+          root,
+          true,
+        ),
+        `column-${i}-base`,
       );
-      add(
-        flutedColumnGeometry(Math.max(0.5, spring - ground - 1.1), 0.91),
-        stone,
-        p.x,
-        ground + 0.6,
-        p.z,
-        root,
-        true,
+      masonrySolid(
+        add(
+          flutedColumnGeometry(Math.max(0.5, spring - ground - 1.1), 0.91),
+          stone,
+          p.x,
+          ground + 0.6,
+          p.z,
+          root,
+          true,
+        ),
+        `column-${i}-shaft`,
       );
       for (const h of [ground + 0.4, spring - 0.15])
-        block(2.8, 0.42, 2.8, dark, p.x, h, p.z, detail);
-      game.obstacles.push({
-        x: x + p.x,
-        z: z + p.z,
-        w: 1.45,
-        d: 1.45,
-        h: base + spring + 0.1 - game.groundHeight(x + p.x, z + p.z),
-        observatory: true,
-      });
+        masonrySolid(
+          block(2.8, 0.42, 2.8, dark, p.x, h, p.z, detail),
+          `column-${i}-trim`,
+        );
       const q = points[(i + 1) % 8],
         width = Math.hypot(q.x - p.x, q.z - p.z) / 2;
       const yaw = Math.atan2(-(q.z - p.z), q.x - p.x);
@@ -206,14 +221,17 @@ export function buildObservatory(game) {
     }
     const ground = game.groundHeight(x, z) - base;
     const bottom = footprintMinimum(groundHeight, x, z, 8, 8) - 0.2;
-    add(
-      pedestalFootingGeometry(bottom - base, ground + 0.035),
-      dark,
-      0,
-      0,
-      0,
-      root,
-      true,
+    masonrySolid(
+      add(
+        pedestalFootingGeometry(bottom - base, ground + 0.035),
+        dark,
+        0,
+        0,
+        0,
+        root,
+        true,
+      ),
+      "pedestal-footing",
     );
     patch.foundations.push({
       kind: "pedestal",
@@ -223,26 +241,21 @@ export function buildObservatory(game) {
       top: base + ground + 0.035,
       radius: 4,
     });
-    add(
-      pedestalStoneUV(
-        new THREE.CylinderGeometry(3.15, 4, 3 - ground, 32),
+    masonrySolid(
+      add(
+        pedestalStoneUV(
+          new THREE.CylinderGeometry(3.15, 4, 3 - ground, 32),
+          (ground + 3) / 2,
+        ),
+        dark,
+        0,
         (ground + 3) / 2,
+        0,
+        root,
+        true,
       ),
-      dark,
-      0,
-      (ground + 3) / 2,
-      0,
-      root,
-      true,
+      "pedestal-core",
     );
-    game.obstacles.push({
-      x,
-      z,
-      w: 3.8,
-      d: 3.8,
-      h: 3 - ground,
-      observatory: true,
-    });
     add(
       new THREE.CylinderGeometry(0.7, 1.2, 4.8, 24),
       bronze,
@@ -333,17 +346,15 @@ export function buildObservatory(game) {
     // The graduated meridian runs between the instrument and its control sanctuary.
     for (let i = 0; i < 18; i++) {
       const pz = z + 5 + i * 0.58,
-        py = game.groundHeight(x, pz) + 0.045;
-      block(
-        i % 3 === 0 ? 1.2 : 0.48,
-        0.04,
-        0.07,
-        bronze,
-        0,
-        py - base,
-        pz - z,
-        detail,
+        width = i % 3 === 0 ? 1.2 : 0.48;
+      const geometry = seatMeridianMark(
+        stoneBlockGeometry(width, 0.04, 0.07, room.index + i),
+        x,
+        pz,
+        groundHeight,
       );
+      add(geometry, bronze, 0, -base, pz - z, detail);
+      patch.meridianMarks.push({ x, z: pz, width });
     }
     buildObservatoryEnclosure(game, patch, points, { stone, dark });
     mergeArchitecture(root);

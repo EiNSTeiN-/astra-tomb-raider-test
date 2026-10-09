@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Observatory body clearance](observatory-body-clearance.md) repairs legal
+  ground approaches that embedded the explorer up to 671.968 mm into pedestals
+  and 420.290 mm into column bases. All 374 masonry pieces now use their finite
+  triangles, with a 0.70 m movement disk and raw sight/sound/projectile rays.
+  All 198 bronze graduations are seated into the paving. The final 122 reachable
+  standing/crouched poses clear 5,867,590 delivered body records at the 15 mm
+  threshold; three inaccessible column directions are explicitly skipped.
+  All 64,416 sole records find actual surfaces. All 30 local routes, 22 sound
+  fronts and both complete climbing loops pass, retaining all 74 preceding
+  recorded route states. Production keyboard/High and portrait touch/Low input,
+  older-save recovery and complete-store reloads pass. All 97 selected checks
+  and the production build pass; no new full campaign-suite run is claimed.
+  All 122 body, 74 route and ten native captures are reviewed, with foreground
+  occlusion limits documented. Costly checks use the shared nine-of-sixteen CPU
+  set in sequence; all temporary workers, browsers and servers are released.
+  Wider airborne contact, composition, landscape/layout, listening and device
+  acceptance remain open.
+
 - [Return-cable geometry verification](cable-clearance.md) repairs a regression
   that counted wheel vertices while inspecting no terminal pieces after camera
   rebuild. Independent observation preserves source identity through batching

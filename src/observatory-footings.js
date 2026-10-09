@@ -1,6 +1,17 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
+// Meridian graduations are bronze inlays, rather than raised walking bars.
+// Each shared corner follows the actual terrain; most of the metal thickness
+// stays beneath the paving while its top remains a few millimetres visible.
+export function seatMeridianMark(geometry, x, z, groundHeight) {
+  const p = geometry.attributes.position;
+  for (let i = 0; i < p.count; i++)
+    p.setY(i, p.getY(i) + groundHeight(x + p.getX(i), z + p.getZ(i)) - 0.016);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 export function pedestalStoneUV(geometry, yOffset = 0) {
   const p = geometry.attributes.position,
     n = geometry.attributes.normal,

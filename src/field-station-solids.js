@@ -1,5 +1,6 @@
 import { boxEntry } from "./camera-collision.js";
 import { mantlePoint } from "./mantle-motion.js";
+import { TriangleSolids } from "./triangle-solids.js";
 
 // Generic field furniture has finite vertical bounds. In particular, an
 // elevated station must not create an invisible column down to the ground.
@@ -54,8 +55,38 @@ export function stationSolid(
   return solid;
 }
 
+// Static masonry keeps a CPU triangle kernel after material batching releases
+// its render geometry. A broad bound only selects candidates; it is never the
+// physical surface used by movement, sight, sound or projectile queries.
+export function stationMeshSolid(game, feature, mesh, options = {}) {
+  mesh.updateWorldMatrix(true, false);
+  const triangles = new TriangleSolids([
+      { geometry: mesh.geometry, matrices: [mesh.matrixWorld] },
+    ]),
+    bounds = triangles.solids[0].bounds,
+    x = (bounds.min.x + bounds.max.x) / 2,
+    z = (bounds.min.z + bounds.max.z) / 2;
+  const solid = {
+    x,
+    z,
+    w: (bounds.max.x - bounds.min.x) / 2,
+    d: (bounds.max.z - bounds.min.z) / 2,
+    h: bounds.max.y - game.groundHeight(x, z),
+    fieldStation: feature.id,
+    bodyPadding: options.bodyPadding ?? 0.4,
+    supportable: options.support !== false,
+    bounds,
+    triangles,
+  };
+  game.obstacles.push(solid);
+  (feature.stationSolids ||= []).push(solid);
+  return solid;
+}
+
 export function stationContains(solid, x, z, padding = 0) {
   if (solid.node && !solid.node.visible) return false;
+  if (solid.triangles)
+    return solid.triangles.support(x, z, Infinity, padding) !== null;
   if (solid.frame && solid.radius === undefined) {
     const dx = x - solid.x,
       dz = z - solid.z,
@@ -79,6 +110,20 @@ export function stationBlocked(
   clearance = 1.8,
   padding = solid.bodyPadding ?? 0.4,
 ) {
+  if (solid.triangles) {
+    const radius = clearance ? padding : 0,
+      b = solid.bounds;
+    if (
+      x + radius < b.min.x ||
+      x - radius > b.max.x ||
+      z + radius < b.min.z ||
+      z - radius > b.max.z ||
+      y >= b.max.y - 0.015 ||
+      y + clearance < b.min.y + 0.015
+    )
+      return false;
+    return solid.triangles.blocked(x, y, z, clearance, clearance ? padding : 0);
+  }
   return (
     stationContains(solid, x, z, padding) &&
     y < (solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y) - 0.015 &&
@@ -133,6 +178,10 @@ export function stationMantleEnd(game, platform, start, requested) {
 // movement's body margin is not part of a ray's physical surface.
 export function stationEntry(solid, from, to) {
   if (solid.node && !solid.node.visible) return null;
+  if (solid.triangles)
+    return boxEntry(from, to, solid.bounds, 0, true) === null
+      ? null
+      : solid.triangles.entry(from, to);
   let entry;
   if (solid.frame && solid.radius === undefined) {
     const f = solid.frame,
