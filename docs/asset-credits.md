@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [monastery gardens](monastery-gardens.md) use original map authoring and
+procedural construction in `src/monastery-garden-layout.js` and
+`src/monastery-gardens.js`. They reuse the credited monastery stone, wood,
+white plaster and snow maps, the project's dressed blocks and existing
+patinated bronze material. No external model, texture, recording, music or
+dependency was added. Documentation images are lossless conversions of actual
+game captures, with decoded RGBA identity checked before publication.
+
 The [winter ground cover](winter-groundcover.md) uses original geometry and wind
 code in `src/snow-groundcover.js`, adapting the project's folded leaves from
 `src/sky-meadow.js`. Colour gradients place frost on the leaf mesh. No external

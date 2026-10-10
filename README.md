@@ -4,18 +4,19 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
-The [winter ground cover](docs/winter-groundcover.md) adds pale grass, seed-bearing
-stems and frost-covered cushions beside the monastery routes. Its 5,718 rooted
-plants preserve the recorded movement and camera states, while working areas
-remain clear. Broader landscape composition and the large clear courts remain
-part of the visual review.
+The [monastery gardens](docs/monastery-gardens.md) add connected foreground
+spaces beside the nine snow courts, with low coursed walls, real snow-capped
+standing surfaces and seven recessed reliquaries. The distinct left/right
+plans open new ground while retaining existing objective placement.
 
-The [alpine peaks and snow edges now use finer geometry and continuous normals](docs/alpine-shape.md),
-rounding the triangular snow shelves seen above the monastery. The earlier
-[rock material variation](docs/alpine-rock-variation.md) reduces repeated
-blotches and verifies continuous texture joins. The 1.044-kilometre snow circuit
-retains its recorded player and camera states; wider mountain composition,
-repeated court layouts and broader visual acceptance remain open.
+The [winter ground cover](docs/winter-groundcover.md) adds pale grass,
+seed-bearing stems and frost-covered cushions beside the monastery routes.
+The [alpine peak and snow-edge refinement](docs/alpine-shape.md) rounds the
+triangular snow shelves, while [rock material variation](docs/alpine-rock-variation.md)
+reduces repeated blotches. The garden map changes nearby scenery placement;
+earlier milestone measurements are documented at their publication state.
+Broader landscape composition and repeated main installations remain under
+visual review.
 
 The [visual audit](docs/visual-audit.md) now records front/rear overviews of all
 77 main courts and the outstanding findings. Repairs add

@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Monastery gardens](monastery-gardens.md) open 18 connected foreground areas
+  beside the nine snow courts, adding 51 grounded wall segments and seven
+  recessed reliquaries. Existing objectives and sampled old walking heights
+  remain intact. All 18 approach/return surveys and the 1.007-km main circuit
+  pass through the normal movement controller; the expanded map permits a
+  shorter return than the preceding circuit. The loaded scene passes 940
+  footing probes, 765 cap/support comparisons and 102 physical entry rays.
+  All three graphics settings, 73 focused regressions and the build pass.
+  All 53 tracked garden resources and 1,891 winter-cover resources dispose
+  once on chapter change. Native keyboard/High and touch/Low controls and
+  repeated whole-store reloads pass, as do the earned cap save/step-down and
+  occupied older-save recovery. All 140 captures are reviewed. Six public
+  lossless witnesses retain their source RGBA bytes; no temporary verification
+  processes or ports remain. Repeated main installations, larger court
+  composition, broader contacts, listening and device review remain open.
+
 - [Winter ground cover](winter-groundcover.md) adds 5,718 rooted specimens
   beside the snow routes, with three detail tiers, restrained wind and reserved
   working/traversal areas. All 617,544 independent root probes pass against the
