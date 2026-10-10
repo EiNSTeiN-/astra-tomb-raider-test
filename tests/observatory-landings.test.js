@@ -383,3 +383,70 @@ test("the delivered crouched knee clears a chipped cap when the other boot reach
   assert(samples > 180000);
   t.diagnostic(JSON.stringify({ samples, worst, height: game.jumpY }));
 });
+
+test("a normal second jump toward the low wall falls clear of the widening shaft and lands back on the base", (t) => {
+  const game = fixture(t),
+    patch = game.observatories[7],
+    column = patch.foundations.find(
+      (f) => f.kind === "column" && f.column === 0,
+    ),
+    cx = patch.root.position.x + column.x,
+    cz = patch.root.position.z + column.z,
+    start = { x: cx + 2.3, z: cz + 2.3 },
+    corner = { x: cx + 1.17, z: cz + 1.17 };
+  // Use the runtime terrain method: a descent response must retain its receiver.
+  game.groundHeight = Adventure.prototype.groundHeight;
+  game.player.position.set(
+    start.x,
+    game.groundHeight(start.x, start.z),
+    start.z,
+  );
+  assert(game.canMove(start.x, start.z, 0));
+  const jump = (target) => {
+    const angle = Math.atan2(
+        game.player.position.x - target.x,
+        game.player.position.z - target.z,
+      ),
+      velocity = { x: -Math.sin(angle) * 6, z: -Math.cos(angle) * 6 };
+    let stopped = false;
+    for (let frame = 0; frame < 140; frame++) {
+      if (
+        Math.hypot(
+          game.player.position.x - target.x,
+          game.player.position.z - target.z,
+        ) < 0.14
+      )
+        stopped = true;
+      advanceCharacter(
+        game,
+        stopped ? { x: 0, z: 0 } : velocity,
+        1 / 60,
+        frame === 0,
+      );
+    }
+    assert(
+      game.grounded &&
+        game.canMove(
+          game.player.position.x,
+          game.player.position.z,
+          game.jumpY,
+        ),
+    );
+  };
+  jump(corner);
+  const first = game.player.position.clone();
+  jump({ x: cx + 0.85, z: patch.root.position.z + 2.063565980414392 });
+  const p = game.player.position,
+    floor = supportAt(game, p.x, p.z, p.y, 0.55);
+  assert.equal(floor.surface.observatoryPart, "column-0-base");
+  assert(Math.abs(p.y - first.y) < 0.01);
+  assert(game.jumpY > 0.8 && game.jumpY < 0.95);
+  assert(Math.abs(p.y - floor.height) < 1e-8);
+  t.diagnostic(
+    JSON.stringify({
+      first: first.toArray(),
+      landed: p.toArray(),
+      height: game.jumpY,
+    }),
+  );
+});

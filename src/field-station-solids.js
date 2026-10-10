@@ -121,7 +121,13 @@ export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
       b.min.y > maxY + 0.2
     )
       return null;
-    return solid.triangles.support(x, z, maxY, footprint)?.height ?? null;
+    // A collision disk can touch a tapered shaft well above the visible boots.
+    // Only upward, walkable faces can hold a body; exact point probes still
+    // report the physical bevel or side underneath their coordinates.
+    return (
+      solid.triangles.support(x, z, maxY, footprint, radius ? 0.65 : 0)
+        ?.height ?? null
+    );
   }
   if (!stationContains(solid, x, z, 0.4)) return null;
   const top = solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y;

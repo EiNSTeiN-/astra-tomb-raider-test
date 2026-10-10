@@ -19,6 +19,12 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Observatory shaft footing](observatory-shaft-footing.md) rejects tapered-side
+  floors and resolves vertical cap contacts. All 32 sampled two-jump cases,
+  192 delivered-body poses, native keyboard/touch controls and repeated saves
+  pass; 833 selected regressions pass with one unchanged camera replay excluded.
+  Capture review exposes rectangular black regions in two body and eight loop
+  views. VA-74 remains open; its cause has not been established.
 - [Observatory cap landings](observatory-cap-landings.md) repair an ordinary
   jump that fell into the actual base, a crouched knee intersection and backward
   departures caught on the bevel. Finite support uses the movement footprint

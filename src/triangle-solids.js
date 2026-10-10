@@ -27,8 +27,17 @@ function kernel(geometry) {
         index ? index.getX(i + j) : i + j,
       ),
     );
-    const bounds = new THREE.Box3().setFromPoints(vertices);
-    const triangle = { vertices, bounds };
+    const bounds = new THREE.Box3().setFromPoints(vertices),
+      normal = new THREE.Vector3().crossVectors(
+        vertices[1].clone().sub(vertices[0]),
+        vertices[2].clone().sub(vertices[0]),
+      );
+    const triangle = {
+      vertices,
+      bounds,
+      normalY: normal.y,
+      normalXZ: Math.hypot(normal.x, normal.z),
+    };
     triangles.push(triangle);
     cells(
       bounds.min.x,
@@ -234,7 +243,7 @@ export class TriangleSolids {
     return result;
   }
 
-  support(x, z, maxY = Infinity, radius = 0) {
+  support(x, z, maxY = Infinity, radius = 0, minUp = 0) {
     let result = null;
     for (const solid of this.nearby(
       x - radius,
@@ -252,11 +261,20 @@ export class TriangleSolids {
       const p = new THREE.Vector3(x, 0, z).applyMatrix4(solid.inverse),
         localRadius = radius / solid.horizontalScale;
       let top = -Infinity;
-      for (const triangle of candidates(solid.shape, p.x, p.z, localRadius))
+      for (const triangle of candidates(solid.shape, p.x, p.z, localRadius)) {
+        // Optional walkable-face selection for body support. Raw point/ray
+        // queries retain every surface. Inverse scale transforms the normal;
+        // upright rotation does not change its world-space vertical component.
+        if (minUp) {
+          const y = triangle.normalY * solid.horizontalScale,
+            xz = triangle.normalXZ * solid.verticalScale;
+          if (!(y / Math.hypot(y, xz) >= minUp)) continue;
+        }
         top = Math.max(
           top,
           diskHeight(triangle.vertices, p.x, p.z, localRadius),
         );
+      }
       const height = top * solid.verticalScale + solid.matrix.elements[13];
       if (
         Number.isFinite(height) &&

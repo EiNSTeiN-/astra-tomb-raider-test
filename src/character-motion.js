@@ -15,7 +15,7 @@ import { orbitDeckAt } from "./orbit-rules.js";
 import { hoistDeckAt } from "./bell-hoist-rules.js";
 import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
-import { stationSupport } from "./field-station-solids.js";
+import { stationSupport, stationBlocked } from "./field-station-solids.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
@@ -84,6 +84,38 @@ export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
   const courierDeck = courierDeckAt(game, x, z, maxY);
   if (courierDeck && courierDeck.height > height) return courierDeck;
   return { height, surface };
+}
+
+// A taper or overhead cap can enter the body during vertical motion after its
+// horizontal move was clear. Resolve an edge contact sideways; a broad ceiling
+// stops upward motion. Neither contact creates a floor on a steep side.
+function clearStationVerticalMotion(game, before) {
+  const p = game.player.position;
+  if (
+    !game.obstacles.some(
+      (o) =>
+        o.fieldStation &&
+        stationBlocked(o, p.x, p.y, p.z) &&
+        !stationBlocked(o, p.x, before, p.z),
+    )
+  )
+    return;
+  for (let radius = 0.02; radius <= 0.2 + 1e-6; radius += 0.02) {
+    for (let i = 0; i < 16; i++) {
+      const angle = (i * Math.PI) / 8,
+        x = p.x + Math.cos(angle) * radius,
+        z = p.z + Math.sin(angle) * radius,
+        ground = game.groundHeight(x, z);
+      if (ground > p.y + 0.45 || !game.canMove(x, z, p.y - ground)) continue;
+      p.x = x;
+      p.z = z;
+      return;
+    }
+  }
+  if (p.y > before) {
+    p.y = before;
+    game.velocityY = 0;
+  }
 }
 
 export function advanceCharacter(game, velocity, dt, jump = false) {
@@ -206,6 +238,8 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         momentum.z = 0;
       }
     }
+    if (!wasGrounded && p.y !== before)
+      clearStationVerticalMotion(game, before);
     if (game.grounded) game.fallPeak = p.y;
     else game.fallPeak = Math.max(game.fallPeak || before, before, p.y);
     if (wasGrounded && !game.grounded && game.velocityY <= 0) game.coyote = 0.1;

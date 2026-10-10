@@ -128,6 +128,10 @@ The [observatory column corners now catch jumps on their actual caps](docs/obser
 with clear crouched knees, ordinary step-downs and preserved earned save heights.
 The final 32 corner trials clear 192 sampled body poses and retain local routes
 and sound-source access; wider contact and landscape review remain open.
+The [observatory shafts now reject false footholds](docs/observatory-shaft-footing.md),
+so second jumps return to real column bases and vertical cap contacts clear the
+body. Native keyboard/touch saves and 833 selected checks pass. A rectangular
+black-region artifact found during capture review remains under investigation.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch
