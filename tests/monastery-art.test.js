@@ -40,9 +40,14 @@ test("intact and broken roof decks and snow caps are sealed outward-facing solid
         );
         volume += a.dot(b.cross(c)) / 6;
         for (let j = 0; j < 3; j++) {
+          // Material seams duplicate vertices without opening the physical
+          // surface. Weld exact delivered positions for the closure check.
           const edge = [ids[j], ids[(j + 1) % 3]]
-            .sort((x, y) => x - y)
-            .join(",");
+            .map((index) =>
+              [p.getX(index), p.getY(index), p.getZ(index)].join(","),
+            )
+            .sort()
+            .join("/");
           edges.set(edge, (edges.get(edge) || 0) + 1);
         }
       }
@@ -87,6 +92,50 @@ test("roof damage removes both slate and snow while the center remains supported
       g.dispose();
     }
   material.dispose();
+});
+
+test("slate and snow edge faces have noncollapsed UVs and outward hard normals", () => {
+  for (const damage of [0, 1, 2])
+    for (const snow of [false, true]) {
+      const geometry = monasteryRoofGeometry({
+          width: 8.1,
+          depth: 4.5,
+          rise: 0.85,
+          damage,
+          snow,
+          seed: 6,
+        }),
+        p = geometry.attributes.position,
+        uv = geometry.attributes.uv,
+        n = geometry.attributes.normal,
+        ids = geometry.index.array;
+      let sides = 0;
+      for (let i = 0; i < ids.length; i += 3) {
+        const indices = [...ids.slice(i, i + 3)],
+          [a, b, c] = indices.map((index) =>
+            new THREE.Vector3().fromBufferAttribute(p, index),
+          ),
+          normal = b.sub(a).cross(c.sub(a)).normalize();
+        if (Math.abs(normal.y) > 1e-6) continue;
+        sides++;
+        const [u, v, w] = indices.map((index) =>
+            new THREE.Vector2().fromBufferAttribute(uv, index),
+          ),
+          area = (v.x - u.x) * (w.y - u.y) - (v.y - u.y) * (w.x - u.x);
+        assert(
+          Math.abs(area) > 1e-8,
+          "side triangles carry a two-dimensional texture patch",
+        );
+        for (const index of indices)
+          assert(
+            normal.dot(new THREE.Vector3().fromBufferAttribute(n, index)) >
+              0.9999,
+            "side normals don't average across the roof edge",
+          );
+      }
+      assert(sides > 40);
+      geometry.dispose();
+    }
 });
 
 test("nine monastery plans leave both court axes and all nearby objective approaches clear", () => {

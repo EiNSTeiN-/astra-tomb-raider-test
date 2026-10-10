@@ -4,10 +4,13 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
-The [monastery gardens](docs/monastery-gardens.md) add connected foreground
-spaces beside the nine snow courts, with low coursed walls, real snow-capped
-standing surfaces and seven recessed reliquaries. The distinct left/right
-plans open new ground while retaining existing objective placement.
+The [snow garden enclosures and timber galleries](docs/monastery-enclosures.md)
+create wider joined foregrounds beside the monastery courts, with 75 wall
+segments, seven recessed reliquaries and four roofed galleries. Openings and
+side paths let you circulate through the spaces. The shared monastery roofs
+also have corrected edge texture coordinates and normals, removing stretched
+stripes from the slate and snow faces. The [preceding garden milestone](docs/monastery-gardens.md)
+records the original annex layout and its verification.
 
 The [winter ground cover](docs/winter-groundcover.md) adds pale grass,
 seed-bearing stems and frost-covered cushions beside the monastery routes.

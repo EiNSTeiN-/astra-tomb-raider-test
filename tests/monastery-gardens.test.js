@@ -63,7 +63,7 @@ function fixture(t) {
     profile = createTerrainProfile(map, level),
     world = new THREE.Group(),
     materials = Object.fromEntries(
-      ["stone", "wood", "plaster", "snow", "bronze"].map((name) => [
+      ["stone", "wood", "plaster", "snow", "roof", "bronze"].map((name) => [
         name,
         new THREE.MeshStandardMaterial(),
       ]),
@@ -109,12 +109,12 @@ test("batched snow caps agree with physical point support and remain grounded ac
         for (const fz of [-0.49, 0, 0.49]) {
           const x = wall.worldX + wall.w * fx,
             z = wall.worldZ + wall.d * fz;
-          ray.ray.origin.set(x, wall.top + 10, z);
+          ray.ray.origin.set(x, wall.top + 0.25, z);
           const hit = ray.intersectObjects(garden.root.children, false)[0];
           assert(hit);
           const support = Math.max(
             ...garden.feature.stationSolids.map(
-              (s) => stationSupport(s, x, z) ?? -Infinity,
+              (s) => stationSupport(s, x, z, wall.top + 0.1) ?? -Infinity,
             ),
           );
           assert(
@@ -163,4 +163,72 @@ test("reliquary niches have real backs and side walls while their upper ledges h
       );
     }
   assert(shrines >= 6);
+});
+
+test("joined enclosures keep a wide threshold and galleries preserve ground headroom with real roof support", (t) => {
+  const game = fixture(t),
+    ray = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0));
+  let galleries = 0,
+    joined = 0;
+  for (const garden of game.monasteryGardens) {
+    const solids = garden.feature.stationSolids;
+    for (const plan of garden.plans) {
+      const fronts = garden.walls.filter(
+        (w) => w.z === plan.z - 3.4 && Math.abs(w.x - plan.x) < 3,
+      );
+      if (fronts.length === 2) {
+        joined++;
+        const gap =
+          Math.abs(fronts[0].x - fronts[1].x) - (fronts[0].w + fronts[1].w) / 2;
+        assert(
+          gap >= 2.5,
+          "body and corner clearance through a genuine opening",
+        );
+      }
+    }
+    for (const gallery of garden.galleries) {
+      galleries++;
+      const ground = game.groundHeight(gallery.x, gallery.z);
+      assert(
+        !solids.some((s) =>
+          stationBlocked(s, gallery.x, ground, gallery.z, 1.8),
+        ),
+        "walk underneath the finite roof",
+      );
+      for (const dx of [-1, 0, 1])
+        for (const dz of [-0.7, 0, 0.7]) {
+          const x = gallery.x + dx,
+            z = gallery.z + dz;
+          ray.ray.origin.set(x, gallery.y + 5, z);
+          const hit = ray.intersectObjects(garden.root.children, false)[0];
+          const support = Math.max(
+            ...solids.map((s) => stationSupport(s, x, z) ?? -Infinity),
+          );
+          assert(
+            hit && hit.point.y > gallery.y,
+            "closed snow roof above the inner gallery",
+          );
+          assert(
+            Math.abs(hit.point.y - support) < 0.0001,
+            "roof standing surface matches its triangles",
+          );
+          assert(
+            solids.some((s) =>
+              stationBlocked(s, x, hit.point.y - 0.1, z, 0, 0),
+            ),
+            "roof shell is physically solid",
+          );
+        }
+      for (const post of gallery.posts)
+        assert(post.bottom < game.groundHeight(post.x, post.z) - 0.15);
+    }
+  }
+  assert(
+    joined >= 10,
+    "authored neighboring walls survive their own reservations",
+  );
+  assert(
+    galleries >= 3,
+    "distinct roofed resting/processional spaces are built",
+  );
 });

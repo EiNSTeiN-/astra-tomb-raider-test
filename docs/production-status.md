@@ -19,6 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Joined monastery enclosures and galleries](monastery-enclosures.md) preserve
+  adjacent walls, widen openings and side paths, and add four timber galleries.
+  The final snow scene has 75 wall segments and seven recessed reliquaries.
+  The shared roof generator repairs collapsed edge UVs while retaining exact
+  triangle positions across 144 variants. All eight existing chapter grids and
+  objective records, the annex cells and all 58,081 snow terrain heights remain
+  identical to the preceding milestone. Loaded terrain/render/collision checks
+  pass 1,444 footing probes, 1,125 cap and 36 roof comparisons, 150 exposed-face
+  rays and 36 headroom samples. All 54 inner-area legs and the 1.008-km main
+  circuit arrive; normal roof mantling and returns pass. All three graphics
+  settings, 96 selected regressions and the build pass. Native keyboard/High,
+  touch/Low, earned cap/roof saves, gallery exit and occupied-save recovery pass.
+  A focused continuation records one independently proved arrival-camera
+  adjustment and an exact second reload. All 24 final native views are reviewed,
+  along with the quality, paired architecture and route captures. All 58 tracked
+  garden resources and 1,891 cover resources dispose once. Six public lossless
+  witnesses retain decoded RGBA identity. Temporary browsers, workers and
+  servers are released; the host check finds no live verification processes or
+  listening test ports. Wider court repetition, body contacts, listening and
+  device review remain open.
+
 - [Monastery gardens](monastery-gardens.md) open 18 connected foreground areas
   beside the nine snow courts, adding 51 grounded wall segments and seven
   recessed reliquaries. Existing objectives and sampled old walking heights

@@ -69,7 +69,24 @@ export function monasteryRoofGeometry({
       );
   const present = (x, z) =>
     x >= 0 && z >= 0 && x < nx && z < nz && active[z * nx + x];
-  const side = (a, b) => indices.push(a, a + count, b + count, a, b + count, b);
+  // Vertical edges need their own UVs and normals. Sharing the planar roof
+  // UVs collapses each side triangle to a line, stretching its normal map into
+  // stripes. Duplicate only the side corners; the closed physical shell keeps
+  // exactly the same positions, winding and triangles.
+  const side = (a, b) => {
+    const first = positions.length / 3,
+      alongX =
+        Math.abs(positions[b * 3] - positions[a * 3]) >=
+        Math.abs(positions[b * 3 + 2] - positions[a * 3 + 2]);
+    for (const index of [a, a + count, b + count, b]) {
+      const x = positions[index * 3],
+        y = positions[index * 3 + 1],
+        z = positions[index * 3 + 2];
+      positions.push(x, y, z);
+      uv.push((alongX ? x : z) / 2, y / 2);
+    }
+    indices.push(first, first + 1, first + 2, first, first + 2, first + 3);
+  };
   let cells = 0;
   for (let iz = 0; iz < nz; iz++)
     for (let ix = 0; ix < nx; ix++) {

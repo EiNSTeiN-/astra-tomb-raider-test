@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [joined monastery enclosures and galleries](monastery-enclosures.md) extend
+original code in `src/monastery-gardens.js` and
+`src/monastery-garden-layout.js`, using the existing credited monastery stone,
+wood, plaster, slate and snow maps. The edge repair in `src/monastery-roof.js`
+changes UVs and normals while preserving the roof surfaces. No external asset,
+recording, music or dependency was added. Documentation images are actual game
+captures converted losslessly to WebP, with decoded RGBA identity checked.
+
 The [monastery gardens](monastery-gardens.md) use original map authoring and
 procedural construction in `src/monastery-garden-layout.js` and
 `src/monastery-gardens.js`. They reuse the credited monastery stone, wood,

@@ -15,6 +15,9 @@ export function inspectMonasteryGardens(game) {
       gardens: game.monasteryGardens.length,
       walls: 0,
       shrines: 0,
+      galleries: 0,
+      headroomProbes: 0,
+      roofProbes: 0,
       footingProbes: 0,
       supportProbes: 0,
       entryProbes: 0,
@@ -69,12 +72,14 @@ export function inspectMonasteryGardens(game) {
             z = wall.worldZ + fz * wall.d;
           footing(garden.room, x, z, wall.bottom);
           ray.set(
-            new THREE.Vector3(x, wall.top + 10, z),
+            new THREE.Vector3(x, wall.top + 0.25, z),
             new THREE.Vector3(0, -1, 0),
           );
           const y = ray.intersectObjects(meshes, false)[0]?.point.y,
             support = Math.max(
-              ...solids.map((s) => stationSupport(s, x, z) ?? -Infinity),
+              ...solids.map(
+                (s) => stationSupport(s, x, z, wall.top + 0.1) ?? -Infinity,
+              ),
             ),
             error = Math.max(
               Math.abs(y - support),
@@ -96,10 +101,13 @@ export function inspectMonasteryGardens(game) {
             });
         }
       for (const side of [-1, 1]) {
+        // Probe the broad exposed face, away from joined end caps. Starting
+        // inside a neighboring return would compare its exit with entry zero.
+        const acrossZ = wall.w >= wall.d;
         const from = new THREE.Vector3(
-            wall.worldX,
+            wall.worldX + (acrossZ ? 0 : side * (wall.w / 2 + 0.05)),
             wall.top - 0.04,
-            wall.worldZ + side * (wall.d / 2 + 0.05),
+            wall.worldZ + (acrossZ ? side * (wall.d / 2 + 0.05) : 0),
           ),
           to = new THREE.Vector3(wall.worldX, from.y, wall.worldZ),
           distance = from.distanceTo(to);
@@ -137,6 +145,54 @@ export function inspectMonasteryGardens(game) {
       ])
         if (blocked(x, y, z) !== expected)
           report.failures.push({ id: garden.room, kind: label });
+    }
+    for (const gallery of garden.galleries || []) {
+      report.galleries++;
+      for (const post of gallery.posts)
+        for (const dx of [-0.44, 0, 0.44])
+          for (const dz of [-0.44, 0, 0.44])
+            footing(garden.room, post.x + dx, post.z + dz, post.bottom);
+      for (const dx of [-0.65, 0, 0.65])
+        for (const dz of [-0.7, 0, 0.7]) {
+          const x = gallery.x + dx,
+            z = gallery.z + dz,
+            floor = ground(x, z);
+          report.headroomProbes++;
+          if (solids.some((s) => stationBlocked(s, x, floor, z, 1.8)))
+            report.failures.push({
+              id: garden.room,
+              kind: "gallery headroom",
+              x,
+              z,
+            });
+          ray.set(
+            new THREE.Vector3(x, gallery.y + 5, z),
+            new THREE.Vector3(0, -1, 0),
+          );
+          const hit = ray.intersectObjects(meshes, false)[0],
+            support = Math.max(
+              ...solids.map((s) => stationSupport(s, x, z) ?? -Infinity),
+            ),
+            error = Math.abs((hit?.point.y ?? Infinity) - support);
+          report.roofProbes++;
+          report.largestSupportError = Math.max(
+            report.largestSupportError,
+            error,
+          );
+          if (
+            !hit ||
+            hit.point.y < gallery.y ||
+            !Number.isFinite(error) ||
+            error > 0.0001
+          )
+            report.failures.push({
+              id: garden.room,
+              kind: "gallery roof support",
+              x,
+              z,
+              error,
+            });
+        }
     }
   }
   return report;

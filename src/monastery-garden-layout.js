@@ -44,12 +44,12 @@ export function monasteryGardenPlan(room) {
     z += 14;
     const x = side * 13,
       walls = [
-        { x: x - 1.65, z: z - 3.4, w: 2.7, d: 0.7, height },
-        { x: x + 1.65, z: z - 3.4, w: 2.7, d: 0.7, height },
-        { x: x - 3, z: z - 1.8, w: 0.7, d: 2.5, height: height * 0.85 },
-        { x: x + 3, z: z - 1.8, w: 0.7, d: 2.5, height: height * 0.85 },
-        { x: x - 3, z: z + 2.1, w: 0.7, d: 1.6, height: height * 0.65 },
-        { x: x + 3, z: z + 2.1, w: 0.7, d: 1.6, height: height * 0.65 },
+        { x: x - 2.65, z: z - 3.4, w: 2.7, d: 0.7, height },
+        { x: x + 2.65, z: z - 3.4, w: 2.7, d: 0.7, height },
+        { x: x - 4, z: z - 1.8, w: 0.7, d: 2.5, height: height * 0.85 },
+        { x: x + 4, z: z - 1.8, w: 0.7, d: 2.5, height: height * 0.85 },
+        { x: x - 4, z: z + 2.1, w: 0.7, d: 1.6, height: height * 0.65 },
+        { x: x + 4, z: z + 2.1, w: 0.7, d: 1.6, height: height * 0.65 },
       ];
     if (kind === "broken") walls.splice(side < 0 ? 2 : 3, 2);
     if (kind === "procession") {
@@ -58,7 +58,17 @@ export function monasteryGardenPlan(room) {
       walls[1].height *= 1.35;
     }
     if (kind === "rest") walls.splice(0, 2);
-    return { side, kind, x, z, height, walls };
+    const gallery = ["rest", "procession"].includes(kind)
+      ? {
+          x,
+          z: z - 2,
+          width: 8.1,
+          depth: 4.5,
+          rise: 0.85,
+          damage: kind === "rest" ? 1 : 0,
+        }
+      : null;
+    return { side, kind, x, z, height, walls, gallery };
   });
 }
 

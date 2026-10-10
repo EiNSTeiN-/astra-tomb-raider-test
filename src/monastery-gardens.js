@@ -8,6 +8,7 @@ import { natureRockAllowed } from "./nature-rocks.js";
 import { discoveryFoliageClear } from "./discovery-setting-plan.js";
 import { mergeArchitecture } from "./visuals.js";
 import { patinatedBronze } from "./observatory-geometry.js";
+import { monasteryRoofGeometry } from "./monastery-roof.js";
 
 export function monasteryGardenAllowed(game, x, z, w, d) {
   const radius = Math.hypot(w, d) / 2,
@@ -72,6 +73,7 @@ export function buildMonasteryGardens(game) {
     snow = original.snow.clone(),
     plaster = original.plaster.clone(),
     wood = original.wood.clone(),
+    roof = original.roof.clone(),
     bronze = patinatedBronze();
   stone.name = "Garden dressed stone";
   mortar.name = "Garden recessed backing";
@@ -80,10 +82,16 @@ export function buildMonasteryGardens(game) {
   plaster.name = "Reliquary whitewash";
   wood.name = "Reliquary painted timber";
   wood.color.setHex(0x6f443c);
+  roof.name = "Garden gallery slate";
   bronze.name = "Reliquary bronze";
   bronze.roughness = 0.61;
-  for (const material of [stone, mortar, snow, plaster, wood, bronze])
+  for (const material of [stone, mortar, snow, plaster, wood, roof, bronze])
     material.vertexColors = true;
+  // Joined pieces are one authored structure. Reserve against the existing
+  // world, rather than treating every previously built garden piece as a
+  // neighboring obstacle and progressively deleting its own walls and shrine.
+  const reservations = Object.create(game);
+  reservations.obstacles = game.obstacles.slice();
   let seed = game.level.seed + 78901;
   for (const room of game.map.rooms) {
     const root = new THREE.Group(),
@@ -95,6 +103,7 @@ export function buildMonasteryGardens(game) {
         plans: monasteryGardenPlan(room),
         walls: [],
         shrines: [],
+        galleries: [],
         parts: 0,
         triangles: 0,
       };
@@ -127,7 +136,7 @@ export function buildMonasteryGardens(game) {
     const wall = (p) => {
       const wx = root.position.x + p.x,
         wz = root.position.z + p.z;
-      if (!monasteryGardenAllowed(game, wx, wz, p.w, p.d)) return;
+      if (!monasteryGardenAllowed(reservations, wx, wz, p.w, p.d)) return;
       let high = -Infinity;
       for (const dx of [-p.w / 2, 0, p.w / 2])
         for (const dz of [-p.d / 2, 0, p.d / 2])
@@ -197,7 +206,7 @@ export function buildMonasteryGardens(game) {
       const { x, z } = plan;
       if (
         !monasteryGardenAllowed(
-          game,
+          reservations,
           root.position.x + x,
           root.position.z + z,
           3.4,
@@ -299,9 +308,76 @@ export function buildMonasteryGardens(game) {
         top: body + 2.62,
       });
     };
+    const gallery = (plan) => {
+      const { x, z, width, depth, rise, damage } = plan,
+        wx = root.position.x + x,
+        wz = root.position.z + z;
+      if (!monasteryGardenAllowed(reservations, wx, wz, width, depth)) return;
+      let highest = -Infinity;
+      const step = game.terrainProfile.step;
+      for (
+        let gx = Math.floor((wx - width / 2) / step) * step;
+        gx <= Math.ceil((wx + width / 2) / step) * step + 1e-6;
+        gx += step
+      )
+        for (
+          let gz = Math.floor((wz - depth / 2) / step) * step;
+          gz <= Math.ceil((wz + depth / 2) / step) * step + 1e-6;
+          gz += step
+        )
+          highest = Math.max(highest, game.groundHeight(gx, gz));
+      const y = highest + 3.25,
+        posts = [];
+      for (const dx of [-3.2, 3.2])
+        for (const dz of [-1.1, 1.1]) {
+          const px = x + dx,
+            pz = z + dz,
+            bottom =
+              footprintMinimum(
+                (a, b) => game.groundHeight(a, b),
+                root.position.x + px,
+                root.position.z + pz,
+                0.9,
+                0.9,
+                step,
+              ) - 0.2,
+            top =
+              Math.max(
+                ...[-0.45, 0, 0.45].flatMap((a) =>
+                  [-0.45, 0, 0.45].map((b) => ground(px + a, pz + b)),
+                ),
+              ) + 0.22;
+          block(0.9, top - bottom, 0.9, mortar, px, (top + bottom) / 2, pz);
+          add(capGeometry(0.9, 0.16, 0.9, ++seed), stone, px, top - 0.08, pz);
+          block(0.38, y + 0.1 - top, 0.38, wood, px, (y + 0.1 + top) / 2, pz);
+          posts.push({
+            x: root.position.x + px,
+            z: root.position.z + pz,
+            bottom,
+            top,
+          });
+        }
+      for (const dz of [-1.1, 1.1])
+        block(7.2, 0.3, 0.32, wood, x, y + 0.1, z + dz);
+      for (const dx of [-3.2, 3.2])
+        block(0.32, 0.3, 2.6, wood, x + dx, y + 0.1, z);
+      const options = { width, depth, rise, damage, seed: room.index };
+      add(monasteryRoofGeometry(options), roof, x, y, z, true, true);
+      add(
+        monasteryRoofGeometry({ ...options, snow: true }),
+        snow,
+        x,
+        y,
+        z,
+        true,
+        true,
+      );
+      record.galleries.push({ ...plan, x: wx, z: wz, y, posts });
+    };
     for (const plan of record.plans) {
       for (const p of plan.walls) wall(p);
       if (["garden", "reliquary"].includes(plan.kind)) shrine(plan);
+      if (plan.gallery) gallery(plan.gallery);
     }
     mergeArchitecture(root);
     game.monasteryGardens.push(record);
