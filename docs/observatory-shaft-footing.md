@@ -119,6 +119,12 @@ regions. The cause is unverified, and ReadPixels diagnostics alone do not
 identify it: they also appear in healthy native views. VA-74 remains open,
 and this report does not claim a clean rendering audit.
 
+The subsequent [finite-shading repair](shader-bloom-finiteness.md) isolates
+invalid flame-shader inputs and clears these recorded cases with bloom
+retained. That report includes the matching-position reproduction, actual
+GPU controls and the additional distant sailcloth repair; the paragraph above
+records the unresolved state at this shaft-footing milestone.
+
 ![A supplemental capture contains a large rectangular black region](images/observatory-shaft/capture-mask.webp)
 
 ![The preceding capture at the matching controller position shows the scene](images/observatory-shaft/capture-matched.webp)

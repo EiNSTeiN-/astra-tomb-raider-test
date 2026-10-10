@@ -19,12 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Finite flame and sailcloth shading](shader-bloom-finiteness.md) repairs
+  rectangular black regions at their shader sources while retaining bloom.
+  Actual factory shaders pass eight extended-UV GPU cases; all failing controls
+  are detected, and six valid-interior comparisons are pixel-identical.
+  Both observatory loops retain all 74 recorded states with finite HDR input.
+  All 32 final near/far High/Medium observer samples across eight chapters pass,
+  including the separately reproduced and repaired distant courier sail.
+  All 41 focused regressions and the production build pass. Production
+  keyboard/High and portrait touch/Low jump, crouch, soil departure, earned
+  full-store reloads and older-position recovery pass with the new bundle.
+  All final capture sheets are reviewed and eight lossless witnesses are
+  included. Costly work runs serially inside the CPU cap; all browser/worker
+  processes and temporary servers are released. Wider world, composition,
+  physical contact, listening and device acceptance remain open.
 - [Observatory shaft footing](observatory-shaft-footing.md) rejects tapered-side
   floors and resolves vertical cap contacts. All 32 sampled two-jump cases,
   192 delivered-body poses, native keyboard/touch controls and repeated saves
   pass; 833 selected regressions pass with one unchanged camera replay excluded.
   Capture review exposes rectangular black regions in two body and eight loop
-  views. VA-74 remains open; its cause has not been established.
+  views. The subsequent [shader repair](shader-bloom-finiteness.md) establishes
+  and corrects the invalid inputs in those sampled rendering cases.
 - [Observatory cap landings](observatory-cap-landings.md) repair an ordinary
   jump that fell into the actual base, a crouched knee intersection and backward
   departures caught on the bevel. Finite support uses the movement footprint

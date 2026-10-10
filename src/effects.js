@@ -31,7 +31,9 @@ export function buildFireEffects(game) {
       #include <common>
       #include <fog_pars_fragment>
       float noise(vec2 p){return sin(p.x*13.0+sin(p.y*7.0))*sin(p.y*11.0+sin(p.x*17.0))*0.5+0.5;}
-      void main(){float y=vUv.y; float flow=time*2.5+vSeed;
+      // A covered MSAA sample can shade a pixel center beyond the card edge.
+      // Keep fractional powers in their domain even when that edge is invisible.
+      void main(){float y=clamp(vUv.y,0.0,1.0); float flow=time*2.5+vSeed;
         float curl=sin(y*9.0-flow)*0.1*y+sin(y*17.0-flow*1.2)*0.04;
         float x=abs(vUv.x-0.5+curl); float width=pow(1.0-y,0.72)*0.42;
         float turbulence=noise(vec2(vUv.x*1.4,y*2.0-time*1.7+vSeed));

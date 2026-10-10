@@ -130,8 +130,10 @@ The final 32 corner trials clear 192 sampled body poses and retain local routes
 and sound-source access; wider contact and landscape review remain open.
 The [observatory shafts now reject false footholds](docs/observatory-shaft-footing.md),
 so second jumps return to real column bases and vertical cap contacts clear the
-body. Native keyboard/touch saves and 833 selected checks pass. A rectangular
-black-region artifact found during capture review remains under investigation.
+body. Native keyboard/touch saves and 833 selected checks pass.
+The [rectangular black regions now have finite shader inputs](docs/shader-bloom-finiteness.md),
+with guarded flame and courier-sail powers, retained bloom, 74 clear loop
+captures and 32 checked chapter views. The wider visual audit remains open.
 The [scattered rocks now support and block the explorer at their rendered surfaces](docs/nature-rock-contact.md),
 clearing a reproduced body intersection while retaining the stone. All 21
 climbing routes complete with the new queries, and native keyboard/touch

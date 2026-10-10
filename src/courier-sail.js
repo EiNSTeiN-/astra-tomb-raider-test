@@ -76,7 +76,8 @@ export function courierSailMaterial() {
       float threadFade=1.-smoothstep(.55,2.2,max(fwidth(threads.x),fwidth(threads.y)));
       float weave=sin(threads.x)*sin(threads.y)*threadFade;
       float mottle=sin(clothUv.x*31.+sin(clothUv.y*12.)*2.)*sin(clothUv.y*23.)*.045;
-      float damp=pow(1.-clothUv.y,5.)*.14+smoothstep(.68,.97,sin(clothUv.x*13.-clothUv.y*7.)*.5+.5)*.045;
+      // Edge interpolation can exceed the UV bounds; pow needs a nonnegative base.
+      float damp=pow(max(0.,1.-clothUv.y),5.)*.14+smoothstep(.68,.97,sin(clothUv.x*13.-clothUv.y*7.)*.5+.5)*.045;
       vec3 linen=vec3(.69,.58,.39)*(1.+mottle-damp+weave*.045);
       float seam=min(abs(fract(clothUv.x*3.+.5)-.5),min(clothUv.x,1.-clothUv.x)*3.);
       float stitch=(1.-smoothstep(.005,.014,seam))*step(.48,fract(clothUv.y*82.));
