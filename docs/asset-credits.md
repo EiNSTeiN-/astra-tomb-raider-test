@@ -704,6 +704,12 @@ They reuse the credited **Rock Boulder Dry** maps and existing loose-rock scans.
 No new external images, models, recordings or dependencies were introduced.
 Documentation images are captures of the running game converted to WebP.
 
+The [cavern limestone formations](cavern-formations.md) use original closed
+geometry and placement code in `src/cavern-formations.js`, sharing the existing
+cavern material and credited **Rock Boulder Dry** maps. No external assets,
+recordings or dependencies were added. The documentation images are lossless
+WebP conversions of actual game captures, retaining dimensions and RGBA values.
+
 The [Room of Wind](shutter-house.md) uses original timber walks, fitted masonry,
 windbreaks, handwheels, louver boards, drive cables, warning ribbons and route
 map artwork in `src/shutter-house*.js`. It reuses the credited monastery timber,

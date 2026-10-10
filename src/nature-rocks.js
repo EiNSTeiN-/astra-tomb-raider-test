@@ -34,7 +34,7 @@ export function rockGroundHeight(profile, x, z) {
 
 // Decorative scans must leave working space around the authored game geometry.
 // Bounds include the actual rotated footprint, not only the instance's origin.
-export function natureRockAllowed(game, x, z, radius) {
+export function natureRockAllowed(game, x, z, radius, height = Infinity) {
   const { map, terrainProfile } = game;
   // Wind pads are spread across their courts, away from the map's mechanism
   // marker. Reserve the 5.3 m camera arm plus the 1.6 m approach and its margin.
@@ -84,6 +84,10 @@ export function natureRockAllowed(game, x, z, radius) {
   if (
     game.obstacles.some(
       (o) =>
+        !(
+          o.cavernFormation &&
+          terrainProfile.height(x, z) + height + 1 < o.bottom
+        ) &&
         Math.abs(x - o.x) < o.w + radius + 0.2 &&
         Math.abs(z - o.z) < o.d + radius + 0.2,
     )
@@ -107,7 +111,8 @@ export function placeNatureRock(game, shape, { x, z, size, yaw }) {
       Math.max(Math.abs(b.min.x), Math.abs(b.max.x)),
       Math.max(Math.abs(b.min.z), Math.abs(b.max.z)),
     ) * size;
-  if (!natureRockAllowed(game, x, z, radius)) return { reason: "reserved" };
+  if (!natureRockAllowed(game, x, z, radius, b.max.y * size))
+    return { reason: "reserved" };
   const seated = seatStone(
     { height: (px, pz) => rockGroundHeight(game.terrainProfile, px, pz) },
     shape,

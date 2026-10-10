@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cavern limestone formations](cavern-formations.md) add 32 off-grid floor
+  lobes and 214 rooted roof pendants. All 53,136 root probes and 54,324 sampled
+  movement comparisons pass. The final 908-metre ground circuit preserves
+  all 43 recorded states and 115 controller samples across 13,651 updates;
+  all four legs arrive at full health with finite HDR inputs. Three graphics
+  settings, 75 selected regressions and the production build pass. Final
+  keyboard/High and actual touch/Low movement, crouch, jump, landing, map and
+  repeated full-store reloads pass; all twelve native captures are reviewed.
+  All 161 new geometry resources dispose exactly once on chapter change. Draw and
+  buffer costs are documented, and all verification processes and temporary
+  servers are released. The wider survey now has 319 reviewed ground
+  views across seven chapters and 63 reviewed sky opening-route views.
+  Sparse floors, repeated installations, wider contacts, listening and device
+  acceptance remain open.
+
 - [Alpine rock variation](alpine-rock-variation.md) reduces repeated colour
   blotches on the mountain faces while preserving the existing geometry,
   terrain, movement and sound code. Eighteen GPU edge cases verify continuous

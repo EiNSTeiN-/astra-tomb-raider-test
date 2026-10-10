@@ -1556,6 +1556,7 @@ export class Adventure {
       for (const dz of [-0.45, 0.45])
         if (!this.walkable(x + dx, z + dz)) return false;
     for (const o of this.obstacles) {
+      if (o.cavernFormation && worldY + clearance <= o.bottom) continue;
       if (o.skyAnchor) {
         if (skyAnchorBlocked(o, x, worldY, z, clearance)) return false;
         continue;

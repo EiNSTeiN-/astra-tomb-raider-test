@@ -13,6 +13,7 @@ import {
   mineralBedGeometry,
 } from "./cavern-geometry.js";
 import { cavernRock, mineralMaterial } from "./cavern-material.js";
+import { buildCavernFormations } from "./cavern-formations.js";
 
 export function buildCaverns(game) {
   game.cavernProfile = null;
@@ -20,6 +21,7 @@ export function buildCaverns(game) {
   game.cavernPatches = [];
   game.cavernSources = [];
   game.cavernLights = [];
+  game.cavernFormations = [];
   game.cavernDrips = null;
   if (game.level.biome !== "crystal") return false;
   const profile = (game.cavernProfile = createCavernProfile(
@@ -222,6 +224,7 @@ export function buildCaverns(game) {
       restoration,
     });
   }
+  buildCavernFormations(game, rock);
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
     "position",

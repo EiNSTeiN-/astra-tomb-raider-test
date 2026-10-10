@@ -72,6 +72,41 @@ function gaps(shape, matrix, profile, divisions = 6) {
   return samples;
 }
 
+test("ground scans can fit below high calcite pendants while tall scans remain reserved", () => {
+  const geometry = new THREE.BoxGeometry(2, 2, 2).translate(0, 1, 0);
+  const shape = stoneFootprint(geometry);
+  const game = {
+    map: { size: 61, features: [], enemies: [], spawn: { x: 10, z: 10 } },
+    terrainProfile: { height: () => 5, waters: [] },
+    obstacles: [
+      { x: 120, z: 140, w: 3, d: 3, h: 20, bottom: 14, cavernFormation: true },
+    ],
+  };
+  assert.equal(
+    natureRockAllowed(game, 120, 140, 2),
+    false,
+    "unknown heights retain the reservation",
+  );
+  const placed = placeNatureRock(game, shape, {
+    x: 120,
+    z: 140,
+    size: 1,
+    yaw: 0,
+  });
+  assert(placed.matrix, "a ground scan fits below the ceiling");
+  assert(placed.position.y + shape.bounds.max.y < game.obstacles[0].bottom);
+  assert.equal(
+    placeNatureRock(game, shape, { x: 120, z: 140, size: 5, yaw: 0 }).reason,
+    "reserved",
+  );
+  game.obstacles[0].bottom = 5;
+  assert.equal(
+    placeNatureRock(game, shape, { x: 120, z: 140, size: 1, yaw: 0 }).reason,
+    "reserved",
+  );
+  geometry.dispose();
+});
+
 test("the observed cloud-cliff rock seats its narrow underside against rendered terrain", () => {
   const shape = shapes.find(
       (s) =>

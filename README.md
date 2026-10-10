@@ -308,6 +308,10 @@ keyboard and touch play.
 Its surrounding [cavern banks and mineral beds](docs/cavern-banks.md) now have
 irregular shelves, broken rock seams and shallow, ground-fitted crystal bases.
 Matched views and a bounded GPU comparison accompany the visual changes.
+New [limestone formations](docs/cavern-formations.md) add 32 grounded bank lobes
+and 214 rooted vault pendants. Their walking clearance, embedded roots and
+the 908-metre assisted court circuit are verified; sparse floors and repeated
+installations remain under review.
 
 The final chapter's [nearby rock banks](docs/meridian-banks.md) now have
 uneven shelves, darker joints and matte dust shading. Walking heights and
