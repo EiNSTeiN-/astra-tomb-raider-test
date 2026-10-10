@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Winter ground cover](winter-groundcover.md) adds 5,718 rooted specimens
+  beside the snow routes, with three detail tiers, restrained wind and reserved
+  working/traversal areas. All 617,544 independent root probes pass against the
+  delivered terrain. The 1.044-km circuit preserves all 49 states and 131
+  controller batches across 15,496 updates. All 36 focused regressions, three
+  graphics settings and the build pass. Final keyboard/High and actual touch/Low
+  movement, crouch, jump, map and repeated full-store reloads pass. All 72 route,
+  comparison, quality and native captures are reviewed. All 1,891 tracked
+  geometry, material and instance resources dispose once on chapter change;
+  temporary browsers, workers and servers are released. Submission and CPU
+  array costs are documented. Large clear courts, repeated installations,
+  broader contacts, listening and device review remain open.
+
 - [Alpine peak shape and snow edges](alpine-shape.md) refine both surrounding
   ranges with finer geometry, continuous height-field normals and broader snow
   transitions. The recorded triangular shelves are rounder in the matched

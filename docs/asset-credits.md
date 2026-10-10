@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [winter ground cover](winter-groundcover.md) uses original geometry and wind
+code in `src/snow-groundcover.js`, adapting the project's folded leaves from
+`src/sky-meadow.js`. Colour gradients place frost on the leaf mesh. No external
+model, texture, recording, music or dependency was added. Its documentation
+images are actual game captures converted losslessly to WebP, with decoded
+RGBA identity checked before publication.
+
 The [alpine peak and snow-edge refinement](alpine-shape.md) is original
 procedural geometry and shader code in `src/snow-mountains.js` and
 `src/alpine-material.js`. It reuses the credited Rock Boulder Dry colour and

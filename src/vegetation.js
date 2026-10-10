@@ -34,6 +34,10 @@ import { rockGroundHeight } from "./nature-rocks.js";
 import { discoveryFoliageClear } from "./discovery-setting-plan.js";
 import { buildSkyMeadow, updateSkyMeadow } from "./sky-meadow.js";
 import {
+  buildSnowGroundcover,
+  updateSnowGroundcover,
+} from "./snow-groundcover.js";
+import {
   buildMeridianGroundcover,
   updateMeridianGroundcover,
 } from "./meridian-groundcover.js";
@@ -521,6 +525,7 @@ export async function loadNature(game) {
   );
   buildSkyMeadow(game);
   buildMeridianGroundcover(game);
+  buildSnowGroundcover(game);
   updateNature(game);
   game.renderOnce = true;
 }
@@ -533,6 +538,7 @@ const NATURE_RANGES = {
 export function updateNature(game, dt = 0) {
   updateSkyMeadow(game, dt);
   updateMeridianGroundcover(game, dt);
+  updateSnowGroundcover(game, dt);
   for (const patch of game.naturePatches || [])
     updateLodPatch(
       patch,

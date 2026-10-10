@@ -13,24 +13,31 @@ export const MEADOW_RANGES = {
 
 // Two bunchgrasses and a low, fleshy rosette. All tiers use a subset of the same
 // leaves, retaining the specimen's silhouette, root positions and wind phase.
-export function skyMeadowSpecimens() {
+export function skyMeadowSpecimens({
+  grassLeaves = 56,
+  cushionLeaves = 48,
+  curveSegments = [4, 3, 2],
+} = {}) {
   return [0, 1, 2].map((variant) => {
     const cushion = variant === 2,
       rng = random(12083 + variant * 47),
-      leaves = Array.from({ length: cushion ? 48 : 56 }, (_, i) => {
-        const angle = rng() * Math.PI * 2,
-          root = rng() * (cushion ? 0.07 : 0.2);
-        return {
-          angle,
-          x: Math.sin(angle) * root,
-          z: Math.cos(angle) * root,
-          height: cushion ? 0.06 + rng() * 0.11 : 0.4 + rng() * 0.57,
-          lean: cushion ? 0.08 + rng() * 0.14 : 0.15 + rng() * 0.35,
-          width: cushion ? 0.015 + rng() * 0.014 : 0.008 + rng() * 0.012,
-          dry: rng() < (variant === 1 ? 0.6 : 0.16),
-          head: !cushion && i % 7 === 0,
-        };
-      });
+      leaves = Array.from(
+        { length: cushion ? cushionLeaves : grassLeaves },
+        (_, i) => {
+          const angle = rng() * Math.PI * 2,
+            root = rng() * (cushion ? 0.07 : 0.2);
+          return {
+            angle,
+            x: Math.sin(angle) * root,
+            z: Math.cos(angle) * root,
+            height: cushion ? 0.06 + rng() * 0.11 : 0.4 + rng() * 0.57,
+            lean: cushion ? 0.08 + rng() * 0.14 : 0.15 + rng() * 0.35,
+            width: cushion ? 0.015 + rng() * 0.014 : 0.008 + rng() * 0.012,
+            dry: rng() < (variant === 1 ? 0.6 : 0.16),
+            head: !cushion && i % 7 === 0,
+          };
+        },
+      );
     const green = new THREE.Color(cushion ? 0x657960 : 0x7d8a55),
       dry = new THREE.Color(0xaaa379),
       rootColor = new THREE.Color(cushion ? 0x384c39 : 0x454c30),
@@ -40,7 +47,7 @@ export function skyMeadowSpecimens() {
         color = [],
         bends = [],
         step = [1, 2, 4][tier],
-        segments = cushion ? [4, 3, 2][tier] : [4, 3, 2][tier];
+        segments = curveSegments[tier];
       const vertex = (p, c, bend) => {
         position.push(...p);
         color.push(c.r, c.g, c.b);
