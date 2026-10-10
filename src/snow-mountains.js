@@ -12,6 +12,7 @@ const smooth = (a, b, value) => {
 // repeated radial peaks. Two warped ridge scales carve branching rock faces;
 // a smooth inner apron keeps the range rooted below the playable terrain.
 export function mountainHeight(angle, across, layer = 0, extent = 420) {
+  across = Math.max(0, Math.min(1, across));
   const radius = extent * (0.73 + layer * 0.53) + across * 400,
     x = Math.cos(angle) * radius,
     z = Math.sin(angle) * radius,
@@ -32,16 +33,38 @@ export function mountainHeight(angle, across, layer = 0, extent = 420) {
     wz = z + (rockNoise(x * 0.012, z * 0.012, seed + 211) - 0.5) * 42;
   const cut = Math.abs(rockNoise(wx * 0.028, wz * 0.028, seed + 317) * 2 - 1),
     smallCut = Math.abs(rockNoise(wx * 0.071, wz * 0.071, seed + 419) * 2 - 1);
-  return -18 + flank * (peaks - cut * cut * 115 - smallCut * smallCut * 25);
+  return -18 + flank * (peaks - cut * cut * 98 - smallCut * smallCut * 10);
+}
+
+// Sample the continuous height field in polar coordinates rather than using
+// triangle averages. This keeps lighting and snow coverage independent of the
+// diagonal used to tessellate each ring, including the duplicated angular seam.
+export function mountainNormal(angle, across, layer = 0, extent = 420) {
+  const radius = extent * (0.73 + layer * 0.53) + across * 400,
+    da = 0.75 / radius,
+    dr = 0.75 / 400,
+    radial =
+      (mountainHeight(angle, across + dr, layer, extent) -
+        mountainHeight(angle, across - dr, layer, extent)) /
+      1.5,
+    tangent =
+      (mountainHeight(angle + da, across, layer, extent) -
+        mountainHeight(angle - da, across, layer, extent)) /
+      1.5,
+    x = radial * Math.cos(angle) - tangent * Math.sin(angle),
+    z = radial * Math.sin(angle) + tangent * Math.cos(angle),
+    length = Math.hypot(x, 1, z);
+  return [-x / length, 1 / length, -z / length];
 }
 
 export function snowMountainGeometry(extent, layer = 0) {
-  const segments = 512,
-    rings = 64,
+  const segments = 768,
+    rings = 96,
     radius = extent * (0.73 + layer * 0.53);
   const positions = [],
     indices = [],
-    uv = [];
+    uv = [],
+    normals = [];
   for (let r = 0; r <= rings; r++)
     for (let i = 0; i <= segments; i++) {
       const angle = ((i % segments) / segments) * Math.PI * 2,
@@ -53,6 +76,7 @@ export function snowMountainGeometry(extent, layer = 0) {
         extent / 2 + Math.sin(angle) * distance,
       );
       uv.push(i / segments, across);
+      normals.push(...mountainNormal(angle, across, layer, extent));
       if (r < rings && i < segments) {
         const n = r * (segments + 1) + i;
         indices.push(
@@ -71,20 +95,8 @@ export function snowMountainGeometry(extent, layer = 0) {
     new THREE.Float32BufferAttribute(positions, 3),
   );
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
   geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  // Average seam normals so lighting joins just as the vertex positions do.
-  const normals = geometry.attributes.normal;
-  for (let r = 0; r <= rings; r++) {
-    const a = r * (segments + 1),
-      b = a + segments;
-    const normal = new THREE.Vector3()
-      .fromBufferAttribute(normals, a)
-      .add(new THREE.Vector3().fromBufferAttribute(normals, b))
-      .normalize();
-    normals.setXYZ(a, ...normal.toArray());
-    normals.setXYZ(b, ...normal.toArray());
-  }
   geometry.computeBoundingSphere();
   geometry.userData = { segments, rings, radius, depth: 400, layer };
   return geometry;

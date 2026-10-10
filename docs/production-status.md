@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Alpine peak shape and snow edges](alpine-shape.md) refine both surrounding
+  ranges with finer geometry, continuous height-field normals and broader snow
+  transitions. The recorded triangular shelves are rounder in the matched
+  views. All 49 snow-circuit states and 131 shared controller batches retain
+  their preceding values across 1.044 km and 15,496 updates. All 31 selected
+  regressions, three graphics settings, background-depth probes and the build
+  pass. Final keyboard/High and actual touch/Low movement, crouch, jump, map and
+  repeated full-store reloads pass. All 72 route, comparison, quality and native
+  captures are reviewed. Both geometries and their shared material dispose
+  once; verification processes and temporary servers are released. The ranges
+  add 163,840 source triangles and about 5.14 MiB of CPU geometry arrays.
+  Hardware frame rates, narrow ridge shapes, wider mountain composition,
+  sparse floors, repeated courts, listening and device review remain open.
+
 - [Volcanic bank shoulders and scan footing](volcanic-shoulders.md) grade the
   recorded sharp crests while preserving walking collars, railway floors and
   lava records. Full underside fitting retains 229 scans; all 96,777 independent

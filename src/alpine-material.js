@@ -98,8 +98,8 @@ export function alpineMaterial(source, haze) {
         vec3 stone=mix(rock,vec3(gray)*vec3(.78,.85,.96),.8)
           *(.36+.14*broad)*(.93+.07*strata);
         float snowline=27.+broad*30.;
-        float shelter=alpineN.y+(broad-.5)*.27+(broken-.5)*.09;
-        float snow=smoothstep(.44,.72,shelter)
+        float shelter=alpineN.y+(broad-.5)*.18+(broken-.5)*.045;
+        float snow=smoothstep(.34,.78,shelter)
           *smoothstep(snowline,snowline+32.,vAlpinePosition.y);
         vec3 snowColor=mix(vec3(.58,.70,.82),vec3(.89,.93,.96),.5+.5*broken);
         diffuseColor.rgb*=mix(stone,snowColor,snow);
@@ -123,6 +123,6 @@ export function alpineMaterial(source, haze) {
         #include <opaque_fragment>`,
       );
   };
-  material.customProgramCacheKey = () => "vesper-alpine-range-5";
+  material.customProgramCacheKey = () => "vesper-alpine-range-6";
   return material;
 }

@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [alpine peak and snow-edge refinement](alpine-shape.md) is original
+procedural geometry and shader code in `src/snow-mountains.js` and
+`src/alpine-material.js`. It reuses the credited Rock Boulder Dry colour and
+normal maps. No external model, texture, recording, music or dependency was
+added. Its documentation images are lossless conversions of actual game
+captures, with decoded RGBA identity checked before publication.
+
 The [alpine rock variation](alpine-rock-variation.md) is original shader code in
 `src/alpine-material.js`. It reuses the credited Rock Boulder Dry colour and
 normal maps; no external asset, recording, music or dependency was added.
