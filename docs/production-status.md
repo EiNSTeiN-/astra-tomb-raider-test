@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Alpine rock variation](alpine-rock-variation.md) reduces repeated colour
+  blotches on the mountain faces while preserving the existing geometry,
+  terrain, movement and sound code. Eighteen GPU edge cases verify continuous
+  joins; every reversed-weight control is detected. The final snow circuit
+  retains all 49 recorded states across 15,496 controller updates, with finite
+  HDR input, three verified graphics settings and preserved background depth.
+  All 32 focused regressions and the production build pass. Final production
+  keyboard/High and portrait touch/Low climb, crouch, descent and full-store
+  reloads pass; all fourteen native captures are reviewed. Six lossless image
+  witnesses retain their original RGBA values. Temporary workers, browsers
+  and servers are released. The wider initial survey covers 190 reviewed views
+  across jungle, desert, snow and coast.
+  Mountain faceting and angular snow, repeated courts, the other four ground
+  circuits, complete contact, listening and device acceptance remain open.
+
 - [Finite flame and sailcloth shading](shader-bloom-finiteness.md) repairs
   rectangular black regions at their shader sources while retaining bloom.
   Actual factory shaders pass eight extended-UV GPU cases; all failing controls

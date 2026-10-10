@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [alpine rock variation](alpine-rock-variation.md) is original shader code in
+`src/alpine-material.js`. It reuses the credited Rock Boulder Dry colour and
+normal maps; no external asset, recording, music or dependency was added.
+Its verification texture is generated in memory by the browser helper and is
+not a delivery asset. Documentation witnesses are lossless conversions of
+actual game captures, with decoded RGBA identity checked before publication.
+
 The [cloud counterweight chamber](sky-counterweights.md) uses original geometry
 in `src/counterweight-art.js` (originally `src/sky-counterweight-art.js`), the
 existing fitted-stone generator, wind reliefs and patina shaders, and the already

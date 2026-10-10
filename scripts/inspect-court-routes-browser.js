@@ -48,7 +48,7 @@ export function prepareCourtRoute(game) {
     destination,
   };
 }
-export function advanceCourtRoute(game, state, limit = 120) {
+export function advanceCourtRoute(game, state, limit = 120, render = true) {
   let moved = 0;
   for (let i = 0; i < limit && state.index < state.points.length; i++) {
     const p = state.points[state.index],
@@ -86,7 +86,9 @@ export function advanceCourtRoute(game, state, limit = 120) {
     state.stall = distance < 0.0001 ? state.stall + 1 : 0;
     if (state.stall > 180) break;
   }
-  game.renderScene(0);
+  // Offline surveys can draw only their recorded views while retaining every
+  // controller/camera step, without paying for unobserved intermediate frames.
+  if (render) game.renderScene(0);
   const gl = game.renderer.getContext();
   return {
     index: state.index,

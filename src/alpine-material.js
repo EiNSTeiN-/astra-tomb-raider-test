@@ -1,6 +1,8 @@
 // Existing rock maps projected in metres; snow collects on ledges and in
 // gullies. Its broad coverage and fine edge breakup use separate scales so
-// the range reads at a distance without a regular striped texture.
+// the range reads at a distance. Neighbouring shifted texture samples blend
+// continuously across a triangular lattice, keeping rock grain while breaking
+// up the large blotches that repeated across entire faces.
 export function alpineMaterial(source, haze) {
   const material = source.clone();
   material.name = "Alpine rock faces and deposited snow";
@@ -43,6 +45,28 @@ export function alpineMaterial(source, haze) {
           vec2 c=floor(p), f=fract(p); f=f*f*(3.-2.*f);
           return mix(mix(alpineHash(c),alpineHash(c+vec2(1.,0.)),f.x),
             mix(alpineHash(c+vec2(0.,1.)),alpineHash(c+vec2(1.)),f.x),f.y);
+        }
+        vec2 alpineOffset(vec2 cell) {
+          return vec2(alpineHash(cell+vec2(71.,11.)),
+            alpineHash(cell+vec2(17.,83.)))*7.23;
+        }
+        vec3 alpineSample(sampler2D surface,vec2 uv) {
+          vec2 tiled=mat2(1.,0.,-.577350269,1.154700538)*uv;
+          vec2 cell=floor(tiled), f=fract(tiled);
+          float upper=step(1.,f.x+f.y);
+          vec3 weights=mix(vec3(1.-f.x-f.y,f.y,f.x),
+            vec3(f.x+f.y-1.,1.-f.x,1.-f.y),upper);
+          weights=max(weights,vec3(0.)); weights=weights*weights*weights;
+          weights/=max(.001,weights.x+weights.y+weights.z);
+          vec2 a=alpineOffset(cell+vec2(upper));
+          vec2 b=alpineOffset(cell+vec2(0.,1.));
+          vec2 c=alpineOffset(cell+vec2(1.,0.));
+          // Shared edge weights join adjacent patches. Projection derivatives
+          // keep mip selection independent of the discrete texture shifts.
+          vec2 dx=dFdx(uv), dy=dFdy(uv);
+          return textureGrad(surface,uv+a,dx,dy).rgb*weights.x
+            +textureGrad(surface,uv+b,dx,dy).rgb*weights.y
+            +textureGrad(surface,uv+c,dx,dy).rgb*weights.z;
         }`,
       )
       .replace(
@@ -64,9 +88,9 @@ export function alpineMaterial(source, haze) {
         vec3 alpineWeights=pow(abs(alpineN),vec3(4.));
         alpineWeights/=max(.001,alpineWeights.x+alpineWeights.y+alpineWeights.z);
         vec3 alpineUv=vAlpinePosition*.07;
-        vec3 rock=texture2D(map,alpineUv.zy).rgb*alpineWeights.x
-          +texture2D(map,alpineUv.xz).rgb*alpineWeights.y
-          +texture2D(map,alpineUv.xy).rgb*alpineWeights.z;
+        vec3 rock=alpineSample(map,alpineUv.zy)*alpineWeights.x
+          +alpineSample(map,alpineUv.xz)*alpineWeights.y
+          +alpineSample(map,alpineUv.xy)*alpineWeights.z;
         float broad=alpineNoise(vAlpinePosition.xz*.027);
         float broken=alpineNoise(vAlpinePosition.xz*.19+vAlpinePosition.y*.012);
         float strata=sin(vAlpinePosition.y*.29+broad*5.);
@@ -85,9 +109,9 @@ export function alpineMaterial(source, haze) {
         "#include <normal_fragment_maps>",
         `float detailStrength=mix(.55,.08,snow);
         normal=normalize(
-          alpineDetail(texture2D(normalMap,alpineUv.zy).xyz,alpineUv.zy,normal,detailStrength)*alpineWeights.x
-          +alpineDetail(texture2D(normalMap,alpineUv.xz).xyz,alpineUv.xz,normal,detailStrength)*alpineWeights.y
-          +alpineDetail(texture2D(normalMap,alpineUv.xy).xyz,alpineUv.xy,normal,detailStrength)*alpineWeights.z);`,
+          alpineDetail(alpineSample(normalMap,alpineUv.zy),alpineUv.zy,normal,detailStrength)*alpineWeights.x
+          +alpineDetail(alpineSample(normalMap,alpineUv.xz),alpineUv.xz,normal,detailStrength)*alpineWeights.y
+          +alpineDetail(alpineSample(normalMap,alpineUv.xy),alpineUv.xy,normal,detailStrength)*alpineWeights.z);`,
       )
       .replace(
         "#include <opaque_fragment>",
@@ -99,6 +123,6 @@ export function alpineMaterial(source, haze) {
         #include <opaque_fragment>`,
       );
   };
-  material.customProgramCacheKey = () => "vesper-alpine-range-2";
+  material.customProgramCacheKey = () => "vesper-alpine-range-5";
   return material;
 }
