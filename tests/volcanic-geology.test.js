@@ -4,9 +4,61 @@ import * as THREE from "three";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile, buildTerrainSurface } from "../src/terrain.js";
 import { volcanicBoulderMaterial } from "../src/volcanic-material.js";
+import { desertRouteDistance } from "../src/desert-geology.js";
 const level = LEVELS[4],
   map = createMap(level),
   profile = createTerrainProfile(map, level);
+
+test("recorded central volcanic ridges have rounded crests without flattening their surrounding relief", () => {
+  const bends = [],
+    elevations = [];
+  for (let z = 140; z <= 205; z += profile.step)
+    for (let x = 245; x <= 315; x += profile.step) {
+      if (desertRouteDistance(map, x, z) < 5.25) continue;
+      const h = profile.height(x, z);
+      bends.push(
+        Math.hypot(
+          profile.height(x - profile.step, z) -
+            2 * h +
+            profile.height(x + profile.step, z),
+          profile.height(x, z - profile.step) -
+            2 * h +
+            profile.height(x, z + profile.step),
+        ),
+      );
+      elevations.push(h);
+    }
+  bends.sort((a, b) => a - b);
+  // The recorded old grid's 95th percentile was 2.235m and its maximum 4.177m.
+  // The 1.75m lattice matches the terrain in those recorded views.
+  assert(bends.length > 350);
+  assert(bends[Math.floor(bends.length * 0.95)] < 0.7);
+  assert(bends.at(-1) < 1.3);
+  assert(Math.max(...elevations) - Math.min(...elevations) > 5);
+});
+
+test("volcanic crest grading retains the full walking boundaries and surrounding protected collar", () => {
+  let probes = 0;
+  for (let z = 0; z < profile.width; z++)
+    for (let x = 0; x < profile.width; x++) {
+      const px = x * profile.step,
+        pz = z * profile.step;
+      if (desertRouteDistance(map, px, pz) > 3.5) continue;
+      assert.equal(
+        profile.height(px, pz),
+        profile.volcanic.originalHeight(px, pz),
+      );
+      probes++;
+    }
+  assert(probes > 30000);
+  for (const f of map.features)
+    for (const dx of [-3.5, 0, 3.5])
+      for (const dz of [-3.5, 0, 3.5])
+        assert.equal(
+          profile.height(f.x * 7 + dx, f.z * 7 + dz),
+          profile.volcanic.originalHeight(f.x * 7 + dx, f.z * 7 + dz),
+        );
+});
 
 test("volcanic fractures vary the enclosing ridges while preserving walking cells and working foundations", () => {
   let changed = 0,

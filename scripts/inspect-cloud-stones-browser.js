@@ -1,5 +1,5 @@
 // Independent world-space underside rays against the delivered terrain buffers.
-// Run on a fully loaded cloud chapter; no fitting samples are reused here.
+// Run on fully loaded cloud or volcanic terrain; no fitting samples are reused.
 import * as THREE from "three";
 import { updateLodPatch } from "../src/instance-lod.js";
 import { updateNature } from "../src/vegetation.js";
@@ -7,6 +7,16 @@ import { updateNature } from "../src/vegetation.js";
 export function inspectCloudStones(game, divisions = 32) {
   if (game.level.biome !== "sky" || !game.rockGrounding)
     throw Error("Load the cloud chapter and its visual assets first");
+  return inspectTerrainStones(game, divisions);
+}
+
+export function inspectVolcanicStones(game, divisions = 32) {
+  if (game.level.biome !== "volcano" || !game.rockGrounding)
+    throw Error("Load the volcanic chapter and its visual assets first");
+  return inspectTerrainStones(game, divisions);
+}
+
+function inspectTerrainStones(game, divisions) {
   if (!Number.isInteger(divisions) || divisions < 8)
     throw Error("Use at least eight underside grid divisions");
   game.world.updateMatrixWorld(true);

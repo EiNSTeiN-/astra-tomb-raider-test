@@ -383,6 +383,10 @@ junction and ride north to the cradle. **E / Use** takes or releases the handle;
 Its surrounding [volcanic banks now have fractured rock and ash surfaces](docs/volcanic-banks.md),
 with uneven crests and small fitted fragments. The comparison notes include
 matched captures, rendering costs and the remaining graphics limitations.
+The latest [volcanic shoulder pass](docs/volcanic-shoulders.md) rounds meeting
+bank crests and checks the retained scans with 96,777 independent terrain rays.
+Working floors stay fixed; the full assisted court circuit and native
+keyboard/touch controls with repeated save reloads pass.
 The [caldera skyline](docs/caldera-rim.md) has a broader, irregular rim and
 consistent rock texture scale. Its background rendering removes the vertical
 cutoffs previously caused by the camera's far plane.

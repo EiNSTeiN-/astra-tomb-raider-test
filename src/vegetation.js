@@ -456,7 +456,9 @@ export async function loadNature(game) {
       });
       const chunks = new Map();
       const footprint = rock
-        ? stoneFootprint(tiers[0][0].geometry, { edgeProbes: biome === "sky" })
+        ? stoneFootprint(tiers[0][0].geometry, {
+            edgeProbes: biome === "sky" || biome === "volcano",
+          })
         : null;
       for (let i = s; i < spots.length; i += sources.length) {
         const p = spots[i],

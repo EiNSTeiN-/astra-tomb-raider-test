@@ -4,6 +4,7 @@ import {
 } from "./desert-geology.js";
 import { temperingFoundationDistance } from "./tempering-cart-rules.js";
 import { TRACK_APPROACH_WIDTH } from "./tempering-terrain.js";
+import { relaxBankCrests } from "./terrain-banks.js";
 
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
@@ -15,7 +16,8 @@ const smooth = (a, b, v) => {
 // their exact previous heights; the new relief belongs to the enclosing banks.
 export function refineVolcanicTerrain(profile, map, seed) {
   const { width, step } = profile,
-    heights = profile.heights.slice();
+    heights = profile.heights.slice(),
+    exposure = new Float32Array(heights.length);
   for (let iz = 0; iz < width; iz++)
     for (let ix = 0; ix < width; ix++) {
       const x = ix * step,
@@ -35,14 +37,20 @@ export function refineVolcanicTerrain(profile, map, seed) {
         );
         mask *= smooth(4, 10, distance);
       }
+      exposure[index] = mask;
       if (!mask) continue;
       const warp = (rockNoise(x * 0.025, z * 0.025, seed + 53) - 0.5) * 7;
       const broad = rockNoise(x * 0.065 + warp * 0.1, z * 0.09, seed + 17);
       const fracture = rockNoise(x * 0.38 + warp, z * 0.16, seed + 89);
       const ledge = Math.tanh(Math.sin(heights[index] * 1.55 + broad * 2) * 3);
       heights[index] +=
-        mask * ((broad - 0.52) * 5.2 + (fracture - 0.5) * 1.6 + ledge * 0.3);
+        mask * ((broad - 0.52) * 4.3 + (fracture - 0.5) * 0.75 + ledge * 0.2);
     }
+  // Meeting banks otherwise terminate in a sharp medial crest. Six masked
+  // relaxation passes round that skyline and the coarse relief, leaving the
+  // protected walking collar, railway apron and lava margins untouched.
+  relaxBankCrests(heights, width, exposure);
+  relaxBankCrests(heights, width, exposure);
   const sample = (x, z) => {
     const fx = Math.max(0, Math.min(width - 1.001, x / step)),
       fz = Math.max(0, Math.min(width - 1.001, z / step));

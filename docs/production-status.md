@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Volcanic bank shoulders and scan footing](volcanic-shoulders.md) grade the
+  recorded sharp crests while preserving walking collars, railway floors and
+  lava records. Full underside fitting retains 229 scans; all 96,777 independent
+  rays clear the rendered terrain. All four legs of the 1.052-km circuit pass
+  across 15,739 updates, with 50 reviewed finite-HDR captures. Three graphics
+  settings, eight matched captures, 76 selected regressions and the build pass.
+  Keyboard/High and actual touch/Low movement, crouch, jump, map and repeated
+  full-store reloads pass; all twelve native captures are reviewed. All 264
+  tracked terrain/nature geometries dispose once, and verification processes
+  and temporary servers are released. Remaining sparse and repeated spaces,
+  wider bank/contact coverage, listening and device acceptance remain open.
+
 - [Cavern limestone formations](cavern-formations.md) add 32 off-grid floor
   lobes and 214 rooted roof pendants. All 53,136 root probes and 54,324 sampled
   movement comparisons pass. The final 908-metre ground circuit preserves

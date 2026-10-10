@@ -659,6 +659,12 @@ Rock Moss Set 01 scan textures; its tint is applied at runtime without changing
 the source maps. No external art, recordings or dependencies were added. The
 comparison images are unretouched game captures encoded as lossless WebP.
 
+The [volcanic shoulder refinement](volcanic-shoulders.md) reuses the original
+heightfield, crest-grading and underside-fitting code with the existing credited
+terrain maps and Rock Moss Set 01 scans. No new external assets, recordings or
+dependencies were added. Its six documentation witnesses are lossless WebP
+conversions of actual game captures, retaining dimensions and RGBA values.
+
 The [caldera skyline](caldera-rim.md) uses original heightfield geometry in
 `src/forge-caldera.js`, original surface and haze code in
 `src/caldera-material.js`, and the existing cloud-city background depth

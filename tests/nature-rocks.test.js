@@ -149,6 +149,40 @@ test("the observed cloud-cliff rock seats its narrow underside against rendered 
   assert(placed.exposed > 0.12);
 });
 
+test("the observed volcanic rail-side scan cannot retain its hanging underside", () => {
+  const profile = createTerrainProfile(createMap(LEVELS[4]), LEVELS[4]);
+  const ground = { height: (x, z) => rockGroundHeight(profile, x, z) };
+  // Actual Float32 placement from the volcanic terrain ray inspection.
+  const matrix = new THREE.Matrix4().fromArray([
+    0.0572814866900444, 0, -1.384880542755127, 0, 0, 1.3860647678375244, 0, 0,
+    1.384880542755127, 0, 0.0572814866900444, 0, 133.7328643798828,
+    20.676868438720703, 416.2366638183594, 1,
+  ]);
+  const cases = shapes.map((shape) => ({
+    shape,
+    gap: Math.max(...gaps(shape, matrix, ground, 32)),
+  }));
+  const observed = cases.sort(
+    (a, b) =>
+      Math.abs(a.gap - 0.8100347091019948) -
+      Math.abs(b.gap - 0.8100347091019948),
+  )[0];
+  assert(
+    Math.abs(observed.gap - 0.8100347091019948) < 0.003,
+    "reproduce the delivered scan's 81cm hanging edge",
+  );
+  const fitted = stoneFootprint(observed.shape.geometry, { edgeProbes: true });
+  const placed = seatStone(ground, fitted, {
+    x: matrix.elements[12],
+    z: matrix.elements[14],
+    size: matrix.elements[5],
+    yaw: Math.atan2(matrix.elements[8], matrix.elements[0]),
+  });
+  if (placed)
+    assert(Math.max(...gaps(fitted, placed.matrix, ground, 32)) < -0.007);
+  else assert.equal(placed, null, "an almost submerged scan is omitted");
+});
+
 test("the six delivered rock undersides fit shallow slopes without altering their source geometry", () => {
   assert.equal(shapes.length, 6);
   for (const shape of shapes) {
