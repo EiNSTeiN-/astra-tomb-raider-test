@@ -5,6 +5,37 @@ import {
   cameraBodyVisibility,
 } from "./camera-body-frame.js";
 
+const APPROACH_TIME = 0.3;
+
+// Anticipate horizontal contact along the current walking direction. Check the
+// intervening follow path too: a clear destination can have a blocked sweep.
+// This only selects a gentler detour; followCamera still enforces actual walls,
+// terrain and near-plane clearance at the current position on every update.
+function clearApproach(game, target, end, ahead, canOccupy) {
+  if (ahead.lengthSq() < 1e-8) return true;
+  for (const amount of [1 / 3, 2 / 3, 1]) {
+    const shift = ahead.clone().multiplyScalar(amount),
+      start = target.clone().add(shift),
+      projected = game.camera.position
+        .clone()
+        .add(shift)
+        .lerp(
+          end.clone().add(shift),
+          1 - Math.exp(-3 * APPROACH_TIME * amount),
+        );
+    if (
+      constrainCamera(
+        start,
+        projected,
+        game.cameraSurfaces,
+        canOccupy,
+      ).distanceTo(projected) > 0.08
+    )
+      return false;
+  }
+  return true;
+}
+
 // Pillars, shafts and overhead parts can close the interpolated follow path
 // even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
 // yaw to 2.1 only when that neighborhood cannot fit a comfortable view. Keep
@@ -17,12 +48,13 @@ export function followClearCamera(
   canOccupy,
   viewPitch = game.pitch,
 ) {
+  let steering = false;
   const follow = (end) =>
       followCamera(
         game.camera.position,
         target,
         end,
-        dt,
+        dt * (steering ? 3 / 8 : 1),
         game.cameraSurfaces,
         canOccupy,
         game.cameraFollowTarget,
@@ -37,13 +69,25 @@ export function followClearCamera(
     game.ropeRide
   ) {
     game.cameraBodyRecovery = null;
+    game.cameraContactRecovery = null;
     return ordinary;
   }
   const body = cameraBodyTargets(game),
     visibility = (position) =>
       cameraBodyVisibility(game.cameraSurfaces, position, body),
     ordinaryVisible = visibility(ordinary),
+    ahead =
+      game.cameraFollowTarget && dt > 0 && dt <= 0.1
+        ? target
+            .clone()
+            .sub(game.cameraFollowTarget)
+            .setY(0)
+            .multiplyScalar(APPROACH_TIME / Math.max(dt, 1 / 120))
+            .clampLength(0, 1.2)
+        : new Vector3(),
+    anticipated = !clearApproach(game, target, desired, ahead, canOccupy),
     bodyRecovery =
+      anticipated ||
       ordinaryVisible < 1 ||
       (game.cameraBodyRecovery &&
         (visibility(desired) < 1 ||
@@ -55,6 +99,7 @@ export function followClearCamera(
           ).distanceTo(target) < 3.2));
   if (ordinaryLength >= 3.2 && !bodyRecovery) {
     game.cameraBodyRecovery = null;
+    game.cameraContactRecovery = null;
     return ordinary;
   }
 
@@ -93,6 +138,16 @@ export function followClearCamera(
         [0, -0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
       ),
     ];
+  // Keep an established detour gentle after the player stops; changing its
+  // response rate at that moment otherwise produces a new sudden correction.
+  steering =
+    anticipated ||
+    (game.cameraBodyRecovery &&
+      game.cameraContactRecovery === game.cameraBodyRecovery);
+  const rememberRecovery = (recovery) => {
+    game.cameraBodyRecovery = recovery;
+    game.cameraContactRecovery = steering ? recovery : null;
+  };
   let best, shorter;
   for (const [index, [yawOffset, pitchOffset]] of candidates.entries()) {
     if (index === nearbyCandidates.length && best && !bodyRecovery) break;
@@ -110,6 +165,8 @@ export function followClearCamera(
       safe = constrainCamera(target, end, game.cameraSurfaces, canOccupy);
     const safeLength = safe.distanceTo(target);
     if (safeLength < 2.2) continue;
+    if (anticipated && !clearApproach(game, target, end, ahead, canOccupy))
+      continue;
     const next = follow(end),
       length = next.distanceTo(target),
       visible = visibility(next),
@@ -130,13 +187,13 @@ export function followClearCamera(
     if (length >= 3.2 && visible === 1) {
       // Arm recovery needs the same continuity as body recovery: otherwise a
       // clear interpolated arm can fall straight back toward a blocked request.
-      game.cameraBodyRecovery = [yawOffset, pitchOffset];
+      rememberRecovery([yawOffset, pitchOffset]);
       return next;
     }
   }
   best ||= shorter;
   if (!best) return ordinary;
-  game.cameraBodyRecovery = best.recovery;
+  rememberRecovery(best.recovery);
   if (best.next.distanceTo(target) >= 2.2) return best.next;
   // A narrow shaft may also block the interpolated sweep. Resolve that contact
   // immediately, like an inward wall correction, then extend with normal follow.

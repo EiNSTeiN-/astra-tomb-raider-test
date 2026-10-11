@@ -16,6 +16,7 @@ import {
   addSolarSunSeal,
 } from "./solar-instrument-art.js";
 import { stationMeshSolid } from "./field-station-solids.js";
+import { terrainInlayGeometry } from "./terrain-inlay.js";
 
 export function solarReady(game, site) {
   if (!site) return false;
@@ -372,16 +373,34 @@ export function buildSolarChambers(game) {
     root.add(site.dust);
     // The engravings form a readable coordinate grid without raising the floor.
     const gridMaterial = new THREE.MeshStandardMaterial({
+      name: "Bronze solar coordinate inlays",
       color: 0xa17f43,
       metalness: 0.5,
       roughness: 0.5,
     });
     for (let row = 0; row < 6; row++)
       for (let col = 0; col < 6; col++) {
-        const p = solarLocal({ x: col, y: row }),
-          y = floor(p) + 0.03;
-        game.box(0.32, 0.035, 0.035, gridMaterial, p.x, y, p.z, root);
-        game.box(0.035, 0.035, 0.32, gridMaterial, p.x, y, p.z, root);
+        const p = solarLocal({ x: col, y: row });
+        for (const [width, depth] of [
+          [0.32, 0.035],
+          [0.035, 0.32],
+        ])
+          add(
+            terrainInlayGeometry(
+              game.terrainProfile,
+              {
+                x: root.position.x + p.x,
+                z: root.position.z + p.z,
+                w: width,
+                d: depth,
+              },
+              root.position,
+            ),
+            gridMaterial,
+            0,
+            0,
+            0,
+          );
       }
     // Copies preserve the original local transforms retained for camera bounds.
     // Static fittings batch across the court; mirrors and handwheels stay movable.

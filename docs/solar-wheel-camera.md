@@ -74,6 +74,12 @@ the preceding index reaches 0.436 m in the other two courts. This repair does
 not certify smooth motion through every instrument arrangement. Wider contact
 continuity remains under review.
 
+The subsequent [camera contact pass](solar-camera-contact.md) reduces the
+recorded corrections with an earlier, gentler detour and terrain-conforming
+floor marks. Its denser comparison retains the full current wheel index in both
+modes. The movement measurements above remain the evidence for this earlier
+wheel-bound milestone.
+
 ## Release checks and scope
 
 The release-build keyboard/High and CDP touch/Low cases exercise movement,

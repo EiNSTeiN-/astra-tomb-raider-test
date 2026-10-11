@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [solar camera contact pass](solar-camera-contact.md) uses original code in
+`src/camera-follow.js`, `src/game.js` and `src/solar-chambers.js`. Coordinate
+marks reuse the project's existing `src/terrain-inlay.js` and their preceding
+bronze colour/material. No external model, texture, recording, score or
+dependency was added. Documentation images are actual browser captures,
+converted losslessly to WebP with decoded pixels checked against their PNG
+sources. The camera comparison runs preceding camera functions with the current
+scene and wheel bounds. Existing scene and character credits apply.
+
 The [solar handwheel camera bounds](solar-wheel-camera.md) are original code in
 `src/solar-mounts.js` and `src/solar-chambers.js`, around the existing original
 handwheel geometry and credited bronze material. No new rendered asset,

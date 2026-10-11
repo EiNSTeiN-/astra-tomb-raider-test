@@ -231,11 +231,15 @@ test("nearby view recovery preserves ordinary follow during aimed, water and rop
     game.cameraFollowTarget,
   );
   for (const flag of ["aiming", "swimming", "diving", "ropeRide"]) {
+    game.cameraBodyRecovery = [0.3, 0];
+    game.cameraContactRecovery = game.cameraBodyRecovery;
     game[flag] = true;
     assert(
       followClearCamera(game, target, desired, 1 / 60, space).equals(expected),
       flag,
     );
+    assert.equal(game.cameraBodyRecovery, null);
+    assert.equal(game.cameraContactRecovery, null);
     game[flag] = false;
   }
   game.climb = { time: 0.4 };

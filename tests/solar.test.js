@@ -22,7 +22,8 @@ import { buildDesertArchitecture } from "../src/desert-architecture.js";
 import { buildFieldGates, updateFieldWorld } from "../src/field-world.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { createTerrainProfile } from "../src/terrain.js";
-import { CameraSurfaces } from "../src/camera-collision.js";
+import { CameraSurfaces, followCamera } from "../src/camera-collision.js";
+import { followClearCamera } from "../src/camera-follow.js";
 import { arrivalCamera } from "../src/camera-arrival.js";
 import { Adventure } from "../src/game.js";
 import { inSolarCourt } from "../src/solar-rules.js";
@@ -104,6 +105,209 @@ const ready = (g, stage) => {
 };
 const stand = (g, f) =>
   g.player.position.set(f.x * 7, g.groundHeight(f.x * 7, f.z * 7), f.z * 7);
+
+test("all delivered solar coordinate marks sit in the terrain and clear the recorded stopping boot ray", (t) => {
+  const { game: g } = fixture(t);
+  g.player.position.set(163, g.groundHeight(163, 380), 380);
+  ready(g, 9);
+  g.world.updateMatrixWorld(true);
+  const inlays = [];
+  for (const site of g.solarSites)
+    site.root.traverse((mesh) => {
+      if (
+        mesh.isMesh &&
+        mesh.material.name === "Bronze solar coordinate inlays"
+      )
+        inlays.push(mesh);
+    });
+  assert.equal(
+    inlays.length,
+    9,
+    "every court retains its batched coordinate grid",
+  );
+  let vertices = 0,
+    samples = 0;
+  const terrain = g.terrainProfile.surfaceHeight;
+  assert(
+    terrain,
+    "observe delivered terrain planes rather than the bilinear field",
+  );
+  for (const mesh of inlays) {
+    const { position } = mesh.geometry.attributes;
+    vertices += position.count;
+    for (let i = 0; i < position.count; i += 3) {
+      const triangle = [0, 1, 2].map((j) =>
+        new THREE.Vector3()
+          .fromBufferAttribute(position, i + j)
+          .applyMatrix4(mesh.matrixWorld),
+      );
+      for (const weights of [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1 / 3, 1 / 3, 1 / 3],
+        [0.8, 0.1, 0.1],
+        [0.1, 0.8, 0.1],
+        [0.1, 0.1, 0.8],
+      ]) {
+        const p = triangle.reduce(
+            (sum, point, j) => sum.addScaledVector(point, weights[j]),
+            new THREE.Vector3(),
+          ),
+          offset = p.y - terrain(p.x, p.z);
+        assert(Math.abs(offset - 0.003) < 1e-5, `inlay height ${offset}`);
+        samples++;
+      }
+    }
+  }
+  assert(
+    vertices >= 9 * 36 * 2 * 6,
+    "all 648 coordinate strokes retain their terrain surface",
+  );
+  assert(samples > 9000, "inspect triangle interiors as well as their corners");
+  const eye = new THREE.Vector3(
+      166.96206059695032,
+      4.403644951723457,
+      383.934607591313,
+    ),
+    boot = new THREE.Vector3(
+      162.58269269140897,
+      3.4054083789444904,
+      379.94999315053076,
+    ),
+    material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    old = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 0.32), material),
+    ray = new THREE.Raycaster(
+      eye,
+      boot.clone().sub(eye).normalize(),
+      0,
+      eye.distanceTo(boot) - 0.015,
+    );
+  old.position.set(162.6, g.groundHeight(162.6, 379.85) + 0.03, 379.85);
+  old.updateMatrixWorld(true);
+  t.after(() => {
+    old.geometry.dispose();
+    material.dispose();
+  });
+  assert(
+    ray.intersectObject(old).length,
+    "the preceding raised marking reproduces the real boot obstruction",
+  );
+  assert.equal(
+    ray.intersectObjects(inlays, false).length,
+    0,
+    "the same view clears the grounded marks",
+  );
+});
+
+// Replay the unchanged three-metre approaches against delivered court bounds.
+// Ordinary follow is the contact control; GPU checks separately inspect the
+// animated clothing and equipment rather than substituting this arm test.
+for (const pose of [
+  {
+    court: 3,
+    start: [166, 380],
+    step: -0.1,
+    camera: [166, 3.929535957223747, 385.21437157177706],
+  },
+  {
+    court: 6,
+    start: [76, 128],
+    step: 0.1,
+    camera: [76, 2.740403497650222, 131.99114121097423],
+  },
+  {
+    court: 8,
+    start: [258, 72],
+    step: 0.1,
+    camera: [258, -1.382372295425342, 75.99114121097425],
+  },
+]) {
+  test(`court ${pose.court} walking camera anticipates fittings while retaining hard clearance and look`, (t) => {
+    const { game: g } = fixture(t);
+    ready(g, 9);
+    g.camera = new THREE.PerspectiveCamera();
+    g.yaw = 0;
+    g.pitch = -0.18;
+    const space = (p) => g.cameraSpace(p),
+      simulate = (anticipate) => {
+        g.camera.position.fromArray(pose.camera);
+        g.cameraBodyRecovery = null;
+        g.cameraFollowTarget = new THREE.Vector3(
+          pose.start[0],
+          g.groundHeight(...pose.start) + 1.3,
+          pose.start[1],
+        );
+        let maximum = 0;
+        for (let frame = 0; frame < 90; frame++) {
+          const x = pose.start[0] + pose.step * Math.min(frame + 1, 30),
+            z = pose.start[1];
+          g.player.position.set(x, g.groundHeight(x, z), z);
+          updateSolarChambers(g, 0);
+          const target = g.player.position
+              .clone()
+              .add(new THREE.Vector3(0, 1.3, 0)),
+            desired = target
+              .clone()
+              .add(
+                new THREE.Vector3(
+                  0,
+                  Math.sin(g.pitch) * 5.3 + 0.2,
+                  Math.cos(g.pitch) * 5.3,
+                ),
+              ),
+            old = g.camera.position.clone(),
+            next = anticipate
+              ? followClearCamera(g, target, desired, 1 / 60, space)
+              : followCamera(
+                  old,
+                  target,
+                  desired,
+                  1 / 60,
+                  g.cameraSurfaces,
+                  space,
+                  g.cameraFollowTarget,
+                );
+          g.camera.position.copy(next);
+          g.cameraFollowTarget = target;
+          maximum = Math.max(maximum, old.distanceTo(next));
+          assert(
+            g.canMove(x, z, 0),
+            "approach stays on the original legal path",
+          );
+          assert(space(next), "camera remains within terrain and map bounds");
+          assert(
+            g.cameraSurfaces.entry(target, next) >= 0.999999,
+            "full near-plane margin remains clear",
+          );
+          if (anticipate)
+            assert(
+              next.distanceTo(target) >= 3.2,
+              "explorer stays outside the close fade range",
+            );
+          assert.equal(g.yaw, 0);
+          assert.equal(g.pitch, -0.18);
+          assert.deepEqual(g.player.position.toArray(), [
+            x,
+            g.groundHeight(x, z),
+            z,
+          ]);
+        }
+        return maximum;
+      },
+      before = simulate(false),
+      after = simulate(true);
+    assert(
+      before > 0.37,
+      "ordinary follow reproduces a sharp contact correction",
+    );
+    assert(after < 0.32, `remaining largest update is ${after} m`);
+    assert(
+      after < before * 0.8,
+      "anticipation reduces the largest contact correction",
+    );
+  });
+}
 
 test("the recorded foreground handwheel catches clothing rays while its open sectors and turning transforms remain clear", (t) => {
   const { game: g } = fixture(t);

@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Gentler solar camera contact](solar-camera-contact.md) anticipates horizontal
+  contact while retaining the actual collision sweep and saved input look. In
+  three recorded approaches, the largest simulated update falls from 0.454 m
+  to 0.276 m. All 207 independent body snapshots have zero blocked or invalid
+  samples across 25,420 body hits. A denser check exposed a raised floor mark;
+  all 648 strokes now follow actual terrain triangles at 3 mm offset, with a
+  preceding-box obstruction control. The 188-case broad batch passed before
+  that final geometry adjustment; 64 relevant final cases and the rebuilt
+  release pass afterward. Keyboard/High and touch/Low input, map access and two
+  complete-store reloads each pass. All comparison and release captures are
+  reviewed. Immediate contact corrections, wider composition, listening and
+  full eight-chapter acceptance remain open.
+
 - [Clear views beside solar handwheels](solar-wheel-camera.md) register the
   omitted rotating rims, spokes, hubs and cast mounts. Six recorded clothing
   rays hit the delivered wheel and now meet its camera bounds; an omitted-wheel

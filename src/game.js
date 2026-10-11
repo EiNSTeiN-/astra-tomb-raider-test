@@ -2173,6 +2173,7 @@ export class Adventure {
       Math.abs(view.yaw - this.yaw) + Math.abs(view.pitch - this.pitch) > 1e-6
         ? [view.yaw - this.yaw, view.pitch - this.pitch]
         : null;
+    this.cameraContactRecovery = null;
     this.avatar.rotation.y = this.yaw + Math.PI;
     this.avatar.visible = true;
     this.rig?.visibility?.set(view.length);
