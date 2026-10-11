@@ -2,7 +2,8 @@ import * as THREE from "three";
 
 // The wheel sits to the side of the vertical mirror spindle. A cast housing
 // and horizontal axle connect it to that spindle; the hub turns with the rim.
-export function addSolarWheelMount(group, wheel, material) {
+export function addSolarWheelMount(game, group, wheel, material) {
+  wheel.userData.cameraDynamic = true;
   const casting = (profile, parent, x, y, z, axis) => {
     const geometry = new THREE.LatheGeometry(
       profile.map(([radius, along]) => new THREE.Vector2(radius, along)),
@@ -14,6 +15,7 @@ export function addSolarWheelMount(group, wheel, material) {
     mesh.position.set(x, y, z);
     mesh.castShadow = mesh.receiveShadow = true;
     parent.add(mesh);
+    game.cameraSurfaces?.capture(mesh, { small: true, cylinderAxis: axis });
   };
   casting(
     [
@@ -68,4 +70,30 @@ export function addSolarWheelMount(group, wheel, material) {
     0,
     "z",
   );
+  // Keep the rim's open sectors: a single box or filled cylinder would turn
+  // its empty centre into opaque metal. These short tangential bounds follow
+  // the rotating wheel, and leave with its scene. Proxies are never rendered.
+  if (game.cameraSurfaces) {
+    const { radius, tube } = wheel.geometry.parameters,
+      segments = 12,
+      half = Math.PI / segments,
+      inner = (radius - tube) * Math.cos(half),
+      outer = radius + tube,
+      centre = (inner + outer) / 2;
+    for (let i = 0; i < segments; i++) {
+      const angle = ((i + 0.5) * Math.PI * 2) / segments,
+        geometry = new THREE.BoxGeometry(
+          2 * outer * Math.sin(half),
+          outer - inner,
+          2 * tube,
+        ),
+        proxy = new THREE.Mesh(geometry, material);
+      proxy.position.set(Math.sin(angle) * centre, Math.cos(angle) * centre, 0);
+      proxy.rotation.z = -angle;
+      wheel.add(proxy);
+      game.cameraSurfaces.capture(proxy, { small: true, thin: true });
+      wheel.remove(proxy);
+      geometry.dispose();
+    }
+  }
 }

@@ -23,6 +23,7 @@ import { buildFieldGates, updateFieldWorld } from "../src/field-world.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
+import { arrivalCamera } from "../src/camera-arrival.js";
 import { Adventure } from "../src/game.js";
 import { inSolarCourt } from "../src/solar-rules.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
@@ -103,6 +104,81 @@ const ready = (g, stage) => {
 };
 const stand = (g, f) =>
   g.player.position.set(f.x * 7, g.groundHeight(f.x * 7, f.z * 7), f.z * 7);
+
+test("the recorded foreground handwheel catches clothing rays while its open sectors and turning transforms remain clear", (t) => {
+  const { game: g } = fixture(t);
+  g.progress.stage = 9;
+  g.player.position.set(163, g.groundHeight(163, 380), 380);
+  updateSolarChambers(g, 100);
+  const wheel = g.solarSites[2].mirrors[3].wheel,
+    eye = new THREE.Vector3(
+      165.16015522760205,
+      3.929535957223747,
+      384.79939285487933,
+    ),
+    points = [
+      [162.76713479969268, 4.390217582140856, 380.2718010104077],
+      [162.8427272570835, 4.46411936828091, 380.24435157961017],
+      [162.83028425945417, 4.542018254749595, 380.22100185278083],
+      [162.82223965642834, 4.619700563971983, 380.2063092120774],
+      [162.74980565590383, 4.876557555510817, 380.06748144937774],
+      [162.75337640950582, 4.9541168760999605, 380.07565721992887],
+    ].map((p) => new THREE.Vector3(...p)),
+    ray = new THREE.Raycaster();
+  g.world.updateMatrixWorld(true);
+  for (const point of points) {
+    ray.set(eye, point.clone().sub(eye).normalize());
+    ray.far = eye.distanceTo(point) - 0.015;
+    assert(
+      ray.intersectObject(wheel, false).length,
+      "delivered metal blocks this recorded clothing ray",
+    );
+    assert(
+      g.cameraSurfaces.entry(point, eye, 0.02) < 1,
+      "camera also catches the wheel",
+    );
+  }
+  const group = g.cameraSurfaces.dynamicGroups.get(wheel);
+  assert(group && group.surfaces.length === 17);
+  const mirrors = g.solarSites.flatMap((s) => s.mirrors);
+  assert.equal(mirrors.length, 68);
+  assert(
+    mirrors.every(
+      (m) =>
+        g.cameraSurfaces.dynamicGroups.get(m.wheel)?.surfaces.length === 17,
+    ),
+    "every wheel retains its own moving metal bounds",
+  );
+  g.cameraSurfaces.dynamicGroups.delete(wheel);
+  try {
+    assert(
+      points.every((p) => g.cameraSurfaces.entry(p, eye, 0.02) === 1),
+      "omitting this wheel reproduces the missed occlusion",
+    );
+  } finally {
+    g.cameraSurfaces.dynamicGroups.set(wheel, group);
+  }
+  // Between the actual spokes, the rim and hub leave an opening. Check world
+  // rays after several turns, not just the capture's original local transform.
+  for (const angle of [0, 0.21, 0.83, 1.37]) {
+    wheel.rotation.z = angle;
+    wheel.updateWorldMatrix(true, true);
+    for (const [r, blocked] of [
+      [0.23, false],
+      [0.34, true],
+      [0.08, true],
+    ]) {
+      const a = Math.PI / 8,
+        local = new THREE.Vector3(Math.sin(a) * r, Math.cos(a) * r, 0),
+        front = local.clone().setZ(0.3).applyMatrix4(wheel.matrixWorld),
+        back = local.clone().setZ(-0.3).applyMatrix4(wheel.matrixWorld);
+      ray.set(front, back.clone().sub(front).normalize());
+      ray.far = front.distanceTo(back);
+      assert.equal(ray.intersectObject(wheel, true).length > 0, blocked);
+      assert.equal(g.cameraSurfaces.entry(front, back, 0) < 1, blocked);
+    }
+  }
+});
 
 test("nine unique optical routes use every intended mirror and obey the physical reflection law", () => {
   assert.equal(new Set(SOLAR_ROUTES.map((r) => JSON.stringify(r))).size, 9);
@@ -269,6 +345,9 @@ test("all 77 solar control arrivals start with a clear full orbit and preserve s
     ready(g, site.stage);
     for (const f of [...site.mirrors.map((m) => m.feature), site.receiver]) {
       stand(g, f);
+      // A prepared arrival must activate the same nearby geometry as the live
+      // scene before querying camera bounds, rather than its last distance state.
+      updateSolarChambers(g, 0);
       g.progress.position = { x: g.player.position.x, z: g.player.position.z };
       g.progress.camera = null;
       // The old fallback aimed toward room 1 after field tasks were complete.
@@ -294,6 +373,52 @@ test("all 77 solar control arrivals start with a clear full orbit and preserve s
     }
   }
   assert.equal(checked, 77);
+});
+
+test("a blocked saved solar look keeps its input angles and complete store while the arrival camera takes a clear detour", (t) => {
+  const { game: g } = fixture(t),
+    preferred = { yaw: 1.161799387799149, pitch: -0.18 };
+  g.camera = new THREE.PerspectiveCamera(58, 1.6, 0.1, 450);
+  g.avatar = new THREE.Group();
+  g.progress.stage = 4;
+  g.player.position.set(261, g.groundHeight(261, 72), 72);
+  updateSolarChambers(g, 100);
+  assert(g.canMove(261, 72, 0));
+  g.yaw = preferred.yaw;
+  g.pitch = preferred.pitch;
+  g.save();
+  const target = g.player.position.clone().add(new THREE.Vector3(0, 1.3, 0)),
+    view = arrivalCamera(target, preferred, g.cameraSurfaces, (p) =>
+      g.cameraSpace(p),
+    ),
+    stable = (data) => {
+      const copy = structuredClone(data);
+      for (const level of Object.values(copy.levels)) delete level.lastPlayed;
+      return copy;
+    },
+    before = stable(g.store.data);
+  assert(
+    Math.abs(view.yaw - preferred.yaw) > 0.1,
+    "delivered solar metal blocks the requested arrival orbit",
+  );
+  for (let reload = 0; reload < 3; reload++) {
+    g.restoreCamera(g.map.rooms[5]);
+    assert.equal(
+      g.yaw,
+      preferred.yaw,
+      "safe camera orbit must not rewrite input yaw",
+    );
+    assert.equal(g.pitch, preferred.pitch);
+    assert(g.camera.position.distanceTo(target) > 5.1);
+    assert(g.cameraSpace(g.camera.position));
+    assert.equal(g.cameraSurfaces.entry(target, g.camera.position, 0), 1);
+    assert(
+      g.cameraBodyRecovery,
+      "retain the selected arrival detour separately from input look",
+    );
+    g.save();
+    assert.deepEqual(stable(g.store.data), before);
+  }
 });
 
 test("world controls require restored field work and counterweights, save each turn, and activate only a lit receiver", (t) => {

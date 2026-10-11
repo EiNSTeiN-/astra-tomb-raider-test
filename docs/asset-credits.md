@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [solar handwheel camera bounds](solar-wheel-camera.md) are original code in
+`src/solar-mounts.js` and `src/solar-chambers.js`, around the existing original
+handwheel geometry and credited bronze material. No new rendered asset,
+recording, score or dependency was added. The documentation images are actual
+browser captures converted losslessly to WebP; existing scene and character
+credits apply. The comparison omits the new camera bounds in the current runtime.
+The accompanying saved-look repair in `src/game.js` is original camera-state code.
+
 The [desert skyline crowns](desert-skyline-crowns.md) use original procedural
 geometry in `src/desert-crowns.js`, the project's stone-block and carved solar
 panel generators, and the existing credited sandstone maps and aged bronze

@@ -2141,13 +2141,15 @@ export class Adventure {
   restoreCamera(next, preferredView = null) {
     const p = this.player.position,
       saved = this.progress.position,
-      preferred = preferredView ||
-        (saved && Math.hypot(p.x - saved.x, p.z - saved.z) < 0.25
+      stored =
+        saved && Math.hypot(p.x - saved.x, p.z - saved.z) < 0.25
           ? normalizeCamera(this.progress.camera)
-          : null) || {
-          yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
-          pitch: 0.15,
-        },
+          : null,
+      keepLook = preferredView || stored,
+      preferred = keepLook || {
+        yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
+        pitch: 0.15,
+      },
       chest = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
       standoff = windCameraStandoff(this),
       target = chest.clone().add(new THREE.Vector3(0, 0, standoff)),
@@ -2161,8 +2163,16 @@ export class Adventure {
           this.diving ? 3.4 : 5.3,
         );
     if (view.target) target.copy(view.target);
-    this.yaw = view.yaw;
-    this.pitch = view.pitch;
+    // A clear arrival orbit is a camera detour, not a new player look input.
+    // Retain validated saved angles so saving again cannot rotate the next
+    // reload. Fresh arrivals may still select their initial safe heading.
+    this.yaw = keepLook ? preferred.yaw : view.yaw;
+    this.pitch = keepLook ? preferred.pitch : view.pitch;
+    this.cameraBodyRecovery =
+      keepLook &&
+      Math.abs(view.yaw - this.yaw) + Math.abs(view.pitch - this.pitch) > 1e-6
+        ? [view.yaw - this.yaw, view.pitch - this.pitch]
+        : null;
     this.avatar.rotation.y = this.yaw + Math.PI;
     this.avatar.visible = true;
     this.rig?.visibility?.set(view.length);

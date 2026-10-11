@@ -4,6 +4,11 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [recorded solar handwheel approach](docs/solar-wheel-camera.md) now keeps
+the explorer clear of the wheel's rim. Moving camera bounds include the small
+metal fittings and retain the open sectors between spokes; wider camera contact
+continuity remains under review.
+
 The desert's [ten distinct skyline crowns](docs/desert-skyline-crowns.md) replace
 repeated solar cartouches with stepped markers, pierced stonework, a recessed
 niche and varied pylons. Closed geometry, cornice bearing, real openings and

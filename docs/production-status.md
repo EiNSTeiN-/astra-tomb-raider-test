@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Clear views beside solar handwheels](solar-wheel-camera.md) register the
+  omitted rotating rims, spokes, hubs and cast mounts. Six recorded clothing
+  rays hit the delivered wheel and now meet its camera bounds; an omitted-wheel
+  control misses them. Point controls retain the open sectors after four turns.
+  Three matched walking/stance sequences have 45 independent surface snapshots
+  with zero blocked or invalid samples; the omission control records 20 blocked
+  samples. All 68 wheels retain their moving bounds. Saved arrival look now
+  stays separate from its safe orbit, preserving input angles through repeated
+  stores. The 185 selected cases and build pass; release input/save checks are
+  recorded in the milestone. Sharp inward camera corrections and wider world
+  acceptance remain under review.
+
 - [Ten distinct desert skyline crowns](desert-skyline-crowns.md) replace the
   repeated main-arcade cartouches with varied closed stone silhouettes. The
   actual buffer observer checks 274 parts, 463 joins, 390 cornice bearings,
