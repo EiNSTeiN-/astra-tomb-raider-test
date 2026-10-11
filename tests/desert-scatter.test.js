@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { isDeepStrictEqual } from "node:util";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import * as THREE from "three";
@@ -256,14 +257,22 @@ test("built scatter clears the actual courtyard piers, retains gameplay bounds a
   );
   const game = fixture();
   buildDesertArchitecture(game);
-  const before = structuredClone(game.obstacles);
+  const before = structuredClone(game.obstacles),
+    identities = [...game.obstacles];
   let textureDisposals = 0;
   for (const u of Object.values(
     game.terrainMeshes[0].material.userData.terrainUniforms,
   ))
     u.value.addEventListener("dispose", () => textureDisposals++);
   buildDesertScatter(game, scanSources());
-  assert.deepEqual(game.obstacles, before);
+  // Crown kernels contain class instances. structuredClone strips prototypes;
+  // compare both data snapshots, and separately retain obstacle identity.
+  assert.equal(game.obstacles.length, identities.length);
+  assert(game.obstacles.every((o, i) => o === identities[i]));
+  assert(
+    isDeepStrictEqual(structuredClone(game.obstacles), before),
+    "scatter preserves collision data without formatting a large kernel diff",
+  );
   const placements = [
     ...game.desertScatter.stones,
     ...game.desertScatter.rubble,

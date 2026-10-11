@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [desert skyline crowns](desert-skyline-crowns.md) use original procedural
+geometry in `src/desert-crowns.js`, the project's stone-block and carved solar
+panel generators, and the existing credited sandstone maps and aged bronze
+material. No external model, texture, recording, score or dependency was added.
+Documentation images are actual browser game captures converted losslessly to
+WebP; the matched construction comparisons rebuild the preceding arcades in
+the current development runtime. Existing scene and character credits apply.
+
 The [gallery walking camera repair](gallery-body-camera.md) uses original
 framing code in `src/camera-body-frame.js` and `src/camera-follow.js`. Its
 independent posed-surface observer is original verification code. No external

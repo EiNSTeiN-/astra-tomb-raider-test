@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The desert's [ten distinct skyline crowns](docs/desert-skyline-crowns.md) replace
+repeated solar cartouches with stepped markers, pierced stonework, a recessed
+niche and varied pylons. Closed geometry, cornice bearing, real openings and
+exact structural support have independent render-buffer checks. Wider world
+composition and body framing remain under review.
+
 The [walking camera now keeps the crouched explorer clear of gallery columns](docs/gallery-body-camera.md)
 and retains a clear detour until its requested view opens. Independent posed-surface
 checks cover forty desert approaches; the eight-chapter stance survey, native

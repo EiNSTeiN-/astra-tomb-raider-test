@@ -60,9 +60,10 @@ export function stationSolid(
 // physical surface used by movement, sight, sound or projectile queries.
 export function stationMeshSolid(game, feature, mesh, options = {}) {
   mesh.updateWorldMatrix(true, false);
-  const triangles = new TriangleSolids([
-      { geometry: mesh.geometry, matrices: [mesh.matrixWorld] },
-    ]),
+  const triangles = new TriangleSolids(
+      [{ geometry: mesh.geometry, matrices: [mesh.matrixWorld] }],
+      { layeredSupport: options.layeredSupport },
+    ),
     bounds = triangles.solids[0].bounds,
     x = (bounds.min.x + bounds.max.x) / 2,
     z = (bounds.min.z + bounds.max.z) / 2;

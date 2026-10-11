@@ -190,7 +190,8 @@ function contains(shape, x, y, z) {
 }
 
 export class TriangleSolids {
-  constructor(placements) {
+  constructor(placements, { layeredSupport = false } = {}) {
+    this.layeredSupport = layeredSupport;
     this.cells = new Map();
     this.solids = [];
     const shapes = new Map();
@@ -270,10 +271,17 @@ export class TriangleSolids {
             xz = triangle.normalXZ * solid.verticalScale;
           if (!(y / Math.hypot(y, xz) >= minUp)) continue;
         }
-        top = Math.max(
-          top,
-          diskHeight(triangle.vertices, p.x, p.z, localRadius),
-        );
+        const height = diskHeight(triangle.vertices, p.x, p.z, localRadius);
+        // A layered construction can have a standing base below an overhead
+        // roof at the same footprint. Select eligible faces before taking the
+        // maximum, rather than rejecting the entire shape for its higher roof.
+        if (
+          this.layeredSupport &&
+          height * solid.verticalScale + solid.matrix.elements[13] >
+            maxY + 0.2 + 1e-6
+        )
+          continue;
+        top = Math.max(top, height);
       }
       const height = top * solid.verticalScale + solid.matrix.elements[13];
       if (

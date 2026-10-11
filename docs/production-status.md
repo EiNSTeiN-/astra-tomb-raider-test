@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Ten distinct desert skyline crowns](desert-skyline-crowns.md) replace the
+  repeated main-arcade cartouches with varied closed stone silhouettes. The
+  actual buffer observer checks 274 parts, 463 joins, 390 cornice bearings,
+  35,736 relief backing probes and 390 support rays, with deliberate defect
+  controls. Existing arcade/pier-carving buffers, plans, foundations and bird
+  perches match after excluding the replaced cartouches. Solar working positions,
+  climbing ledges, quality/distance detail and once-only graphics retirement
+  pass. Layered support also retains the portal's lower base beneath its roof,
+  and local cap departure clears the recorded descending body contacts. All
+  259 selected cases and the build pass; release input/save checks are documented
+  in the milestone. Broad sparse spaces, repeated instruments and eight-chapter
+  acceptance remain open; some free-court views still obscure parts of the
+  explorer behind existing optical posts.
+
 - [Clear walking views beside gallery columns](gallery-body-camera.md) repair
   the recorded crouched-body occlusion with posed joint checks and retained
   arm/body detours. The independent delivered-surface observer finds zero

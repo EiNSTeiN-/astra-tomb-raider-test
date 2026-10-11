@@ -102,11 +102,14 @@ function clearStationVerticalMotion(game, before) {
   // same body margin used by its side collision before descending beside it.
   const limit = Math.max(
     0.2,
-    ...contacts.map((o) =>
-      o.supportRadius === 0 && p.y < before && before >= o.bounds.max.y - 0.015
-        ? (o.bodyPadding ?? 0.4) + 0.02
-        : 0.2,
-    ),
+    ...contacts.map((o) => {
+      if (o.supportRadius !== 0 || p.y >= before) return 0.2;
+      const padding = o.bodyPadding ?? 0.4,
+        top = o.triangles?.layeredSupport
+          ? o.triangles.support(p.x, p.z, before, padding, 0.65)?.height
+          : o.bounds.max.y;
+      return top !== undefined && before >= top - 0.015 ? padding + 0.02 : 0.2;
+    }),
   );
   for (let radius = 0.02; radius <= limit + 1e-6; radius += 0.02) {
     for (let i = 0; i < 16; i++) {

@@ -3,6 +3,7 @@ import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { addMasonryFooting } from "./masonry-footings.js";
+import { buildDesertCrown } from "./desert-crowns.js";
 
 // The court's two crossing axes and the sanctuary approach remain open. Structure
 // occupies the perimeter; each room gets an authored gallery and ruin pattern.
@@ -204,7 +205,8 @@ export function buildDesertArchitecture(game) {
     const ground = (px, pz) => game.groundHeight(x + px, z + pz) - base;
     const foundations = [];
     let triangles = 0,
-      blocks = 0;
+      blocks = 0,
+      crown;
     const add = (
       geometry,
       px,
@@ -481,15 +483,20 @@ export function buildDesertArchitecture(game) {
         };
       }
       if (span.a.x === -5 && span.b.x === 5) {
-        block(4.4, 2.7, 1.35, cx, top + 1.9, cz, 0, 1, true);
-        block(4.8, 0.3, 1.85, cx, top + 3.35, cz, 0, 0.84, true);
-        panel(3.65, 2.25, cx, top + 0.75, cz + 0.69);
-        const sundial = new THREE.Mesh(
-          new THREE.TorusGeometry(0.79, 0.08, 6, 36),
+        // Preserve the pre-existing masonry's serials and shade sequence.
+        serial += 2;
+        rng();
+        rng();
+        crown = buildDesertCrown(game, {
+          room,
+          x: x + cx,
+          y: base + top + 0.485,
+          z: z + cz,
+          stone: material,
+          carved: detailMaterial,
           bronze,
-        );
-        sundial.position.set(cx, top + 1.95, cz + 0.83);
-        detail.add(sundial);
+          panelGeometry: solarPanelGeometry,
+        });
       }
     }
     mergeArchitecture(root);
@@ -505,6 +512,7 @@ export function buildDesertArchitecture(game) {
       blocks,
       triangles,
       detailBounds,
+      crown,
     });
   }
   return true;
@@ -517,5 +525,12 @@ export function updateDesertArchitecture(game) {
       patch.detailBounds.center.distanceTo(game.player.position) -
       patch.detailBounds.radius;
     patch.detail.visible = distance < range + (patch.detail.visible ? 6 : 0);
+    if (patch.crown) {
+      const c = patch.crown,
+        near =
+          c.detailBounds.center.distanceTo(game.player.position) -
+          c.detailBounds.radius;
+      c.detail.visible = near < range + (c.detail.visible ? 6 : 0);
+    }
   }
 }
