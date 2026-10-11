@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Shared rendered-floor support](rendered-terrain-support.md) extends the
+  existing desert triangle sampler to the other seven chapters. All 1,282,173
+  independent floor queries agree within 3 micrometres, with unchanged buffers
+  in 648 terrain chunks. Crouched lower-body fitting, final sole corrections
+  and a surrounding terrain margin repair the recorded floor and steep-bank
+  contacts. The broad body review, before the last shallow-step correction,
+  has 1,247 snapshots and 59,974,465 positive vertex gaps. All 315 final selected
+  cases across 36 files, the build and eight final release keyboard/touch
+  movement, stance, look, jump, map and repeated complete-store checks pass.
+  This is a selected suite; the initial full-suite attempt was stopped.
+  Camp props and foreground banks still obscure the explorer in some reviewed
+  views. Full visual acceptance, wider routes, contact lighting and listening
+  remain open.
+
 - [Gentler solar camera contact](solar-camera-contact.md) anticipates horizontal
   contact while retaining the actual collision sweep and saved input look. In
   three recorded approaches, the largest simulated update falls from 0.454 m

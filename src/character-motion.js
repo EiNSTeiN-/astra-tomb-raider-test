@@ -17,6 +17,7 @@ import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
 import { stationSupport, stationBlocked } from "./field-station-solids.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
+import { terrainBodyClear } from "./terrain-body-clearance.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
 // support, and crossing uneven ground in the air must not lift the jump arc.
@@ -193,9 +194,15 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         if (support.surface?.natureRock && support.height <= p.y + 0.45)
           y = Math.max(y, support.height);
       }
+      const footing = game.grounded
+        ? supportAt(game, x, z, p.y + 0.25, NATURE_BODY_RADIUS).height
+        : y;
+      const settled =
+        footing >= p.y - 0.42 && footing <= p.y + 0.45 ? footing : y;
       return game.groundHeight(x, z) <= y + 0.45 &&
-        game.canMove(x, z, y - game.groundHeight(x, z))
-        ? y
+        terrainBodyClear(game, x, settled, z) &&
+        game.canMove(x, z, settled - game.groundHeight(x, z))
+        ? settled
         : null;
     };
     const xY = free(p.x + dx, p.z);

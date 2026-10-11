@@ -3,6 +3,7 @@ import { buildMonasteryGardens } from "./monastery-gardens.js";
 import { buildDesertForecourts } from "./desert-forecourts.js";
 import { buildCourtCover } from "./court-cover.js";
 import { buildCourtDais } from "./court-dais.js";
+import { terrainBodyClear } from "./terrain-body-clearance.js";
 import { mantlePoint, mantleEdge } from "./mantle-motion.js";
 import { buildWindTerrace } from "./wind-terraces.js";
 import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
@@ -1540,6 +1541,7 @@ export class Adventure {
       return false;
     if (galleryAt(this, x, worldY, z))
       return galleryClear(this, x, worldY, z, clearance);
+    if (clearance && !terrainBodyClear(this, x, worldY, z)) return false;
     if (!cavernClear(this, x, this.groundHeight(x, z) + height, z, clearance))
       return false;
     if (skyBridgeBlocked(this, x, z, this.groundHeight(x, z) + height))

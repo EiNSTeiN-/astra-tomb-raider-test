@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [shared rendered-floor support](rendered-terrain-support.md) uses original
+terrain-query, character-pose and movement code, extending the project's existing
+triangle sampler. No external model, texture, recording, score or dependency
+was added. Its documentation images are actual browser captures converted
+losslessly to WebP, with decoded pixels checked against their PNG sources.
+The preceding-floor comparison reconstructs the preceding terrain support
+profile; release images temporarily hide the pause panel during capture.
+Existing scene, material and character credits below apply.
+
 The [solar camera contact pass](solar-camera-contact.md) uses original code in
 `src/camera-follow.js`, `src/game.js` and `src/solar-chambers.js`. Coordinate
 marks reuse the project's existing `src/terrain-inlay.js` and their preceding

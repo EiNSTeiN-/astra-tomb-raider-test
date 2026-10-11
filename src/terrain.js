@@ -19,6 +19,7 @@ import { refineVolcanicTerrain } from "./volcanic-geology.js";
 import { temperingTerrainWeight } from "./tempering-terrain.js";
 import { courierFoundationWeight } from "./courier-rules.js";
 import { desertBankRise, refineDesertTerrain } from "./desert-geology.js";
+import { createTerrainSurfaceSampler } from "./terrain-surface.js";
 import { buildDesertHorizon } from "./desert-horizon.js";
 import * as THREE from "three";
 import { buildSnowMountains } from "./snow-mountains.js";
@@ -359,20 +360,26 @@ export function createTerrainProfile(map, level) {
     court: (x, z) => sample(courts, x, z),
   };
   profile.gallery = createSunkenGallery(profile, biome);
-  if (biome === "snow") return refineSnowTerrain(profile, map, level.seed);
-  if (biome === "crystal") return refineCavernTerrain(profile, map, level.seed);
-  if (biome === "eclipse")
-    return refineMeridianTerrain(profile, map, level.seed);
-  if (biome === "desert") return refineDesertTerrain(profile, map, level.seed);
-  if (biome === "volcano")
-    return refineVolcanicTerrain(profile, map, level.seed);
-  return upperHeights
-    ? refineSkyTerrain(
-        profile,
-        (x, z) => sample(upperHeights, x, z),
-        level.seed,
-      )
-    : profile;
+  let terrain = profile;
+  if (biome === "snow") terrain = refineSnowTerrain(profile, map, level.seed);
+  else if (biome === "crystal")
+    terrain = refineCavernTerrain(profile, map, level.seed);
+  else if (biome === "eclipse")
+    terrain = refineMeridianTerrain(profile, map, level.seed);
+  else if (biome === "desert")
+    terrain = refineDesertTerrain(profile, map, level.seed);
+  else if (biome === "volcano")
+    terrain = refineVolcanicTerrain(profile, map, level.seed);
+  else if (upperHeights)
+    terrain = refineSkyTerrain(
+      profile,
+      (x, z) => sample(upperHeights, x, z),
+      level.seed,
+    );
+  // Keep the generation/masking field intact. Walking and camera clearance
+  // follow the float32 triangle planes that buildTerrainSurface delivers.
+  terrain.surfaceHeight ||= createTerrainSurfaceSampler(terrain);
+  return terrain;
 }
 
 export function buildTerrainSurface(game) {

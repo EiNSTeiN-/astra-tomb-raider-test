@@ -4,6 +4,13 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [shared rendered-floor support pass](docs/rendered-terrain-support.md)
+aligns standing and camera height with the visible terrain in all eight chapters.
+Crouched knees and posed soles fit uneven ground, while movement checks the
+surrounding bank and the next settled foothold. All 315 selected regressions,
+the build and eight native release input/save cases pass. Wider scenery,
+camera framing, contact lighting and listening remain under review.
+
 The [solar camera contact pass](docs/solar-camera-contact.md) begins detours
 before reaching a fitting and keeps them gentle after stopping. Across three
 recorded approaches, the largest camera update falls from 0.454 m to 0.276 m,

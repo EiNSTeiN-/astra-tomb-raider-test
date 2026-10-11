@@ -5,6 +5,7 @@ import { waterAt } from "./hydrology.js";
 import { CROUCH_DROP, playerFootstep } from "./stealth.js";
 import { strideScale } from "./stride.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
+import { fitCrouchTerrain } from "./explorer-terrain-pose.js";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -148,7 +149,9 @@ export function groundExplorer(game, dt, moving, sprinting) {
     // through the cap. Treat a substantial drop as an unsupported foothold.
     if (bodySupport.surface?.triangles && root.y - result.height > 0.12)
       return null;
-    return Math.abs(result.height - root.y) <= 0.5 ? result : null;
+    return result.height >= root.y - 0.5 && result.height <= root.y + 0.65
+      ? result
+      : null;
   };
   const plans = state.feet.map((foot) => {
     const points = probes(foot),
@@ -233,13 +236,39 @@ export function groundExplorer(game, dt, moving, sprinting) {
         pelvis,
         THREE.MathUtils.lerp(state.pelvis, pelvis, 1 - Math.exp(-20 * dt)),
       );
-  game.avatar.position.y = state.pelvis - (rig.crouchBlend || 0) * CROUCH_DROP;
-  poseFeet(
-    game,
-    plans.map((p) => p.ankle.clone().add(new THREE.Vector3(0, p.shift, 0))),
-  );
-  for (const p of plans) setWorldRotation(p.foot.bone, p.rotation);
-  updateSkin(game);
+  const drop = (rig.crouchBlend || 0) * CROUCH_DROP,
+    ankleTargets = plans.map((p) =>
+      p.ankle.clone().add(new THREE.Vector3(0, p.shift, 0)),
+    ),
+    applyPelvis = (value) => {
+      game.avatar.position.y = value - drop;
+      poseFeet(game, ankleTargets);
+      for (const p of plans) setWorldRotation(p.foot.bone, p.rotation);
+      updateSkin(game);
+    };
+  applyPelvis(state.pelvis);
+  state.pelvis = fitCrouchTerrain(game, state.pelvis, drop, applyPelvis);
+  // Re-solving a deeply bent leg can shift the posed sole slightly from its
+  // planned clearance. Check the delivered sole after IK, then fit the knees
+  // again if an ankle needs lifting. Keep this bounded and visual only.
+  for (let pass = 0; pass < 3; pass++) {
+    let adjusted = false;
+    for (const [index, p] of plans.entries()) {
+      if (!p.valid) continue;
+      const gaps = probes(p.foot).flatMap((point) => {
+        const floor = support(point.x, point.z);
+        return floor ? [point.y - floor.height] : [];
+      });
+      const lift = Math.min(0.03, 0.006 - Math.min(...gaps));
+      if (lift > 0.0001) {
+        ankleTargets[index].y += lift;
+        adjusted = true;
+      }
+    }
+    if (!adjusted) break;
+    applyPelvis(state.pelvis);
+    state.pelvis = fitCrouchTerrain(game, state.pelvis, drop, applyPelvis);
+  }
   state.active = true;
   state.contacts = plans.map((p) => {
     const points = probes(p.foot),

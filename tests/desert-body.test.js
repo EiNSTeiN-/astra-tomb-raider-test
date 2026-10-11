@@ -7,7 +7,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { animateExplorer } from "../src/explorer.js";
-import { advanceCharacter } from "../src/character-motion.js";
+import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { terrainTriangleReader } from "../scripts/inspect-desert-groundcover-browser.js";
 import { buildDesertForecourts } from "../src/desert-forecourts.js";
@@ -20,8 +20,13 @@ import {
   inspectExplorerSolids,
 } from "../scripts/inspect-explorer-solids-browser.js";
 
-async function actorAndTerrain(t, forecourts = false, camera = false) {
-  const level = LEVELS[1],
+async function actorAndTerrain(
+  t,
+  forecourts = false,
+  camera = false,
+  chapter = 1,
+) {
+  const level = LEVELS[chapter],
     map = createMap(level),
     profile = createTerrainProfile(map, level),
     io = new NodeIO(),
@@ -125,6 +130,169 @@ async function actorAndTerrain(t, forecourts = false, camera = false) {
     },
   };
 }
+
+test("the delivered explorer stays on six crystal triangle slopes without crouched knees entering the floor", async () => {
+  const s = await actorAndTerrain(undefined, false, false, 6),
+    g = s.game;
+  const pose = (x, z, crouch, heading = Math.PI) => {
+    g.rig.mixer.stopAllAction();
+    g.rig.actions.Idle.reset().play();
+    g.rig.state = "Idle";
+    g.rig.grounding = undefined;
+    g.rig.crouchBlend = 0;
+    g.crouching = crouch;
+    g.player.position.set(x, g.groundHeight(x, z), z);
+    g.avatar.rotation.set(0, heading, 0);
+    g.avatar.position.set(0, 0, 0);
+    const root = g.player.position.clone();
+    for (let frame = 0; frame < 60; frame++)
+      animateExplorer(g, 1 / 60, false, false);
+    assert(g.player.position.equals(root), "fitting cannot move the player");
+    assert(Math.abs(root.y - s.floor(x, z)) < 1e-5);
+    assert(
+      g.avatar.position.y <= 1e-9,
+      "retain the standing movement envelope",
+    );
+    return inspectExplorerTerrain(g, s.floor);
+  };
+  let samples = 0;
+  try {
+    // Disable only the knee probes to reproduce the original bent trouser
+    // penetration on a correct ground root; keep ankle IK and every body mesh.
+    g.rig.terrainCrouch = { model: g.rig.model, probes: [] };
+    const control = pose(46.23, 25.43, true);
+    assert(control.embedded > 200 && control.minimumGap < -0.26);
+    g.rig.terrainCrouch = undefined;
+    for (const [x, z] of [
+      [46.23, 25.43],
+      [198.91, 306.93],
+      [198.91, 299.93],
+      [191.91, 308.59],
+      [4.23, 25.43],
+      [44.91, 23.83],
+    ])
+      for (const heading of [Math.PI, Math.PI / 2])
+        for (const crouch of [false, true]) {
+          const report = pose(x, z, crouch, heading);
+          assert(report.samples > 48000);
+          assert.equal(report.invalid, 0);
+          assert.equal(report.missing, 0);
+          assert.equal(report.embedded, 0, JSON.stringify(report.witnesses));
+          samples += report.samples;
+        }
+    // Settled ankle targets alone missed the animated toe during a stance
+    // change. Measure every delivered vertex through both complete transitions.
+    for (const heading of [Math.PI, Math.PI / 2]) {
+      pose(46.23, 25.43, false, heading);
+      const root = g.player.position.clone();
+      for (let frame = 0; frame < 120; frame++) {
+        if (frame === 0) g.crouching = true;
+        if (frame === 60) g.crouching = false;
+        animateExplorer(g, 1 / 60, false, false);
+        const report = inspectExplorerTerrain(g, s.floor);
+        assert.equal(report.embedded, 0, JSON.stringify(report.witnesses));
+        assert.equal(report.invalid, 0);
+        assert.equal(report.missing, 0);
+        assert(g.player.position.equals(root));
+        assert(g.avatar.position.y <= 1e-9);
+        samples += report.samples;
+      }
+    }
+    assert(samples > 12672000);
+  } finally {
+    s.dispose();
+  }
+});
+
+test("terrain banks stop the surrounding body, recover older arrivals and remain solid during sustained approaches", async () => {
+  for (const [chapter, x, z] of [
+    [0, 382.23, 275.83],
+    [2, 338.91, 166.93],
+    [3, 54.69, 380.83],
+    [4, 156.91, 170.83],
+    [5, 159.69, 98.59],
+  ]) {
+    const s = await actorAndTerrain(undefined, false, false, chapter),
+      g = s.game;
+    try {
+      g.walkable = Adventure.prototype.walkable.bind(g);
+      g.canMove = Adventure.prototype.canMove.bind(g);
+      g.player.position.set(x, g.groundHeight(x, z), z);
+      g.jumpY = g.velocityY = 0;
+      g.health = 100;
+      assert(g.walkable(x, z), "the centre-only control admits this map cell");
+      assert.equal(
+        g.canMove(x, z, 0),
+        false,
+        "the bank enters the body margin",
+      );
+      const arrival = safeArrival(g, g.player.position);
+      assert(arrival, "the old stance has a nearby supported recovery");
+      g.player.position.set(arrival.x, arrival.y, arrival.z);
+      g.avatar.rotation.set(0, Math.atan2(arrival.x - x, arrival.z - z), 0);
+      const direction = new THREE.Vector3(x - arrival.x, 0, z - arrival.z)
+        .normalize()
+        .multiplyScalar(3);
+      for (let frame = 0; frame < 180; frame++) {
+        const before = g.player.position.clone();
+        advanceCharacter(g, direction, 1 / 60, false);
+        g.actualMoveSpeed = before.distanceTo(g.player.position) * 60;
+        animateExplorer(g, 1 / 60, g.actualMoveSpeed > 0.1, false);
+        assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+        if (frame % 30 === 29) {
+          const report = inspectExplorerTerrain(g, s.floor);
+          assert.equal(report.embedded, 0, JSON.stringify(report.witnesses));
+          assert.equal(report.invalid, 0);
+        }
+      }
+      assert(
+        Math.hypot(g.player.position.x - x, g.player.position.z - z) > 0.1,
+      );
+    } finally {
+      s.dispose();
+    }
+  }
+});
+
+test("the recorded desert stance can take a shallow uphill step using its settled foot elevation", async () => {
+  const s = await actorAndTerrain(),
+    g = s.game;
+  try {
+    g.walkable = Adventure.prototype.walkable.bind(g);
+    g.canMove = Adventure.prototype.canMove.bind(g);
+    g.player.position.set(382.23, g.groundHeight(382.23, 235.43), 235.43);
+    g.jumpY = g.velocityY = 0;
+    g.avatar.rotation.set(0, Math.PI / 2, 0);
+    assert(g.canMove(382.33, 235.43, 0));
+    assert.equal(
+      g.canMove(
+        382.33,
+        235.43,
+        g.player.position.y - g.groundHeight(382.33, 235.43),
+      ),
+      false,
+      "the old elevation reproduces the false obstruction",
+    );
+    const start = g.player.position.x;
+    for (let frame = 0; frame < 4; frame++) {
+      advanceCharacter(g, { x: 6, z: 0 }, 0.05, false);
+      g.actualMoveSpeed = 6;
+      animateExplorer(g, 0.05, true, false);
+      assert(g.grounded);
+      assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+      const report = inspectExplorerTerrain(g, s.floor);
+      assert.equal(report.embedded, 0, JSON.stringify(report.witnesses));
+    }
+    assert(g.player.position.x - start > 1.1);
+    assert(
+      Math.abs(
+        g.player.position.y - s.floor(g.player.position.x, g.player.position.z),
+      ) < 1e-5,
+    );
+  } finally {
+    s.dispose();
+  }
+});
 
 test("the delivered crouched explorer clears the recorded gallery column without moving feet or changing look", async (t) => {
   const s = await actorAndTerrain(t, true, true),

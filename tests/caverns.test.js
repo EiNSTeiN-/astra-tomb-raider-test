@@ -278,7 +278,7 @@ test("saved resonance work controls the same gradual mineral glow and positional
 test("drip streaks, impact rings and sound follow the same drained water surface", (t) => {
   const game = fixture(t),
     site = game.cavernDrips.sites[0],
-    ground = terrain.height(site.x, site.z);
+    ground = game.groundHeight(site.x, site.z);
   game.waterMeshes = [
     {
       position: { x: site.x, y: ground + 2, z: site.z },
