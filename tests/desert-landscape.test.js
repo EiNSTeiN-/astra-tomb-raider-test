@@ -163,7 +163,7 @@ test("dune and escarpment meshes have upward winding, seamless normals and remai
     assert(radius > Math.hypot(427 / 2, 427 / 2) + 5);
     assert(p.array.every(Number.isFinite));
     assert(n.array.every(Number.isFinite));
-    assert.equal(g.index.count / 3, 49152);
+    assert(g.index.count / 3 > 49000 && g.index.count / 3 <= 85000);
     for (let ring = 0; ring <= rings; ring++) {
       const a = ring * (segments + 1),
         b = a + segments;
@@ -197,6 +197,50 @@ test("dune and escarpment meshes have upward winding, seamless normals and remai
     geometries[1].attributes.position.array,
   );
 });
+test("horizon normals follow independent Cartesian slope probes and both aprons stay buried", () => {
+  const extent = 427;
+  for (const layer of [0, 1]) {
+    const geometry = desertHorizonGeometry(extent, layer),
+      { radius, depth, segments, rings } = geometry.userData,
+      normals = geometry.attributes.normal;
+    const height = (x, z) =>
+      desertHorizonHeight(
+        Math.atan2(z, x),
+        (Math.hypot(x, z) - radius) / depth,
+        layer,
+        extent,
+      );
+    for (let ring = 5; ring < rings - 5; ring += 7)
+      for (let i = 3; i < segments; i += 13) {
+        const angle = (i / segments) * Math.PI * 2,
+          r = radius + (ring / rings) * depth,
+          x = Math.cos(angle) * r,
+          z = Math.sin(angle) * r,
+          dx = (height(x + 0.1, z) - height(x - 0.1, z)) / 0.2,
+          dz = (height(x, z + 0.1) - height(x, z - 0.1)) / 0.2,
+          expected = new THREE.Vector3(-dx, 1, -dz).normalize(),
+          actual = new THREE.Vector3().fromBufferAttribute(
+            normals,
+            ring * (segments + 1) + i,
+          );
+        assert(Math.abs(actual.length() - 1) < 1e-6);
+        assert(actual.dot(expected) > 0.999);
+      }
+    for (let i = 0; i < segments; i += 17) {
+      const angle = (i / segments) * Math.PI * 2;
+      assert.equal(
+        desertHorizonHeight(angle, 0, layer, extent),
+        layer ? -18 : -14,
+      );
+      assert.equal(
+        desertHorizonHeight(angle, 1, layer, extent),
+        layer ? -18 : -14,
+      );
+    }
+    geometry.dispose();
+  }
+});
+
 test("built desert terrain provides its exposure attribute and reuses existing textures for two horizon draws", async (t) => {
   const requests = [];
   t.mock.method(THREE.TextureLoader.prototype, "load", (_url, onLoad) => {

@@ -1142,3 +1142,14 @@ No external asset, recording, music or dependency is added. Its six public
 images are actual game captures converted losslessly to WebP, with identical
 decoded RGBA pixels and dimensions. The two comparison pairs retain exactly
 their recorded feet, chosen look and camera coordinates on separate runtimes.
+
+The [desert trail vegetation and distant range](desert-trail-landscape.md) extend
+original project folded-leaf geometry and height-field landscape code in
+`src/desert-groundcover.js` and `src/desert-horizon.js`. The existing credited
+sand/rock textures, regional materials, explorer, positioned ambience and quiet
+chapter/objective score remain in use. No external asset, recording, music or
+dependency is added. The documentation comparisons reconstruct the preceding
+horizon geometry and hide the new plants inside the current runtime, retaining
+the recorded feet, look and camera. They are distinct from native screenshots
+of the old built application. All six public images are lossless WebP conversions
+of actual game captures, with identical decoded RGBA pixels and dimensions.

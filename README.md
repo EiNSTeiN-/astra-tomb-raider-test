@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The desert's [trail vegetation and distant range](docs/desert-trail-landscape.md)
+add dry grasses, seed stalks and grey-green rosettes beside the paths, with
+grounded roots, wind and distance-selected detail. Varying dune and escarpment
+silhouettes reduce the repeated pointed skyline. Broad sparse areas, nearby
+bank shapes and the chapter's repeated structures remain under review.
+
 The desert's [solar instrument rebuild](docs/solar-instruments.md) gives all
 68 mirrors fitted sandstone and bronze bearings, unobstructed reflective faces,
 closed chamfered cases and mounted labels. Source and receiver posts meet their

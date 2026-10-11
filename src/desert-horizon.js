@@ -1,57 +1,88 @@
 import * as THREE from "three";
+import { desertNoise } from "./desert-geology.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
   return t * t * (3 - 2 * t);
 };
-// Integer angular frequencies make the two ends of each circular range meet.
-export function desertHorizonHeight(angle, t, layer = 0) {
-  const a = angle + layer * 0.7;
+// Cartesian noise varies the crests around the range without repeating angular
+// waves. The apron stays below the world edge; both circular ends sample the
+// same field, including the branching erosion across the distant escarpment.
+export function desertHorizonHeight(angle, t, layer = 0, extent = 420) {
+  t = Math.max(0, Math.min(1, t));
+  const radius = extent * (layer ? 0.9 : 0.73) + t * (layer ? 270 : 235),
+    x = Math.cos(angle) * radius,
+    z = Math.sin(angle) * radius,
+    cx = Math.cos(angle) * extent,
+    cz = Math.sin(angle) * extent;
   if (!layer) {
-    const crest = 0.57 + 0.08 * Math.sin(a * 7) + 0.025 * Math.sin(a * 19);
+    const crest = 0.39 + desertNoise(cx * 0.009, cz * 0.009, 813) * 0.28;
     const peak =
-      39 +
-      24 * (0.5 + 0.5 * Math.sin(a * 5 + 0.8)) +
-      15 * Math.pow(0.5 + 0.5 * Math.sin(a * 13), 3);
-    const flank =
-      t < crest
-        ? Math.pow(t / crest, 1.7)
-        : Math.pow((1 - t) / (1 - crest), 0.92);
-    const subsidiary = Math.sin(Math.PI * t) * Math.sin(a * 31 + t * 9) * 1.5;
-    return -14 + Math.max(0, flank) * peak + subsidiary;
+      38 +
+      desertNoise(cx * 0.007, cz * 0.007, 927) * 45 +
+      desertNoise(cx * 0.023, cz * 0.023, 1073) * 12;
+    const flank = smooth(0, crest, t) * (1 - smooth(crest, 1, t)),
+      ripple = (desertNoise(x * 0.024, z * 0.019, 1291) - 0.5) * 3;
+    return -14 + flank * (peak + ripple);
   }
-  const rise = smooth(0.025, 0.26, t),
-    fall = 1 - smooth(0.53, 0.95, t);
+  const front = 0.24 + desertNoise(cx * 0.011, cz * 0.011, 1777) * 0.13,
+    back = 0.59 + desertNoise(cx * 0.007, cz * 0.007, 1861) * 0.18,
+    rise = smooth(0.025, front, t),
+    fall = 1 - smooth(back, 1, t);
   const mesas =
-    58 +
-    36 * smooth(0.25, 0.7, 0.5 + 0.5 * Math.sin(a * 4 + 0.4)) +
-    23 * smooth(0.3, 0.65, 0.5 + 0.5 * Math.sin(a * 11));
-  const channels =
-    Math.pow(Math.abs(Math.sin(a * 37 + t * 4)), 9) * 12 +
-    Math.pow(Math.abs(Math.sin(a * 71 - t * 3)), 11) * 4;
-  const bedding = Math.tanh(Math.sin(t * 48 + Math.sin(a * 7) * 0.4) * 3) * 1.4;
-  return -18 + rise * fall * (mesas - channels + bedding);
+    63 +
+    desertNoise(cx * 0.004, cz * 0.004, 1979) * 55 +
+    desertNoise(cx * 0.019, cz * 0.019, 2053) * 18;
+  const wx = x + (desertNoise(x * 0.014, z * 0.014, 2179) - 0.5) * 32,
+    wz = z + (desertNoise(x * 0.014, z * 0.014, 2309) - 0.5) * 32,
+    broadCut = Math.abs(desertNoise(wx * 0.021, wz * 0.021, 2411) * 2 - 1),
+    fineCut = Math.abs(desertNoise(wx * 0.049, wz * 0.049, 2593) * 2 - 1);
+  const channels = broadCut * broadCut * 23 + fineCut * fineCut * 4;
+  return -18 + rise * fall * (mesas - channels);
+}
+
+// Differentiate the continuous field rather than averaging triangle faces.
+// Lighting is stable across tessellation diagonals and the duplicate ring seam.
+export function desertHorizonNormal(angle, t, layer = 0, extent = 420) {
+  const depth = layer ? 270 : 235,
+    radius = extent * (layer ? 0.9 : 0.73) + t * depth,
+    da = 0.6 / radius,
+    dr = 0.6 / depth,
+    radial =
+      (desertHorizonHeight(angle, t + dr, layer, extent) -
+        desertHorizonHeight(angle, t - dr, layer, extent)) /
+      1.2,
+    tangent =
+      (desertHorizonHeight(angle + da, t, layer, extent) -
+        desertHorizonHeight(angle - da, t, layer, extent)) /
+      1.2,
+    x = radial * Math.cos(angle) - tangent * Math.sin(angle),
+    z = radial * Math.sin(angle) + tangent * Math.cos(angle),
+    length = Math.hypot(x, 1, z);
+  return [-x / length, 1 / length, -z / length];
 }
 
 export function desertHorizonGeometry(extent, layer = 0) {
-  const segments = 384,
-    rings = 64,
+  const segments = 512,
+    rings = 80,
     radius = extent * (layer ? 0.9 : 0.73),
     depth = layer ? 270 : 235;
   const p = [],
     uv = [],
+    normals = [],
     index = [];
   for (let ring = 0; ring <= rings; ring++)
     for (let i = 0; i <= segments; i++) {
-      const a = (i / segments) * Math.PI * 2,
+      const a = ((i % segments) / segments) * Math.PI * 2,
         t = ring / rings,
         r = radius + t * depth;
       p.push(
         extent / 2 + Math.cos(a) * r,
-        desertHorizonHeight(a, t, layer),
+        desertHorizonHeight(a, t, layer, extent),
         extent / 2 + Math.sin(a) * r,
       );
       uv.push(i / segments, t);
+      normals.push(...desertHorizonNormal(a, t, layer, extent));
       if (ring < rings && i < segments) {
         const n = ring * (segments + 1) + i;
         index.push(
@@ -67,19 +98,8 @@ export function desertHorizonGeometry(extent, layer = 0) {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
   geometry.setIndex(index);
-  geometry.computeVertexNormals();
-  const normals = geometry.attributes.normal;
-  for (let ring = 0; ring <= rings; ring++) {
-    const a = ring * (segments + 1),
-      b = a + segments;
-    const n = new THREE.Vector3()
-      .fromBufferAttribute(normals, a)
-      .add(new THREE.Vector3().fromBufferAttribute(normals, b))
-      .normalize();
-    normals.setXYZ(a, ...n.toArray());
-    normals.setXYZ(b, ...n.toArray());
-  }
   geometry.computeBoundingSphere();
   geometry.userData = { segments, rings, radius, depth, layer };
   return geometry;

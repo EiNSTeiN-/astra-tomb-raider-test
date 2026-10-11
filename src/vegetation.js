@@ -42,6 +42,10 @@ import {
   updateMeridianGroundcover,
 } from "./meridian-groundcover.js";
 import { NatureRockSolids } from "./nature-rock-solids.js";
+import {
+  buildDesertGroundcover,
+  updateDesertGroundcover,
+} from "./desert-groundcover.js";
 
 function meshSources(scene) {
   scene.updateMatrixWorld(true);
@@ -336,6 +340,7 @@ export async function loadNature(game) {
       game.naturePatches,
       world.matrixWorld,
     );
+    buildDesertGroundcover(game);
     updateNature(game);
     game.renderOnce = true;
     return;
@@ -536,6 +541,7 @@ const NATURE_RANGES = {
   low: { rock: [91], gravel: [28], fern: [10, 40], shrub: [5, 16, 48] },
 };
 export function updateNature(game, dt = 0) {
+  updateDesertGroundcover(game, dt);
   updateSkyMeadow(game, dt);
   updateMeridianGroundcover(game, dt);
   updateSnowGroundcover(game, dt);

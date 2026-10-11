@@ -19,6 +19,26 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Desert trail vegetation and distant range](desert-trail-landscape.md) add
+  6,954 dry grasses, seed stalks and rosettes beside paths, with wind and three
+  distance-selected detail tiers. All 1,110,384 roots pass independent delivered
+  terrain triangle queries after float32 transform rounding; a raised plant is
+  rejected. The horizon uses varying rounded height fields and continuous
+  normals, with exact seams and geometry outside the playable square. Existing
+  terrain, map, water and objective records pass. All 24 paired views, 24 route
+  views, three corrected graphics-setting views and fourteen native captures
+  are reviewed. The four-leg 930-m circuit's recorded routes, controller and
+  camera states match the preceding milestone exactly over 14,094 updates.
+  High/Medium/Low plant counts are 399/204/113 at the recorded observer.
+  All 90 selected regressions, formatting and the build pass. Production
+  keyboard/High and CDP touch/Low movement, crouch, look, jump, map and two
+  complete-store reloads per case pass. All 2,012 tracked graphics resources
+  dispose once on chapter change, with references cleared. Six public lossless
+  images preserve source pixels; comparisons reconstruct the earlier landscape
+  inside the current runtime. Temporary processes and ports are closed.
+  Near bank shapes, broad sparse areas, repeated structures, wider contact,
+  listening and consumer performance remain open.
+
 - [Desert solar instruments](solar-instruments.md) rebuild 68 mirror supports,
   18 optical posts, nine guided shutters and nine physical receiver consoles.
   Loaded delivery buffers pass 6,935 footing rays, 6,800 aperture rays and
