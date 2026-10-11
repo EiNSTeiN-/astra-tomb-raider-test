@@ -6,7 +6,14 @@ const smooth = (a, b, value) => {
 // Fixed pads can overlap at different elevations. Selecting only the strongest
 // terrace switches height abruptly along their equal-weight line. Relax that
 // shared surface while keeping the actual working centres and special floors.
-export function courtTerrain(width, step, terraces, raw, waters = []) {
+export function courtTerrain(
+  width,
+  step,
+  terraces,
+  raw,
+  waters = [],
+  passes = 24,
+) {
   const heights = new Float32Array(width * width),
     exposure = new Float32Array(heights.length);
   for (let iz = 0; iz < width; iz++)
@@ -39,7 +46,9 @@ export function courtTerrain(width, step, terraces, raw, waters = []) {
         // below: their old protected cores could contain the very height switch
         // that needs repair, sometimes directly under a pickup.
         if (terrace.flat || terrace.main || terrace.field) {
-          const core = terrace.flat ? terrace.radius + 1.75 : 10.5;
+          const core = terrace.flat
+            ? terrace.radius + 1.75
+            : (terrace.core ?? 10.5);
           free = Math.min(free, smooth(core, core + 4, distance));
         }
         vicinity = Math.max(
@@ -62,7 +71,7 @@ export function courtTerrain(width, step, terraces, raw, waters = []) {
       exposure[index] = free * vicinity;
     }
   fitDiscoveryLandings(heights, exposure, width, step, terraces);
-  for (let pass = 0; pass < 24; pass++) {
+  for (let pass = 0; pass < passes; pass++) {
     const previous = heights.slice();
     for (let z = 1; z < width - 1; z++)
       for (let x = 1; x < width - 1; x++) {

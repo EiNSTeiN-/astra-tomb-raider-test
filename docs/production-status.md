@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Desert terrace approaches and complete rock footing](desert-terrace-approaches.md)
+  repair the recorded steep descent and five crouched knee contacts by grading
+  the approach joins while retaining 8,437 work-floor vertices, 59 feature
+  centres and all water interiors. All seven other chapter height arrays are
+  unchanged. The loaded body check covers 320 poses and every update of two
+  descents, totaling 26,933,200 visible-body vertex queries with no intersection
+  beyond the 15 mm observation tolerance. All 230 scanned rocks and 690 rubble
+  fragments pass independent Float32 underside checks. The wider visual audit
+  and unobserved body poses remain open.
+
 - [Desert banks and ground support](desert-ground-support.md) round the sampled
   sharp meeting crests without adding terrain triangles. Standing height now
   follows the delivered float32 triangle planes; all 52,325 independent queries

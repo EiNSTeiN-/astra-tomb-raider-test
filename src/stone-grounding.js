@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 // A scan's underside, rather than its origin, determines how it meets soil.
 // Cache these samples per shape; placement only performs terrain height queries.
-export function stoneShape(source, matrix = new THREE.Matrix4()) {
+export function stoneShape(source, matrix = new THREE.Matrix4(), options = {}) {
   const geometry = source.clone().applyMatrix4(matrix);
   geometry.computeBoundingBox();
   const box = geometry.boundingBox,
@@ -12,7 +12,7 @@ export function stoneShape(source, matrix = new THREE.Matrix4()) {
   geometry.scale(...new Array(3).fill(1 / Math.max(size.x, size.y, size.z)));
   geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
-  return stoneFootprint(geometry);
+  return stoneFootprint(geometry, options);
 }
 
 // The caller retains geometry ownership; probes allocate no lasting render resources.

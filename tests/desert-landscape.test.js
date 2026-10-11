@@ -16,37 +16,43 @@ import {
   desertHorizonHeight,
 } from "../src/desert-horizon.js";
 
-test("desert fields outside the survey approaches and reshaped pools preserve published bilinear heights", () => {
+test("desert terrace grading retains the published main and field working floors", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),
     floors = [];
-  // The survey construction region and five reshaped pool beds are intentional
-  // terrain changes. The remaining 45,738 samples match the pre-pool heightfield
-  // from 87b33d8 exactly, including bilinearly interpolated cell boundaries.
-  for (let gz = 0; gz < map.size; gz++)
-    for (let gx = 0; gx < map.size; gx++)
-      if (map.grid[gz][gx])
-        for (const dx of [-3.5, -2, 0, 2, 3.5])
-          for (const dz of [-3.5, -2, 0, 2, 3.5]) {
-            const x = gx * 7 + dx,
-              z = gz * 7 + dz;
-            if (x >= 270 && x <= 406 && z >= 203 && z <= 303) continue;
-            if (
-              profile.waters.some(
-                (w) =>
-                  w.shore &&
-                  Math.abs(x - w.x) <= w.width / 2 &&
-                  Math.abs(z - w.z) <= w.length / 2,
-              )
-            )
-              continue;
-            floors.push(profile.height(x, z));
-          }
-  assert.equal(floors.length, 45738);
+  // These 8,437 work-floor vertices were recorded at 76631e0 before the
+  // approach joins were graded. Main optical floors retain a 21 m core;
+  // field controls retain their 7 m work squares. Approaches deliberately change.
+  for (const room of [...map.rooms, ...map.fieldSites]) {
+    const radius = map.rooms.includes(room) ? 21 : 7;
+    for (let z = -radius; z <= radius; z += profile.step)
+      for (let x = -radius; x <= radius; x += profile.step)
+        floors.push(profile.height(room.x * 7 + x, room.z * 7 + z));
+  }
+  assert.equal(floors.length, 8437);
   assert.equal(
-    createHash("sha256").update(JSON.stringify(floors)).digest("hex"),
-    "4de626e1456edbbb044b79a255ade4153cd30412243e6071a6f2c00d0306fdb9",
+    createHash("sha256")
+      .update(Buffer.from(new Float32Array(floors).buffer))
+      .digest("hex"),
+    "febee252edb244c90dadeee010f49b01b69f04c7dd4a4648dc325f3cb9be65e5",
   );
+});
+
+test("the desert maintenance approach descends on a gradual ramp between the two terrace floors", () => {
+  const map = createMap(LEVELS[1]),
+    profile = createTerrainProfile(map, LEVELS[1]);
+  let samples = 0;
+  for (let z = 65; z < 85; z += 0.1) {
+    const slope =
+      Math.abs(
+        profile.surfaceHeight(373, z + 0.1) - profile.surfaceHeight(373, z),
+      ) / 0.1;
+    // The published slope reached 1.46876 m/m and let a normal descent
+    // put the trailing boot 80.5 cm inside the actual terrain.
+    assert(slope < 0.25, `Abrupt approach at ${z}: ${slope}`);
+    samples++;
+  }
+  assert(samples >= 200);
 });
 
 test("desert banks ease out of route floors before rising into their shoulders", () => {

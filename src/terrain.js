@@ -95,6 +95,8 @@ export function createTerrainProfile(map, level) {
     radius: r.r * 7,
     y: raw(r.x * 7, r.z * 7),
     main: map.rooms.includes(r),
+    // The solar courts need a wider fixed floor beneath their optical routes.
+    core: biome === "desert" && map.rooms.includes(r) ? 21 : 10.5,
     discovery: map.sideRooms.includes(r),
     field: (map.fieldSites || []).includes(r),
     flat: !!r.fireVault || !!r.bellHoist || !!r.cleft || !!r.pressureRelay,
@@ -105,8 +107,16 @@ export function createTerrainProfile(map, level) {
     "volcano",
     "crystal",
     "eclipse",
+    "desert",
   ].includes(biome)
-    ? courtTerrain(width, step, terraces, raw, waters)
+    ? courtTerrain(
+        width,
+        step,
+        terraces,
+        raw,
+        waters,
+        biome === "desert" ? 40 : 24,
+      )
     : null;
   for (let iz = 0; iz < width; iz++)
     for (let ix = 0; ix < width; ix++) {

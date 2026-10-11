@@ -5,12 +5,21 @@ import { desertPlan } from "./desert-architecture.js";
 import { inSolarCourt } from "./solar-rules.js";
 import { createLodPatch } from "./instance-lod.js";
 import { desertScatterMaterial } from "./desert-scatter-material.js";
+import { rockGroundHeight } from "./nature-rocks.js";
 
-import {
-  stoneShape as desertStoneShape,
-  seatStone as seatDesertStone,
-} from "./stone-grounding.js";
-export { desertStoneShape, seatDesertStone };
+import { stoneShape, seatStone } from "./stone-grounding.js";
+
+export function desertStoneShape(source, matrix) {
+  return stoneShape(source, matrix, { edgeProbes: true });
+}
+
+export function seatDesertStone(profile, shape, placement) {
+  return seatStone(
+    { height: (x, z) => rockGroundHeight(profile, x, z) },
+    shape,
+    placement,
+  );
+}
 
 export function desertScatterAllowed(game, x, z, radius, large = false) {
   const { map, terrainProfile: profile } = game;
@@ -119,12 +128,14 @@ export function desertScatterLayout(game, shapes, chip) {
       );
     }
   };
+  // Complete underside fitting rejects more tiny fragments. Use additional
+  // candidates to retain the sparse rubble clusters around supported outcrops.
   for (const stone of stones)
-    sprinkle(stone.position.x, stone.position.z, 9, stone.radius + 1.9);
+    sprinkle(stone.position.x, stone.position.z, 24, stone.radius + 1.9);
   // Small masonry fragments accumulate by the piers, not in the crossing axes.
   for (const room of game.map.rooms)
     for (const pier of desertPlan(room).piers)
-      sprinkle(room.x * 7 + pier.x, room.z * 7 + pier.z, 44, 4.4);
+      sprinkle(room.x * 7 + pier.x, room.z * 7 + pier.z, 96, 4.4);
   return { stones, rubble };
 }
 

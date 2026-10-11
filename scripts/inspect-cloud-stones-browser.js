@@ -1,5 +1,5 @@
 // Independent world-space underside rays against the delivered terrain buffers.
-// Run on fully loaded cloud or volcanic terrain; no fitting samples are reused.
+// Run on fully loaded terrain; no fitting samples are reused.
 import * as THREE from "three";
 import { updateLodPatch } from "../src/instance-lod.js";
 import { updateNature } from "../src/vegetation.js";
@@ -16,7 +16,19 @@ export function inspectVolcanicStones(game, divisions = 32) {
   return inspectTerrainStones(game, divisions);
 }
 
-function inspectTerrainStones(game, divisions) {
+export function inspectDesertStones(game, divisions = 32) {
+  if (game.level.biome !== "desert" || !game.rockGrounding)
+    throw Error("Load the desert chapter and its visual assets first");
+  return inspectTerrainStones(game, divisions);
+}
+
+export function inspectDesertGravel(game, divisions = 32) {
+  if (game.level.biome !== "desert" || !game.desertScatter)
+    throw Error("Load the desert chapter and its visual assets first");
+  return inspectTerrainStones(game, divisions, "gravel", 0.002);
+}
+
+function inspectTerrainStones(game, divisions, kind = "rock", burial = 0.007) {
   if (!Number.isInteger(divisions) || divisions < 8)
     throw Error("Use at least eight underside grid divisions");
   game.world.updateMatrixWorld(true);
@@ -69,7 +81,7 @@ function inspectTerrainStones(game, divisions) {
     return null;
   };
   try {
-    for (const patch of game.naturePatches.filter((p) => p.kind === "rock")) {
+    for (const patch of game.naturePatches.filter((p) => p.kind === kind)) {
       // Resolve all instances into the actual Float32 GPU transform buffer.
       updateLodPatch(patch, game.player.position, [Infinity], 0);
       const mesh = patch.tiers[0][0];
@@ -117,7 +129,7 @@ function inspectTerrainStones(game, divisions) {
             }
           }
         rocks.push(result);
-        if (!result.samples || result.highestGap > -0.007)
+        if (!result.samples || result.highestGap > -burial)
           failures.push(result);
       }
     }
@@ -128,6 +140,8 @@ function inspectTerrainStones(game, divisions) {
   return {
     stats: { ...game.rockGrounding },
     divisions,
+    kind,
+    burial,
     instances: rocks.length,
     rootProbes: rocks.reduce((n, r) => n + r.samples, 0),
     highestRootGap: Math.max(...rocks.map((r) => r.highestGap)),

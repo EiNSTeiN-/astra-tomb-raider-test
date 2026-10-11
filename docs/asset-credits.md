@@ -1163,3 +1163,14 @@ WebP conversion. The bank pair uses separate before/after development runtimes;
 the support and palm pairs reconstruct the earlier calculations inside the
 revised runtime, with fixed cameras. Corrected support can change feet and
 follow-camera elevation in the bank comparison.
+
+The [desert terrace and rock-footing refinement](desert-terrace-approaches.md)
+extends the original joined-court terrain method and the existing complete
+stone-footprint probes. It retains the six credited desert scans, their shapes,
+the original procedural rubble, desert textures, explorer, positioned ambience
+and quiet chapter/objective score. No external asset, dependency, recording or
+music is added. Its six public images are lossless game captures with unchanged
+decoded RGBA pixels and dimensions. Earlier captures restore the four terrain
+and stone-placement files from `76631e0`; later captures use the revised files.
+Each pair fixes horizontal placement, input, simulation time and camera, while
+terrain grading changes vertical support and the posed body.

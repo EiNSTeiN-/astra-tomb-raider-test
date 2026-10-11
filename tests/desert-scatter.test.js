@@ -95,22 +95,25 @@ function undersideGaps(shape, matrix, profile) {
   const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
     mesh = new THREE.Mesh(shape.geometry, material);
   mesh.matrixAutoUpdate = false;
-  mesh.matrix.copy(matrix);
+  mesh.matrix.fromArray(new Float32Array(matrix.elements));
   mesh.updateMatrixWorld(true);
   const box = shape.bounds.clone().applyMatrix4(matrix),
     ray = new THREE.Raycaster(),
     gaps = [];
   // A different world-aligned sampling grid from the local footprint used to seat it.
-  for (let iz = 1; iz < 6; iz++)
-    for (let ix = 1; ix < 6; ix++) {
-      const x = THREE.MathUtils.lerp(box.min.x, box.max.x, ix / 6),
-        z = THREE.MathUtils.lerp(box.min.z, box.max.z, iz / 6);
+  for (let iz = 1; iz < 32; iz++)
+    for (let ix = 1; ix < 32; ix++) {
+      const x = THREE.MathUtils.lerp(box.min.x, box.max.x, ix / 32),
+        z = THREE.MathUtils.lerp(box.min.z, box.max.z, iz / 32);
       ray.set(
         new THREE.Vector3(x, box.min.y - 10, z),
         new THREE.Vector3(0, 1, 0),
       );
       const hit = ray.intersectObject(mesh)[0];
-      if (hit) gaps.push(hit.point.y - profile.height(x, z));
+      if (hit)
+        gaps.push(
+          hit.point.y - (profile.surfaceHeight?.(x, z) ?? profile.height(x, z)),
+        );
     }
   material.dispose();
   return gaps;
@@ -162,7 +165,8 @@ test("desert delivery preserves all six scanned stone shapes and transforms with
   }
 });
 
-test("seating scanned undersides embeds rocks on gentle slopes and rejects an abrupt terrain step", () => {
+test("complete scanned undersides embed suitable stones on gentle slopes and reject an abrupt terrain step", () => {
+  let retained = 0;
   for (const shape of shapes)
     for (const slope of [0, 0.08, -0.08]) {
       const profile = { height: (x, z) => 3 + x * slope + z * 0.03 };
@@ -173,13 +177,18 @@ test("seating scanned undersides embeds rocks on gentle slopes and rejects an ab
         yaw: 0.7,
         squash: 0.85,
       });
-      assert(seated);
+      // A complete footprint can reject a shape whose narrow high rim would
+      // require burying its visible body. Retained placements must clear the
+      // independent world grid, including float32 instance rounding.
+      if (!seated) continue;
+      retained++;
       const gaps = undersideGaps(shape, seated.matrix, profile);
       assert(Math.min(...gaps) < 0);
-      assert(Math.max(...gaps) < 0.4);
+      assert(Math.max(...gaps) < -0.007);
       assert(seated.exposed > 0.1);
       assert(seated.matrix.elements.every(Number.isFinite));
     }
+  assert(retained >= 6);
   for (const shape of shapes)
     assert.equal(
       seatDesertStone({ height: (x) => (x > 0 ? 8 : 0) }, shape, {
@@ -198,6 +207,7 @@ test("desert outcrops are deterministic, supported and keep their full geometry 
     b = desertScatterLayout(game, shapes, chip);
   assert.deepEqual(a, b);
   assert.equal(a.stones.length, 230);
+  assert.equal(new Set(a.stones.map((s) => s.variant)).size, 6);
   assert(a.rubble.length > 800);
   let maximum = -Infinity;
   for (const stone of a.stones) {
@@ -215,7 +225,7 @@ test("desert outcrops are deterministic, supported and keep their full geometry 
     assert(Math.min(...gaps) <= 0.01);
     maximum = Math.max(maximum, ...gaps);
   }
-  assert(maximum < 0.5);
+  assert(maximum < -0.007);
   for (const stone of [...a.stones, ...a.rubble]) {
     const p = stone.position,
       r = stone.radius;
@@ -259,7 +269,10 @@ test("built scatter clears the actual courtyard piers, retains gameplay bounds a
     ...game.desertScatter.rubble,
   ];
   assert(game.desertScatter.stones.length >= 200);
-  assert(game.desertScatter.rubble.length > 600);
+  assert(
+    game.desertScatter.rubble.length > 600,
+    `Expected at least 601 supported fragments, got ${game.desertScatter.rubble.length}`,
+  );
   for (const s of placements)
     assert(
       game.obstacles.every(
