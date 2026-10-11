@@ -1174,3 +1174,14 @@ decoded RGBA pixels and dimensions. Earlier captures restore the four terrain
 and stone-placement files from `76631e0`; later captures use the revised files.
 Each pair fixes horizontal placement, input, simulation time and camera, while
 terrain grading changes vertical support and the posed body.
+
+The [desert foreground courtyards](desert-forecourts.md) add original masonry,
+shade-gallery roofs, hollow octagonal cisterns and bronze bowls in
+`src/desert-forecourts.js`, with authored annex plans in
+`src/desert-forecourt-layout.js`. They reuse the credited sandstone maps and
+original solar-panel carving generator. No external asset, dependency,
+recording or music is introduced. Their construction comparisons hide or show
+the new roots inside the revised runtime, with fixed explorer state and camera;
+the terrain and existing scenery remain present.
+The six public forecourt images are lossless WebP conversions of in-game
+captures, verified to preserve decoded RGBA pixels and dimensions.

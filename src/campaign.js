@@ -1,4 +1,5 @@
 import { addMonasteryGardenMap } from "./monastery-garden-layout.js";
+import { addDesertForecourtMap } from "./desert-forecourt-layout.js";
 import { addSunBridge } from "./sun-bridge-rules.js";
 import { addArcadeLock } from "./arcade-lock-rules.js";
 import { addDesertSurvey } from "./desert-survey-rules.js";
@@ -569,7 +570,7 @@ export function createMap(level) {
     level,
   );
   addMonasteryGardenMap(map, level);
-  return addDesertSurvey(
+  const finished = addDesertSurvey(
     addArcadeLock(
       addSunBridge(
         addEchoCauseway(
@@ -588,4 +589,5 @@ export function createMap(level) {
     ),
     level,
   );
+  return addDesertForecourtMap(finished, level);
 }

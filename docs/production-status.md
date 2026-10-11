@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Desert foreground courtyards](desert-forecourts.md) add twenty connected
+  areas beside the ten optical courts, with 78 wall segments, five galleries,
+  three hollow cisterns and four relief walls. Independent delivered-body
+  checks cover 160 centre poses and 160 normal pressure snapshots. Recorded
+  crouched knee contacts and empty cap-edge support are repaired, with failing
+  previous-behavior controls. Eight cistern wall-face camera bounds repair the
+  recorded hidden crouched view. All 40 local entrance/return legs pass, and
+  terrain, vegetation, solar-control access, distance audio, three graphics
+  settings and once-only graphics disposal checks pass. The 925.369 m continuous
+  route, 196 selected regressions, build and native keyboard/touch controls and
+  repeated whole-store reloads pass. Earned wall-cap departure and occupied
+  older-save recovery pass. All twenty native captures are reviewed and all
+  temporary processes and test ports are closed. A native gallery crouch view
+  still partly obscures the explorer behind a column. Broad sparse ground,
+  repeated main installations and the full eight-chapter audit remain open.
+
 - [Desert terrace approaches and complete rock footing](desert-terrace-approaches.md)
   repair the recorded steep descent and five crouched knee contacts by grading
   the approach joins while retaining 8,437 work-floor vertices, 59 feature

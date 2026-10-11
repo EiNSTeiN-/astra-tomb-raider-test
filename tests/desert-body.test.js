@@ -10,8 +10,13 @@ import { animateExplorer } from "../src/explorer.js";
 import { advanceCharacter } from "../src/character-motion.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { terrainTriangleReader } from "../scripts/inspect-desert-groundcover-browser.js";
+import { buildDesertForecourts } from "../src/desert-forecourts.js";
+import {
+  closedMeshReader,
+  inspectExplorerSolids,
+} from "../scripts/inspect-explorer-solids-browser.js";
 
-async function actorAndTerrain() {
+async function actorAndTerrain(t, forecourts = false) {
   const level = LEVELS[1],
     map = createMap(level),
     profile = createTerrainProfile(map, level),
@@ -71,6 +76,24 @@ async function actorAndTerrain() {
     },
   };
   game.groundHeight = Adventure.prototype.groundHeight.bind(game);
+  if (forecourts) {
+    t.mock.method(
+      THREE.TextureLoader.prototype,
+      "load",
+      () => new THREE.Texture(),
+    );
+    game.world = new THREE.Group();
+    game.world.add(terrain);
+    game.items = [];
+    game.fieldGates = [];
+    game.traversalCourses = [];
+    game.jumpY = 0;
+    game.velocityY = 0;
+    game.health = 100;
+    game.walkable = Adventure.prototype.walkable.bind(game);
+    game.canMove = Adventure.prototype.canMove.bind(game);
+    buildDesertForecourts(game);
+  }
   return {
     game,
     floor,
@@ -78,7 +101,7 @@ async function actorAndTerrain() {
       mixer.stopAllAction();
       mixer.uncacheRoot(scene);
       const resources = new Set();
-      for (const root of [scene, terrain])
+      for (const root of [scene, terrain, game.world].filter(Boolean))
         root.traverse((mesh) => {
           if (mesh.geometry) resources.add(mesh.geometry);
           if (mesh.skeleton) resources.add(mesh.skeleton);
@@ -86,8 +109,11 @@ async function actorAndTerrain() {
             ? mesh.material
             : mesh.material
               ? [mesh.material]
-              : [])
+              : []) {
             resources.add(m);
+            for (const value of Object.values(m))
+              if (value?.isTexture) resources.add(value);
+          }
         });
       for (const resource of resources) resource.dispose();
     },
@@ -129,6 +155,75 @@ test("all delivered clothing and boot vertices clear the five recorded desert cr
   }
 });
 
+test("the four recorded forecourt knee contacts clear delivered masonry after normal movement presses against it", async (t) => {
+  const s = await actorAndTerrain(t, true),
+    g = s.game,
+    read = closedMeshReader(
+      g.desertForecourts.flatMap((c) =>
+        c.root.children.filter(
+          (m) => m.isMesh && m.material.name !== "Forecourt relief faces",
+        ),
+      ),
+    );
+  let samples = 0;
+  try {
+    for (const [room, side] of [
+      [1, 1],
+      [2, -1],
+      [4, -1],
+      [9, -1],
+    ]) {
+      const court = g.desertForecourts.find((c) => c.room === room),
+        wall = court.walls.find(
+          (w) => w.height < 1.3 && Math.max(w.w, w.d) > 2,
+        ),
+        alongZ = wall.w > wall.d;
+      const start = [2.4, 1.8, 3]
+        .map((distance) => ({
+          x: wall.worldX + (alongZ ? 0 : side * distance),
+          z: wall.worldZ + (alongZ ? side * distance : 0),
+        }))
+        .find((p) => g.canMove(p.x, p.z, 0));
+      assert(start);
+      const yaw = Math.atan2(start.x - wall.worldX, start.z - wall.worldZ);
+      g.player.position.set(start.x, g.groundHeight(start.x, start.z), start.z);
+      g.jumpY = g.velocityY = 0;
+      g.grounded = true;
+      g.crouching = false;
+      g.rig.crouchBlend = 0;
+      g.rig.grounding = undefined;
+      g.rig.mixer.stopAllAction();
+      g.rig.actions.Idle.reset().play();
+      g.rig.state = "Idle";
+      g.avatar.rotation.set(0, yaw + Math.PI, 0);
+      for (let frame = 0; frame < 60; frame++)
+        animateExplorer(g, 1 / 60, false, false);
+      for (let frame = 0; frame < 90; frame++) {
+        if (frame === 60) g.crouching = true;
+        const before = g.player.position.clone(),
+          velocity = { x: -Math.sin(yaw) * 6, z: -Math.cos(yaw) * 6 };
+        advanceCharacter(g, velocity, 1 / 60);
+        g.elapsed += 1 / 60;
+        g.actualMoveSpeed =
+          Math.hypot(
+            g.player.position.x - before.x,
+            g.player.position.z - before.z,
+          ) * 60;
+        animateExplorer(g, 1 / 60, g.actualMoveSpeed > 0.1, false);
+        if (![74, 89].includes(frame)) continue;
+        const r = inspectExplorerSolids(g, read);
+        assert(r.samples > 48000);
+        assert.equal(r.invalid, 0);
+        assert.equal(r.embedded, 0, JSON.stringify(r.witnesses));
+        samples += r.samples;
+      }
+    }
+    assert(samples > 380000);
+  } finally {
+    s.dispose();
+  }
+});
+
 test("the recorded desert bank descent clears every delivered body vertex on every controller update", async () => {
   const s = await actorAndTerrain(),
     g = s.game;
@@ -163,6 +258,51 @@ test("the recorded desert bank descent clears every delivered body vertex on eve
     }
     assert(Math.abs(g.player.position.z - 87) < 1e-6);
     assert(samples > 5700000);
+  } finally {
+    s.dispose();
+  }
+});
+
+test("the two recorded empty cap-edge positions fall to soil without trapping or embedding the delivered body", async (t) => {
+  const s = await actorAndTerrain(t, true),
+    g = s.game,
+    read = closedMeshReader(
+      g.desertForecourts.flatMap((c) =>
+        c.root.children.filter(
+          (m) => m.isMesh && m.material.name !== "Forecourt relief faces",
+        ),
+      ),
+    );
+  try {
+    for (const [x, y, z] of [
+      [357.5, -0.08849723190069195, 245.2],
+      [62.5, 5.455498982965946, 248.1],
+    ]) {
+      g.player.position.set(x, y, z);
+      g.avatar.rotation.set(0, Math.PI, 0);
+      g.rig.grounding = undefined;
+      g.rig.crouchBlend = 0;
+      g.crouching = false;
+      g.grounded = true;
+      g.velocityY = 0;
+      g.coyote = g.jumpBuffer = 0;
+      for (let frame = 0; frame < 120; frame++) {
+        advanceCharacter(g, { x: 0, z: 0 }, 1 / 60);
+        animateExplorer(g, 1 / 60, false, false);
+        assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+        if (frame % 10 === 0 || frame === 119) {
+          const body = inspectExplorerSolids(g, read);
+          assert.equal(body.embedded, 0, JSON.stringify(body.witnesses));
+          assert.equal(body.invalid, 0);
+        }
+      }
+      assert(
+        g.grounded && g.jumpY === 0,
+        "the root cannot stand on an empty support margin",
+      );
+      const terrain = inspectExplorerTerrain(g, s.floor);
+      assert.equal(terrain.embedded, 0, JSON.stringify(terrain.witnesses));
+    }
   } finally {
     s.dispose();
   }

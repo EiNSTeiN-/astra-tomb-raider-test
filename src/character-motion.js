@@ -91,16 +91,24 @@ export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
 // stops upward motion. Neither contact creates a floor on a steep side.
 function clearStationVerticalMotion(game, before) {
   const p = game.player.position;
-  if (
-    !game.obstacles.some(
-      (o) =>
-        o.fieldStation &&
-        stationBlocked(o, p.x, p.y, p.z) &&
-        !stationBlocked(o, p.x, before, p.z),
-    )
-  )
-    return;
-  for (let radius = 0.02; radius <= 0.2 + 1e-6; radius += 0.02) {
+  const contacts = game.obstacles.filter(
+    (o) =>
+      o.fieldStation &&
+      stationBlocked(o, p.x, p.y, p.z) &&
+      !stationBlocked(o, p.x, before, p.z),
+  );
+  if (!contacts.length) return;
+  // An exact-footprint cap releases support at its visible edge. Clear the
+  // same body margin used by its side collision before descending beside it.
+  const limit = Math.max(
+    0.2,
+    ...contacts.map((o) =>
+      o.supportRadius === 0 && p.y < before && before >= o.bounds.max.y - 0.015
+        ? (o.bodyPadding ?? 0.4) + 0.02
+        : 0.2,
+    ),
+  );
+  for (let radius = 0.02; radius <= limit + 1e-6; radius += 0.02) {
     for (let i = 0; i < 16; i++) {
       const angle = (i * Math.PI) / 8,
         x = p.x + Math.cos(angle) * radius,

@@ -74,6 +74,7 @@ export function stationMeshSolid(game, feature, mesh, options = {}) {
     h: bounds.max.y - game.groundHeight(x, z),
     fieldStation: feature.id,
     bodyPadding: options.bodyPadding ?? 0.4,
+    supportRadius: options.supportRadius,
     supportable: options.support !== false,
     bounds,
     triangles,
@@ -111,7 +112,9 @@ export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
     // Keep a descending body on the cap until its collision disk clears the
     // edge. A smaller support disk would lower it into the bevel and then
     // reject the outward step. Point probes still query the exact surface.
-    const footprint = radius ? Math.max(radius, solid.bodyPadding ?? 0) : 0,
+    const footprint = radius
+        ? (solid.supportRadius ?? Math.max(radius, solid.bodyPadding ?? 0))
+        : 0,
       b = solid.bounds;
     if (
       x + footprint < b.min.x ||

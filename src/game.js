@@ -1,5 +1,6 @@
 import { buildStationYards } from "./station-yards.js";
 import { buildMonasteryGardens } from "./monastery-gardens.js";
+import { buildDesertForecourts } from "./desert-forecourts.js";
 import { buildCourtCover } from "./court-cover.js";
 import { buildCourtDais } from "./court-dais.js";
 import { mantlePoint, mantleEdge } from "./mantle-motion.js";
@@ -1036,6 +1037,7 @@ export class Adventure {
     buildDiscoveryProps(this);
     buildDiscoverySettings(this);
     buildMonasteryGardens(this);
+    buildDesertForecourts(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();

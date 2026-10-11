@@ -132,3 +132,54 @@ test("a jump clears the edge of an overhead field cap, while a broad ceiling sto
     }
   }
 });
+
+test("an exact-footprint narrow cap releases empty edge support and clears its full side margin while falling", () => {
+  const geometry = new THREE.BoxGeometry(8.67, 0.2, 0.79),
+    material = new THREE.MeshBasicMaterial(),
+    mesh = new THREE.Mesh(geometry, material),
+    game = {
+      obstacles: [],
+      groundHeight: () => 0,
+      player: new THREE.Group(),
+      grounded: true,
+      velocityY: 0,
+      audio: { tone() {} },
+    };
+  mesh.position.set(20, 1.3, 30);
+  const solid = stationMeshSolid(game, { id: "narrow-cap" }, mesh, {
+    bodyPadding: 0.72,
+    supportRadius: 0,
+  });
+  game.canMove = (x, z, y) =>
+    !game.obstacles.some((o) => stationBlocked(o, x, y, z));
+  try {
+    assert.equal(stationSupport(solid, 20, 30, 1.4, 0.55), solid.bounds.max.y);
+    assert.equal(stationSupport(solid, 20, 29.4, 1.4, 0.55), null);
+    const ray = new THREE.Raycaster(
+      new THREE.Vector3(20, 3, 29.4),
+      new THREE.Vector3(0, -1, 0),
+    );
+    assert.equal(ray.intersectObject(mesh).length, 0);
+    for (const edge of [29.6, 29.4, 30.4, 30.6]) {
+      game.player.position.set(20, solid.bounds.max.y, edge);
+      game.grounded = true;
+      game.velocityY = 0;
+      game.coyote = game.jumpBuffer = 0;
+      for (let frame = 0; frame < 120; frame++) {
+        advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+        const p = game.player.position;
+        assert(
+          game.canMove(p.x, p.z, p.y),
+          "falling edge clears the actual side collider",
+        );
+      }
+      assert(
+        game.grounded && game.jumpY === 0,
+        "the unsupported edge returns to the ground",
+      );
+    }
+  } finally {
+    geometry.dispose();
+    material.dispose();
+  }
+});

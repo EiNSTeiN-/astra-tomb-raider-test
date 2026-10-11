@@ -86,8 +86,8 @@ test("desert banks ease out of route floors before rising into their shoulders",
     }
   slopes.sort((a, b) => a - b);
   assert(
-    slopes.length > 7500,
-    "Sample the full network of desert route shoulders.",
+    slopes.length > 7400,
+    "Sample the full current contour (7,448 nodes after forecourt annexes).",
   );
   // b02fd56 measured 38.80 / 52.90 degrees here, with first-interval rises
   // reaching 4.50 m. Check the actual sampled terrain, including terrace and
