@@ -768,7 +768,9 @@ export class Adventure {
   }
   groundHeight(x, z) {
     if (this.terrainProfile) {
-      let ground = this.terrainProfile.height(x, z);
+      const height =
+        this.terrainProfile.surfaceHeight || this.terrainProfile.height;
+      let ground = height(x, z);
       // Restored slag is a solid crust above the excavated bed. Standing and
       // resuming here must place the explorer on that surface, not ankle-deep
       // inside it. Hot pools still use the bed for their damage intersection.

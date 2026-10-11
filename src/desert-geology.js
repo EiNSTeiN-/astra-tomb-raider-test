@@ -1,3 +1,5 @@
+import { createTerrainSurfaceSampler } from "./terrain-surface.js";
+
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -64,10 +66,32 @@ function sample(data, width, step, x, z) {
       v
   );
 }
+
+function relaxShoulders(heights, width, mask, passes) {
+  for (let pass = 0; pass < passes; pass++) {
+    const previous = heights.slice();
+    for (let iz = 1; iz < width - 1; iz++)
+      for (let ix = 1; ix < width - 1; ix++) {
+        const index = iz * width + ix,
+          blend = mask[index] * 0.85;
+        if (!blend) continue;
+        let sum = 0;
+        for (let dz = -1; dz <= 1; dz++)
+          for (let dx = -1; dx <= 1; dx++)
+            sum +=
+              previous[index + dz * width + dx] *
+              (dx === 0 ? 2 : 1) *
+              (dz === 0 ? 2 : 1);
+        heights[index] += (sum / 16 - previous[index]) * blend;
+      }
+  }
+}
+
 export function refineDesertTerrain(profile, map, seed) {
   const { width, step } = profile,
     heights = profile.heights.slice(),
-    exposure = new Float32Array(width * width);
+    exposure = new Float32Array(width * width),
+    shoulders = new Float32Array(width * width);
   for (let iz = 0; iz < width; iz++)
     for (let ix = 0; ix < width; ix++) {
       const x = ix * step,
@@ -77,14 +101,21 @@ export function refineDesertTerrain(profile, map, seed) {
       // More than one complete sample cell beyond every walkable boundary stays
       // untouched, so bilinear interpolation cannot alter a path or foundation.
       let mask = smooth(2 * step, 9, distance);
+      let waterMask = 1;
       for (const water of profile.waters) {
         const r =
           Math.hypot(
             water.bedWidth ?? water.width,
             water.bedLength ?? water.length,
           ) / 2;
-        mask *= smooth(r + 5, r + 12, Math.hypot(x - water.x, z - water.z));
+        waterMask *= smooth(
+          r + 5,
+          r + 12,
+          Math.hypot(x - water.x, z - water.z),
+        );
       }
+      mask *= waterMask;
+      shoulders[index] = smooth(0, 7, distance) * waterMask;
       if (!mask) continue;
       const broad = desertNoise(x * 0.036, z * 0.036, seed),
         ribs = desertNoise(x * 0.2 + z * 0.035, z * 0.095, seed + 61);
@@ -99,24 +130,12 @@ export function refineDesertTerrain(profile, map, seed) {
   // meet in sharp, stair-stepped crests. Separate source/destination samples
   // make each pass independent of iteration direction; the protected margin
   // and water mask also apply to this smoothing.
-  for (let pass = 0; pass < 3; pass++) {
-    const previous = heights.slice();
-    for (let iz = 1; iz < width - 1; iz++)
-      for (let ix = 1; ix < width - 1; ix++) {
-        const index = iz * width + ix,
-          blend = exposure[index] * 0.85;
-        if (!blend) continue;
-        let sum = 0;
-        for (let dz = -1; dz <= 1; dz++)
-          for (let dx = -1; dx <= 1; dx++)
-            sum +=
-              previous[index + dz * width + dx] *
-              (dx === 0 ? 2 : 1) *
-              (dz === 0 ? 2 : 1);
-        heights[index] += (sum / 16 - previous[index]) * blend;
-      }
-  }
-  return {
+  relaxShoulders(heights, width, exposure, 3);
+  // Adjacent trails also leave narrow banks inside the erosion-free collar.
+  // Round those meeting crests while pinning every walking vertex and keeping
+  // the reservoir mask. Both drawing and support read the resulting field.
+  relaxShoulders(heights, width, shoulders, 6);
+  const terrain = {
     ...profile,
     heights,
     height: (x, z) => sample(heights, width, step, x, z),
@@ -126,4 +145,6 @@ export function refineDesertTerrain(profile, map, seed) {
       rock: (x, z) => sample(exposure, width, step, x, z),
     },
   };
+  terrain.surfaceHeight = createTerrainSurfaceSampler(terrain);
+  return terrain;
 }

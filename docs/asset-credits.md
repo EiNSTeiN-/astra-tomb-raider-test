@@ -1153,3 +1153,13 @@ horizon geometry and hide the new plants inside the current runtime, retaining
 the recorded feet, look and camera. They are distinct from native screenshots
 of the old built application. All six public images are lossless WebP conversions
 of actual game captures, with identical decoded RGBA pixels and dimensions.
+
+The [desert bank and ground-support refinement](desert-ground-support.md)
+extends original terrain and palm-seating code, retaining the credited desert
+textures, explorer, positioned ambience and quiet chapter/objective music.
+No external artwork, recordings, music or dependencies are introduced. Its six
+public images preserve decoded RGBA pixels and dimensions through lossless
+WebP conversion. The bank pair uses separate before/after development runtimes;
+the support and palm pairs reconstruct the earlier calculations inside the
+revised runtime, with fixed cameras. Corrected support can change feet and
+follow-camera elevation in the bank comparison.

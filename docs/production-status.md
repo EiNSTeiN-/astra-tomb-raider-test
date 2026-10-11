@@ -19,6 +19,28 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Desert banks and ground support](desert-ground-support.md) round the sampled
+  sharp meeting crests without adding terrain triangles. Standing height now
+  follows the delivered float32 triangle planes; all 52,325 independent queries
+  agree within rounding. Palm seating clears 2,030 root vertices and 30,450 edge
+  probes across all tiers; 4,598 courtyard footing rays and the solar footing,
+  aperture and working-position checks pass. Updated vegetation has 7,110 plants
+  and 1,134,396 buried roots, with a raised-plant negative control. All 24 paired
+  bank views, six contact views, three quality views and 24 continuous route
+  views are reviewed. The four-leg route arrives over 930.352 m / 14,102 normal
+  controller updates; support and camera elevations intentionally differ from
+  the preceding milestone. All 106 selected regressions and the production build
+  pass. Native keyboard/High and CDP touch/Low solar and older-ground-save cases
+  pass movement, crouch, look, jump, map and two complete-store reloads per case;
+  console-cap departure and occupied-save recovery also pass. All 36 final native
+  views are reviewed. All 2,112 tracked landscape graphics resources dispose
+  once on chapter change. Temporary browsers, workers and servers are stopped;
+  the host audit finds no live verification processes or listening test ports.
+  Public comparisons distinguish separate old/new
+  terrain runtimes from reconstructed earlier support and palm seating.
+  Wider body contact, sparse spaces, repeated structures, the eight-chapter
+  visual audit, listening and device performance remain open.
+
 - [Desert trail vegetation and distant range](desert-trail-landscape.md) add
   6,954 dry grasses, seed stalks and rosettes beside paths, with wind and three
   distance-selected detail tiers. All 1,110,384 roots pass independent delivered

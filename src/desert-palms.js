@@ -104,6 +104,48 @@ export function palmWind(material, time) {
   material.customProgramCacheKey = () => "vesper-palm-wind-2";
 }
 
+// A root edge crosses piecewise planar terrain. Its lowest clearance can lie
+// between vertices, so include grid and triangle-diagonal crossings as well.
+export function palmSeatHeight(palm, rootRings, height, step = 1.75) {
+  const matrix = new THREE.Matrix4().compose(
+    new THREE.Vector3(palm.x, 0, palm.z),
+    new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      palm.angle,
+    ),
+    new THREE.Vector3(palm.scale, palm.scale, palm.scale),
+  );
+  let bottom = palm.y;
+  for (const ring of rootRings) {
+    const points = ring.map((p) => p.clone().applyMatrix4(matrix));
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i],
+        b = points[(i + 1) % points.length],
+        times = [0, 1];
+      for (const [start, end] of [
+        [a.x, b.x],
+        [a.z, b.z],
+        [a.x + a.z, b.x + b.z],
+      ]) {
+        if (Math.abs(end - start) < 1e-12) continue;
+        const low = Math.floor(Math.min(start, end) / step),
+          high = Math.ceil(Math.max(start, end) / step);
+        for (let grid = low; grid <= high; grid++) {
+          const t = (grid * step - start) / (end - start);
+          if (t > 0 && t < 1) times.push(t);
+        }
+      }
+      for (const t of times) {
+        const x = a.x + (b.x - a.x) * t,
+          z = a.z + (b.z - a.z) * t,
+          y = a.y + (b.y - a.y) * t;
+        bottom = Math.min(bottom, height(x, z) - y - 0.04);
+      }
+    }
+  }
+  return bottom;
+}
+
 export function buildDesertPalms(game) {
   game.palmPatches = [];
   game.palmLayout = [];
@@ -135,9 +177,24 @@ export function buildDesertPalms(game) {
       ];
     });
     const trees = layout.filter((p) => p.variant === variant),
+      rootRings = tiers.map(([{ geometry }]) => {
+        const p = geometry.attributes.position,
+          uv = geometry.attributes.uv,
+          roots = [];
+        for (let i = 0; i < p.count; i++)
+          if (uv.getY(i) === 0)
+            roots.push(new THREE.Vector3().fromBufferAttribute(p, i));
+        return roots;
+      }),
       matrices = [],
       positions = [];
     for (const palm of trees) {
+      palm.y = palmSeatHeight(
+        palm,
+        rootRings,
+        (x, z) => game.groundHeight(x, z),
+        game.terrainProfile?.step,
+      );
       dummy.position.set(palm.x, palm.y, palm.z);
       dummy.rotation.set(0, palm.angle, 0);
       dummy.scale.setScalar(palm.scale);

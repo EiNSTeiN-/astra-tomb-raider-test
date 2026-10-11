@@ -16,7 +16,7 @@ import {
   desertHorizonHeight,
 } from "../src/desert-horizon.js";
 
-test("desert floors outside the survey approaches and reshaped pools preserve published standing heights", () => {
+test("desert fields outside the survey approaches and reshaped pools preserve published bilinear heights", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),
     floors = [];
@@ -94,7 +94,7 @@ test("desert banks ease out of route floors before rising into their shoulders",
   assert(toes.at(-1) < 1.5);
 });
 
-test("desert erosion retains every walking-cell boundary, feature foundation, reservoir and climbing pad", () => {
+test("desert shaping retains every walking-cell boundary, feature foundation, reservoir and climbing pad", () => {
   const map = createMap(LEVELS[1]),
     profile = createTerrainProfile(map, LEVELS[1]),
     old = profile.desert.originalHeight;
@@ -131,11 +131,49 @@ test("desert erosion retains every walking-cell boundary, feature foundation, re
       if (delta > 0.001) {
         changed++;
         maximum = Math.max(maximum, delta);
-        assert(desertRouteDistance(map, wx, wz) > 3.5);
+        assert(desertRouteDistance(map, wx, wz) > 0);
       }
     }
   assert(changed > 2000);
   assert(maximum > 1 && maximum < 6);
+});
+
+test("narrow desert banks retain rounded meeting crests without steepening their route toes", () => {
+  const map = createMap(LEVELS[1]),
+    profile = createTerrainProfile(map, LEVELS[1]),
+    { width, step, heights } = profile,
+    turns = [];
+  for (let z = 1; z < width - 1; z++)
+    for (let x = 1; x < width - 1; x++) {
+      const px = x * step,
+        pz = z * step,
+        d = desertRouteDistance(map, px, pz);
+      if (d <= 0 || d >= 7) continue;
+      if (
+        profile.waters.some(
+          (w) =>
+            Math.hypot(px - w.x, pz - w.z) <=
+            Math.hypot(w.bedWidth ?? w.width, w.bedLength ?? w.length) / 2 + 12,
+        )
+      )
+        continue;
+      const i = z * width + x,
+        ax = Math.atan((heights[i + 1] - heights[i]) / step),
+        bx = Math.atan((heights[i] - heights[i - 1]) / step),
+        az = Math.atan((heights[i + width] - heights[i]) / step),
+        bz = Math.atan((heights[i] - heights[i - width]) / step);
+      turns.push(
+        (Math.max(Math.abs(ax - bx), Math.abs(az - bz)) * 180) / Math.PI,
+      );
+    }
+  turns.sort((a, b) => a - b);
+  assert(turns.length > 10000);
+  // The published 1c4f9e9 crests turn sharply between adjacent delivered
+  // intervals. Measure the final field, rather than the smoothing mask, so
+  // narrow ridge meetings cannot be excluded from the check.
+  assert(turns[Math.floor(turns.length * 0.9)] < 13);
+  assert(turns[Math.floor(turns.length * 0.99)] < 22);
+  assert(turns.at(-1) < 35);
 });
 test("desert strata are deterministic, continuous, bounded and isolated from the seven other biomes", () => {
   const map = createMap(LEVELS[1]),
