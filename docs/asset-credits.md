@@ -1131,3 +1131,14 @@ asset or dependency is added. Its four documentation images are actual game
 captures converted losslessly to WebP, with identical decoded RGBA pixels and
 dimensions. The comparison uses normal-controller walks on separate runtimes;
 the revised support changes controller elevation and wind response.
+
+The [solar instrument construction pass](solar-instruments.md) adds original
+turned footings and castings, chamfered reflector shells, seated solar reliefs,
+number brackets, guided shutters and sun-seal consoles in
+`src/solar-instrument-art.js`. It reuses the credited sandstone colour, normal
+and roughness maps, original weathered stone/bronze shaders and explorer,
+positioned bearing and receiver synthesis, and quiet desert/objective music.
+No external asset, recording, music or dependency is added. Its six public
+images are actual game captures converted losslessly to WebP, with identical
+decoded RGBA pixels and dimensions. The two comparison pairs retain exactly
+their recorded feet, chosen look and camera coordinates on separate runtimes.

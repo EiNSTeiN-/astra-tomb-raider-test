@@ -19,6 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Desert solar instruments](solar-instruments.md) rebuild 68 mirror supports,
+  18 optical posts, nine guided shutters and nine physical receiver consoles.
+  Loaded delivery buffers pass 6,935 footing rays, 6,800 aperture rays and
+  693 working-position probes, repairing measured floating bases and shafts
+  across the glass. Short castings get explicit rounded camera bounds.
+  All 77 controls and nine receiver activations pass an assisted 1.578-km
+  normal-controller survey, split once to allow existing water traversal.
+  Nine console jump/return trials and the separate continuous 930-m desert
+  circuit pass. All three graphics settings, 74 selected regressions, formatting
+  and the build pass. Production keyboard/High and CDP touch/Low controls, two
+  whole-store reloads per case, observed cap replay/departure and occupied old
+  save recovery pass; existing missing survey-bearing initialization is checked
+  separately. All 70 final architecture, quality, activation, route and native
+  views are reviewed. All 544 tracked delivered solar graphics resources dispose
+  once on chapter change. Receiver hums originate on the actual consoles.
+  Six lossless public images preserve source RGBA bytes, with exact recorded
+  feet/look/camera coordinates in the two comparison pairs. Temporary browsers,
+  workers and servers are stopped; the host check finds no live verification
+  processes or listening test ports. Wider landscape repetition, sparse ground,
+  raised-body contact, listening and device review remain open.
+
 - [Joined monastery enclosures and galleries](monastery-enclosures.md) preserve
   adjacent walls, widen openings and side paths, and add four timber galleries.
   The final snow scene has 75 wall segments and seven recessed reliquaries.

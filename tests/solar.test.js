@@ -369,6 +369,65 @@ test("moving reflectors interrupt outgoing light until they settle and update ca
   );
 });
 
+test("receiver consoles are solid, with clear operator positions, physical sound origins and bounded activation reach", (t) => {
+  const { game: g } = fixture(t);
+  let consoles = 0;
+  for (const site of g.solarSites) {
+    const f = site.receiver,
+      position = f.group.getWorldPosition(new THREE.Vector3()),
+      source = g.solarSources.find(
+        (s) => s.id === `solar-receiver-${site.stage}`,
+      );
+    assert(
+      !g.canMove(position.x, position.z, 0),
+      "cannot stand inside the visible console",
+    );
+    assert(
+      g.canMove(position.x, position.z, 1.4),
+      "finite console leaves the space above it open",
+    );
+    for (const dx of [-0.18, 0, 0.18])
+      for (const dz of [-0.18, 0, 0.18])
+        assert(g.canMove(f.x * 7 + dx, f.z * 7 + dz, 0));
+    assert(Math.hypot(f.x * 7 - position.x, f.z * 7 - position.z) > 1);
+    assert(Math.abs(source.x - position.x) < 1e-8);
+    assert(Math.abs(source.z - position.z) < 1e-8);
+    assert(Math.abs(source.y - position.y - 0.901) < 1e-8);
+    assert.equal(
+      site.foundations.filter((p) => p.kind === "console").length,
+      1,
+    );
+    consoles++;
+  }
+  assert.equal(consoles, 9);
+  ready(g, 4);
+  const site = g.solarSites[4],
+    f = site.receiver,
+    position = f.group.getWorldPosition(new THREE.Vector3());
+  g.progress.solar[4] = { values: [...site.state.target], moves: 10 };
+  updateSolarChambers(g, 100);
+  assert(site.aligned);
+  g.nearest = f;
+  g.player.position.set(position.x, position.y, position.z - 3.35);
+  assert(
+    Math.hypot(g.player.position.x - f.x * 7, g.player.position.z - f.z * 7) <
+      2.25,
+  );
+  solarInteract(g);
+  assert.equal(
+    g.progress.stage,
+    4,
+    "operator marker cannot extend reach beyond the actual console",
+  );
+  stand(g, f);
+  solarInteract(g);
+  assert.equal(
+    g.progress.stage,
+    5,
+    "ordinary operator position activates the lit receiver",
+  );
+});
+
 test("missed sunlight stops at a thin wall or rising terrain and cannot illuminate a receiver through cover", () => {
   const a = new THREE.Vector3(0, 2, 0),
     b = new THREE.Vector3(10, 2, 0);

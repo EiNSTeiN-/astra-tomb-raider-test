@@ -4,6 +4,15 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The desert's [solar instrument rebuild](docs/solar-instruments.md) gives all
+68 mirrors fitted sandstone and bronze bearings, unobstructed reflective faces,
+closed chamfered cases and mounted labels. Source and receiver posts meet their
+optical housings, sliding shutters have guide frames, and the nine receiver
+consoles have physical collision and clear operating positions beside them.
+Receiver hums originate at the consoles. Loaded terrain and mesh checks verify
+all 95 foundations, the glass across its turning range and all 77 controls;
+the chapter's wider landscape and repeated installations remain under review.
+
 The [snow garden enclosures and timber galleries](docs/monastery-enclosures.md)
 create wider joined foregrounds beside the monastery courts, with 75 wall
 segments, seven recessed reliquaries and four roofed galleries. Openings and

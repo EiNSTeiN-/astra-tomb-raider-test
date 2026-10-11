@@ -6,6 +6,16 @@ import { counterweightsReady } from "./counterweights.js";
 import { mergeArchitecture } from "./visuals.js";
 import { boxEntry } from "./camera-collision.js";
 import { addSolarWheelMount } from "./solar-mounts.js";
+import {
+  solarInstrumentMaterials,
+  addSolarPedestal,
+  addSolarReflectorFrame,
+  addSolarLabelMount,
+  addSolarShutter,
+  addSolarConsole,
+  addSolarSunSeal,
+} from "./solar-instrument-art.js";
+import { stationMeshSolid } from "./field-station-solids.js";
 
 export function solarReady(game, site) {
   if (!site) return false;
@@ -41,7 +51,7 @@ function numberPlaque(index, material) {
     uv = geometry.attributes.uv;
   for (let i = 0; i < uv.count; i++) uv.setX(i, (uv.getX(i) + index) / 10);
   const plaque = new THREE.Mesh(geometry, material);
-  plaque.position.set(1.03, 0.73, 0);
+  plaque.position.set(0.61, 0.68, 0);
   plaque.rotation.y = Math.PI / 2;
   return plaque;
 }
@@ -51,11 +61,8 @@ export function buildSolarChambers(game) {
   game.solarSources = [];
   if (game.level.biome !== "desert") return false;
   const numbers = numberMaterial();
-  const bronze = new THREE.MeshStandardMaterial({
-    color: 0xc4a35c,
-    metalness: 0.78,
-    roughness: 0.32,
-  });
+  const materials = solarInstrumentMaterials(game),
+    bronze = materials.bronze;
   const mirrorMaterial = new THREE.MeshPhysicalMaterial({
     name: "Silvered solar reflectors",
     color: 0xdbe4db,
@@ -104,6 +111,7 @@ export function buildSolarChambers(game) {
       segments: [],
       signature: "",
       sourceIds: [],
+      foundations: [],
     };
     game.solarSites.push(site);
     const add = (geo, mat, x, y, z, parent = root) => {
@@ -157,18 +165,8 @@ export function buildSolarChambers(game) {
         group = new THREE.Group();
       group.position.set(p.x, ground, p.z);
       root.add(group);
-      game.cylinder(0.67, 0.83, 0.45, game.darkMat, 0, 0.225, 0, group, 20);
-      game.cylinder(0.46, 0.63, 0.14, bronze, 0, 0.53, 0, group, 24);
-      game.cylinder(
-        0.18,
-        0.28,
-        beamY - ground - 0.55,
-        bronze,
-        0,
-        (beamY - ground + 0.55) / 2,
-        0,
-        group,
-        16,
+      site.foundations.push(
+        addSolarPedestal(game, group, beamY - ground, materials, "mirror"),
       );
       const pivot = new THREE.Group();
       pivot.userData.cameraDynamic = true;
@@ -185,12 +183,7 @@ export function buildSolarChambers(game) {
         pivot,
       );
       face.receiveShadow = false;
-      for (const side of [-1, 1]) {
-        game.box(0.12, 1.85, 0.16, bronze, side * 0.97, 0, 0, pivot);
-        game.box(2.05, 0.12, 0.16, bronze, 0, side * 0.88, 0, pivot);
-      }
-      // A separate support captures the thin reflective face for camera collision.
-      game.box(2.05, 1.82, 0.14, bronze, 0, 0, -0.09, pivot);
+      addSolarReflectorFrame(game, pivot, bronze, stage);
       const wheel = add(
         new THREE.TorusGeometry(0.34, 0.045, 8, 24),
         bronze,
@@ -207,6 +200,7 @@ export function buildSolarChambers(game) {
         bar.rotation.z = (spoke * Math.PI) / 4;
       }
       mergeArchitecture(wheel);
+      addSolarLabelMount(game, group, bronze);
       group.add(numberPlaque(index, numbers));
       const f = featureAt(
         group,
@@ -245,17 +239,8 @@ export function buildSolarChambers(game) {
         group = new THREE.Group();
       group.position.set(p.x, ground, p.z);
       root.add(group);
-      game.cylinder(0.75, 1.02, 0.5, game.darkMat, 0, 0.25, 0, group, 24);
-      game.cylinder(
-        0.36,
-        0.57,
-        beamY - ground - 0.4,
-        game.stoneMat,
-        0,
-        (beamY - ground + 0.4) / 2,
-        0,
-        group,
-        24,
+      site.foundations.push(
+        addSolarPedestal(game, group, beamY - ground, materials, kind),
       );
       const lensMaterial = new THREE.MeshStandardMaterial({
         color: kind === "receiver" ? 0x608b78 : 0xcbd4b0,
@@ -272,7 +257,10 @@ export function buildSolarChambers(game) {
         0,
         group,
       );
-      lens.scale.x = 0.23;
+      // Bake the thin lens into its geometry so camera clearance remains in
+      // world metres instead of inflating the margin through a scaled axis.
+      lens.geometry.scale(0.23, 1, 1);
+      game.cameraSurfaces?.capture(lens, { small: true, cylinderAxis: "x" });
       const ring = add(
         new THREE.TorusGeometry(0.66, 0.1, 12, 32),
         bronze,
@@ -282,6 +270,9 @@ export function buildSolarChambers(game) {
         group,
       );
       ring.rotation.y = Math.PI / 2;
+      // The lens and bezel form a filled circular assembly. Rounded bounds
+      // keep its empty rectangular corners clear while protecting the body view.
+      game.cameraSurfaces?.capture(ring, { small: true, cylinderAxis: "z" });
       for (let i = 0; i < 12; i++) {
         const a = (i * Math.PI) / 6;
         add(
@@ -296,18 +287,7 @@ export function buildSolarChambers(game) {
       obstacle(p, 1.15, 1.15);
       if (kind === "source") {
         site.sourceLens = lensMaterial;
-        const shade = game.box(
-          0.2,
-          1.5,
-          1.5,
-          game.darkMat,
-          -0.32,
-          beamY - ground,
-          0,
-          group,
-        );
-        shade.userData.animated = true;
-        site.shutter = shade;
+        site.shutter = addSolarShutter(game, group, beamY - ground, materials);
         const sun = (game.sunOffset?.clone() || new THREE.Vector3(-70, 55, 45))
           .normalize()
           .multiplyScalar(9);
@@ -329,30 +309,27 @@ export function buildSolarChambers(game) {
         site.receiverLens = lensMaterial;
         // The receiver's control sits on its east side, clear of the pedestal.
         const control = new THREE.Group();
-        control.position.set(p.x + 1.55, ground, p.z);
+        control.position.set(p.x + 1.55, floor({ x: p.x + 1.55, z: p.z }), p.z);
         root.add(control);
-        game.cylinder(0.28, 0.38, 0.8, bronze, 0, 0.4, 0, control, 16);
-        const sun = add(
-          new THREE.OctahedronGeometry(0.22),
-          lensMaterial,
-          0,
-          1.05,
-          0,
-          control,
-        );
+        const console = addSolarConsole(game, control, materials),
+          sun = addSolarSunSeal(control, lensMaterial);
+        site.foundations.push(console.footing);
         site.receiver = featureAt(
           control,
-          { x: p.x + 1.55, z: p.z },
+          // Stand beside the solid console and clear of the final relic stand.
+          { x: p.x + 1.55, z: p.z - 1.35 },
           "Activate the solar receiver",
           "receiver",
         );
         site.receiverCore = sun;
+        for (const mesh of console.meshes)
+          stationMeshSolid(game, site.receiver, mesh, { bodyPadding: 0.55 });
         game.solarSources.push({
           id: `solar-receiver-${stage}`,
           kind: "crystal",
-          x: site.receiver.x * 7,
-          y: root.position.y + ground + 1.2,
-          z: site.receiver.z * 7,
+          x: root.position.x + control.position.x,
+          y: root.position.y + control.position.y + 0.901,
+          z: root.position.z + control.position.z,
           gain: 0.12,
           near: 2,
           range: 18,
@@ -573,12 +550,20 @@ export function solarInteract(game) {
   const site = game.solarSites?.find((s) => s.stage === f.stage);
   if (!site || site.stage !== game.progress.stage || !solarReady(game, site))
     return true;
+  const working =
+    f.kind === "receiver"
+      ? f.group.getWorldPosition(new THREE.Vector3())
+      : new THREE.Vector3(
+          f.x * 7,
+          game.groundHeight(f.x * 7, f.z * 7),
+          f.z * 7,
+        );
   if (
     Math.hypot(
-      game.player.position.x - f.x * 7,
-      game.player.position.z - f.z * 7,
+      game.player.position.x - working.x,
+      game.player.position.z - working.z,
     ) > 2.25 ||
-    Math.abs(game.player.position.y - game.groundHeight(f.x * 7, f.z * 7)) > 1.5
+    Math.abs(game.player.position.y - working.y) > 1.5
   )
     return true;
   if (f.kind === "mirror") {
