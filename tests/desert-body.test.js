@@ -161,7 +161,9 @@ test("the delivered explorer stays on six crystal triangle slopes without crouch
     // penetration on a correct ground root; keep ankle IK and every body mesh.
     g.rig.terrainCrouch = { model: g.rig.model, probes: [] };
     const control = pose(46.23, 25.43, true);
-    assert(control.embedded > 200 && control.minimumGap < -0.26);
+    // The repaired outsole weights reduce this bend, but omitting the knee
+    // fit still drives hundreds of delivered clothing vertices into the bank.
+    assert(control.embedded > 200 && control.minimumGap < -0.2);
     g.rig.terrainCrouch = undefined;
     for (const [x, z] of [
       [46.23, 25.43],
@@ -201,6 +203,153 @@ test("the delivered explorer stays on six crystal triangle slopes without crouch
     assert(samples > 12672000);
   } finally {
     s.dispose();
+  }
+});
+
+test("the delivered boot heels stay rigid and both resting soles follow the recorded cavern and desert banks", async () => {
+  let samples = 0;
+  for (const [chapter, x, z] of [
+    [6, 46.23, 25.43],
+    [6, 198.91, 306.93],
+    [1, 382.23, 235.43],
+  ]) {
+    const s = await actorAndTerrain(undefined, false, false, chapter),
+      g = s.game,
+      shoe = g.rig.model.getObjectByName("shoes04"),
+      base = shoe.geometry.attributes.position,
+      feet = [1, -1].map((side) => {
+        const sole = [],
+          heel = [];
+        for (let i = 0; i < base.count; i++) {
+          if (base.getX(i) * side <= 0) continue;
+          if (base.getY(i) <= 0.035) sole.push(i);
+          if (base.getY(i) <= 0.045 && base.getZ(i) < 0.025) heel.push(i);
+        }
+        assert(sole.length > 200 && heel.length > 40);
+        return { sole, heel };
+      });
+    try {
+      for (const heading of [Math.PI, Math.PI / 2])
+        for (const crouch of [false, true]) {
+          g.rig.mixer.stopAllAction();
+          g.rig.actions.Idle.reset().play();
+          g.rig.state = "Idle";
+          g.rig.grounding = undefined;
+          g.rig.crouchBlend = 0;
+          g.crouching = crouch;
+          g.player.position.set(x, g.groundHeight(x, z), z);
+          g.avatar.rotation.set(0, heading, 0);
+          const root = g.player.position.clone();
+          for (let frame = 0; frame < 60; frame++)
+            animateExplorer(g, 1 / 60, false, false);
+          g.rig.model.updateMatrixWorld(true);
+          for (const { sole, heel } of feet) {
+            const posed = (i) =>
+              shoe
+                .getVertexPosition(i, new THREE.Vector3())
+                .applyMatrix4(shoe.matrixWorld);
+            // Read every low footwear vertex, without using the fitter's
+            // reduced sole probes or its reported contact clearance.
+            const gaps = sole.map((i) => {
+              const p = posed(i),
+                height = s.floor(p.x, p.z);
+              assert.notEqual(height, null);
+              samples++;
+              return p.y - height;
+            });
+            assert(Math.min(...gaps) > -0.005, "the outsole enters the bank");
+            assert(
+              Math.max(...gaps) < 0.1,
+              `the resting outsole remains suspended: ${Math.max(...gaps)} m`,
+            );
+            const reference = new THREE.Vector3().fromBufferAttribute(
+                base,
+                heel[0],
+              ),
+              origin = posed(heel[0]);
+            for (const i of heel) {
+              const length = new THREE.Vector3()
+                .fromBufferAttribute(base, i)
+                .distanceTo(reference);
+              assert(
+                Math.abs(posed(i).distanceTo(origin) - length) < 0.000005,
+                "the shin stretches the boot heel during knee bending",
+              );
+            }
+          }
+          const body = inspectExplorerTerrain(g, s.floor);
+          assert.equal(body.embedded, 0, JSON.stringify(body.witnesses));
+          assert.equal(body.invalid, 0);
+          assert.equal(body.missing, 0);
+          assert(g.player.position.equals(root));
+          assert(g.avatar.position.y <= 1e-9);
+        }
+    } finally {
+      s.dispose();
+    }
+  }
+  assert(samples > 7000);
+});
+
+test("the complete posed soles clear the recorded medial contacts on four chapter terrains", async () => {
+  for (const [chapter, points] of [
+    [0, [[61.69, 198.83]]],
+    [
+      2,
+      [
+        [214.23, 331.83],
+        [315.43, 165.43],
+      ],
+    ],
+    [
+      3,
+      [
+        [54.69, 366.83],
+        [194.69, 268.83],
+      ],
+    ],
+    [
+      4,
+      [
+        [312.23, 198.83],
+        [156.91, 168.59],
+        [156.91, 172.43],
+      ],
+    ],
+  ]) {
+    const s = await actorAndTerrain(undefined, false, false, chapter),
+      g = s.game;
+    try {
+      for (const [x, z] of points)
+        for (const heading of [Math.PI, Math.PI / 2])
+          for (const crouch of [false, true]) {
+            g.rig.mixer.stopAllAction();
+            g.rig.actions.Idle.reset().play();
+            g.rig.state = "Idle";
+            g.rig.grounding = undefined;
+            g.rig.crouchBlend = 0;
+            g.crouching = crouch;
+            g.player.position.set(x, g.groundHeight(x, z), z);
+            g.avatar.rotation.set(0, heading, 0);
+            const root = g.player.position.clone();
+            for (let frame = 0; frame < 60; frame++)
+              animateExplorer(g, 1 / 60, false, false);
+            const body = inspectExplorerTerrain(g, s.floor);
+            assert(
+              body.minimumGap > 0,
+              JSON.stringify(
+                body.meshes
+                  .filter((m) => m.minimumGap <= 0)
+                  .map((m) => m.witness),
+              ),
+            );
+            assert.equal(body.invalid, 0);
+            assert.equal(body.missing, 0);
+            assert(g.player.position.equals(root));
+          }
+    } finally {
+      s.dispose();
+    }
   }
 });
 

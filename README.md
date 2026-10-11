@@ -4,6 +4,13 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [boot shape and bank-footing pass](docs/boot-grounding.md) keeps the low
+heels rigid as the knees bend and fits resting boots to supported slopes.
+The recorded desert crouch's highest measured footwear gap falls from 36.91 cm
+to 7.26 cm. Complete low-vertex checks also remove the recorded medial contacts.
+The verification launcher now locks the shared CPU allowance for native worker
+threads. Contact lighting, wider poses and camera framing remain under review.
+
 The [shared rendered-floor support pass](docs/rendered-terrain-support.md)
 aligns standing and camera height with the visible terrain in all eight chapters.
 Crouched knees and posed soles fit uneven ground, while movement checks the

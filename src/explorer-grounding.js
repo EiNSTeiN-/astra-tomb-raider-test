@@ -57,17 +57,87 @@ function makeFeet(model) {
       bone: model.getObjectByName(`mixamorig${side}Foot`),
       shoe,
       indices: [...indices],
+      clearanceIndices: candidates,
       lifted: false,
     };
   });
 }
 
-function probes(foot) {
-  return foot.indices.map((i) =>
+function probes(foot, complete = false) {
+  return (complete ? foot.clearanceIndices : foot.indices).map((i) =>
     foot.shoe
       .getVertexPosition(i, new THREE.Vector3())
       .applyMatrix4(foot.shoe.matrixWorld),
   );
+}
+
+// The animated foot frame can already pitch the outsole, particularly when
+// the model leans into a crouch. Fit its actual outsole instead of assuming
+// world up: adding a terrain tilt to an already tilted boot leaves a high heel.
+function footPlane(points) {
+  const center = new THREE.Vector3();
+  for (const point of points) center.add(point);
+  center.divideScalar(points.length || 1);
+  let xx = 0,
+    zz = 0,
+    xz = 0,
+    xy = 0,
+    zy = 0;
+  for (const point of points) {
+    const x = point.x - center.x,
+      y = point.y - center.y,
+      z = point.z - center.z;
+    xx += x * x;
+    zz += z * z;
+    xz += x * z;
+    xy += x * y;
+    zy += z * y;
+  }
+  const determinant = xx * zz - xz * xz;
+  if (determinant <= 1e-10) return null;
+  return {
+    center,
+    normal: new THREE.Vector3(
+      -(xy * zz - zy * xz) / determinant,
+      1,
+      -(zy * xx - xy * xz) / determinant,
+    ).normalize(),
+  };
+}
+
+function terrainSoleNormal(points, support, ankle) {
+  const anchor = ankle.clone();
+  const floors = [
+    ...points.map((point) => point.clone()),
+    anchor,
+    ...[
+      [-0.12, 0],
+      [0.12, 0],
+      [0, -0.12],
+      [0, 0.12],
+    ].map(([x, z]) => anchor.clone().add(new THREE.Vector3(x, 0, z))),
+  ];
+  if (
+    !floors.every((point) => {
+      const floor = support(point.x, point.z);
+      if (!floor) return false;
+      point.y = floor.height;
+      return true;
+    })
+  )
+    return null;
+  const plane = footPlane(floors);
+  if (!plane || plane.normal.y <= 0.55) return null;
+  const { center, normal } = plane;
+  return floors.every((point) => {
+    const predicted =
+      center.y -
+      (normal.x * (point.x - center.x) + normal.z * (point.z - center.z)) /
+        normal.y;
+    return Math.abs(point.y - predicted) < 0.04;
+  })
+    ? normal
+    : null;
 }
 function setWorldRotation(bone, rotation) {
   bone.quaternion.copy(
@@ -156,7 +226,9 @@ export function groundExplorer(game, dt, moving, sprinting) {
   const plans = state.feet.map((foot) => {
     const points = probes(foot),
       ankle = foot.bone.getWorldPosition(new THREE.Vector3());
-    const lift = Math.max(0, Math.min(...points.map((p) => p.y)) - root.y);
+    const lift = moving
+      ? Math.max(0, Math.min(...points.map((p) => p.y)) - root.y)
+      : 0;
     const local = ankle.clone().sub(root).applyQuaternion(inverseFacing);
     const crouch = rig.crouchBlend || 0;
     // A crouched recovery passes beneath the hips instead of lifting the heel
@@ -165,7 +237,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
     const offset = new THREE.Vector3(
       0,
       0,
-      local.z * (state.stride - 1) + crouch * (0.14 + recovery),
+      local.z * (state.stride - 1) + crouch * (moving ? 0.14 + recovery : 0),
     ).applyQuaternion(facing);
     ankle.add(offset);
     const rotation = foot.bone.getWorldQuaternion(new THREE.Quaternion());
@@ -177,15 +249,18 @@ export function groundExplorer(game, dt, moving, sprinting) {
       support(ankle.x, ankle.z + 0.12),
     ];
     if (center && samples.every(Boolean)) {
-      const normal = new THREE.Vector3(
-        samples[0].height - samples[1].height,
-        0.24,
-        samples[2].height - samples[3].height,
-      ).normalize();
-      // Discontinuous ledges and very steep ground retain the animated boot
-      // angle. A planted foot follows a walkable slope; a raised toe keeps roll.
-      if (normal.y > 0.88) {
-        const tilt = new THREE.Quaternion().setFromUnitVectors(UP, normal);
+      const normal = terrainSoleNormal(
+        points.map((point) => point.clone().add(offset)),
+        support,
+        ankle,
+      );
+      // Follow continuous supported banks as well as gentle slopes. Keep the
+      // animated angle beside a discontinuous ledge and during a raised stride.
+      if (normal) {
+        const tilt = new THREE.Quaternion().setFromUnitVectors(
+          moving ? UP : footPlane(points)?.normal || UP,
+          normal,
+        );
         tilt.slerp(
           new THREE.Quaternion(),
           THREE.MathUtils.smoothstep(lift, 0.04, 0.2),
@@ -255,7 +330,10 @@ export function groundExplorer(game, dt, moving, sprinting) {
     let adjusted = false;
     for (const [index, p] of plans.entries()) {
       if (!p.valid) continue;
-      const gaps = probes(p.foot).flatMap((point) => {
+      // A continuous bank can rise inside the sole perimeter, and toe weights
+      // can bend its medial vertices below the outline. Read the complete low
+      // footwear here; keep the small perimeter for orientation and footsteps.
+      const gaps = probes(p.foot, true).flatMap((point) => {
         const floor = support(point.x, point.z);
         return floor ? [point.y - floor.height] : [];
       });

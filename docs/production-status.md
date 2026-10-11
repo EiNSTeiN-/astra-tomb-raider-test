@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Boot shape and bank footing](boot-grounding.md) repair transferred shin
+  influence at the low heels and fit resting outsoles to supported banks.
+  The recorded desert crouch's highest low-footwear gap falls from 36.91 to
+  7.26 cm, with preserved heel dimensions and positive recorded body contact.
+  Complete low-vertex checks remove twelve medial contacts exposed by the
+  broader review. All 317 selected JavaScript cases across 36 files and three
+  launcher checks pass. Geometry, texture bytes, rest transforms and animation
+  rotations match the preceding character; only boot weights and vertical hip
+  correction channels change. The launcher now locks the CPU set for native
+  threads after a GPU worker widened its inherited allowance. Wider poses,
+  contact lighting, camera occlusion and full visual acceptance remain open.
+
 - [Shared rendered-floor support](rendered-terrain-support.md) extends the
   existing desert triangle sampler to the other seven chapters. All 1,282,173
   independent floor queries agree within 3 micrometres, with unchanged buffers

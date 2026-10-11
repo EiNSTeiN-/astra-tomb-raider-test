@@ -7,6 +7,9 @@ import * as T from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import sharp from "sharp";
 
+sharp.concurrency(2);
+sharp.cache(false);
+
 const root = path.resolve("asset-sources/characters/makehuman");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const vec = (a) => new T.Vector3().fromArray(a);
@@ -441,6 +444,35 @@ function fitAsset(folder, basename, mat) {
     for (let axis = 0; axis < 3; axis++) p[axis] += row[axis + 6] * scale[axis];
     fitted.push(world(p));
     fittedWeights.push(w);
+  }
+  if (basename === "shoes04") {
+    // Clothing transfer weights can bind the heel to the shin. Keep the low
+    // outsole on the foot, with a forefoot bend at the actual toe joint; blend
+    // back to the transferred ankle weights only above the stiff sole.
+    for (const [i, point] of fitted.entries()) {
+      const side = point.x > 0 ? "Left" : "Right",
+        foot = indices.get(`mixamorig:${side}Foot`),
+        toe = indices.get(`mixamorig:${side}ToeBase`),
+        toeZ = bones
+          .get(`mixamorig:${side}ToeBase`)
+          .getWorldPosition(new T.Vector3()).z,
+        bend = T.MathUtils.smoothstep(point.z, toeZ - 0.025, toeZ + 0.025),
+        ankle = T.MathUtils.smoothstep(point.y, 0.045, 0.13),
+        original = fittedWeights[i],
+        total = [...original.values()].reduce((a, b) => a + b, 0),
+        fittedWeight = new Map(
+          [...original].map(([joint, weight]) => [
+            joint,
+            (weight / total) * ankle,
+          ]),
+        );
+      fittedWeight.set(
+        foot,
+        (fittedWeight.get(foot) || 0) + (1 - ankle) * (1 - bend),
+      );
+      fittedWeight.set(toe, (fittedWeight.get(toe) || 0) + (1 - ankle) * bend);
+      fittedWeights[i] = fittedWeight;
+    }
   }
   addMesh(
     basename,

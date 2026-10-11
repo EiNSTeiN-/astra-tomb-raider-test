@@ -14,6 +14,12 @@ The owner requires agent verification workloads to use at most 60% of the
 available CPUs in aggregate. On Linux, launch tests, builds and browser helpers
 through `python3 scripts/run-with-cpu-budget.py COMMAND [ARG ...]`; its child
 processes inherit a shared CPU affinity set and lower scheduling priority.
+On Linux x86_64 and aarch64, the launcher also locks affinity with an inherited
+kernel syscall filter, preventing native libraries from expanding their worker
+threads' CPU set. Nested launches retain the same allowance. The helper fails
+if it cannot install this guard; do not bypass it for verification work.
+Run its thread/child, nesting and exit-status checks with
+`python3 scripts/run-with-cpu-budget.py python3 tests/cpu-budget.test.py`.
 `npm test` defaults to two concurrent test workers. Use at most two test workers
 and one browser check at a time. Avoid overlapping expensive checks when memory
 is constrained. Close each browser after its check, and stop temporary preview

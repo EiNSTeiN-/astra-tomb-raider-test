@@ -1,5 +1,17 @@
 # Asset credits and provenance
 
+The [boot shape and bank footing](boot-grounding.md) adapt the existing credited
+MakeHuman `shoes04` weights in `scripts/build-explorer.mjs` and rebuild the
+delivered `public/assets/characters/vesper.glb`. The stiff sole uses the foot and
+toe joints; original ankle transfer weights return above it. Existing geometry,
+texture bytes, bind poses and animation rotations are preserved. Locomotion hip
+height is refitted to the revised soles, retaining the donor's running flight.
+The original character, clothing, generated fabric and Mixamo animation credits
+below still apply. No external asset or dependency was added. Its comparison
+images reconstruct the preceding character and grounding functions in the
+current scene; all documentation images are actual game captures converted
+losslessly to WebP with decoded pixels checked against their source PNGs.
+
 The [shared rendered-floor support](rendered-terrain-support.md) uses original
 terrain-query, character-pose and movement code, extending the project's existing
 triangle sampler. No external model, texture, recording, score or dependency
