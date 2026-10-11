@@ -417,6 +417,81 @@ test("both boot contact patches remain visible above the recorded cavern and des
   }
 });
 
+test("resting bank cameras retain the visible delivered clothing and boots without changing roots or saved look", async () => {
+  for (const [chapter, x, z] of [
+    [1, 382.23, 235.43],
+    [0, 382.23, 298.43],
+    [6, 198.91, 306.93],
+    [6, 46.23, 25.43],
+  ]) {
+    const f = await actorAndTerrain(undefined, false, false, chapter),
+      game = f.game;
+    game.camera = new THREE.PerspectiveCamera(58, 1.6, 0.1, 800);
+    game.cameraSurfaces = new CameraSurfaces(new THREE.Group());
+    game.cameraSurfaces.rebuild();
+    try {
+      for (const heading of [Math.PI, Math.PI / 2])
+        for (const crouch of [false, true]) {
+          game.rig.mixer.stopAllAction();
+          game.rig.actions.Idle.reset().play();
+          game.rig.state = "Idle";
+          game.rig.grounding = undefined;
+          game.rig.crouchBlend = 0;
+          game.crouching = crouch;
+          game.player.position.set(x, game.groundHeight(x, z), z);
+          game.avatar.rotation.set(0, heading, 0);
+          for (let i = 0; i < 60; i++)
+            animateExplorer(game, 1 / 60, false, false);
+          game.yaw = 0;
+          game.pitch = -0.18;
+          game.cameraBodyRecovery = null;
+          game.cameraContactRecovery = null;
+          const root = game.player.position.clone(),
+            target = root
+              .clone()
+              .add(new THREE.Vector3(0, crouch ? 0.9 : 1.3, 0)),
+            desired = target
+              .clone()
+              .add(
+                new THREE.Vector3(
+                  0,
+                  Math.sin(game.pitch) * 5.3 + 0.2,
+                  Math.cos(game.pitch) * 5.3,
+                ),
+              ),
+            space = (p) => p.y >= game.groundHeight(p.x, p.z) + 0.28;
+          game.camera.position.copy(desired);
+          game.cameraFollowTarget = target.clone();
+          for (let i = 0; i < 180; i++)
+            game.camera.position.copy(
+              followClearCamera(game, target, desired, 1 / 60, space),
+            );
+          game.camera.lookAt(target);
+          const observed = inspectExplorerCamera(
+            game,
+            game.terrainMeshes,
+            24,
+            36,
+          );
+          assert(observed.bodyRays > 100);
+          assert.equal(observed.invalid, 0);
+          assert.equal(
+            observed.blocked,
+            0,
+            JSON.stringify({ chapter, heading, crouch, ...observed }),
+          );
+          assert(space(game.camera.position));
+          assert(game.camera.position.distanceTo(target) >= 2.2);
+          assert(game.player.position.equals(root));
+          assert.equal(game.yaw, 0);
+          assert.equal(game.pitch, -0.18);
+        }
+    } finally {
+      f.dispose();
+    }
+  }
+});
+
 test("terrain banks stop the surrounding body, recover older arrivals and remain solid during sustained approaches", async () => {
   for (const [chapter, x, z] of [
     [0, 382.23, 275.83],

@@ -333,6 +333,20 @@ export function buildCamp(game, feature, group) {
     for (const child of children) if (child.parent !== root) root.attach(child);
     for (const child of [...root.children])
       if (!child.isMesh) root.remove(child);
+    if (root === solid && game.cameraSurfaces)
+      for (const child of children) {
+        child.updateMatrix();
+        child.geometry.computeBoundingBox();
+        const size = child.geometry.boundingBox
+          .clone()
+          .applyMatrix4(child.matrix)
+          .getSize(new THREE.Vector3());
+        // Camp furniture uses its own mesh builder. Capture the opaque bodies
+        // after flattening and before batching releases their original meshes.
+        // Tiny coals and fittings do not need a separate camera margin.
+        if (size.y >= 0.12 && Math.max(size.x, size.z) >= 0.15)
+          game.cameraSurfaces.capture(child, { small: true });
+      }
     mergeArchitecture(root);
   }
   const fire = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.2), fx.fire);

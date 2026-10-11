@@ -11,6 +11,7 @@ import { Adventure } from "../src/game.js";
 import { safeArrival } from "../src/character-motion.js";
 import { buildTorch, useTorch } from "../src/torch.js";
 import { SaveStore } from "../src/storage.js";
+import { CameraSurfaces } from "../src/camera-collision.js";
 function fixture(level = LEVELS[0]) {
   const map = createMap(level),
     terrain = createTerrainProfile(map, level),
@@ -134,6 +135,54 @@ test("all chapter camps retain their flame anchors and clear approaches around f
   }
   assert.equal(new Set(Object.values(CAMP_FABRIC)).size, 8);
   t.diagnostic(JSON.stringify({ count, maxTriangles, maxCalls }));
+});
+
+test("batched camp supply bodies remain registered for camera clearance in every chapter", () => {
+  for (const level of LEVELS) {
+    const game = fixture(level);
+    game.cameraSurfaces = new CameraSurfaces(game.world);
+    try {
+      const feature = game.map.features.find((f) => f.id === "camp-0"),
+        camp = add(game, feature);
+      game.cameraSurfaces.rebuild();
+      const wood = camp.solid.children.find(
+          (m) => m.isMesh && m.material === game.campMaterials.wood,
+        ),
+        bounds = new THREE.Box3().setFromObject(wood),
+        center = bounds.getCenter(new THREE.Vector3()),
+        start = center.clone().add(new THREE.Vector3(0, 0, -2)),
+        end = center.clone().add(new THREE.Vector3(0, 0, 2)),
+        ray = new THREE.Raycaster(
+          start,
+          end.clone().sub(start).normalize(),
+          0,
+          4,
+        );
+      assert(ray.intersectObject(wood, false).length > 0);
+      assert(
+        game.cameraSurfaces.entry(start, end, 0) < 1,
+        "the rendered supply body is absent from camera bounds",
+      );
+      assert.equal(game.cameraSurfaces.pending.length, 0);
+      camp.solid.visible = false;
+      assert.equal(
+        game.cameraSurfaces.entry(start, end, 0),
+        1,
+        "hidden camp batches retain camera obstruction",
+      );
+    } finally {
+      const resources = new Set();
+      game.world.traverse((node) => {
+        if (node.geometry) resources.add(node.geometry);
+        for (const m of node.material ? [node.material].flat() : []) {
+          resources.add(m);
+          for (const value of Object.values(m))
+            if (value?.isTexture) resources.add(value);
+        }
+      });
+      for (const resource of resources) resource.dispose();
+    }
+  }
 });
 
 test("camp fire effects preserve torch access, one positioned ambient voice, rest and saved checkpoint behavior", () => {

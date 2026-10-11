@@ -1,4 +1,6 @@
 import { Vector3 } from "three";
+import { terrainCameraClear } from "./camera-terrain-sight.js";
+import { lowerBodyProbes } from "./explorer-terrain-pose.js";
 
 const JOINTS = [
   ["Head", 0.14],
@@ -27,25 +29,73 @@ export function cameraBodyTargets(game) {
     });
     return bone ? { bone, radius } : null;
   }).filter(Boolean);
-  return rig.cameraBodyBones.map(({ bone, radius }) => ({
+  const targets = rig.cameraBodyBones.map(({ bone, radius }) => ({
     position: bone.getWorldPosition(new Vector3()),
     radius,
   }));
+  // Fitted boots can extend downhill beyond their ankle joints. Their actual
+  // posed perimeter must stay in view as well; a clear bone proxy can still
+  // leave the visible outsole behind the foreground bank.
+  for (const foot of rig.grounding?.active ? rig.grounding.feet : []) {
+    foot.cameraIndices ??= (() => {
+      const position = foot.shoe.geometry.attributes.position,
+        cells = new Map();
+      for (const i of foot.clearanceIndices || []) {
+        const key = `${Math.floor(position.getX(i) / 0.05)},${Math.floor(position.getZ(i) / 0.05)}`,
+          previous = cells.get(key);
+        if (
+          previous === undefined ||
+          position.getY(i) < position.getY(previous)
+        )
+          cells.set(key, i);
+      }
+      return [...new Set([...foot.indices, ...cells.values()])];
+    })();
+    for (const index of foot.cameraIndices)
+      targets.push({
+        position: foot.shoe
+          .getVertexPosition(index, new Vector3())
+          .applyMatrix4(foot.shoe.matrixWorld),
+        radius: 0,
+      });
+  }
+  rig.cameraTerrainProbes ??= lowerBodyProbes(rig.model);
+  for (const { mesh, index } of rig.cameraTerrainProbes)
+    targets.push({
+      position: mesh
+        .getVertexPosition(index, new Vector3())
+        .applyMatrix4(mesh.matrixWorld),
+      radius: 0,
+      terrainOnly: true,
+    });
+  return targets;
 }
 
-export function cameraBodyVisibility(surfaces, camera, targets) {
-  if (!targets.length || !surfaces) return 1;
-  let clear = 0,
-    count = 0;
-  for (const { position, radius } of targets) {
+export function cameraBodyVisibility(surfaces, camera, targets, game) {
+  if (!targets.length) return 1;
+  let sceneryClear = 0,
+    sceneryCount = 0,
+    terrainClear = 0,
+    terrainCount = 0;
+  for (const { position, radius, terrainOnly } of targets) {
     const right = new Vector3(camera.z - position.z, 0, position.x - camera.x)
       .normalize()
       .multiplyScalar(radius);
-    for (const side of [-1, 0, 1]) {
+    for (const side of radius === 0 ? [0] : [-1, 0, 1]) {
       const point = position.clone().addScaledVector(right, side);
-      count++;
-      if (surfaces.entry(point, camera, 0.02) >= 0.999999) clear++;
+      if (!terrainOnly) {
+        sceneryCount++;
+        if ((surfaces?.entry(point, camera, 0.02) ?? 1) >= 0.999999)
+          sceneryClear++;
+      }
+      if (game?.groundHeight) {
+        terrainCount++;
+        if (terrainCameraClear(game, point, camera)) terrainClear++;
+      }
     }
   }
-  return clear / count;
+  return Math.min(
+    sceneryCount ? sceneryClear / sceneryCount : 1,
+    terrainCount ? terrainClear / terrainCount : 1,
+  );
 }

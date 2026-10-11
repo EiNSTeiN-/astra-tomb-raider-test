@@ -1246,3 +1246,14 @@ the new roots inside the revised runtime, with fixed explorer state and camera;
 the terrain and existing scenery remain present.
 The six public forecourt images are lossless WebP conversions of in-game
 captures, verified to preserve decoded RGBA pixels and dimensions.
+
+The [terrain and camp camera pass](terrain-camp-camera.md) extends original
+camera framing and camp-batching code. It retains the credited explorer,
+regional textures, camp artwork, positioned ambience and quiet adaptive score.
+No external asset, recording, music or dependency is introduced. Its comparison
+captures reconstruct the preceding camera solver and omit the new camp bounds
+inside the current scene, preserving explorer pose, root and input look.
+They are distinct from screenshots of the preceding production application.
+The native release captures use the actual built interface and controls.
+All fourteen public images are lossless WebP conversions of game captures,
+verified to retain decoded RGBA pixels and dimensions.

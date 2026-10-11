@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Terrain and camp camera framing](terrain-camp-camera.md) adds posed boot
+  and lower-clothing terrain rays, safe-destination scoring and camera bounds
+  for substantial camp supplies. All 54 selected cases pass. Thirty rendered
+  captures cover eight chapters; the 18 revised views have zero sampled terrain
+  or camp obstruction across 5,606 body rays per scenery set. Moving bounds
+  refresh once per synchronous solve and remain current afterward. Some camp
+  solves still take 18–22 ms in this sandbox. Physical hearth overlap, instanced
+  foliage, wider camera motion and full visual acceptance remain open.
+  The built release passes keyboard/High and touch/Low movement, stance, look,
+  jump and map checks, preserving the complete store through two reloads each.
+
 - [Bank contact shadows](bank-contact-shadows.md) repair two missing planted
   patches and 431 sampled patch-face contacts below the recorded terrain.
   All 84,532 final face queries across twelve poses are above the terrain.

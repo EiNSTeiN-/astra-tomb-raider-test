@@ -117,6 +117,7 @@ export class CameraSurfaces {
     this.cellSize = 16;
     this.capturing = true;
     this.count = 0;
+    this.snapshotDepth = 0;
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
   }
@@ -191,6 +192,30 @@ export class CameraSurfaces {
       Math.hypot(...elements.slice(8, 11)),
     );
   }
+  syncDynamicGroup(parent, group) {
+    parent.updateWorldMatrix(true, false);
+    if (parent.matrixWorld.equals(group.matrix)) return;
+    group.bounds.makeEmpty();
+    for (const surface of group.surfaces) {
+      this.updateSurface(surface);
+      group.bounds.union(surface.bounds);
+    }
+    group.matrix.copy(parent.matrixWorld);
+  }
+  // A camera solve is synchronous: prop transforms cannot animate between its
+  // body rays. Synchronize moving bounds once for that solve, then release the
+  // snapshot so later gameplay queries still see their current transforms.
+  withSnapshot(query) {
+    if (!this.snapshotDepth)
+      for (const [parent, group] of this.dynamicGroups)
+        this.syncDynamicGroup(parent, group);
+    this.snapshotDepth++;
+    try {
+      return query();
+    } finally {
+      this.snapshotDepth--;
+    }
+  }
   eachCell(min, max, visit) {
     for (
       let z = Math.floor(min.z / this.cellSize);
@@ -222,15 +247,7 @@ export class CameraSurfaces {
     );
     for (const [parent, group] of this.dynamicGroups) {
       if (parent === ignoreParent) continue;
-      parent.updateWorldMatrix(true, false);
-      if (!parent.matrixWorld.equals(group.matrix)) {
-        group.bounds.makeEmpty();
-        for (const surface of group.surfaces) {
-          this.updateSurface(surface);
-          group.bounds.union(surface.bounds);
-        }
-        group.matrix.copy(parent.matrixWorld);
-      }
+      if (!this.snapshotDepth) this.syncDynamicGroup(parent, group);
       if (boxEntry(start, end, group.bounds, radius, true) !== null)
         for (const surface of group.surfaces) candidates.add(surface);
     }

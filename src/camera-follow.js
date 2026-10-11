@@ -48,6 +48,21 @@ export function followClearCamera(
   canOccupy,
   viewPitch = game.pitch,
 ) {
+  const solve = () =>
+    followClearCameraStep(game, target, desired, dt, canOccupy, viewPitch);
+  return game.cameraSurfaces?.withSnapshot
+    ? game.cameraSurfaces.withSnapshot(solve)
+    : solve();
+}
+
+function followClearCameraStep(
+  game,
+  target,
+  desired,
+  dt,
+  canOccupy,
+  viewPitch = game.pitch,
+) {
   let steering = false;
   const follow = (end) =>
       followCamera(
@@ -74,7 +89,7 @@ export function followClearCamera(
   }
   const body = cameraBodyTargets(game),
     visibility = (position) =>
-      cameraBodyVisibility(game.cameraSurfaces, position, body),
+      cameraBodyVisibility(game.cameraSurfaces, position, body, game),
     ordinaryVisible = visibility(ordinary),
     ahead =
       game.cameraFollowTarget && dt > 0 && dt <= 0.1
@@ -129,6 +144,11 @@ export function followClearCamera(
         ? [game.cameraBodyRecovery]
         : []),
       ...nearbyCandidates,
+      // A steep foreground bank can cover the boots while the central arm
+      // clears it. Lift the view before swinging far around the explorer.
+      ...[0, -0.15, 0.15, -0.3, 0.3].flatMap((yaw) =>
+        [0.6, 0.8, 1].map((pitch) => [yaw, pitch]),
+      ),
       // A close pillar can cover the entire small neighborhood. Try its sides
       // only if none of those rays provides enough room for the explorer.
       ...[
@@ -170,11 +190,13 @@ export function followClearCamera(
     const next = follow(end),
       length = next.distanceTo(target),
       visible = visibility(next),
+      endVisible = visibility(safe),
       score =
         Math.min(length, 3.2) * 2 +
         Math.min(safeLength, 5.3) -
         (Math.abs(yawOffset) + Math.abs(pitch - viewPitch)) * 0.5 -
-        (1 - visible) * 12;
+        (1 - visible) * 12 -
+        (1 - endVisible) * 12;
     // A low bridge may leave a visible arm just short of the comfortable
     // distance. Keep that option only if the full search finds no longer view.
     if (safeLength < 3.2) {
@@ -184,7 +206,7 @@ export function followClearCamera(
     }
     if (!best || score > best.score)
       best = { next, safe, score, recovery: [yawOffset, pitchOffset] };
-    if (length >= 3.2 && visible === 1) {
+    if (length >= 3.2 && visible === 1 && endVisible === 1) {
       // Arm recovery needs the same continuity as body recovery: otherwise a
       // clear interpolated arm can fall straight back toward a blocked request.
       rememberRecovery([yawOffset, pitchOffset]);

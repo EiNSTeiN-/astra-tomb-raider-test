@@ -3,7 +3,7 @@ import { Vector3 } from "three";
 // Small, delivered-skin samples around the thighs and knees. Separate bone
 // groups and height bands retain the trouser edges when a bent joint deforms
 // them differently. References belong to the current character, like sole probes.
-function lowerBodyProbes(model) {
+export function lowerBodyProbes(model) {
   const samples = [];
   const directions = [
     [1, 0, 0],

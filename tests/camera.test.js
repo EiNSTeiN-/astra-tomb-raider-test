@@ -16,6 +16,64 @@ import { SaveStore, normalizeSave } from "../src/storage.js";
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 
+test("a synchronous camera snapshot shares moving bounds and releases them on success and failure", (t) => {
+  const world = new THREE.Group(),
+    moving = new THREE.Group(),
+    material = new THREE.MeshStandardMaterial(),
+    geometry = new THREE.BoxGeometry(2, 2, 2),
+    mesh = new THREE.Mesh(geometry, material),
+    surfaces = new CameraSurfaces(world);
+  moving.userData.cameraDynamic = true;
+  moving.position.z = 2;
+  mesh.position.y = 1;
+  moving.add(mesh);
+  world.add(moving);
+  surfaces.capture(mesh);
+  surfaces.rebuild();
+  t.after(() => {
+    geometry.dispose();
+    material.dispose();
+  });
+  const start = v(0, 1, 0),
+    end = v(0, 1, 5),
+    reference = surfaces.entry(start, end, 0);
+  assert(reference > 0 && reference < 1);
+  const update = moving.updateWorldMatrix;
+  let updates = 0;
+  t.mock.method(moving, "updateWorldMatrix", function (...args) {
+    updates++;
+    return update.apply(this, args);
+  });
+  surfaces.withSnapshot(() => {
+    for (let i = 0; i < 100; i++)
+      assert.equal(surfaces.entry(start, end, 0), reference);
+    surfaces.withSnapshot(() =>
+      assert.equal(surfaces.entry(start, end, 0), reference),
+    );
+  });
+  assert.equal(
+    updates,
+    1,
+    "each body ray repeats the moving-parent transform update",
+  );
+  moving.position.x = 4;
+  surfaces.withSnapshot(() => assert.equal(surfaces.entry(start, end, 0), 1));
+  assert.equal(updates, 2);
+  assert.throws(
+    () =>
+      surfaces.withSnapshot(() => {
+        throw Error("camera solve failed");
+      }),
+    /camera solve failed/,
+  );
+  moving.position.x = 0;
+  assert.equal(
+    surfaces.entry(start, end, 0),
+    reference,
+    "a failed solve leaves stale moving bounds",
+  );
+});
+
 test("circular castings retain rounded camera clearance without blocking empty box corners", () => {
   const cylinder = new THREE.Box3(v(-1, -1, -1), v(1, 1, 1)),
     a = v(0.95, 0, 1.55),
