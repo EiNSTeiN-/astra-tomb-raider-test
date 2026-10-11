@@ -1017,7 +1017,18 @@ test("ambient contacts track delivered animated soles without changing the actor
             visible++;
             const p = mesh.geometry.attributes.position,
               index = mesh.geometry.index,
-              center = new THREE.Vector3().fromBufferAttribute(p, 24),
+              uv = mesh.geometry.attributes.uv,
+              drawn = Array.from(
+                { length: mesh.geometry.drawRange.count },
+                (_, k) => index.getX(k),
+              ),
+              centerVertex = drawn.reduce((best, v) =>
+                Math.hypot(uv.getX(v) - 0.5, uv.getY(v) - 0.5) <
+                Math.hypot(uv.getX(best) - 0.5, uv.getY(best) - 0.5)
+                  ? v
+                  : best,
+              ),
+              center = new THREE.Vector3().fromBufferAttribute(p, centerVertex),
               bounds = new THREE.Box3().setFromPoints(soles[f]);
             assert(
               center.x >= bounds.min.x - 0.02 &&

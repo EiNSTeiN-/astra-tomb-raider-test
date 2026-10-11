@@ -7,6 +7,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { animateExplorer } from "../src/explorer.js";
+import { ExplorerContact } from "../src/explorer-contact.js";
 import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { terrainTriangleReader } from "../scripts/inspect-desert-groundcover-browser.js";
@@ -349,6 +350,69 @@ test("the complete posed soles clear the recorded medial contacts on four chapte
           }
     } finally {
       s.dispose();
+    }
+  }
+});
+
+test("both boot contact patches remain visible above the recorded cavern and desert bank faces", async () => {
+  for (const [chapter, x, z] of [
+    [6, 46.23, 25.43],
+    [6, 198.91, 306.93],
+    [1, 382.23, 235.43],
+  ]) {
+    const fixture = await actorAndTerrain(undefined, false, false, chapter),
+      game = fixture.game;
+    game.scene = new THREE.Scene();
+    const contact = new ExplorerContact(game);
+    try {
+      for (const yaw of [Math.PI, Math.PI / 2])
+        for (const crouch of [false, true]) {
+          game.rig.mixer.stopAllAction();
+          game.rig.actions.Idle.reset().play();
+          game.rig.state = "Idle";
+          game.rig.grounding = undefined;
+          game.rig.crouchBlend = 0;
+          game.crouching = crouch;
+          game.player.position.set(x, game.groundHeight(x, z), z);
+          game.avatar.rotation.set(0, yaw, 0);
+          for (let i = 0; i < 60; i++)
+            animateExplorer(game, 1 / 60, false, false);
+          const root = game.player.position.clone();
+          contact.update();
+          assert(game.player.position.equals(root));
+          for (const mesh of contact.meshes) {
+            assert(mesh.visible, "a planted boot loses its contact patch");
+            const geometry = mesh.geometry,
+              position = geometry.attributes.position,
+              index = geometry.index;
+            assert(geometry.drawRange.count <= 72 * 4 ** 3 * 3);
+            for (let k = 0; k < geometry.drawRange.count; k += 3) {
+              const [a, b, c] = [0, 1, 2].map((offset) =>
+                new THREE.Vector3().fromBufferAttribute(
+                  position,
+                  index.getX(k + offset),
+                ),
+              );
+              for (let i = 0; i <= 6; i++)
+                for (let j = 0; j <= 6 - i; j++) {
+                  const p = a
+                      .clone()
+                      .multiplyScalar(i / 6)
+                      .addScaledVector(b, j / 6)
+                      .addScaledVector(c, (6 - i - j) / 6),
+                    height = fixture.floor(p.x, p.z);
+                  assert.notEqual(height, null);
+                  assert(
+                    p.y > height,
+                    "the contact face dips under the actual terrain triangle",
+                  );
+                }
+            }
+          }
+        }
+    } finally {
+      contact.dispose();
+      fixture.dispose();
     }
   }
 });

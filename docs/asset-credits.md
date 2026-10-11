@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [bank contact-shadow repair](bank-contact-shadows.md) uses original contact
+fitting and rendering code. It adds no external asset or dependency and retains
+the existing character and environment credits below. Its comparison images
+swap only the preceding contact fitter in the current scene; intentional
+published captures use lossless WebP with decoded-pixel parity checks.
+
 The [boot shape and bank footing](boot-grounding.md) adapt the existing credited
 MakeHuman `shoes04` weights in `scripts/build-explorer.mjs` and rebuild the
 delivered `public/assets/characters/vesper.glb`. The stiff sole uses the foot and

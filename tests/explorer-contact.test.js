@@ -76,6 +76,94 @@ test("contact triangles cannot span a missing support or a raised ledge", () => 
   contact.dispose();
 });
 
+test("continuous steep banks retain the whole contact patch in both headings", () => {
+  const contact = new ExplorerContact({ scene: new THREE.Scene() }),
+    geometry = contact.meshes[0].geometry;
+  try {
+    for (const grade of [-1.8, 1.8])
+      for (const yaw of [0, Math.PI / 2]) {
+        const floor = (x, z) => x * grade + z * 0.35,
+          points = sole(0.01, yaw, 37, -42);
+        for (const p of points) p.y += floor(p.x, p.z);
+        assert(fitFootContact(geometry, points, floor));
+        const uv = geometry.attributes.uv,
+          index = geometry.index;
+        let area = 0;
+        for (let i = 0; i < geometry.drawRange.count; i += 3) {
+          const [a, b, c] = [0, 1, 2].map((k) => index.getX(i + k));
+          area +=
+            Math.abs(
+              (uv.getX(b) - uv.getX(a)) * (uv.getY(c) - uv.getY(a)) -
+                (uv.getY(b) - uv.getY(a)) * (uv.getX(c) - uv.getX(a)),
+            ) / 2;
+        }
+        assert(
+          Math.abs(area - 1) < 0.000001,
+          "the slope clips part of the contact footprint",
+        );
+        for (const p of triangles(geometry).flat())
+          assert(Math.abs(p.y - floor(p.x, p.z) - 0.004) < 0.00002);
+      }
+  } finally {
+    contact.dispose();
+  }
+});
+
+test("patch face interiors stay above a continuous terrain crease with bounded refinement", () => {
+  const contact = new ExplorerContact({ scene: new THREE.Scene() }),
+    geometry = contact.meshes[0].geometry,
+    floor = (x, z) => Math.min(0, (x + z - 0.015) * 0.8),
+    points = sole(0.01);
+  try {
+    for (const p of points) p.y += floor(p.x, p.z);
+    assert(fitFootContact(geometry, points, floor));
+    const faces = triangles(geometry);
+    assert(faces.length > 0 && faces.length <= 72 * 4 ** 3);
+    for (const [a, b, c] of faces)
+      for (let i = 0; i <= 8; i++)
+        for (let j = 0; j <= 8 - i; j++) {
+          const p = a
+            .clone()
+            .multiplyScalar(i / 8)
+            .addScaledVector(b, j / 8)
+            .addScaledVector(c, (8 - i - j) / 8);
+          assert(p.y > floor(p.x, p.z), "the contact face enters the ridge");
+        }
+    const position = geometry.attributes.position;
+    fitFootContact(geometry, points, floor);
+    assert.equal(
+      geometry.attributes.position,
+      position,
+      "movement reallocates the patch",
+    );
+    assert.equal(position.updateRanges.length, 1);
+    assert.equal(position.updateRanges[0].count, geometry.drawRange.count * 3);
+  } finally {
+    contact.dispose();
+  }
+});
+
+test("terrain refinement preserves raised deck contact and its open edge", () => {
+  const contact = new ExplorerContact({ scene: new THREE.Scene() }),
+    geometry = contact.meshes[0].geometry,
+    deck = (x) => (x < 0.03 ? 0.4 : null),
+    points = sole(0.41);
+  try {
+    assert(fitFootContact(geometry, points, deck, () => 0));
+    const drawn = triangles(geometry);
+    assert(drawn.length > 0);
+    for (const p of drawn.flat()) {
+      assert(p.x < 0.03001, "a contact patch crosses the open deck edge");
+      assert(
+        Math.abs(p.y - 0.404) < 0.00001,
+        "terrain refinement pulls contact below the deck",
+      );
+    }
+  } finally {
+    contact.dispose();
+  }
+});
+
 test("contacts disappear for traversal and submerged supports and release owned resources", () => {
   const points = [sole(), sole(0.01, 0, 0.2, 0.1)],
     game = {

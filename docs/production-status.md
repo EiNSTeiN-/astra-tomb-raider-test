@@ -19,6 +19,13 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Bank contact shadows](bank-contact-shadows.md) repair two missing planted
+  patches and 431 sampled patch-face contacts below the recorded terrain.
+  All 84,532 final face queries across twelve poses are above the terrain.
+  Forty-five selected cases pass, including steep footprints, concave face
+  interiors, raised decks, open edges and resource release. Wider contact
+  lighting, camera framing and full visual acceptance remain open.
+
 - [Boot shape and bank footing](boot-grounding.md) repair transferred shin
   influence at the low heels and fit resting outsoles to supported banks.
   The recorded desert crouch's highest low-footwear gap falls from 36.91 to
