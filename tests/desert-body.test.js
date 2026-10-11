@@ -11,12 +11,16 @@ import { advanceCharacter } from "../src/character-motion.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { terrainTriangleReader } from "../scripts/inspect-desert-groundcover-browser.js";
 import { buildDesertForecourts } from "../src/desert-forecourts.js";
+import { CameraSurfaces } from "../src/camera-collision.js";
+import { followClearCamera } from "../src/camera-follow.js";
+import { inspectExplorerCamera } from "../scripts/inspect-explorer-camera-browser.js";
+import { CROUCH_DROP } from "../src/stealth.js";
 import {
   closedMeshReader,
   inspectExplorerSolids,
 } from "../scripts/inspect-explorer-solids-browser.js";
 
-async function actorAndTerrain(t, forecourts = false) {
+async function actorAndTerrain(t, forecourts = false, camera = false) {
   const level = LEVELS[1],
     map = createMap(level),
     profile = createTerrainProfile(map, level),
@@ -84,6 +88,7 @@ async function actorAndTerrain(t, forecourts = false) {
     );
     game.world = new THREE.Group();
     game.world.add(terrain);
+    if (camera) game.cameraSurfaces = new CameraSurfaces(game.world);
     game.items = [];
     game.fieldGates = [];
     game.traversalCourses = [];
@@ -93,6 +98,7 @@ async function actorAndTerrain(t, forecourts = false) {
     game.walkable = Adventure.prototype.walkable.bind(game);
     game.canMove = Adventure.prototype.canMove.bind(game);
     buildDesertForecourts(game);
+    game.cameraSurfaces?.rebuild();
   }
   return {
     game,
@@ -119,6 +125,82 @@ async function actorAndTerrain(t, forecourts = false) {
     },
   };
 }
+
+test("the delivered crouched explorer clears the recorded gallery column without moving feet or changing look", async (t) => {
+  const s = await actorAndTerrain(t, true, true),
+    g = s.game;
+  try {
+    g.player.position.set(
+      360.6000000000007,
+      g.groundHeight(360.6000000000007, 242),
+      242,
+    );
+    g.avatar.rotation.set(0, Math.PI / 2, 0);
+    g.yaw = Math.PI;
+    g.pitch = 0.18;
+    for (let frame = 0; frame < 60; frame++)
+      animateExplorer(g, 1 / 60, false, false);
+    g.crouching = true;
+    for (let frame = 0; frame < 18; frame++)
+      animateExplorer(g, 1 / 60, false, false);
+    const target = g.player.position
+        .clone()
+        .add(
+          new THREE.Vector3(
+            0,
+            1.3 - CROUCH_DROP * (1 - Math.exp(-12 * 0.3)),
+            0,
+          ),
+        ),
+      desired = target
+        .clone()
+        .add(
+          new THREE.Vector3(
+            0,
+            Math.sin(g.pitch) * 5.3 + 0.2,
+            -Math.cos(g.pitch) * 5.3,
+          ),
+        ),
+      meshes = g.desertForecourts.flatMap((c) =>
+        c.root.children.filter((m) => m.isMesh),
+      );
+    g.camera = new THREE.PerspectiveCamera(58, 1.6, 0.1, 100);
+    g.camera.position.set(
+      360.15043464498575,
+      0.12999271686325053,
+      238.81354435945715,
+    );
+    g.camera.lookAt(target);
+    g.cameraFollowTarget = target.clone();
+    const feet = g.player.position.clone(),
+      blocked = inspectExplorerCamera(g, meshes);
+    assert(
+      blocked.bodyRays > 100 && blocked.blocked > 20,
+      "the delivered column must reproduce partial body occlusion",
+    );
+    assert.equal(
+      g.cameraSurfaces.entry(target, g.camera.position),
+      1,
+      "the old central arm check misses the body",
+    );
+    assert(g.camera.position.distanceTo(target) >= 3.2);
+    for (let frame = 0; frame < 120; frame++) {
+      g.camera.position.copy(
+        followClearCamera(g, target, desired, 1 / 60, () => true),
+      );
+      g.camera.lookAt(target);
+    }
+    const clear = inspectExplorerCamera(g, meshes);
+    assert(clear.bodyRays > 100);
+    assert.equal(clear.blocked, 0, JSON.stringify(clear.witnesses));
+    assert.equal(clear.invalid, 0);
+    assert(g.player.position.equals(feet));
+    assert.equal(g.yaw, Math.PI);
+    assert.equal(g.pitch, 0.18);
+  } finally {
+    s.dispose();
+  }
+});
 
 test("all delivered clothing and boot vertices clear the five recorded desert crouching slopes", async () => {
   const s = await actorAndTerrain(),

@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Clear walking views beside gallery columns](gallery-body-camera.md) repair
+  the recorded crouched-body occlusion with posed joint checks and retained
+  arm/body detours. The independent delivered-surface observer finds zero
+  blocked samples across 160 intermediate and forty settled pressure views,
+  covering 50,384 actual body samples. All twenty gallery columns are included.
+  The recorded 0.3-second crouch falls from 77 blocked samples out of 566 to
+  zero out of 466. The normal return releases its detour and remains clear.
+  All 128 settled chapter states have clear joint probes, full opacity and
+  finite linked rendering; this is a separate scope from the forecourt-triangle
+  observer. Repeated jungle stance changes no longer fall back toward the
+  obstructed request: maximum camera movement falls from 0.406 m to 0.024 m.
+  All 254 selected regressions, build, native keyboard/High and touch/Low input,
+  two complete-store reloads per case, wall-cap departure and older-save recovery
+  pass. All 41 gallery, 32 chapter and twenty native captures are reviewed.
+  Host cleanup checks include tracked browser child start times; no verification
+  processes or test ports remain. Broader art, continuous routes and the full
+  visual acceptance target remain open.
+
 - [Desert foreground courtyards](desert-forecourts.md) add twenty connected
   areas beside the ten optical courts, with 78 wall segments, five galleries,
   three hollow cisterns and four relief walls. Independent delivered-body
@@ -31,8 +49,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   route, 196 selected regressions, build and native keyboard/touch controls and
   repeated whole-store reloads pass. Earned wall-cap departure and occupied
   older-save recovery pass. All twenty native captures are reviewed and all
-  temporary processes and test ports are closed. A native gallery crouch view
-  still partly obscures the explorer behind a column. Broad sparse ground,
+  temporary processes and test ports are closed. That milestone recorded a
+  native gallery crouch view partly obscured behind a column, subsequently
+  repaired by the walking-camera pass above. Broad sparse ground,
   repeated main installations and the full eight-chapter audit remain open.
 
 - [Desert terrace approaches and complete rock footing](desert-terrace-approaches.md)

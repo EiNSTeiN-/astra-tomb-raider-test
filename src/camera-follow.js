@@ -1,5 +1,9 @@
 import { MathUtils, Vector3 } from "three";
 import { constrainCamera, followCamera } from "./camera-collision.js";
+import {
+  cameraBodyTargets,
+  cameraBodyVisibility,
+} from "./camera-body-frame.js";
 
 // Pillars, shafts and overhead parts can close the interpolated follow path
 // even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
@@ -26,14 +30,33 @@ export function followClearCamera(
     ordinary = follow(desired),
     ordinaryLength = ordinary.distanceTo(target);
   if (
-    ordinaryLength >= 3.2 ||
     game.swimming ||
     game.diving ||
     game.aiming ||
     (game.climb && ordinaryLength >= 2.2) ||
     game.ropeRide
-  )
+  ) {
+    game.cameraBodyRecovery = null;
     return ordinary;
+  }
+  const body = cameraBodyTargets(game),
+    visibility = (position) =>
+      cameraBodyVisibility(game.cameraSurfaces, position, body),
+    ordinaryVisible = visibility(ordinary),
+    bodyRecovery =
+      ordinaryVisible < 1 ||
+      (game.cameraBodyRecovery &&
+        (visibility(desired) < 1 ||
+          constrainCamera(
+            target,
+            desired,
+            game.cameraSurfaces,
+            canOccupy,
+          ).distanceTo(target) < 3.2));
+  if (ordinaryLength >= 3.2 && !bodyRecovery) {
+    game.cameraBodyRecovery = null;
+    return ordinary;
+  }
 
   // Keep an ordinary mantle view unless a casting pushes it into the body
   // fade range. A safe neighboring view then retains the visible explorer.
@@ -57,6 +80,9 @@ export function followClearCamera(
       ),
     ],
     candidates = [
+      ...(bodyRecovery && game.cameraBodyRecovery
+        ? [game.cameraBodyRecovery]
+        : []),
       ...nearbyCandidates,
       // A close pillar can cover the entire small neighborhood. Try its sides
       // only if none of those rays provides enough room for the explorer.
@@ -69,7 +95,7 @@ export function followClearCamera(
     ];
   let best, shorter;
   for (const [index, [yawOffset, pitchOffset]] of candidates.entries()) {
-    if (index === nearbyCandidates.length && best) break;
+    if (index === nearbyCandidates.length && best && !bodyRecovery) break;
     const yaw = game.yaw + yawOffset,
       pitch = MathUtils.clamp(viewPitch + pitchOffset, -0.65, 1.05),
       end = target
@@ -86,21 +112,31 @@ export function followClearCamera(
     if (safeLength < 2.2) continue;
     const next = follow(end),
       length = next.distanceTo(target),
+      visible = visibility(next),
       score =
         Math.min(length, 3.2) * 2 +
         Math.min(safeLength, 5.3) -
-        (Math.abs(yawOffset) + Math.abs(pitch - viewPitch)) * 0.5;
+        (Math.abs(yawOffset) + Math.abs(pitch - viewPitch)) * 0.5 -
+        (1 - visible) * 12;
     // A low bridge may leave a visible arm just short of the comfortable
     // distance. Keep that option only if the full search finds no longer view.
     if (safeLength < 3.2) {
-      if (!shorter || score > shorter.score) shorter = { next, safe, score };
+      if (!shorter || score > shorter.score)
+        shorter = { next, safe, score, recovery: [yawOffset, pitchOffset] };
       continue;
     }
-    if (!best || score > best.score) best = { next, safe, score };
-    if (length >= 3.2) return next;
+    if (!best || score > best.score)
+      best = { next, safe, score, recovery: [yawOffset, pitchOffset] };
+    if (length >= 3.2 && visible === 1) {
+      // Arm recovery needs the same continuity as body recovery: otherwise a
+      // clear interpolated arm can fall straight back toward a blocked request.
+      game.cameraBodyRecovery = [yawOffset, pitchOffset];
+      return next;
+    }
   }
   best ||= shorter;
   if (!best) return ordinary;
+  game.cameraBodyRecovery = best.recovery;
   if (best.next.distanceTo(target) >= 2.2) return best.next;
   // A narrow shaft may also block the interpolated sweep. Resolve that contact
   // immediately, like an inward wall correction, then extend with normal follow.

@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [gallery walking camera repair](gallery-body-camera.md) uses original
+framing code in `src/camera-body-frame.js` and `src/camera-follow.js`. Its
+independent posed-surface observer is original verification code. No external
+asset, recording, score or dependency was added. The four documentation images
+are actual browser game captures, converted losslessly to WebP with identical
+decoded RGBA pixels and dimensions; two are development-camera comparisons and
+two are native release keyboard/touch views. Existing scene and character
+credits below continue to apply.
+
 The [joined monastery enclosures and galleries](monastery-enclosures.md) extend
 original code in `src/monastery-gardens.js` and
 `src/monastery-garden-layout.js`, using the existing credited monastery stone,

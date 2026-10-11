@@ -138,8 +138,9 @@ shipped bundle has no development game hook, and its fetched scripts and styles
 match the build. All twenty native captures are reviewed.
 
 One native gallery crouch view places a nearby column over part of the
-explorer's arm and legs. The recorded cistern torso obstruction is repaired,
-but full-body framing across gallery angles still needs review.
+explorer's arm and legs in this milestone's native capture. The subsequent
+[walking camera repair](gallery-body-camera.md) clears that recorded view and
+retains a clear detour beside columns. Wider body framing remains under review.
 
 Verification uses a shared 9-of-16 CPU affinity budget, at most two test workers
 and one browser. All temporary browsers, workers and servers are stopped; the
