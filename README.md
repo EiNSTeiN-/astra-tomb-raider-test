@@ -10,7 +10,9 @@ stone bases. Delivered hardware protects the explorer and camera, and older
 occupied saves recover nearby. [Nearby camera recovery](docs/crystal-camera-recovery.md)
 also lowers a retained overhead view after crystal turns.
 [Dry working ground](docs/crystal-working-ground.md) keeps reservoir water
-beside the instruments and their operating positions. Wider chamber
+beside the instruments and their operating positions.
+[Gentler walking camera turns](docs/walking-camera-turns.md) reduce sharp
+angular corrections when a clear view leaves a detour. Wider chamber
 composition remains under review.
 
 The [crystal archive vaults](docs/crystal-vaults.md) give eight objective

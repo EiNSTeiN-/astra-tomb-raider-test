@@ -25,6 +25,10 @@ import { buildPalaceArchitecture } from "../src/palace-architecture.js";
 import { buildSkyBridges } from "../src/sky-bridges.js";
 import { followClearCamera } from "../src/camera-follow.js";
 import {
+  cameraBodyTargets,
+  cameraBodyVisibility,
+} from "../src/camera-body-frame.js";
+import {
   buildTraversalCourse,
   hasTraversalCourse,
 } from "../src/traversal-courses.js";
@@ -76,6 +80,179 @@ function fixture(t, wall = false) {
   });
   return { game, target, desired, space };
 }
+
+function turningFixture(t, obstacle = null) {
+  const world = new Group(),
+    surfaces = new CameraSurfaces(world),
+    material = new MeshStandardMaterial(),
+    game = {
+      player: new Group(),
+      camera: new PerspectiveCamera(),
+      cameraSurfaces: surfaces,
+      yaw: Math.PI / 2,
+      pitch: 0.13,
+      grounded: true,
+    };
+  if (obstacle) {
+    const mesh = new Mesh(new BoxGeometry(...obstacle.size), material);
+    mesh.position.fromArray(obstacle.position);
+    world.add(mesh);
+    surfaces.capture(mesh, { small: true, thin: true });
+  }
+  surfaces.rebuild();
+  const target = new Vector3(0, 1.3, 0),
+    desired = target.clone().add(new Vector3(5.3, 0.89, 0)),
+    space = (p) => p.y >= 0.28;
+  game.camera.position.copy(target).add(new Vector3(0, 0.89, 5.3));
+  game.cameraFollowTarget = target.clone();
+  t.after(() => {
+    world.traverse((o) => o.geometry?.dispose());
+    material.dispose();
+  });
+  return { game, target, desired, space };
+}
+
+function limitedTurn(game, target, next, dt) {
+  const from = game.camera.position.clone().sub(game.cameraFollowTarget),
+    to = next.clone().sub(target),
+    turn = new THREE.Quaternion().setFromUnitVectors(
+      from.clone().normalize(),
+      to.clone().normalize(),
+    );
+  return from
+    .normalize()
+    .applyQuaternion(
+      new THREE.Quaternion().slerp(turn, (3 * dt) / from.angleTo(to)),
+    )
+    .multiplyScalar(to.length())
+    .add(target);
+}
+
+test("a clear walking turn limits angular steps while following a moving target and retaining look", (t) => {
+  const { game, target, desired, space } = turningFixture(t),
+    feet = game.player.position.clone(),
+    initial = game.camera.position.clone().sub(target),
+    ordinary = followCamera(
+      game.camera.position,
+      target,
+      desired,
+      1 / 60,
+      game.cameraSurfaces,
+      space,
+      game.cameraFollowTarget,
+    );
+  assert(initial.angleTo(ordinary.clone().sub(target)) > 3 / 60);
+  for (let frame = 0; frame < 180; frame++) {
+    const previous = game.camera.position.clone().sub(game.cameraFollowTarget);
+    target.x += 0.025;
+    desired.x += 0.025;
+    const next = followClearCamera(game, target, desired, 1 / 60, space);
+    assert(previous.angleTo(next.clone().sub(target)) <= 3 / 60 + 1e-8);
+    assert.equal(game.cameraSurfaces.entry(target, next), 1);
+    assert(space(next));
+    assert(game.player.position.equals(feet));
+    assert.equal(game.yaw, Math.PI / 2);
+    assert.equal(game.pitch, 0.13);
+    game.camera.position.copy(next);
+    game.cameraFollowTarget.copy(target);
+  }
+  assert(
+    game.camera.position.distanceTo(desired) < 0.2,
+    "the camera continues toward the requested view",
+  );
+});
+
+test("a blocked camera arm retains the required correction rather than accepting a gentler turn", (t) => {
+  const { game, target, desired, space } = turningFixture(t, {
+      size: [0.08, 0.7, 0.08],
+      position: [0.235, 2.19, 4.71],
+    }),
+    ordinary = followCamera(
+      game.camera.position,
+      target,
+      desired,
+      1 / 60,
+      game.cameraSurfaces,
+      space,
+      game.cameraFollowTarget,
+    ),
+    limited = limitedTurn(game, target, ordinary, 1 / 60);
+  assert(
+    game.cameraSurfaces.entry(target, limited) < 1,
+    "the gentler camera arm meets the obstacle",
+  );
+  assert.equal(game.cameraSurfaces.entry(target, ordinary), 1);
+  const next = followClearCamera(game, target, desired, 1 / 60, space);
+  assert(next.distanceTo(ordinary) < 1e-8);
+  assert(space(next));
+});
+
+test("a gentler turn rejects an obstructed lens journey even when both camera arms clear", (t) => {
+  const { game, target, desired, space } = turningFixture(t, {
+    size: [0.08, 0.7, 0.08],
+    position: [0.94, 2.327, 5.64],
+  });
+  desired.x = 10.6;
+  const dt = 0.1,
+    ordinary = followCamera(
+      game.camera.position,
+      target,
+      desired,
+      dt,
+      game.cameraSurfaces,
+      space,
+      game.cameraFollowTarget,
+    ),
+    limited = limitedTurn(game, target, ordinary, dt);
+  assert.equal(game.cameraSurfaces.entry(target, game.camera.position), 1);
+  assert.equal(game.cameraSurfaces.entry(target, limited), 1);
+  assert.equal(game.cameraSurfaces.entry(target, ordinary), 1);
+  assert.equal(game.cameraSurfaces.entry(game.camera.position, ordinary), 1);
+  assert(game.cameraSurfaces.entry(game.camera.position, limited) < 1);
+  const next = followClearCamera(game, target, desired, dt, space);
+  assert(next.distanceTo(ordinary) < 1e-8);
+});
+
+test("a gentler turn cannot hide a posed foot behind scenery even when its chest arm clears", (t) => {
+  const { game, target, desired, space } = turningFixture(t, {
+      size: [0.14, 1.5, 0.12],
+      position: [0.15, 0.75, 3.1],
+    }),
+    model = new Group(),
+    foot = new THREE.Bone();
+  foot.name = "LeftFoot";
+  model.add(foot);
+  game.player.add(model);
+  game.rig = { model };
+  game.player.updateWorldMatrix(true, true);
+  const ordinary = followCamera(
+      game.camera.position,
+      target,
+      desired,
+      1 / 60,
+      game.cameraSurfaces,
+      space,
+      game.cameraFollowTarget,
+    ),
+    limited = limitedTurn(game, target, ordinary, 1 / 60),
+    body = cameraBodyTargets(game);
+  assert.equal(
+    game.cameraSurfaces.entry(target, limited),
+    1,
+    "the chest arm clears the low obstruction",
+  );
+  assert(
+    cameraBodyVisibility(game.cameraSurfaces, limited, body, game) < 1,
+    "the posed foot is covered in the gentler view",
+  );
+  assert.equal(
+    cameraBodyVisibility(game.cameraSurfaces, ordinary, body, game),
+    1,
+  );
+  const next = followClearCamera(game, target, desired, 1 / 60, space);
+  assert(next.distanceTo(ordinary) < 1e-8);
+  assert.equal(cameraBodyVisibility(game.cameraSurfaces, next, body, game), 1);
+});
 
 test("an overhead wind coupling can clear a nearby walking camera without rewriting look or player state", (t) => {
   const { game, target, desired, space } = fixture(t),

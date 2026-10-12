@@ -1,4 +1,4 @@
-import { MathUtils, Vector3 } from "three";
+import { MathUtils, Quaternion, Vector3 } from "three";
 import { constrainCamera, followCamera } from "./camera-collision.js";
 import {
   cameraBodyTargets,
@@ -6,6 +6,68 @@ import {
 } from "./camera-body-frame.js";
 
 const APPROACH_TIME = 0.3;
+const WALKING_TURN_RATE = 3;
+
+// A short arm can rotate sharply when it leaves a detour or turns toward a
+// new heading. Keep a clear walking view within a modest angular step. Move
+// with the target, retaining the collision solver's radial correction, and
+// verify both the arm and lens path before accepting the slower turn. A newly
+// obstructed view still receives its required immediate correction.
+function gentleWalkingTurn(game, target, next, dt, canOccupy) {
+  if (
+    !game.cameraFollowTarget ||
+    dt <= 0 ||
+    dt > 0.1 ||
+    game.grounded === false ||
+    game.swimming ||
+    game.diving ||
+    game.aiming ||
+    game.climb ||
+    game.ropeRide ||
+    // Anticipatory detours already use the slower follow rate. Preserve their
+    // planned escape path rather than adding angular lag beside the obstacle.
+    game.cameraContactRecovery
+  )
+    return next;
+  const arm = game.camera.position.clone().sub(game.cameraFollowTarget),
+    nextArm = next.clone().sub(target),
+    length = nextArm.length(),
+    angle = arm.angleTo(nextArm),
+    step = WALKING_TURN_RATE * dt;
+  if (arm.length() < 2.2 || length < 2.2 || angle <= step) return next;
+  const from = arm.clone().normalize(),
+    turn = new Quaternion().setFromUnitVectors(
+      from,
+      nextArm.clone().normalize(),
+    ),
+    rotation = new Quaternion().slerp(turn, step / angle),
+    position = from
+      .applyQuaternion(rotation)
+      .multiplyScalar(length)
+      .add(target),
+    start = arm.add(target);
+  if (
+    !canOccupy(start) ||
+    !canOccupy(position) ||
+    constrainCamera(
+      target,
+      position,
+      game.cameraSurfaces,
+      canOccupy,
+    ).distanceTo(position) > 1e-6 ||
+    constrainCamera(start, position, game.cameraSurfaces, canOccupy).distanceTo(
+      position,
+    ) > 1e-6 ||
+    cameraBodyVisibility(
+      game.cameraSurfaces,
+      position,
+      cameraBodyTargets(game),
+      game,
+    ) < 1
+  )
+    return next;
+  return position;
+}
 
 // Anticipate horizontal contact along the current walking direction. Check the
 // intervening follow path too: a clear destination can have a blocked sweep.
@@ -49,7 +111,13 @@ export function followClearCamera(
   viewPitch = game.pitch,
 ) {
   const solve = () =>
-    followClearCameraStep(game, target, desired, dt, canOccupy, viewPitch);
+    gentleWalkingTurn(
+      game,
+      target,
+      followClearCameraStep(game, target, desired, dt, canOccupy, viewPitch),
+      dt,
+      canOccupy,
+    );
   return game.cameraSurfaces?.withSnapshot
     ? game.cameraSurfaces.withSnapshot(solve)
     : solve();

@@ -1304,6 +1304,12 @@ existing follow-camera selection. Its documentation images are captures from
 the game, delivered through checked lossless WebP conversion. Existing runtime
 asset attribution remains in effect; no external asset or recording is added.
 
+The [gentler walking-camera turns](walking-camera-turns.md) adjust the existing
+walking follow response. Their documentation captures use current game assets
+with the preceding and current camera modules; checked lossless WebP conversion
+preserves the captured pixels. Existing asset attribution remains in effect.
+No external geometry, texture, dependency, music or recording is added.
+
 The [crystal resonator frames](resonator-frames.md) add original closed bronze
 staves, hoops, splice straps, bearings, shafts, brackets and lathed limestone
 footings in `src/resonator-frames.js`. Their stone material reuses the credited

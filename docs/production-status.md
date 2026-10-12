@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Gentler walking camera turns](walking-camera-turns.md) reduce the recorded
+  ascending route's largest step from 11.086° to 6.887° and the paired-heart
+  approach from 6.973° to 2.865° per 60 Hz update. The mirrored route is unchanged.
+  All 1,494 recorded updates retain camera-space, arm and registered body-target
+  clearance and full explorer coverage. Controller positions, selected look,
+  eight local legs and six reversible physical turns match the module control.
+  The selected 52 camera and resonance regressions, an additional lens-path
+  isolation and the build pass. Native keyboard/High and touch/Low checks solve
+  the ascending objective and retain the gameplay fields through three reloads
+  each. Required obstruction corrections retain their priority; broader motion
+  remains open.
+
 - [Dry crystal working ground](crystal-working-ground.md) preserves the
   instruments and their front margins during basin excavation, repairing two
   submerged wheel centres and a third wet base. All 33 instruments and controls

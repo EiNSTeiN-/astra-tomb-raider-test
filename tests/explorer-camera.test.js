@@ -285,7 +285,7 @@ test("aim, water and rope cameras discard walking detours without reading posed 
   }
 });
 
-test("a clear body detour remains stable while terrain still shortens the requested arm, then yields when it opens", () => {
+test("a clear body detour remains stable while terrain still shortens the requested arm, then yields gently when it opens", () => {
   const model = new THREE.Group(),
     foot = new THREE.Bone();
   foot.name = "LeftFoot";
@@ -346,10 +346,28 @@ test("a clear body detour remains stable while terrain still shortens the reques
     () => true,
     target,
   );
-  assert(
-    followClearCamera(game, target, desired, 1 / 60, () => true).equals(opened),
-  );
+  const next = followClearCamera(game, target, desired, 1 / 60, () => true);
+  assert(next.distanceTo(detour) < opened.distanceTo(detour));
+  assert(next.distanceTo(desired) < detour.distanceTo(desired));
   assert.equal(game.cameraBodyRecovery, null);
+  game.camera.position.copy(next);
+  for (let frame = 0; frame < 180; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, () => true),
+    );
+    assert.equal(surfaces.entry(target, game.camera.position), 1);
+    assert.equal(
+      cameraBodyVisibility(
+        surfaces,
+        game.camera.position,
+        cameraBodyTargets(game),
+      ),
+      1,
+    );
+    assert(game.camera.position.distanceTo(target) >= 3.2);
+    assert.equal(game.cameraBodyRecovery, null);
+  }
+  assert(game.camera.position.distanceTo(desired) < 0.0001);
   assert.equal(game.yaw, 0);
   assert.equal(game.pitch, 0);
 });
