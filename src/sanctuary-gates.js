@@ -29,6 +29,7 @@ import {
   buildSkyGateCrown,
 } from "./sky-gate-art.js";
 import { buildSkyChamberWall } from "./sky-chamber-walls.js";
+import { buildCrystalVault } from "./crystal-vaults.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -596,31 +597,7 @@ export function buildSanctuaryGate(game, feature, materials) {
       detail,
     );
   } else if (design.crown === "angular") {
-    for (const side of [-1, 1])
-      for (let i = 0; i < 5; i++)
-        block(
-          1.8,
-          0.58,
-          1.6,
-          m.trim,
-          side * (5.7 - i * 1.0),
-          8.0 + i * 0.43,
-          6.5,
-          root,
-          true,
-        );
-    block(3.5, 0.6, 1.8, m.trim, 0, 10.25, 6.5, root, true);
-    for (let i = 0; i < 5; i++) {
-      const gem = add(
-        new THREE.IcosahedronGeometry(0.38, 0),
-        m.inlay,
-        (i - 2) * 0.65,
-        10.6 - Math.abs(i - 2) * 0.15,
-        6.7,
-        detail,
-      );
-      gem.scale.y = 1.55;
-    }
+    buildCrystalVault(game, gate, m);
   } else if (design.crown === "forge") {
     block(14.4, 0.75, 1.9, m.metal, 0, 8.4, 6.5, root, true);
     for (const side of [-1, 1]) {

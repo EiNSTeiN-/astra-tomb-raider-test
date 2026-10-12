@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Crystal archive vaults](crystal-vaults.md) give eight chambers distinct
+  upper masonry, from a low porch to a broken archive and glazed lantern.
+  Both final geometry/threshold cases pass, including 72 restored threshold
+  queries. A 314.078 m assisted controller check completes 32 chamber legs;
+  all 122 final observer, route and native captures are reviewed. Built
+  keyboard/High and touch/Low checks solve a tuning objective, advance progress
+  and preserve complete stores through three reloads each. All 26 new
+  geometries dispose once, and owned browsers and temporary servers close.
+  The broader selection passes 79 of 80 cases: a jungle stage-2 threshold
+  failure also reproduces with the preceding gate/field builders and remains
+  unresolved. The full suite is not green. Lower footprints, instruments,
+  wider cavern composition and full visual acceptance remain open.
+
 - [Cavern sediment and fragments](cavern-deposits.md) adds irregular floor
   deposits and 683 grounded bank fragments. Sixty-two selected cases pass,
   including 49,176 buried-edge probes and 54,324 unchanged movement queries.

@@ -1292,3 +1292,13 @@ position, look, camera and time. Native captures use the actual built interface
 and controls.
 Ten public images preserve decoded RGBA pixels and dimensions through verified
 lossless WebP conversion.
+
+The [crystal archive vaults](crystal-vaults.md) add original closed masonry
+ribs, springing blocks, crossed crowns, fitted bronze and an octagonal lantern
+over existing credited rock maps and shared chamber materials. No external
+asset, dependency, music or recording is added. Controlled comparison captures
+recreate the preceding gate builders in the current environment, alternately
+showing the old and new construction at the same observer lens, player state
+and time, with refreshed reflections. Separate native captures use the actual
+built interface and controls. Fourteen public images preserve decoded RGBA
+pixels and dimensions through verified lossless WebP conversion.
