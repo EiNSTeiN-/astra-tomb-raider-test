@@ -9,17 +9,18 @@ import {
 test("continuous mountain normals agree with independent Cartesian derivatives", () => {
   for (const layer of [0, 1]) {
     const extent = 420,
-      inner = extent * (0.73 + layer * 0.53),
+      geometry = snowMountainGeometry(extent, layer),
+      { radius: inner, depth } = geometry.userData,
       height = (x, z) =>
         mountainHeight(
           Math.atan2(z, x),
-          (Math.hypot(x, z) - inner) / 400,
+          (Math.hypot(x, z) - inner) / depth,
           layer,
           extent,
         );
     for (const angle of [0, 0.7, 1.8, 3.1, 4.3, 6.28])
       for (const across of [0, 0.07, 0.29, 0.53, 0.87, 1]) {
-        const radius = inner + across * 400,
+        const radius = inner + across * depth,
           x = Math.cos(angle) * radius,
           z = Math.sin(angle) * radius,
           dx = (height(x + 0.1, z) - height(x - 0.1, z)) / 0.2,
@@ -34,6 +35,7 @@ test("continuous mountain normals agree with independent Cartesian derivatives",
           `normal at layer ${layer}, ${angle}, ${across}`,
         );
       }
+    geometry.dispose();
   }
 });
 

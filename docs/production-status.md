@@ -13,11 +13,32 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: a current visual audit covering all eight chapters is still required; shared primitive forms and repetitive spaces remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: 194 current dry standing views reviewed across eight chapters; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- [Alpine horizon composition](alpine-horizon.md) widens the two snow ranges,
+  lowers and separates their summits, reduces narrow erosion cuts and adjusts
+  snow coverage on steeper faces. All 31 final standing/direction views are
+  reviewed; the 23 shared baseline states match exactly. All 23 focused tests,
+  the build, three graphics settings, depth comparisons and once-only disposal
+  pass. Native keyboard/High and portrait touch/Low pass movement, crouch,
+  jump/landing, map access and two whole-store reload comparisons each. Mesh,
+  triangle and source-array counts are unchanged. The broader court, discovery,
+  traversal, listening and device requirements remain open.
+
+- [Current campaign ground views](campaign-ground-review.md) review 194 High
+  captures across all eight chapters: every main court from both sides,
+  arrival, sixteen discovery samples and sixteen path midpoints. All recorded
+  views retain legal grounded roots, full health, clear camera space and
+  registered body targets, finite HDR and linked shaders. Close wall samples
+  demonstrate that a projected court centre does not prove a whole court is
+  visible. Repeated main structures and sparse surrounding areas remain;
+  complete discoveries, moving/raised/underwater traversal and listening remain
+  outside this static sample. Every chapter browser and server closes, and the
+  final process, port and runtime audit is clear.
 
 - [Crystal archive wall detail](crystal-wall-detail.md) gives the eight
   chambers varied blind-bay profiles, geometric inlays and coursed inner
