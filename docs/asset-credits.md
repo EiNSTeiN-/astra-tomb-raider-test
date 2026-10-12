@@ -1299,6 +1299,13 @@ documentation images are game captures with checked lossless WebP delivery.
 No external geometry, texture, recording or dependency is added; existing
 runtime asset attribution remains in effect.
 
+The [crystal archive paving](crystal-floors.md) adds original stone coursing,
+joint, fracture and inlay calculations in `src/crystal-floor-material.js`.
+It reuses the existing credited stone paving and cavern maps without adding
+an external asset, texture, recording or dependency. Documentation captures
+come from the game; their lossless WebP delivery is checked against the
+captured pixels and dimensions.
+
 The [crystal camera recovery](crystal-camera-recovery.md) changes only the
 existing follow-camera selection. Its documentation images are captures from
 the game, delivered through checked lossless WebP conversion. Existing runtime

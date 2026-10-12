@@ -11,6 +11,13 @@ import {
   cavernTerrainRoughness,
 } from "./cavern-strata.js";
 import {
+  crystalFloorUniforms,
+  crystalFloorDeclarations,
+  crystalFloorColor,
+  crystalFloorNormal,
+  crystalFloorRoughness,
+} from "./crystal-floor-material.js";
+import {
   meridianDeclarations,
   meridianColor,
   meridianNormal,
@@ -75,6 +82,7 @@ ${desertTerrainDeclarations}
 ${volcanicDeclarations}
 ${meridianDeclarations}
 ${cavernTerrainDeclarations}
+${crystalFloorDeclarations}
 ${snowDeclarations}
 `;
 
@@ -139,6 +147,7 @@ terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 #endif
 ${coastalAlbedo}
 ${skyTerrainAlbedo}
+${crystalFloorColor}
 diffuseColor.rgb *= terrainAlbedo * mix(.87, 1.04, terrainNoise(vTerrainPosition.xz * .013));
 `;
 
@@ -164,6 +173,7 @@ ${snowRoughness}
 terrainRough = mix(terrainRough, rockRough, terrainSlope);
 terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
+${crystalFloorRoughness}
 float roughnessFactor = roughness * clamp(terrainRough, .42, 1.0);
 `;
 
@@ -202,6 +212,7 @@ terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
     terrainSurfaceNormal(texture2D(verdureNormal, verdureUv).xyz, verdureUv, normal, .38), growthWeight));
 #endif
 ${skyGroundNormal}
+${crystalFloorNormal}
 normal = terrainN;
 `;
 
@@ -298,7 +309,10 @@ export function terrainMaterial(game) {
   };
   if (biome === "snow") material.defines = { TERRAIN_SNOW: 1 };
   if (biome === "desert") material.defines = { TERRAIN_DESERT: 1 };
-  if (biome === "crystal") material.defines = { TERRAIN_CAVERN: 1 };
+  if (biome === "crystal") {
+    material.defines = { TERRAIN_CAVERN: 1 };
+    Object.assign(uniforms, crystalFloorUniforms(game.map));
+  }
   if (biome === "eclipse") {
     const rooms = game.map?.rooms || [];
     material.defines = {
@@ -380,6 +394,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "eclipse"].includes(biome) ? 9 : ["desert", "water", "volcano", "crystal"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["snow", "eclipse", "crystal"].includes(biome) ? 9 : ["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
   return material;
 }

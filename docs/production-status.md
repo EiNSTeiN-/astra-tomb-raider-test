@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Crystal archive paving](crystal-floors.md) gives eight chambers distinct
+  stone floors over the existing terrain. All eight chapters retain identical
+  geometry buffers, heights, water metadata, vertex shaders and texture requests;
+  the other seven fragment templates and uniforms match after removing inactive
+  floor blocks. All 27 paired High/Medium/Low views retain their camera and player
+  states and primitive counts, with linked shaders and finite HDR. The terrain
+  material and nine textures dispose once. All 49 local route legs and 33
+  reversible physical turns pass, along with 30 selected regressions, the build
+  and native keyboard/touch puzzle, movement and three reloads per input mode.
+  Wider cavern composition and full campaign visual acceptance remain open.
+
 - [Gentler walking camera turns](walking-camera-turns.md) reduce the recorded
   ascending route's largest step from 11.086° to 6.887° and the paired-heart
   approach from 6.973° to 2.865° per 60 Hz update. The mirrored route is unchanged.
