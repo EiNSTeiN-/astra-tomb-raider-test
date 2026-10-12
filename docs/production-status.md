@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Nearby crystal camera recovery](crystal-camera-recovery.md) retries modest
+  neighboring angles before retaining a large upward detour. The ascending
+  return lowers from 60.16° to 30.11°; the mirrored front lowers from 41.74° to
+  29.95°. All 1,519 recorded updates retain clear registered body targets,
+  camera space, swept arms and full explorer coverage. Eight local legs and
+  six reversible turns retain their preceding arrivals and selected look.
+  All 49 selected regressions and the build pass. Built keyboard/High and
+  touch/Low checks solve the ascending objective and preserve saved gameplay
+  fields through three reloads each. Bright foreground glow, sharper motion
+  corrections and broader campaign framing remain open.
+
 - [Crystal resonator frames](resonator-frames.md) give 33 instruments eight
   bronze constructions, mounted wheels and dressed stone bases. Delivered
   hardware and wider crouch margins repair reproduced knee, hair and base-rim

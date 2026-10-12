@@ -139,11 +139,17 @@ function followClearCameraStep(
         [-0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
       ),
     ],
+    retained = bodyRecovery && game.cameraBodyRecovery,
+    lowerNearbyFirst =
+      retained &&
+      MathUtils.clamp(viewPitch + retained[1], -0.65, 1.05) - viewPitch > 0.4,
     candidates = [
-      ...(bodyRecovery && game.cameraBodyRecovery
-        ? [game.cameraBodyRecovery]
-        : []),
+      ...(retained && !lowerNearbyFirst ? [retained] : []),
       ...nearbyCandidates,
+      // A bank can need an overhead view during a turn, then expose a lower
+      // neighboring arm. Do not let that remembered lift prevent trying it.
+      // The existing body and swept-arm checks still govern each option.
+      ...(lowerNearbyFirst ? [retained] : []),
       // A steep foreground bank can cover the boots while the central arm
       // clears it. Lift the view before swinging far around the explorer.
       ...[0, -0.15, 0.15, -0.3, 0.3].flatMap((yaw) =>

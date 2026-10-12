@@ -18,6 +18,9 @@ import {
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
+import { createCavernProfile } from "../src/cavern-profile.js";
+import { buildFieldGates } from "../src/field-world.js";
+import { buildResonanceCourts } from "../src/resonance-courts.js";
 import { buildPalaceArchitecture } from "../src/palace-architecture.js";
 import { buildSkyBridges } from "../src/sky-bridges.js";
 import { followClearCamera } from "../src/camera-follow.js";
@@ -201,6 +204,90 @@ test("a crystal slope turn recovers a visible walking view beyond the side neigh
     camera: [143.63657474893444, 17.929487723334116, 230.41142431792628],
     yaw: -2.2144160504385155,
   });
+});
+
+test("a remembered overhead bank detour yields to a clear nearby walking view", (t) => {
+  const game = terrainFixture(t, 6);
+  game.groundHeight = game.terrainProfile.surfaceHeight;
+  const previousDocument = globalThis.document;
+  globalThis.document = {
+    createElement: () => ({
+      getContext: () => ({ fillText() {}, clearRect() {} }),
+    }),
+  };
+  t.after(() => (globalThis.document = previousDocument));
+  game.cameraSurfaces = new CameraSurfaces(game.world);
+  game.cavernProfile = createCavernProfile(game.map, game.terrainProfile);
+  game.items = game.map.features.filter((f) => f.type === "mechanism");
+  game.progress = { stage: 3, completed: false, field: [] };
+  game.darkMat = game.stoneMat;
+  game.glowMat = game.goldMat;
+  for (const f of game.items) {
+    f.group = new Group();
+    f.group.position.set(f.x * 7, game.groundHeight(f.x * 7, f.z * 7), f.z * 7);
+    game.world.add(f.group);
+    f.core = new THREE.Object3D();
+    f.group.add(f.core);
+  }
+  buildFieldGates(game);
+  buildResonanceCourts(game);
+  game.world.updateMatrixWorld(true);
+  game.cameraSurfaces.rebuild();
+  game.player.position.set(
+    203.00389505069535,
+    12.14476372286561,
+    194.31881031765735,
+  );
+  game.yaw = 2.3725065556122478;
+  game.pitch = 0.13;
+  game.camera.position.set(
+    204.83768385647622,
+    18.23939242459835,
+    192.42507149129528,
+  );
+  game.cameraBodyRecovery = [0, 1];
+  const target = game.player.position.clone().add(new Vector3(0, 1.3, 0)),
+    desired = target
+      .clone()
+      .add(
+        new Vector3(
+          Math.sin(game.yaw) * Math.cos(game.pitch) * 5.3,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.yaw) * Math.cos(game.pitch) * 5.3,
+        ),
+      ),
+    space = (p) => game.cameraSpace(p),
+    feet = game.player.position.clone(),
+    settled = [];
+  game.cameraFollowTarget = target.clone();
+  assert(
+    constrainCamera(target, desired, game.cameraSurfaces, space).distanceTo(
+      target,
+    ) < 3.2,
+    "the original straight arm is still obstructed in the recorded court",
+  );
+  for (let frame = 0; frame < 180; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, space),
+    );
+    assert(space(game.camera.position));
+    assert(game.camera.position.distanceTo(target) >= 3.2);
+    assert.equal(game.cameraSurfaces.entry(target, game.camera.position), 1);
+    assert(game.player.position.equals(feet));
+    assert.equal(game.yaw, 2.3725065556122478);
+    assert.equal(game.pitch, 0.13);
+    if (frame >= 120) settled.push(game.camera.position.clone());
+  }
+  const arm = game.camera.position.clone().sub(target),
+    actualPitch = Math.atan2(arm.y - 0.2, Math.hypot(arm.x, arm.z));
+  assert(
+    actualPitch <= game.pitch + 0.4 + 1e-6,
+    "a clear lower neighbor must replace the unnecessary overhead detour",
+  );
+  assert(
+    settled.every((p) => p.distanceTo(settled[0]) < 0.0001),
+    "the recovered bank view does not repeatedly climb and retract",
+  );
 });
 
 test("a cloud terrace turn retains a visible walking view beside its steep bank", (t) => {

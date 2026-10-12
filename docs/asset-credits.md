@@ -1293,6 +1293,11 @@ and controls.
 Ten public images preserve decoded RGBA pixels and dimensions through verified
 lossless WebP conversion.
 
+The [crystal camera recovery](crystal-camera-recovery.md) changes only the
+existing follow-camera selection. Its documentation images are captures from
+the game, delivered through checked lossless WebP conversion. Existing runtime
+asset attribution remains in effect; no external asset or recording is added.
+
 The [crystal resonator frames](resonator-frames.md) add original closed bronze
 staves, hoops, splice straps, bearings, shafts, brackets and lathed limestone
 footings in `src/resonator-frames.js`. Their stone material reuses the credited

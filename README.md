@@ -7,7 +7,9 @@ An original, browser-based third-person archaeological adventure built with Thre
 The [crystal resonator frames](docs/resonator-frames.md) give 33 tuning
 instruments eight bronze constructions, mounted wheel bearings and dressed
 stone bases. Delivered hardware protects the explorer and camera, and older
-occupied saves recover nearby. Wider chamber composition remains under review.
+occupied saves recover nearby. [Nearby camera recovery](docs/crystal-camera-recovery.md)
+also lowers a retained overhead view after crystal turns. Wider chamber
+composition remains under review.
 
 The [crystal archive vaults](docs/crystal-vaults.md) give eight objective
 chambers distinct upper profiles, from a low porch and mirrored nave to a
