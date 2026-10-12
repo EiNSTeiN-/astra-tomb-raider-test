@@ -19,6 +19,14 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Foreground foliage framing](foliage-framing.md) opens a posed character view
+  through grass and leaves, with whole-clump low-plant fade. Twenty-six selected
+  cases pass; sixteen rendered stance checks reduce covered body pixels from
+  4,463 to zero across 51,312 sampled body pixels. All 32 comparison captures and
+  both built keyboard/High and touch/Low captures are reviewed. Exact arrivals,
+  ordinary input and two complete-store reloads per case pass. Wider canopy,
+  continuous motion, foreground density and full visual acceptance remain open.
+
 - [Camp body clearance and recovery](camp-body-contact.md) follows delivered
   chest/bedding/kettle geometry and keeps grounded bodies outside the hearth.
   Six recorded jumps now advance horizontally by at most 0.100 m per 60 Hz

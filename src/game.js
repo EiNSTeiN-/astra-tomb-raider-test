@@ -1,4 +1,5 @@
 import { buildStationYards } from "./station-yards.js";
+import { FoliageFraming } from "./foliage-framing.js";
 import { buildMonasteryGardens } from "./monastery-gardens.js";
 import { buildDesertForecourts } from "./desert-forecourts.js";
 import { buildCourtCover } from "./court-cover.js";
@@ -1696,6 +1697,8 @@ export class Adventure {
     }
   }
   renderScene(dt = 0) {
+    this.foliageFraming ??= new FoliageFraming();
+    this.foliageFraming.update(this);
     updateSunBridgeDepth(this);
     if (this.cinematic) this.cinematic.render(dt);
     else this.renderer.render(this.scene, this.camera);

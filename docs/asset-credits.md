@@ -1271,3 +1271,13 @@ preceding production application.
 The native captures use the actual built interface and controls. All twelve
 public images preserve decoded RGBA pixels and dimensions through verified
 lossless WebP conversion.
+
+The [foreground foliage framing pass](foliage-framing.md) adds original shader
+and view-framing code over the credited grass, regional plants, fern/shrub
+models and tree leaf atlases. Their artwork, placement, wind, geometry positions
+and bundled audio remain intact. No external asset, dependency, music or
+recording is added. Comparison captures disable the new mask inside the current
+scene while preserving pose, root, look, camera and simulation time. Native
+captures use the actual built interface and controls. Fourteen public images
+are verified lossless WebP conversions with identical decoded RGBA pixels and
+dimensions.

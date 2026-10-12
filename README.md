@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [foreground foliage pass](docs/foliage-framing.md) opens a soft view of the
+explorer through leaves and grass. Low plants fade as whole clumps; trunks,
+stones, artwork and movement remain intact. Sixteen rendered stance checks
+across eight chapters and built keyboard/touch input and reloads pass. Wider
+canopy, moving-view and foreground-density review remains open.
+
 The [camp body-clearance pass](docs/camp-body-contact.md) gives the hearth,
 bedding and kettle finite body clearance. Descending jumps rebound through
 ordinary motion, and older occupied saves/checkpoints recover nearby while
