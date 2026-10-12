@@ -43,6 +43,13 @@ export function canCrouch(game) {
 export function toggleCrouch(game) {
   if (game.paused || game.active === false) return false;
   game.crouching = !game.crouching && canCrouch(game);
+  if (game.crouching && game.canMove) {
+    const p = game.player.position;
+    if (!game.canMove(p.x, p.z, p.y - game.groundHeight(p.x, p.z))) {
+      game.crouching = false;
+      game.cb?.toast?.("Step back to crouch.");
+    }
+  }
   return game.crouching;
 }
 

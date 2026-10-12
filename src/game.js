@@ -1580,7 +1580,11 @@ export class Adventure {
         continue;
       }
       if (o.fieldStation) {
-        if (stationBlocked(o, x, worldY, z, clearance)) return false;
+        const padding =
+          this.crouching || this.rig?.crouchBlend > 0.01
+            ? (o.crouchPadding ?? o.bodyPadding)
+            : o.bodyPadding;
+        if (stationBlocked(o, x, worldY, z, clearance, padding)) return false;
         continue;
       }
       if (

@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Crystal resonator frames](resonator-frames.md) give 33 instruments eight
+  bronze constructions, mounted wheels and dressed stone bases. Delivered
+  hardware and wider crouch margins repair reproduced knee, hair and base-rim
+  contacts; all 38 hoop legs reach beneath their local floor. All 51 selected
+  regressions pass. Ninety-nine frame poses sample 4,761,405 character vertex
+  records without frame or terrain embedding; additional boundary and moved
+  reader poses also clear. All 49 local controller legs and 33 reversible
+  wheel interactions pass. Built keyboard/High and touch/Low checks solve an
+  objective, preserve complete stores through three reloads each and verify
+  the stance boundary; an older occupied save recovers 0.75 m away with its
+  other saved fields intact. Final captures and rendering costs are recorded
+  in the notes. Wider chamber footprints, cavern composition, body-face
+  coverage and campaign visual acceptance remain open.
+
 - [Gate threshold verification](gate-threshold-verification.md) resolves the
   original jungle assertion by distinguishing raised-panel obstruction from
   standing terrain safety. All 621 panel/map samples and all 207 normal

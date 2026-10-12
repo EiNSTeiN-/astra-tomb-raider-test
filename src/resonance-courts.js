@@ -16,6 +16,12 @@ import { quartzGeometry } from "./cavern-geometry.js";
 import { mineralMaterial } from "./cavern-material.js";
 import { hydraulicPlaque } from "./hydraulic-geometry.js";
 import { poseHands } from "./pose.js";
+import { pbrMaterial } from "./visuals.js";
+import {
+  buildResonatorFrame,
+  resonanceHardwareSolid,
+  resonanceCollarSolid,
+} from "./resonator-frames.js";
 
 export function resonanceReady(game, site) {
   return (
@@ -34,7 +40,10 @@ export function buildResonanceCourts(game) {
   if (game.level.biome !== "crystal") return false;
   const bronze = patinatedBronze(),
     stone = game.darkMat,
-    gold = game.goldMat;
+    gold = game.goldMat,
+    footingStone = pbrMaterial("rock", 0x85949a);
+  footingStone.name = "Dressed resonance limestone";
+  footingStone.normalScale.set(0.35, 0.35);
   const pieces = [new THREE.TorusGeometry(0.42, 0.045, 8, 36)];
   for (let i = 0; i < 6; i++)
     pieces.push(
@@ -135,20 +144,22 @@ export function buildResonanceCourts(game) {
           [0x8cafdf, 0x93c7bc, 0xbc99da, 0xa2adce, 0xc1b6db][index],
         ),
         material = mineralMaterial(color, level);
-      add(
-        new THREE.CylinderGeometry(1.12, 1.35, 0.38, 12),
-        stone,
-        x,
-        y + 0.16,
-        z,
+      const frame = buildResonatorFrame(
+        game,
+        site,
+        body,
+        index,
+        bronze,
+        footingStone,
       );
-      add(
+      const pedestal = add(
         new THREE.CylinderGeometry(0.86, 1.05, 0.75, 12),
         bronze,
         x,
         y + 0.67,
         z,
       );
+      resonanceHardwareSolid(game, site, pedestal);
       const crystal = add(
         quartzGeometry(0.66, 3.05 + (index % 3) * 0.28, stage * 0.2),
         material,
@@ -157,18 +168,9 @@ export function buildResonanceCourts(game) {
         0,
         body,
       );
+      resonanceHardwareSolid(game, site, crystal);
       for (const a of [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3]) {
-        const support = add(
-          new THREE.BoxGeometry(0.14, 2.05, 0.17),
-          bronze,
-          Math.sin(a) * 0.87,
-          1.6,
-          Math.cos(a) * 0.87,
-          body,
-        );
-        support.rotation.z = -Math.sin(a) * 0.15;
-        support.rotation.x = Math.cos(a) * 0.15;
-        add(
+        const shard = add(
           quartzGeometry(0.18, 0.65, index + a),
           material,
           Math.sin(a) * 0.95,
@@ -176,6 +178,7 @@ export function buildResonanceCourts(game) {
           Math.cos(a) * 0.95,
           body,
         );
+        resonanceHardwareSolid(game, site, shard);
       }
       for (const height of [0.99, 2.36]) {
         const ring = add(
@@ -186,6 +189,7 @@ export function buildResonanceCourts(game) {
           z,
         );
         ring.rotation.x = Math.PI / 2;
+        resonanceHardwareSolid(game, site, ring);
       }
       const collar = new THREE.Group();
       collar.position.set(0, 1.43, 0);
@@ -212,7 +216,26 @@ export function buildResonanceCourts(game) {
         tick.rotation.y = a;
       }
       mergeArchitecture(collar);
+      resonanceCollarSolid(game, site, body);
       const wheel = add(wheelGeometry, bronze, 0, 1.07, 1.12, body);
+      // The circular rim is invariant under the tuning rotation. Its physical
+      // surface protects the operator without freezing the rotating spokes.
+      const rim = add(
+        new THREE.TorusGeometry(0.42, 0.045, 8, 36),
+        bronze,
+        0,
+        1.07,
+        1.12,
+        body,
+      );
+      resonanceHardwareSolid(game, site, rim);
+      body.remove(rim);
+      rim.geometry.dispose();
+      game.cameraSurfaces?.capture(wheel, {
+        small: true,
+        thin: true,
+        cylinderAxis: "z",
+      });
       const handles = [-1, 1].map((side) => {
         const h = new THREE.Object3D();
         h.position.set(side * 0.36, 0, 0.03);
@@ -239,7 +262,8 @@ export function buildResonanceCourts(game) {
         new THREE.BoxGeometry(1.95, 0.38, 0.08).translate(0, 0.65, 1.23),
         new THREE.BoxGeometry(1.48, 0.28, 0.06).translate(0, 1.86, 1),
       ];
-      add(mergeGeometries(plateParts), stone, 0, 0, 0, body);
+      const plates = add(mergeGeometries(plateParts), stone, 0, 0, 0, body);
+      resonanceHardwareSolid(game, site, plates);
       plateParts.forEach((part) => part.dispose());
       const rings = [0, 1].map((i) => {
         const m = add(
@@ -289,6 +313,7 @@ export function buildResonanceCourts(game) {
         center: root.position.clone().add(new THREE.Vector3(x, y, z)),
         body,
         crystal,
+        frame,
         material,
         level,
         color,
@@ -357,7 +382,9 @@ export function buildResonanceCourts(game) {
     const record = hydraulicPlaque("READ · TUNE · REMEMBER", 1.95);
     record.position.set(0, floor(0, 17) + 0.64, 17.26);
     root.add(record);
-    site.tablet = control("tablet", 0, 0, 18.3);
+    // Counterpoint D occupies z=20. Keep the reader and its small working
+    // margin between that physical base and the inscription stand.
+    site.tablet = control("tablet", 0, 0, stage === 4 ? 18 : 18.3);
     game.obstacles.push({
       x: root.position.x,
       z: root.position.z + 17,

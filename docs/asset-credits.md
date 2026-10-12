@@ -1293,6 +1293,14 @@ and controls.
 Ten public images preserve decoded RGBA pixels and dimensions through verified
 lossless WebP conversion.
 
+The [crystal resonator frames](resonator-frames.md) add original closed bronze
+staves, hoops, splice straps, bearings, shafts, brackets and lathed limestone
+footings in `src/resonator-frames.js`. Their stone material reuses the credited
+Rock Boulder Dry maps with a reduced normal scale. The original quartz,
+bronze, labels and positional tuning voices remain in use. No third-party
+asset, recording or music is added. Documentation captures come from the game;
+their lossless WebP delivery is checked against the captured pixels.
+
 The [crystal archive vaults](crystal-vaults.md) add original closed masonry
 ribs, springing blocks, crossed crowns, fitted bronze and an octagonal lantern
 over existing credited rock maps and shared chamber materials. No external
