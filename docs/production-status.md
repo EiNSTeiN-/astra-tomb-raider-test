@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Gate threshold verification](gate-threshold-verification.md) resolves the
+  original jungle assertion by distinguishing raised-panel obstruction from
+  standing terrain safety. All 621 panel/map samples and all 207 normal
+  center-passage samples pass. A retained regression requires the steep jungle
+  point to reject standing while its two adjacent approaches remain clear.
+  All sixteen final gate cases pass. The application code and verified vault
+  production build are unchanged; the full campaign suite is not rerun.
+  Wider bank approaches and continuous-route acceptance remain open.
+
 - [Crystal archive vaults](crystal-vaults.md) give eight chambers distinct
   upper masonry, from a low porch to a broken archive and glazed lantern.
   Both final geometry/threshold cases pass, including 72 restored threshold
@@ -27,10 +36,12 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   keyboard/High and touch/Low checks solve a tuning objective, advance progress
   and preserve complete stores through three reloads each. All 26 new
   geometries dispose once, and owned browsers and temporary servers close.
-  The broader selection passes 79 of 80 cases: a jungle stage-2 threshold
-  failure also reproduces with the preceding gate/field builders and remains
-  unresolved. The full suite is not green. Lower footprints, instruments,
-  wider cavern composition and full visual acceptance remain open.
+  The original broader selection passed 79 of 80 cases: a jungle stage-2
+  threshold assertion also failed with the preceding gate/field builders.
+  The subsequent threshold investigation
+  above resolves its incorrect standing assumption; the full suite has not
+  been rerun. Lower footprints, instruments, wider cavern composition and
+  full visual acceptance remain open.
 
 - [Cavern sediment and fragments](cavern-deposits.md) adds irregular floor
   deposits and 683 grounded bank fragments. Sixty-two selected cases pass,

@@ -74,7 +74,7 @@ function open(game, gate) {
   }
 }
 
-test("all 69 chapter gates have regional construction, finite batches, retained camera surfaces, and a clear restored threshold", (t) => {
+test("all 69 chapter gates retain regional construction, clear restored panels and a standing centre passage", (t) => {
   assert.equal(
     new Set(Object.values(GATE_DESIGNS).map((d) => d.panel)).size,
     8,
@@ -125,13 +125,45 @@ test("all 69 chapter gates have regional construction, finite batches, retained 
       for (const dx of [-3, 0, 3])
         for (const dz of [5.8, 6.5, 7.2])
           assert.equal(
-            game.canMove(c.x + dx, c.z + dz, 0),
+            // Inspect the panel/map obstruction at floor height. Some side
+            // samples lie on steep banks or excavated coastal beds, where
+            // the separate standing-body terrain guard must still reject a
+            // grounded pose after the gate has opened.
+            game.canMove(c.x + dx, c.z + dz, 0, 0),
             true,
             `${game.level.id} ${gate.stage} threshold ${dx},${dz}`,
           );
+      for (const dz of [5.8, 6.5, 7.2])
+        assert.equal(
+          game.canMove(c.x, c.z + dz, 0),
+          true,
+          `${game.level.id} ${gate.stage} standing centre ${dz}`,
+        );
     }
   }
   assert.equal(total, 69);
+});
+
+test("an open jungle gate retains steep-bank standing rejection and a clear adjacent approach", (t) => {
+  const { game } = fixture(t, 0, null, true),
+    gate = game.fieldGates[2],
+    x = gate.root.position.x - 3,
+    z = gate.root.position.z + 7.2;
+  game.progress.field = [0, 1, 2].map((i) => `field-2-${i}`);
+  updateSanctuaryGate(game, gate, 100);
+  const y = game.groundHeight(x, z),
+    highestCorner = Math.max(
+      ...[-0.45, 0.45].flatMap((dx) =>
+        [-0.45, 0.45].map((dz) => game.groundHeight(x + dx, z + dz) - y),
+      ),
+    );
+  // This is the original failed threshold: its NE body-margin terrain rises
+  // about 0.743 m. An open shutter cannot make that a safe standing pose.
+  assert(highestCorner > 0.7);
+  assert.equal(game.canMove(x, z, 0, 0), true, "raised panel clears floor");
+  assert.equal(game.canMove(x, z, 0), false, "steep standing bank remains solid");
+  assert.equal(game.canMove(x, gate.root.position.z + 6.5, 0), true);
+  assert.equal(game.canMove(gate.root.position.x, z, 0), true);
 });
 
 test("coastal sluice footings meet the terrain across their full width and protect submerged camera approaches", (t) => {

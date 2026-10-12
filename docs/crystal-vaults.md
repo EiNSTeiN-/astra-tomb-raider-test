@@ -54,11 +54,17 @@ resolves the first chamber's narrow aisle, which the preceding 1.4 m inspection
 grid could not sample. The collision and water predicates remain unchanged;
 starting stances avoid the resonance stones.
 
-The eight-file regression selection passes 79 of 80 cases. Its sole failure is
+The original eight-file regression selection passed 79 of 80 cases. Its sole
+failure was
 `verdant` stage 2 at the restored threshold offset `(-3, +7.2)`. Isolated copies
 of the preceding gate and field builders reproduce the same failure, with
 movement and terrain code identical to the published commit. The failure
-remains unresolved and prevents a claim that the full regression suite passes.
+was recorded as unresolved at the vault publication. The subsequent
+[threshold investigation](gate-threshold-verification.md) finds that the
+raised gate clears this point, while its steep terrain correctly rejects a
+grounded standing body. The corrected gate test distinguishes those queries;
+all sixteen final gate cases pass, including normal standing clearance along
+all 69 center passages. The complete campaign suite has not been rerun.
 Both final vault cases pass, including all eight locked thresholds and all
 72 restored threshold queries for the affected crystal chambers.
 
