@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Cavern sediment and fragments](cavern-deposits.md) adds irregular floor
+  deposits and 683 grounded bank fragments. Sixty-two selected cases pass,
+  including 49,176 buried-edge probes and 54,324 unchanged movement queries.
+  A 908 m assisted controller circuit reaches three chambers and returns;
+  all seventeen revised views, eight final comparison pairs and eight native
+  views are reviewed. Both built keyboard/High and touch/Low inputs and two
+  complete-store reloads per case pass. All 71 debris geometries dispose once.
+  Rendering cost is recorded; broader cavern composition, repeated
+  installations and full visual acceptance remain open.
+
 - [Foreground foliage framing](foliage-framing.md) opens a posed character view
   through grass and leaves, with whole-clump low-plant fade. Twenty-six selected
   cases pass; sixteen rendered stance checks reduce covered body pixels from

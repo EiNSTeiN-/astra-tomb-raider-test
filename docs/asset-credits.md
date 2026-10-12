@@ -1281,3 +1281,14 @@ scene while preserving pose, root, look, camera and simulation time. Native
 captures use the actual built interface and controls. Fourteen public images
 are verified lossless WebP conversions with identical decoded RGBA pixels and
 dimensions.
+
+The [cavern floor pass](cavern-deposits.md) adds original sediment shader layers
+and shallow limestone-fragment geometry over the existing credited rock maps.
+It introduces no external asset, dependency, music or recording. Comparison
+captures reconstruct legal circuit stances in the current application, replace
+the new terrain layers with the preceding layers and hide the new debris.
+Both views refresh water reflections and preserve the same posed explorer,
+position, look, camera and time. Native captures use the actual built interface
+and controls.
+Ten public images preserve decoded RGBA pixels and dimensions through verified
+lossless WebP conversion.

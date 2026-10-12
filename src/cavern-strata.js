@@ -46,9 +46,26 @@ ${cavernStrata}
 export const cavernTerrainColor = /* glsl */ `
 #ifdef TERRAIN_CAVERN
   KarstSurface karst=karstSurface(vTerrainPosition,normalize(vTerrainNormal));
+  vec2 depositP=vTerrainPosition.xz;
+  float depositWarp=karstNoise(depositP*.036+vec2(53.,13.));
+  float depositFlow=depositP.x*.086-depositP.y*.063+sin(depositP.y*.029)*1.4+depositWarp*3.8;
+  float depositFoot=max(.002,fwidth(depositFlow));
+  float depositEdge=abs(fract(depositFlow)-.5);
+  float depositBand=(1.-smoothstep(.13,.32+depositFoot,depositEdge))
+    *smoothstep(.27,.67,karstNoise(depositP*.057+vec2(9.,71.)));
+  float depositFloor=smoothstep(.7,.97,vTerrainNormal.y)*(1.-vCavernRock);
+  float sediment=depositBand*depositFloor;
+  float dampChannel=(1.-smoothstep(.015,.09+depositFoot,depositEdge))
+    *depositFloor*(.35+.65*depositWarp);
+  float grit=karstNoise(depositP*2.8+vec2(11.,37.));
+  float depositRelief=sediment*(grit-.5)*.012-dampChannel*.006;
   cliffColor=karstColor(cliffColor,karst);
   earthColor=karstColor(earthColor,karst)*mix(.66,.78,karst.dust);
   earthColor=mix(earthColor,vec3(.115,.11,.10),karst.dust*.18);
+  vec3 sedimentColor=vec3(.16,.119,.079)*mix(.73,1.2,grit);
+  earthColor=mix(earthColor,sedimentColor,sediment*.72);
+  earthColor*=1.-dampChannel*.34;
+  pavingColor=mix(pavingColor,sedimentColor,sediment*.32);
   terrainSlope=max(terrainSlope,clamp(vCavernRock,0.,1.)*.88);
   pavingWeight*=1.-clamp(vCavernRock,0.,1.);
 #endif
@@ -56,12 +73,15 @@ export const cavernTerrainColor = /* glsl */ `
 export const cavernTerrainNormal = /* glsl */ `
 #ifdef TERRAIN_CAVERN
   earthN=karstNormal(normalize(mix(normal,earthN,.42-karst.dust*.12)),karst.relief*.7);
+  earthN=karstNormal(earthN,depositRelief);
   cliffN=karstNormal(normalize(mix(normal,cliffN,.68)),karst.relief);
 #endif
 `;
 export const cavernTerrainRoughness = /* glsl */ `
 #ifdef TERRAIN_CAVERN
   terrainRough=mix(.94,.7,karst.damp)*(1.-pavingWeight)+terrainRough*pavingWeight;
+  terrainRough=mix(terrainRough,.96,sediment*.8);
+  terrainRough=mix(terrainRough,.56,dampChannel);
   rockRough=mix(.91,.59,karst.damp);
 #endif
 `;
