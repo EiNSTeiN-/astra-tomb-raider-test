@@ -8,7 +8,9 @@ The [crystal resonator frames](docs/resonator-frames.md) give 33 tuning
 instruments eight bronze constructions, mounted wheel bearings and dressed
 stone bases. Delivered hardware protects the explorer and camera, and older
 occupied saves recover nearby. [Nearby camera recovery](docs/crystal-camera-recovery.md)
-also lowers a retained overhead view after crystal turns. Wider chamber
+also lowers a retained overhead view after crystal turns.
+[Dry working ground](docs/crystal-working-ground.md) keeps reservoir water
+beside the instruments and their operating positions. Wider chamber
 composition remains under review.
 
 The [crystal archive vaults](docs/crystal-vaults.md) give eight objective

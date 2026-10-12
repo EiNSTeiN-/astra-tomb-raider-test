@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Dry crystal working ground](crystal-working-ground.md) preserves the
+  instruments and their front margins during basin excavation, repairing two
+  submerged wheel centres and a third wet base. All 33 instruments and controls
+  are dry, with 4,224 footprint probes above the wave crests; all four pools
+  retain visible water. Only 98 crystal height samples change, and the other
+  seven terrain arrays and all water metadata remain identical. All 99 sampled
+  standing, crouching and tuning poses clear their hardware and terrain. All
+  49 local controller legs and 33 reversible physical turns pass, along with
+  sixteen desktop/portrait puzzle views, 73 selected regressions and the build.
+  Native keyboard/High and touch/Low checks solve the mirrored objective,
+  retain gameplay fields through reloads, and restore the recorded older wet
+  operating position on dry ground before a physical wheel turn and reload.
+  Broader composition, motion and campaign visual acceptance remain open.
+
 - [Nearby crystal camera recovery](crystal-camera-recovery.md) retries modest
   neighboring angles before retaining a large upward detour. The ascending
   return lowers from 60.16° to 30.11°; the mirrored front lowers from 41.74° to

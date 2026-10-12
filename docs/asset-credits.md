@@ -1293,6 +1293,12 @@ and controls.
 Ten public images preserve decoded RGBA pixels and dimensions through verified
 lossless WebP conversion.
 
+The [crystal working-ground repair](crystal-working-ground.md) preserves
+original court terrain beneath instruments during reservoir excavation. Its
+documentation images are game captures with checked lossless WebP delivery.
+No external geometry, texture, recording or dependency is added; existing
+runtime asset attribution remains in effect.
+
 The [crystal camera recovery](crystal-camera-recovery.md) changes only the
 existing follow-camera selection. Its documentation images are captures from
 the game, delivered through checked lossless WebP conversion. Existing runtime

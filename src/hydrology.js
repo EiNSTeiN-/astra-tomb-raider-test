@@ -1,6 +1,7 @@
 import { galleryWaterAt } from "./sunken-gallery-layout.js";
 import { ARCADE_SITE, ARCADE_POOL } from "./arcade-lock-rules.js";
 import { CIPHER_TRIALS } from "./cipher-rules.js";
+import { RESONANCE_TRIALS } from "./resonance-rules.js";
 
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
@@ -208,6 +209,19 @@ export function protectedGround(map, x, z, biome) {
           Math.abs(z - f.z * 7 - dz - 0.8) - 3.6,
         );
         keep = Math.max(keep, forecourt * (1 - smooth(0, 2, outside)));
+      }
+    }
+    if (biome === "crystal" && f.type === "mechanism") {
+      // Preserve the instrument and its front working margin on the existing
+      // court ground. A reservoir must not excavate a wheel beneath its water.
+      // Include the terrain cells around the footing and crouched operator.
+      for (const [dx, dz] of RESONANCE_TRIALS[f.stage]?.positions || []) {
+        const outside = Math.max(
+          0,
+          Math.abs(x - f.x * 7 - dx) - 2.8,
+          Math.abs(z - f.z * 7 - dz - 0.8) - 3.6,
+        );
+        keep = Math.max(keep, 1 - smooth(0, 2, outside));
       }
     }
     // The wind mechanisms extend into their forecourts. Keep their working
