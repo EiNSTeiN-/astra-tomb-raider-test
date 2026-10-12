@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { random } from "./campaign.js";
 import { mergeArchitecture } from "./visuals.js";
 import { campMaterials } from "./camp-materials.js";
+import { campFurnitureSolid, campHearthSolid } from "./camp-contact.js";
 import {
   campBox,
   campStone,
@@ -76,10 +77,11 @@ export function buildCamp(game, feature, group) {
   const ash = new THREE.Mesh(ashGeometry, campAshMaterial());
   ash.receiveShadow = true;
   group.add(ash);
+  let hearthRadius = 0;
   for (let i = 0; i < 13; i++) {
     const a = (i * Math.PI * 2) / 13 + (rng() - 0.5) * 0.12,
       r = 0.85 + (rng() - 0.5) * 0.07;
-    seated(
+    const stone = seated(
       campStone(i * 0.7),
       mats.stone,
       Math.cos(a) * r,
@@ -89,6 +91,14 @@ export function buildCamp(game, feature, group) {
       0.16 + rng() * 0.04,
       a,
     );
+    stone.updateMatrix();
+    const vertices = stone.geometry.attributes.position;
+    for (let j = 0; j < vertices.count; j++) {
+      const v = new THREE.Vector3()
+        .fromBufferAttribute(vertices, j)
+        .applyMatrix4(stone.matrix);
+      hearthRadius = Math.max(hearthRadius, Math.hypot(v.x, v.z));
+    }
   }
   for (let i = 0; i < 27; i++) {
     const a = rng() * Math.PI * 2,
@@ -322,6 +332,9 @@ export function buildCamp(game, feature, group) {
     kettle,
   );
   spout.rotation.z = -0.9;
+  const obstacle = campFurnitureSolid(game, feature, chest),
+    kettleObstacle = campFurnitureSolid(game, feature, kettle),
+    hearthObstacle = campHearthSolid(game, feature, group, hearthRadius);
   // Flatten nested rigid parts before batching by material. Small fittings
   // retain separate batches with a shorter visibility range.
   for (const root of [solid, fine]) {
@@ -359,19 +372,6 @@ export function buildCamp(game, feature, group) {
   const smoke = campParticles(fx.smoke, rng, true),
     sparks = campParticles(fx.sparks, rng, false);
   group.add(smoke, sparks);
-  const obstacle = {
-    x: group.position.x + cx,
-    z: group.position.z + cz,
-    w: 0.66,
-    d: 0.43,
-    h:
-      group.position.y +
-      base +
-      0.96 -
-      game.groundHeight(group.position.x + cx, group.position.z + cz),
-    camp: feature.id,
-  };
-  game.obstacles.push(obstacle);
   const stats = { triangles: 0, calls: 0 };
   for (const root of [solid, fine])
     root.traverse((o) => {
@@ -391,6 +391,8 @@ export function buildCamp(game, feature, group) {
     smoke,
     sparks,
     obstacle,
+    kettleObstacle,
+    hearthObstacle,
     stats,
   };
   (game.camps ??= []).push(camp);

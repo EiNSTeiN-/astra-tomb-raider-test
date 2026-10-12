@@ -155,13 +155,15 @@ Image conversion uses two Sharp workers with its cache disabled.
 
 ## Still open
 
-Legal hearth-centre positions can overlap the opaque hearth and flames. Those
-positions require a physical-placement repair; they are not camera-clearance
-acceptance cases. Wider moving-camera routes, instanced foliage, body contact,
-scene composition, listening and consumer-device performance remain open.
+At publication, legal hearth-centre positions could overlap the opaque hearth
+and flames. The subsequent [camp body-clearance repair](camp-body-contact.md)
+addresses the recorded contacts and older occupied saves. These positions were
+excluded from this camera pass's acceptance cases. Wider moving-camera routes,
+instanced foliage, body contact, scene composition, listening and consumer-device
+performance remain open.
 
 The recorded hearth-centre positions are `(84, 42)` in the sky chapter and
 `(385, 210)` in the eclipse chapter. The accepted supply approaches are two
-metres to their side and 0.6 m behind them. No physical hearth-placement repair
-is included here. Some bank poses also retain the perceived-weight problems
-tracked in the [boot and bank-contact review](bank-contact-shadows.md).
+metres to their side and 0.6 m behind them. This earlier camera pass includes no
+physical hearth-placement repair. Some bank poses also retain the perceived-weight
+problems tracked in the [boot and bank-contact review](bank-contact-shadows.md).

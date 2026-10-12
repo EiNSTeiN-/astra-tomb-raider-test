@@ -146,6 +146,13 @@ export function stationBlocked(
   clearance = 1.8,
   padding = solid.bodyPadding ?? 0.4,
 ) {
+  if (solid.campFire)
+    return (
+      clearance > 0 &&
+      stationContains(solid, x, z, padding) &&
+      y < solid.bounds.max.y + 0.015 &&
+      y + clearance > solid.bounds.min.y
+    );
   if (solid.triangles) {
     const radius = clearance ? padding : 0,
       b = solid.bounds;
@@ -213,6 +220,7 @@ export function stationMantleEnd(game, platform, start, requested) {
 // Use the same raw solids for sight, sound occlusion and projectile impacts;
 // movement's body margin is not part of a ray's physical surface.
 export function stationEntry(solid, from, to) {
+  if (solid.campFire) return null;
   if (solid.node && !solid.node.visible) return null;
   if (solid.triangles)
     return boxEntry(from, to, solid.bounds, 0, true) === null

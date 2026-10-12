@@ -19,14 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Camp body clearance and recovery](camp-body-contact.md) follows delivered
+  chest/bedding/kettle geometry and keeps grounded bodies outside the hearth.
+  Six recorded jumps now advance horizontally by at most 0.100 m per 60 Hz
+  update instead of the earlier prototype's 1.348 m snap. Ninety-three selected
+  cases pass, including actual rendered-body poses, airborne sole clearance,
+  occupied-save recovery, checkpoint return and rest/torch/audio-source access.
+  Sixteen revised views across eight chapters have zero sampled body
+  embedding, flame contact and opaque camp obstruction. The built keyboard/High
+  and touch/Low cases preserve complete stores through two reloads each,
+  including occupied-checkpoint recovery. Wider routes, face interiors,
+  framing and visual acceptance remain open.
+
 - [Terrain and camp camera framing](terrain-camp-camera.md) adds posed boot
   and lower-clothing terrain rays, safe-destination scoring and camera bounds
   for substantial camp supplies. All 54 selected cases pass. Thirty rendered
   captures cover eight chapters; the 18 revised views have zero sampled terrain
   or camp obstruction across 5,606 body rays per scenery set. Moving bounds
   refresh once per synchronous solve and remain current afterward. Some camp
-  solves still take 18–22 ms in this sandbox. Physical hearth overlap, instanced
-  foliage, wider camera motion and full visual acceptance remain open.
+  solves still take 18–22 ms in this sandbox. The subsequent camp body-clearance
+  repair addresses the recorded hearth overlap. Instanced foliage, wider camera motion and full visual acceptance
+  remain open.
   The built release passes keyboard/High and touch/Low movement, stance, look,
   jump and map checks, preserving the complete store through two reloads each.
 

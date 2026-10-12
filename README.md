@@ -4,11 +4,17 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [camp body-clearance pass](docs/camp-body-contact.md) gives the hearth,
+bedding and kettle finite body clearance. Descending jumps rebound through
+ordinary motion, and older occupied saves/checkpoints recover nearby while
+preserving discoveries and saved look. Selected delivered-body and movement
+checks pass; wider continuous routes and visual acceptance remain open.
+
 The [terrain and camp camera pass](docs/terrain-camp-camera.md) keeps the
 explorer visible over the recorded foreground banks and behind camp supplies.
 The review covers 30 captures across eight chapters; all 18 revised views have
-zero sampled terrain or camp obstruction. Wider camera motion,
-hearth contact and performance remain under review.
+zero sampled terrain or camp obstruction. Broader camera motion,
+body contact and performance remain under review.
 
 The [bank contact-shadow pass](docs/bank-contact-shadows.md) restores a missing
 boot patch on the recorded desert slope and keeps cavern patch interiors above
@@ -638,7 +644,7 @@ Guardians now have carved masks, layered stone armor, articulated limbs, and dis
 
 Liquid pools have excavated beds and shallow banks. Vesper automatically swims in deeper water, can climb a nearby ledge with Space, and resumes at the water surface after reloading a swimming save. Completing hydraulic work lowers the reservoir and exposes its banks; that drainage restores immediately on load. Animated surface normals, depth-dependent color and transparency, shoreline foam, stroke ripples, waterfall ribbons, spray, and mist replace the earlier flat water treatment. High quality captures a single nearby planar reflection at 512 px. Stable views update every three active frames; camera movement beyond the reuse tolerance, resizing, changing surfaces and drainage trigger an immediate refresh. Capture edges blend into the sky-color approximation, which also serves other quality settings. See [water reflection verification](docs/water-reflections.md) for the rendering cost and limits.
 
-The 28 base camps now have stone fire rings, charred timber, glowing coals, fitted supply chests, rolled bedding and small expedition equipment. Animated flame tongues, embers and light smoke use the existing positioned fire sound. Resting and torch lighting keep their familiar controls; the chests now have solid footprints. See [camp artwork comparisons](docs/camp-art.md) for verification and rendering cost.
+The 28 base camps now have stone fire rings, charred timber, glowing coals, fitted supply chests, rolled bedding and small expedition equipment. Animated flame tongues, embers and light smoke use the existing positioned fire sound. Resting and torch lighting keep their familiar controls; the hearth, chest and kettle have finite body clearance. See [camp artwork comparisons](docs/camp-art.md) for verification and rendering cost.
 
 The 154 courtyard braziers have framed stone supports, regional ornament, weathered basins, rolled rims, handles and glowing fuel. Nearby and distant models share instanced material groups; fire, smoke and embers retain the existing positioned recordings. The supports are solid and older saves inside them recover on nearby clear ground. See [brazier artwork comparisons](docs/brazier-art.md).
 

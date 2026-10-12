@@ -870,6 +870,7 @@ export class Adventure {
     this.jumpY = 0;
     this.climb = null;
     this.velocityY = 0;
+    this.campEscape = null;
     resetTraversal(this);
     this.counterweights = null;
     this.traversalCourses = [];
@@ -1072,6 +1073,10 @@ export class Adventure {
       x: this.map.spawn.x * CELL,
       z: this.map.spawn.z * CELL,
     };
+    const savedLook =
+      this.progress.position && this.walkable(start.x, start.z)
+        ? normalizeCamera(this.progress.camera)
+        : null;
     this.player.position.set(
       start.x,
       this.groundHeight(start.x, start.z),
@@ -1117,7 +1122,7 @@ export class Adventure {
       ) ||
       this.items.find((f) => f.type === "exit") ||
       this.map.rooms[1];
-    this.restoreCamera(next);
+    this.restoreCamera(next, savedLook);
     this.checkpoint = this.progress.checkpoint || {
       x: this.map.spawn.x * CELL,
       z: this.map.spawn.z * CELL,
@@ -2137,6 +2142,7 @@ export class Adventure {
     this.jumpY = p.y - this.groundHeight(p.x, p.z);
     this.velocityY = 0;
     this.grounded = true;
+    this.campEscape = null;
     this.fallPeak = p.y;
     return true;
   }
@@ -2456,6 +2462,13 @@ export class Adventure {
       }
       this.cb.puzzle?.(f, this.level);
     } else if (f.type === "camp") {
+      if (
+        !this.grounded ||
+        !this.canMove(this.player.position.x, this.player.position.z, 0)
+      ) {
+        this.cb.toast?.("Stand on clear ground beside the camp to rest.");
+        return;
+      }
       this.health = 100;
       this.stamina = 100;
       this.progress.medkits = Math.max(3, this.progress.medkits);
@@ -2649,13 +2662,7 @@ export class Adventure {
       this.hitTimer = 2.5;
       this.avatar.rotation.x = 0;
       this.avatar.position.y = 0;
-      this.player.position.set(
-        this.checkpoint.x,
-        this.groundHeight(this.checkpoint.x, this.checkpoint.z),
-        this.checkpoint.z,
-      );
-      this.jumpY = 0;
-      this.velocityY = 0;
+      this.placeAtCheckpoint();
       this.progress.medkits = Math.max(1, this.progress.medkits);
       this.cb.toast?.(
         "You recovered at your last checkpoint. Your discoveries are safe.",
@@ -2674,17 +2681,35 @@ export class Adventure {
     this.swimming = false;
     resetDiving(this);
     this.grounded = true;
-    this.jumpY = 0;
-    this.player.position.set(
-      this.checkpoint.x,
-      this.groundHeight(this.checkpoint.x, this.checkpoint.z),
-      this.checkpoint.z,
-    );
-    this.fallPeak = this.player.position.y;
+    this.placeAtCheckpoint();
     this.nearest = null;
     this.keys.clear();
     this.health = 100;
     this.save();
+  }
+  placeAtCheckpoint() {
+    const wanted = {
+      x: this.checkpoint.x,
+      y: this.groundHeight(this.checkpoint.x, this.checkpoint.z),
+      z: this.checkpoint.z,
+    };
+    let arrival = safeArrival(this, wanted);
+    if (!arrival && this.map.spawn) {
+      const x = this.map.spawn.x * CELL,
+        z = this.map.spawn.z * CELL;
+      arrival = safeArrival(this, { x, y: this.groundHeight(x, z), z });
+    }
+    if (!arrival) return false;
+    this.player.position.set(arrival.x, arrival.y, arrival.z);
+    this.checkpoint = { x: arrival.x, z: arrival.z };
+    this.jumpY = Math.max(
+      0,
+      arrival.y - this.groundHeight(arrival.x, arrival.z),
+    );
+    this.velocityY = 0;
+    this.campEscape = null;
+    this.fallPeak = arrival.y;
+    return true;
   }
   heal() {
     if (this.health >= 100) {

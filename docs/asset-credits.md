@@ -1257,3 +1257,17 @@ They are distinct from screenshots of the preceding production application.
 The native release captures use the actual built interface and controls.
 All fourteen public images are lossless WebP conversions of game captures,
 verified to retain decoded RGBA pixels and dimensions.
+
+The [camp body-clearance repair](camp-body-contact.md) extends original movement
+and arrival code using the existing camp render geometry. It retains the
+credited explorer, regional materials, camp artwork, positioned fire audio and
+quiet scores. No external asset, dependency, recording or music is added.
+Comparison captures restore the preceding narrow chest footprint and omit
+hearth/kettle clearance in the current scene; their finite chest height follows
+current furniture bounds. The requested hearth-centre root stays fixed for the old
+control; the revised controller relocates it to legal ground while preserving
+input look. These are assisted in-game comparisons, not captures of the
+preceding production application.
+The native captures use the actual built interface and controls. All twelve
+public images preserve decoded RGBA pixels and dimensions through verified
+lossless WebP conversion.

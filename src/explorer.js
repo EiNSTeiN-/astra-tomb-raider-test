@@ -338,7 +338,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
     ]);
   } else if (!game.grounded) {
     poseHands(game, [point(0.44, 1.08, 0.12), point(-0.44, 1.17, 0.07)]);
-    poseFeet(game, [point(0.12, 0.12, 0.01), point(-0.12, 0.22, 0.02)]);
+    poseFeet(game, [point(0.12, 0.17, 0.01), point(-0.12, 0.22, 0.02)]);
   } else if (game.aimUntil > game.elapsed && !game.carrying && !game.dodge) {
     const gripHeight = 1.34 - CROUCH_DROP * rig.crouchBlend;
     const angle = (game.aimYaw ?? game.yaw) + Math.PI;

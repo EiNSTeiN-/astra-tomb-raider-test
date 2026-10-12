@@ -18,6 +18,10 @@ import { vaultDeckAt } from "./fire-vault-rules.js";
 import { stationSupport, stationBlocked } from "./field-station-solids.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import { terrainBodyClear } from "./terrain-body-clearance.js";
+import {
+  clearCampVerticalContact,
+  campEscapeVelocity,
+} from "./camp-contact.js";
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
 // support, and crossing uneven ground in the air must not lift the jump arc.
@@ -91,6 +95,7 @@ export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
 // horizontal move was clear. Resolve an edge contact sideways; a broad ceiling
 // stops upward motion. Neither contact creates a floor on a steep side.
 function clearStationVerticalMotion(game, before) {
+  if (clearCampVerticalContact(game, before)) return;
   const p = game.player.position;
   const contacts = game.obstacles.filter(
     (o) =>
@@ -177,15 +182,15 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         game.velocityY = 0;
       }
     }
-    const momentum = game.airVelocity,
+    const escape = campEscapeVelocity(game, step),
+      motion = escape || velocity,
+      momentum = escape ? null : game.airVelocity,
       hasMomentum = momentum && Math.hypot(momentum.x, momentum.z) > 0.1;
     const dx =
-        (velocity.x * (hasMomentum ? 0.35 : 1) +
-          (hasMomentum ? momentum.x : 0)) *
+        (motion.x * (hasMomentum ? 0.35 : 1) + (hasMomentum ? momentum.x : 0)) *
         step,
       dz =
-        (velocity.z * (hasMomentum ? 0.35 : 1) +
-          (hasMomentum ? momentum.z : 0)) *
+        (motion.z * (hasMomentum ? 0.35 : 1) + (hasMomentum ? momentum.z : 0)) *
         step;
     const free = (x, z) => {
       let y = p.y;

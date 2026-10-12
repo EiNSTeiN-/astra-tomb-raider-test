@@ -8,7 +8,7 @@ import { buildCamp, updateCamps } from "../src/camps.js";
 import { buildFireEffects, updateFireEffects } from "../src/effects.js";
 import { buildSoundLandmarks } from "../src/sound-landmarks.js";
 import { Adventure } from "../src/game.js";
-import { safeArrival } from "../src/character-motion.js";
+import { safeArrival, advanceCharacter } from "../src/character-motion.js";
 import { buildTorch, useTorch } from "../src/torch.js";
 import { SaveStore } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
@@ -104,10 +104,10 @@ test("all chapter camps retain their flame anchors and clear approaches around f
         });
       assert(triangles < 32000);
       for (const [dx, dz] of [
-        [-1.8, 0],
-        [0, -1.8],
-        [0, 1.8],
-        [1.8, 0],
+        [-2.1, 0],
+        [0, -2.1],
+        [0, 2.1],
+        [2.3, -0.9],
       ])
         assert(
           game.canMove(feature.x * 7 + dx, feature.z * 7 + dz, 0),
@@ -117,6 +117,25 @@ test("all chapter camps retain their flame anchors and clear approaches around f
         !game.canMove(camp.obstacle.x, camp.obstacle.z, 0),
         "supply chest must be solid",
       );
+      for (const obstacle of [camp.hearthObstacle, camp.kettleObstacle]) {
+        assert(
+          !game.canMove(obstacle.x, obstacle.z, 0),
+          "camp body is missing",
+        );
+        const recovered = safeArrival(game, {
+          x: obstacle.x,
+          y: game.groundHeight(obstacle.x, obstacle.z),
+          z: obstacle.z,
+        });
+        assert(
+          recovered &&
+            game.canMove(
+              recovered.x,
+              recovered.z,
+              recovered.y - game.groundHeight(recovered.x, recovered.z),
+            ),
+        );
+      }
       const p = {
         x: camp.obstacle.x,
         y: game.groundHeight(camp.obstacle.x, camp.obstacle.z),
@@ -190,13 +209,14 @@ test("camp fire effects preserve torch access, one positioned ambient voice, res
     feature = game.map.features.find((f) => f.id === "camp-0"),
     camp = add(game, feature),
     p = camp.group.position;
-  game.player.position.copy(p).add(new THREE.Vector3(-1.8, 0, 0));
+  game.player.position.copy(p).add(new THREE.Vector3(-2.1, 0, 0));
   game.player.position.y = game.groundHeight(
     game.player.position.x,
     game.player.position.z,
   );
   game.map = { ...game.map, rooms: [] };
   buildSoundLandmarks(game);
+  game.lineOfSight = Adventure.prototype.lineOfSight.bind(game);
   assert.equal(game.soundSources.length, 1);
   const source = game.soundSources[0];
   assert.equal(source.kind, "fire");
@@ -230,13 +250,97 @@ test("camp fire effects preserve torch access, one positioned ambient voice, res
           0.001,
     ),
   );
-  const light = game.fireLights.find((l) => l.visible);
+  const campLight = () =>
+    game.fireLights.find(
+      (l) =>
+        l.visible &&
+        l.position.distanceTo(camp.fire.getWorldPosition(new THREE.Vector3())) <
+          0.001,
+    );
+  const light = campLight();
   const intensity = light.intensity;
   game.paused = true;
   game.elapsed += 1;
   updateCamps(game);
   updateFireEffects(game);
-  assert.equal(light.intensity, intensity);
+  assert.equal(campLight().intensity, intensity);
+});
+
+test("finite camp contacts let air clear props, then return descending arrivals to legal ground", () => {
+  for (const level of LEVELS) {
+    const game = fixture(level),
+      camp = add(
+        game,
+        game.map.features.find((f) => f.id === "camp-0"),
+      );
+    for (const o of [camp.hearthObstacle, camp.obstacle, camp.kettleObstacle]) {
+      const ground = game.groundHeight(o.x, o.z),
+        top = Math.max(
+          camp.hearthObstacle.bounds.max.y,
+          camp.obstacle.bounds.max.y,
+          camp.kettleObstacle.bounds.max.y,
+        );
+      assert(game.canMove(o.x, o.z, top - ground + 0.03));
+      game.player.position.set(o.x, top + 0.06, o.z);
+      game.grounded = false;
+      game.velocityY = -1;
+      game.jumpY = top - ground + 0.06;
+      game.fallPeak = top + 0.06;
+      for (let i = 0; i < 120; i++)
+        advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+      const p = game.player.position;
+      assert(game.grounded, level.id + " " + o.camp);
+      assert.equal(game.jumpY, 0);
+      assert(game.canMove(p.x, p.z, game.jumpY));
+      assert(Math.hypot(p.x - o.x, p.z - o.z) > 0.3);
+    }
+  }
+});
+
+test("camp resting rejects an airborne checkpoint, and both return and death recover older occupied checkpoints", () => {
+  for (const level of LEVELS) {
+    const game = fixture(level),
+      feature = game.map.features.find((f) => f.id === "camp-0"),
+      camp = add(game, feature);
+    game.progress.stage = 2;
+    game.progress.field = ["field-0-0"];
+    game.progress.medkits = 3;
+    game.checkpoint = {
+      x: camp.group.position.x - 2.1,
+      z: camp.group.position.z,
+    };
+    game.player.position.copy(camp.group.position);
+    game.player.position.y += 1.8;
+    game.nearest = feature;
+    game.grounded = false;
+    const checkpoint = { ...game.checkpoint };
+    game.interact();
+    assert.deepEqual(game.checkpoint, checkpoint);
+    assert.equal(game.health, 40);
+    for (const death of [false, true]) {
+      game.checkpoint = { x: camp.group.position.x, z: camp.group.position.z };
+      game.campEscape = { source: camp.hearthObstacle };
+      game.yaw = 0.37;
+      game.pitch = -0.18;
+      if (death) {
+        game.health = 1;
+        game.hitTimer = 0;
+        game.damage(10);
+      } else game.returnToCheckpoint();
+      const p = game.player.position;
+      assert(game.canMove(p.x, p.z, game.jumpY));
+      assert.equal(game.jumpY, 0);
+      assert(game.grounded);
+      assert(!game.campEscape);
+      assert.equal(game.velocityY, 0);
+      assert.deepEqual(game.checkpoint, { x: p.x, z: p.z });
+      assert.equal(game.yaw, 0.37);
+      assert.equal(game.pitch, -0.18);
+      assert.equal(game.progress.stage, 2);
+      assert.deepEqual(game.progress.field, ["field-0-0"]);
+      assert.equal(game.progress.medkits, 3);
+    }
+  }
 });
 
 test("camp animation freezes on pause, distance controls detail and particles, and resource ownership is local to the chapter", () => {
