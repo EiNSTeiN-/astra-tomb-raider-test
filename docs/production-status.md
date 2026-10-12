@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Crystal archive wall detail](crystal-wall-detail.md) gives the eight
+  chambers varied blind-bay profiles, geometric inlays and coursed inner
+  faces. A retained regression repairs exposed backing beside the new
+  stepped heads; all nineteen gate/vault cases pass. All 24 walls stay within
+  their existing movement envelope, and the other seven chapters retain
+  byte-identical gate geometry. All 35 paired High/Medium/Low views retain
+  player/camera state with finite HDR and linked shaders; recorded observers
+  match their validated positions. All 49 local legs, 33 physical turns,
+  the build and native keyboard/touch puzzle, movement and three reloads per
+  mode pass. Gate geometries and materials dispose once. Broader cavern paths
+  and full campaign visual acceptance remain open.
+
 - [Crystal archive paving](crystal-floors.md) gives eight chambers distinct
   stone floors over the existing terrain. All eight chapters retain identical
   geometry buffers, heights, water metadata, vertex shaders and texture requests;

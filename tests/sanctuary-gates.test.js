@@ -215,6 +215,40 @@ test("coastal sluice footings meet the terrain across their full width and prote
   assert.ok(immersed >= 5, "all five sounding wells exercise a submerged jamb");
 });
 
+test("stepped crystal bay heads retain the finished face outside their tiered outline", (t) => {
+  t.mock.method(THREE.TextureLoader.prototype, "load", () => new THREE.Texture());
+  const game = { level: LEVELS[6] }, materials = gateMaterials(game.level), roots = [];
+  t.after(() => {
+    for (const root of roots) root.traverse((mesh) => mesh.geometry?.dispose());
+    const textures = new Set();
+    for (const material of Object.values(materials)) {
+      if (!material?.isMaterial) continue;
+      for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+      for (const texture of material.userData.additionalTextures || []) textures.add(texture);
+      material.dispose();
+    }
+    for (const texture of textures) texture.dispose();
+  });
+  for (const [stage, fraction, scale] of [[0, 0.64, 0.9], [3, 0.7, 0.57]]) {
+    for (const side of [-1, 0, 1]) {
+      const gate = { stage, design: materials.design, root: new THREE.Group() };
+      roots.push(gate.root);
+      const wall = buildChamberWall(game, gate, materials, { length: 13, side, floor: 0 });
+      gate.root.updateMatrixWorld(true);
+      const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
+      matrix.setPosition(new THREE.Vector3(...wall.position));
+      const y = wall.bottom + (wall.top - wall.bottom) * fraction + 0.15;
+      const x = wall.bays[Math.floor(wall.bays.length / 2)] + wall.radius * scale;
+      const origin = new THREE.Vector3(x, y, 2).applyMatrix4(matrix);
+      const direction = new THREE.Vector3(0, 0, -1).transformDirection(matrix);
+      const ray = new THREE.Raycaster(origin, direction);
+      const hit = ray.intersectObject(gate.root, true)[0];
+      assert.ok(hit && hit.distance < 1.8,
+        `${stage}/${side}: stone outside the stepped head must retain its finished face`);
+    }
+  }
+});
+
 test("all 180 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
   const ray = new THREE.Raycaster();
   let walls = 0,

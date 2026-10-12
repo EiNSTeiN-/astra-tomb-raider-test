@@ -8,6 +8,7 @@ import {
 import { vaultStoneGeometry, shellReliefGeometry } from "./palace-geometry.js";
 import { solarPanelGeometry } from "./desert-architecture.js";
 import { timberGeometry } from "./monastery-architecture.js";
+import { crystalBayContour, addCrystalBayInlay } from "./crystal-wall-art.js";
 
 export const CHAMBER_WALL_BIOMES = new Set([
   "jungle",
@@ -53,7 +54,7 @@ export function chamberWallPlan(biome, length, stage, side) {
 
 // Each aperture has one horizontal interval. Sample its silhouette once and
 // use that same polygon for the masonry and inset; joints cannot expose sky.
-function aperture(plan) {
+function aperture(plan, stage) {
   const { biome, radius: r, bottom, top } = plan;
   if (biome === "desert")
     return [
@@ -103,13 +104,7 @@ function aperture(plan) {
       }),
     ];
   if (biome === "crystal")
-    return [
-      [-r, bottom],
-      [r, bottom],
-      [r * 0.84, 4.55],
-      [0, top],
-      [-r * 0.84, 4.55],
-    ];
+    return crystalBayContour(stage, r, bottom, top);
   return [
     [-r, bottom],
     [r, bottom],
@@ -268,7 +263,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
     mesh.rotation.z = -Math.atan2(dx, dy);
     return mesh;
   };
-  const contour = aperture(plan);
+  const contour = aperture(plan, gate.stage);
   const halfWidth = (y) => {
     let width = 0;
     for (let i = 0; i < contour.length; i++) {
@@ -284,6 +279,20 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
     }
     return width;
   };
+  // Shallow inner courses break up the broad backing faces. Their back
+  // embeds in the core, and their dressed front stays inside existing relief.
+  // Crystal panels sink; a hinged design would retain its clear side pockets.
+  if (plan.biome === "crystal" && (side === 0 || gate.design.motion !== "hinge")) {
+    for (let row = 0; row < 8; row++) {
+      const step = 1.75 + (gate.stage % 3) * .15;
+      for (let x = -length / 2 - (row % 2) * step / 2; x < length / 2; x += step) {
+        const lo = Math.max(-length / 2, x), hi = Math.min(length / 2, x + step);
+        if (hi - lo < .05) continue;
+        block(hi - lo - .016, .785, .065, row === 0 ? m.trim : m.wall,
+          (lo + hi) / 2, row * .8 + .4, -.424);
+      }
+    }
+  }
   block(
     length,
     7.0,
@@ -299,6 +308,13 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
       plan.bottom,
       plan.top,
       7,
+      // A stepped head changes width abruptly at its horizontal ledge. Split
+      // the masonry there so interpolation cannot bevel away the outer face.
+      ...(plan.biome === "crystal"
+        ? contour
+            .filter((p, i) => Math.abs(p[1] - contour[(i + 1) % contour.length][1]) < 1e-8)
+            .map((p) => p[1])
+        : []),
       ...Array.from({ length: 8 }, (_, i) => (i + 1) * 0.8),
     ]),
   ].sort((a, b) => a - b);
@@ -592,16 +608,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
           b = contour[(j + 1) % contour.length];
         bar([a[0] + cx, a[1]], [b[0] + cx, b[1]], 0.2, m.trim, 0.46);
       }
-      for (const sign of [-1, 1]) {
-        const points = [
-          [cx + sign * r * 0.69, 1.58],
-          [cx + sign * r * 0.28, 2.65],
-          [cx + sign * r * 0.49, 3.78],
-          [cx, 4.93],
-        ];
-        for (let j = 0; j < points.length - 1; j++)
-          bar(points[j], points[j + 1], 0.055, m.inlay, -0.045);
-      }
+      addCrystalBayInlay(gate.stage, r, bottom, top, cx, bar, m.inlay);
       const gem = new THREE.OctahedronGeometry(0.25, 0);
       gem.scale(0.7, 1.5 + ((gate.stage + i) % 3) * 0.2, 0.3);
       add(gem, m.inlay, cx, 3.13, -0.04, false);
@@ -693,6 +700,10 @@ export function buildChamberWall(game, gate, m, { length, side, floor }) {
           false,
         );
         relief.rotation.y = Math.PI;
+      } else if (biome === "crystal") {
+        addCrystalBayInlay(gate.stage, r, bottom, top, cx, bar, m.inlay, {
+          interior: true,
+        });
       } else if (biome === "jungle") {
         const relief = add(
           carvedPlaque(r * 1.15, 1.84, gate.stage + i, [24, 40]),

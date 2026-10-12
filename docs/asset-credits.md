@@ -1306,6 +1306,13 @@ an external asset, texture, recording or dependency. Documentation captures
 come from the game; their lossless WebP delivery is checked against the
 captured pixels and dimensions.
 
+The [crystal archive wall detail](crystal-wall-detail.md) adds original blind-bay
+profiles and geometric diagrams in `src/crystal-wall-art.js`, with shallow
+inner masonry in `src/chamber-walls.js`. It reuses the existing credited wall,
+trim and mineral-inlay materials. No external asset, texture, recording or
+dependency is added. Its documentation images are game captures delivered as
+checked lossless WebP files.
+
 The [crystal camera recovery](crystal-camera-recovery.md) changes only the
 existing follow-camera selection. Its documentation images are captures from
 the game, delivered through checked lossless WebP conversion. Existing runtime

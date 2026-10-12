@@ -14,7 +14,9 @@ beside the instruments and their operating positions.
 [Gentler walking camera turns](docs/walking-camera-turns.md) reduce sharp
 angular corrections when a clear view leaves a detour.
 [Crystal archive paving](docs/crystal-floors.md) gives eight chamber floors
-distinct stone courses, inlays and weathering. Wider chamber
+distinct stone courses, inlays and weathering.
+[Archive wall detail](docs/crystal-wall-detail.md) adds varied blind bays,
+geometric diagrams and coursed inner faces. Wider chamber
 composition remains under review.
 
 The [crystal archive vaults](docs/crystal-vaults.md) give eight objective
