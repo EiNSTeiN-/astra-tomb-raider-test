@@ -4,9 +4,16 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+[Pool ambience now follows exposed water](docs/pool-sound-placement.md)
+beside dry working pads and the palace pontoon. Placement, distance falloff and
+water-state checks pass across six environments,
+with native keyboard/portrait movement and saves. Wider listening and scene
+acceptance remain open.
+
 The [guardian camera now clears nearby posed armor](docs/guardian-camera.md),
 with reviewed views across all eight chapters and native keyboard/touch saves.
-All 971 current automated checks pass; the broader visual audit remains open.
+All 971 automated checks passed at that milestone; the broader visual audit
+remains open.
 
 The [crystal resonator frames](docs/resonator-frames.md) give 33 tuning
 instruments eight bronze constructions, mounted wheel bearings and dressed

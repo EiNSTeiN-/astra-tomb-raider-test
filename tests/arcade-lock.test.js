@@ -7,6 +7,9 @@ import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { advanceCharacter, supportAt } from "../src/character-motion.js";
+import { buildWaterSurfaces } from "../src/water-surface.js";
+import { waterSoundAnchor } from "../src/water-sound.js";
+import { updateSoundSources } from "../src/sound-landmarks.js";
 import { finishFieldTask, buildFieldStation } from "../src/field-world.js";
 import {
   buildArcadeLock,
@@ -100,6 +103,93 @@ function place(g, x, y, z) {
   g.velocityY = 0;
   g.airVelocity = null;
 }
+
+test("the arcade pool voice stays in exposed water beside the delivered moving pontoon", (t) => {
+  const g = fixture({ stage: 5 });
+  g.groundHeight = terrain.surfaceHeight;
+  buildWaterSurfaces(g);
+  t.after(() =>
+    g.world.traverse((o) => {
+      o.geometry?.dispose();
+      (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) =>
+        m?.dispose(),
+      );
+    }),
+  );
+  const water = g.waterMeshes.find((w) => w.userData.arcade),
+    source = {
+      id: "arcade-pool-test",
+      waterIndex: g.waterMeshes.indexOf(water),
+    };
+  const covered = (point) => {
+    g.world.updateMatrixWorld(true);
+    let hits = 0;
+    for (const dx of [-0.08, 0, 0.08])
+      for (const dz of [-0.08, 0, 0.08]) {
+        const ray = new THREE.Raycaster(
+          new THREE.Vector3(point.x + dx, water.position.y + 3, point.z + dz),
+          new THREE.Vector3(0, -1, 0),
+        );
+        if (
+          ray
+            .intersectObject(g.arcadeLock.pontoon, true)
+            .some((h) => h.point.y > water.position.y + 0.06)
+        )
+          hits++;
+      }
+    return hits;
+  };
+  assert(
+    covered(water.position) > 0,
+    "the previous centre voice lies beneath delivered planks",
+  );
+  const anchor = waterSoundAnchor(g, water);
+  assert(
+    anchor && covered(anchor) === 0,
+    "revised source has a clear surface beside the real pontoon",
+  );
+  assert(anchor.y - g.groundHeight(anchor.x, anchor.z) > 3);
+  const banks = g.arcadeLock.decks.filter(
+    (d) => !d.pontoon && d.y > water.position.y,
+  );
+  const clear = banks.some((d) =>
+    [-0.6, 0, 0.6].some((dx) =>
+      [-0.6, 0, 0.6].some((dz) => {
+        const x = d.x + dx * d.w,
+          z = d.z + dz * d.d,
+          point = new THREE.Vector3(x, d.y, z);
+        return (
+          g.canMove(x, z, d.y - g.groundHeight(x, z)) &&
+          g.lineOfSight(
+            point,
+            new THREE.Vector3(anchor.x, anchor.y - 1.4, anchor.z),
+          )
+        );
+      }),
+    ),
+  );
+  assert(clear, "a supported fixed landing has a clear listening route");
+  g.soundSources = [source];
+  updateSoundSources(g);
+  assert.deepEqual(
+    [source.x, source.y, source.z, source.activity],
+    [anchor.x, anchor.y, anchor.z, 1],
+  );
+  const x = source.x,
+    z = source.z;
+  g.arcadeLock.saved.level = 1;
+  updateArcadeLock(g, 0);
+  updateSoundSources(g);
+  assert.equal(source.x, x);
+  assert.equal(source.z, z);
+  assert.equal(source.y, water.position.y);
+  assert(Math.abs(source.y - anchor.y - 5.6) < 1e-7);
+  assert.equal(
+    covered(source),
+    0,
+    "the raised platform retains its open-water source",
+  );
+});
 
 function tick(g, n = 1) {
   for (let i = 0; i < n; i++) {

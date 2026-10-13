@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { buildWaterfall, updateWaterfalls } from "./waterfall-effects.js";
 import { birdPerch, buildBird, updateBirds } from "./birds.js";
+import { waterSoundAnchor } from "./water-sound.js";
 
 export function buildSoundLandmarks(game) {
   const { biome } = game.level;
@@ -117,21 +118,24 @@ export function buildSoundLandmarks(game) {
   );
   for (const [i, water] of game.waterMeshes.entries()) {
     if (
+      biome === "snow" ||
       water.userData.width > 30 ||
       (water.userData.fall !== undefined && water.userData.stage === undefined)
     )
       continue;
-    const p = water.position;
+    const anchor = waterSoundAnchor(game, water),
+      p = anchor || water.position,
+      extra = { waterIndex: i, activity: anchor ? 1 : 0 };
     if (biome === "volcano")
-      source(`lava-pool-${i}`, "lava", p.x, p.y, p.z, { waterIndex: i });
-    else if (biome !== "snow")
+      source(`lava-pool-${i}`, "lava", p.x, p.y, p.z, extra);
+    else
       source(
         `pool-${i}`,
         biome === "crystal" ? "drips" : "stream",
         p.x,
         p.y,
         p.z,
-        { waterIndex: i },
+        extra,
       );
   }
   for (const f of game.items)
@@ -268,12 +272,16 @@ export function updateSoundSources(game) {
     if (source.waterIndex === undefined) continue;
     const water = game.waterMeshes[source.waterIndex];
     if (!water) continue;
-    source.x = water.position.x;
-    source.y = water.position.y;
-    source.z = water.position.z;
-    source.activity = water.userData.cooled
-      ? 0
-      : 1 - Math.min(1, (water.userData.drain || 0) / 1.8) * 0.7;
+    const anchor = waterSoundAnchor(game, water);
+    if (anchor) {
+      source.x = anchor.x;
+      source.y = anchor.y;
+      source.z = anchor.z;
+    }
+    source.activity =
+      water.userData.cooled || !anchor
+        ? 0
+        : 1 - Math.min(1, (water.userData.drain || 0) / 1.8) * 0.7;
   }
 }
 
