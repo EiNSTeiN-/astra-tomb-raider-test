@@ -36,6 +36,10 @@ combat, subjective listening or consumer device performance. No whole-surface
 or AAA graphics acceptance is claimed. The
 [alpine horizon change](alpine-horizon.md) follows this baseline with wider
 shoulders and lower passes. Repeated main-court massing remains a broader target.
+The later [keeper shrine pass](keeper-shrines.md) replaces the eight repeated
+jungle reading slabs and moves seven to side pockets. Its eight court comparison
+states match this baseline; the original jungle findings above describe the
+earlier construction. The larger temple silhouettes remain a broader target.
 
 All recorded High views have finite pre-bloom input, linked programs, no GL
 error, a legal grounded player root, full health, clear camera space and clear

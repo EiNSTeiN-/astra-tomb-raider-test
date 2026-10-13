@@ -1,5 +1,15 @@
 # Asset credits and provenance
 
+The [jungle keeper shrines](keeper-shrines.md) use original closed-panel,
+foundation, post and crest code in `src/keeper-shrine-art.js`, the existing
+stone-block and carved-sign generators, and the credited temple materials.
+The inscription atlas reuses the original covenant text and adds their titles.
+No external model, texture, recording, score or dependency was added. The
+documentation images are actual game captures encoded losslessly as WebP,
+with decoded pixel and dimension parity checked against their source PNGs.
+The eight court comparison states match the earlier player, camera and look.
+Existing character and environmental credits below continue to apply.
+
 The [bank contact-shadow repair](bank-contact-shadows.md) uses original contact
 fitting and rendering code. It adds no external asset or dependency and retains
 the existing character and environment credits below. Its comparison images

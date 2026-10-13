@@ -98,6 +98,15 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [keeper shrine pass](keeper-shrines.md) follows the eight-chapter ground
+baseline with eight jungle reading profiles and seven side-pocket placements.
+Its 16 batched quality/raised views, 66 assisted local-route images and seven
+controller-descent images are reviewed. It also repairs two observed support
+hovering cases and the lower-seal descent snag, and reduces isolated shrine
+assemblies from 153 meshes to 24 material batches with geometry cleanup checked.
+The wider temple silhouettes, complete discoveries/traversal and listening
+coverage remain open.
+
 The [eagle-route continuation](sky-eagle-route.md) checks two climbing crossings,
 their swings and return cables, the survey, two damaged spans and the fourth
 engine's 26 physical turns. Its 126 continuous-route captures and native

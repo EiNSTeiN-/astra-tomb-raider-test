@@ -217,7 +217,18 @@ export function groundExplorer(game, dt, moving, sprinting) {
     // A boot beside a finite cap can reach its steep bevel while the other
     // boot stands on top. Lowering the pelvis toward that edge bends the knee
     // through the cap. Treat a substantial drop as an unsupported foothold.
-    if (bodySupport.surface?.triangles && root.y - result.height > 0.12)
+    const continuousSlope =
+      bodySupport.surface?.groundingSlope &&
+      Math.abs(
+        result.height -
+          (bodySupport.surface.triangles.support(x, z, root.y + 0.45, 0, 0.65)
+            ?.height ?? -Infinity),
+      ) < 0.08;
+    if (
+      bodySupport.surface?.triangles &&
+      !continuousSlope &&
+      root.y - result.height > 0.12
+    )
       return null;
     return result.height >= root.y - 0.5 && result.height <= root.y + 0.65
       ? result

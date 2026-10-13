@@ -114,7 +114,9 @@ function clearStationVerticalMotion(game, before) {
         top = o.triangles?.layeredSupport
           ? o.triangles.support(p.x, p.z, before, padding, 0.65)?.height
           : o.bounds.max.y;
-      return top !== undefined && before >= top - 0.015 ? padding + 0.02 : 0.2;
+      return o.groundingSlope || (top !== undefined && before >= top - 0.015)
+        ? padding + 0.02
+        : 0.2;
     }),
   );
   for (let radius = 0.02; radius <= limit + 1e-6; radius += 0.02) {
@@ -204,10 +206,20 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         : y;
       const settled =
         footing >= p.y - 0.42 && footing <= p.y + 0.45 ? footing : y;
-      return game.groundHeight(x, z) <= y + 0.45 &&
-        terrainBodyClear(game, x, settled, z) &&
-        game.canMove(x, z, settled - game.groundHeight(x, z))
-        ? settled
+      if (game.groundHeight(x, z) > y + 0.45) return null;
+      const clear = (height) =>
+        terrainBodyClear(game, x, height, z) &&
+        game.canMove(x, z, height - game.groundHeight(x, z));
+      if (clear(settled)) return settled;
+      // Leave an exact-footprint floor at the current height when snapping
+      // down first would put the cylinder into its edge. The contact resolver
+      // clears that margin before settling on the lower surface below.
+      return game.grounded &&
+        here.surface?.fieldStation &&
+        here.surface.supportRadius === 0 &&
+        settled < y &&
+        clear(y)
+        ? y
         : null;
     };
     const xY = free(p.x + dx, p.z);
@@ -261,8 +273,24 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         momentum.z = 0;
       }
     }
-    if (!wasGrounded && p.y !== before)
+    const leavingExactFloor =
+      wasGrounded &&
+      here.surface?.fieldStation &&
+      here.surface.supportRadius === 0 &&
+      support.surface !== here.surface;
+    if ((!wasGrounded || leavingExactFloor) && p.y !== before) {
       clearStationVerticalMotion(game, before);
+      if (leavingExactFloor && game.grounded) {
+        const next = supportAt(game, p.x, p.z, p.y + 0.25, NATURE_BODY_RADIUS);
+        if (
+          next.height >= p.y - 0.42 &&
+          next.height <= p.y + 0.45 &&
+          game.canMove(p.x, p.z, next.height - game.groundHeight(p.x, p.z))
+        )
+          p.y = next.height;
+        else game.grounded = false;
+      }
+    }
     if (game.grounded) game.fallPeak = p.y;
     else game.fallPeak = Math.max(game.fallPeak || before, before, p.y);
     if (wasGrounded && !game.grounded && game.velocityY <= 0) game.coyote = 0.1;

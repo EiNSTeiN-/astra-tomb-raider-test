@@ -21,6 +21,7 @@ import { poseHands } from "./pose.js";
 import { captureCipherRotor } from "./cipher-camera.js";
 import { addCipherDriveSolid, fitCipherPedestal } from "./cipher-solids.js";
 import { frameCipherCourt } from "./cipher-view.js";
+import { buildKeeperShrine } from "./keeper-shrine-art.js";
 
 export function cipherReady(game, site) {
   return (
@@ -316,40 +317,25 @@ export function buildCipherCourts(game) {
         cipher: true,
       });
     }
-    const recordZ = stage === 0 ? 17 : 23,
-      recordY = floor(0, recordZ);
-    add(
-      stoneBlockGeometry(4.4, 2.8, 0.42, stage + 53),
-      stone,
-      0,
-      recordY + 1.45,
-      recordZ,
+    site.keeperShrine = buildKeeperShrine(
+      game,
+      site,
+      { stone, relief },
+      plaque,
     );
-    add(
-      stoneBlockGeometry(4.75, 0.24, 0.75, stage + 59),
-      stone,
+    const shrinePlan = site.keeperShrine.plan;
+    site.tablet = control(
+      "tablet",
       0,
-      recordY + 2.93,
-      recordZ,
+      shrinePlan.x,
+      shrinePlan.z + shrinePlan.approach,
     );
-    const header = plaque("READ THE COVENANT", 3.8, 0.32);
-    header.position.set(0, recordY + 2.62, recordZ + 0.24);
-    fixed.add(header);
-    trial.clues.forEach((clue, i) => {
-      const line = plaque(cipherClue(clue), 4, 0.23);
-      line.position.set(0, recordY + 2.25 - i * 0.25, recordZ + 0.24);
-      fixed.add(line);
-    });
-    site.tablet = control("tablet", 0, 0, recordZ + 1.7);
-    game.obstacles.push({
-      x: root.position.x,
-      z: root.position.z + recordZ,
-      w: 2.2,
-      d: 0.3,
-      h: 3.1,
-      cipher: true,
-    });
     mergeArchitecture(fixed);
+    // Atlas lettering is printed on the stone. Its transparent label quads
+    // must not become rectangular shadow casters when the static batch forms.
+    for (const mesh of fixed.children)
+      if (mesh.isMesh && mesh.material.isMeshBasicMaterial)
+        mesh.castShadow = false;
     root.updateWorldMatrix(true, true);
     site.inspectionBounds = new THREE.Box3()
       .setFromObject(fixed, true)

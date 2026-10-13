@@ -76,7 +76,9 @@ export function stationMeshSolid(game, feature, mesh, options = {}) {
     fieldStation: feature.id,
     bodyPadding: options.bodyPadding ?? 0.4,
     supportRadius: options.supportRadius,
+    groundingSlope: options.groundingSlope,
     supportable: options.support !== false,
+    bodySupport: options.bodySupport !== false,
     bounds,
     triangles,
   };
@@ -109,6 +111,7 @@ export function stationContains(solid, x, z, padding = 0) {
 // a floor beneath every point of its tapered or chipped surface.
 export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
   if (!solid.supportable || (solid.node && !solid.node.visible)) return null;
+  if (radius && solid.bodySupport === false) return null;
   if (solid.triangles) {
     // Keep a descending body on the cap until its collision disk clears the
     // edge. A smaller support disk would lower it into the bevel and then
@@ -165,6 +168,34 @@ export function stationBlocked(
       y + clearance < b.min.y + 0.015
     )
       return false;
+    // The cylinder's uphill rim is not the foot position on an authored ramp.
+    // Use the real root floor; beside an edge, use its nearest walkable face.
+    // A small step tolerance lets the root leave before descending clear.
+    if (solid.groundingSlope) {
+      const face = solid.groundingFace || solid,
+        floor = face.triangles.support(x, z, Infinity, 0, 0.65);
+      if (floor && y >= floor.height - 0.015) return false;
+      if (!floor) {
+        for (let r = 0.02; r <= radius + 0.02; r += 0.02) {
+          let nearest = Infinity;
+          for (let i = 0; i < 16; i++) {
+            const angle = (i * Math.PI) / 8,
+              hit = face.triangles.support(
+                x + Math.sin(angle) * r,
+                z + Math.cos(angle) * r,
+                Infinity,
+                0,
+                0.65,
+              );
+            if (hit) nearest = Math.min(nearest, hit.height);
+          }
+          if (nearest < Infinity) {
+            if (y >= nearest - 0.06) return false;
+            break;
+          }
+        }
+      }
+    }
     return solid.triangles.blocked(x, y, z, clearance, clearance ? padding : 0);
   }
   return (

@@ -13,11 +13,26 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: 194 current dry standing views reviewed across eight chapters; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: 194 baseline dry views across eight chapters, plus jungle shrine and route views; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- [Jungle keeper shrines](keeper-shrines.md) give eight covenants distinct reading
+  structures and move seven to surveyed side pockets, exposing their drum
+  layouts. Their static geometry reduces from 153 meshes to 24 material batches;
+  triangle counts stay the same and original/merged geometry disposal is checked.
+  Retained regressions repair distant-support hovering, inclined boot contact
+  and the downhill seal/short-step snag. All 43 distinct focused checks pass
+  during the pass, with affected cases repeated after the repairs. All 58 local
+  legs and 42 reversible drum operations pass; all 16 final quality/raised views,
+  66 route views and seven descent views are reviewed. The last raised-descent
+  repair has its own normal-controller trace and shared motion regressions.
+  All four native keyboard/High and emulated touch/Low release cases pass their
+  controls, movement and two whole-store reload comparisons each; their twenty
+  captures are reviewed. Broader court massing, discoveries,
+  moving/underwater coverage and listening/device acceptance remain open.
 
 - [Alpine horizon composition](alpine-horizon.md) widens the two snow ranges,
   lowers and separates their summits, reduces narrow erosion cuts and adjusts

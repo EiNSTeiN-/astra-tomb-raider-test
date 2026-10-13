@@ -6,6 +6,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces, faceCameraTarget } from "../src/camera-collision.js";
+import { stationSupport } from "../src/field-station-solids.js";
 import { followClearCamera } from "../src/camera-follow.js";
 import {
   advanceCharacter,
@@ -246,6 +247,124 @@ test("all physical drum controls stay supported and clear, with bounded relief b
   }
   assert.equal(rotors, 42);
   assert.equal(maps.size, 1);
+});
+test("keeper shrine support matches rendered faces, including both inclined altars", (t) => {
+  const { game } = fixture(t),
+    ray = new THREE.Raycaster(),
+    direction = new THREE.Vector3(0, -1, 0);
+  game.world.updateMatrixWorld(true);
+  for (const site of game.cipherSites) {
+    const shrine = site.keeperShrine,
+      { x, z } = shrine.foundation;
+    assert.deepEqual(shrine.inscriptions, [
+      site.trial.title.toUpperCase(),
+      ...site.trial.clues.map(cipherClue),
+    ]);
+    for (const dx of [-1.6, -0.8, 0, 0.8, 1.6])
+      // Sample face interiors. The canopy ends at ±0.275; batching into
+      // Float32 moves that mathematical boundary by less than a micrometre.
+      for (const dz of [-0.55, -0.25, 0, 0.25, 0.55]) {
+        const px = x + dx,
+          pz = z + dz;
+        ray.set(new THREE.Vector3(px, shrine.bounds.max.y + 2, pz), direction);
+        const hits = ray
+          .intersectObject(site.fixed, true)
+          .filter((hit) => hit.object.material.isMeshStandardMaterial);
+        assert(hits.length, `stage ${site.stage} missing rendered support`);
+        const expected = hits[0].point.y,
+          supports = shrine.solids.map((solid) =>
+            stationSupport(solid, px, pz),
+          );
+        const actual = Math.max(
+          ...supports.filter((height) => height !== null),
+        );
+        assert(
+          Math.abs(actual - expected) < 0.0001,
+          `stage ${site.stage}, ${dx},${dz}: physics ${actual}, render ${expected}`,
+        );
+      }
+  }
+});
+test("keeper reader pads and the former first pad stay on soil beside finite bases", (t) => {
+  const { game } = fixture(t);
+  for (const site of game.cipherSites) {
+    const p = site.tablet.group.position;
+    for (const dz of [0, 0.2, 0.4]) {
+      const z = p.z + dz,
+        soil = game.groundHeight(p.x, z);
+      assert(game.canMove(p.x, z, 0), `stage ${site.stage} reader clearance`);
+      assert.equal(supportAt(game, p.x, z, soil + 0.25, 0.55).height, soil);
+    }
+  }
+  const { x, z } = game.cipherSites[0].keeperShrine.foundation;
+  game.player.position.set(x, game.groundHeight(x, z + 1.7), z + 1.7);
+  const before = game.player.position.clone();
+  for (let i = 0; i < 60; i++) advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+  assert(
+    game.player.position.distanceTo(before) < 1e-8,
+    "older first-reader position must not rise onto a distant cap",
+  );
+});
+test("inclined keeper footing needs a real walkable face beneath the root", (t) => {
+  const { game } = fixture(t),
+    shrine = game.cipherSites[0].keeperShrine,
+    face = shrine.solids.find((solid) => solid.groundingSlope),
+    { x, z } = shrine.foundation;
+  assert(face);
+  assert.equal(
+    stationSupport(face, x, z, Infinity, 0.55),
+    stationSupport(face, x, z),
+    "the root rests on the inclined floor instead of its uphill disk edge",
+  );
+  for (const px of [face.bounds.min.x - 0.1, face.bounds.max.x + 0.1]) {
+    assert.equal(stationSupport(face, px, z, Infinity, 0.55), null);
+  }
+  const saved = structuredClone(game.progress),
+    occupied = { x, y: game.groundHeight(x, z), z },
+    arrival = safeArrival(game, occupied);
+  assert(arrival);
+  assert(
+    game.canMove(
+      arrival.x,
+      arrival.z,
+      arrival.y - game.groundHeight(arrival.x, arrival.z),
+    ),
+  );
+  assert.deepEqual(game.progress, saved);
+  game.player.position.set(x, stationSupport(face, x, z, Infinity, 0.55), z);
+  game.grounded = true;
+  game.velocityY = 0;
+  assert(
+    game.canMove(x, z, game.player.position.y - game.groundHeight(x, z)),
+    "initial raised stance",
+  );
+  for (let i = 0; i < 90; i++) {
+    advanceCharacter(game, { x: 0, z: -3 }, 1 / 60);
+    const p = game.player.position;
+    assert(
+      game.canMove(p.x, p.z, p.y - game.groundHeight(p.x, p.z)),
+      `raised step ${i}: ${p.toArray()}`,
+    );
+  }
+  assert(
+    game.player.position.z < z - 1.7,
+    "the raised altar must release the player at its visible edge",
+  );
+});
+test("the first lectern's lower seal leaves its downhill walking exit open", (t) => {
+  const { game } = fixture(t),
+    shrine = game.cipherSites[0].keeperShrine,
+    face = shrine.solids.find((solid) => solid.groundingSlope),
+    { x, z } = shrine.foundation;
+  game.player.position.set(x, stationSupport(face, x, z, Infinity, 0.55), z);
+  game.grounded = true;
+  game.velocityY = 0;
+  for (let i = 0; i < 90; i++) advanceCharacter(game, { x: 0, z: 3 }, 1 / 60);
+  assert(
+    game.player.position.z > z + 1.7,
+    `downhill exit stopped at ${game.player.position.toArray()}`,
+  );
+  assert(game.grounded);
 });
 test("world turns, shared focused changes and reset persist; locked courts cannot turn or activate", (t) => {
   const { game, storage } = fixture(t),

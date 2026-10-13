@@ -1,5 +1,6 @@
 // Four carved signs form a cycle. Later covenants combine counts, shared signs
 // and exclusions; the answer is deduced from the inscriptions, never random.
+import { keeperShrineReserved } from "./keeper-shrine-plan.js";
 export const CIPHER_SIGNS = ["SUN", "ROOT", "RAIN", "MOON"];
 export const cipherName = (i) => ["I", "II", "III", "IV", "V", "VI"][i];
 const is = (at, value) => ({ kind: "is", at, value });
@@ -268,8 +269,9 @@ export function inCipherCourt(map, x, z, padding = 0) {
   return map.features.some(
     (f) =>
       f.type === "mechanism" &&
-      Math.abs(x - f.x * 7) < 12 + padding &&
-      z - f.z * 7 > 7 - padding &&
-      z - f.z * 7 < 25 + padding,
+      ((Math.abs(x - f.x * 7) < 12 + padding &&
+        z - f.z * 7 > 7 - padding &&
+        z - f.z * 7 < 25 + padding) ||
+        keeperShrineReserved(f.stage, x - f.x * 7, z - f.z * 7, padding)),
   );
 }

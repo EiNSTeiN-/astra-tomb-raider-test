@@ -96,6 +96,7 @@ export function cipherPlaques() {
       ...CIPHER_SIGNS,
       ...Array.from({ length: 6 }, (_, i) => cipherName(i)),
       "READ THE COVENANT",
+      ...CIPHER_TRIALS.map((trial) => trial.title.toUpperCase()),
       ...CIPHER_TRIALS.flatMap((t) => t.clues.map(cipherClue)),
     ]),
   ];
