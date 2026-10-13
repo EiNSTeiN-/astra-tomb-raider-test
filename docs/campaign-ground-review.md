@@ -40,6 +40,10 @@ The later [keeper shrine pass](keeper-shrines.md) replaces the eight repeated
 jungle reading slabs and moves seven to side pockets. Its eight court comparison
 states match this baseline; the original jungle findings above describe the
 earlier construction. The larger temple silhouettes remain a broader target.
+The [gateway crown pass](jungle-gate-crowns.md) subsequently varies all eight
+foreground jungle gates, with nine exactly matched court comparisons and
+repeated threshold, climbing, raised-contact and release checks. Rear temple
+crowns and gallery footprints still need broader variation.
 
 All recorded High views have finite pre-bloom input, linked programs, no GL
 error, a legal grounded player root, full health, clear camera space and clear

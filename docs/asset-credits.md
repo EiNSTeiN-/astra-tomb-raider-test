@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [jungle gateway crowns](jungle-gate-crowns.md) use original profile and
+construction code in `src/jungle-gate-crowns.js`, the existing chamfered stone,
+botanical relief and closed-vault generators, and the credited temple maps.
+No external model, texture, recording, score or dependency was added. Six
+documentation images are actual game captures encoded losslessly as WebP;
+decoded pixels and dimensions match their source PNGs. Existing character,
+environmental and audio attribution below continues to apply.
+
 The [jungle keeper shrines](keeper-shrines.md) use original closed-panel,
 foundation, post and crest code in `src/keeper-shrine-art.js`, the existing
 stone-block and carved-sign generators, and the credited temple materials.

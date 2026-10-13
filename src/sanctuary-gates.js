@@ -30,6 +30,7 @@ import {
 } from "./sky-gate-art.js";
 import { buildSkyChamberWall } from "./sky-chamber-walls.js";
 import { buildCrystalVault } from "./crystal-vaults.js";
+import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -574,28 +575,10 @@ export function buildSanctuaryGate(game, feature, materials) {
       6.5,
     );
   } else if (design.crown === "corbel") {
-    for (const side of [-1, 1])
-      for (let i = 0; i < 6; i++)
-        block(
-          1.85,
-          0.43,
-          1.65,
-          m.trim,
-          side * (5.85 - i * 0.86),
-          8.07 + i * 0.4,
-          6.5,
-          root,
-          true,
-        );
-    block(3.8, 0.48, 1.85, m.trim, 0, 10.4, 6.5, root, true);
-    add(
-      carvedPanelGeometry(1.7, 2.2, feature.stage % 3),
-      m.wall,
-      0,
-      8.0,
-      7.39,
-      detail,
-    );
+    gate.crown = buildJungleGateCrown(game, gate, m, add);
+    // The old crown used thirteen seeded blocks. Retain the subsequent leaf
+    // and fitting seeds so a visual replacement leaves moving art unchanged.
+    serial += 13;
   } else if (design.crown === "angular") {
     buildCrystalVault(game, gate, m);
   } else if (design.crown === "forge") {

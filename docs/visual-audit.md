@@ -98,6 +98,13 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [jungle gateway crowns](jungle-gate-crowns.md) now vary the eight foreground
+gate silhouettes. Nine matched court comparisons, twenty-six construction
+captures, twenty gate tests, raised boot contact and repeated threshold/climbing
+checks cover their geometry and integration. Native controls and reloads pass,
+with a final Low release case after the upper collision repair. Larger rear
+temple crowns, gallery footprints and wider campaign coverage remain open.
+
 The [keeper shrine pass](keeper-shrines.md) follows the eight-chapter ground
 baseline with eight jungle reading profiles and seven side-pocket placements.
 Its 16 batched quality/raised views, 66 assisted local-route images and seven

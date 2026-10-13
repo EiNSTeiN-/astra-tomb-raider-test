@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { buildJungleGateCrown } from "../src/jungle-gate-crowns.js";
+import { stoneBlockGeometry } from "../src/temple-architecture.js";
+import { mergeArchitecture } from "../src/visuals.js";
+import { stationBlocked, stationSupport } from "../src/field-station-solids.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { SaveStore } from "../src/storage.js";
@@ -73,6 +79,249 @@ function open(game, gate) {
     updateSanctuaryGate(game, gate, 1 / 30);
   }
 }
+
+test("eight jungle crowns preserve the delivered shutters, drive emitters and navigation obstacles", (t) => {
+  const expected = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/jungle-gate-baseline.json", import.meta.url),
+    ),
+  );
+  const { game } = fixture(t, 0, null, true);
+  const hash = (value) => createHash("sha256").update(value).digest("hex");
+  assert.equal(new Set(game.fieldGates.map((g) => g.crown.style)).size, 8);
+  assert.equal(
+    hash(JSON.stringify(game.obstacles.filter((o) => !o.jungleGateCrown))),
+    expected.obstacles,
+  );
+  assert.equal(
+    hash(JSON.stringify(game.fieldGates.map((g) => g.sources))),
+    expected.sources,
+  );
+  const geometryHash = (geometry) => {
+    const digest = createHash("sha256");
+    for (const name of ["position", "normal", "uv"]) {
+      const a = geometry.attributes[name];
+      digest.update(
+        Buffer.from(a.array.buffer, a.array.byteOffset, a.array.byteLength),
+      );
+    }
+    return digest.digest("hex");
+  };
+  assert.deepEqual(
+    game.fieldGates.map((g) =>
+      g.leaves.map((l) => ({
+        side: l.side,
+        meshes: l.group.children
+          .filter((o) => o.isMesh)
+          .map((o) => geometryHash(o.geometry)),
+      })),
+    ),
+    expected.leaves,
+  );
+});
+
+test("jungle crown courses have seated jamb bearings and backed reliefs that survive batching and release once", () => {
+  for (let stage = 0; stage < 8; stage++) {
+    const world = new THREE.Group(),
+      root = new THREE.Group(),
+      detail = new THREE.Group();
+    root.position.set(17, 2, 31);
+    root.add(detail);
+    world.add(root);
+    const wall = new THREE.MeshStandardMaterial(),
+      trim = new THREE.MeshStandardMaterial();
+    const cameraSurfaces = new CameraSurfaces(world);
+    const game = {
+        level: LEVELS[0],
+        cameraSurfaces,
+        obstacles: [],
+        groundHeight: () => 2,
+      },
+      gate = { stage, root, detail };
+    const add = (geometry, material, x, y, z, parent = root) => {
+      if (!material.vertexColors) geometry.deleteAttribute("color");
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(x, y, z);
+      parent.add(mesh);
+      return mesh;
+    };
+    const crown = buildJungleGateCrown(game, gate, { wall, trim }, add);
+    const structural = root.children.filter((o) => o.isMesh),
+      originals = [...structural, ...detail.children];
+    const disposed = new Map();
+    for (const mesh of originals) {
+      assert(
+        Object.values(mesh.geometry.attributes).every((a) =>
+          a.array.every(Number.isFinite),
+        ),
+      );
+      disposed.set(mesh.geometry, 0);
+      mesh.geometry.addEventListener("dispose", () =>
+        disposed.set(mesh.geometry, disposed.get(mesh.geometry) + 1),
+      );
+    }
+    root.updateMatrixWorld(true);
+    // The lintel bears on both actual existing jamb caps, rather than only
+    // meeting a nominal centre height or touching one side of a sloped site.
+    for (const side of [-1, 1]) {
+      const jamb = add(
+        stoneBlockGeometry(1.7, 0.3, 1.78),
+        trim,
+        side * 6.5,
+        8.35,
+        6.5,
+      );
+      jamb.updateMatrix();
+      const bearing = new THREE.Box3().setFromObject(jamb);
+      assert(
+        structural.some((mesh) => {
+          const box = new THREE.Box3().setFromObject(mesh);
+          return (
+            box.max.y < root.position.y + 8.9 &&
+            box.intersectsBox(bearing) &&
+            Math.min(box.max.y, bearing.max.y) -
+              Math.max(box.min.y, bearing.min.y) >
+              0.08
+          );
+        }),
+        `unseated jamb ${stage}/${side}`,
+      );
+    }
+    for (const face of detail.children) {
+      const p = face.geometry.attributes.position;
+      for (let index = 0; index < p.count; index += 71) {
+        const point = new THREE.Vector3()
+          .fromBufferAttribute(p, index)
+          .applyMatrix4(face.matrixWorld);
+        point.z -= 0.003;
+        const hit = new THREE.Raycaster(
+          point,
+          new THREE.Vector3(0, 0, -1),
+        ).intersectObjects(structural)[0];
+        assert(
+          hit && hit.distance < 0.22,
+          `unbacked carving ${stage}/${index}`,
+        );
+      }
+    }
+    const probes = crown.tiers.map((tier) =>
+      new THREE.Vector3(tier.x, (tier.bottom + tier.top) / 2, 8.2).add(
+        root.position,
+      ),
+    );
+    const distances = probes.map(
+      (p) =>
+        new THREE.Raycaster(p, new THREE.Vector3(0, 0, -1)).intersectObjects(
+          structural,
+        )[0]?.distance,
+    );
+    assert(distances.every(Number.isFinite));
+    const countTriangles = () => {
+      let count = 0;
+      world.traverse((o) => {
+        if (o.isMesh)
+          count +=
+            (o.geometry.index?.count ?? o.geometry.attributes.position.count) /
+            3;
+      });
+      return count;
+    };
+    const triangles = countTriangles();
+    mergeArchitecture(root);
+    mergeArchitecture(detail);
+    world.updateMatrixWorld(true);
+    assert.equal(countTriangles(), triangles);
+    assert(root.children.filter((o) => o.isMesh).length <= 2);
+    probes.forEach((p, i) => {
+      const hit = new THREE.Raycaster(
+        p,
+        new THREE.Vector3(0, 0, -1),
+      ).intersectObjects(root.children.filter((o) => o.isMesh))[0];
+      assert(
+        hit && Math.abs(hit.distance - distances[i]) < 1e-6,
+        `changed batched face ${stage}/${i}`,
+      );
+    });
+    cameraSurfaces.rebuild();
+    assert.equal(cameraSurfaces.count, structural.length);
+    assert.equal(cameraSurfaces.pending.length, 0);
+    const geometries = new Set();
+    world.traverse((o) => {
+      if (o.isMesh) geometries.add(o.geometry);
+    });
+    geometries.forEach((g) => g.dispose());
+    wall.dispose();
+    trim.dispose();
+    assert([...disposed.values()].every((n) => n === 1));
+  }
+});
+
+test("raised bodies meet crown stone while original thresholds stay clear and rendered caps provide exact footing", (t) => {
+  const { game } = fixture(t, 0, null, true);
+  game.progress.completed = true;
+  let samples = 0;
+  for (const gate of game.fieldGates) {
+    updateSanctuaryGate(game, gate, 100);
+    const c = gate.root.position,
+      solid = gate.crown.solid;
+    const x = c.x,
+      z = c.z + 6.5,
+      inside = c.y + 8.65;
+    assert(
+      !game.canMove(x, z, inside - game.groundHeight(x, z)),
+      `raised body passes through lintel ${gate.stage}`,
+    );
+    assert(
+      !stationBlocked(solid, x, game.groundHeight(x, z), z),
+      `upper crown blocks the floor ${gate.stage}`,
+    );
+    assert(game.canMove(x, z, 0), `restored ground threshold ${gate.stage}`);
+    const renderer = gate.root.children.filter(
+      (o) => o.isMesh && o.material.isMeshStandardMaterial,
+    );
+    for (const dx of [-6.4, -4.3, -1.9, 0, 1.9, 4.3, 6.4])
+      for (const dz of [-0.45, 0, 0.45]) {
+        const px = c.x + dx,
+          pz = c.z + 6.5 + dz;
+        const ray = new THREE.Raycaster(
+          new THREE.Vector3(px, c.y + 20, pz),
+          new THREE.Vector3(0, -1, 0),
+        );
+        const hit = ray
+          .intersectObjects(renderer)
+          .find((h) => h.face.normal.y >= 0.65);
+        const height = stationSupport(solid, px, pz, Infinity, 0.4);
+        assert(
+          hit && height !== null && Math.abs(hit.point.y - height) < 1e-5,
+          `rendered cap ${gate.stage}/${dx}/${dz}`,
+        );
+        samples++;
+      }
+    // Crouching wholly inside the moon pillar still intersects its union,
+    // including the overlap between its recessed core and dressed courses.
+    if (gate.stage === 5) {
+      assert(stationBlocked(solid, x, c.y + 9.2, z, 1.05, 0.29));
+      for (const dx of [-5.9, 5.9]) {
+        const px = c.x + dx,
+          floor = stationSupport(solid, px, z, Infinity, 0.4);
+        assert(
+          floor !== null &&
+            game.canMove(px, z, floor - game.groundHeight(px, z)),
+          `walkable moon cap ${dx}`,
+        );
+      }
+      assert(
+        stationBlocked(solid, c.x + 3, c.y + 8.88, z),
+        "a lower beam does not erase overhead arch collision",
+      );
+      assert(
+        stationBlocked(solid, c.x + 6.7, c.y + 8.88, z),
+        "a lower beam does not erase the neighbouring arch edge",
+      );
+    }
+  }
+  assert.equal(samples, 168);
+});
 
 test("all 69 chapter gates retain regional construction, clear restored panels and a standing centre passage", (t) => {
   assert.equal(

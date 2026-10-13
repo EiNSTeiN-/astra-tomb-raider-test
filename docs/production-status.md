@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Jungle gateway crowns](jungle-gate-crowns.md) give the eight foreground gates
+  distinct lintels, paired towers, stepped pediments and a moon arch. Supported
+  cores and backed carvings preserve original shutter geometry, drive sources
+  and lower navigation obstacles. Exact upper collision repairs a raised-body
+  pass-through and supports real caps. All twenty gate tests, 168 rendered support
+  samples, four raised boot-contact views, sixteen repeated crossings, fifty
+  control approaches and the jungle climbing loop pass. Nine court comparisons
+  match exactly; twenty-six construction captures are reviewed. Two native input
+  cases precede the final collision addition, and the repaired Low release repeats
+  controls, movement and both whole-store reload comparisons. Rear temple/galleries,
+  broader world coverage and listening/device acceptance remain open.
+
 - [Jungle keeper shrines](keeper-shrines.md) give eight covenants distinct reading
   structures and move seven to surveyed side pockets, exposing their drum
   layouts. Their static geometry reduces from 153 meshes to 24 material batches;
