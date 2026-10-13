@@ -98,6 +98,12 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [temple crown bearing repair](temple-crown-bearings.md) closes the eighth
+larger jungle temple's measured 7.82 cm crown gap and gives all nine tall reliefs
+continuous stone backing. Geometry hashes, rendered bearings/support, local
+passages and construction views cover the repair. The larger profiles and
+gallery/chamber layouts still repeat and remain a composition target.
+
 The [jungle gateway crowns](jungle-gate-crowns.md) now vary the eight foreground
 gate silhouettes. Nine matched court comparisons, twenty-six construction
 captures, twenty gate tests, raised boot contact and repeated threshold/climbing

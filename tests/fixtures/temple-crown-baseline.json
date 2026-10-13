@@ -1,0 +1,96 @@
+{
+  "sourceCommit": "62e277f525788d30bf9bb2c3587e35969d17f63f",
+  "obstacleHash": "640d3b99e4866f8a21907f56af01d5504cc5725cd94325df0751fe5005d9a6fb",
+  "rooms": [
+    {
+      "index": 0,
+      "arcadeTriangles": 58356,
+      "attributes": {
+        "position": "fd973135b9163b47591e76696e329eb3abcebe2b38e0ceab66ea1aebba5418d6",
+        "normal": "91bf9337a070a373a2ad2e401df205073efc5e29972a26ce9e959a92358ad99a",
+        "uv": "ccf582ed7a4f5718093761bef42ebcc421a35878848b63b3f96a4eed1daa509c",
+        "color": "ee7707031e343032211654001d3eb5a212035a584b4461dfc1857196b39fc88d"
+      }
+    },
+    {
+      "index": 1,
+      "arcadeTriangles": 39676,
+      "attributes": {
+        "position": "206596b252ee6b0ab70e7ffa082b36499ce0faf22f54cd142a962c50225c199a",
+        "normal": "b0cb7b8d05babdc683aa8c12099d6be4985ee9e8dad2ed0783aa2cc5befef07f",
+        "uv": "786614085b1d1552fca80a7dcdfcc47b185ab2bacc95da3f5e8cb7adbface020",
+        "color": "b42b0158441fa77b20986d5658e1704f1ee5ae843a4729f47e33d396558e54ef"
+      }
+    },
+    {
+      "index": 2,
+      "arcadeTriangles": 38356,
+      "attributes": {
+        "position": "e2fbc9ed6101aa27fadbfc448709f32dfce388044e1c63d3b8632fc56108883e",
+        "normal": "2a7b2dd23ed22b1ba8be33c55abc779103eeeb1a02d9087a0c0ae8c8ede911a6",
+        "uv": "a1ef1d856ba1245f2c47dbefc78b8e6308a01e32d177f7becd1c3207c749f7cd",
+        "color": "308939da3e924c10c9b513534dcd54f34937cd31395fc93175db17992a61ae2e"
+      }
+    },
+    {
+      "index": 3,
+      "arcadeTriangles": 58024,
+      "attributes": {
+        "position": "f498c5ae0187397fa78b0b1280e085b73244f3aa8e95fd876a408f75c35b8a0e",
+        "normal": "3f18c12c028a70fac5aac2ff1275d6a04572baf1cce5a707e12c7a0f71c4e052",
+        "uv": "0539467b5fe722ed0dc959ba34b36acaacc96b92703812fe19af48ff6895e5c3",
+        "color": "b9d8a3b3b5c13f587e5d3c7ff16d9fc7c241e9e32b2f5ad2411cfdc9726a74ab"
+      }
+    },
+    {
+      "index": 4,
+      "arcadeTriangles": 39676,
+      "attributes": {
+        "position": "3e364a9c1351c8ffa3fbbd2befa5f91951cf913a6715b92c1abe9b5f97aa451d",
+        "normal": "591b9062afb10403aeffc42a460f70075d3dc34317d864ba361ad68bc1c4e31c",
+        "uv": "6b7493d0613832b0ddc944a51781ee58f81441624c86b9a69035d240e40ba76a",
+        "color": "5dce38b4cb71cc236137dd4303c185b51d68ff8e2bca7435fe76ded19671dd98"
+      }
+    },
+    {
+      "index": 5,
+      "arcadeTriangles": 50224,
+      "attributes": {
+        "position": "43701f5b1d6de2ec8b63f012596cbaf805841cdf43a340b45d471683f9da2825",
+        "normal": "0944993e080b2cc09e1711a313dec6c31592daa0df21340ed182519891d451e0",
+        "uv": "f03c78c7a0016f0e8628842e602848d5609d7820bb8de9ff64b11963c224e479",
+        "color": "af26c11e9df0cead0b38ab1e4debd074162a7656db4c66bb1b18702cd5423bef"
+      }
+    },
+    {
+      "index": 6,
+      "arcadeTriangles": 41740,
+      "attributes": {
+        "position": "c3cfb7241dd8c403428e0d55396dd58b09f7930182f6afe5b7e5093ad6b68c9a",
+        "normal": "3dbb8d542f2d6aff07a18551930800b18136fccc09f653123a360ed513d9bc0b",
+        "uv": "0147a5b4dca56fd0e10fdc9664fe8877346077464b4187bad2497c21bdd16287",
+        "color": "4cee061fc5a65ffacafc7ed3573fc48765189d0ecffcdaffd93a813dae62afd3"
+      }
+    },
+    {
+      "index": 7,
+      "arcadeTriangles": 39532,
+      "attributes": {
+        "position": "5d63a043f168661d5741062d820483f42b978c415c12aeb99a4bbe61e1eeaf3b",
+        "normal": "441a2036595ee6a7bf79c7b4e84f1cdc11773c933d7f6b876c0c4863ed831d9d",
+        "uv": "5265cf6c086054fc02109485f0df0c4e0311d556dff1c0469140267ca6b5bda0",
+        "color": "d8cb12222515e6d5bc491669172d87a257c171cea20d17d8560b6c2803ce06c4"
+      }
+    },
+    {
+      "index": 8,
+      "arcadeTriangles": 49544,
+      "attributes": {
+        "position": "f84722dcefe92caba6f28f2a2bd2e8cfec440996310b6fb27a67edd25ce97cd2",
+        "normal": "5a0e0af3673433f78f36316dfd0debc954404e00a4aa02b79790851a669715ab",
+        "uv": "8bcfe58d531b9587752a92e1366c457aac156a2a07435e0a7e245c577a332932",
+        "color": "9c1e37c7326237b6ad116af1a95c3fdf9313b880fb3f99cb39853347e981c65e"
+      }
+    }
+  ]
+}

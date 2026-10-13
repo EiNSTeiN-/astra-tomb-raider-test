@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Jungle temple crown bearings](temple-crown-bearings.md) seat nine larger
+  crowns on their actual roofs and back their tall carvings, repairing a
+  measured 7.82 cm separation at the eighth temple. Original arcade buffers
+  and all 122 navigation records remain intact. All 13 focused checks pass,
+  including 792 backing probes, 162 bearings and 135 cap supports. Thirteen
+  standing context views, three elevated inspections and 18 local passage
+  captures are reviewed; controller passages, control/sound approaches and
+  the complete climbing loop pass. The repaired touch/Low release passes
+  controls, native movement and two whole-store reload comparisons, with five
+  reviewed captures. Broader silhouette/layout variation,
+  campaign coverage and listening/device acceptance remain open.
+
 - [Jungle gateway crowns](jungle-gate-crowns.md) give the eight foreground gates
   distinct lintels, paired towers, stepped pediments and a moon arch. Supported
   cores and backed carvings preserve original shutter geometry, drive sources

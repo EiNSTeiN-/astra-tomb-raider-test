@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [jungle temple crown bearing repair](temple-crown-bearings.md) uses original
+closed-core and stele construction in `src/temple-crown-support.js`, existing
+chamfered stone and botanical generators, and the credited temple materials.
+Three lossless documentation images are actual game captures; the elevated
+construction cameras are identified in the notes. No external asset or
+dependency was added. Existing environmental and character credits apply.
+
 The [jungle gateway crowns](jungle-gate-crowns.md) use original profile and
 construction code in `src/jungle-gate-crowns.js`, the existing chamfered stone,
 botanical relief and closed-vault generators, and the credited temple maps.

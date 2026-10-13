@@ -3,6 +3,7 @@ import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { addPierFacings, templeGrowthMaterials } from "./temple-facings.js";
 import { addMasonryFooting } from "./masonry-footings.js";
+import { buildTempleCrownSupport } from "./temple-crown-support.js";
 
 // Chamfered blocks use flat faces and narrow bevels, rather than six subdivided
 // grids. The disconnected faces retain sharp masonry edges after batching.
@@ -282,7 +283,8 @@ export function buildTempleArchitecture(game) {
     detail.position.copy(root.position);
     game.world.add(root, detail);
     let blocks = 0,
-      triangles = 0;
+      triangles = 0,
+      crownParts = null;
     const block = (w, h, d, px, py, pz, tint = 1, rotation = 0) => {
       const g = stoneBlockGeometry(w, h, d, ++serial + game.level.seed, 0.029),
         m = new THREE.Mesh(g, material);
@@ -302,6 +304,7 @@ export function buildTempleArchitecture(game) {
       m.rotation.y = rotation;
       m.castShadow = m.receiveShadow = true;
       root.add(m);
+      if (crownParts) crownParts.push(m);
       blocks++;
       triangles += positions.count / 3;
       return m;
@@ -502,7 +505,11 @@ export function buildTempleArchitecture(game) {
       }
     }
     // A corbelled entrance crown has a layered silhouette and a recessed rosette.
-    const crownY = 9.95;
+    const roof =
+      (game.groundHeight(x - 5.5, z - 18) +
+        game.groundHeight(x + 5.5, z - 18)) / 2 + 9.8725;
+    const crownY = roof - base + 0.1875;
+    crownParts = [];
     for (let tier = 0; tier < (room.index === 8 ? 8 : 5); tier++) {
       const width = (room.index === 8 ? 17 : 12) - tier * 1.65,
         height = 0.62;
@@ -531,9 +538,15 @@ export function buildTempleArchitecture(game) {
       carvedPanelGeometry(3, 2.8, room.index + 1),
       detailMaterial,
     );
-    crown.position.set(0, 9.6, -15.73);
     crown.receiveShadow = true;
     detail.add(crown);
+    const crownSupport = buildTempleCrownSupport(game, {
+      room, root, material, blockGeometry: stoneBlockGeometry,
+      crownY, roof, bodyParts: crownParts, panel: crown,
+    });
+    crownParts = null;
+    blocks += crownSupport.parts;
+    triangles += crownSupport.triangles;
     // Broken blocks stay beside the piers, preserving central routes and stations.
     if (plan.broken)
       for (let i = 0; i < 8; i++) {
@@ -572,6 +585,7 @@ export function buildTempleArchitecture(game) {
       blocks,
       triangles,
       plan,
+      crown: crownSupport,
       foundations,
       rootedPiers,
       facings: plan.piers.length * 4,
