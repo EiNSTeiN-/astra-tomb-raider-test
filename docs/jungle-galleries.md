@@ -1,5 +1,10 @@
 # Jungle galleries with distinct footprints
 
+This record describes milestone `e38f4af`. The subsequent
+[guardian camera repair](guardian-camera.md) resolves the warden-filled walking
+view and reconciles the three historical pool/terrain test failures documented
+below. The current full suite passes all 971 checks.
+
 The nine larger jungle temples now have different side-gallery footprints.
 Their former wings used the same two intermediate pier positions and straight
 roofs. The new bearings turn the galleries inward, flare them outward, or form
@@ -97,7 +102,7 @@ Native portrait touch movement and reload on that elevated landing, at Low:
   pitch. All eighteen views and all 39 ground crossing captures were reviewed.
   HDR input is finite and programs link. These elevated comparisons expose the
   layout; they are not reachable-player traversal checks. Some ground and roof
-  views remain crowded by foliage, including one very close walking camera.
+  views remain crowded by foliage; one walking view is filled by a guardian.
 - The production build passes with the existing bundle-size advisory. Native
   keyboard High and portrait touch Low checks use the built interface without
   development hooks. They cover ground movement, a 2.10 m walk that stays on

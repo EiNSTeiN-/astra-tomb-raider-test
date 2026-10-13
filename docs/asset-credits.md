@@ -1383,3 +1383,11 @@ intentional documentation images are actual game captures, delivered as
 lossless WebP files with decoded RGBA pixels and dimensions checked against
 their sources. Paired moon-court views use the preceding and current source
 with identical construction-camera and lighting states.
+
+The [guardian camera clearance](guardian-camera.md) uses bounds derived from
+the existing original rigid guardian armor and its two delivery tiers. It adds
+no geometry, external asset, dependency, recording or music. Six intentional
+documentation images are actual game captures using the existing credited
+assets; their lossless WebP files preserve decoded RGBA pixels and dimensions.
+The preceding normal-camera view and current native arrival share player
+position and chosen look; objective progress and interface presentation differ.

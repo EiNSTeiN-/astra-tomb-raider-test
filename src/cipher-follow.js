@@ -1,5 +1,6 @@
 import { MathUtils, Vector3 } from "three";
 import { followClearCamera } from "./camera-follow.js";
+import { guardianCameraSurfaces } from "./guardian-camera.js";
 
 // Start rising before a reverse arm reaches a drum. The clear path over its
 // crown joins both sides continuously, instead of jumping between side orbits.
@@ -94,6 +95,7 @@ export function cipherArrivalCamera(game, chest, preferred) {
         game.cameraSpace(p) &&
         cipherCameraSpace(game, p, chest, recovery.strength),
       recovery.pitch,
+      guardianCameraSurfaces(game),
     ),
     length = position.distanceTo(target);
   if (length < 3.2) return null;

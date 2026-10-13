@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import * as THREE from "three";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
@@ -20,7 +21,7 @@ function fixture(t, index) {
       terrainProfile: profile,
       world: new THREE.Group(),
       waterMeshes: [],
-      groundHeight: (x, z) => profile.height(x, z),
+      groundHeight: profile.surfaceHeight,
       player: new THREE.Group(),
       avatar: new THREE.Group(),
       progress: { stage: 0, field: [] },
@@ -54,6 +55,36 @@ function drawnHeight(p, x, z) {
     : d + (1 - tx) * (c - d) + (1 - tz) * (b - d);
 }
 
+// Recorded after the 2c14f7d dry-instrument repair, using the actual delivered
+// terrain planes. Short or absent rays belong to preserved crystal working
+// ground; require their exact new profiles rather than loosening all pools.
+const crystalShoreDigests = {
+  "reservoir-1":
+    "0b4aac8c7f6bafabfe3b6359c9798f2b1dff514cf7c0900e433eea07b1f561b5",
+  "reservoir-3":
+    "5af9e619345e6fe292bcbb0c7b74d91cc08602cd5fa73bdaa6714fa06cce25ec",
+  "reservoir-5":
+    "4380b9c8b83a73dab120dff9096acff6177b0158578ab691efa88a40a135205f",
+  "reservoir-7":
+    "aee9a9ab353b24d4fef2d06a23fb752b9ad82d657020cab6e3f7ed003a4bbde8",
+};
+
+function deepestWater(game, site) {
+  let deepest;
+  for (let x = site.x - site.width / 2; x <= site.x + site.width / 2; x += 0.5)
+    for (
+      let z = site.z - site.length / 2;
+      z <= site.z + site.length / 2;
+      z += 0.5
+    ) {
+      const sample = waterAt(game, x, z);
+      if (sample && (!deepest || sample.depth > deepest.depth))
+        deepest = { x, z, depth: sample.depth };
+    }
+  assert(deepest, `${game.level.id}/${site.id} retains water`);
+  return deepest;
+}
+
 test("all fourteen regional court pools bury their mesh boundaries below both ground surfaces and retain distinct shores", (t) => {
   let pools = 0,
     samples = 0;
@@ -82,11 +113,16 @@ test("all fourteen regional court pools bury their mesh boundaries below both gr
           assert.equal(waterAt(g, x, z), null);
           samples++;
         }
-      const depth = waterAt(g, s.x, s.z).depth;
-      assert(
-        depth > 1.2 && depth < 1.48,
-        "Even the lower neighbouring terrace retains a swimming-depth centre",
-      );
+      if (g.level.biome !== "crystal") {
+        const depth = waterAt(g, s.x, s.z).depth;
+        assert(depth > 1.2 && depth < 1.48, "unchanged swimming-depth centre");
+      } else {
+        // The mirrored and heart pads deliberately occupy two old centres.
+        // The final retained pocket is shallow; none should be excavated again
+        // merely to satisfy an obsolete circular swimming-pool assumption.
+        const deepest = deepestWater(g, s);
+        assert(deepest.depth > 0.35 && deepest.depth < 1.48);
+      }
       const radii = [];
       for (let j = 0; j < 32; j++) {
         const a = (j * Math.PI) / 16;
@@ -94,10 +130,19 @@ test("all fourteen regional court pools bury their mesh boundaries below both gr
         for (let r = 0; r < 9; r += 0.05)
           if (waterAt(g, s.x + Math.cos(a) * r, s.z + Math.sin(a) * r))
             radius = r;
-        assert(radius > 2 && radius < 8.5);
+        assert(radius < 8.5, "water stays inside the buried mesh border");
+        if (g.level.biome !== "crystal") assert(radius > 2);
         radii.push(Math.round(radius * 100));
       }
       assert(Math.max(...radii) - Math.min(...radii) > 30);
+      if (g.level.biome === "crystal")
+        assert.equal(
+          createHash("sha256")
+            .update(Buffer.from(new Uint16Array(radii).buffer))
+            .digest("hex"),
+          crystalShoreDigests[s.id],
+          `${s.id} retains the recorded dry margins and varied wet bank`,
+        );
       profiles.push(JSON.stringify(radii));
       assert(w.geometry.attributes.position.array.every(Number.isFinite));
       assert(w.geometry.attributes.bedHeight.array.every(Number.isFinite));
@@ -108,9 +153,11 @@ test("all fourteen regional court pools bury their mesh boundaries below both gr
   assert.equal(samples, 5656);
 });
 
-test("pool reshaping leaves objective foundations intact and saved swimmers can reach each shallower bank", (t) => {
+test("pool reshaping retains objective foundations, dry legacy arrivals and swimming exits from each retained deep pocket", (t) => {
   let foundations = 0,
-    exits = 0;
+    exits = 0,
+    shallow = 0,
+    dryCentres = 0;
   for (const index of [1, 6, 7]) {
     const g = fixture(t, index),
       p = g.terrainProfile;
@@ -131,8 +178,26 @@ test("pool reshaping leaves objective foundations intact and saved swimmers can 
       g.progress = JSON.parse(JSON.stringify({ stage: 12, field: [] }));
       updateWaterSurfaces(g, 100);
       assert.equal(w.position.y, level);
-      g.player.position.set(x, g.groundHeight(x, z), z);
+      // Ground-relative legacy saves at newly dry centres remain on that floor.
+      if (g.level.biome === "crystal" && !waterAt(g, x, z)) {
+        g.player.position.set(x, g.groundHeight(x, z), z);
+        const saved = g.player.position.clone();
+        restoreWaterArrival(g);
+        assert.equal(g.swimming, false);
+        assert(g.player.position.equals(saved));
+        dryCentres++;
+      }
+      const start = deepestWater(g, w.userData);
+      g.player.position.set(start.x, g.groundHeight(start.x, start.z), start.z);
       restoreWaterArrival(g);
+      if (start.depth <= 1.15) {
+        assert.equal(g.swimming, false);
+        assert.equal(g.player.position.y, g.groundHeight(start.x, start.z));
+        assert.equal(g.level.biome, "crystal");
+        assert.equal(w.userData.id, "reservoir-7");
+        shallow++;
+        continue;
+      }
       assert.equal(g.swimming, true);
       assert.equal(g.player.position.y, w.position.y - 0.38);
       for (let i = 0; i < 240 && g.swimming; i++) {
@@ -140,11 +205,20 @@ test("pool reshaping leaves objective foundations intact and saved swimmers can 
         advanceSwimming(g, { x: 1, z: 0 }, 1 / 60, false);
       }
       assert.equal(g.swimming, false);
-      assert(g.player.position.y >= g.groundHeight(g.player.position.x, z));
-      assert(g.player.position.x > x + 2 && g.player.position.x < x + 8.5);
+      assert(
+        g.player.position.y >= g.groundHeight(g.player.position.x, start.z),
+      );
+      assert(
+        g.player.position.x > start.x,
+        "swimmer moves to a shallower bank",
+      );
+      assert(g.player.position.x <= x + w.userData.width / 2);
+      assert((waterAt(g, g.player.position.x, start.z)?.depth || 0) < 1.1);
       exits++;
     }
   }
   assert(foundations > 1500);
-  assert.equal(exits, 14);
+  assert.equal(exits, 13);
+  assert.equal(shallow, 1);
+  assert.equal(dryCentres, 2);
 });

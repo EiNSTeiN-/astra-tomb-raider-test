@@ -1,5 +1,6 @@
 import { MathUtils, Quaternion, Vector3 } from "three";
 import { constrainCamera, followCamera } from "./camera-collision.js";
+import { guardianCameraSurfaces } from "./guardian-camera.js";
 import {
   cameraBodyTargets,
   cameraBodyVisibility,
@@ -13,7 +14,7 @@ const WALKING_TURN_RATE = 3;
 // with the target, retaining the collision solver's radial correction, and
 // verify both the arm and lens path before accepting the slower turn. A newly
 // obstructed view still receives its required immediate correction.
-function gentleWalkingTurn(game, target, next, dt, canOccupy) {
+function gentleWalkingTurn(game, target, next, dt, canOccupy, surfaces) {
   if (
     !game.cameraFollowTarget ||
     dt <= 0 ||
@@ -49,21 +50,12 @@ function gentleWalkingTurn(game, target, next, dt, canOccupy) {
   if (
     !canOccupy(start) ||
     !canOccupy(position) ||
-    constrainCamera(
-      target,
-      position,
-      game.cameraSurfaces,
-      canOccupy,
-    ).distanceTo(position) > 1e-6 ||
-    constrainCamera(start, position, game.cameraSurfaces, canOccupy).distanceTo(
+    constrainCamera(target, position, surfaces, canOccupy).distanceTo(
       position,
     ) > 1e-6 ||
-    cameraBodyVisibility(
-      game.cameraSurfaces,
-      position,
-      cameraBodyTargets(game),
-      game,
-    ) < 1
+    constrainCamera(start, position, surfaces, canOccupy).distanceTo(position) >
+      1e-6 ||
+    cameraBodyVisibility(surfaces, position, cameraBodyTargets(game), game) < 1
   )
     return next;
   return position;
@@ -73,7 +65,7 @@ function gentleWalkingTurn(game, target, next, dt, canOccupy) {
 // intervening follow path too: a clear destination can have a blocked sweep.
 // This only selects a gentler detour; followCamera still enforces actual walls,
 // terrain and near-plane clearance at the current position on every update.
-function clearApproach(game, target, end, ahead, canOccupy) {
+function clearApproach(game, target, end, ahead, canOccupy, surfaces) {
   if (ahead.lengthSq() < 1e-8) return true;
   for (const amount of [1 / 3, 2 / 3, 1]) {
     const shift = ahead.clone().multiplyScalar(amount),
@@ -86,12 +78,9 @@ function clearApproach(game, target, end, ahead, canOccupy) {
           1 - Math.exp(-3 * APPROACH_TIME * amount),
         );
     if (
-      constrainCamera(
-        start,
+      constrainCamera(start, projected, surfaces, canOccupy).distanceTo(
         projected,
-        game.cameraSurfaces,
-        canOccupy,
-      ).distanceTo(projected) > 0.08
+      ) > 0.08
     )
       return false;
   }
@@ -109,18 +98,26 @@ export function followClearCamera(
   dt,
   canOccupy,
   viewPitch = game.pitch,
+  surfaces = guardianCameraSurfaces(game),
 ) {
   const solve = () =>
     gentleWalkingTurn(
       game,
       target,
-      followClearCameraStep(game, target, desired, dt, canOccupy, viewPitch),
+      followClearCameraStep(
+        game,
+        target,
+        desired,
+        dt,
+        canOccupy,
+        viewPitch,
+        surfaces,
+      ),
       dt,
       canOccupy,
+      surfaces,
     );
-  return game.cameraSurfaces?.withSnapshot
-    ? game.cameraSurfaces.withSnapshot(solve)
-    : solve();
+  return surfaces?.withSnapshot ? surfaces.withSnapshot(solve) : solve();
 }
 
 function followClearCameraStep(
@@ -130,6 +127,7 @@ function followClearCameraStep(
   dt,
   canOccupy,
   viewPitch = game.pitch,
+  surfaces = guardianCameraSurfaces(game),
 ) {
   let steering = false;
   const follow = (end) =>
@@ -138,7 +136,7 @@ function followClearCameraStep(
         target,
         end,
         dt * (steering ? 3 / 8 : 1),
-        game.cameraSurfaces,
+        surfaces,
         canOccupy,
         game.cameraFollowTarget,
       ),
@@ -157,7 +155,7 @@ function followClearCameraStep(
   }
   const body = cameraBodyTargets(game),
     visibility = (position) =>
-      cameraBodyVisibility(game.cameraSurfaces, position, body, game),
+      cameraBodyVisibility(surfaces, position, body, game),
     ordinaryVisible = visibility(ordinary),
     ahead =
       game.cameraFollowTarget && dt > 0 && dt <= 0.1
@@ -168,18 +166,22 @@ function followClearCameraStep(
             .multiplyScalar(APPROACH_TIME / Math.max(dt, 1 / 120))
             .clampLength(0, 1.2)
         : new Vector3(),
-    anticipated = !clearApproach(game, target, desired, ahead, canOccupy),
+    anticipated = !clearApproach(
+      game,
+      target,
+      desired,
+      ahead,
+      canOccupy,
+      surfaces,
+    ),
     bodyRecovery =
       anticipated ||
       ordinaryVisible < 1 ||
       (game.cameraBodyRecovery &&
         (visibility(desired) < 1 ||
-          constrainCamera(
+          constrainCamera(target, desired, surfaces, canOccupy).distanceTo(
             target,
-            desired,
-            game.cameraSurfaces,
-            canOccupy,
-          ).distanceTo(target) < 3.2));
+          ) < 3.2));
   if (ordinaryLength >= 3.2 && !bodyRecovery) {
     game.cameraBodyRecovery = null;
     game.cameraContactRecovery = null;
@@ -256,10 +258,13 @@ function followClearCameraStep(
             Math.cos(yaw) * Math.cos(pitch) * distance,
           ),
         ),
-      safe = constrainCamera(target, end, game.cameraSurfaces, canOccupy);
+      safe = constrainCamera(target, end, surfaces, canOccupy);
     const safeLength = safe.distanceTo(target);
     if (safeLength < 2.2) continue;
-    if (anticipated && !clearApproach(game, target, end, ahead, canOccupy))
+    if (
+      anticipated &&
+      !clearApproach(game, target, end, ahead, canOccupy, surfaces)
+    )
       continue;
     const next = follow(end),
       length = next.distanceTo(target),
@@ -300,7 +305,7 @@ function followClearCameraStep(
   return constrainCamera(
     target,
     target.clone().add(best.safe.clone().sub(target).setLength(length)),
-    game.cameraSurfaces,
+    surfaces,
     canOccupy,
   );
 }

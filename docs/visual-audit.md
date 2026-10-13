@@ -98,6 +98,15 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [guardian camera repair](guardian-camera.md) keeps ordinary follow and
+arrival views outside nearby posed armor. The reproduced jungle warden view
+now shows the explorer clearly. Sixty-four reviewed views across eight chapters,
+independent posed-body rays, native input/reloads and all 971 regressions pass.
+The same pass reconciles the three historical pool/terrain failures with the
+previously documented dry-instrument repair, retaining the original terrain
+hash outside eight exact corrected samples. Wider framing, combat, surroundings
+and continuous campaign coverage remain open.
+
 The [jungle gallery layouts](jungle-galleries.md) give the nine larger temples
 nine distinct side-wing footprints. Twenty-six piers move with their detail;
 closed construction retains real body, roof, sight and sound queries. Coverage
@@ -105,9 +114,10 @@ adds 39 local bay crossings, 104 pressure/crouch body poses, 13 final roof poses
 nine matched construction comparisons and native floor/elevated/occupied-save
 checks. Roof backing stays below its dressed faces. Some cameras remain crowded
 by foliage; broader surroundings, chamber composition and continuous campaign
-coverage remain open. The full suite passes 964 of 967 tests; the same two
-court-pool failures and crystal working-core digest failure reproduce on the
-preceding `8ad729a` source and remain follow-up work.
+coverage remain open. At that milestone, the full suite passed 964 of 967 tests;
+the same two court-pool failures and crystal working-core digest failure reproduced on the
+preceding `8ad729a` source. The guardian-camera pass above resolves their obsolete
+expectations while preserving the intended dry working ground.
 
 The [distinct temple profiles](temple-profiles.md) now vary all nine larger
 jungle temple roofs while retaining their repaired construction and lower
@@ -268,6 +278,8 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-108 | The resonator's previous centre proxy permits body entry near a new base rim; the broader review also exposes crouched knee and ponytail contact at a standing-safe edge. | [Delivered hardware and stance clearance](resonator-frames.md) close the reproduced intrusion, narrow the stone shoulder and retain a larger margin through crouch transitions. At the sloped pressure case, standing remains clear at 1.620 m and crouching at 1.770 m, with zero sampled frame or terrain embedding in all three final poses. All 33 wheel controls retain crouched access. All 49 local routes and 33 reversible physical turns pass. Both native input modes verify the stance boundary, and an older occupied save recovers 0.75 m away with all other saved fields intact. | Fixed for the reproduced cases and sampled poses; wider routes, body faces and composition open |
 | VA-109 | Current instrument approach views shorten or elevate the follow camera on some banks; a remembered detour can retain an overhead return after a lower view opens. | [Nearby camera recovery](crystal-camera-recovery.md) retries the modest neighborhood before retaining a large upward adjustment. The ascending return lowers from 60.16° to 30.11°, and the mirrored front from 41.74° to 29.95°. All 1,519 recorded updates retain clear registered body targets, swept arms, camera space and full explorer coverage; eight local legs and six reversible turns retain their arrivals and selected look. At that milestone the sharpest ascending arm step remains 11.09° per 60 Hz update. [Gentler walking turns](walking-camera-turns.md) now lower it to 6.887° and the paired-heart maximum from 6.973° to 2.865° in the current dry world. All 1,494 recorded updates retain clear camera space, arms and posed body targets with unchanged controller trajectories. Required obstruction responses still produce larger steps; continuous framing and wider motion remain open. | Partly fixed; overhead views and turn steps improved, broader motion and framing open |
 | VA-110 | The mirrored and paired-heart front views show a bright glow over the explorer's footwear and nearby floor. | [Dry crystal working ground](crystal-working-ground.md) isolates the water overlay and finds two submerged wheel centres, two metre-deep operator positions and a third wet base. Preserving the instrument ground through excavation makes all 33 centres and controls dry; 4,224 footprint probes clear the wave crests while all four pools retain visible water. All 99 sampled body poses, 49 local controller legs and 33 reversible turns pass. Current views keep every effect enabled and show clear footwear and bronze bases. Wider shoreline, airborne and body-face coverage remain open. | Fixed for the reproduced submerged instruments and sampled margins; wider ground and visual acceptance open |
+| VA-111 | A normal jungle walking camera can enter a nearby warden’s torso, filling the lens with armor and hiding the explorer. | [Posed guardian camera bounds](guardian-camera.md) follow rigid armor across both tiers and retain open space around limbs. Sixty-four reviewed views of sixteen guardians across eight chapters have zero sampled armor obstruction in 10,409 actual body rays. Native keyboard/portrait movement and four exact paused-store reload comparisons retain chosen look. All 971 regressions pass. Wider continuous combat and framing remain under review. | Fixed for the reproduced view and sampled cases; broader framing and combat open |
+
 
 
 The [observatory body-clearance pass](observatory-body-clearance.md) adds

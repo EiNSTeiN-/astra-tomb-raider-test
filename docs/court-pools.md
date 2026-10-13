@@ -1,5 +1,11 @@
 # Court pools with grounded shorelines
 
+This records the original terrain milestone. The later
+[crystal working-ground repair](crystal-working-ground.md) deliberately preserves
+instrument pads through excavation. The [guardian-camera verification](guardian-camera.md)
+reconciles that change with the older pool and working-core checks, retaining
+unchanged terrain and checking the corrected dry margins explicitly.
+
 The desert, crystal and eclipse courts used square water meshes set above the
 surrounding terrain. Every one of the 4,536 sampled positions on their fourteen
 old mesh borders was exposed, by 12–32.4 cm. In close views this produced purple,

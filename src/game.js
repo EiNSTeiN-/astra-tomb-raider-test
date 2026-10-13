@@ -228,6 +228,7 @@ import {
   cipherArrivalCamera,
 } from "./cipher-follow.js";
 import { followClearCamera } from "./camera-follow.js";
+import { guardianCameraSurfaces } from "./guardian-camera.js";
 import { buildRelicArtwork, updateRelicArtwork } from "./relic-art.js";
 import {
   buildCipherCourts,
@@ -2173,7 +2174,7 @@ export class Adventure {
         arrivalCamera(
           target,
           preferred,
-          this.cameraSurfaces,
+          guardianCameraSurfaces(this),
           (point) => windCameraSpace(this, point, chest, standoff),
           this.diving ? 3.4 : 5.3,
         );
@@ -2265,20 +2266,27 @@ export class Adventure {
       Math.sin(cipherView.pitch) * distance + 0.2 * (1 - blend),
       Math.cos(this.yaw) * Math.cos(cipherView.pitch) * distance,
     );
-    const chest = this.player.position.clone().setY(target.y),
+    const surfaces = guardianCameraSurfaces(this),
+      chest = this.player.position.clone().setY(target.y),
       canOccupy = (p) =>
         windCameraSpace(this, p, chest, standoff) &&
         cipherCameraSpace(this, p, chest, cipherView.strength);
     // Sweep the lateral shoulder shift as well as the arm behind it.
     if (blend > 0.001) {
       const center = this.player.position.clone().setY(target.y);
-      target.copy(
-        constrainCamera(center, target, this.cameraSurfaces, canOccupy),
-      );
+      target.copy(constrainCamera(center, target, surfaces, canOccupy));
     }
     const desired = target.clone().add(offset);
     this.camera.position.copy(
-      followClearCamera(this, target, desired, dt, canOccupy, cipherView.pitch),
+      followClearCamera(
+        this,
+        target,
+        desired,
+        dt,
+        canOccupy,
+        cipherView.pitch,
+        surfaces,
+      ),
     );
     this.cameraFollowTarget = target.clone();
     this.rig?.visibility?.set(this.camera.position.distanceTo(target));

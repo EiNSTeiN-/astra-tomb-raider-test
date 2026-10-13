@@ -1,5 +1,11 @@
 # Continuous court approaches
 
+This records the original terrain milestone. The later
+[crystal working-ground repair](crystal-working-ground.md) deliberately preserves
+instrument pads through excavation. The [guardian-camera verification](guardian-camera.md)
+reconciles that change with the older pool and working-core checks, retaining
+unchanged terrain and checking the corrected dry margins explicitly.
+
 The jungle, snow, volcanic, crystal and eclipse terrain now joins neighbouring
 court pads through graded slopes. This addresses the abrupt terrace cuts left
 open by the [regional bank pass](regional-banks.md), including the rear snow
