@@ -256,7 +256,8 @@ export class TriangleSolids {
         x + radius < solid.bounds.min.x ||
         x - radius > solid.bounds.max.x ||
         z + radius < solid.bounds.min.z ||
-        z - radius > solid.bounds.max.z
+        z - radius > solid.bounds.max.z ||
+        solid.bounds.min.y > maxY + 0.2 + 1e-6
       )
         continue;
       const p = new THREE.Vector3(x, 0, z).applyMatrix4(solid.inverse),

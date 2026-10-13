@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a verification command and its children within a shared 60% CPU budget."""
+"""Run a verification command and its children within a shared 5/16 CPU budget."""
 
 import ctypes
 import errno
@@ -85,16 +85,18 @@ def main():
             cpus != available
             or not isinstance(total, int)
             or total > (os.cpu_count() or total)
-            or len(cpus) > total * 60 // 100
+            or len(cpus) > total * 5 // 16
         ):
             raise SystemExit("The inherited CPU budget does not match this process.")
         # A nested launcher already has the parent's locked set and priority.
         # Do not shrink its allowance again or try a blocked affinity syscall.
     else:
         total = len(available)
-        limit = total * 60 // 100
+        limit = total * 5 // 16
         if limit < 1:
-            raise SystemExit("A fractional CPU quota is required on a single-CPU system.")
+            raise SystemExit(
+                "A fractional CPU quota is required below four available CPUs."
+            )
         state = Path("local/staging/resource-budget/cpu-set.json")
         state.parent.mkdir(parents=True, exist_ok=True)
         try:
@@ -102,7 +104,7 @@ def main():
                 json.dump(available[:limit], file)
         except FileExistsError:
             pass
-        # Concurrent commands share a set; separate sets could exceed 60%.
+        # Concurrent commands share a set; separate sets could exceed 5/16.
         cpus = sorted(set(json.loads(state.read_text())) & set(available))[:limit]
         if not cpus:
             raise SystemExit(

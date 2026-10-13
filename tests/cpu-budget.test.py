@@ -32,7 +32,7 @@ PROBE = THREAD_PROBE + f"\nr['child']=json.loads(subprocess.check_output([sys.ex
 @unittest.skipUnless(
     platform.machine() in ["x86_64", "aarch64"]
     and hasattr(os, "sched_getaffinity")
-    and (os.cpu_count() or 0) >= 2,
+    and (os.cpu_count() or 0) >= 4,
     "requires a supported Linux CPU-affinity platform",
 )
 class CpuBudgetTests(unittest.TestCase):
@@ -59,7 +59,7 @@ class CpuBudgetTests(unittest.TestCase):
             self.assertEqual(probe["before"], probe["after"])
             self.assertEqual(probe["after"], observed["after"])
             self.assertLessEqual(
-                len(probe["after"]), (os.cpu_count() or 0) * 60 // 100
+                len(probe["after"]), (os.cpu_count() or 0) * 5 // 16
             )
 
     def test_nested_launcher_preserves_the_shared_set(self):

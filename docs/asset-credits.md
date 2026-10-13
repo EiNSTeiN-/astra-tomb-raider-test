@@ -1373,3 +1373,13 @@ showing the old and new construction at the same observer lens, player state
 and time, with refreshed reflections. Separate native captures use the actual
 built interface and controls. Fourteen public images preserve decoded RGBA
 pixels and dimensions through verified lossless WebP conversion.
+
+The [jungle gallery layouts](jungle-galleries.md) add original authored pier
+bearings, angled spans and continuous recessed roof cores in
+`src/temple-galleries.js` and `src/temple-architecture.js`. They reuse existing
+credited masonry materials and retain original pier facings and woody roots.
+No external geometry, texture, dependency, recording or music is added. Six
+intentional documentation images are actual game captures, delivered as
+lossless WebP files with decoded RGBA pixels and dimensions checked against
+their sources. Paired moon-court views use the preceding and current source
+with identical construction-camera and lighting states.

@@ -1,5 +1,10 @@
 # Distinct jungle temple profiles
 
+This record describes the crown-profile milestone at `8ad729a`. The subsequent
+[jungle gallery layouts](jungle-galleries.md) intentionally change the lower
+arcades and navigation, so the unchanged-arcade hashes and lower geometry counts
+below apply to that earlier milestone. The distinct crown profiles remain.
+
 The jungle chapter's nine larger temples previously shared a stepped crown,
 with a taller version at the final court. They now have different roof volumes
 associated with the arrival and eight covenants. Their repaired roof bearings

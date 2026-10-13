@@ -98,11 +98,23 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [jungle gallery layouts](jungle-galleries.md) give the nine larger temples
+nine distinct side-wing footprints. Twenty-six piers move with their detail;
+closed construction retains real body, roof, sight and sound queries. Coverage
+adds 39 local bay crossings, 104 pressure/crouch body poses, 13 final roof poses,
+nine matched construction comparisons and native floor/elevated/occupied-save
+checks. Roof backing stays below its dressed faces. Some cameras remain crowded
+by foliage; broader surroundings, chamber composition and continuous campaign
+coverage remain open. The full suite passes 964 of 967 tests; the same two
+court-pool failures and crystal working-core digest failure reproduce on the
+preceding `8ad729a` source and remain follow-up work.
+
 The [distinct temple profiles](temple-profiles.md) now vary all nine larger
 jungle temple roofs while retaining their repaired construction and lower
 arcades. Nine matched construction comparisons, 13 matched standing contexts,
 raised boot contact, local passages, climbing and native saves cover the change.
-Gallery/chamber footprints and broader campaign composition still need work.
+The subsequent gallery pass above varies side-wing footprints; chamber layouts
+and broader campaign composition still need work.
 
 The [temple crown bearing repair](temple-crown-bearings.md) closes the eighth
 larger jungle temple's measured 7.82 cm crown gap and gives all nine tall reliefs

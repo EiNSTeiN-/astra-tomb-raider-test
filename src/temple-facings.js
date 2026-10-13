@@ -178,7 +178,8 @@ export function addPierFacings(
 ) {
   const plan = pierFacingPlan(pier.width),
     rng = random(7011 + room.index * 173 + index * 37);
-  const offset = new THREE.Vector3(pier.x, bottom, pier.z);
+  const offset = new THREE.Vector3(pier.x, bottom, pier.z),
+    solids = [];
   const solid = (w, h, d, x, y, z, angle, shade = 1) => {
     const g = tintGeometry(
       stoneBlockGeometry(w, h, d, Math.floor(rng() * 100000), 0.026),
@@ -191,6 +192,7 @@ export function addPierFacings(
       .add(offset);
     m.rotation.y = angle;
     detail.add(m);
+    solids.push(m);
   };
   for (let side = 0; side < 4; side++) {
     const angle = (side * Math.PI) / 2;
@@ -249,7 +251,8 @@ export function addPierFacings(
         n % 2 ? 0.77 : 0.94,
       );
   }
-  const rooted = Math.abs(pier.x) === 19 && (room.index + index) % 4 === 0;
+  const rooted =
+    (pier.gallery || Math.abs(pier.x) === 19) && (room.index + index) % 4 === 0;
   const roots = [];
   if (rooted) {
     for (let n = 0; n < 5; n++) {
@@ -311,6 +314,7 @@ export function addPierFacings(
       const mesh = new THREE.Mesh(geometry, growth.bark);
       mesh.position.copy(offset);
       detail.add(mesh);
+      solids.push(mesh);
       roots.push({ geometry, offset: offset.clone(), radius });
       for (let j = 3; j < 9; j++)
         for (const side of [-1, 1]) {
@@ -327,5 +331,5 @@ export function addPierFacings(
         }
     }
   }
-  return { plan, rooted, roots };
+  return { plan, rooted, roots, solids };
 }

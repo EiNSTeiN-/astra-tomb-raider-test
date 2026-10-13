@@ -4,6 +4,10 @@ import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { addPierFacings, templeGrowthMaterials } from "./temple-facings.js";
 import { addMasonryFooting } from "./masonry-footings.js";
 import {
+  templeGalleryPlan,
+  buildTempleGallerySolid,
+} from "./temple-galleries.js";
+import {
   buildTempleCrownSupport,
   templeCrownPlan,
 } from "./temple-crown-support.js";
@@ -95,17 +99,8 @@ export function stoneBlockGeometry(w, h, d, seed = 1, bevelLimit = 0.055) {
 }
 
 export function templePlan(room) {
-  const wings = [
-    ["west", "east"],
-    ["east"],
-    ["west"],
-    ["west", "east"],
-    ["east"],
-    ["west", "east"],
-    ["west"],
-    ["east"],
-    ["west", "east"],
-  ][room.index % 9];
+  const gallery = templeGalleryPlan(room.index % 9),
+    wings = gallery.wings.map((wing) => wing.side);
   const piers = [-19, -12, -5.5, 5.5, 12, 19].map((x) => ({
     x,
     z: -18,
@@ -119,21 +114,28 @@ export function templePlan(room) {
       b: piers[i + 1],
       roof: !(room.index % 3 === 1 && i === 0),
     });
-  for (const wing of wings) {
-    const x = wing === "west" ? -19 : 19,
-      points = [-18, -6, 6, 18].map((z) => ({ x, z, width: 2.65 }));
+  const galleries = [];
+  for (const wing of gallery.wings) {
+    const west = wing.side === "west",
+      points = [piers[west ? 0 : 5], ...wing.bearings, piers[west ? 6 : 7]],
+      wingSpans = [];
     piers.push(...points.slice(1, 3));
     for (let i = 0; i < 3; i++)
-      spans.push({
+      wingSpans.push({
         a: points[i],
         b: points[i + 1],
         roof: !(room.index % 3 === 2 && i === 1),
+        wing: wing.side,
       });
+    spans.push(...wingSpans);
+    galleries.push({ side: wing.side, points, spans: wingSpans });
   }
   return {
     piers,
     spans,
     wings,
+    galleries,
+    galleryStyle: gallery.style,
     shrine: room.index % 3,
     broken: room.index % 3 === 1,
   };
@@ -348,8 +350,12 @@ export function buildTempleArchitecture(game) {
       }
     };
     const foundations = [];
+    const galleryPiers = new Set(plan.galleries.flatMap((g) => g.points)),
+      pierParts = new Map(),
+      spanParts = new Map();
     let rootedPiers = 0;
     for (const [pierIndex, pier] of plan.piers.entries()) {
+      const start = root.children.length;
       const py = game.groundHeight(x + pier.x, z + pier.z) - base,
         w = pier.width;
       const foundation = addMasonryFooting(game, root, {
@@ -366,26 +372,28 @@ export function buildTempleArchitecture(game) {
         blocks += foundation.parts;
         triangles += foundation.triangles;
       }
-      // The broad base sits inside its navigation footprint, and the capital stays
-      // at the old bird-perch height on the two forward piers.
-      const footprint = w / 2 + 0.13;
-      game.obstacles.push({
-        x: x + pier.x,
-        z: z + pier.z,
-        w: footprint,
-        d: footprint,
-        h: 9.1,
-        temple: true,
-      });
-      const bottom = foundation ? foundation.bottom - base : py;
-      cameraBox(
-        w + 0.26,
-        py + 9.1 - bottom,
-        w + 0.26,
-        pier.x,
-        (py + 9.1 + bottom) / 2,
-        pier.z,
-      );
+      // Gallery piers use the closed pieces below, including their true caps.
+      // The other facade piers retain their preceding navigation footprint.
+      if (!galleryPiers.has(pier)) {
+        const footprint = w / 2 + 0.13;
+        game.obstacles.push({
+          x: x + pier.x,
+          z: z + pier.z,
+          w: footprint,
+          d: footprint,
+          h: 9.1,
+          temple: true,
+        });
+        const bottom = foundation ? foundation.bottom - base : py;
+        cameraBox(
+          w + 0.26,
+          py + 9.1 - bottom,
+          w + 0.26,
+          pier.x,
+          (py + 9.1 + bottom) / 2,
+          pier.z,
+        );
+      }
       for (const [width, height, y] of [
         [w + 0.25, 0.3, 0.1],
         [w + 0.1, 0.22, 0.35],
@@ -440,8 +448,10 @@ export function buildTempleArchitecture(game) {
       if (facings.rooted) rootedPiers++;
       // A shallow lintel above each panel protects the carving and catches light.
       block(w * 0.67, 0.16, 0.22, pier.x, py + 5.75, pier.z + w * 0.44, 0.87);
+      pierParts.set(pier, [...root.children.slice(start), ...facings.solids]);
     }
     for (const span of plan.spans) {
+      const start = root.children.length;
       const dx = span.b.x - span.a.x,
         dz = span.b.z - span.a.z,
         length = Math.hypot(dx, dz),
@@ -474,7 +484,8 @@ export function buildTempleArchitecture(game) {
             rotation,
             0.88,
           );
-          cameraBox(width, 0.45, 2.4, px, y + 6.1 + row * 0.45, pz, rotation);
+          if (!span.wing)
+            cameraBox(width, 0.45, 2.4, px, y + 6.1 + row * 0.45, pz, rotation);
         }
       }
       if (span.roof) {
@@ -483,9 +494,34 @@ export function buildTempleArchitecture(game) {
           [0.46, 3.0, 9.12],
           [0.16, 3.25, 9.45],
           [0.35, 3.55, 9.71],
-        ])
+        ]) {
+          // Recessed continuous stone backs the dressed joints. Its cap stays
+          // just below the visible faces; the lower overlap seats each course
+          // on the corbel/roof beneath it instead of leaving daylight gaps.
+          if (span.wing) {
+            const core = block(
+              length + 0.98,
+              height + 0.125,
+              depth - 0.12,
+              cx,
+              y + yy - 0.081,
+              cz,
+              0.86,
+              rotation,
+            );
+            // Keep the concealed landing level and 6 mm below the dressed
+            // cap. Random vertical chips must not bring it through that skin
+            // or make a narrow joint lower than the body contact tolerance.
+            const positions = core.geometry.attributes.position,
+              top = (height + 0.125) / 2;
+            for (let i = 0; i < positions.count; i++)
+              if (positions.getY(i) > top - 0.015) positions.setY(i, top);
+            core.geometry.computeVertexNormals();
+          }
           course(length + 1.1, height, depth, cx, y + yy, cz, rotation, 0.92);
-        cameraBox(length + 1.1, 1.2, 3.55, cx, y + 9.35, cz, rotation);
+        }
+        if (!span.wing)
+          cameraBox(length + 1.1, 1.2, 3.55, cx, y + 9.35, cz, rotation);
         // Small corbels break the roof line and frame the frieze's recessed slots.
         for (let i = 0; i < Math.floor(length / 0.75); i++) {
           const along = (i + 0.5) * 0.75 - length / 2,
@@ -504,9 +540,27 @@ export function buildTempleArchitecture(game) {
             );
         }
       }
+      spanParts.set(span, root.children.slice(start));
     }
-    // Each roof belongs to its covenant. Retain the preceding crown's seed
-    // and colour consumption so later rubble and arcades stay unchanged.
+    const arcadeTriangles = triangles;
+    const galleries = plan.galleries.map((gallery) => ({
+      ...gallery,
+      solid: buildTempleGallerySolid(game, room, gallery.side, [
+        ...gallery.points.flatMap((pier) => pierParts.get(pier)),
+        ...gallery.spans.flatMap((span) => spanParts.get(span)),
+        // The first pier also carries a facade span. Include that real roof
+        // where its cap lies above the wing, so the shared landing cannot sink.
+        ...plan.spans
+          .filter(
+            (span) =>
+              !span.wing &&
+              (span.a === gallery.points[0] || span.b === gallery.points[0]),
+          )
+          .flatMap((span) => spanParts.get(span)),
+      ]),
+    }));
+    // Crown art uses independent seeds. Retain its reserved slots in the
+    // lower masonry random stream.
     const roof =
       (game.groundHeight(x - 5.5, z - 18) +
         game.groundHeight(x + 5.5, z - 18)) /
@@ -575,6 +629,8 @@ export function buildTempleArchitecture(game) {
       blocks,
       triangles,
       plan,
+      galleries,
+      arcadeTriangles,
       crown: crownSupport,
       foundations,
       rootedPiers,

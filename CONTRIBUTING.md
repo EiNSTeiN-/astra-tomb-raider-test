@@ -10,9 +10,10 @@ puts that installation on `PATH`. Its npm cache, global install prefix and
 temporary files stay under the ignored `local/` directory. Keep downloaded
 toolchains out of commits; a fresh clone can use its own supported Node install.
 
-The owner requires agent verification workloads to use at most 60% of the
-available CPUs in aggregate. On Linux, launch tests, builds and browser helpers
-through `python3 scripts/run-with-cpu-budget.py COMMAND [ARG ...]`; its child
+The owner requires agent verification workloads to use at most 5/16 (31.25%) of
+the available CPUs in aggregate: five CPUs on this sixteen-CPU sandbox. On Linux,
+launch tests, builds and browser helpers through
+`python3 scripts/run-with-cpu-budget.py COMMAND [ARG ...]`; its child
 processes inherit a shared CPU affinity set and lower scheduling priority.
 On Linux x86_64 and aarch64, the launcher also locks affinity with an inherited
 kernel syscall filter, preventing native libraries from expanding their worker
