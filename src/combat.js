@@ -12,6 +12,7 @@ import {
 import { ENEMY_TYPES } from "./encounters.js";
 import { perceivePlayer, playerNoise, guardianEngaged } from "./stealth.js";
 import { shotCover } from "./aiming.js";
+import { projectedRing } from "./ground-cues.js";
 export {
   ENEMY_TYPES,
   ENCOUNTER_PALETTES,
@@ -29,8 +30,9 @@ export function buildGuardian(game, spawn) {
     spec.color,
   );
   group.add(body);
-  const warning = new THREE.Mesh(
-    new THREE.RingGeometry(0.88, 1, 48),
+  const warning = projectedRing(
+    0.88,
+    1,
     new THREE.MeshBasicMaterial({
       color: spec.color,
       transparent: true,
@@ -38,6 +40,7 @@ export function buildGuardian(game, spawn) {
       side: THREE.DoubleSide,
       depthWrite: false,
     }),
+    0.08,
   );
   warning.rotation.x = -Math.PI / 2;
   warning.visible = false;

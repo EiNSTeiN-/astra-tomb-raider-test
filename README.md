@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [guardian and trap warnings now follow rendered ground](docs/ground-warning-projection.md),
+including sloping banks and the expanding observatory pulse. All 54 selected
+regressions and 34 High/Low chapter comparisons pass, alongside built keyboard
+and portrait touch movement and four save/reload comparisons. Broader combat,
+scenery and visual acceptance remain under review.
+
 [Pool ambience now follows exposed water](docs/pool-sound-placement.md)
 beside dry working pads and the palace pontoon. Placement, distance falloff and
 water-state checks pass across six environments,

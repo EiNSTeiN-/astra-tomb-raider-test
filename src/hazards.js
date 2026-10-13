@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { projectedRing } from "./ground-cues.js";
 import { spawnBolt } from "./combat.js";
 import { mergeArchitecture } from "./visuals.js";
 import { softParticleMaterial } from "./effects.js";
@@ -197,8 +198,9 @@ export function buildHazards(game) {
       { blade: 5.2, darts: 6, jet: 5, gust: 6.5, beam: 7, pulse: 7 }[
         spec.kind
       ] || 3.65;
-    const marker = new THREE.Mesh(
-      new THREE.RingGeometry(warningRadius - 0.2, warningRadius, 48),
+    const marker = projectedRing(
+      warningRadius - 0.2,
+      warningRadius,
       glow.clone(),
     );
     marker.rotation.x = -Math.PI / 2;
@@ -412,7 +414,7 @@ export function buildHazards(game) {
       ring.rotation.x = Math.PI / 2;
       ring.position.y = 0.35;
       root.add(ring);
-      const wave = new THREE.Mesh(new THREE.RingGeometry(0.91, 1, 64), glow);
+      const wave = projectedRing(0.91, 1, glow, 0.25);
       wave.rotation.x = -Math.PI / 2;
       wave.position.y = 0.25;
       hazard.fx.add(wave);

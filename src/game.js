@@ -282,6 +282,7 @@ import {
   settleHydraulics,
 } from "./hydraulic-courts.js";
 import * as THREE from "three";
+import { updateGroundCues, disposeGroundCues } from "./ground-cues.js";
 import { updateSunBridgeDepth } from "./sun-bridge-depth.js";
 import { updateSkyGusts, skyWindVelocity } from "./sky-gusts.js";
 import {
@@ -812,6 +813,7 @@ export class Adventure {
   }
   buildLevel(level, index) {
     this.active = false;
+    disposeGroundCues(this);
     this.presentationRemaining = 0;
     this.cinematic?.dispose();
     this.level = level;
@@ -1704,6 +1706,7 @@ export class Adventure {
   renderScene(dt = 0) {
     this.foliageFraming ??= new FoliageFraming();
     this.foliageFraming.update(this);
+    updateGroundCues(this);
     updateSunBridgeDepth(this);
     if (this.cinematic) this.cinematic.render(dt);
     else this.renderer.render(this.scene, this.camera);

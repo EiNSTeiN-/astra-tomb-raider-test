@@ -1391,3 +1391,12 @@ documentation images are actual game captures using the existing credited
 assets; their lossless WebP files preserve decoded RGBA pixels and dimensions.
 The preceding normal-camera view and current native arrival share player
 position and chosen look; objective progress and interface presentation differ.
+
+The [ground warning projection](ground-warning-projection.md) uses original
+surface shader code and the existing warning controls. It introduces no
+external geometry, texture, dependency, recording or music. Three intentional
+documentation images are actual game captures using the existing credited
+assets. Their lossless WebP files preserve decoded RGBA pixels and dimensions.
+The preceding and current cavern-bank views share player position, chosen look
+and warning centre in a prepared keeper windup on accepted guardian footing.
+The third image uses the built portrait touch controls with a live warning.
