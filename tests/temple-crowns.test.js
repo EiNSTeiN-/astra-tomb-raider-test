@@ -8,6 +8,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { buildTempleArchitecture } from "../src/temple-architecture.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { stationBlocked, stationSupport } from "../src/field-station-solids.js";
+import { templeCrownPlan } from "../src/temple-crown-support.js";
 
 function fixture(t) {
   t.mock.method(
@@ -49,6 +50,81 @@ function fixture(t) {
   world.updateMatrixWorld(true);
   return game;
 }
+
+test("nine temple profiles have distinct physical silhouettes and independent authored plans", (t) => {
+  const game = fixture(t);
+  assert.equal(new Set(game.templePatches.map((p) => p.crown.style)).size, 9);
+  const signatures = game.templePatches.map((patch) => {
+    const c = patch.root.position,
+      crown = patch.crown;
+    assert(
+      crown.bounds.min.x > c.x - 6.03 && crown.bounds.max.x < c.x + 6.03,
+      "the complete crown bears within the unchanged central arcade",
+    );
+    return [-5, -3.75, -2, 0, 2, 3.75, 5]
+      .map((dx) => {
+        const height = stationSupport(
+          crown.solid,
+          c.x + dx,
+          c.z - 18,
+          Infinity,
+          0.4,
+        );
+        assert(height !== null);
+        return Math.round((height - crown.roof) * 100);
+      })
+      .join(",");
+  });
+  assert.equal(
+    new Set(signatures).size,
+    9,
+    "style labels must correspond to different delivered roof volumes",
+  );
+  const plan = templeCrownPlan(2),
+    original = templeCrownPlan(2);
+  plan.towers[0].widths[0] = 100;
+  plan.plaque.width = 100;
+  assert.deepEqual(templeCrownPlan(2), original);
+  assert.throws(() => templeCrownPlan(9), RangeError);
+});
+
+test("the lantern retains a real opening and the rain arch has finite walkable slope support", (t) => {
+  const game = fixture(t);
+  const lantern = game.templePatches[6],
+    c = lantern.root.position;
+  const x = c.x + 2.2,
+    z = c.z - 18,
+    solid = lantern.crown.solid;
+  const floor = stationSupport(solid, x, z, lantern.crown.roof + 0.8, 0.4);
+  assert(
+    floor !== null && floor < lantern.crown.roof + 0.5,
+    "an overhead beam must not replace the lower landing",
+  );
+  assert(
+    !stationBlocked(solid, x, floor, z),
+    "the clerestory opening is not an invisible wall",
+  );
+  assert(
+    stationBlocked(solid, x, lantern.crown.roof + 2.2, z),
+    "the lower landing cannot suppress real beam headroom",
+  );
+  const rain = game.templePatches[3],
+    a = rain.root.position;
+  for (const dx of [-4, 4]) {
+    const height = stationSupport(
+      rain.crown.solid,
+      a.x + dx,
+      a.z - 18,
+      Infinity,
+      0.4,
+    );
+    assert(
+      height !== null &&
+        !stationBlocked(rain.crown.solid, a.x + dx, height, a.z - 18),
+      "the authored arch roof provides slope clearance without a false flat cap",
+    );
+  }
+});
 
 test("temple botanical plaques have masonry behind their entire delivered height", (t) => {
   const game = fixture(t);

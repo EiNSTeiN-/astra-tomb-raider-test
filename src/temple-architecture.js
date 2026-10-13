@@ -3,7 +3,10 @@ import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { addPierFacings, templeGrowthMaterials } from "./temple-facings.js";
 import { addMasonryFooting } from "./masonry-footings.js";
-import { buildTempleCrownSupport } from "./temple-crown-support.js";
+import {
+  buildTempleCrownSupport,
+  templeCrownPlan,
+} from "./temple-crown-support.js";
 
 // Chamfered blocks use flat faces and narrow bevels, rather than six subdivided
 // grids. The disconnected faces retain sharp masonry edges after batching.
@@ -283,8 +286,7 @@ export function buildTempleArchitecture(game) {
     detail.position.copy(root.position);
     game.world.add(root, detail);
     let blocks = 0,
-      triangles = 0,
-      crownParts = null;
+      triangles = 0;
     const block = (w, h, d, px, py, pz, tint = 1, rotation = 0) => {
       const g = stoneBlockGeometry(w, h, d, ++serial + game.level.seed, 0.029),
         m = new THREE.Mesh(g, material);
@@ -304,7 +306,6 @@ export function buildTempleArchitecture(game) {
       m.rotation.y = rotation;
       m.castShadow = m.receiveShadow = true;
       root.add(m);
-      if (crownParts) crownParts.push(m);
       blocks++;
       triangles += positions.count / 3;
       return m;
@@ -504,47 +505,36 @@ export function buildTempleArchitecture(game) {
         }
       }
     }
-    // A corbelled entrance crown has a layered silhouette and a recessed rosette.
+    // Each roof belongs to its covenant. Retain the preceding crown's seed
+    // and colour consumption so later rubble and arcades stay unchanged.
     const roof =
       (game.groundHeight(x - 5.5, z - 18) +
-        game.groundHeight(x + 5.5, z - 18)) / 2 + 9.8725;
-    const crownY = roof - base + 0.1875;
-    crownParts = [];
-    for (let tier = 0; tier < (room.index === 8 ? 8 : 5); tier++) {
-      const width = (room.index === 8 ? 17 : 12) - tier * 1.65,
-        height = 0.62;
-      course(
-        width,
-        height,
-        4.5 - tier * 0.5,
-        0,
-        crownY + tier * 0.65,
-        -18,
-        0,
-        0.91,
-      );
-      course(
-        width + 0.35,
-        0.13,
-        4.8 - tier * 0.5,
-        0,
-        crownY + tier * 0.65 + 0.36,
-        -18,
-        0,
-        0.74,
-      );
-    }
+        game.groundHeight(x + 5.5, z - 18)) /
+        2 +
+      9.8725;
+    const legacyBlocks = room.index === 8 ? 123 : 60;
+    serial += legacyBlocks;
+    for (let i = 0; i < legacyBlocks * 2; i++) rng();
+    const profile = templeCrownPlan(room.index);
     const crown = new THREE.Mesh(
-      carvedPanelGeometry(3, 2.8, room.index + 1),
+      carvedPanelGeometry(
+        profile.plaque.width,
+        profile.plaque.height,
+        room.index + 1,
+      ),
       detailMaterial,
     );
     crown.receiveShadow = true;
     detail.add(crown);
     const crownSupport = buildTempleCrownSupport(game, {
-      room, root, material, blockGeometry: stoneBlockGeometry,
-      crownY, roof, bodyParts: crownParts, panel: crown,
+      room,
+      root,
+      material,
+      blockGeometry: stoneBlockGeometry,
+      roof,
+      panel: crown,
+      profile,
     });
-    crownParts = null;
     blocks += crownSupport.parts;
     triangles += crownSupport.triangles;
     // Broken blocks stay beside the piers, preserving central routes and stations.

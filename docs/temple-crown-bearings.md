@@ -10,6 +10,10 @@ The crowns now follow their supporting roof heights. Overlapping closed cores
 seal the dressed courses, and a seated stone stele backs each panel through its
 full height. The existing five-course profiles and taller final profile remain;
 this repairs construction before broader silhouette and gallery variation.
+The subsequent [temple profile pass](temple-profiles.md) replaces those shared
+upper profiles with nine different volumes while retaining the repaired
+bearings and full carving backs. The images and measurements on this page
+describe the preceding bearing repair.
 
 ![The first temple from a normal standing gameplay observer](images/temple-crown-bearings/first.webp)
 

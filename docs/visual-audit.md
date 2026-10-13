@@ -98,6 +98,12 @@ and reload checks pass. Later sectors and broader court composition remain open.
 
 ## Findings and follow-up
 
+The [distinct temple profiles](temple-profiles.md) now vary all nine larger
+jungle temple roofs while retaining their repaired construction and lower
+arcades. Nine matched construction comparisons, 13 matched standing contexts,
+raised boot contact, local passages, climbing and native saves cover the change.
+Gallery/chamber footprints and broader campaign composition still need work.
+
 The [temple crown bearing repair](temple-crown-bearings.md) closes the eighth
 larger jungle temple's measured 7.82 cm crown gap and gives all nine tall reliefs
 continuous stone backing. Geometry hashes, rendered bearings/support, local

@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Distinct jungle temple profiles](temple-profiles.md) replace the shared
+  upper crown with nine porch, tower, vault, terrace and lantern volumes.
+  Repaired bearings and carving backs remain, while original arcade buffers
+  and navigation records match their hashes. All 15 focused checks, nine
+  matched construction comparisons, 13 matched standing contexts, three raised
+  boot-contact poses, 18 local passage legs and the complete climbing loop pass.
+  Controls/sound approaches and the built touch/Low controls, movement and both
+  whole-store reload comparisons pass. Crown masonry decreases by 9,596
+  triangles. Gallery/chamber layouts, wider campaign coverage and
+  listening/device acceptance remain open.
+
 - [Jungle temple crown bearings](temple-crown-bearings.md) seat nine larger
   crowns on their actual roofs and back their tall carvings, repairing a
   measured 7.82 cm separation at the eighth temple. Original arcade buffers
