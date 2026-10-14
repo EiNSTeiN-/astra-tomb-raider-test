@@ -21,6 +21,7 @@ import {
 import { GATE_DESIGNS, gateLeafBounds } from "../src/gate-designs.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { buildChamberWall } from "../src/chamber-walls.js";
+import { crystalEnclosureSegments } from "../src/crystal-enclosure-plan.js";
 import {
   skyGateWallGeometry,
   hingeStrapGeometry,
@@ -498,7 +499,7 @@ test("stepped crystal bay heads retain the finished face outside their tiered ou
   }
 });
 
-test("all 180 regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
+test("regional chamber walls have sealed deep recesses and buried full-width footings", (t) => {
   const ray = new THREE.Raycaster();
   let walls = 0,
     niches = 0,
@@ -507,7 +508,10 @@ test("all 180 regional chamber walls have sealed deep recesses and buried full-w
     const { game } = fixture(t, index, null, true);
     game.world.updateMatrixWorld(true);
     for (const gate of game.fieldGates) {
-      assert.equal(gate.walls.length, 3);
+      assert.equal(
+        gate.walls.length,
+        gate.enclosure ? crystalEnclosureSegments(gate.stage).length : 3,
+      );
       for (const wall of gate.walls) {
         walls++;
         const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
@@ -568,9 +572,9 @@ test("all 180 regional chamber walls have sealed deep recesses and buried full-w
       }
     }
   }
-  assert.equal(walls, 180);
+  assert.equal(walls, 212);
   assert.ok(niches > 400);
-  assert.equal(feet, 2700);
+  assert.equal(feet, walls * 15);
 });
 
 test("monastery blind-bay lattice is seated against its plaster backing", () => {

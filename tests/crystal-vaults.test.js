@@ -67,7 +67,9 @@ test("eight archive crowns are distinct closed masonry within the vault and abov
   for (const gate of game.fieldGates) {
     assert.deepEqual(gate.vault.plan, crystalVaultPlan(gate.stage));
     const roofs = gate.vault.root.children,
-      old = gate.root.children.filter((o) => o.isMesh);
+      supports = gate.root.children.filter(
+        (o) => o.isMesh || o === gate.enclosure?.root,
+      );
     assert(roofs.length >= 2 && roofs.length <= 4);
     for (const mesh of roofs) {
       const p = mesh.geometry.attributes.position;
@@ -137,7 +139,7 @@ test("eight archive crowns are distinct closed masonry within the vault and abov
               new THREE.Vector3(x + dx, gate.root.position.y + 19, z + dz),
               new THREE.Vector3(0, -1, 0),
             );
-            const hits = ray.intersectObjects(old, false);
+            const hits = ray.intersectObjects(supports, true);
             supported += hits.some(
               (h) => h.point.y >= gate.root.position.y + 7.05,
             )
@@ -147,7 +149,7 @@ test("eight archive crowns are distinct closed masonry within the vault and abov
           }
         assert(
           supported >= 5,
-          `stage ${gate.stage} springing ${x},${z} lacks existing masonry bearing`,
+          `stage ${gate.stage} springing ${x},${z} lacks masonry bearing`,
         );
       }
     }

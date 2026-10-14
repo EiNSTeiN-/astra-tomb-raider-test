@@ -1400,3 +1400,16 @@ assets. Their lossless WebP files preserve decoded RGBA pixels and dimensions.
 The preceding and current cavern-bank views share player position, chosen look
 and warning centre in a prepared keeper windup on accepted guardian footing.
 The third image uses the built portrait touch controls with a live warning.
+
+The [crystal archive enclosures](crystal-enclosures.md) use original authored
+room profiles, generated floor shader code, dressed piers, foundations and
+calcite display geometry in `src/crystal-enclosure-plan.js` and
+`src/crystal-enclosures.js`. They reuse existing credited rock maps, masonry,
+bronze and mineral materials. No external texture, model, dependency, recording
+or music is added. Four intentional documentation images are actual game
+captures, with lossless WebP files checked for identical decoded RGBA pixels
+and dimensions. The opposed wing uses a constrained construction observer;
+the heart apse uses its follow camera, both with prepared restored progress,
+hidden guardians and muted sound. The remaining images show the current built
+interface: a paused occupied-display recovery with its pause modal hidden, and
+the portrait tuning controls.

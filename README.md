@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [crystal archive enclosures](docs/crystal-enclosures.md) now vary seven
+rear room plans and add fourteen grounded specimen cases. Independent body
+checks repair crouched knee contact at their edges; source access, chapter
+cleanup and ten native save/reload comparisons pass. Wider cavern composition
+and the full campaign visual review remain open.
+
 The [guardian and trap warnings now follow rendered ground](docs/ground-warning-projection.md),
 including sloping banks and the expanding observatory pulse. All 54 selected
 regressions and 34 High/Low chapter comparisons pass, alongside built keyboard
@@ -39,8 +45,9 @@ composition remains under review.
 The [crystal archive vaults](docs/crystal-vaults.md) give eight objective
 chambers distinct upper profiles, from a low porch and mirrored nave to a
 broken archive and glazed lantern. They bear on the existing masonry and keep
-the working aisles clear. Lower chamber footprints and wider scene composition
-remain under review.
+the working aisles clear. Their [new lower enclosures](docs/crystal-enclosures.md)
+add rear rooms, side pockets and archive cases; wider scene composition remains
+under review.
 
 The [cavern floor pass](docs/cavern-deposits.md) adds irregular sediment bands,
 damp channels and grounded limestone fragments at the banks. Walking cells

@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Crystal archive enclosures](crystal-enclosures.md) give seven rear rooms
+  distinct apses, lateral wings, a long gallery and an asymmetric store, with
+  fourteen grounded specimen cases. Paving follows the authored perimeters;
+  joined piers preserve all old vault bearings. The initial 76 selected cases
+  and fifteen affected repeats after the clearance repair pass. Crouched knee
+  contact is repaired at all fourteen cases: 224 High/Low boundary poses have
+  zero embedding across 10,773,280 visible character vertex records. All 46
+  static views and sixteen native captures are reviewed; control/source
+  access, all 42 geometry disposals and ten built-interface reloads pass.
+  Final local controller-route results are recorded in the enclosure notes.
+  Broader scenery, body faces, continuous campaign routes and listening remain
+  open.
+
 - [Distinct jungle temple profiles](temple-profiles.md) replace the shared
   upper crown with nine porch, tower, vault, terrace and lantern volumes.
   Repaired bearings and carving backs remain, while original arcade buffers

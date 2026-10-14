@@ -217,15 +217,23 @@ function closedPlaque(face, w, h, segments, vertexColors = false) {
 // at z=-.13 (.04 beside hinged leaves), the coursed face at .43, and the largest
 // cornice at .74. All remain inside the existing .85 m movement half-width;
 // the inner face stays at -.41.
-export function buildChamberWall(game, gate, m, { length, side, floor }) {
-  const plan = chamberWallPlan(game.level.biome, length, gate.stage, side);
+export function buildChamberWall(game, gate, m, { length, side, floor, transform, bayLayout }) {
+  const plan = {
+    ...chamberWallPlan(game.level.biome, length, gate.stage, side),
+    ...bayLayout,
+  };
   // Fully opened leaf backs reach .06 m inward of the wall centerline. Their
   // existing pocket needs a thicker core behind the exterior blind bays.
   const insetOffset = side !== 0 && gate.design.motion === "hinge" ? 0.17 : 0;
   const group = new THREE.Group();
   group.name = `${plan.biome} chamber wall ${side}`;
-  group.position.set(side * 6.5, 0, side === 0 ? -6.5 : 0);
-  group.rotation.y = side === 0 ? Math.PI : (side * Math.PI) / 2;
+  group.position.set(
+    transform?.x ?? side * 6.5,
+    0,
+    transform?.z ?? (side === 0 ? -6.5 : 0),
+  );
+  group.rotation.y =
+    transform?.angle ?? (side === 0 ? Math.PI : (side * Math.PI) / 2);
   gate.root.add(group);
   let seed = game.level.seed + gate.stage * 557 + (side + 1) * 103;
   const add = (g, mat, x = 0, y = 0, z = 0, capture = true) => {

@@ -394,6 +394,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "eclipse", "crystal"].includes(biome) ? 9 : ["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${biome === "crystal" ? 10 : ["snow", "eclipse"].includes(biome) ? 9 : ["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
   return material;
 }

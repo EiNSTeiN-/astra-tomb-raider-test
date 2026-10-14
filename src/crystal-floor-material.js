@@ -1,3 +1,5 @@
+import { CRYSTAL_ENCLOSURE_FLOOR_GLSL } from "./crystal-enclosure-plan.js";
+
 import { Vector4 } from "three";
 import { RESONANCE_TRIALS } from "./resonance-rules.js";
 
@@ -27,6 +29,7 @@ export const crystalFloorDeclarations = /* glsl */ `
 uniform vec4 crystalFloorSites[8];
 uniform float crystalFloorStrength;
 struct CrystalFloor { float coverage; float joint; float inlay; float tone; float relief; };
+${CRYSTAL_ENCLOSURE_FLOOR_GLSL}
 float archiveLine(float distance) {
   float aa=clamp(fwidth(distance),.006,.12);
   return 1.0-smoothstep(.035,.075+aa,abs(distance));
@@ -36,7 +39,7 @@ CrystalFloor archiveFloor(vec2 world) {
   for(int i=0;i<8;i++) {
     vec4 site=crystalFloorSites[i]; vec2 q=world-site.xy;
     float width=mix(6.25,site.z,smoothstep(4.5,10.5,q.y));
-    float edge=max(abs(q.x)-width,max(-6.25-q.y,q.y-site.w));
+    float edge=min(max(abs(q.x)-width,max(-6.25-q.y,q.y-site.w)),archiveChamberEdge(q,i));
     if(edge<boundary) { boundary=edge; p=q; stage=float(i); }
   }
   float wear=terrainNoise(p*.43+stage*13.7);

@@ -30,6 +30,7 @@ import {
 } from "./sky-gate-art.js";
 import { buildSkyChamberWall } from "./sky-chamber-walls.js";
 import { buildCrystalVault } from "./crystal-vaults.js";
+import { buildCrystalEnclosure } from "./crystal-enclosures.js";
 import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
 
 export function gateMaterials(level) {
@@ -255,7 +256,8 @@ export function buildSanctuaryGate(game, feature, materials) {
   const fittedSkyWalls = design.panel === "lattice";
   gate.walls = [];
   // Fit wall construction and both kinds of collision to the same room span.
-  for (const side of [-1, 0, 1]) {
+  const wallSides = buildCrystalEnclosure(game, gate, m) ? [] : [-1, 0, 1];
+  for (const side of wallSides) {
     const back = side === 0,
       length = back ? 2 * halfWidth : 13.8;
     const point = (t) => ({

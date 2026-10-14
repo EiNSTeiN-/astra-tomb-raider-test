@@ -133,7 +133,8 @@ gates; the native views show the actual built interface.
 | Crouched approach | ![Keyboard crouched approach](images/crystal-vaults/keyboard-crouched.webp) | ![Touch crouched approach](images/crystal-vaults/touch-crouched.webp) |
 | Tuning inspection | ![Keyboard tuning inspection](images/crystal-vaults/keyboard-focused.webp) | ![Touch tuning inspection](images/crystal-vaults/touch-focused.webp) |
 
-This improves the repeated upper chamber silhouettes. The instrument families,
-lower chamber footprints, sparse wider cavern spaces and full eight-chapter
-visual acceptance still need work. These checks do not establish human
+This improves the repeated upper chamber silhouettes. The subsequent
+[archive enclosure pass](crystal-enclosures.md) varies seven lower footprints
+and adds fourteen grounded specimen cases. Sparse wider cavern spaces and full
+eight-chapter visual acceptance still need work. These checks do not establish human
 playthrough duration, subjective sound quality or consumer-device frame rate.
