@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [coastal hydraulic wall records](coastal-wall-records.md) use original
+closed-panel, vessel, channel and motif code in `src/coastal-wall-art.js`, the
+existing dressed-stone and closed-vault generators, and the credited palace
+materials. Four documentation images are actual game captures encoded as
+lossless WebP, with decoded pixels and dimensions checked against their PNG
+sources. No external model, texture, recording, score or dependency was added.
+Existing character, environmental and audio attribution below applies.
+
 The [distinct jungle temple profiles](temple-profiles.md) use original authored
 layouts and construction in `src/temple-crown-support.js`, existing chamfered
 stone, closed-vault and botanical generators, and the credited temple maps.

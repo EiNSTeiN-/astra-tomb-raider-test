@@ -9,6 +9,7 @@ import { vaultStoneGeometry, shellReliefGeometry } from "./palace-geometry.js";
 import { solarPanelGeometry } from "./desert-architecture.js";
 import { timberGeometry } from "./monastery-architecture.js";
 import { crystalBayContour, addCrystalBayInlay } from "./crystal-wall-art.js";
+import { buildCoastalWallArt } from "./coastal-wall-art.js";
 
 export const CHAMBER_WALL_BIOMES = new Set([
   "jungle",
@@ -301,15 +302,29 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
       }
     }
   }
-  block(
-    length,
-    7.0,
-    0.28 + insetOffset,
-    m.wall,
-    0,
-    3.5,
-    -0.27 + insetOffset / 2,
-  );
+  const recessedCoastalRecord = plan.biome === "water" && side === 0 && gate.stage > 0;
+  if (recessedCoastalRecord) {
+    // Keep the exterior bay backing sealed, then dress the four edges of the
+    // interior recess. The new relief stays behind the old -0.41 inner face;
+    // nominal wall bounds alone do not reserve the explorer's posed body.
+    block(length, 7.0, 0.02, m.wall, 0, 3.5, -0.14);
+    const halfOpening = 5.84, bottom = 1.05, top = 6.18;
+    for (const sign of [-1, 1])
+      block(length / 2 - halfOpening, 7, 0.28, m.wall,
+        sign * (length / 2 + halfOpening) / 2, 3.5, -0.27);
+    block(2 * halfOpening, bottom, 0.28, m.wall, 0, bottom / 2, -0.27);
+    block(2 * halfOpening, 7 - top, 0.28, m.wall, 0, (top + 7) / 2, -0.27);
+  } else {
+    block(
+      length,
+      7.0,
+      0.28 + insetOffset,
+      m.wall,
+      0,
+      3.5,
+      -0.27 + insetOffset / 2,
+    );
+  }
   const breaks = [
     ...new Set([
       0,
@@ -680,7 +695,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     }
     // Relief on the inner rear face is shallow enough to preserve chamber
     // working space. Side walls are left clear of the inward-swinging leaves.
-    if (side === 0) {
+    if (side === 0 && !(biome === "water" && gate.stage > 0)) {
       const interiorTrim = biome === "snow" ? m.wood : m.trim;
       const inner = contour.map(([x, y]) => [
         cx + x * 0.72,
@@ -725,12 +740,17 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
       }
     }
   }
+  const coastalRecord =
+    plan.biome === "water" && side === 0 && gate.stage > 0
+      ? buildCoastalWallArt(gate.stage, m, add)
+      : null;
   const measurement = {
     ...plan,
     side,
     floor,
     position: group.position.toArray(),
     angle: group.rotation.y,
+    ...(coastalRecord ? { coastalRecord } : {}),
   };
   mergeArchitecture(group);
   // Flatten the regional material batches into the gate so the existing

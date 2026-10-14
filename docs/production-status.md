@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal hydraulic wall records](coastal-wall-records.md) give eight later
+  rear chambers distinct ceramic and bronze motifs drawn from their actual
+  capacities, target measures and directed circuits. A close crouch exposed
+  new ponytail contact; the records now recess 0.30 m behind the old wall face.
+  All 35 affected tests pass again. Full geometry for the other 61 gates,
+  all nine coastal gate-generated obstacle snapshots, all 69 leaf sets and
+  all 69 drive-source sets match the preceding milestone. All 192 sampled relief poses have zero
+  embedding across 9,234,240 visible character vertex records; the closed
+  relief parts are reconstructed at their actual placements for this observer.
+  All 24 final scene views and twelve rebuilt native captures are reviewed.
+  Keyboard/High and portrait touch/Low retain selected sources and earned
+  transfers through eight exact paused-store reloads, with movement and map
+  checks. Owned browsers and servers close after each check.
+  A separately recorded low masonry contact remains open, along with broader
+  palace layouts, scenery and listening.
+
 - [Crystal archive enclosures](crystal-enclosures.md) give seven rear rooms
   distinct apses, lateral wings, a long gallery and an asymmetric store, with
   fourteen grounded specimen cases. Paving follows the authored perimeters;
