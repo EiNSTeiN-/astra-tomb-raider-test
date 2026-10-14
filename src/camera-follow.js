@@ -128,6 +128,7 @@ function followClearCameraStep(
   canOccupy,
   viewPitch = game.pitch,
   surfaces = guardianCameraSurfaces(game),
+  allowAnticipation = true,
 ) {
   let steering = false;
   const follow = (end) =>
@@ -166,14 +167,9 @@ function followClearCameraStep(
             .multiplyScalar(APPROACH_TIME / Math.max(dt, 1 / 120))
             .clampLength(0, 1.2)
         : new Vector3(),
-    anticipated = !clearApproach(
-      game,
-      target,
-      desired,
-      ahead,
-      canOccupy,
-      surfaces,
-    ),
+    anticipated =
+      allowAnticipation &&
+      !clearApproach(game, target, desired, ahead, canOccupy, surfaces),
     bodyRecovery =
       anticipated ||
       ordinaryVisible < 1 ||
@@ -293,7 +289,24 @@ function followClearCameraStep(
     }
   }
   best ||= shorter;
-  if (!best) return ordinary;
+  if (!best) {
+    // A projected target can cross a bank or obstacle that the player will
+    // stop before. If that forecast rejects every detour, retain a legal view
+    // at the actual current position instead of collapsing into the body.
+    // The second search still enforces walls, terrain and current body sight.
+    if (anticipated && ordinaryLength < 2.2)
+      return followClearCameraStep(
+        game,
+        target,
+        desired,
+        dt,
+        canOccupy,
+        viewPitch,
+        surfaces,
+        false,
+      );
+    return ordinary;
+  }
   rememberRecovery(best.recovery);
   if (best.next.distanceTo(target) >= 2.2) return best.next;
   // A narrow shaft may also block the interpolated sweep. Resolve that contact

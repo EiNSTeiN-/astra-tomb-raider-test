@@ -19,6 +19,29 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal chamber vaults](coastal-vaults.md) replace the repeated front arch
+  with nine roof and façade profiles, real openings and supported closed stone.
+  All 68 affected construction/movement tests and 21 selected camera tests pass.
+  All 54 final High/Low scene views are reviewed, with the 27 corresponding
+  baseline player/camera/look states preserved. A recursive render observer
+  clears all 184 supported lower-wall/jamb poses across 8,849,480 body records;
+  roof support matches 297 sampled rendered positions. The other 60 gate
+  geometries, all 69 leaf sets and all 69 drive-source sets retain their hashes.
+  A per-frame walking check finds a complete character fade at the first
+  tablet; the published version reproduces the same witness. A current-position
+  fallback repairs its regression. All 90 assisted local walking legs pass:
+  914.72 m and 13,732 controller updates keep the character-fade uniform at 1, with
+  99 reviewed High captures. All 36 control neighborhoods and 27 pump sight
+  lines pass; all 139 preceding dry emitter ranges retain access. The build
+  and four native keyboard/High and portrait touch/Low cases pass. Both
+  occupied-save cases recover 0.75 m with look and progress preserved;
+  twelve whole-save reload comparisons and sixteen reviewed release captures
+  pass. Sixteen character-model responses match the delivered asset, and
+  owned browser/server resources close. Wider lower plans, main arcades,
+  sparse surroundings, moving/roof body contact and listening remain under
+  review. The keyboard landing view still has steep framing beside the tablet,
+  also observed in the preceding release capture.
+
 - [Coastal foundation clearance](coastal-masonry.md) repairs the recorded harbor
   clothing contact and a diagonal crouched boot contact at the first jamb.
   All 45 coastal wall and jamb bodies use finite boxes with a shared 0.65 m

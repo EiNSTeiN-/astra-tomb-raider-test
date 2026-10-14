@@ -128,6 +128,48 @@ function limitedTurn(game, target, next, dt) {
     .add(target);
 }
 
+test("a blocked forecast cannot hide the explorer when the current position has a clear neighboring view", (t) => {
+  const { game, target } = turningFixture(t, {
+    size: [0.2, 5, 40],
+    position: [1.1, 2.5, 0],
+  });
+  game.yaw = 0;
+  const space = (p) => p.y >= (p.x > 0.3 ? 1.7 : 0.28);
+  game.camera.position.set(1.4, 1.7, 0);
+  game.cameraFollowTarget.copy(target).add(new Vector3(-0.06, 0, 0));
+  const desired = target.clone().add(new Vector3(0, 0.89, 5.3));
+  const before = followCamera(
+    game.camera.position,
+    target,
+    desired,
+    1 / 60,
+    game.cameraSurfaces,
+    space,
+    game.cameraFollowTarget,
+  );
+  assert(
+    before.distanceTo(target) < 1.5,
+    "ordinary smoothing retracts into the fade range",
+  );
+  const feet = game.player.position.clone();
+  const next = followClearCamera(game, target, desired, 1 / 60, space);
+  assert(next.distanceTo(target) >= 2.2 - 1e-8, "retain a visible current arm");
+  assert.equal(game.cameraSurfaces.entry(target, next), 1);
+  assert.equal(
+    cameraBodyVisibility(
+      game.cameraSurfaces,
+      next,
+      cameraBodyTargets(game),
+      game,
+    ),
+    1,
+  );
+  assert(space(next));
+  assert(game.player.position.equals(feet));
+  assert.equal(game.yaw, 0);
+  assert.equal(game.pitch, 0.13);
+});
+
 test("a clear walking turn limits angular steps while following a moving target and retaining look", (t) => {
   const { game, target, desired, space } = turningFixture(t),
     feet = game.player.position.clone(),

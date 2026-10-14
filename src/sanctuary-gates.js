@@ -33,6 +33,7 @@ import { buildCrystalVault } from "./crystal-vaults.js";
 import { buildCrystalEnclosure } from "./crystal-enclosures.js";
 import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
 import { stationSolid } from "./field-station-solids.js";
+import { buildCoastalVault } from "./coastal-vaults.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -535,6 +536,8 @@ export function buildSanctuaryGate(game, feature, materials) {
   );
   if (design.crown === "wind") {
     buildSkyGateCrown({ m, add, block, root, detail, halfWidth });
+  } else if (design.panel === "sluice") {
+    buildCoastalVault(game, gate, m);
   } else if (design.crown === "arch") {
     for (let i = 0; i < 15; i++) {
       const a = (i * Math.PI) / 15 + 0.006,

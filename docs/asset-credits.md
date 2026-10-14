@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [coastal chamber vaults](coastal-vaults.md) use original closed-cell roof,
+façade, opening and mounting code in `src/coastal-vaults.js`, the existing stone
+generator and credited palace materials. The walking-camera repair adapts the
+existing collision and body-framing code. Six documentation images are actual
+game captures encoded as lossless WebP, with decoded pixel/dimension parity
+against their PNG sources; elevated inspection cameras are identified in the
+notes. No external asset or dependency was added. Existing character,
+environmental and audio attribution below applies.
+
 The [coastal foundation clearance](coastal-masonry.md) uses the existing finite
 field-station solids and an original closed-component render observer. Four
 documentation images are actual High game captures encoded as lossless WebP,
