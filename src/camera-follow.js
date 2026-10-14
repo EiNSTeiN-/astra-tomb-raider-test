@@ -88,8 +88,8 @@ function clearApproach(game, target, end, ahead, canOccupy, surfaces) {
 }
 
 // Pillars, shafts and overhead parts can close the interpolated follow path
-// even when its destination is clear. Prefer .3 yaw / .4 pitch offsets, widening
-// yaw to 2.1 only when that neighborhood cannot fit a comfortable view. Keep
+// even when its destination is clear. Prefer small turns and moderate sideways
+// views before larger upward offsets, widening yaw to 2.1 when needed. Keep
 // the player's chosen look in save data throughout collision response.
 export function followClearCamera(
   game,
@@ -193,28 +193,32 @@ function followClearCameraStep(
     distance = Math.hypot(offset.x, offset.z) / Math.cos(viewPitch),
     lift = offset.y - Math.sin(viewPitch) * distance,
     nearbyCandidates = [
+      [0, 0],
       [0, -0.2],
       [0, 0.2],
       [-0.15, 0],
       [0.15, 0],
-      [0, -0.4],
-      [0, 0.4],
       [-0.3, 0],
       [0.3, 0],
       ...[-0.15, 0.15, -0.3, 0.3].flatMap((yaw) =>
-        [-0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
+        [-0.2, 0.2].map((pitch) => [yaw, pitch]),
       ),
     ],
     retained = bodyRecovery && game.cameraBodyRecovery,
     lowerNearbyFirst =
       retained &&
-      MathUtils.clamp(viewPitch + retained[1], -0.65, 1.05) - viewPitch > 0.4,
+      MathUtils.clamp(viewPitch + retained[1], -0.65, 1.05) - viewPitch > 0.2,
     candidates = [
       ...(retained && !lowerNearbyFirst ? [retained] : []),
       ...nearbyCandidates,
-      // A bank can need an overhead view during a turn, then expose a lower
-      // neighboring arm. Do not let that remembered lift prevent trying it.
-      // The existing body and swept-arm checks still govern each option.
+      // Try a moderate sideways view before lifting above the explorer. A
+      // remembered upward detour must yield when the lower neighborhood opens.
+      ...[-0.45, 0.45, -0.6, 0.6, -0.9, 0.9].flatMap((yaw) =>
+        [0, -0.2, 0.2].map((pitch) => [yaw, pitch]),
+      ),
+      ...[0, -0.15, 0.15, -0.3, 0.3, -0.45, 0.45, -0.6, 0.6, -0.9, 0.9].flatMap(
+        (yaw) => [-0.4, 0.4].map((pitch) => [yaw, pitch]),
+      ),
       ...(lowerNearbyFirst ? [retained] : []),
       // A steep foreground bank can cover the boots while the central arm
       // clears it. Lift the view before swinging far around the explorer.
@@ -224,8 +228,8 @@ function followClearCameraStep(
       // A close pillar can cover the entire small neighborhood. Try its sides
       // only if none of those rays provides enough room for the explorer.
       ...[
-        -0.45, 0.45, -0.6, 0.6, -0.9, 0.9, -1.05, 1.05, -1.2, 1.2, -1.35, 1.35,
-        -1.5, 1.5, -1.65, 1.65, -1.8, 1.8, -1.95, 1.95, -2.1, 2.1,
+        -1.05, 1.05, -1.2, 1.2, -1.35, 1.35, -1.5, 1.5, -1.65, 1.65, -1.8, 1.8,
+        -1.95, 1.95, -2.1, 2.1,
       ].flatMap((yaw) =>
         [0, -0.2, 0.2, -0.4, 0.4].map((pitch) => [yaw, pitch]),
       ),

@@ -19,6 +19,26 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal follow framing](coastal-camera-framing.md) lowers the recorded
+  doorway return view and harbor-tablet landing by trying moderate sideways
+  views before larger upward detours. The matched controller replay preserves
+  feet and chosen look; landed arm pitch falls from +0.9429 to −0.0551 rad,
+  with the character-fade uniform at 1 through 318 updates. All 49 selected camera
+  regressions and the build pass; the new closed-column framing regression
+  fails the published predecessor and passes the correction. All 166 assisted
+  local coastal legs keep the character-fade uniform at 1 through 19,642 updates, and
+  all 213 route captures are reviewed. All 128 representative High stance cases
+  across eight chapters pass, with 32 reviewed captures. Four native
+  keyboard/High and portrait touch/Low cases pass twelve whole-save reloads;
+  sixteen release captures are reviewed and sixteen model responses match the
+  asset. Both occupied saves recover 0.75 m with chosen look and progress
+  preserved. A development-preview heap failure is retained; dependency
+  discovery now uses the app entry point and watching excludes local archives
+  and downloaded sources. The seven remaining chapters pass without another
+  preview heap failure, and production bundles remain unchanged by that
+  configuration. Owned resources close under the shared five-CPU guard.
+  Wider world composition, moving camera framing and listening remain open.
+
 - [Coastal palace courts](palace-courts.md) replace the repeated main halls
   with ten roof combinations, side rooms, 28 supported doorways, seven shore
   windows and mounted cistern-capacity records. Independent render inspection

@@ -147,3 +147,8 @@ The wider campaign visual audit remains active. Repeated side arcades, sparse
 surroundings, continuous campaign routes, upper/moving/interacting body contact,
 landing-camera framing and actual listening still need work. No full-world
 graphics acceptance, human duration or commercial AAA quality is claimed here.
+
+The later [coastal follow-camera refinement](coastal-camera-framing.md) lowers
+the recorded doorway return and harbor-tablet landing views. Its matched
+controller comparisons, wider local routes, chapter stances and built saves
+pass; broader moving-view framing remains open.

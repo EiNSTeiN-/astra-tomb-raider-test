@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal follow camera](docs/coastal-camera-framing.md) now tries clear
+sideways views before steep upward detours, lowering the recorded tablet
+landing and doorway return views while preserving the chosen look. Local
+routes, representative eight-chapter stances and built keyboard/touch saves
+pass. Wider framing and scenery remain under review.
+
 The [coastal palace courts](docs/palace-courts.md) give ten main halls distinct
 roof combinations, side rooms, open doorways and guarded shore windows.
 Mounted capacity records tie the new masonry to the hydraulic puzzles, and

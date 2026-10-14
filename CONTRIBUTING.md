@@ -33,6 +33,12 @@ covered by the `/local/` exclusion in `.gitignore`. Do not use `/tmp` for projec
 staging: it may be cleared during a reboot. Keep reusable public verification
 helpers in `scripts/` and intentional documentation images in `docs/images/`.
 
+The development server discovers dependencies from `index.html` and excludes
+`local/` and `asset-sources/` from its watcher. This keeps installed toolchains,
+archived review apps and generated reports outside normal development scans.
+Private browser helpers can still be served from `local/`; restart their
+isolated preview after editing them because those files do not trigger reloads.
+
 The public repository is https://github.com/EiNSTeiN-/astra-tomb-raider-test.
 The project owner has requested that every playable milestone be committed and
 pushed here. Finish the relevant checks, record the resulting behavior and any

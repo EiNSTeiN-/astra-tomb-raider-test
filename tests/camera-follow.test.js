@@ -673,6 +673,88 @@ test("an enclosed corridor with no clear escape retains the safe retracted view"
   assert.equal(game.cameraSurfaces.entry(target, next, 0), 1);
 });
 
+test("a clear moderate side view replaces an unnecessary upward column detour", (t) => {
+  const world = new Group(),
+    surfaces = new CameraSurfaces(world),
+    material = new MeshStandardMaterial(),
+    column = new Mesh(new BoxGeometry(1.8, 12, 0.8), material),
+    model = new Group(),
+    game = {
+      player: new Group(),
+      camera: new PerspectiveCamera(),
+      cameraSurfaces: surfaces,
+      rig: { model },
+      yaw: 0,
+      pitch: 0.13,
+      grounded: true,
+      groundHeight: () => 0,
+    };
+  column.position.set(0, 6, 3.5);
+  world.add(column);
+  surfaces.capture(column);
+  surfaces.rebuild();
+  for (const [name, x] of [
+    ["LeftFoot", -0.15],
+    ["RightFoot", 0.15],
+  ]) {
+    const foot = new THREE.Bone();
+    foot.name = name;
+    foot.position.set(x, 0.05, 0);
+    model.add(foot);
+  }
+  game.player.add(model);
+  game.player.updateWorldMatrix(true, true);
+  const target = new Vector3(0, 1.3, 0),
+    desired = target
+      .clone()
+      .add(new Vector3(0, Math.sin(0.13) * 5.3 + 0.2, Math.cos(0.13) * 5.3)),
+    space = (p) => p.y >= 0.28,
+    body = cameraBodyTargets(game),
+    side = target
+      .clone()
+      .add(
+        new Vector3(
+          Math.sin(-0.6) * Math.cos(0.13) * 5.3,
+          Math.sin(0.13) * 5.3 + 0.2,
+          Math.cos(-0.6) * Math.cos(0.13) * 5.3,
+        ),
+      );
+  assert(
+    constrainCamera(target, side, surfaces, space).distanceTo(side) < 1e-8,
+  );
+  assert.equal(cameraBodyVisibility(surfaces, side, body, game), 1);
+  game.camera.position
+    .copy(target)
+    .add(new Vector3(0, Math.sin(1.05) * 5.3 + 0.2, Math.cos(1.05) * 5.3));
+  game.cameraFollowTarget = target.clone();
+  game.cameraBodyRecovery = [0, 1];
+  game.cameraContactRecovery = game.cameraBodyRecovery;
+  for (let frame = 0; frame < 240; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, space),
+    );
+    assert(space(game.camera.position));
+    assert(game.camera.position.distanceTo(target) >= 3.2);
+    assert.equal(surfaces.entry(target, game.camera.position), 1);
+    assert.equal(
+      cameraBodyVisibility(surfaces, game.camera.position, body, game),
+      1,
+    );
+  }
+  const arm = game.camera.position.clone().sub(target);
+  assert(
+    Math.atan2(arm.y - 0.2, Math.hypot(arm.x, arm.z)) <=
+      game.pitch + 0.2 + 1e-6,
+    "a clear sideways view must replace the avoidable upward detour",
+  );
+  assert.equal(game.yaw, 0);
+  assert.equal(game.pitch, 0.13);
+  t.after(() => {
+    column.geometry.dispose();
+    material.dispose();
+  });
+});
+
 test("recovery keeps a supplied shorter camera arm during the transition out of aim", (t) => {
   const { game, target, space } = fixture(t),
     distance = 3.4,

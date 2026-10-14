@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The [coastal follow-camera framing](coastal-camera-framing.md) adapts the
+project's original nearby-view search in `src/camera-follow.js`. Its comparison
+captures use the existing attributed character, palace and environmental art.
+No external asset or dependency was added.
+
 The [coastal palace courts](palace-courts.md) use original closed roof-cell,
 side-room, doorway, shore-window and column-clearance code in
 `src/palace-court-plan.js`, `src/palace-courts.js` and `src/palace-architecture.js`.
