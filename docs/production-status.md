@@ -19,6 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal foundation clearance](coastal-masonry.md) repairs the recorded harbor
+  clothing contact and a diagonal crouched boot contact at the first jamb.
+  All 45 coastal wall and jamb bodies use finite boxes with a shared 0.65 m
+  standing/crouch margin. All 61 affected regressions and three independent
+  observer tests pass. All 184 supported poses have zero embedding beyond
+  15 mm across 8,849,480 visible body records; High covers all 45 pieces and
+  Low repeats four harbor rear poses. The observer separates open shell relief
+  from closed rendered stone and expands actual instance transforms; positive
+  and negative witnesses calibrate the correction. All 69 gate geometries,
+  leaf sets and drive-source sets retain their hashes. All 90 assisted local
+  controller legs and 99 reviewed High route captures pass. All 36 control
+  neighborhoods and 27 pump sight lines stay clear; source probes retain all
+  139 preceding dry distance ranges. Idle outlet occlusion appears with both
+  bounds and still needs active-flow/listening review. The build passes.
+  Built keyboard/High and portrait touch/Low controls, transfers, movement and
+  map checks pass. Both occupied-save cases recover 0.75 m with chosen look and
+  progress preserved; twelve paused-store reload comparisons and sixteen
+  reviewed native captures pass. Owned browsers/servers close and the shared
+  five-CPU guard passes its three checks. Broader moving/underwater body contact,
+  palace composition and listening remain open.
+
 - [Coastal hydraulic wall records](coastal-wall-records.md) give eight later
   rear chambers distinct ceramic and bronze motifs drawn from their actual
   capacities, target measures and directed circuits. A close crouch exposed
@@ -32,8 +53,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   Keyboard/High and portrait touch/Low retain selected sources and earned
   transfers through eight exact paused-store reloads, with movement and map
   checks. Owned browsers and servers close after each check.
-  A separately recorded low masonry contact remains open, along with broader
-  palace layouts, scenery and listening.
+  Its separately recorded low masonry contact is repaired in the later
+  foundation-clearance pass above. Broader palace layouts, scenery and
+  listening remain open.
 
 - [Crystal archive enclosures](crystal-enclosures.md) give seven rear rooms
   distinct apses, lateral wings, a long gallery and an asymmetric store, with

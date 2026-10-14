@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [coastal foundation clearance](coastal-masonry.md) uses the existing finite
+field-station solids and an original closed-component render observer. Four
+documentation images are actual High game captures encoded as lossless WebP,
+with decoded pixel and dimension parity checked against their PNG sources.
+The lateral foundation views use inspection cameras identified in the notes.
+No external model, texture, recording, score or dependency was added; existing
+character, palace material and audio credits below apply.
+
 The [coastal hydraulic wall records](coastal-wall-records.md) use original
 closed-panel, vessel, channel and motif code in `src/coastal-wall-art.js`, the
 existing dressed-stone and closed-vault generators, and the credited palace

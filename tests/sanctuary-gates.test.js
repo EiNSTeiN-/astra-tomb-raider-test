@@ -12,6 +12,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { SaveStore } from "../src/storage.js";
 import { CameraSurfaces, constrainCamera } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
+import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { buildFieldGates } from "../src/field-world.js";
 import {
   buildSanctuaryGate,
@@ -80,6 +81,92 @@ function open(game, gate) {
     updateSanctuaryGate(game, gate, 1 / 30);
   }
 }
+
+test("coastal masonry reserves the posed body beside all 45 finite wall and jamb foundations", (t) => {
+  const { game } = fixture(t, 3, null, true);
+  let solids = 0;
+  for (const gate of game.fieldGates) {
+    assert.equal(gate.masonrySolids.length, 5);
+    for (const solid of gate.masonrySolids) {
+      solids++;
+      assert.equal(solid.bodyPadding, 0.65);
+      assert.equal(solid.coastalMasonry, true);
+      assert.equal(stationSupport(solid, solid.x, solid.z), null);
+      assert.equal(
+        stationBlocked(solid, solid.x, solid.bounds.min.y - 1, solid.z, 0.2),
+        false,
+      );
+      assert.equal(
+        stationBlocked(solid, solid.x, solid.bounds.max.y + 0.02, solid.z),
+        false,
+      );
+    }
+    for (const footing of gate.foundations) {
+      const x = gate.root.position.x + footing.x,
+        z = gate.root.position.z + footing.z;
+      assert(
+        gate.masonrySolids.some(
+          (s) =>
+            s.bounds.min.x <= x - footing.width / 2 &&
+            s.bounds.max.x >= x + footing.width / 2 &&
+            s.bounds.min.z <= z - footing.depth / 2 &&
+            s.bounds.max.z >= z + footing.depth / 2 &&
+            s.bounds.min.y <= gate.root.position.y + footing.bottom + 1e-9 &&
+            s.bounds.max.y >= gate.root.position.y + footing.top,
+        ),
+        `complete footing ${gate.stage}/${footing.x}/${footing.z}`,
+      );
+    }
+  }
+  assert.equal(solids, 45);
+  const x = 350,
+    z = 64.374,
+    y = game.groundHeight(x, z),
+    before = structuredClone(game.progress);
+  for (const crouching of [false, true]) {
+    game.crouching = crouching;
+    assert.equal(
+      game.canMove(x, z, 0),
+      false,
+      "recorded occupied root rejects both poses",
+    );
+    const arrival = safeArrival(game, { x, y, z });
+    assert(arrival && Math.hypot(arrival.x - x, arrival.z - z) <= 1.5);
+    assert(
+      game.canMove(
+        arrival.x,
+        arrival.z,
+        arrival.y - game.groundHeight(arrival.x, arrival.z),
+      ),
+    );
+    assert.deepEqual(
+      game.progress,
+      before,
+      "recovery search does not change progression",
+    );
+  }
+});
+
+test("normal coastal walking stops before the reproduced rear foundation instead of entering its low stone", (t) => {
+  const { game } = fixture(t, 3, null, true),
+    gate = game.fieldGates[1],
+    c = gate.root.position;
+  game.player.position.set(c.x, game.groundHeight(c.x, c.z - 4), c.z - 4);
+  Object.assign(game, {
+    jumpY: 0,
+    velocityY: 0,
+    grounded: true,
+    moveVelocity: { x: 0, z: 0 },
+    airVelocity: null,
+  });
+  for (let i = 0; i < 240; i++) advanceCharacter(game, { x: 0, z: -4 }, 1 / 60);
+  assert(
+    game.player.position.z >= c.z - 5.0 && game.player.position.z <= c.z - 4.9,
+  );
+  assert(
+    game.canMove(game.player.position.x, game.player.position.z, game.jumpY),
+  );
+});
 
 test("eight jungle crowns preserve the delivered shutters, drive emitters and navigation obstacles", (t) => {
   const expected = JSON.parse(

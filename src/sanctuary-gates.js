@@ -32,6 +32,7 @@ import { buildSkyChamberWall } from "./sky-chamber-walls.js";
 import { buildCrystalVault } from "./crystal-vaults.js";
 import { buildCrystalEnclosure } from "./crystal-enclosures.js";
 import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
+import { stationSolid } from "./field-station-solids.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -255,6 +256,19 @@ export function buildSanctuaryGate(game, feature, materials) {
   const regionalWalls = CHAMBER_WALL_BIOMES.has(game.level.biome);
   const fittedSkyWalls = design.panel === "lattice";
   gate.walls = [];
+  if (design.panel === "sluice") gate.masonrySolids = [];
+  const masonrySolid = (size, position) => {
+    const solid = stationSolid(
+      game,
+      { id: `sluice-masonry-${gate.stage}-${gate.masonrySolids.length}` },
+      root,
+      size,
+      position,
+      { bodyPadding: 0.65, support: false },
+    );
+    solid.coastalMasonry = true;
+    gate.masonrySolids.push(solid);
+  };
   // Fit wall construction and both kinds of collision to the same room span.
   const wallSides = buildCrystalEnclosure(game, gate, m) ? [] : [-1, 0, 1];
   for (const side of wallSides) {
@@ -383,13 +397,23 @@ export function buildSanctuaryGate(game, feature, materials) {
         (floor + 7.38) / 2,
         center.z - (fittedSkyWalls && back ? 0.15 : 0),
       );
-    game.obstacles.push({
-      x: x + center.x,
-      z: z + center.z,
-      w: back ? halfWidth + 0.7 : 0.85,
-      d: back ? 0.85 : 7.2,
-      h: 7.5,
-    });
+    if (design.panel === "sluice") {
+      // The old root-only box allowed boots and clothing inside the wider
+      // foundation. Reserve low footwear through a crouch transition and
+      // diagonal bank approach, with finite bounds around the buried base.
+      masonrySolid(
+        [back ? 2 * halfWidth + 1.4 : 1.7, 7.5 - floor, back ? 1.7 : 14.4],
+        [center.x, (floor + 7.5) / 2, center.z],
+      );
+    } else {
+      game.obstacles.push({
+        x: x + center.x,
+        z: z + center.z,
+        w: back ? halfWidth + 0.7 : 0.85,
+        d: back ? 0.85 : 7.2,
+        h: 7.5,
+      });
+    }
   }
   // The jambs carry their lintels, drive axles, tracks and visible counterweights.
   for (const side of [-1, 1]) {
@@ -403,13 +427,10 @@ export function buildSanctuaryGate(game, feature, materials) {
       );
       gate.foundations.push(footing);
       // The fluted face and its footing extend beyond the thin side wall.
-      game.obstacles.push({
-        x: x + footing.x,
-        z: z + footing.z,
-        w: footing.width / 2,
-        d: footing.depth / 2,
-        h: y + 8.5 - game.groundHeight(x + footing.x, z + footing.z),
-      });
+      masonrySolid(
+        [footing.width, 8.5 - footing.bottom, footing.depth],
+        [footing.x, (footing.bottom + 8.5) / 2, footing.z],
+      );
     }
     if (design.panel === "lattice")
       buildSkyGateJamb({ side, m, add, block, halfWidth });

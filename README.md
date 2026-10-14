@@ -4,6 +4,14 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal foundation clearance](docs/coastal-masonry.md) keeps standing and
+crouching bodies outside the low walls and jambs of all nine sluice chambers.
+Independent inspection of the delivered masonry passes all 184 sampled poses;
+the visible gate geometry and sound sources remain intact. Local walking routes
+and built keyboard/touch input pass, including older occupied-save recovery and
+twelve exact reload comparisons. Broader moving body contact and palace
+composition remain under review.
+
 The [coastal hydraulic wall records](docs/coastal-wall-records.md) give eight
 later sluice chambers different ceramic and bronze compositions tied to their
 real puzzle measures and return valves. The records sit in masonry recesses

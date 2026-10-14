@@ -1,5 +1,108 @@
 import * as THREE from "three";
 
+// Material batches mix closed stone with open decorative relief. Separate by
+// shared geometric edges, then retain components whose oriented edges balance.
+// A vertex-only connection would join a carving to stone it merely touches.
+// Positions are preserved; quantization identifies seams without moving them.
+export function closedComponentMeshes(meshes, precision = 1e-5) {
+  const result = [],
+    stats = {
+      triangles: 0,
+      closedTriangles: 0,
+      openTriangles: 0,
+      closedComponents: 0,
+      openComponents: 0,
+    };
+  for (const mesh of meshes) {
+    mesh.updateWorldMatrix(true, false);
+    const position = mesh.geometry.attributes.position,
+      index = mesh.geometry.index;
+    const vertices = new Map(),
+      triangles = [],
+      edges = new Map();
+    const vertex = (point) => {
+      const key = point.map((n) => Math.round(n / precision)).join(",");
+      if (!vertices.has(key)) vertices.set(key, vertices.size);
+      return vertices.get(key);
+    };
+    const count = index?.count ?? position.count;
+    const matrices = mesh.isInstancedMesh
+      ? Array.from({ length: mesh.count }, (_, i) => {
+          const instance = new THREE.Matrix4();
+          mesh.getMatrixAt(i, instance);
+          return mesh.matrixWorld.clone().multiply(instance);
+        })
+      : [mesh.matrixWorld];
+    for (const matrix of matrices)
+      for (let i = 0; i < count; i += 3) {
+        const points = [0, 1, 2].map((k) =>
+          new THREE.Vector3()
+            .fromBufferAttribute(position, index ? index.getX(i + k) : i + k)
+            .applyMatrix4(matrix),
+        );
+        if (new THREE.Triangle(...points).getArea() < 1e-12) continue;
+        const ids = points.map((p) => vertex(p.toArray()));
+        if (new Set(ids).size !== 3)
+          throw Error("Observer precision collapsed a rendered triangle");
+        triangles.push({ points, ids });
+      }
+    const parents = Int32Array.from(triangles, (_, i) => i);
+    const find = (i) => {
+      while (parents[i] !== i) {
+        parents[i] = parents[parents[i]];
+        i = parents[i];
+      }
+      return i;
+    };
+    triangles.forEach(({ ids }, i) => {
+      for (let j = 0; j < 3; j++) {
+        const a = ids[j],
+          b = ids[(j + 1) % 3],
+          key = `${Math.min(a, b)},${Math.max(a, b)}`,
+          sign = a < b ? 1 : -1;
+        const edge = edges.get(key);
+        if (edge) {
+          parents[find(i)] = find(edge.triangle);
+          edge.balance += sign;
+        } else edges.set(key, { triangle: i, balance: sign });
+      }
+    });
+    const open = new Set();
+    for (const edge of edges.values())
+      if (edge.balance) open.add(find(edge.triangle));
+    const components = new Set(),
+      closed = [];
+    triangles.forEach(({ points }, i) => {
+      const component = find(i);
+      components.add(component);
+      if (!open.has(component))
+        for (const point of points) closed.push(...point.toArray());
+    });
+    stats.triangles += triangles.length;
+    stats.closedTriangles += closed.length / 9;
+    stats.openTriangles += triangles.length - closed.length / 9;
+    stats.openComponents += open.size;
+    stats.closedComponents += components.size - open.size;
+    if (closed.length) {
+      const geometry = new THREE.BufferGeometry();
+      // These CPU-only records keep the exact world coordinates. They are
+      // never submitted to WebGL or registered as gameplay collision.
+      geometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(new Float64Array(closed), 3),
+      );
+      result.push(new THREE.Mesh(geometry, mesh.material));
+    }
+  }
+  return {
+    meshes: result,
+    stats,
+    dispose() {
+      for (const mesh of result) mesh.geometry.dispose();
+    },
+  };
+}
+
 // Index actual world-space render triangles in the plane perpendicular to an
 // oblique inspection ray. Closed, outward-wound meshes are required; decorative
 // open faces must be omitted by the caller. No movement kernel is consulted.

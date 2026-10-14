@@ -88,8 +88,10 @@ scene checks and rebuilt native input/save checks pass.
 A separate standing check against the entire harbor gate found 659 embedded
 vertex records, reaching 72.15 mm, with recorded clothing witnesses in low
 masonry below the new relief. The surrounding foundations retain their original
-construction. This low masonry contact remains open; the relief checks do not
-establish clearance against every part of the chamber.
+construction at this milestone. The subsequent [coastal foundation clearance
+repair](coastal-masonry.md) reproduces and repairs this lower contact with finite
+body bounds. The relief checks alone do not establish clearance against every
+part of the chamber.
 
 No external model, texture, recording, score or dependency was added. Existing
 palace material, character and environmental attribution still applies. This
