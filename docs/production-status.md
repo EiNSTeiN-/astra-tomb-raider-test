@@ -19,6 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal palace courts](palace-courts.md) replace the repeated main halls
+  with ten roof combinations, side rooms, 28 supported doorways, seven shore
+  windows and mounted cistern-capacity records. Independent render inspection
+  finds boot contact at an original Queen column; finite body margins repair
+  all 132 main columns. All 20 selected regressions and the build pass.
+  The final static observer clears 532 column poses across 25,586,540 visible
+  records and 152 new-wall poses across 7,310,440 records, with genuine old
+  contact witnesses retained. Fifty final High/Low scene views and 114 local
+  route captures are reviewed. All 76 normal-controller legs pass: 393.94 m,
+  5,910 updates, no damage or stalls, actual doorway crossings and a character
+  fade uniform of 1. All 36 hydraulic controls, 54 ready/completed field cases,
+  two assisted climbing loops, ten bird supports and all 139 preceding dry
+  source ranges retain access. Four native keyboard/High and portrait touch/Low
+  cases pass twelve whole-save reload comparisons; older occupied saves
+  recover 0.75 m with progress and chosen look preserved. Sixteen release
+  captures are reviewed and sixteen character-model responses match the asset.
+  All owned verification resources close under the shared five-CPU limit.
+  Wider side arcades, sparse surroundings, moving/upper-body contact, listening
+  and follow framing remain open. The arrival western-door return view is steep;
+  the previously recorded crowded harbor-tablet landing view also remains.
+
 - [Coastal chamber vaults](coastal-vaults.md) replace the repeated front arch
   with nine roof and façade profiles, real openings and supported closed stone.
   All 68 affected construction/movement tests and 21 selected camera tests pass.

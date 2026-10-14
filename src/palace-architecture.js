@@ -5,10 +5,12 @@ import {
   vaultStoneGeometry,
   flutedColumnGeometry,
   shellReliefGeometry,
-  vaultCellPresent,
 } from "./palace-geometry.js";
 import { weatherPalaceStone } from "./palace-material.js";
 import { addMasonryFooting } from "./masonry-footings.js";
+import { palaceCourtPlan } from "./palace-court-plan.js";
+import { buildPalaceCourt } from "./palace-courts.js";
+import { stationSolid } from "./field-station-solids.js";
 
 export function palacePlan(room) {
   const i = room.index % 10;
@@ -33,7 +35,7 @@ export function palacePlan(room) {
   return {
     columns,
     galleries,
-    damage: [0, 1, 2, 3, 2, 1, 3, 1, 0, 3][i],
+    court: palaceCourtPlan(i),
     spring: i === 9 ? 7 : 6.2,
   };
 }
@@ -148,17 +150,18 @@ export function buildPalaceArchitecture(game) {
         color: [0.85, 0.845, 0.833],
       });
       if (foundation) foundations.push(foundation);
-      game.obstacles.push({
-        x: x + px,
-        z: z + pz,
-        w: width / 2,
-        d: width / 2,
-        h: top - ground + 0.36,
-        palace: true,
-      });
       const bottom = foundation
         ? Math.min(ground - 0.2, foundation.bottom - base)
         : ground - 0.2;
+      const guard = stationSolid(
+        game,
+        { id: `palace-column-${room.index}-${px}-${pz}` },
+        root,
+        [width * 1.1, top + 0.24 - bottom, width * 1.1],
+        [px, (top + 0.24 + bottom) / 2, pz],
+        { bodyPadding: 0.65, support: false },
+      );
+      guard.palace = true;
       capture(
         new THREE.BoxGeometry(width, top + 0.2 - bottom, width),
         px,
@@ -265,101 +268,15 @@ export function buildPalaceArchitecture(game) {
         i = end;
       }
     };
-    const vaults = [];
-    for (const [bay, [ax, bx]] of [
-      [-19, -6.5],
-      [-6.5, 6.5],
-      [6.5, 19],
-    ].entries()) {
-      const center = (ax + bx) / 2,
-        inner = (bx - ax) / 2 - 1.05,
-        outer = (bx - ax) / 2 + 0.04;
-      const damage = bay === 1 ? plan.damage : (room.index + bay) % 4;
-      arch(ax, -12, bx, -12);
-      arch(ax, -24, bx, -24);
-      const rows = 6,
-        rowDepth = 12 / rows;
-      for (let row = 0; row < rows; row++)
-        for (let sector = 0; sector < 24; sector++) {
-          if (!vaultCellPresent(sector, row, damage)) continue;
-          const a = (sector / 24) * Math.PI + 0.003,
-            b = ((sector + 1) / 24) * Math.PI - 0.003,
-            pz = -24 + (row + 0.5) * rowDepth;
-          add(
-            vaultStoneGeometry(
-              inner + 0.06,
-              outer,
-              (sector / 24) * Math.PI,
-              ((sector + 1) / 24) * Math.PI,
-              rowDepth,
-              2,
-            ),
-            stone,
-            center,
-            plan.spring,
-            pz,
-          );
-          // Surviving blue plaster follows the intrados, with irregular bare areas.
-          if (
-            (((Math.sin((sector + row * 37 + room.index * 113) * 17.13) *
-              43758.5453) %
-              1) +
-              1) %
-              1 >
-            0.12
-          )
-            add(
-              vaultStoneGeometry(
-                inner + 0.015,
-                inner + 0.045,
-                a,
-                b,
-                rowDepth - 0.055,
-                2,
-              ),
-              plaster,
-              center,
-              plan.spring,
-              pz,
-            );
-        }
-      // Capture consecutive surviving depth runs, keeping skylights open without
-      // one camera volume for every decorative masonry block.
-      for (let sector = 0; sector < 24;) {
-        let end = Math.min(24, sector + 2);
-        for (let row = 0; row < rows; row++)
-          if (
-            vaultCellPresent(sector, row, damage) !==
-            vaultCellPresent(end - 1, row, damage)
-          )
-            end = sector + 1;
-        let first = -1;
-        for (let row = 0; row <= rows; row++) {
-          const present = row < rows && vaultCellPresent(sector, row, damage);
-          if (present && first < 0) first = row;
-          if (!present && first >= 0) {
-            capture(
-              vaultStoneGeometry(
-                inner,
-                outer,
-                (sector / 24) * Math.PI,
-                (end / 24) * Math.PI,
-                (row - first) * rowDepth,
-                2,
-              ),
-              center,
-              plan.spring,
-              -24 + ((first + row) * rowDepth) / 2,
-            );
-            first = -1;
-          }
-        }
-        sector = end;
-      }
-      vaults.push({ center, inner, outer, damage, depth: 12 });
-    }
-    // Longitudinal arches support the vault edges and covered side passages.
-    for (const px of [-19, -6.5, 6.5, 19]) arch(px, -24, px, -12, 1.25);
+    const court = buildPalaceCourt(
+        game,
+        root,
+        { stone, plaster, dark },
+        plan.court,
+        plan.spring,
+        toneGeometry,
+      ),
+      vaults = court.roofs;
     for (const side of plan.galleries) {
       const stops = [-12, -4.5, 4.5, 13.5, 22.5];
       for (let j = 1; j < stops.length; j++) {
@@ -421,6 +338,7 @@ export function buildPalaceArchitecture(game) {
       plan,
       foundations,
       vaults,
+      court,
       triangles,
       center: new THREE.Vector3(x, base + 6, z),
     });

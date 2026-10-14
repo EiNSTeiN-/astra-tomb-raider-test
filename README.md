@@ -4,11 +4,17 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal palace courts](docs/palace-courts.md) give ten main halls distinct
+roof combinations, side rooms, open doorways and guarded shore windows.
+Mounted capacity records tie the new masonry to the hydraulic puzzles, and
+finite body margins repair boot contact at the palace columns. Wider side
+arcades, surroundings and follow-camera framing remain under review.
+
 The [coastal chamber vaults](docs/coastal-vaults.md) give nine hydraulic rooms
 different roof volumes, stepped façades and real light openings. Their upper
 masonry now supplies physical support and shaded blue interiors. An expanded
 walking check also repairs a brief camera collapse at the first tablet.
-Wider room plans, main palace arcades and surrounding landscape remain open.
+Wider palace side arcades and surrounding landscape remain open.
 
 The [coastal foundation clearance](docs/coastal-masonry.md) keeps standing and
 crouching bodies outside the low walls and jambs of all nine sluice chambers.

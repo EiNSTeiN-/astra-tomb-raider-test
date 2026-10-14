@@ -19,6 +19,9 @@ import {
   shellReliefGeometry,
   vaultCellPresent,
 } from "../src/palace-geometry.js";
+import { palaceRoofCellGeometry } from "../src/palace-courts.js";
+import { palaceRoofCells } from "../src/palace-court-plan.js";
+import { stationSupport, stationBlocked } from "../src/field-station-solids.js";
 import { woodlandLayout, coastalPlantAllowed } from "../src/habitat.js";
 
 function inspectSolid(geometry) {
@@ -71,12 +74,60 @@ test("vault voussoirs and fluted columns are sealed, consistently wound solids w
   }
 });
 
+test("new roof cells are closed and their inset skins stay seated on the actual core planes", () => {
+  const ray = new THREE.Raycaster(
+      new THREE.Vector3(),
+      new THREE.Vector3(0, -1, 0),
+    ),
+    material = new THREE.MeshBasicMaterial();
+  for (let room = 0; room < 10; room++)
+    for (const roof of palacePlan({ index: room }).court.roofs)
+      for (const cell of palaceRoofCells(roof)) {
+        const spring = room === 9 ? 7 : 6.2,
+          core = palaceRoofCellGeometry(roof, spring, cell),
+          skin = palaceRoofCellGeometry(roof, spring, cell, true);
+        inspectSolid(core);
+        inspectSolid(skin);
+        const mesh = new THREE.Mesh(core, material),
+          p = skin.attributes.position,
+          bottoms = new Map();
+        for (let i = 0; i < p.count; i++) {
+          const x = p.getX(i),
+            z = p.getZ(i),
+            key = `${x}/${z}`,
+            y = p.getY(i);
+          if (!bottoms.has(key) || bottoms.get(key).y > y)
+            bottoms.set(key, { x, y, z });
+        }
+        for (const { x, y, z } of bottoms.values()) {
+          ray.ray.origin.set(x, 30, z);
+          const hit = ray.intersectObject(mesh)[0];
+          assert(hit, "skin stays over its actual core");
+          assert(
+            hit.point.y - y >= 0.024 && hit.point.y - y <= 0.026,
+            "skin underside sits 25 mm inside the actual core plane",
+          );
+        }
+        core.dispose();
+        skin.dispose();
+      }
+  material.dispose();
+});
+
 test("ten palace plans keep the crossing axes and objective margins clear of their new columns", () => {
   const map = createMap(LEVELS[3]),
     plans = new Set();
   for (const r of map.rooms) {
     const plan = palacePlan(r);
-    plans.add(JSON.stringify(plan));
+    plans.add(
+      JSON.stringify({
+        columns: plan.columns,
+        galleries: plan.galleries,
+        spring: plan.spring,
+        roofs: plan.court.roofs,
+        walls: plan.court.walls,
+      }),
+    );
     for (const c of plan.columns) {
       assert.ok(Math.abs(c.x) - c.width / 2 > 3);
       assert.ok(Math.abs(c.z) - c.width / 2 > 3);
@@ -105,7 +156,7 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
     level,
     map,
     world,
-    groundHeight: profile.height,
+    terrainProfile: profile,
     obstacles: [],
     cameraSurfaces: new CameraSurfaces(world),
     stoneMat: pbrMaterial("palace-stone"),
@@ -123,7 +174,7 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
   game.cameraSurfaces.rebuild();
   assert.equal(game.palacePatches.length, 10);
   assert.ok(
-    game.cameraSurfaces.count < 1800,
+    game.cameraSurfaces.count < 2600,
     `${game.cameraSurfaces.count} camera surfaces`,
   );
   const ray = new THREE.Raycaster(
@@ -134,7 +185,7 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
     const room = map.rooms[i],
       x = room.x * 7,
       z = room.z * 7,
-      y = profile.height(x, z),
+      y = profile.surfaceHeight(x, z),
       spring = patch.plan.spring;
     assert.ok(patch.root.children.length <= 3, "structure batches by material");
     assert.ok(
@@ -156,52 +207,112 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
       1,
       "camera crosses central hall",
     );
-    assert.ok(
-      game.cameraSurfaces.entry(
-        new THREE.Vector3(x, y + spring + 6, z - 8),
-        new THREE.Vector3(x, y + spring + 6, z - 15),
-      ) < 1,
-      "camera stops at arch crown",
-    );
-    if (patch.plan.damage === 0) {
-      // The intact middle vault must block daylight at both radial and depth
-      // joints, even where its decorative blue plaster has narrow gaps.
-      for (const [dx, dz] of [
-        [0, -20],
-        [0.5, -18],
-        [1, -16],
-      ]) {
-        ray.ray.origin.set(x + dx, y + 30, z + dz);
-        const hit = ray.intersectObject(patch.root, true)[0];
-        assert.ok(
-          hit && hit.point.y > y + spring + 5,
-          "mortar joint has structural backing",
+    for (const roof of patch.court.roofs) {
+      for (const [a, b, c, d] of roof.holes) {
+        const px = x + (a + b) / 2,
+          pz = z + (c + d) / 2;
+        ray.ray.origin.set(px, y + 30, pz);
+        assert.equal(
+          ray.intersectObject(patch.root, true).length,
+          0,
+          "roof light passes through both skins",
+        );
+        assert.equal(
+          game.cameraSurfaces.entry(
+            new THREE.Vector3(px, y + 30, pz),
+            new THREE.Vector3(px, y + 2, pz),
+          ),
+          1,
+          "camera runs preserve real roof light",
         );
       }
-    } else {
-      const row = patch.plan.damage === 1 ? 4 : patch.plan.damage === 2 ? 1 : 3,
-        dx = Math.cos((11.5 / 24) * Math.PI) * 5.7,
-        dz = -24 + (row + 0.5) * 2;
-      ray.ray.origin.set(x + dx, y + 30, z + dz);
+      for (const cell of roof.cells.filter((_, i) => i % 27 === 0)) {
+        const px = x + (cell.x0 + cell.x1) / 2,
+          pz = z + (cell.z0 + cell.z1) / 2;
+        ray.ray.origin.set(px, y + 30, pz);
+        const hit = ray.intersectObject(patch.root, true)[0];
+        assert(hit);
+        const support = Math.max(
+          ...patch.court.solids.map(
+            (s) => stationSupport(s, px, pz) ?? -Infinity,
+          ),
+        );
+        assert(
+          Math.abs(hit.point.y - support) < 1e-5,
+          "roof support matches actual rendered stone",
+        );
+        assert(
+          patch.court.solids.some((s) =>
+            stationBlocked(s, px, support - 0.08, pz, 0.2),
+          ),
+          "finite roof thickness blocks raised bodies",
+        );
+        assert(
+          game.cameraSurfaces.entry(
+            new THREE.Vector3(px, support + 3, pz),
+            new THREE.Vector3(px, support - 0.4, pz),
+          ) < 1,
+          "camera stops at rendered roof",
+        );
+      }
+    }
+    for (const wall of patch.court.walls) {
+      const c = Math.cos(wall.angle),
+        s = Math.sin(wall.angle),
+        p = { x: x + wall.x + wall.door * c, z: z + wall.z - wall.door * s },
+        floor = profile.surfaceHeight(p.x, p.z);
+      if (wall.kind === "door") {
+        for (let step = -6; step <= 6; step++)
+          assert(
+            game.canMove(p.x + s * step * 0.3, p.z + c * step * 0.3, 0),
+            "doorway has supported walking space through both faces",
+          );
+        assert.equal(
+          game.cameraSurfaces.entry(
+            new THREE.Vector3(p.x + s * 1.5, floor + 1.3, p.z + c * 1.5),
+            new THREE.Vector3(p.x - s * 1.5, floor + 1.3, p.z - c * 1.5),
+          ),
+          1,
+          "camera passes through the doorway",
+        );
+      } else {
+        assert.equal(
+          game.canMove(p.x, p.z, 0),
+          false,
+          "shore window has a physical sill",
+        );
+        const q = { x: p.x + c * 0.525, z: p.z - s * 0.525 },
+          height = y + 1.2 - profile.surfaceHeight(q.x, q.z);
+        assert.equal(
+          game.canMove(q.x, q.z, height),
+          false,
+          "mullions prevent the body crossing above the sill",
+        );
+        assert.equal(
+          game.cameraSurfaces.entry(
+            new THREE.Vector3(q.x + s * 1.5, y + 2.4, q.z + c * 1.5),
+            new THREE.Vector3(q.x - s * 1.5, y + 2.4, q.z - c * 1.5),
+          ),
+          1,
+          "real window gap admits a sight ray",
+        );
+      }
+      const u = (-wall.length / 2 + wall.door - wall.doorWidth / 2) / 2,
+        q = { x: x + wall.x + u * c, z: z + wall.z - u * s };
       assert.equal(
-        ray.intersectObject(patch.root, true).length,
-        0,
-        "authored roof break remains open",
-      );
-      assert.equal(
-        game.cameraSurfaces.entry(
-          new THREE.Vector3(x + dx, y + 30, z + dz),
-          new THREE.Vector3(x + dx, y + 2, z + dz),
-        ),
-        1,
-        "camera bounds preserve the skylight",
+        game.canMove(q.x, q.z, 0),
+        false,
+        "dressed wall blocks the body",
       );
     }
     for (const c of patch.plan.columns) {
       const o = game.obstacles.find((o) => o.x === x + c.x && o.z === z + c.z);
       assert.ok(
-        Math.abs(profile.height(o.x, o.z) + o.h - y - spring - 0.36) < 0.000001,
+        Math.abs(profile.surfaceHeight(o.x, o.z) + o.h - y - spring - 0.24) <
+          0.000001,
       );
+      assert.equal(o.bodyPadding, 0.65);
+      assert.equal(o.supportable, false);
       assert.equal(game.canMove(o.x, o.z, 0), false);
     }
     const bird = game.palaceBirdPerches[i];
@@ -233,6 +344,16 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
       }
   }
   game.player.position.copy(game.palacePatches[0].center);
+  assert.equal(
+    game.canMove(227.75, 252.8, 0),
+    false,
+    "retained Queen-column boot contact stops outside the original base",
+  );
+  assert.equal(
+    game.canMove(227, 252.8, 0),
+    true,
+    "a nearby supported point remains free",
+  );
   updatePalaceArchitecture(game);
   assert.equal(game.palacePatches[0].detail.visible, true);
   game.player.position.set(-500, 0, -500);

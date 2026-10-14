@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [coastal palace courts](palace-courts.md) use original closed roof-cell,
+side-room, doorway, shore-window and column-clearance code in
+`src/palace-court-plan.js`, `src/palace-courts.js` and `src/palace-architecture.js`.
+The carved measures use the existing hydraulic trial capacities. Existing
+palace materials, stone construction, bird art and character attribution below
+apply. No external asset or dependency was added in this pass.
+
 The [coastal chamber vaults](coastal-vaults.md) use original closed-cell roof,
 façade, opening and mounting code in `src/coastal-vaults.js`, the existing stone
 generator and credited palace materials. The walking-camera repair adapts the
