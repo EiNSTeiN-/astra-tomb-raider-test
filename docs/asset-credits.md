@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [coastal side arcades](coastal-arcades.md) use original authored profiles,
+closed stone outlines, recessed backing and frieze placement in
+`src/palace-arcades.js`. The physical assembly helper retains the actual
+existing dressed arches and new closed pieces. Existing palace stone and
+plaster materials, character art and environmental attribution below apply.
+Four intentional documentation images are actual browser captures, with
+lossless WebP files preserving exact decoded RGBA pixels and dimensions.
+No external model, texture, dependency, recording or music was added.
+
 The [coastal ground cover](coastal-groundcover.md) uses original folded leaves,
 stems, attached seed/flower heads and vertex colors in
 `src/coastal-groundcover.js`. Root fitting and instance detail transitions reuse

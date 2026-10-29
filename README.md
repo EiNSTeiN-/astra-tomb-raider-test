@@ -4,6 +4,11 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal side arcades](docs/coastal-arcades.md) now have supported stone
+heads, varied upper profiles and blue friezes. Recessed backing closes the
+open joints beneath their old floating caps, while the galleries retain their
+column feet and walking openings. Wider world composition remains under review.
+
 The [coastal ground cover](docs/coastal-groundcover.md) adds salt grass,
 seed-bearing stems and flowering cushions beside the palace ruins. Rooted
 clusters replace the shared short grass while leaving routes and working

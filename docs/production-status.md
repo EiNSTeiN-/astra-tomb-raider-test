@@ -19,6 +19,29 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal side arcades](coastal-arcades.md) give thirteen galleries supported
+  stone heads, varied coping and blue friezes. Actual generated geometry had
+  an approximately 8.2 cm gap between each arch crest and its old cap; all
+  fifty-two preceding bearing rays miss stone and all revised rays hit it.
+  Eight palace tests and fourteen collision/foothold regressions pass, covering
+  closed profiles, upper blocking, rendered roof support and clear openings.
+  All thirty-nine matched High/Low gallery views pass and are reviewed, with
+  identical feet, camera position and chosen look. All thirty-six hydraulic
+  controls, fifty-four ready/completed field cases and 139 previously available
+  source ranges retain access. Bird-support positions remain exactly equal.
+  Camera surfaces increase from 1,549 to 1,809 and the largest court from
+  59,796 to 60,756 structural triangles; its explicit allowance is now 61,000.
+  Both full coastal climbing loops pass over 547.27 m and 7,606 updates with
+  no character fading; all 103 route captures are reviewed. Three local
+  gallery round trips add 42.52 m, 639 updates and nine reviewed captures.
+  Four built keyboard/High and portrait touch/Low cases pass twelve whole-save
+  reload comparisons; sixteen release captures are reviewed and sixteen model
+  responses match the asset. Occupied saves recover 0.75 m with progress and
+  look retained. The build and three CPU-guard checks pass. All owned resources
+  close, verification ports are released and the runtime directory is empty
+  under the shared five-CPU cap. Broader composition, contact and listening
+  remain open.
+
 - [Coastal ground cover](coastal-groundcover.md) replaces shared short grass
   with green salt grass, dry seed stems and flowering cushions. The current
   world places 15,024 rooted plants in 282 batches, with three distance-selected

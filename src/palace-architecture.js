@@ -11,6 +11,7 @@ import { addMasonryFooting } from "./masonry-footings.js";
 import { palaceCourtPlan } from "./palace-court-plan.js";
 import { buildPalaceCourt } from "./palace-courts.js";
 import { stationSolid } from "./field-station-solids.js";
+import { buildPalaceArcadeHead } from "./palace-arcades.js";
 
 export function palacePlan(room) {
   const i = room.index % 10;
@@ -235,19 +236,22 @@ export function buildPalaceArchitecture(game) {
         angle = -Math.atan2(bz - az, bx - ax),
         inner = length / 2 - 1.05,
         outer = length / 2 + 0.2,
-        parts = 17;
+        parts = 17,
+        dressed = [];
       for (let i = 0; i < parts; i++) {
         const a = (i / parts) * Math.PI + 0.004,
           b = ((i + 1) / parts) * Math.PI - 0.004;
-        add(
-          vaultStoneGeometry(inner, outer, a, b, depth),
-          stone,
-          (ax + bx) / 2,
-          spring,
-          (az + bz) / 2,
-          angle,
-          root,
-          false,
+        dressed.push(
+          add(
+            vaultStoneGeometry(inner, outer, a, b, depth),
+            stone,
+            (ax + bx) / 2,
+            spring,
+            (az + bz) / 2,
+            angle,
+            root,
+            false,
+          ),
         );
       }
       for (let i = 0; i < parts;) {
@@ -267,6 +271,7 @@ export function buildPalaceArchitecture(game) {
         );
         i = end;
       }
+      return dressed;
     };
     const court = buildPalaceCourt(
         game,
@@ -277,33 +282,36 @@ export function buildPalaceArchitecture(game) {
         toneGeometry,
       ),
       vaults = court.roofs;
+    const arcades = [];
     for (const side of plan.galleries) {
       const stops = [-12, -4.5, 4.5, 13.5, 22.5];
       for (let j = 1; j < stops.length; j++) {
-        arch(side * 19, stops[j - 1], side * 19, stops[j], 1.25);
-        const length = stops[j] - stops[j - 1],
-          roofY = plan.spring + length / 2 + 0.5;
-        // Narrow entablature caps the arcade; the open arches remain walkable.
-        block(
-          2.1,
-          0.44,
-          length + 0.3,
-          stone,
+        const dressed = arch(
           side * 19,
-          roofY,
-          (stops[j] + stops[j - 1]) / 2,
-          0,
-          root,
-          true,
+          stops[j - 1],
+          side * 19,
+          stops[j],
+          1.25,
         );
-        block(
-          2.32,
-          0.16,
-          length + 0.48,
-          dark,
-          side * 19,
-          roofY + 0.28,
-          (stops[j] + stops[j - 1]) / 2,
+        // Replaced caps consumed two shape/tone seed pairs. Preserve later
+        // stone, column and perch geometry while the new work uses its own seed.
+        serial += 4;
+        arcades.push(
+          buildPalaceArcadeHead(
+            game,
+            root,
+            { stone, plaster, dark },
+            {
+              room: room.index,
+              side,
+              bay: j - 1,
+              az: stops[j - 1],
+              bz: stops[j],
+              spring: plan.spring,
+            },
+            dressed,
+            toneGeometry,
+          ),
         );
       }
     }
@@ -339,6 +347,7 @@ export function buildPalaceArchitecture(game) {
       foundations,
       vaults,
       court,
+      arcades,
       triangles,
       center: new THREE.Vector3(x, base + 6, z),
     });

@@ -21,6 +21,7 @@ import {
 } from "../src/palace-geometry.js";
 import { palaceRoofCellGeometry } from "../src/palace-courts.js";
 import { palaceRoofCells } from "../src/palace-court-plan.js";
+import { arcadeUpperCells } from "../src/palace-arcades.js";
 import { stationSupport, stationBlocked } from "../src/field-station-solids.js";
 import { woodlandLayout, coastalPlantAllowed } from "../src/habitat.js";
 
@@ -72,6 +73,17 @@ test("vault voussoirs and fluted columns are sealed, consistently wound solids w
     assert.ok(g.index.count / 3 < 1500);
     g.dispose();
   }
+});
+
+test("authored arcade fill and coping have closed, outward faces through every stepped profile", () => {
+  for (let room = 0; room < 10; room++)
+    for (const length of [7.5, 9]) {
+      const upper = arcadeUpperCells(room, 1, 0, length, room === 9 ? 7 : 6.2);
+      for (const geometry of [upper.fill, upper.cap]) {
+        inspectSolid(geometry);
+        geometry.dispose();
+      }
+    }
 });
 
 test("new roof cells are closed and their inset skins stay seated on the actual core planes", () => {
@@ -189,8 +201,10 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
       spring = patch.plan.spring;
     assert.ok(patch.root.children.length <= 3, "structure batches by material");
     assert.ok(
-      patch.triangles < 60000,
-      `${patch.triangles} structural triangles`,
+      // Closed gallery heads add at most 960 triangles to an existing court.
+      // Keep a bounded allowance for the new stone and its real silhouettes.
+      patch.triangles < 61000,
+      `${i}: ${patch.triangles} structural triangles`,
     );
     for (const [dx, dz] of [
       [0, 0],
@@ -315,6 +329,54 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
       assert.equal(o.supportable, false);
       assert.equal(game.canMove(o.x, o.z, 0), false);
     }
+    assert.equal(patch.arcades.length, patch.plan.galleries.length * 4);
+    for (const arcade of patch.arcades) {
+      const px = x + arcade.side * 19,
+        pz = z + (arcade.az + arcade.bz) / 2,
+        floor = game.groundHeight(px, pz);
+      assert.equal(stationBlocked(arcade.solid, px, floor, pz), false);
+      assert.equal(
+        stationBlocked(
+          arcade.solid,
+          px,
+          y + spring + arcade.plan.outer + 0.2,
+          pz,
+          0.2,
+          0,
+        ),
+        true,
+      );
+      const oldBearingGap = y + spring + arcade.plan.outer + 0.04,
+        joinRay = new THREE.Raycaster(
+          new THREE.Vector3(px - 2, oldBearingGap, pz),
+          new THREE.Vector3(1, 0, 0),
+          0,
+          4,
+        );
+      assert(
+        joinRay.intersectObject(patch.root, true).length > 0,
+        "delivered stone closes the former gap above the arch crest",
+      );
+      assert(
+        stationBlocked(arcade.solid, px, oldBearingGap, pz, 0.001, 0),
+        "the repaired bearing is physical stone",
+      );
+      ray.ray.origin.set(px, y + 30, pz);
+      const top = ray.intersectObject(patch.root, true)[0];
+      assert(top);
+      assert(
+        Math.abs(top.point.y - stationSupport(arcade.solid, px, pz)) < 1e-5,
+        "gallery roof support matches delivered stone",
+      );
+      assert.equal(
+        game.cameraSurfaces.entry(
+          new THREE.Vector3(px - 2, floor + 2, pz),
+          new THREE.Vector3(px + 2, floor + 2, pz),
+        ),
+        1,
+        "camera crosses the opening below the new upper stone",
+      );
+    }
     const bird = game.palaceBirdPerches[i];
     ray.ray.origin.set(bird.x, bird.y + 0.15, bird.z);
     const hit = ray.intersectObject(patch.root, true)[0];
@@ -335,9 +397,8 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
             Math.sin((a / 24) * Math.PI * 2) *
               ((site.bedLength ?? site.length) / 2 + 0.5);
         assert.ok(
-          !game.obstacles.some(
-            (o) =>
-              Math.abs(px - o.x) < o.w + 0.5 && Math.abs(pz - o.z) < o.d + 0.5,
+          !game.obstacles.some((o) =>
+            stationBlocked(o, px, game.groundHeight(px, pz), pz, 1.8, 0.5),
           ),
           "masonry leaves the water bank free",
         );

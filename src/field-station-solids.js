@@ -87,6 +87,48 @@ export function stationMeshSolid(game, feature, mesh, options = {}) {
   return solid;
 }
 
+// A single broad bound can contain several overlapping closed pieces. Keep
+// their triangle kernels separate so joints represent a union of real stone.
+export function stationAssemblySolid(game, feature, meshes, options = {}) {
+  if (!meshes.length) throw new Error("A masonry assembly needs real meshes");
+  for (const mesh of meshes) mesh.updateWorldMatrix(true, false);
+  const triangles = new TriangleSolids(
+      meshes.map((mesh) => ({
+        geometry: mesh.geometry,
+        matrices: [mesh.matrixWorld],
+      })),
+      { layeredSupport: options.layeredSupport },
+    ),
+    bounds = {
+      min: { x: Infinity, y: Infinity, z: Infinity },
+      max: { x: -Infinity, y: -Infinity, z: -Infinity },
+    };
+  for (const part of triangles.solids)
+    for (const axis of ["x", "y", "z"]) {
+      bounds.min[axis] = Math.min(bounds.min[axis], part.bounds.min[axis]);
+      bounds.max[axis] = Math.max(bounds.max[axis], part.bounds.max[axis]);
+    }
+  const x = (bounds.min.x + bounds.max.x) / 2,
+    z = (bounds.min.z + bounds.max.z) / 2,
+    solid = {
+      x,
+      z,
+      w: (bounds.max.x - bounds.min.x) / 2,
+      d: (bounds.max.z - bounds.min.z) / 2,
+      h: bounds.max.y - game.groundHeight(x, z),
+      fieldStation: feature.id,
+      bodyPadding: options.bodyPadding ?? 0.4,
+      supportRadius: options.supportRadius,
+      supportable: options.support !== false,
+      bodySupport: options.bodySupport !== false,
+      bounds,
+      triangles,
+    };
+  game.obstacles.push(solid);
+  (feature.stationSolids ||= []).push(solid);
+  return solid;
+}
+
 export function stationContains(solid, x, z, padding = 0) {
   if (solid.node && !solid.node.visible) return false;
   if (solid.triangles)
