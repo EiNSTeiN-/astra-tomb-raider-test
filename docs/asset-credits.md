@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [coastal marine sky](coastal-atmosphere.md) adds original procedural cloud
+code in `src/coastal-sky.js` over the existing Three.js daylight sky. Three.js
+attribution below continues to apply. No external asset or dependency was added.
+The two documentation images are actual browser captures, exported losslessly
+with identical decoded pixels and dimensions.
+
 The [coastal furnishing contact repair](coastal-raised-contact.md) uses original
 controller and character-pose code. It adds no external model, texture, recording,
 music or dependency. Existing character, furniture and palace material attribution

@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal marine sky](coastal-atmosphere.md) adds slowly drifting cloud
+  banks and upper wisps while retaining the coastal sunlight and haze settings.
+  All 24 prototype comparisons and fourteen delivered views are reviewed,
+  including two 600-second cloud-clock advances. Player and camera positions
+  and chosen look match the references exactly; sampled High output is finite
+  and Low output is populated with linked shaders. Actual pool immersion hides
+  and restores the sky and exact surface fog/background. Reload and chapter
+  change each release its geometry, material and environment target; the jungle
+  does not receive the coastal shader. Fourteen existing tests and the build
+  pass. Two production keyboard/High and portrait touch/Low scenarios pass eight
+  save comparisons, with all twelve release captures reviewed. All owned
+  verification resources close under the shared five-CPU cap. Broader landscape
+  composition and listening acceptance remain open.
+
 - The [coastal raised-contact repair](coastal-raised-contact.md) matches
   furnishing support to body clearance, plants a resting foot on actual narrow
   treads and carries the torso over that support. Raised crouches fit above

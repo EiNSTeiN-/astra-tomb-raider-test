@@ -3,6 +3,7 @@ import { Sky } from "three/addons/objects/Sky.js";
 import { forgeSky } from "./forge-sky.js";
 import { observatorySky } from "./observatory-sky.js";
 import { cloudCitySky } from "./cloud-city.js";
+import { coastalSky } from "./coastal-sky.js";
 import { stabilizeSunShadow } from "./sun-shadows.js";
 
 export function buildAtmosphere(game) {
@@ -72,17 +73,21 @@ export function buildAtmosphere(game) {
   const volcano = game.level.biome === "volcano";
   const eclipse = game.level.biome === "eclipse";
   const cloudCity = game.level.biome === "sky";
+  const coastal = game.level.biome === "water";
   if (volcano) game.sunOffset.set(-80, 42, 55);
   if (eclipse) game.sunOffset.set(-48, 50, -95);
   if (cloudCity) game.sunOffset.set(-80, 88, -65);
+  if (coastal) game.sunOffset.set(-95, 72, 45);
   const sky = eclipse
     ? observatorySky(game.sunOffset, game.progress)
     : volcano
       ? forgeSky(game.sunOffset)
       : cloudCity
         ? cloudCitySky(game.sunOffset)
-        : new Sky();
-  if (!volcano && !eclipse && !cloudCity) {
+        : coastal
+          ? coastalSky(game.sunOffset)
+          : new Sky();
+  if (!volcano && !eclipse && !cloudCity && !coastal) {
     sky.scale.setScalar(4000);
     sky.frustumCulled = false;
     sky.material.uniforms.turbidity.value = 5.5;
@@ -149,16 +154,8 @@ export function buildAtmosphere(game) {
     game.scene.fog.density = 0.0028;
   }
   if (game.level.biome === "water") {
-    // Calibrate the visible sky and its shared reflection capture together.
-    sky.material.fragmentShader = sky.material.fragmentShader.replace(
-      "gl_FragColor = vec4( retColor, 1.0 );",
-      "gl_FragColor = vec4( retColor * .38, 1.0 );",
-    );
-    game.sunOffset.set(-95, 72, 45);
-    sky.material.uniforms.turbidity.value = 2.6;
-    sky.material.uniforms.rayleigh.value = 2.5;
-    sky.material.uniforms.mieCoefficient.value = 0.004;
-    sky.material.uniforms.sunPosition.value.copy(game.sunOffset).normalize();
+    // The coastal dome supplies the same calibrated radiance to the view
+    // and the shared reflection capture below.
     game.sun.color.set(0xffefd7);
     game.sun.intensity = 2.35;
     const hemisphere = game.scene.children.find(
@@ -233,7 +230,7 @@ export function updateAtmosphere(game, target) {
   stabilizeSunShadow(game.sun);
   game.daylightSky?.position.copy(target);
   if (
-    ["volcano", "eclipse", "sky"].includes(game.level.biome) &&
+    ["volcano", "eclipse", "sky", "water"].includes(game.level.biome) &&
     game.daylightSky
   )
     game.daylightSky.material.uniforms.time.value = game.elapsed;
