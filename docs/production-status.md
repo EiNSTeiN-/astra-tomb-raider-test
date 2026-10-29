@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal ground cover](coastal-groundcover.md) replaces shared short grass
+  with green salt grass, dry seed stems and flowering cushions. The current
+  world places 15,024 rooted plants in 282 batches, with three distance-selected
+  detail tiers. Fourteen selected regressions and the build pass. All thirty
+  matched High/Low court views and nineteen planted-ground/route views pass
+  and are reviewed. The independent observer clears all 2,874,720 root records
+  against delivered terrain triangles; the highest root stays 23.17 mm buried.
+  Six assisted local walking legs cover 20.46 m and 309 controller/camera
+  updates without character fading. A restored reload preserves every plant
+  transform and repeats all root checks. All 2,548 tracked plant-resource
+  disposal events fire on reload and again on chapter change; the jungle
+  has no coastal cover. Four built keyboard/High and portrait touch/Low cases
+  pass twelve paused whole-save reload comparisons, with sixteen reviewed
+  release captures and matching model/bundle delivery. All owned verification
+  resources close under the shared five-CPU cap; temporary profiles are gone.
+  Larger bare spaces, repeated side arcades, moving
+  body contact, continuous routes and listening remain open.
+
 - [Coastal court floors](coastal-floors.md) give the ten main palace courts
   separate limestone bonds, dimensions, orientation, color and hydraulic
   mosaics. Placement checks fit the panels within paved dry rear bays, clear

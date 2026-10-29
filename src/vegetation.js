@@ -34,6 +34,10 @@ import { rockGroundHeight } from "./nature-rocks.js";
 import { discoveryFoliageClear } from "./discovery-setting-plan.js";
 import { buildSkyMeadow, updateSkyMeadow } from "./sky-meadow.js";
 import {
+  buildCoastalGroundcover,
+  updateCoastalGroundcover,
+} from "./coastal-groundcover.js";
+import {
   buildSnowGroundcover,
   updateSnowGroundcover,
 } from "./snow-groundcover.js";
@@ -531,6 +535,7 @@ export async function loadNature(game) {
   buildSkyMeadow(game);
   buildMeridianGroundcover(game);
   buildSnowGroundcover(game);
+  buildCoastalGroundcover(game);
   updateNature(game);
   game.renderOnce = true;
 }
@@ -545,6 +550,7 @@ export function updateNature(game, dt = 0) {
   updateSkyMeadow(game, dt);
   updateMeridianGroundcover(game, dt);
   updateSnowGroundcover(game, dt);
+  updateCoastalGroundcover(game, dt);
   for (const patch of game.naturePatches || [])
     updateLodPatch(
       patch,

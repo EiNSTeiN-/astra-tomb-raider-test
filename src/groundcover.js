@@ -67,7 +67,8 @@ export function buildGroundCover(game) {
   game.grassPatches = [];
   game.grassWind = null;
   game.grassRange = null;
-  if (!["jungle", "water"].includes(game.level.biome)) return;
+  // Coastal shoulders use their rooted salt-grass and flowering cushions.
+  if (game.level.biome !== "jungle") return;
   const jungle = game.level.biome === "jungle";
   const rng = random(game.level.seed + 8347);
   const geometries = createGrassGeometries(rng, jungle);

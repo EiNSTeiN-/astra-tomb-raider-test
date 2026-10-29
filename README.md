@@ -4,6 +4,11 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal ground cover](docs/coastal-groundcover.md) adds salt grass,
+seed-bearing stems and flowering cushions beside the palace ruins. Rooted
+clusters replace the shared short grass while leaving routes and working
+lanes clear. Broader court and landscape composition remains under review.
+
 The [coastal floors](docs/coastal-floors.md) now give the ten palace courts
 different limestone bonds, orientations and mosaics tied to their hydraulic
 work. The panels fit the dry rear bays, and fine grout softens at distance.
@@ -871,6 +876,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 - `src/puzzles.js` — eight puzzle state machines, validators, hints, and interfaces.
 - `src/hydraulic-rules.js`, `src/hydraulic-geometry.js`, `src/hydraulic-courts.js` — nine directed cistern circuits, saved measures, physical pumps, conserved water animation and positional machinery sounds.
 - `src/coastal-layout.js`, `src/coastal-floor-plan.js`, `src/coastal-material.js` — palace floor and causeway coverage, authored court bonds and mosaics, filtered slab shading and water-linked ground wetness.
+- `src/coastal-groundcover.js` — rooted salt grass, seed stems and flowering cushions, with reserved working lanes, wind, distance detail and chapter cleanup.
 - `src/thermal-courts.js`, `src/thermal-rules.js` — physical forge regulators, reversible valve circuits, moving shutters, coolant outlets and saved firing patterns.
 - `src/wind-courts.js`, `src/wind-rules.js`, `src/wind-rendering.js`, `src/wind-art.js`, `src/wind-pose.js` — physical wind engines, rotating ducts, airflow traces, fixed bearings, saved channel routes, detailed bronze machinery, instance batches and shared inscriptions. See [wind art notes](docs/wind-art.md), [rendering and ground verification](docs/wind-rendering.md) and [handwheel foot contact](docs/wind-foot-contact.md).
 - `src/resonance-courts.js`, `src/resonance-rules.js` — physical crystal arrays, relational inscriptions, tuning collars, paired tones and recovered memories.

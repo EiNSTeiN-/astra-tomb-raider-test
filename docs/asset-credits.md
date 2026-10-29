@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [coastal ground cover](coastal-groundcover.md) uses original folded leaves,
+stems, attached seed/flower heads and vertex colors in
+`src/coastal-groundcover.js`. Root fitting and instance detail transitions reuse
+the existing project helpers. No external model, texture, dependency, recording
+or music was added. Five intentional documentation images are actual game
+captures; their lossless WebP files preserve exact decoded RGBA pixels and
+dimensions. Existing character, palace and environment attribution below
+continues to apply.
+
 The [coastal court floors](coastal-floors.md) use original authored profiles
 and shader motifs in `src/coastal-floor-plan.js`, `src/coastal-material.js`
 and `src/terrain-material.js`. Their measured designs use the existing

@@ -504,6 +504,7 @@ import {
   updateNature,
 } from "./visuals.js";
 import { disposeSnowGroundcover } from "./snow-groundcover.js";
+import { disposeCoastalGroundcover } from "./coastal-groundcover.js";
 import { disposeDesertGroundcover } from "./desert-groundcover.js";
 
 import {
@@ -851,6 +852,7 @@ export class Adventure {
     this.skyMeadow = null;
     this.meridianGroundcover = null;
     disposeSnowGroundcover(this);
+    disposeCoastalGroundcover(this);
     disposeDesertGroundcover(this);
     this.forestPatches = [];
     this.explored = new Set(this.progress.explored || []);
