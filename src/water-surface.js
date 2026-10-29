@@ -122,7 +122,7 @@ export function waterMaterial(game, site) {
     );
   };
   material.customProgramCacheKey = () =>
-    `vesper-water-4-${ice}-${mountainWater}`;
+    `vesper-water-5-${ice}-${mountainWater}`;
   return material;
 }
 

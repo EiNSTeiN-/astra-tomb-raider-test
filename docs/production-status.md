@@ -19,6 +19,14 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [water ripple revision](water-ripples.md) replaces the coastal crossing
+  pattern with 24 overlapping waves and pixel averaging. Twenty-one selected
+  checks, six half-float filtering cases, ten chapter surface captures and two
+  release swim/dive/save cases pass. Fourteen comparison frames and eight
+  production captures are reviewed. Filtering error falls 97.4–99.6% against
+  supersampled references. The frozen boundary (VA-134) and possible swimmer
+  arm/pillar intersection (VA-135) remain open; software-rendered timing samples
+  do not establish consumer GPU performance.
 - The [coastal horizon](coastal-horizon.md) adds eight eroded limestone islands
   and extends the visible sea beyond the camera's ordinary far limit. Twenty-nine
   selected tests and sixteen reviewed High/Low and elevated captures pass.

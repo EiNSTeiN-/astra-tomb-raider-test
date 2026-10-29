@@ -442,7 +442,7 @@ include browser views, contact checks and keyboard/touch save verification.
 
 High-quality water reflections now [refresh after quick camera changes](docs/water-reflections.md),
 with gradual blending at capture edges to remove geometric patches across the sea.
-Water also has [curved ripples filtered for viewing distance](docs/water-ripples.md),
+Water also has [irregular ripples filtered for viewing distance](docs/water-ripples.md),
 with stronger open seas, calmer reservoirs and quieter crystal pools. The notes
 include matched views, a GPU filtering check and the measured rendering cost.
 The five coastal wells now have [one consistent underwater surface](docs/underwater-surfaces.md),

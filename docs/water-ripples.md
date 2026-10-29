@@ -1,101 +1,120 @@
 # Water ripple detail
 
-Water now has eight differently directed ripple bands with curved crests,
-reducing the long parallel stripes across the sea. The open sea has stronger
-ripples; reservoirs and cisterns use half that strength, and the enclosed
-crystal pools use one quarter. Reflections remain visible through the quieter
-pool surfaces.
+The water uses twenty-four waves with a spread of wavelengths, directions,
+phases and speeds. Their overlapping crests break up the regular crossing
+pattern visible in the previous eight-band surface. Open sea retains the
+strongest ripples; reservoirs use half that strength and the crystal pools
+use one quarter, preserving their quieter reflections.
 
-Small details fade according to their footprint in screen pixels. The same
-filter applies to swimming rings, waterfall impact ripples and the oscillating
-shoreline foam. Foam retains its average brightness as its individual bands
-become too small to resolve. The existing small vertex displacement, water
-levels, drainage, transparency and swimming rules remain in use.
+Each wave uses a signed sinc weight to average its slope across a screen
+pixel. This is the box average of a linear phase in screen space; the world
+projection is approximated locally by its pixel derivatives. Small waves
+therefore lose contrast with distance without an abrupt frequency cutoff.
+The same averaging function handles swimming rings, waterfall impact ripples
+and shoreline foam, using their local phase gradients. Foam retains its mean
+brightness when its pattern becomes too fine to resolve.
+
+The shader adds arithmetic but no texture, geometry, render target or runtime
+dependency. The small vertex displacement, physical swimming surface, water
+levels, drainage and existing reflection system remain in use. This is an
+animated surface treatment, not a fluid simulation.
 
 ## Actual game comparison
 
-The following 1280 × 800 High-quality captures use the same scene, camera and
-water time. The before material comes from published commit `740ebc1`; the
-revised material is switched into the same scene. Six pairs cover the shore,
-a low ocean view and the harbor reservoir on High and Low.
+These 1280 × 800 High-quality images use the same coastal scene, camera and
+animation time. The previous material is from commit `62e552d`; the revised
+material is switched into that same scene. The lossless WebP exports preserve
+the decoded capture pixels and dimensions exactly.
 
-| Before | Revised |
+| Previous | Revised |
 | --- | --- |
-| ![Regular stripes across the sea beside the coral pump](images/water-ripples-before.webp) | ![Varied ripples and a smoother distant sea beside the coral pump](images/water-ripples-after.webp) |
+| ![Regular crossing crests on the sea](images/water-ripples-before.webp) | ![Irregular overlapping waves across the sea](images/water-ripples-after.webp) |
 
-These are in-engine screenshots with the existing HUD and asset attribution.
-The public WebP files preserve the decoded capture pixels exactly. The shader
-adds no texture download, geometry, render target or dependency.
+The comparison covers elevated and low sea views on High and Low, plus two
+later animation samples. All fourteen captured frames were reviewed. The two
+harbor pairs are largely obstructed by architecture, so they do not establish
+reservoir surface coverage; separate chapter and swimming views cover that work.
 
 ## Filtering measurement
 
-The reusable [GPU fixture](../scripts/verify-water-ripples-browser.js) compares
-the actual eight-band shader with the same pattern rendered without filtering.
-Its reference averages 16 × 16 samples for every output pixel. It measures two
-linear slope channels without lighting, reflections or tone mapping; it is a
-spatial-filtering check rather than a score for overall graphics quality.
-Each row below averages two animation times at a different sampling scale.
+The [GPU fixture](../scripts/verify-water-ripples-browser.js) compares the actual
+shader against the same waves without filtering. Its reference averages
+16 × 16 samples per output pixel. It measures two linear slope channels,
+without lighting, reflections or tone mapping, and retains the requirement
+that filtering reduce error by at least 75% in all six cases.
+
+Readback now uses half-float targets. The previous 8-bit target introduced an
+approximately 0.00113 normalized rounding floor, which dominated this shader's
+filtered result. The fixture now detects readback errors and nonfinite results
+as well as shader-link failures. Its temporary targets and renderer are disposed.
 
 | Metres per pixel | Error without filtering | Error with filtering | Reduction |
 | ---: | ---: | ---: | ---: |
-| 0.25 | 0.006668 | 0.001167 | 82.5% |
-| 1 | 0.026615 | 0.001985 | 92.5% |
-| 2 | 0.041164 | 0.002972 | 92.8% |
+| 0.25 | 0.004343 | 0.000113 | 97.4% |
+| 1 | 0.021436 | 0.000121 | 99.4% |
+| 2 | 0.031544 | 0.000127 | 99.6% |
 
-Error is normalized root-mean-square error against the supersampled reference.
-All six cases passed the check requiring at least a 75% reduction. The filter
-uses an approximation to averaging across a pixel and progressively removes
-unresolvable frequencies. The curved wavefronts are procedural shading, not a
-fluid simulation.
+Each row averages times 25 and 26.3 seconds. Error is root-mean-square error
+in the fixture's linear encoded slope channels. These measurements describe
+spatial filtering, not complete graphics quality or motion on every device.
 
 ## Rendering cost
 
-A Radeon 780M browser run held the coastal overview at 1280 × 800, pixel ratio
-1, while the actual game loop continued. Each setting used four-second
-before/after/after/before samples. The table averages the two sample means per
-material version.
+A fixed coastal overview used four alternating previous/current/current/previous
+batches of four timed frames on High. The mean query times were 1782.65 ms for
+the previous shader and 1747.08 ms for the revision, with substantial variation
+within both groups. All sixteen queries completed without a disjoint event.
 
-| Setting | Mean GPU time before | Mean GPU time revised | Change |
-| --- | ---: | ---: | ---: |
-| High | 17.700 ms | 18.620 ms | +5.2% |
-| Low | 7.725 ms | 8.000 ms | +3.5% |
-
-The extra wave and filtering calculations add GPU work. Mean frame intervals
-in these samples were 46.04 → 52.62 ms on High and 18.54 → 18.77 ms on Low.
-These short samples have substantial frame-time variation and describe this
-view and device. They do not establish performance on other hardware or a
-performance improvement. All eight samples used valid GPU queries with zero
-disjoint events and no browser errors or warnings.
+This sandbox uses ANGLE/Vulkan **llvmpipe software rendering**, restricted to
+five CPUs. These short, slow software-rendered samples do not establish consumer
+GPU frame rates or a performance improvement. The revision evaluates more wave
+terms; a hardware-browser performance review remains open.
 
 ## Playable verification
 
-All 488 automated tests passed in 106.2 seconds. The release build passed in
-3.26 seconds with the existing large-chunk advisory, and source formatting
-passed. The six GPU filtering cases and twelve matching game views also passed.
+The twenty-one selected water, diving, horizon and rendering-settings tests
+pass. The release build passes in 4.51 seconds with the existing large-chunk
+advisory. Ten additional captures cover one surface in each of the eight
+chapters, the coastal pool on Balanced, and the frozen comparison. They were
+reviewed; rendered channels were finite, shaders linked, and the browser
+reported no application errors or warnings. The volcanic view shows restored,
+cooled crust. The frozen comparison has zero differing RGBA values.
 
-Inspected surfaces in all eight chapters compiled and rendered. The coastal
-view passed on High, Balanced and Low; the crystal pool used its quieter ripple
-strength. The frozen-water comparison had zero differing RGBA values. Seven
-inspected chapter transitions released their reflection targets. The ice
-comparison's two synchronous pixel reads produced two driver performance
-messages about GPU stalls; the checks reported no application or shader errors.
+The actual public GPU fixture passes all six cases. Source hashes stayed fixed
+through the chapter run. Built-release keyboard/High and portrait touch/Low
+cases swam 1.37 m and 1.25 m, turned the camera, dived to a displayed 31 seconds
+of air and resurfaced. Both finished at 100 health. Each complete local save
+matched after reload except for its play timestamp; persisted settings matched.
+All eight production captures were reviewed.
 
-Release keyboard and portrait touch cases swam 1.70 m and 1.93 m from a prepared
-harbor save, turned the camera, dived until the air indicator reached 31 seconds,
-and surfaced successfully. Both finished at 100 health. Their complete local
-saves matched after reload except for the play timestamp, and the portrait case
-retained its muted setting. The release loaded the expected bundles, exposed
-no development hook and reported no browser errors, warnings or failed assets.
-These short prepared checks verify controls and recovery, not chapter pacing.
+The release served the expected bundles and four matching character-model
+responses, with no development hook, application errors or asset failures.
+Two driver diagnostics reported stalls during synchronous pixel readback.
+Browser and worker affinity stayed within the shared five-CPU allowance. All
+owned browsers, workers and preview servers closed; temporary runtime folders
+were empty after the checks.
 
 ## Remaining scope
 
-The coastline still has schematic banks, and the water retains a flat physical
-swimming surface beneath small visual height changes. The existing reflection
-system captures one nearby surface on High; other surfaces and quality settings
+The physical swimming plane remains flat beneath small visual height changes.
+The frozen chapter's inspected reservoir also has a conspicuous rectangular
+ice boundary against the snow. Its before/after pixels are identical: the
+ripple change neither causes nor repairs that existing composition issue.
+This is recorded as an open finding, VA-134.
+
+![Existing rectangular frozen-water boundary under review](images/water-ripples-frozen-review.webp)
+
+The portrait dive view also shows a possible right-arm intersection with the
+nearby stone support. This remains an open body-clearance review, VA-135;
+the functional swimming and persistence checks do not resolve it.
+
+![Portrait dive beside the harbor pillar, with arm contact under review](images/water-ripples-swim-contact.webp)
+
+High captures one nearby reflected surface; other surfaces and quality settings
 use the sky-color approximation. See [reflection continuity](water-reflections.md).
 
-Modern AAA graphics, approximately one hour of human play per chapter,
-subjective sound and music review, and broader device/browser acceptance remain
-open. [Production status](production-status.md) records the full target, and
-[asset credits](asset-credits.md) preserve the sources of the existing artwork.
+Broader ground and water composition, moving body contact, full-world visual
+coverage, subjective audio review and broader browser/device acceptance remain
+open. There is no minimum chapter duration; AAA is the artistic direction.
+[Production status](production-status.md) records the full target and
+[asset credits](asset-credits.md) retain the existing artwork attribution.

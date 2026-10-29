@@ -3,6 +3,7 @@ import { waterRipples } from "../src/water-ripples.js";
 
 // Disposable GPU fixture: compare the actual ripple shader with a 16x16-sample
 // pixel average. Normal channels are linear, without lighting or tone mapping.
+// Half-float readback keeps 8-bit rounding from dominating the filtered error.
 // This measures spatial filtering, not complete water appearance or frame rate.
 export function verifyWaterRipples() {
   const renderer = new THREE.WebGLRenderer({ antialias: false }),
@@ -43,8 +44,9 @@ export function verifyWaterRipples() {
     mesh.material.uniforms.time.value = time;
     const target = new THREE.WebGLRenderTarget(resolution, resolution, {
         depthBuffer: false,
+        type: THREE.HalfFloatType,
       }),
-      bytes = new Uint8Array(resolution * resolution * 4);
+      bytes = new Uint16Array(resolution * resolution * 4);
     try {
       renderer.setRenderTarget(target);
       renderer.render(scene, camera);
@@ -56,7 +58,9 @@ export function verifyWaterRipples() {
         resolution,
         bytes,
       );
-      return bytes;
+      if (renderer.getContext().getError() !== 0)
+        throw Error("Ripple fixture readback failed");
+      return Float32Array.from(bytes, THREE.DataUtils.fromHalfFloat);
     } finally {
       renderer.setRenderTarget(null);
       target.dispose();
@@ -78,7 +82,7 @@ export function verifyWaterRipples() {
           average /= samples * samples;
           squared += (bytes[(y * size + x) * 4 + channel] - average) ** 2;
         }
-    return Math.sqrt(squared / (size * size * 2)) / 255;
+    return Math.sqrt(squared / (size * size * 2));
   }
   try {
     for (const span of [32, 128, 256])
@@ -87,7 +91,11 @@ export function verifyWaterRipples() {
           row = { span, time, metresPerPixel: span / size };
         for (const mode of Object.keys(shaders))
           row[mode] = error(render(mode, size, span, time), reference);
-        if (row.filtered >= row.unfiltered * 0.25)
+        if (
+          !Number.isFinite(row.filtered) ||
+          !Number.isFinite(row.unfiltered) ||
+          row.filtered >= row.unfiltered * 0.25
+        )
           throw Error(`Ripple filtering failed at ${span} m / ${time} s`);
         results.push(row);
       }

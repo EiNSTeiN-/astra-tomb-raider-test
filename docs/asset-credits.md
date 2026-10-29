@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The [water ripple revision](water-ripples.md) uses original wave-vector and
+pixel-averaging code in `src/water-ripples.js`. It adds no external texture,
+model, recording or dependency. The updated comparison and review images are actual
+browser captures; their lossless exports preserve decoded pixels and dimensions.
+
 The [coastal horizon](coastal-horizon.md) uses original island heightfields and
 shading in `src/coastal-horizon.js`, reusing the existing credited coastal cliff
 texture and water shader. No external asset or dependency was added.
