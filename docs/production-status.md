@@ -19,13 +19,25 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [swimmer-clearance revision](water-ripples.md#swimmer-clearance) repairs
+  VA-135's head/arm intersection at the harbor pillar with stroke and turn
+  clearance, compact treading near masonry and bounded old-save recovery.
+  Twenty-eight selected checks and the build pass. Independent rendered-body
+  inspection finds no embedded vertices in 196 harbor poses; the new model
+  regression covers 640 poses and shallow-bed recovery. The assisted gallery
+  route still completes at full health. Keyboard and touch release cases swim,
+  dive, resurface and preserve the complete save after reload except its play
+  timestamp. All ten release captures are reviewed, including correctly posed
+  paused arrivals. Owned verification resources close under the five-CPU cap.
+  Broader swimming contact remains open.
 - The [frozen ground](water-ripples.md#frozen-ground) replaces four raised,
   rectangular ice sheets with irregular material patches on the actual walking
   terrain. Thirteen selected checks and the release build pass. Twenty High/Low
   and ground-level captures are reviewed. Keyboard and portrait touch release
   cases cross the ice, crouch, jump, land and preserve the complete local save
   after reload, except its play timestamp. All twelve release captures are
-  reviewed. This addresses VA-134; the separate swimmer-arm review remains open.
+  reviewed. This addresses VA-134; the subsequent swimmer-clearance revision
+  addresses the separate harbor-pillar contact.
   The new CC0 material adds three 1K maps; owned verification resources close
   under the shared five-CPU cap.
 - The [water ripple revision](water-ripples.md) replaces the coastal crossing
@@ -33,9 +45,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   checks, six half-float filtering cases, ten chapter surface captures and two
   release swim/dive/save cases pass. Fourteen comparison frames and eight
   production captures are reviewed. Filtering error falls 97.4–99.6% against
-  supersampled references. The possible swimmer arm/pillar intersection (VA-135)
-  remains open; the frozen boundary (VA-134) is addressed by the subsequent
-  ground revision. Software-rendered timing samples do not establish consumer
+  supersampled references. The swimmer arm/pillar intersection (VA-135) and
+  frozen boundary (VA-134) are addressed by the subsequent clearance and
+  ground revisions. Software-rendered timing samples do not establish consumer
   GPU performance.
 - The [coastal horizon](coastal-horizon.md) adds eight eroded limestone islands
   and extends the visible sea beyond the camera's ordinary far limit. Twenty-nine

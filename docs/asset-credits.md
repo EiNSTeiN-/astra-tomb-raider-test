@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [swimmer clearance revision](water-ripples.md#swimmer-clearance) uses original
+controller and character-pose code. It adds no external model, texture, recording,
+music or dependency. Existing character and coastal masonry attribution below
+continues to apply. Its four documentation images are actual browser captures;
+lossless WebP exports preserve decoded pixels and dimensions. The comparison
+uses prepared progress and the follow camera; the revised player moves 10 cm
+away from the pillar during recovery. The touch image uses the built release's
+native controls, with the pause dialog hidden for the photograph.
+
 The [water ripple revision](water-ripples.md) uses original wave-vector and
 pixel-averaging code in `src/water-ripples.js`. It adds no external texture,
 model, recording or dependency. The updated comparison and review images are actual

@@ -156,17 +156,90 @@ the decoded source pixels and dimensions exactly.
 This repairs the observed rectangular boundary in VA-134. Broader mountain
 composition, other routes and moving body contact remain part of the visual audit.
 
+## Swimmer clearance
+
+The harbor-pillar dive view exposed a real body intersection (VA-135). In the
+previous controller, the swimmer's centre cleared the masonry while the prone
+head and arm stroke extended into it. Sixteen animation samples of the delivered
+character measured up to 24.3 cm of penetration into the rendered closed stone
+geometry. Each sample inspected all 48,095 body and equipment vertices,
+independently of the movement collision queries.
+
+The controller now checks the rotated torso, boot and hand reaches before a
+translation or turn. Near a wall, the swimmer draws the arms in and lowers the
+legs into a compact treading pose, provided there is enough room above the bed.
+The fold increases with proximity and eases out when moving away. Air-bell
+breathing and the gallery wheel retain their existing interaction poses.
+On arrival, a saved camera orbit first selects a clear body heading at the
+saved position. If no heading fits, an older save whose extended body already
+occupies masonry searches nearby water, preserving depth and rejecting paths
+that cross a solid with the player centre. This recovery is limited to 1.5 m.
+The swimming pose is initialized before the paused arrival screen renders,
+preventing a temporary standing pose above the water.
+
+| Previous prone stroke | Treading beside the pillar |
+| --- | --- |
+| ![Head and arm intersect the harbor masonry](images/swimmer-clearance-before.webp) | ![Swimmer draws in beside the harbor pillar](images/swimmer-clearance-after.webp) |
+
+These Low-quality inspection views use prepared restored progress, hidden
+guardians and muted sound. The chosen look and animation phase match; recovery
+moves the revised player 10 cm away from the pillar, and the follow camera moves
+with it. They are not identical-camera material comparisons.
+
+Twenty-eight selected swimming, diving and gallery tests pass. The new test
+inspects the actual skinned character at five distances, eight headings and
+sixteen stroke phases (640 poses and over 25 million vertex reads), checks
+accepted turns, retains a saved position when a different heading fits, and
+verifies that recovery from treading does not put the feet through a shallow
+bed. Reinstating centre-only clearance detects the original
+intersection in its positive control.
+
+In the actual harbor scene, sixteen fixed phases, 120 approach frames and sixty
+retreat frames contain zero embedded or nonfinite body/equipment vertices.
+That is 196 poses and 9,426,620 vertex reads against the nearby closed rendered
+components. The approach moves 2.84 m and the retreat returns to the full stroke.
+All three inspection captures were reviewed. These samples establish clearance
+at this pillar, not every possible swimming contact throughout the campaign.
+
+![Full swimming stroke restored after moving away](images/swimmer-clearance-retreat.webp)
+
+The assisted gallery route still breathes in both air bells, operates the wheel,
+passes both gates, recovers the archive and returns to the surface at 100 health.
+Its fixture now turns half a metre farther past the final colonnade pier to
+accommodate the stroke clearance. This is a route regression check, not an
+unassisted chapter playthrough. The release build passes in 5.06 seconds with
+the existing large-chunk advisory. No external asset or dependency is added.
+
+Built-release keyboard/High (1280 × 800) and portrait touch/Low (540 × 900)
+cases swam 1.11 m and 1.12 m, turned, dived to a displayed 31 seconds of air,
+and resurfaced at 100 health. Each complete local save matched after reload
+except for its play timestamp, including position, settings and field progress.
+The cases start from a prepared save and use native controls with muted sound.
+All ten release captures were reviewed, including paused arrivals; dialogs
+were hidden for the photographs. The initial and restored swimming poses
+are placed in the water before active animation resumes.
+
+![Portrait touch dive with the compact swimming pose](images/swimmer-clearance-touch.webp)
+
+The served bundles and four character-model responses matched the delivered
+files, and the development hook was absent. There were no application errors,
+asset failures or application warnings. Three driver diagnostics reported
+stalls during synchronous pixel readback. Browser threads stayed within the
+shared five-CPU allowance; all owned browsers, workers and preview servers
+closed, and the temporary runtime directory was empty. The four public WebP
+exports preserve the source captures' decoded pixels and dimensions exactly.
+
 ## Remaining scope
 
 The physical swimming plane remains flat beneath small visual height changes.
 The former rectangular frozen-water boundary (VA-134) is addressed by the
 frozen-ground revision above.
 
-The portrait dive view also shows a possible right-arm intersection with the
-nearby stone support. This remains an open body-clearance review, VA-135;
-the functional swimming and persistence checks do not resolve it.
+The portrait dive view below records the original right-arm intersection with
+the nearby stone support. The swimmer-clearance revision above addresses that
+observed defect, VA-135; broader moving body contact remains part of the audit.
 
-![Portrait dive beside the harbor pillar, with arm contact under review](images/water-ripples-swim-contact.webp)
+![Historical portrait dive showing the harbor-pillar arm contact](images/water-ripples-swim-contact.webp)
 
 High captures one nearby reflected surface; other surfaces and quality settings
 use the sky-color approximation. See [reflection continuity](water-reflections.md).

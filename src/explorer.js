@@ -20,6 +20,7 @@ import { poseHands, poseFeet } from "./pose.js";
 import { groundExplorer } from "./explorer-grounding.js";
 import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
 import { strideRate } from "./stride.js";
+import { swimCompactAmount, swimCompactLimit } from "./swimmer-clearance.js";
 import { ExplorerVisibility } from "./explorer-visibility.js";
 import { activeWindGrip } from "./wind-pose.js";
 import {
@@ -250,6 +251,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
   if (!game.swimming) {
     rig.bellFloat = undefined;
     rig.wheelBrace = 0;
+    rig.swimCompact = 0;
   }
   if (game.swimming) {
     const p = game.player.position;
@@ -268,11 +270,21 @@ export function animateExplorer(game, dt, moving, sprinting) {
       (rig.wheelBrace || 0) - dt * 5,
     );
     const float = Math.max(rig.bellFloat, rig.wheelBrace);
-    rig.model.rotation.x = 1.25 - 1.13 * float;
-    game.avatar.position.y -= 1.05 * float;
-    const offset = new THREE.Vector3(0, 0, -0.65 * (1 - float)).applyQuaternion(
-      rotation,
+    const required = game.canMove
+      ? Math.min(1, swimCompactAmount(game, p.x, p.y, p.z))
+      : 0;
+    rig.swimCompact = Math.min(
+      game.canMove ? swimCompactLimit(game, p.x, p.y, p.z) : 1,
+      Math.max(required, (rig.swimCompact || 0) - dt * 2),
     );
+    const compact = rig.swimCompact * (1 - float);
+    rig.model.rotation.x = 1.25 - 1.13 * float - 0.75 * compact;
+    game.avatar.position.y -= 1.05 * float + 0.85 * compact;
+    const offset = new THREE.Vector3(
+      0,
+      0,
+      -0.65 * (1 - float) + 0.25 * compact,
+    ).applyQuaternion(rotation);
     game.avatar.position.x = offset.x;
     game.avatar.position.z = offset.z;
     poseHands(
@@ -280,13 +292,18 @@ export function animateExplorer(game, dt, moving, sprinting) {
       [1, -1].map((side, i) => {
         const phase = game.elapsed * 4 + i * Math.PI;
         return point(
-          side * (0.38 + 0.18 * Math.cos(phase)),
+          side *
+            THREE.MathUtils.lerp(0.38 + 0.18 * Math.cos(phase), 0.23, compact),
           THREE.MathUtils.lerp(
-            0.27 + 0.13 * Math.sin(phase),
+            THREE.MathUtils.lerp(0.27 + 0.13 * Math.sin(phase), 0.12, compact),
             0.05 + 0.025 * Math.sin(phase),
             float,
           ),
-          THREE.MathUtils.lerp(0.6 + 0.48 * Math.sin(phase), 0.12, float),
+          THREE.MathUtils.lerp(
+            THREE.MathUtils.lerp(0.6 + 0.48 * Math.sin(phase), 0.25, compact),
+            0.12,
+            float,
+          ),
         );
       }),
     );
@@ -295,8 +312,12 @@ export function animateExplorer(game, dt, moving, sprinting) {
       [1, -1].map((side, i) =>
         point(
           side * 0.12,
-          -0.15 - float + 0.09 * Math.sin(game.elapsed * 7 + i * Math.PI),
-          THREE.MathUtils.lerp(-0.7, 0.1, float),
+          THREE.MathUtils.lerp(
+            -0.15 + 0.09 * Math.sin(game.elapsed * 7 + i * Math.PI),
+            -0.7,
+            compact,
+          ) - float,
+          THREE.MathUtils.lerp(-0.7 + 0.7 * compact, 0.1, float),
         ),
       ),
     );

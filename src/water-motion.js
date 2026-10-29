@@ -2,6 +2,7 @@ import { waterAt } from "./hydrology.js";
 import { waterSplash } from "./water-surface.js";
 import { advanceDiving, resetDiving } from "./diving.js";
 import { galleryFloor } from "./sunken-gallery-layout.js";
+import { canSwimAt, recoverSwimmer, turnSwimmer } from "./swimmer-clearance.js";
 
 export function restoreWaterArrival(game) {
   resetDiving(game);
@@ -25,6 +26,8 @@ export function advanceSwimming(game, input, dt, jump) {
     game.diving = false;
     return false;
   }
+  recoverSwimmer(game);
+  turnSwimmer(game, input, dt);
   if (advanceDiving(game, input, dt, water, jump)) return true;
   if (!game.swimming && p.y > water.y - 0.3) return false;
   if (!game.swimming) {
@@ -43,12 +46,15 @@ export function advanceSwimming(game, input, dt, jump) {
   const moving = Math.hypot(input.x, input.z) > 0.05;
   const speed = game.carrying ? 2.5 : 3.4;
   for (const axis of ["x", "z"]) {
+    // An idle surface swimmer still resets buoyancy once per frame, including
+    // after a held rise stroke. Only duplicate stationary-axis checks are skipped.
+    if (!input[axis] && (moving || axis === "z")) continue;
     const x = p.x + (axis === "x" ? input.x * speed * dt : 0),
       z = p.z + (axis === "z" ? input.z * speed * dt : 0);
     const ground = galleryFloor(game, x, z, p.y),
       nextWater = waterAt(game, x, z, p.y);
     const y = Math.max(ground, nextWater ? nextWater.y - 0.38 : p.y);
-    if (y <= p.y + 0.5 && game.canMove(x, z, y - game.groundHeight(x, z))) {
+    if (y <= p.y + 0.5 && canSwimAt(game, x, y, z)) {
       p.x = x;
       p.z = z;
       p.y = y;
@@ -67,7 +73,6 @@ export function advanceSwimming(game, input, dt, jump) {
   game.coyote = 0;
   game.stamina = Math.min(100, game.stamina + dt * 5);
   if (moving) {
-    game.avatar.rotation.y = Math.atan2(input.x, input.z);
     if ((game.nextSwimStroke || 0) < game.elapsed) {
       waterSplash(game, p, 0.7);
       game.nextSwimStroke = game.elapsed + 0.72;

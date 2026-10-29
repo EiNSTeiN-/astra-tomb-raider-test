@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { waterAt } from "./hydrology.js";
 import { galleryAt, galleryFloor } from "./sunken-gallery-layout.js";
 import { advanceGalleryWheel } from "./gallery-wheel.js";
+import { canSwimAt } from "./swimmer-clearance.js";
 
 export const DIVE_AIR = 32;
 
@@ -44,15 +45,12 @@ export function advanceDiving(game, input, dt, water, rise) {
   for (let i = 0; i < steps; i++) {
     const step = dt / steps;
     for (const axis of ["x", "z"]) {
+      if (!input[axis]) continue;
       const x = p.x + (axis === "x" ? input.x * speed * step : 0);
       const z = p.z + (axis === "z" ? input.z * speed * step : 0);
       const ground = galleryFloor(game, x, z, p.y);
       const next = waterAt(game, x, z, p.y);
-      if (
-        next &&
-        p.y >= ground + 0.35 &&
-        game.canMove(x, z, p.y - game.groundHeight(x, z), 0.8)
-      ) {
+      if (next && p.y >= ground + 0.35 && canSwimAt(game, x, p.y, z)) {
         p.x = x;
         p.z = z;
       }
@@ -63,7 +61,7 @@ export function advanceDiving(game, input, dt, water, rise) {
       ground + 0.4,
       Math.min(current.y - 0.38, p.y + vertical * speed * step),
     );
-    if (game.canMove(p.x, p.z, y - game.groundHeight(p.x, p.z), 0.8)) p.y = y;
+    if (y !== p.y && canSwimAt(game, p.x, y, p.z)) p.y = y;
     if (current.depth < 1.1 || (vertical > 0 && p.y >= current.y - 0.4)) {
       p.y = Math.max(ground, current.y - 0.38);
       game.diving = false;

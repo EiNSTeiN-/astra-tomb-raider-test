@@ -421,6 +421,7 @@ import {
 } from "./field-station-solids.js";
 import { prepareGuardianPatrols } from "./guardian-patrols.js";
 import { resetDiving, divingHint, updateDiveView, DIVE_AIR } from "./diving.js";
+import { recoverSwimmer } from "./swimmer-clearance.js";
 import {
   buildTideArchive,
   updateTideArchive,
@@ -1073,6 +1074,10 @@ export class Adventure {
         this.restoreCamera(next, { yaw: this.yaw, pitch: this.pitch });
         this.save();
       }
+      // Arrival can render while the welcome dialog pauses player updates.
+      // The asynchronously loaded rig needs its swimming pose before then.
+      if (this.assetBatch === batch && this.swimming)
+        animateExplorer(this, 0, false, false);
       batch.seal(results);
       if (this.assetBatch === batch) this.renderOnce = true;
       return batch.ready;
@@ -1895,7 +1900,7 @@ export class Adventure {
       this.audio.noiseHit?.(0.012, 0.18, 800, p);
       playerNoise(this, 16, "landing");
     }
-    if (moving) {
+    if (moving && !this.swimming) {
       const angle = Math.atan2(input.x, input.z),
         delta = angle - this.avatar.rotation.y;
       this.avatar.rotation.y +=
@@ -2198,6 +2203,8 @@ export class Adventure {
         : null;
     this.cameraContactRecovery = null;
     this.avatar.rotation.y = this.yaw + Math.PI;
+    if (recoverSwimmer(this, true))
+      return this.restoreCamera(next, { yaw: this.yaw, pitch: this.pitch });
     this.avatar.visible = true;
     this.rig?.visibility?.set(view.length);
     this.cameraFollowTarget = target.clone();

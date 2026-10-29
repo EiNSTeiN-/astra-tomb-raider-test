@@ -276,7 +276,8 @@ test("the memorial route crosses the bank, breathes in both bells, opens both ga
     [-29, -4.1, 24],
     [-29, -6.3, 24],
     [-29, -6.3, 30],
-    [-29, -6.3, 34],
+    [-29, -6.3, 34.5],
+    [-8, -6.3, 34.5],
     [-8, -6.3, 34],
     [-8, -3.18, 34],
   ])
