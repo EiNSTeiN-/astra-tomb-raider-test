@@ -19,6 +19,31 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal hall furnishings](coastal-furnishings.md) add twenty purpose-specific
+  settings across the ten palace halls: storage, weighing, records, pump work,
+  reserve measures and ceremonial stonework. All twenty-six selected tests and
+  the build pass. Thirty matched High/Low context views preserve feet, camera
+  and chosen look exactly; twenty-four offset views show the furnishings clearly.
+  All eighty-four baseline/context/detail captures are reviewed. An independent
+  actual-render observer clears ninety-six static front-boundary poses across
+  4,617,120 visible character records. Eighty bed-bottom vertices remain buried
+  by at least 120 mm, with identical geometry/color/placement after reload.
+  All ninety-eight tracked geometry/material resources dispose on reload and
+  chapter change; the jungle constructs no palace furnishings. The new settings
+  total 47,372 triangles and ninety render meshes. The isolated palace camera
+  count is 2,143, retaining its 2,600 bound. Forty ordinary walking legs pass
+  over 158.30 m and 2,380 updates with no fading; all sixty route captures are
+  reviewed. All thirty-six hydraulic controls, fifty-four field cases and 139
+  preceding dry source ranges retain access. Both full climbing loops pass
+  over 547.27 m and 7,606 updates with no fading; all 103 captures are reviewed.
+  A predecessor check proves a newly occupied quay-storage pose was formerly
+  legal. Four built keyboard/High and portrait touch/Low cases pass twelve
+  whole-save reload comparisons, with sixteen reviewed release captures and
+  sixteen matching model responses. Both older storage-area saves recover
+  0.75 m with progress and look retained. All owned verification resources close
+  under the shared five-CPU cap; ports are released and the runtime directory
+  is empty. Broader composition, moving/elevated contact and listening remain open.
+
 - [Coastal side arcades](coastal-arcades.md) give thirteen galleries supported
   stone heads, varied coping and blue friezes. Actual generated geometry had
   an approximately 8.2 cm gap between each arch crest and its old cap; all

@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [coastal hall furnishings](coastal-furnishings.md) use original authored
+plans, vessels, furniture, fittings and placement code in
+`src/palace-furnishing-art.js` and `src/palace-furnishings.js`. Existing palace,
+monastery-wood and forge-metal material attribution below applies. Paper,
+rope and part tints use original material colors. Four intentional documentation
+images are actual browser captures; lossless WebP preserves their decoded
+pixels and dimensions. No external asset or dependency was added.
+
 The [coastal side arcades](coastal-arcades.md) use original authored profiles,
 closed stone outlines, recessed backing and frieze placement in
 `src/palace-arcades.js`. The physical assembly helper retains the actual

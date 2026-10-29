@@ -1,4 +1,5 @@
 import { buildStationYards } from "./station-yards.js";
+import { buildPalaceFurnishings } from "./palace-furnishings.js";
 import { FoliageFraming } from "./foliage-framing.js";
 import { buildMonasteryGardens } from "./monastery-gardens.js";
 import { buildDesertForecourts } from "./desert-forecourts.js";
@@ -1046,6 +1047,7 @@ export class Adventure {
     buildDiscoverySettings(this);
     buildMonasteryGardens(this);
     buildDesertForecourts(this);
+    buildPalaceFurnishings(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();
