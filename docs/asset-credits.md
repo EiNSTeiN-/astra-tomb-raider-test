@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [coastal horizon](coastal-horizon.md) uses original island heightfields and
+shading in `src/coastal-horizon.js`, reusing the existing credited coastal cliff
+texture and water shader. No external asset or dependency was added.
+The three documentation images are actual browser captures; their lossless
+exports preserve the exact decoded pixels and dimensions.
+
 The [coastal marine sky](coastal-atmosphere.md) adds original procedural cloud
 code in `src/coastal-sky.js` over the existing Three.js daylight sky. Three.js
 attribution below continues to apply. No external asset or dependency was added.

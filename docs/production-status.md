@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal horizon](coastal-horizon.md) adds eight eroded limestone islands
+  and extends the visible sea beyond the camera's ordinary far limit. Twenty-nine
+  selected tests and sixteen reviewed High/Low and elevated captures pass.
+  Development checks repaired exposed apron edges, a reflection feedback loop
+  and water drawing over the island slopes. Reload and chapter change each release
+  both new geometries and materials exactly once. Keyboard and touch production
+  scenarios pass with eight whole-save reload comparisons and twelve reviewed
+  captures. Broader coastal ground and water composition remain under review.
+
 - The [coastal marine sky](coastal-atmosphere.md) adds slowly drifting cloud
   banks and upper wisps while retaining the coastal sunlight and haze settings.
   All 24 prototype comparisons and fourteen delivered views are reviewed,

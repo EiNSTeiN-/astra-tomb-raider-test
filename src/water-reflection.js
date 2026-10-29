@@ -101,11 +101,13 @@ export class WaterReflection {
     )
       return;
     const saved = game.waterMeshes.map((w) => w.visible),
+      distantSeaVisible = game.coastalSea?.visible,
       avatarVisible = game.avatar.visible,
       coverage = game.rig?.visibility?.uniform,
       savedCoverage = coverage?.value;
     try {
       for (const water of game.waterMeshes) water.visible = false;
+      if (game.coastalSea) game.coastalSea.visible = false;
       game.avatar.visible = true;
       if (coverage) coverage.value = 1;
       this.reflector.position.copy(selected.position);
@@ -126,6 +128,7 @@ export class WaterReflection {
       this.captures++;
     } finally {
       game.waterMeshes.forEach((w, i) => (w.visible = saved[i]));
+      if (game.coastalSea) game.coastalSea.visible = distantSeaVisible;
       game.avatar.visible = avatarVisible;
       if (coverage) coverage.value = savedCoverage;
     }

@@ -25,6 +25,7 @@ import * as THREE from "three";
 import { buildSnowMountains } from "./snow-mountains.js";
 import { buildForgeCaldera } from "./forge-caldera.js";
 import { buildCloudCity } from "./cloud-city.js";
+import { buildCoastalHorizon } from "./coastal-horizon.js";
 import { bridgeCut, bridgeDeckY, bridgeGaps } from "./sky-bridge-rules.js";
 import { waterSites, basinDepression, protectedGround } from "./hydrology.js";
 import { terrainMaterial } from "./terrain-material.js";
@@ -490,6 +491,8 @@ export function buildTerrainSurface(game) {
 export function buildHorizon(game) {
   buildJungleFringe(game);
   game.cloudCity = null;
+  game.coastalHorizon = null;
+  game.coastalSea = null;
   game.desertHorizon = [];
   if (game.level.biome === "desert") {
     buildDesertHorizon(game);
@@ -499,7 +502,11 @@ export function buildHorizon(game) {
     buildCloudCity(game);
     return;
   }
-  if (["jungle", "water", "crystal"].includes(game.level.biome)) return;
+  if (game.level.biome === "water") {
+    buildCoastalHorizon(game);
+    return;
+  }
+  if (["jungle", "crystal"].includes(game.level.biome)) return;
   if (game.level.biome === "snow") {
     buildSnowMountains(game);
     return;

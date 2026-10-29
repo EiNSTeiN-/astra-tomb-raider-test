@@ -139,11 +139,13 @@ export function updateDiveView(game) {
     game.scene.fog.density = 0.065 + Math.min(0.025, depth * 0.003);
     game.scene.background = game.diveView.waterColor;
     if (game.daylightSky) game.daylightSky.visible = false;
+    if (game.coastalHorizon) game.coastalHorizon.visible = false;
   } else if (game.diveView) {
     game.scene.fog.color.copy(game.diveView.color);
     game.scene.fog.density = game.diveView.density;
     game.scene.background = game.diveView.background;
     if (game.daylightSky) game.daylightSky.visible = true;
+    if (game.coastalHorizon) game.coastalHorizon.visible = true;
     game.diveView = null;
   }
 }

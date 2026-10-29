@@ -173,14 +173,17 @@ test("camera immersion restores exact surface atmosphere and dive music retains 
   g.scene.background = background;
   g.scene.fog = new THREE.FogExp2(0x987654, 0.0022);
   g.daylightSky = new THREE.Group();
+  g.coastalHorizon = new THREE.Mesh();
   g.camera = new THREE.PerspectiveCamera();
   g.camera.position.set(0, -3, 0);
   updateDiveView(g);
   assert.equal(g.daylightSky.visible, false);
+  assert.equal(g.coastalHorizon.visible, false);
   assert.ok(g.scene.fog.density > 0.06);
   g.camera.position.y = 1;
   updateDiveView(g);
   assert.equal(g.daylightSky.visible, true);
+  assert.equal(g.coastalHorizon.visible, true);
   assert.equal(g.scene.background, background);
   assert.equal(g.scene.fog.color.getHex(), 0x987654);
   assert.equal(g.scene.fog.density, 0.0022);

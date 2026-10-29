@@ -51,6 +51,7 @@ export function coastalSky(sunPosition) {
   sky.name = "Coastal daylight and marine clouds";
   sky.scale.setScalar(4000);
   sky.frustumCulled = false;
+  sky.renderOrder = -100;
   const { material } = sky;
   material.uniforms.turbidity.value = 2.6;
   material.uniforms.rayleigh.value = 2.5;
