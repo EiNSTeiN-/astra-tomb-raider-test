@@ -17,6 +17,106 @@ import {
   palaceVesselGeometry,
 } from "../src/palace-furnishing-art.js";
 import { stationBlocked, stationSupport } from "../src/field-station-solids.js";
+import { advanceCharacter } from "../src/character-motion.js";
+
+test("retained raised arrivals and walking exits clear neighboring part margins", (t) => {
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
+  const level = LEVELS[3],
+    map = createMap(level),
+    world = new THREE.Group();
+  const g = Object.assign(Object.create(Adventure.prototype), {
+    level,
+    map,
+    world,
+    terrainProfile: createTerrainProfile(map, level),
+    obstacles: [],
+    stoneMat: pbrMaterial("palace-stone"),
+    darkMat: pbrMaterial("palace-stone"),
+    player: new THREE.Group(),
+    audio: { tone() {} },
+  });
+  buildPalaceArchitecture(g);
+  buildPalaceFurnishings(g);
+  try {
+    for (const [x, y, z, court] of [
+      [226.3782612715613, 1.4169456005096435, 49.25472223806066, 1],
+      [365.87466150428384, 2.864167058467865, 48.571796711814876, 2],
+      [86.04252809337632, 3.2873066902160644, 244.7994385538968, 6],
+      [333.8678090271395, 1.3798452727091064, 146.2061759071352, 5],
+    ])
+      for (const crouching of [false, true]) {
+        g.player.position.set(x, y, z);
+        g.jumpY = y - g.groundHeight(x, z);
+        g.crouching = crouching;
+        g.grounded = true;
+        g.velocityY = g.coyote = g.jumpBuffer = 0;
+        g.fallPeak = y;
+        assert(g.canMove(x, z, g.jumpY), "retained arrival begins clear");
+        for (let frame = 0; frame < 120; frame++) {
+          advanceCharacter(g, { x: 0, z: 0 }, 1 / 60);
+          const p = g.player.position;
+          assert(
+            g.canMove(p.x, p.z, g.jumpY),
+            JSON.stringify({
+              start: [x, y, z],
+              crouching,
+              frame,
+              settled: p.toArray(),
+            }),
+          );
+        }
+        assert(
+          g.grounded,
+          "the retained arrival reaches a supported resting point",
+        );
+        const started = g.player.position.clone(),
+          room = g.map.rooms[court];
+        const dx = room.x * 7 - started.x,
+          dz = room.z * 7 - started.z,
+          distance = Math.hypot(dx, dz);
+        for (let frame = 0; frame < 120; frame++) {
+          advanceCharacter(
+            g,
+            { x: (dx / distance) * 4, z: (dz / distance) * 4 },
+            1 / 60,
+          );
+          const p = g.player.position;
+          assert(
+            g.canMove(p.x, p.z, g.jumpY),
+            JSON.stringify({
+              kind: "walking",
+              court,
+              frame,
+              feet: p.toArray(),
+            }),
+          );
+        }
+        assert(
+          Math.hypot(
+            g.player.position.x - started.x,
+            g.player.position.z - started.z,
+          ) > 0.5,
+          "the recovered top retains an ordinary walking exit",
+        );
+      }
+  } finally {
+    const resources = new Set([g.stoneMat, g.darkMat]);
+    world.traverse((o) => {
+      if (o.geometry) resources.add(o.geometry);
+      for (const m of Array.isArray(o.material)
+        ? o.material
+        : o.material
+          ? [o.material]
+          : [])
+        resources.add(m);
+    });
+    for (const resource of resources) resource.dispose();
+  }
+});
 
 function inspectSolid(geometry) {
   const g = geometry.index ? geometry.toNonIndexed() : geometry,

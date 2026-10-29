@@ -113,7 +113,9 @@ export function buildPalaceFurnishings(game) {
         feature = { id: spec.id },
         solid = stationAssemblySolid(game, feature, parts, {
           bodyPadding: 0.65,
-          supportRadius: 0.4,
+          // Match the landing footprint to the side collision margin.
+          // The visible resting foot plants on a real tread within reach.
+          supportRadius: 0.65,
           layeredSupport: true,
         });
       for (const mesh of parts)

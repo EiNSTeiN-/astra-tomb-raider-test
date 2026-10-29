@@ -19,6 +19,25 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal raised-contact repair](coastal-raised-contact.md) matches
+  furnishing support to body clearance, plants a resting foot on actual narrow
+  treads and carries the torso over that support. Raised crouches fit above
+  nearby furniture, and takeoff eases the visual balance offset. The current
+  code passes a 236-pose delivered-character survey, all 69 affected character,
+  terrain, camp and foothold tests, and the production build. A separate
+  controller survey covers 39 roots in both stances and sixteen directions,
+  including stopping. Six built keyboard/High and portrait touch/Low scenarios
+  pass sixteen save comparisons; all 22 release captures are reviewed. Old
+  occupied saves recover 0.75 m with progress and chosen look retained, while
+  elevated jar saves preserve their original positions and complete supported
+  jumps and landings. All 96 original raised browser poses pass across
+  4,617,120 visible body records, with legal grounded roots and no character
+  fading. All 28 contact/render captures are reviewed; High output is finite
+  and four direct Low framebuffer checks pass. The source stays unchanged
+  through the final browser checks. Owned resources close, both preview ports
+  are released and the runtime directory is empty under the shared five-CPU cap.
+  Broader moving contact, world composition and listening acceptance remain open.
+
 - [Coastal hall furnishings](coastal-furnishings.md) add twenty purpose-specific
   settings across the ten palace halls: storage, weighing, records, pump work,
   reserve measures and ceremonial stonework. All twenty-six selected tests and

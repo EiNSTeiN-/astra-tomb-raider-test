@@ -60,7 +60,13 @@ export function lowerBodyProbes(model) {
 // ankle targets and raise the visual pelvis only enough for the clothed knees
 // to clear. The caller bounds this below the ordinary standing origin, so the
 // player's existing standing movement envelope still contains the entire pose.
-export function fitCrouchTerrain(game, pelvis, maximum, applyPelvis) {
+export function fitCrouchTerrain(
+  game,
+  pelvis,
+  maximum,
+  applyPelvis,
+  supportHeight = (x, z) => game.groundHeight(x, z),
+) {
   const rig = game.rig;
   if ((rig.crouchBlend || 0) < 0.05 || maximum <= pelvis) return pelvis;
   if (rig.terrainCrouch?.model !== rig.model)
@@ -74,7 +80,8 @@ export function fitCrouchTerrain(game, pelvis, maximum, applyPelvis) {
   const clear = () => {
     for (const { mesh, index } of probes) {
       mesh.getVertexPosition(index, point).applyMatrix4(mesh.matrixWorld);
-      if (point.y - game.groundHeight(point.x, point.z) < 0.03) return false;
+      const height = supportHeight(point.x, point.z);
+      if (height !== null && point.y - height < 0.03) return false;
     }
     return true;
   };

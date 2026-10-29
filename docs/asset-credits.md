@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [coastal furnishing contact repair](coastal-raised-contact.md) uses original
+controller and character-pose code. It adds no external model, texture, recording,
+music or dependency. Existing character, furniture and palace material attribution
+below continues to apply. Three intentional documentation images are actual
+browser captures; their lossless WebP exports preserve exact decoded pixels and
+dimensions.
+
 The [coastal hall furnishings](coastal-furnishings.md) use original authored
 plans, vessels, furniture, fittings and placement code in
 `src/palace-furnishing-art.js` and `src/palace-furnishings.js`. Existing palace,

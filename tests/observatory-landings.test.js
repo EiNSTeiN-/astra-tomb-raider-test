@@ -143,7 +143,7 @@ function jumpToCorner(game, room, column, sx = 1, sz = 1) {
   return { start, target, arrived, peak };
 }
 
-test("reachable column corners catch ordinary jumps on real masonry, while removing their support reproduces the former fall-through", (t) => {
+test("reachable column corners catch ordinary jumps on real masonry and safely fall to soil when support is removed", (t) => {
   const game = fixture(t);
   let reached = 0,
     checked = 0;
@@ -172,17 +172,36 @@ test("reachable column corners catch ordinary jumps on real masonry, while remov
   const trial = jumpToCorner(game, 9, 0),
     p = game.player.position;
   assert(trial.arrived && game.grounded);
-  assert.equal(game.canMove(p.x, p.z, game.jumpY), false);
+  // Removing support still disables the cap, but descending side contact now
+  // moves the body clear before it reaches soil instead of leaving it embedded.
+  assert(game.canMove(p.x, p.z, game.jumpY));
+  assert.equal(game.jumpY, 0);
+  assert.equal(game.canMove(trial.target.x, trial.target.z, 0), false);
   const base = game.observatories[9].stationSolids.find(
       (s) => s.observatoryPart === "column-0-base",
     ),
-    physical = base.triangles.support(p.x, p.z, Infinity, 0)?.height;
+    physical = base.triangles.support(
+      trial.target.x,
+      trial.target.z,
+      Infinity,
+      0,
+    )?.height,
+    soil = game.groundHeight(trial.target.x, trial.target.z);
   assert(
-    physical - p.y > 0.75,
-    "negative control reproduces a foot beneath the delivered cap",
+    physical - soil > 0.75,
+    "the disabled cap still covers the original landing target",
+  );
+  assert.equal(
+    stationSupport(base, trial.target.x, trial.target.z, Infinity, 0.55),
+    null,
+  );
+  assert.equal(supportAt(game, p.x, p.z, p.y, 0.55).surface, null);
+  assert(
+    Math.hypot(p.x - trial.target.x, p.z - trial.target.z) > 0.55,
+    "the unsupported fall clears the cap's body margin",
   );
   t.diagnostic(
-    JSON.stringify({ checked, reached, negativeControlDepth: physical - p.y }),
+    JSON.stringify({ checked, reached, unsupportedLanding: p.toArray() }),
   );
 });
 

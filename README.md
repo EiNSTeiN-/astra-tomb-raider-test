@@ -4,6 +4,12 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal furnishing contact repair](docs/coastal-raised-contact.md) aligns
+landing support with body clearance, plants a resting foot on real narrow
+treads, balances the torso above that support and fits crouched clothing above
+raised furniture. All 96 recorded browser poses and six production input/save
+scenarios pass; broader moving contact and world composition remain under review.
+
 The [coastal hall furnishings](docs/coastal-furnishings.md) add storage jars,
 weighing equipment, record tables, pump fittings and ceremonial stonework to
 the ten palace halls. Each hall has a distinct pair of authored settings,

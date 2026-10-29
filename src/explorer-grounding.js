@@ -1,3 +1,4 @@
+import { restingFoothold } from "./explorer-foothold.js";
 import * as THREE from "three";
 import { supportAt } from "./character-motion.js";
 import { poseFeet } from "./pose.js";
@@ -156,6 +157,29 @@ function updateSkin(game) {
   game.rig.model.updateMatrixWorld(true);
 }
 
+function applyBalanceOffset(game, state) {
+  const root = game.player.position;
+  // The visual weight shift must also fit a clear standing body at this height.
+  let balanceClear = state.balance.lengthSq() < 1e-8;
+  for (let attempt = 0; !balanceClear && attempt < 6; attempt++) {
+    const x = root.x + state.balance.x,
+      z = root.z + state.balance.z;
+    if (game.canMove(x, z, root.y - game.groundHeight(x, z))) {
+      balanceClear = true;
+      break;
+    }
+    state.balance.multiplyScalar(0.5);
+  }
+  if (!balanceClear) state.balance.set(0, 0, 0);
+  const localBalance = state.balance
+    .clone()
+    .applyQuaternion(
+      game.avatar.parent.getWorldQuaternion(new THREE.Quaternion()).invert(),
+    );
+  game.avatar.position.x = localBalance.x;
+  game.avatar.position.z = localBalance.z;
+}
+
 // Visual only: support queries share the character controller's decks and
 // platforms, but this never changes its capsule, velocity or persistent position.
 export function groundExplorer(game, dt, moving, sprinting) {
@@ -173,6 +197,19 @@ export function groundExplorer(game, dt, moving, sprinting) {
     if (rig.grounding) {
       rig.grounding.active = false;
       rig.grounding.previous = null;
+      if (rig.grounding.balance) {
+        if (
+          !game.grounded &&
+          !game.swimming &&
+          !game.climb &&
+          !game.ropeRide &&
+          !game.zipRide &&
+          !game.dodge
+        ) {
+          rig.grounding.balance.multiplyScalar(Math.exp(-14 * dt));
+          applyBalanceOffset(game, rig.grounding);
+        } else rig.grounding.balance.set(0, 0, 0);
+      }
     }
     return false;
   }
@@ -234,6 +271,46 @@ export function groundExplorer(game, dt, moving, sprinting) {
       ? result
       : null;
   };
+  let plant = null;
+  if (
+    !moving &&
+    bodySupport.surface?.triangles &&
+    !bodySupport.surface.groundingSlope
+  ) {
+    const old = state.plant,
+      oldAnkle = old?.foot.bone.getWorldPosition(new THREE.Vector3());
+    if (
+      old &&
+      Math.hypot(old.point.x - oldAnkle.x, old.point.z - oldAnkle.z) <= 0.55 &&
+      old.surface === bodySupport.surface &&
+      Math.hypot(root.x - old.root.x, root.z - old.root.z) < 0.02 &&
+      Math.abs(old.facing.dot(facing)) > 0.9995 &&
+      support(old.point.x, old.point.z)
+    ) {
+      plant = old;
+    } else {
+      let distance = 0.55 * 0.55;
+      for (const foot of state.feet) {
+        const ankle = foot.bone.getWorldPosition(new THREE.Vector3());
+        const tread = restingFoothold(bodySupport.surface, ankle, root.y);
+        if (!tread) continue;
+        const { point, normal } = tread;
+        const d = (point.x - ankle.x) ** 2 + (point.z - ankle.z) ** 2;
+        if (d < distance) {
+          distance = d;
+          plant = {
+            foot,
+            point,
+            normal,
+            root: root.clone(),
+            facing: facing.clone(),
+            surface: bodySupport.surface,
+          };
+        }
+      }
+    }
+  }
+  state.plant = plant;
   const plans = state.feet.map((foot) => {
     const points = probes(foot),
       ankle = foot.bone.getWorldPosition(new THREE.Vector3());
@@ -251,7 +328,27 @@ export function groundExplorer(game, dt, moving, sprinting) {
       local.z * (state.stride - 1) + crouch * (moving ? 0.14 + recovery : 0),
     ).applyQuaternion(facing);
     ankle.add(offset);
+    if (foot === plant?.foot) {
+      const dx = plant.point.x - ankle.x,
+        dz = plant.point.z - ankle.z;
+      if (Math.hypot(dx, dz) <= 0.55) {
+        offset.x += dx;
+        offset.z += dz;
+        ankle.x += dx;
+        ankle.z += dz;
+      }
+    }
+
     const rotation = foot.bone.getWorldQuaternion(new THREE.Quaternion());
+    if (foot === plant?.foot) {
+      rotation.premultiply(
+        new THREE.Quaternion().setFromUnitVectors(
+          footPlane(points)?.normal || UP,
+          plant.normal,
+        ),
+      );
+      setWorldRotation(foot.bone, rotation);
+    }
     const center = support(ankle.x, ankle.z);
     const samples = [
       support(ankle.x - 0.12, ankle.z),
@@ -259,7 +356,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       support(ankle.x, ankle.z - 0.12),
       support(ankle.x, ankle.z + 0.12),
     ];
-    if (center && samples.every(Boolean)) {
+    if (foot !== plant?.foot && center && samples.every(Boolean)) {
       const normal = terrainSoleNormal(
         points.map((point) => point.clone().add(offset)),
         support,
@@ -285,6 +382,17 @@ export function groundExplorer(game, dt, moving, sprinting) {
       const floor = support(p.x, p.z);
       return floor ? [p.y - floor.height] : [];
     });
+    if (foot === plant?.foot && !clearances.length) {
+      const low = foot.clearanceIndices
+        .filter((i) => foot.shoe.geometry.attributes.position.getY(i) <= 0.025)
+        .map(
+          (i) =>
+            foot.shoe
+              .getVertexPosition(i, new THREE.Vector3())
+              .applyMatrix4(foot.shoe.matrixWorld).y,
+        );
+      clearances.push(Math.min(...low) - plant.point.y);
+    }
     const valid = clearances.length > 0;
     const shift = valid
       ? THREE.MathUtils.clamp(
@@ -295,6 +403,31 @@ export function groundExplorer(game, dt, moving, sprinting) {
       : 0;
     return { foot, ankle, rotation, lift, valid, center, shift };
   });
+  // On a narrow tread, carry the visual hips over the planted ankle instead
+  // of leaving the torso suspended beside it. Preserve both targets on a
+  // broad top; the free leg follows the weight shift with a small knee bend.
+  const supported = plans.filter((p) => p.valid && p.center);
+  const balance = new THREE.Vector3();
+  if (plant && supported.length === 1) {
+    const hips = rig.model.getObjectByName("mixamorigHips");
+    if (hips) {
+      const hip = hips.getWorldPosition(new THREE.Vector3());
+      balance.set(plant.point.x - hip.x, 0, plant.point.z - hip.z);
+      const distance = balance.length();
+      if (distance > 0.06)
+        balance.multiplyScalar(Math.min(0.6, distance - 0.06) / distance);
+      else balance.set(0, 0, 0);
+    }
+  }
+  if (!state.balance) state.balance = balance.clone();
+  else state.balance.lerp(balance, 1 - Math.exp(-14 * dt));
+  applyBalanceOffset(game, state);
+  for (const plan of plans)
+    if (!supported.includes(plan)) {
+      plan.ankle.add(state.balance);
+      if (plant && supported.length === 1) plan.ankle.y += 0.12;
+    }
+  updateSkin(game);
   let pelvis = Math.max(-0.3, Math.min(0, ...plans.map((p) => p.shift)));
   // Longer steps need room to extend. Lower only the visual pelvis enough for
   // the existing leg lengths to reach the ankle targets, preserving sole lift.
@@ -323,6 +456,9 @@ export function groundExplorer(game, dt, moving, sprinting) {
         THREE.MathUtils.lerp(state.pelvis, pelvis, 1 - Math.exp(-20 * dt)),
       );
   const drop = (rig.crouchBlend || 0) * CROUCH_DROP,
+    crouchSupport = bodySupport.surface
+      ? (x, z) => support(x, z)?.height ?? null
+      : (x, z) => game.groundHeight(x, z),
     ankleTargets = plans.map((p) =>
       p.ankle.clone().add(new THREE.Vector3(0, p.shift, 0)),
     ),
@@ -333,7 +469,13 @@ export function groundExplorer(game, dt, moving, sprinting) {
       updateSkin(game);
     };
   applyPelvis(state.pelvis);
-  state.pelvis = fitCrouchTerrain(game, state.pelvis, drop, applyPelvis);
+  state.pelvis = fitCrouchTerrain(
+    game,
+    state.pelvis,
+    drop,
+    applyPelvis,
+    crouchSupport,
+  );
   // Re-solving a deeply bent leg can shift the posed sole slightly from its
   // planned clearance. Check the delivered sole after IK, then fit the knees
   // again if an ankle needs lifting. Keep this bounded and visual only.
@@ -356,7 +498,13 @@ export function groundExplorer(game, dt, moving, sprinting) {
     }
     if (!adjusted) break;
     applyPelvis(state.pelvis);
-    state.pelvis = fitCrouchTerrain(game, state.pelvis, drop, applyPelvis);
+    state.pelvis = fitCrouchTerrain(
+      game,
+      state.pelvis,
+      drop,
+      applyPelvis,
+      crouchSupport,
+    );
   }
   state.active = true;
   state.contacts = plans.map((p) => {

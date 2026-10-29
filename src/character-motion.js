@@ -94,6 +94,13 @@ export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
 // A taper or overhead cap can enter the body during vertical motion after its
 // horizontal move was clear. Resolve an edge contact sideways; a broad ceiling
 // stops upward motion. Neither contact creates a floor on a steep side.
+function narrowSupport(o) {
+  return (
+    o?.fieldStation &&
+    Number.isFinite(o.supportRadius) &&
+    o.supportRadius < (o.bodyPadding ?? 0.4)
+  );
+}
 function clearStationVerticalMotion(game, before) {
   if (clearCampVerticalContact(game, before)) return;
   const p = game.player.position;
@@ -104,19 +111,13 @@ function clearStationVerticalMotion(game, before) {
       !stationBlocked(o, p.x, before, p.z),
   );
   if (!contacts.length) return;
-  // An exact-footprint cap releases support at its visible edge. Clear the
-  // same body margin used by its side collision before descending beside it.
+  // A descending body can meet a neighboring part after leaving a cap.
+  // Clear the same margin used by its side collision before settling beside it.
   const limit = Math.max(
     0.2,
     ...contacts.map((o) => {
-      if (o.supportRadius !== 0 || p.y >= before) return 0.2;
-      const padding = o.bodyPadding ?? 0.4,
-        top = o.triangles?.layeredSupport
-          ? o.triangles.support(p.x, p.z, before, padding, 0.65)?.height
-          : o.bounds.max.y;
-      return o.groundingSlope || (top !== undefined && before >= top - 0.015)
-        ? padding + 0.02
-        : 0.2;
+      if (!o.triangles || p.y >= before) return 0.2;
+      return (o.bodyPadding ?? 0.4) + 0.02;
     }),
   );
   for (let radius = 0.02; radius <= limit + 1e-6; radius += 0.02) {
@@ -215,8 +216,7 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
       // down first would put the cylinder into its edge. The contact resolver
       // clears that margin before settling on the lower surface below.
       return game.grounded &&
-        here.surface?.fieldStation &&
-        here.surface.supportRadius === 0 &&
+        narrowSupport(here.surface) &&
         settled < y &&
         clear(y)
         ? y
@@ -248,7 +248,11 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
       NATURE_BODY_RADIUS,
     );
     if (game.grounded) {
-      if (support.height >= p.y - 0.42 && support.height <= p.y + 0.45)
+      if (
+        support.height >= p.y - 0.42 &&
+        support.height <= p.y + 0.45 &&
+        game.canMove(p.x, p.z, support.height - game.groundHeight(p.x, p.z))
+      )
         p.y = support.height;
       else {
         game.grounded = false;
@@ -275,12 +279,11 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
     }
     const leavingExactFloor =
       wasGrounded &&
-      here.surface?.fieldStation &&
-      here.surface.supportRadius === 0 &&
+      narrowSupport(here.surface) &&
       support.surface !== here.surface;
     if ((!wasGrounded || leavingExactFloor) && p.y !== before) {
       clearStationVerticalMotion(game, before);
-      if (leavingExactFloor && game.grounded) {
+      if (game.grounded) {
         const next = supportAt(game, p.x, p.z, p.y + 0.25, NATURE_BODY_RADIUS);
         if (
           next.height >= p.y - 0.42 &&

@@ -1,3 +1,4 @@
+import { buildPalaceArchitecture } from "../src/palace-architecture.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { NodeIO } from "@gltf-transform/core";
@@ -12,14 +13,190 @@ import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { terrainTriangleReader } from "../scripts/inspect-desert-groundcover-browser.js";
 import { buildDesertForecourts } from "../src/desert-forecourts.js";
+import { buildPalaceFurnishings } from "../src/palace-furnishings.js";
+import { pbrMaterial } from "../src/visuals.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { followClearCamera } from "../src/camera-follow.js";
 import { inspectExplorerCamera } from "../scripts/inspect-explorer-camera-browser.js";
+import { strideSoles, sampleStrideSoles } from "../scripts/inspect-stride.js";
 import { CROUCH_DROP } from "../src/stealth.js";
 import {
   closedMeshReader,
+  closedComponentMeshes,
   inspectExplorerSolids,
 } from "../scripts/inspect-explorer-solids-browser.js";
+
+test("delivered boots and crouched clothing clear the recorded raised coastal furnishings", async (t) => {
+  const s = await actorAndTerrain(t, false, false, 3),
+    g = s.game;
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
+  g.world = new THREE.Group();
+  g.stoneMat = pbrMaterial("palace-stone");
+  g.darkMat = pbrMaterial("palace-stone");
+  g.cameraSurfaces = new CameraSurfaces(g.world);
+  buildPalaceArchitecture(g);
+  buildPalaceFurnishings(g);
+  g.canMove = Adventure.prototype.canMove.bind(g);
+  g.walkable = Adventure.prototype.walkable.bind(g);
+  let closed;
+  try {
+    const poses = [
+      ...[
+        [2, 0, 333.95747190662365, 1.9910324305295943, 48.7994385538968],
+        [2, 1, 366.04252809337635, 2.864167058467865, 48.7994385538968],
+      ].flatMap((point) =>
+        [0, Math.PI].flatMap((angle) =>
+          [false, true].map((crouch) => [...point, angle, crouch]),
+        ),
+      ),
+      ...[false, true].map((crouch) => [
+        0,
+        0,
+        53.95747190662368,
+        3.0327229738235473,
+        48.7994385538968,
+        0,
+        crouch,
+      ]),
+      [0, 1, 85.2813988575222, 2.4578115582466125, 48.48213383233072, 0, true],
+      [
+        4,
+        0,
+        194.71860114247778,
+        0.9970656219869852,
+        146.4821338323307,
+        0,
+        true,
+      ],
+      [5, 0, 334.1552261222109, 1.390359842777252, 146.7695509274021, 0, true],
+      [
+        5,
+        0,
+        334.1552261222109,
+        1.390359842777252,
+        146.7695509274021,
+        Math.PI,
+        true,
+      ],
+      [
+        6,
+        1,
+        86.46792415104545,
+        3.2873066902160644,
+        244.66145959129904,
+        0,
+        true,
+      ],
+      ...[
+        [3, 0, 53.75971769103647, 2.8235890892568962, 146.82932618039152],
+        [7, 1, 226.60590311364325, 2.403062844276428, 245.08685564896817],
+      ].flatMap((point) =>
+        [0, Math.PI].flatMap((angle) =>
+          [false, true].map((crouch) => [...point, angle, crouch]),
+        ),
+      ),
+    ];
+    for (const [court, wall, x, y, z, angle, crouch] of poses) {
+      closed?.dispose();
+      const meshes = [];
+      g.palaceFurnishings[court].settings[wall].root.traverse((m) => {
+        if (m.isMesh) meshes.push(m);
+      });
+      closed = closedComponentMeshes(meshes);
+      const read = closedMeshReader(closed.meshes);
+      g.player.position.set(x, y, z);
+      g.jumpY = y - g.groundHeight(x, z);
+      g.avatar.rotation.set(0, angle + Math.PI, 0);
+      g.rig.mixer.stopAllAction();
+      g.rig.actions.Idle.reset().play();
+      g.rig.state = "Idle";
+      g.rig.grounding = undefined;
+      g.rig.crouchBlend = 0;
+      for (const stance of [crouch, !crouch]) {
+        g.crouching = stance;
+        for (let frame = 0; frame < 45; frame++)
+          animateExplorer(g, 1 / 60, false, false);
+      }
+      g.crouching = crouch;
+      for (let frame = 0; frame < 60; frame++)
+        animateExplorer(g, 1 / 60, false, false);
+      const ray = new THREE.Raycaster(),
+        setting = g.palaceFurnishings[court].settings[wall];
+      const gaps = sampleStrideSoles(strideSoles(g.rig.model)).map((points) =>
+        Math.min(
+          ...points.map((point) => {
+            ray.set(
+              point.clone().add(new THREE.Vector3(0, 0.45, 0)),
+              new THREE.Vector3(0, -1, 0),
+            );
+            const hit = ray.intersectObject(setting.root, true)[0];
+            assert(
+              hit,
+              "a furnishing surface remains beneath each sampled sole",
+            );
+            return point.y - hit.point.y;
+          }),
+        ),
+      );
+      assert(
+        Math.min(...gaps) <= 0.03,
+        `both resting boots hover: ${JSON.stringify({ court, angle, crouch, gaps, contacts: g.rig.grounding.contacts, ankles: g.rig.grounding.feet.map((f) => f.bone.getWorldPosition(new THREE.Vector3()).toArray()) })}`,
+      );
+      assert(
+        gaps.every((gap) => gap >= -0.015),
+        "soles cannot enter the delivered furniture",
+      );
+      if (court === 2) {
+        const hip = g.rig.model
+            .getObjectByName("mixamorigHips")
+            .getWorldPosition(new THREE.Vector3()),
+          planted = g.rig.grounding.plant.foot.bone.getWorldPosition(
+            new THREE.Vector3(),
+          );
+        assert(
+          Math.hypot(hip.x - planted.x, hip.z - planted.z) < 0.11,
+          "the archive resting stance carries its hips over the supporting boot",
+        );
+      }
+      const report = inspectExplorerSolids(g, read);
+      assert(report.samples > 48000);
+      assert.equal(report.invalid, 0);
+      assert.equal(report.embedded, 0, JSON.stringify(report.witnesses));
+      assert(
+        g.avatar.position.y <= 1e-9,
+        "preserve the standing movement envelope",
+      );
+      assert.deepEqual(
+        g.player.position.toArray(),
+        [x, y, z],
+        "visual fitting cannot move the root",
+      );
+      if (court === 2 && wall === 1 && angle === 0 && !crouch) {
+        const hips = g.rig.model.getObjectByName("mixamorigHips"),
+          before = hips.getWorldPosition(new THREE.Vector3());
+        g.velocityY = 0;
+        advanceCharacter(g, { x: 0, z: 0 }, 1 / 60, true);
+        animateExplorer(g, 1 / 60, false, false);
+        const after = hips.getWorldPosition(new THREE.Vector3());
+        assert(
+          Math.hypot(after.x - before.x, after.z - before.z) < 0.15,
+          "takeoff eases the visual weight shift instead of snapping sideways",
+        );
+        g.grounded = true;
+        g.velocityY = 0;
+      }
+    }
+  } finally {
+    closed?.dispose();
+    g.stoneMat.dispose();
+    g.darkMat.dispose();
+    s.dispose();
+  }
+});
 
 async function actorAndTerrain(
   t,
