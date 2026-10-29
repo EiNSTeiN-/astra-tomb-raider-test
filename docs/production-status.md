@@ -19,14 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [frozen ground](water-ripples.md#frozen-ground) replaces four raised,
+  rectangular ice sheets with irregular material patches on the actual walking
+  terrain. Thirteen selected checks and the release build pass. Twenty High/Low
+  and ground-level captures are reviewed. Keyboard and portrait touch release
+  cases cross the ice, crouch, jump, land and preserve the complete local save
+  after reload, except its play timestamp. All twelve release captures are
+  reviewed. This addresses VA-134; the separate swimmer-arm review remains open.
+  The new CC0 material adds three 1K maps; owned verification resources close
+  under the shared five-CPU cap.
 - The [water ripple revision](water-ripples.md) replaces the coastal crossing
   pattern with 24 overlapping waves and pixel averaging. Twenty-one selected
   checks, six half-float filtering cases, ten chapter surface captures and two
   release swim/dive/save cases pass. Fourteen comparison frames and eight
   production captures are reviewed. Filtering error falls 97.4–99.6% against
-  supersampled references. The frozen boundary (VA-134) and possible swimmer
-  arm/pillar intersection (VA-135) remain open; software-rendered timing samples
-  do not establish consumer GPU performance.
+  supersampled references. The possible swimmer arm/pillar intersection (VA-135)
+  remains open; the frozen boundary (VA-134) is addressed by the subsequent
+  ground revision. Software-rendered timing samples do not establish consumer
+  GPU performance.
 - The [coastal horizon](coastal-horizon.md) adds eight eroded limestone islands
   and extends the visible sea beyond the camera's ordinary far limit. Twenty-nine
   selected tests and sixteen reviewed High/Low and elevated captures pass.

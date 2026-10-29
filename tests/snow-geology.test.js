@@ -73,7 +73,7 @@ test("snow banks retain monastery footings, working pads, ice edges and moving s
     for (let x = 154; x < 200; x += 0.9)
       if (shutterFoundationDistance(x, z) < 2) unchanged(x, z, "wind house");
 });
-test("snow terrain chunks share positions, normals and exposure without adding triangles or maps", async (t) => {
+test("snow terrain chunks share positions, normals and exposure without adding triangles", async (t) => {
   t.mock.method(THREE.TextureLoader.prototype, "load", (url, onLoad) => {
     const texture = new THREE.Texture();
     queueMicrotask(() => onLoad?.(texture));
@@ -108,7 +108,10 @@ test("snow terrain chunks share positions, normals and exposure without adding t
   }
   assert.equal(triangles, 2 * (profile.width - 1) ** 2);
   const material = g.terrainMeshes[0].material;
-  assert.deepEqual(material.defines, { TERRAIN_SNOW: 1 });
-  assert.equal(material.userData.additionalTextures.length, 6);
+  assert.deepEqual(material.defines, {
+    TERRAIN_SNOW: 1,
+    FROZEN_PATCH_COUNT: profile.waters.filter((s) => s.kind === "ice").length,
+  });
+  assert.equal(material.userData.additionalTextures.length, 9);
   material.dispose();
 });

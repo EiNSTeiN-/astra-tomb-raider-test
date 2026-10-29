@@ -1,0 +1,44 @@
+[
+  {
+    "asset": "Ice002",
+    "source": "https://ambientcg.com/view?id=Ice002",
+    "license": "CC0-1.0",
+    "license_url": "https://docs.ambientcg.com/license/",
+    "resolution": "1K",
+    "url": "https://ambientcg.com/get?file=Ice002_1K-JPG.zip",
+    "resolved_url": "https://acg-download.struffelproductions.com/file/ambientCG-Web/download/Ice002_CxUSojOZ/Ice002_1K-JPG.zip",
+    "archive_member": "Ice002_1K-JPG_Color.jpg",
+    "file": "public/assets/textures/ice-color.jpg",
+    "bytes": 1081720,
+    "sha256": "9aa010f0fa4e01a982e593eb5b06f82671acc9023a67d9451bbc94cacd7ef44c",
+    "modifications": "None; unmodified source JPEG. Scale and tint applied by runtime shader."
+  },
+  {
+    "asset": "Ice002",
+    "source": "https://ambientcg.com/view?id=Ice002",
+    "license": "CC0-1.0",
+    "license_url": "https://docs.ambientcg.com/license/",
+    "resolution": "1K",
+    "url": "https://ambientcg.com/get?file=Ice002_1K-JPG.zip",
+    "resolved_url": "https://acg-download.struffelproductions.com/file/ambientCG-Web/download/Ice002_CxUSojOZ/Ice002_1K-JPG.zip",
+    "archive_member": "Ice002_1K-JPG_NormalGL.jpg",
+    "file": "public/assets/textures/ice-normal.jpg",
+    "bytes": 1277023,
+    "sha256": "f2c190e341fede5bec99c86757529e4df387dba8a1ab8127bcc85b7ed528a018",
+    "modifications": "None; unmodified source JPEG. Scale and tint applied by runtime shader."
+  },
+  {
+    "asset": "Ice002",
+    "source": "https://ambientcg.com/view?id=Ice002",
+    "license": "CC0-1.0",
+    "license_url": "https://docs.ambientcg.com/license/",
+    "resolution": "1K",
+    "url": "https://ambientcg.com/get?file=Ice002_1K-JPG.zip",
+    "resolved_url": "https://acg-download.struffelproductions.com/file/ambientCG-Web/download/Ice002_CxUSojOZ/Ice002_1K-JPG.zip",
+    "archive_member": "Ice002_1K-JPG_Roughness.jpg",
+    "file": "public/assets/textures/ice-roughness.jpg",
+    "bytes": 467557,
+    "sha256": "52a806348c7ddb23f201e4c1fc677e33914f0921ba7253163533daee3c4de121",
+    "modifications": "None; unmodified source JPEG. Scale and tint applied by runtime shader."
+  }
+]

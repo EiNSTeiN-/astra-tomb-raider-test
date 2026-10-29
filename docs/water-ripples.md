@@ -72,6 +72,10 @@ terms; a hardware-browser performance review remains open.
 
 ## Playable verification
 
+The following results describe the ripple milestone `13e6315`, before the
+frozen-ground revision below. In particular, its identical frozen comparison
+is historical evidence; the ice material has since changed.
+
 The twenty-one selected water, diving, horizon and rendering-settings tests
 pass. The release build passes in 4.51 seconds with the existing large-chunk
 advisory. Ten additional captures cover one surface in each of the eight
@@ -94,15 +98,69 @@ Browser and worker affinity stayed within the shared five-CPU allowance. All
 owned browsers, workers and preview servers closed; temporary runtime folders
 were empty after the checks.
 
+## Frozen ground
+
+The mountain chapter's four ice patches now share the terrain's actual walking
+triangles. Previously, separate 15 m square planes sat 25 mm above their
+centres and exposed straight edges against the snow. The new shader shapes
+uneven, differently oriented patches and fades them at the snow margin, on
+steep ground and where the terrain rises away from the frozen pool. It adds
+no displacement, obstacle or swimming volume.
+
+Color, normal and roughness detail comes from ambientCG's CC0 **Ice 002**
+procedural material. The runtime shader softens its contrast and normal strength;
+all three delivered 1K JPEG maps retain their original pixels. They add
+2,826,300 downloaded bytes and approximately 16 MiB of GPU texture storage
+with RGBA8 mipmaps. These maps load only for terrain with frozen patches and
+are registered with the existing terrain texture disposal path. Four separate
+ice meshes are removed. No consumer-GPU frame-rate claim is based on this work.
+
+| Previous flat sheet | Ice on the walking terrain |
+| --- | --- |
+| ![Straight rectangular ice edge beside the monastery](images/frozen-ground-before.webp) | ![Frosted ice with a soft irregular edge](images/frozen-ground-after.webp) |
+
+The comparison reconstructs the preceding ice planes in the current scene and
+alternates them with the new ground material at the same camera and time.
+It uses prepared restored progress, muted sound and hidden guardians. All
+sixteen High/Low overview frames and four ground-level approaches were reviewed.
+Each rendered finite output with linked shaders; Low output was populated.
+The second patch's overview has a nearby snow bank in the foreground, with
+the ice still visible. These inspection views do not demonstrate traversal.
+
+![Ground-level approach to the frozen patch](images/frozen-ground-approach.webp)
+
+Thirteen selected terrain and water tests pass. A downward ray against the
+rendered geometry agrees with walking support at twenty sampled ice positions;
+reintroducing an old sheet detects its greater-than-20 mm gap. Frozen patches
+remain outside the swimming query, and terrain heights are unchanged. The
+release build passes in 3.87 seconds with the existing large-chunk advisory.
+
+Built-release keyboard/High (1280 × 800) and portrait touch/Low (540 × 900)
+cases walked 3.97 m and 4.80 m across the first patch. Both crouched, turned,
+jumped and landed at 100 health. After reload, each complete local save matched
+except for its play timestamp, including settings and prepared field progress.
+These checks start from a prepared restored save and use native controls;
+they do not represent an unassisted chapter playthrough. All twelve release
+captures were reviewed, with the pause dialog hidden for the photographs.
+
+![Portrait touch controls on the frozen ground](images/frozen-ground-touch.webp)
+
+The served bundles matched the release build and four character-model responses
+matched the delivered file. The production development hook was absent. There
+were no application errors, failed asset requests or application warnings; two
+driver messages reported stalls during synchronous pixel readback. Browser
+threads stayed within the shared five-CPU allowance. The browsers, workers and
+preview servers closed after verification. The four public WebP images preserve
+the decoded source pixels and dimensions exactly.
+
+This repairs the observed rectangular boundary in VA-134. Broader mountain
+composition, other routes and moving body contact remain part of the visual audit.
+
 ## Remaining scope
 
 The physical swimming plane remains flat beneath small visual height changes.
-The frozen chapter's inspected reservoir also has a conspicuous rectangular
-ice boundary against the snow. Its before/after pixels are identical: the
-ripple change neither causes nor repairs that existing composition issue.
-This is recorded as an open finding, VA-134.
-
-![Existing rectangular frozen-water boundary under review](images/water-ripples-frozen-review.webp)
+The former rectangular frozen-water boundary (VA-134) is addressed by the
+frozen-ground revision above.
 
 The portrait dive view also shows a possible right-arm intersection with the
 nearby stone support. This remains an open body-clearance review, VA-135;

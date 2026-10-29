@@ -205,7 +205,9 @@ export function createWaterSurface(game, site) {
 }
 export function buildWaterSurfaces(game) {
   for (const site of game.terrainProfile.waters.filter(
-    (s) => s.fall === undefined,
+    // Frozen meltwater is shaded on the walking terrain. A separate flat ice
+    // plane would bridge uneven snow and expose a rectangular raised edge.
+    (s) => s.fall === undefined && s.kind !== "ice",
   ))
     createWaterSurface(game, site);
   for (const site of game.terrainProfile.waters.filter(

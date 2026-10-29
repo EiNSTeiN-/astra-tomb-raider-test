@@ -445,6 +445,8 @@ with gradual blending at capture edges to remove geometric patches across the se
 Water also has [irregular ripples filtered for viewing distance](docs/water-ripples.md),
 with stronger open seas, calmer reservoirs and quieter crystal pools. The notes
 include matched views, a GPU filtering check and the measured rendering cost.
+The mountain chapter's [frozen patches now share the walking terrain](docs/water-ripples.md#frozen-ground),
+with frosted detail and irregular snow margins replacing raised rectangular sheets.
 The five coastal wells now have [one consistent underwater surface](docs/underwater-surfaces.md),
 removing the extra ocean sheet that obscured their floors and archive cases.
 The coastal sluices also have [masonry foundations fitted to the well floors](docs/sluice-foundations.md),

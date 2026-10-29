@@ -1509,3 +1509,19 @@ the heart apse uses its follow camera, both with prepared restored progress,
 hidden guardians and muted sound. The remaining images show the current built
 interface: a paused occupied-display recovery with its pause modal hidden, and
 the portrait tuning controls.
+
+The [frozen ground](water-ripples.md#frozen-ground) uses the color, OpenGL normal
+and roughness maps from [Ice 002 by ambientCG](https://ambientcg.com/view?id=Ice002),
+a procedural material distributed under
+[CC0 1.0 Universal](https://docs.ambientcg.com/license/).
+The three 1K JPEG files are unmodified; the game shader controls their tint,
+scale and blending into snow. [The source manifest](../asset-sources/frozen-ground/sources.json)
+records archive members, delivery paths, byte lengths and SHA-256 checksums;
+[the license record](../asset-sources/frozen-ground/LICENSE.md) accompanies it.
+No external model, recording, music or dependency is added.
+Four frozen-ground documentation images are actual game captures, exported as
+lossless WebP with identical decoded pixels and dimensions. The previous/current
+pair switches the old flat planes and new terrain shading at the same observer
+camera and time; the approach uses the follow camera with prepared progress.
+The portrait image shows the built release after native touch movement, with
+its pause dialog hidden for the photograph.

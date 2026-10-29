@@ -5,6 +5,13 @@ import {
   snowRoughness,
 } from "./snow-terrain-material.js";
 import {
+  frozenGroundUniforms,
+  frozenDeclarations,
+  frozenColor,
+  frozenRoughness,
+  frozenNormal,
+} from "./frozen-ground.js";
+import {
   cavernTerrainDeclarations,
   cavernTerrainColor,
   cavernTerrainNormal,
@@ -84,6 +91,7 @@ ${meridianDeclarations}
 ${cavernTerrainDeclarations}
 ${crystalFloorDeclarations}
 ${snowDeclarations}
+${frozenDeclarations}
 `;
 
 const colorLayer = /* glsl */ `
@@ -148,6 +156,7 @@ terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 ${coastalAlbedo}
 ${skyTerrainAlbedo}
 ${crystalFloorColor}
+${frozenColor}
 diffuseColor.rgb *= terrainAlbedo * mix(.87, 1.04, terrainNoise(vTerrainPosition.xz * .013));
 `;
 
@@ -175,6 +184,7 @@ terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
 ${crystalFloorRoughness}
 float roughnessFactor = roughness * clamp(terrainRough, .42, 1.0);
+${frozenRoughness}
 `;
 
 const normalHelper = /* glsl */ `
@@ -213,6 +223,7 @@ terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
 #endif
 ${skyGroundNormal}
 ${crystalFloorNormal}
+${frozenNormal}
 normal = terrainN;
 `;
 
@@ -307,7 +318,18 @@ export function terrainMaterial(game) {
               : 0.86,
     },
   };
-  if (biome === "snow") material.defines = { TERRAIN_SNOW: 1 };
+  if (biome === "snow") {
+    material.defines = { TERRAIN_SNOW: 1 };
+    const frozen = frozenGroundUniforms(game.terrainProfile?.waters || []);
+    if (frozen.frozenCenters.value.length) {
+      material.defines.FROZEN_PATCH_COUNT = frozen.frozenCenters.value.length;
+      Object.assign(uniforms, frozen, {
+        frozenMap: { value: load("ice", "color") },
+        frozenNormalMap: { value: load("ice", "normal") },
+        frozenRoughnessMap: { value: load("ice", "roughness") },
+      });
+    }
+  }
   if (biome === "desert") material.defines = { TERRAIN_DESERT: 1 };
   if (biome === "crystal") {
     material.defines = { TERRAIN_CAVERN: 1 };
@@ -395,6 +417,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${biome === "crystal" ? 10 : ["snow", "eclipse"].includes(biome) ? 9 : ["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : biome === "eclipse" ? 9 : ["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
   return material;
 }
