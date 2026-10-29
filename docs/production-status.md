@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Coastal court floors](coastal-floors.md) give the ten main palace courts
+  separate limestone bonds, dimensions, orientation, color and hydraulic
+  mosaics. Placement checks fit the panels within paved dry rear bays, clear
+  of columns and walls. All six coastal regressions and the build pass.
+  Thirty final High/Low panel and aisle views plus two matched predecessor
+  views pass shader, finite-output, grounding, legal-position and visibility
+  checks; all 32 captures are reviewed. The quay and Queen comparisons hold
+  feet, camera and chosen look fixed while changing the terrain material.
+  Four built keyboard/High and portrait touch/Low cases pass twelve paused
+  whole-save reload comparisons, with sixteen reviewed release captures.
+  Older occupied saves recover 0.75 m with progress and chosen look retained.
+  Delivered model responses and release bundles match the final build.
+  Owned resources close and temporary browser directories are removed under
+  the shared five-CPU allowance.
+  Four lossless documentation images retain exact decoded pixels. Wider
+  side arcades, sparse scenery, moving contact and listening remain open.
+
 - [Coastal follow framing](coastal-camera-framing.md) lowers the recorded
   doorway return view and harbor-tablet landing by trying moderate sideways
   views before larger upward detours. The matched controller replay preserves

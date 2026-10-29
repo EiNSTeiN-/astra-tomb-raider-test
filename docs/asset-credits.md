@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [coastal court floors](coastal-floors.md) use original authored profiles
+and shader motifs in `src/coastal-floor-plan.js`, `src/coastal-material.js`
+and `src/terrain-material.js`. Their measured designs use the existing
+hydraulic capacities. They reuse the credited palace stone and mosaic maps;
+no external asset, dependency, recording or music was added. Four intentional
+documentation images are actual browser captures. Their lossless WebP files
+preserve exact decoded RGBA pixels and dimensions. Existing character,
+architecture and environmental attribution below applies.
+
 The [coastal follow-camera framing](coastal-camera-framing.md) adapts the
 project's original nearby-view search in `src/camera-follow.js`. Its comparison
 captures use the existing attributed character, palace and environmental art.

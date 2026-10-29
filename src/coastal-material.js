@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import {
+  coastalFloorUniforms,
+  coastalFloorDeclarations,
+} from "./coastal-floor-plan.js";
 
 export const coastalDeclarations = /* glsl */ `
 #ifdef TERRAIN_COASTAL
@@ -6,26 +10,32 @@ varying vec3 vCoastal;
 uniform vec4 coastalBasins[COASTAL_BASIN_COUNT];
 uniform float coastalWaterHeight[COASTAL_BASIN_COUNT];
 uniform sampler2D coastalSlabMap, coastalSlabNormal, coastalSlabRoughness;
+${coastalFloorDeclarations}
 
-vec3 coastalStone(vec2 p) {
-  vec2 uv = p / vec2(1.45, .96);
-  uv.x += mod(floor(uv.y), 2.0) * .5;
-  vec2 cell = floor(uv), f = fract(uv);
-  vec2 edge = min(f, 1.0-f) * vec2(1.45, .96);
-  float d = min(edge.x, edge.y);
-  float worn = terrainNoise(p * 7.0) * .008;
+vec3 coastalStone(vec2 p,vec4 profile) {
+  vec2 size=profile.xy,uv=p/size;
+  if(profile.w<.5)uv.x+=mod(floor(uv.y),2.0)*.5;
+  vec2 cell=floor(uv),f=fract(uv);
+  if(profile.w>1.5){
+    vec2 block=floor(p/size.x),q=fract(p/size.x);
+    if(mod(block.x+block.y,2.0)<1.0)q=q.yx;
+    uv=q*vec2(3.0,1.0);cell=block*3.0+floor(uv);f=fract(uv);size=vec2(size.x/3.0,size.x);
+  }
+  vec2 edge=min(f,1.0-f)*size;
+  float d=min(edge.x,edge.y),worn=terrainNoise(p*7.0)*.008;
   float footprint=max(length(dFdx(p)),length(dFdy(p)));
-  float pixelWidth=max(.003,footprint*.45);
-  float farStone=smoothstep(.2,.65,footprint);
+  float pixelWidth=max(.003,footprint*.45),farStone=smoothstep(.2,.65,footprint);
   float joint=mix(1.0-smoothstep(.019-pixelWidth,.019+pixelWidth,d-worn),.064,farStone);
-  return vec3(joint, mix(smoothstep(.014,.058,d-worn),1.0,farStone), terrainHash(cell));
+  return vec3(joint,mix(smoothstep(.014,.058,d-worn),1.0,farStone),terrainHash(cell));
 }
 
 float coastalTessera(vec2 p) {
   vec2 f=fract(p/.095);
   float edge=min(min(f.x,1.0-f.x),min(f.y,1.0-f.y));
   float aa=max(.01, fwidth(edge));
-  return smoothstep(.045-aa,.075+aa,edge);
+  float coverage=smoothstep(.045-aa,.075+aa,edge);
+  float footprint=max(length(dFdx(p)),length(dFdy(p)))/.095;
+  return mix(coverage,.85,smoothstep(.8,2.0,footprint));
 }
 #endif
 `;
@@ -40,37 +50,57 @@ export const coastalCliffCoordinates = /* glsl */ `
 
 export const coastalColor = /* glsl */ `
 #ifdef TERRAIN_COASTAL
-  vec2 cp = vCoastal.xy;
-  float courtIndex = floor(vCoastal.z+.5);
-  vec3 slab = coastalStone(vTerrainPosition.xz);
-  float breakage = terrainNoise(vTerrainPosition.xz * .19 + vec2(8,31));
-  float burial = smoothstep(.65,.88,breakage) * .38;
-  pavingWeight = smoothstep(.05,.8, vCourt - burial);
-  // Broad worn limestone slabs sit beneath the surviving tessellated inlays.
-  vec3 limestone = texture2D(coastalSlabMap,vTerrainPosition.xz/2.7).rgb;
-  vec3 slabColor = limestone * (.55+.22*slab.z) * mix(1.0,.32,slab.x);
-  slabColor *= vec3(.89,.95,.92);
-  float frame = min(20.0-abs(cp.x),21.0-abs(cp.y));
-  float border = (1.0-smoothstep(.6,.85,abs(frame-1.0)))
-    * smoothstep(-.2,.4,frame);
-  float along = abs(cp.x)>abs(cp.y) ? cp.y : cp.x;
-  float braidA = abs((frame-1.0)-sin(along*1.7+courtIndex)*.36);
-  float braidB = abs((frame-1.0)+sin(along*1.7+courtIndex)*.36);
-  float braid = 1.0-smoothstep(.08,.15,min(braidA,braidB));
-  vec2 center=vec2(8.5,mod(courtIndex,3.0)<1.0 ? -15.0 : 6.5);
-  vec2 medallionPoint=cp-center;
-  float radius=length(medallionPoint), angle=atan(medallionPoint.y,medallionPoint.x);
-  float medallion=1.0-smoothstep(3.15,3.3,radius);
-  float petals=sin(angle*(6.0+2.0*mod(courtIndex,3.0))+radius*1.6);
-  float motif=1.0-smoothstep(.12,.23,abs(radius-(1.65+.53*petals)));
-  motif=max(motif,1.0-smoothstep(.055,.14,abs(radius-2.9)));
-  motif=max(motif,1.0-smoothstep(.45,.57,radius));
-  float pattern=mix(braid,motif,medallion);
-  vec3 mosaic=mix(vec3(.055,.16,.17),vec3(.46,.47,.37),pattern);
+  // Fragment world coordinates keep room identity stable at terrain seams.
+  vec4 floorFrame=coastalCourtFrames[0],tileProfile=coastalFloorTiles[0];
+  vec3 stoneTint=coastalFloorStone[0],floorMeasures=coastalFloorMeasures[0];
+  vec4 panelProfile=coastalFloorPanels[0];
+  float closestCourt=1.0e12;
+  for(int i=0;i<COASTAL_COURT_COUNT;i++){
+    vec2 delta=vTerrainPosition.xz-coastalCourtFrames[i].xy;
+    float distanceSquared=dot(delta,delta);
+    if(distanceSquared<closestCourt){
+      closestCourt=distanceSquared;floorFrame=coastalCourtFrames[i];
+      tileProfile=coastalFloorTiles[i];stoneTint=coastalFloorStone[i];floorMeasures=coastalFloorMeasures[i];
+      panelProfile=coastalFloorPanels[i];
+    }
+  }
+  vec2 cp=vTerrainPosition.xz-floorFrame.xy;
+  float courtIndex=floorFrame.z;
+  float floorBlend=1.0-smoothstep(22.0,26.0,max(abs(cp.x),abs(cp.y)));
+  mat2 floorTurn=mat2(cos(tileProfile.z),sin(tileProfile.z),-sin(tileProfile.z),cos(tileProfile.z));
+  vec2 floorPoint=floorTurn*cp;
+  vec3 baseSlab=coastalStone(vTerrainPosition.xz,vec4(1.45,.96,0,0));
+  vec3 courtSlab=coastalStone(floorPoint,tileProfile);
+  vec3 slab=mix(baseSlab,courtSlab,floorBlend);
+  vec2 baseStoneUv=vTerrainPosition.xz/2.7,floorStoneUv=floorPoint/2.7;
+  float breakage=terrainNoise(vTerrainPosition.xz*.19+vec2(8,31));
+  float floorEdge=min(20.0-abs(cp.x),21.0-abs(cp.y));
+  float edgeWear=1.0-smoothstep(1.0,5.0,floorEdge);
+  float burial=smoothstep(.61,.85,breakage)*(.18+edgeWear*.45);
+  pavingWeight=smoothstep(.05,.8,vCourt-burial);
+  vec3 limestone=mix(texture2D(coastalSlabMap,baseStoneUv).rgb,
+    texture2D(coastalSlabMap,floorStoneUv).rgb,floorBlend);
+  vec3 slabColor=limestone*(.55+.22*slab.z)*mix(1.0,.32,slab.x);
+  slabColor*=mix(vec3(.89,.95,.92),stoneTint,floorBlend);
+  float aa=max(.012,(fwidth(cp.x)+fwidth(cp.y))*.55);
+  float border=(1.0-smoothstep(.6,.85,abs(floorEdge-1.0)))*smoothstep(-.2,.4,floorEdge);
+  float along=abs(cp.x)>abs(cp.y)?cp.y:cp.x;
+  float braidA=abs((floorEdge-1.0)-sin(along*1.7+courtIndex)*.36);
+  float braidB=abs((floorEdge-1.0)+sin(along*1.7+courtIndex)*.36);
+  float braid=1.0-smoothstep(.08,.15,min(braidA,braidB));
+  vec2 panelPoint=cp-panelProfile.xy;
+  float panelRadius=panelProfile.z;
+  float panel=1.0-smoothstep(panelRadius,panelRadius+.16,length(panelPoint));
+  if(courtIndex>1.5&&courtIndex<3.5)panel=1.0-smoothstep(-.1,.12,coastalRect(panelPoint,vec2(3.0,3.05)));
+  float motif=coastalMotif(panelPoint*panelProfile.w,courtIndex,floorMeasures,aa*panelProfile.w);
+  float pattern=mix(braid,motif,panel);
+  vec3 accent=mix(vec3(.46,.47,.37),vec3(.57,.47,.32),mod(courtIndex,3.0)<1.5?.38:0.0);
+  vec3 mosaic=mix(vec3(.055,.16,.17),accent,pattern);
   mosaic*=.8+.35*terrainHash(floor(vTerrainPosition.xz/.095));
   mosaic*=mix(.42,1.0,coastalTessera(vTerrainPosition.xz));
-  float ornament=max(border,medallion);
-  ornament*=1.0-smoothstep(.55,.77,breakage + terrainNoise(vTerrainPosition.xz*1.6)*.1);
+  float ornament=max(border,panel)*floorBlend;
+  float erosion=1.0-smoothstep(.58,.8,breakage+terrainNoise(vTerrainPosition.xz*1.6)*.1);
+  ornament*=mix(erosion,.72+.28*erosion,panel);
   pavingColor=mix(slabColor,mosaic,ornament);
   earthColor*=vec3(.53,.58,.52);
   // Paving belongs to the level courts. Exposed banks use their own rock maps
@@ -107,14 +137,14 @@ export const coastalAlbedo = /* glsl */ `
 export const coastalNormal = /* glsl */ `
 #ifdef TERRAIN_COASTAL
   // Geometric tile bevels in the normal response, with no collision displacement.
-  float slabHeight=coastalStone(vTerrainPosition.xz).y * .014;
+  float slabHeight=slab.y*.014;
   vec3 q0=dFdx(-vViewPosition),q1=dFdy(-vViewPosition);
   vec3 r1=cross(q1,normal),r2=cross(normal,q0);
   float determinant=dot(q0,r1);
   vec3 gradient=sign(determinant)*(dFdx(slabHeight)*r1+dFdy(slabHeight)*r2);
   vec3 bevelN=normalize(max(.000001,abs(determinant))*normal-gradient);
-  vec3 slabN=terrainSurfaceNormal(texture2D(coastalSlabNormal,vTerrainPosition.xz/2.7).xyz,
-    vTerrainPosition.xz/2.7,normal,.4);
+  vec3 slabN=normalize(mix(terrainSurfaceNormal(texture2D(coastalSlabNormal,baseStoneUv).xyz,baseStoneUv,normal,.4),
+    terrainSurfaceNormal(texture2D(coastalSlabNormal,floorStoneUv).xyz,floorStoneUv,normal,.4),floorBlend));
   pavingN=normalize(mix(slabN,pavingN,ornament));
   pavingN=normalize(mix(pavingN,bevelN,.6*(1.0-ornament)));
   earthN=normalize(mix(normal,earthN,.3));
@@ -123,6 +153,7 @@ export const coastalNormal = /* glsl */ `
 
 export function coastalUniforms(game) {
   return {
+    ...coastalFloorUniforms(game),
     coastalBasins: {
       value: game.terrainProfile.waters.map(
         (w) => new THREE.Vector4(w.x, w.z, w.width / 2, w.length / 2),

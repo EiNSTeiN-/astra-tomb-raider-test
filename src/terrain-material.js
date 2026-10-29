@@ -158,7 +158,7 @@ float terrainRough = mix(texture2D(roughnessMap, earthUv).g,
 terrainRough = mix(terrainRough, .92, trailWeight);
 terrainRough = mix(terrainRough, texture2D(pavingRoughness, pavingUv).g, pavingWeight);
 #ifdef TERRAIN_COASTAL
-terrainRough=mix(terrainRough,mix(texture2D(coastalSlabRoughness,vTerrainPosition.xz/2.7).g,
+terrainRough=mix(terrainRough,mix(mix(texture2D(coastalSlabRoughness,baseStoneUv).g,texture2D(coastalSlabRoughness,floorStoneUv).g,floorBlend),
   .94,slab.x),pavingWeight*(1.0-ornament));
 #endif
 float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
@@ -353,6 +353,7 @@ export function terrainMaterial(game) {
     material.defines = {
       TERRAIN_COASTAL: 1,
       COASTAL_BASIN_COUNT: game.terrainProfile.waters.length,
+      COASTAL_COURT_COUNT: game.terrainProfile.coastal.rooms.length,
     };
     Object.assign(uniforms, coastalUniforms(game), {
       coastalSlabMap: { value: load("palace-stone", "color") },

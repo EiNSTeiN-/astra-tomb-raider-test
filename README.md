@@ -4,6 +4,11 @@ An original, browser-based third-person archaeological adventure built with Thre
 
 **Current milestone: a playable campaign prototype.** All eight chapters and their completion flow are implemented. The map is revealed as you explore, and surveyed areas persist. The current target is a polished, rich and visually interesting playable world, with no observed placement or geometry defects across the eight chapters. There is no minimum chapter duration; AAA is an artistic direction rather than a required benchmark. The complete visual audit is still in progress. See [the production status](docs/production-status.md) for the current requirements, evidence, and remaining work.
 
+The [coastal floors](docs/coastal-floors.md) now give the ten palace courts
+different limestone bonds, orientations and mosaics tied to their hydraulic
+work. The panels fit the dry rear bays, and fine grout softens at distance.
+Wider side arcades and surrounding scenery remain under review.
+
 The [coastal follow camera](docs/coastal-camera-framing.md) now tries clear
 sideways views before steep upward detours, lowering the recorded tablet
 landing and doorway return views while preserving the chosen look. Local
@@ -793,7 +798,7 @@ The coastal chapter’s third field mission now repairs [the coral pump](docs/co
 
 Nine hydraulic circuits now occupy those palace courts, with 27 open cisterns, turning handwheels, overhead pipes, floating gauges and visible water transfers. Different capacities and check valves lead to a final one-way circuit. Physical pumps and focused controls share saved quantities and selected sources; the tablet activates each balanced receiver. Pump and falling-water sounds follow their machinery and fade with distance beneath the quiet palace score. [Hydraulic court notes](docs/hydraulic-courts.md) include the nine measures, browser views, movement checks and measured audio falloff.
 
-Limestone paving now extends across the palace floors and follows the actual causeways. Worn teal mosaic borders and floral medallions distinguish the courts, and the ground's wet staining follows draining reservoirs. Revised coastal daylight gives the arcades clearer shadows; thin grout detail softens at distance. [Coastal ground notes](docs/coastal-ground.md) include before/after views, drainage checks and rendering limits.
+Limestone paving extends across the palace floors and follows the actual causeways. Worn teal borders and ten authored mosaics accompany different court bonds and stone dimensions; the ground's wet staining follows draining reservoirs. Coastal daylight gives the arcades clear shadows, and thin grout detail softens at distance. [Coastal ground notes](docs/coastal-ground.md) record coverage and drainage, while the [floor compositions](docs/coastal-floors.md) show the newer court designs and review limits.
 
 Steep coastal well banks now use natural rock, with separate marble maps for
 the level courts. [Coastal bank comparisons](docs/coastal-banks.md) show the
@@ -865,7 +870,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 - `src/journal.js` — 96 chapter-specific narrative discoveries.
 - `src/puzzles.js` — eight puzzle state machines, validators, hints, and interfaces.
 - `src/hydraulic-rules.js`, `src/hydraulic-geometry.js`, `src/hydraulic-courts.js` — nine directed cistern circuits, saved measures, physical pumps, conserved water animation and positional machinery sounds.
-- `src/coastal-layout.js`, `src/coastal-material.js` — palace floor and causeway coverage, worn tessellation, filtered slab shading and water-linked ground wetness.
+- `src/coastal-layout.js`, `src/coastal-floor-plan.js`, `src/coastal-material.js` — palace floor and causeway coverage, authored court bonds and mosaics, filtered slab shading and water-linked ground wetness.
 - `src/thermal-courts.js`, `src/thermal-rules.js` — physical forge regulators, reversible valve circuits, moving shutters, coolant outlets and saved firing patterns.
 - `src/wind-courts.js`, `src/wind-rules.js`, `src/wind-rendering.js`, `src/wind-art.js`, `src/wind-pose.js` — physical wind engines, rotating ducts, airflow traces, fixed bearings, saved channel routes, detailed bronze machinery, instance batches and shared inscriptions. See [wind art notes](docs/wind-art.md), [rendering and ground verification](docs/wind-rendering.md) and [handwheel foot contact](docs/wind-foot-contact.md).
 - `src/resonance-courts.js`, `src/resonance-rules.js` — physical crystal arrays, relational inscriptions, tuning collars, paired tones and recovered memories.

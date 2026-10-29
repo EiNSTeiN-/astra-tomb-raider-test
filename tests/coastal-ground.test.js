@@ -4,6 +4,10 @@ import * as THREE from "three";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile, buildTerrainSurface } from "../src/terrain.js";
 import { coastalLayout } from "../src/coastal-layout.js";
+import { coastalFloorPlan } from "../src/coastal-floor-plan.js";
+import { HYDRAULIC_TRIALS } from "../src/hydraulic-rules.js";
+import { palacePlan } from "../src/palace-architecture.js";
+import { courtCoverPlan } from "../src/court-cover.js";
 import {
   coastalUniforms,
   updateCoastalWater,
@@ -16,6 +20,89 @@ import {
 const level = LEVELS[3],
   map = createMap(level),
   profile = createTerrainProfile(map, level);
+
+test("floor palettes and measurements are independent and use the actual hydraulic capacities", () => {
+  const profiles = new Set();
+  for (let i = 0; i < map.rooms.length; i++) {
+    const a = coastalFloorPlan(i),
+      b = coastalFloorPlan(i);
+    assert.equal(a.motif, i);
+    assert.deepEqual(
+      a.capacity,
+      HYDRAULIC_TRIALS[i - 1]?.capacity ?? [8, 5, 3],
+    );
+    for (const name of ["tile", "stone", "capacity", "panel"]) {
+      assert.notEqual(a[name], b[name]);
+      assert.ok(a[name].every(Number.isFinite));
+      a[name][0] = -999;
+      assert.deepEqual(coastalFloorPlan(i)[name], b[name]);
+    }
+    profiles.add(JSON.stringify(b.tile));
+  }
+  assert.equal(profiles.size, 10);
+  assert.throws(() => coastalFloorPlan(-1), RangeError);
+  assert.throws(() => coastalFloorPlan(10), RangeError);
+});
+
+test("mosaic panels occupy paved dry rear bays clear of columns, court walls and cover walls", () => {
+  const plan = coastalLayout(map),
+    game = { level, groundHeight: profile.height, terrainProfile: profile };
+  for (const room of map.rooms) {
+    const floor = coastalFloorPlan(room.index),
+      [x, z, radius] = floor.panel,
+      cx = room.x * 7,
+      cz = room.z * 7,
+      rectangular = room.index === 2 || room.index === 3,
+      halfX = rectangular ? 3.12 : radius + 0.16,
+      halfZ = rectangular ? 3.17 : radius + 0.16;
+    const separated = (bx, bz, width, depth) => {
+      const dx = Math.max(0, Math.abs(x - bx) - width / 2),
+        dz = Math.max(0, Math.abs(z - bz) - depth / 2);
+      return rectangular
+        ? dx > halfX + 0.15 || dz > halfZ + 0.15
+        : Math.hypot(dx, dz) > radius + 0.31;
+    };
+    for (const column of palacePlan(room).columns)
+      assert.ok(
+        separated(column.x, column.z, column.width * 1.1, column.width * 1.1),
+        `${room.index}: column foot`,
+      );
+    for (const wall of palacePlan(room).court.walls) {
+      const c = Math.abs(Math.cos(wall.angle)),
+        s = Math.abs(Math.sin(wall.angle));
+      assert.ok(
+        separated(
+          wall.x,
+          wall.z,
+          c * wall.length + s * 1.16,
+          s * wall.length + c * 1.16,
+        ),
+        `${room.index}: bay enclosure`,
+      );
+    }
+    if (room.index % 3 === 1) {
+      const cover = courtCoverPlan(game, room);
+      assert.ok(
+        separated(cover.x - cx, cover.z - cz, cover.width, cover.depth),
+      );
+    }
+    for (let row = 0; row <= 16; row++)
+      for (let col = 0; col <= 16; col++) {
+        const dx = (col / 8 - 1) * halfX,
+          dz = (row / 8 - 1) * halfZ;
+        if (!rectangular && Math.hypot(dx, dz) > radius + 0.16) continue;
+        const px = cx + x + dx,
+          pz = cz + z + dz;
+        assert.ok(plan.coverage(px, pz) > 0.9, `${room.index}: paved panel`);
+        for (const water of profile.waters)
+          assert.ok(
+            Math.abs(px - water.x) > water.width / 2 + 0.1 ||
+              Math.abs(pz - water.z) > water.length / 2 + 0.1,
+            `${room.index}: dry panel, ${water.id}`,
+          );
+      }
+  }
+});
 
 test("coastal paving covers the ten arcade floors and actual causeway turns without extending the playable land", () => {
   const plan = coastalLayout(map);
@@ -163,6 +250,31 @@ test("chunk borders share material coordinates, terrain normals and ground conta
   }
   assert.ok(duplicates > 1000);
   assert.equal(game.terrainMeshes[0].material.defines.TERRAIN_COASTAL, 1);
+  const material = game.terrainMeshes[0].material,
+    uniforms = material.userData.terrainUniforms;
+  assert.equal(
+    material.defines.COASTAL_COURT_COUNT,
+    profile.coastal.rooms.length,
+  );
+  for (const [i, room] of profile.coastal.rooms.entries()) {
+    const plan = coastalFloorPlan(room.index);
+    assert.deepEqual(uniforms.coastalCourtFrames.value[i].toArray(), [
+      room.x,
+      room.z,
+      room.index,
+      room.radius,
+    ]);
+    assert.deepEqual(uniforms.coastalFloorTiles.value[i].toArray(), plan.tile);
+    assert.deepEqual(uniforms.coastalFloorStone.value[i].toArray(), plan.stone);
+    assert.deepEqual(
+      uniforms.coastalFloorMeasures.value[i].toArray(),
+      plan.capacity,
+    );
+    assert.deepEqual(
+      uniforms.coastalFloorPanels.value[i].toArray(),
+      plan.panel,
+    );
+  }
 });
 
 test("damp terrain follows actual draining water, including waterfall basins sharing a reservoir", async (t) => {
