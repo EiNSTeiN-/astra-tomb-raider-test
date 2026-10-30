@@ -1,0 +1,71 @@
+[
+  {
+    "asset": "rocks_ground_09",
+    "author": "Rob Tuytel",
+    "source": "https://polyhaven.com/a/rocks_ground_09",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://polyhaven.com/license",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rocks_ground_09/rocks_ground_09_diff_2k.jpg",
+    "sourceFile": "asset-sources/forge-ground/raw/rocks_ground_09_diff_2k.jpg",
+    "sourceBytes": 3545539,
+    "sourceSha256": "cf93419edfeb18b8d1d82b033d8dd5010d5b7dceb996d9871471fefeea3cca87",
+    "file": "public/assets/textures/forge-ground-color.jpg",
+    "encoding": {
+      "format": "JPEG",
+      "quality": 90,
+      "chromaSubsampling": "4:4:4",
+      "mozjpeg": true
+    },
+    "width": 2048,
+    "height": 2048,
+    "bytes": 2363787,
+    "sha256": "437b05a4731e8ca1d3295d73868dbad95b95b95d6cbe31c46c7634215b371136"
+  },
+  {
+    "asset": "rocks_ground_09",
+    "author": "Rob Tuytel",
+    "source": "https://polyhaven.com/a/rocks_ground_09",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://polyhaven.com/license",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rocks_ground_09/rocks_ground_09_nor_gl_2k.jpg",
+    "sourceFile": "asset-sources/forge-ground/raw/rocks_ground_09_nor_gl_2k.jpg",
+    "sourceBytes": 5003330,
+    "sourceSha256": "34fb9d9aca12ac7cdca6d4ddc491c7fe17b82bf641c7be129a922677d5dc51e8",
+    "file": "public/assets/textures/forge-ground-normal.jpg",
+    "encoding": {
+      "format": "JPEG",
+      "quality": 95,
+      "chromaSubsampling": "4:4:4",
+      "mozjpeg": true
+    },
+    "width": 2048,
+    "height": 2048,
+    "bytes": 4607350,
+    "sha256": "2304de549da472ad285d74f38a45035c8d551dc83f6f0e939d0ba834a829162a"
+  },
+  {
+    "asset": "rocks_ground_09",
+    "author": "Rob Tuytel",
+    "source": "https://polyhaven.com/a/rocks_ground_09",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://polyhaven.com/license",
+    "resolution": "2k",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rocks_ground_09/rocks_ground_09_rough_2k.jpg",
+    "sourceFile": "asset-sources/forge-ground/raw/rocks_ground_09_rough_2k.jpg",
+    "sourceBytes": 1696825,
+    "sourceSha256": "b358eea0dc64be90a494c9cb5bf03d673e699cb53c6bbc0b57c51ef12b322ea2",
+    "file": "public/assets/textures/forge-ground-roughness.jpg",
+    "encoding": {
+      "format": "JPEG",
+      "quality": 90,
+      "chromaSubsampling": "4:4:4",
+      "mozjpeg": true
+    },
+    "width": 2048,
+    "height": 2048,
+    "bytes": 948580,
+    "sha256": "77dc95bebd44a761dcb71eb70b3e2da0ef51ba4ae26f508587ab66006e58ec0a"
+  }
+]

@@ -360,6 +360,42 @@ test("all ten local forge texture maps match their archived CC0 source hashes", 
   }
 });
 
+test("the three delivered ground maps match their licensed conversion records and remain full-resolution textures", async () => {
+  const { default: sharp } = await import("sharp");
+  sharp.concurrency(1);
+  const sources = JSON.parse(
+    readFileSync(
+      new URL("../asset-sources/forge-ground/sources.json", import.meta.url),
+    ),
+  );
+  assert.equal(sources.length, 3);
+  assert.deepEqual(
+    sources.map((s) => s.file).sort(),
+    ["color", "normal", "roughness"]
+      .map((suffix) => `public/assets/textures/forge-ground-${suffix}.jpg`)
+      .sort(),
+  );
+  for (const source of sources) {
+    const bytes = readFileSync(new URL(`../${source.file}`, import.meta.url));
+    assert.equal(bytes.length, source.bytes);
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      source.sha256,
+    );
+    assert.equal(source.license, "CC0-1.0");
+    assert.equal(source.author, "Rob Tuytel");
+    const metadata = await sharp(bytes).metadata();
+    assert.equal(metadata.format, "jpeg");
+    assert.equal(metadata.width, 2048);
+    assert.equal(metadata.height, 2048);
+    assert.equal(metadata.width, source.width);
+    assert.equal(metadata.height, source.height);
+    if (source.file.endsWith("roughness.jpg"))
+      assert([1, 3].includes(metadata.channels));
+    else assert.equal(metadata.channels, 3);
+  }
+});
+
 test("coolant hiss is a quiet finite band-limited signal distinct from low ridge wind", () => {
   const sound = Object.create(Soundscape.prototype);
   sound.ctx = {

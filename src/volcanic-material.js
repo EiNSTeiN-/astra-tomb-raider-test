@@ -45,8 +45,22 @@ export const volcanicColor = /* glsl */ `
   cliffColor=mix(cliffColor,vec3(basaltGray)*vec3(.96,1.,1.07),.94);
   cliffColor*=mix(.82,1.18,cooling.z)*(1.-fracture*.3);
   cliffColor=mix(cliffColor,vec3(.23,.245,.26),ash*.25);
+  // Wind sorts pale ash into broad drifts across dark cooling lobes. The
+  // stretched field breaks up the ground at a different scale from its scan.
+  vec2 windUv=mat2(.857,.515,-.515,.857)*vTerrainPosition.xz;
+  float driftWarp=terrainNoise(windUv*vec2(.019,.035)+vec2(47.,11.));
+  float ashField=terrainNoise(windUv*vec2(.022,.075)+vec2(driftWarp*1.9,7.));
+  float ashDrift=smoothstep(.4,.76,ashField)*smoothstep(.52,.94,abs(vTerrainNormal.y));
+  float flowField=terrainNoise(vTerrainPosition.xz*.027+vec2(73.,19.));
+  float flowEdge=1.-smoothstep(.035,.16,abs(flowField-.47));
+  float oxide=flowEdge*(1.-ashDrift)*smoothstep(.3,.75,terrainNoise(vTerrainPosition.xz*.1+vec2(13.,83.)));
   float groundGray=dot(earthColor,vec3(.2126,.7152,.0722));
-  earthColor=mix(vec3(groundGray)*vec3(.4,.43,.46),vec3(.11,.12,.13),ash*.17);
+  vec3 cooledRock=vec3(groundGray)*vec3(.22,.245,.27);
+  cooledRock*=mix(.78,1.15,flowField);
+  cooledRock=mix(cooledRock,vec3(.12,.064,.036)*(0.65+groundGray*2.),oxide*.46);
+  vec3 ashColor=vec3(groundGray)*vec3(.62,.63,.59);
+  earthColor=mix(cooledRock,ashColor,ashDrift*.68);
+  cliffColor=mix(cliffColor,vec3(basaltGray)*vec3(1.16,.83,.64),oxide*.19);
   pavingWeight*=smoothstep(.15,.72,vCourt+terrainNoise(vTerrainPosition.xz*.19)*.21);
   float coolingRelief=(min(.32,cooling.x)*.12-joint*.014-seam*.012)*jointDetail;
   terrainDamp=0.;
@@ -55,13 +69,13 @@ export const volcanicColor = /* glsl */ `
 export const volcanicNormal = /* glsl */ `
 #ifdef TERRAIN_FORGE
   cliffN=volcanicReliefNormal(cliffN,coolingRelief);
-  earthN=normalize(mix(earthN,normal,ash*.24));
+  earthN=normalize(mix(earthN,normal,ashDrift*.4));
 #endif
 `;
 export const volcanicRoughness = /* glsl */ `
 #ifdef TERRAIN_FORGE
   rockRough=mix(.79,.98,max(fracture,ash));
-  terrainRough=mix(terrainRough,.98,ash*(1.-pavingWeight));
+  terrainRough=mix(terrainRough,.98,ashDrift*(1.-pavingWeight));
 #endif
 `;
 

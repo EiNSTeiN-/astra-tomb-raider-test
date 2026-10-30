@@ -96,6 +96,9 @@ ${frozenDeclarations}
 
 const colorLayer = /* glsl */ `
 vec2 earthUv = vTerrainPosition.xz / 4.0;
+#ifdef TERRAIN_FORGE
+earthUv = vTerrainPosition.xz / 3.0;
+#endif
 vec2 rotatedEarthUv = mat2(.8, .6, -.6, .8) * earthUv + vec2(.37, .61);
 vec2 pavingUv = vTerrainPosition.xz / 5.0;
 vec2 cliffUvX = vTerrainPosition.zy / 5.0;
@@ -236,7 +239,7 @@ export function terrainMaterial(game) {
       desert: "desert-sand",
       snow: "snow",
       water: "sand",
-      volcano: "forge-rock",
+      volcano: "forge-ground",
       crystal: "rock",
       eclipse: "rock",
     }[biome] || "ground";
@@ -417,6 +420,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : biome === "eclipse" ? 9 : ["desert", "water", "volcano"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}`;
   return material;
 }

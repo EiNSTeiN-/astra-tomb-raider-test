@@ -552,6 +552,7 @@ These assets are published by Poly Haven under [CC0](https://polyhaven.com/licen
 | Blue Plaster Weathered — Amal Kumar | [Poly Haven](https://polyhaven.com/a/blue_plaster_weathered) | `textures/palace-plaster-*` (2K) |
 | Marble Mosaic Tiles — Amal Kumar | [Poly Haven](https://polyhaven.com/a/marble_mosaic_tiles) | `textures/palace-mosaic-*` (2K) |
 | Rock Face 03 — Dario Barresi, Rico Cilliers | [Poly Haven](https://polyhaven.com/a/rock_face_03) | `textures/forge-rock-*` (2K) |
+| Rocks Ground 09 — Rob Tuytel | [Poly Haven](https://polyhaven.com/a/rocks_ground_09) | `textures/forge-ground-*` (2K) |
 | Rusty Metal 04 — Amal Kumar | [Poly Haven](https://polyhaven.com/a/rusty_metal_04) | `textures/forge-metal-*` (2K, including metalness) |
 | Volcanic Rock Tiles — Charlotte Baglioni | [Poly Haven](https://polyhaven.com/a/volcanic_rock_tiles) | `textures/forge-paving-*` (2K) |
 | Rock Boulder Dry                                      | [Poly Haven](https://polyhaven.com/a/rock_boulder_dry)      | `textures/rock-*`                            |
@@ -1567,3 +1568,18 @@ images are actual game captures exported as lossless WebP with identical decoded
 pixels and dimensions. The casting-yard view is a prepared ground observer with
 the character hidden; the keyboard and portrait touch images show the built
 release from prepared saves, with the pause dialog hidden for the photograph.
+
+The [forge gravel and ash](forge-ground.md) use Rocks Ground 09 by Rob Tuytel,
+published by [Poly Haven](https://polyhaven.com/a/rocks_ground_09) under
+[CC0](https://polyhaven.com/license). The three 2K delivery JPEGs are recompressed
+color, OpenGL normal and roughness maps with retained dimensions. The
+[manifest](../asset-sources/forge-ground/sources.json) records both source and
+delivery hashes and conversion settings; the
+[license note](../asset-sources/forge-ground/LICENSE.md) records provenance.
+Charcoal tint, wind-shaped ash and mineral staining are original project shader
+work. No source-site reference render is redistributed.
+Three documentation images are actual game captures exported as lossless WebP
+with identical decoded pixels and dimensions. The material comparison restores
+the preceding shader and flat maps in the same current world, observer and
+simulation time, with the character hidden. The portrait shows the built game
+after native touch movement and reload, with its pause dialog hidden.
