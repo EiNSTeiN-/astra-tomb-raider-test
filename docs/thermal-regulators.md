@@ -31,6 +31,12 @@ Corroded bodies, brass trim and handwheels reuse existing local materials. Twin 
 
 The focused view keeps the physical court beside or above its controls. Paused presentation can animate a command without advancing expedition time, guardians, health or field physics. Pausing or rebuilding settles the saved heat pattern without replaying steam.
 
+The [basalt landscape review](basalt-outcrops.md#portrait-regulator-camera)
+subsequently found a neighboring chimney in the sixth regulator's portrait view.
+The portrait camera now stops in front of that chimney. Rays against the rendered
+furnaces clear all 102 chamber views, and all eight revised portrait views plus
+the sixth regulator's native touch turn/save/reload case pass.
+
 ![Final firing controls on desktop](images/thermal-focus-desktop.png)
 
 The final 4 × 4 interface was checked at 900 × 650, 390 × 844 and 844 × 390. All controls and actions fit without panel scrolling. Portrait cells retain a 44-pixel touch height. The full rule remains in the record tablet; the short landscape diagram retains target labels and field hints.

@@ -426,6 +426,33 @@ test("pause and reload settle committed shutters without replaying steam and res
 test("focused cameras frame the regulator rows on desktop and portrait and changing chapters clears references", (t) => {
   const { game } = fixture(t);
   game.paused = true;
+  game.world.updateMatrixWorld(true);
+  const furnaces = [];
+  for (const patch of game.forgePatches)
+    for (const root of [patch.root, patch.detail])
+      root.traverse((o) => {
+        if (o.isMesh) furnaces.push(o);
+      });
+  const ray = new THREE.Raycaster();
+  const obscured = (eye, target) => {
+    ray.set(eye, target.clone().sub(eye).normalize());
+    ray.far = eye.distanceTo(target) - 0.01;
+    return ray.intersectObjects(furnaces, false).length > 0;
+  };
+  const sixth = game.thermalSites[5],
+    oldEye = sixth.root.position.clone().add(new THREE.Vector3(10, 25, 64));
+  assert(
+    sixth.nodes.some((n) =>
+      obscured(
+        oldEye,
+        n.body.position
+          .clone()
+          .add(sixth.root.position)
+          .add(new THREE.Vector3(0, 1.4, 0)),
+      ),
+    ),
+    "the preceding portrait camera really intersects rendered furnace geometry",
+  );
   for (const [width, height] of [
     [900, 650],
     [390, 844],
@@ -441,11 +468,16 @@ test("focused cameras frame the regulator rows on desktop and portrait and chang
       assert.equal(focusThermal(game), true);
       game.camera.updateMatrixWorld();
       for (const n of site.nodes) {
-        const p = n.body.position
+        const target = n.body.position
           .clone()
           .add(site.root.position)
-          .add(new THREE.Vector3(0, 1.4, 0))
-          .project(game.camera);
+          .add(new THREE.Vector3(0, 1.4, 0));
+        assert.equal(
+          obscured(game.camera.position, target),
+          false,
+          `regulator ${site.stage}, chamber ${n.index} clears actual furnaces`,
+        );
+        const p = target.clone().project(game.camera);
         assert.ok(Math.abs(p.x) < 1 && p.y > -1 && p.y < 1);
         if (width === 390)
           assert.ok(p.y > 0, "portrait machinery above the panel");

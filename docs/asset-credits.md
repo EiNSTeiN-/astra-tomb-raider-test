@@ -1545,3 +1545,15 @@ barrel pair shares its observer camera, fresh progress and simulation time.
 The twin-ridge view is another chamber in that survey. The portrait view uses
 the built game after movement and reload at its prepared first-objective approach,
 with the pause dialog hidden.
+
+The [columnar basalt outcrops](basalt-outcrops.md) use original convex-cell,
+fracture, cap and placement code in `src/volcanic-outcrops.js`, reusing the existing
+credited volcanic stone maps and project shader. The closer portrait regulator
+camera is also original project code. No external texture, model, recording,
+music or dependency is added.
+Five documentation images are actual game captures exported as lossless WebP
+with identical decoded pixels and dimensions. The basalt hidden/visible pair
+uses the same current world, observer and simulation time; it is not the full
+preceding release. The forge context is another ground observer. The portrait
+pair compares an obstructed static survey with an active sixth-regulator release
+touch interface; those two captures use different prepared progress states.

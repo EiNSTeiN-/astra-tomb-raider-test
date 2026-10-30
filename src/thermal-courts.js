@@ -550,7 +550,8 @@ export function focusThermal(game) {
   game.camera.position.set(
     c.x + (compact ? 10 : 18),
     c.y + (compact ? 25 : 18),
-    c.z + (compact ? 64 : 43),
+    // Stay in front of the neighboring furnace stack at the sixth regulator.
+    c.z + (compact ? 48 : 43),
   );
   game.camera.lookAt(
     c.x + (compact ? 10 : 16),

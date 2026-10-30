@@ -838,6 +838,12 @@ corrected paving stretch and record the added texture memory and rendering cost.
 
 The volcanic forge now has nine furnace halls with recessed fireboxes, corroded metal hoods, hollow chimneys, overhead pipes, and rotating toothed gears. An ash-cloud sky, eroded caldera rim, dark paving, and moving lava crust establish its volcanic setting. Saved objectives control furnace glow and rumble, coolant steam and pressure hiss, and gear motion. Positional emitters follow their visible machinery and retain the quiet adaptive score. [Forge art and sound notes](docs/forge-art.md) include comparisons, source records, distance measurements, and release save/reload verification.
 
+Five [columnar basalt outcrops](docs/basalt-outcrops.md) now break up the forge
+banks and frame several working courts. Buried bases, separated cooling joints
+and protected walking routes are verified. The same review fixes a furnace
+chimney obscuring the sixth regulator's portrait camera. Keyboard/touch input,
+local saves and resource cleanup pass; the wider visual audit remains open.
+
 The [eight objective chambers now have distinct roof profiles](docs/forge-art.md#objective-chamber-roofs): barrel vaults, offset and paired ridges, raised monitors and open-sided lanterns. Fitted basalt bearings, iron seams and nine open front vents give the chambers different silhouettes. High/Low views, entry/exit routes, keyboard/touch controls, local saves and geometry cleanup are checked; broader landscape composition remains under review.
 
 Eight physical regulators now occupy the forge forecourts. Their 102 chambers use six different coupling rules and engraved HEAT / COOL targets, progressing from a cold manifold to an alternating heart-engine pattern. Turn handwheels with E or Use, watch linked shutters and coolant outlets respond, and activate the completed pattern at its record tablet. The optional focused controls share the same saved state. Hot chambers emit restrained mechanical rumble, changing shutters release short localized steam, and the score adds its quiet working accent during a turn. [Thermal regulator notes](docs/thermal-regulators.md) describe the designs, access checks, audio falloff and save verification.
@@ -925,6 +931,7 @@ Settings provide independent master, music, ambience, and action/puzzle volume c
 - `src/ruin-growth.js` — roots, hanging tendrils, and animated climbing leaves.
 - `src/palace-architecture.js`, `src/palace-geometry.js`, `src/palace-material.js` — fluted columns, broken vaults, tidal stone weathering, and coastal court plans.
 - `src/forge-architecture.js`, `src/forge-geometry.js`, `src/forge-state.js` — furnace halls, original machinery, and saved-objective heat, steam, and motion.
+- `src/volcanic-outcrops.js` — five seated columnar basalt formations, with individual physical surfaces and batched rendering.
 - `src/forge-vaults.js` — eight objective chamber roofs, fitted vents and lanterns, with physical support and camera clearance.
 - `src/forge-effects.js`, `src/forge-sky.js`, `src/forge-caldera.js` — fireboxes, lava crust, plumes, ash clouds, and an eroded volcanic rim.
 - `src/monastery-architecture.js`, `src/monastery-roof.js`, `src/monastery-cloth.js` — supported timber halls, damaged snow-covered roofs, and animated banners with matching shadows.

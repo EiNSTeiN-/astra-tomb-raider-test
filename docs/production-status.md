@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [basalt outcrops](basalt-outcrops.md) add five formations with 181 separated,
+  grounded columns and 27,040 triangles. All 41 selected checks and the build
+  pass. Ten assisted local legs cover 119.71 m at full health and visibility;
+  all fifteen route images are reviewed. Nine court fronts, fifteen close/control/Low
+  views, eight desktop focus views and eight revised portrait focus views are
+  also reviewed. A separate furnace obstruction found in the sixth regulator's
+  portrait camera is repaired and covered by actual-geometry rays and native
+  touch input. Keyboard and touch cases preserve complete saves through two
+  reloads each; all twelve release images are reviewed. Reload and chapter
+  change each dispose the five new geometries and shared material once.
+  Workers stay within the shared five-CPU cap and release owned resources.
+  Wider volcanic composition and whole-world acceptance remain open.
 - The [forge chamber roofs](forge-art.md#objective-chamber-roofs) give eight
   objective halls distinct profiles, fitted bearings and open vents. Twenty-four
   selected game checks, three CPU-guard checks and the build pass. All 34 current
