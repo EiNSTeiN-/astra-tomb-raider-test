@@ -2,19 +2,26 @@ import * as THREE from "three";
 import { materialTextureLoader } from "./asset-loading.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
+import { forgeGearGeometry } from "./forge-geometry.js";
 import {
-  forgeGearGeometry,
-  furnaceHoodGeometry,
-  furnaceFlueGeometry,
-} from "./forge-geometry.js";
+  furnaceCrownPlan,
+  furnaceRingPoints,
+  buildFurnaceCrown,
+  buildFurnaceCoolant,
+  forgeGantryPlan,
+  forgeGantryGeometry,
+} from "./forge-furnace-art.js";
+import { stationAssemblySolid, stationSolid } from "./field-station-solids.js";
 import { forgeState } from "./forge-state.js";
 import { moltenMaterial, forgePlume } from "./forge-effects.js";
 
 export function forgePlan(room) {
-  const i = room.index % 9;
+  const i = room.index % 9,
+    crown = [12, 11.5, 12.8, 13.2, 11.8, 14, 12.4, 11.3, 15][i];
   return {
     stacks: [14, 16, 12, 15, 13, 17, 14, 16, 20][i],
-    crown: [12, 11.5, 12.8, 13.2, 11.8, 14, 12.4, 11.3, 15][i],
+    crown,
+    gantry: forgeGantryPlan(i, crown),
     kilns: [-16.5, 16.5].map((x) => ({ x, z: -21, w: 4, d: 3.5 })),
     piers: [-5.8, 5.8].map((x) => ({ x, z: -21, w: 1.25, d: 1.65 })),
   };
@@ -65,6 +72,7 @@ export function buildForgeArchitecture(game) {
       heat,
       steam,
       gears: [],
+      furnaces: [],
       mouths: [],
       index: room.index,
       center: new THREE.Vector3(x, base + 5, z - 15),
@@ -134,22 +142,63 @@ export function buildForgeArchitecture(game) {
         h: 8.9 - ground,
         forge: true,
       });
-      beam(
-        new THREE.Vector3(p.x, 8.8, -21),
-        new THREE.Vector3(0, plan.crown, -21),
-        1.2,
-        3.3,
-      );
     }
+    const gantry = [];
+    // Retain narrow oriented camera bounds for each span, leaving the aisle
+    // clear. The delivered masonry uses fitted joints around the full profile.
+    for (let i = 0; i < plan.gantry.points.length - 1; i++) {
+      const [a, b] = plan.gantry.points.slice(i, i + 2);
+      const start = new THREE.Vector3(...a, -21),
+        end = new THREE.Vector3(...b, -21),
+        extension = end.clone().sub(start).normalize().multiplyScalar(0.65);
+      // Fitted corners project along each span (at most 0.60 m for these
+      // profiles). Include that projection without reserving the open arch.
+      const proxy = beam(start.sub(extension), end.add(extension), 1.2, 3.3);
+      root.remove(proxy);
+      proxy.geometry.dispose();
+    }
+    gantry.push(add(forgeGantryGeometry(plan.gantry), stone, 0, 0, -21));
+    gantry.push(
+      beam(
+        new THREE.Vector3(-5.8, 9.1, -21),
+        new THREE.Vector3(5.8, 9.1, -21),
+        0.22,
+        0.3,
+        metal,
+      ),
+    );
     // A cross-shaft is suspended from the masonry crown. Gear teeth and spokes
     // are geometry; both wheels retain their ratio when objectives change speed.
-    beam(
-      new THREE.Vector3(0, plan.crown, -21),
-      new THREE.Vector3(0, 9.3, -21),
-      0.48,
-      0.55,
-      metal,
+    gantry.push(
+      beam(
+        new THREE.Vector3(0, plan.gantry.bearing, -21),
+        new THREE.Vector3(0, 9.3, -21),
+        0.48,
+        0.55,
+        metal,
+      ),
     );
+    // Preserve the beams' oriented camera bounds while giving the physical
+    // kernel upright copies of their actual tilted geometry.
+    const gantryBodies = gantry.map((mesh) => {
+      mesh.updateMatrix();
+      const body = new THREE.Mesh(
+        mesh.geometry.clone().applyMatrix4(mesh.matrix),
+        metal,
+      );
+      root.add(body);
+      return body;
+    });
+    patch.gantrySolid = stationAssemblySolid(
+      game,
+      { id: `forge-gantry-${room.index}` },
+      gantryBodies,
+      { bodyPadding: 0.65 },
+    );
+    for (const body of gantryBodies) {
+      root.remove(body);
+      body.geometry.dispose();
+    }
     for (const [gx, radius, teeth] of [
       [0, 3.2, 24],
       [4.533, 1.333, 10],
@@ -274,45 +323,55 @@ export function buildForgeArchitecture(game) {
       for (let bar = -2; bar <= 2; bar++)
         block(0.12, 3.85, 0.2, metal, px + bar * 0.63, ground + 2.9, pz + 3.18);
       block(3.6, 0.16, 0.2, metal, px, ground + 2.65, pz + 3.2);
-      add(furnaceHoodGeometry(), metal, px, top + 1.8, pz, root, true);
-      const chimneyBase = top + 3.6;
-      const chimneyTop = Math.max(
-        chimneyBase + 2.5,
-        ground + plan.stacks + side * 2.1,
+      const crown = furnaceCrownPlan(
+        room.index,
+        side,
+        plan.stacks + side * 2.1 - 6.2,
       );
-      add(
-        furnaceFlueGeometry(chimneyTop - chimneyBase),
-        metal,
-        px,
-        chimneyBase,
-        pz,
-        root,
-        true,
+      const crownMeshes = buildFurnaceCrown(crown, metal, add);
+      for (const mesh of crownMeshes)
+        mesh.position.add(new THREE.Vector3(px, top, pz));
+      const crownSolid = stationAssemblySolid(
+        game,
+        { id: `furnace-crown-${room.index}-${side}` },
+        crownMeshes,
+        { bodyPadding: 0.65 },
       );
-      for (let y = chimneyBase; y <= chimneyTop + 0.01; y += 1.5) {
-        const ring = add(
-          new THREE.TorusGeometry(1.42, 0.11, 6, 8),
+      // The camera retains separate hood and stack envelopes. A single tall
+      // firebox-width box would reject clear space beside the narrower flue.
+      for (const hood of [true, false]) {
+        const box = new THREE.Box3();
+        for (const ring of crown.rings.filter((r) =>
+          hood ? r.y <= crown.hoodHeight : r.y >= crown.hoodHeight,
+        ))
+          for (const point of furnaceRingPoints(ring)) box.expandByPoint(point);
+        box.expandByScalar(0.12);
+        const size = box.getSize(new THREE.Vector3()),
+          center = box.getCenter(new THREE.Vector3());
+        const proxy = add(
+          new THREE.BoxGeometry(...size.toArray()),
           metal,
-          px,
-          y,
-          pz,
-          detail,
+          px + center.x,
+          top + center.y,
+          pz + center.z,
+          root,
+          true,
         );
-        ring.rotation.x = Math.PI / 2;
-        for (let bolt = 0; bolt < 8; bolt++) {
-          const a = (bolt * Math.PI) / 4;
-          add(
-            new THREE.IcosahedronGeometry(0.095, 0),
-            metal,
-            px + Math.cos(a) * 1.46,
-            y,
-            pz + Math.sin(a) * 1.46,
-            detail,
-          );
-        }
+        root.remove(proxy);
+        proxy.geometry.dispose();
       }
-      // Inner return pipe remains overhead; the small outlet beneath it is where
-      // white steam and the local pressure hiss actually originate.
+      const furnace = {
+        plan: crown,
+        solid: crownSolid,
+        ground,
+        lower,
+        top,
+        x: px,
+        z: pz,
+      };
+      patch.furnaces.push(furnace);
+      // The vent branches from the overhead return and clears the hood, so
+      // its steam and local pressure hiss originate in the visible open bore.
       const sign = Math.sign(px);
       const curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(px - sign * 2.8, top + 1.3, pz),
@@ -321,18 +380,29 @@ export function buildForgeArchitecture(game) {
         new THREE.Vector3(sign * 5.8, 8.9, pz),
       ]);
       add(new THREE.TubeGeometry(curve, 18, 0.3, 10, false), metal, 0, 0, 0);
-      const outletX = px - sign * 3.5;
-      const outlet = add(
-        new THREE.CylinderGeometry(0.3, 0.3, 1.4, 12, 1, true),
-        metal,
-        outletX,
-        top + 0.2,
-        pz + 0.5,
-      );
+      const coolant = buildFurnaceCoolant(side, metal, add);
+      for (const mesh of coolant.meshes)
+        mesh.position.add(new THREE.Vector3(px, top, pz));
+      furnace.coolant = {
+        tip: new THREE.Vector3(...coolant.tip).add(
+          new THREE.Vector3(px, top, pz),
+        ),
+        bounds: coolant.meshes.reduce((box, mesh) => {
+          mesh.updateMatrix();
+          mesh.geometry.computeBoundingBox();
+          return box.union(
+            mesh.geometry.boundingBox.clone().applyMatrix4(mesh.matrix),
+          );
+        }, new THREE.Box3()),
+      };
       const smoke = forgePlume(time, heat, false, room.index * 2 + side);
-      smoke.position.set(px, chimneyTop - 0.08, pz);
+      smoke.position.set(
+        px + crown.outlet[0],
+        top + crown.outlet[1] - 0.08,
+        pz + crown.outlet[2],
+      );
       const mist = forgePlume(time, steam, true, room.index * 2 + side);
-      mist.position.set(outletX, outlet.position.y + 0.7, pz + 0.5);
+      mist.position.copy(furnace.coolant.tip);
       effects.add(smoke, mist);
       const position = new THREE.Vector3(
         x + px,
@@ -364,22 +434,20 @@ export function buildForgeArchitecture(game) {
         forgeChannel: "steam",
         activity: state.steam,
       });
-      game.obstacles.push({
-        x: x + px,
-        z: z + pz,
-        w: kiln.w,
-        d: kiln.d,
-        h: ground + 6.2 - centerGround,
-        forge: true,
-      });
-      game.obstacles.push({
-        x: x + px,
-        z: z + pz,
-        w: 1.38,
-        d: 1.38,
-        h: chimneyTop - centerGround,
-        forge: true,
-      });
+      // Reserve boots and clothing at the old root-only boundary, including
+      // the buried foundation and projecting iron bands. The emitter sits
+      // outside the 3.60 m front, so the firebox does not muffle its own mouth.
+      const bottom = lower - 0.05,
+        cap = ground + 6.3;
+      furnace.body = stationSolid(
+        game,
+        { id: `forge-firebox-${room.index}-${side}` },
+        root,
+        [8.2, cap - bottom, 7.2],
+        [px, (bottom + cap) / 2, pz],
+        { bodyPadding: 0.65, support: false },
+      );
+      furnace.body.forge = true;
     }
     mergeArchitecture(root);
     mergeArchitecture(detail);

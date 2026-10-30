@@ -1594,3 +1594,14 @@ with identical decoded pixels and dimensions. The paired wall views share
 observer and simulation time; development views hide the character. The
 portrait shows the built game after touch movement and reload, with its pause
 dialog hidden.
+
+The [furnace profiles and fitted gantries](forge-furnace-profiles.md) use original
+project construction in `src/forge-furnace-art.js` and its forge integration.
+Hollow sheet-metal lofts, fitted bands, hood seams, connected coolant vents and
+continuous gantry joints reuse the credited forge stone and corroded-metal maps.
+No external model, texture, recording, music or dependency is added.
+Four documentation images are actual game captures exported as lossless WebP
+with identical decoded pixels and dimensions. The paired smelting views share
+observer and simulation time; development views hide the character. The active
+vent uses prepared completed objectives, and the portrait shows the built game
+after touch input and reload with the pause dialog hidden.

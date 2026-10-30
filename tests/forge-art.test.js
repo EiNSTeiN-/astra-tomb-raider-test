@@ -9,6 +9,8 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
 import { Soundscape } from "../src/audio.js";
+import { stationSupport, stationBlocked } from "../src/field-station-solids.js";
+import { safeArrival, advanceCharacter } from "../src/character-motion.js";
 import { forgeState } from "../src/forge-state.js";
 import {
   forgePlan,
@@ -177,11 +179,55 @@ test("nine built forge halls preserve approaches and camera headroom, and share 
       x = r.x * 7,
       z = r.z * 7,
       y = profile.height(x, z);
+    world.updateMatrixWorld(true);
+    const roofRay = new THREE.Raycaster();
+    for (const dx of [-4.5, -2, 0, 2, 4.5]) {
+      roofRay.set(
+        new THREE.Vector3(x + dx, y + 30, z - 21),
+        new THREE.Vector3(0, -1, 0),
+      );
+      const hit = roofRay.intersectObject(patch.root, true)[0];
+      assert(
+        hit &&
+          Math.abs(
+            stationSupport(patch.gantrySolid, x + dx, z - 21) - hit.point.y,
+          ) < 1e-5,
+        "gantry support follows tilted rendered beams",
+      );
+    }
     assert.ok(
       patch.root.children.length <= 4,
       "two material batches and two animated gears",
     );
     assert.ok(patch.triangles < 20000);
+    for (const [side, furnace] of patch.furnaces.entries()) {
+      const source = game.soundSources.find(
+        (s) => s.id === `coolant-${patch.index}-${side}`,
+      );
+      const tip = furnace.coolant.tip.clone().add(patch.root.position);
+      assert.deepEqual(
+        [source.x, source.y, source.z],
+        tip.toArray(),
+        "hiss originates at the delivered vent",
+      );
+      const mist = patch.effects.children.find(
+        (m) =>
+          m.material?.name === "Coolant steam" &&
+          m.position.distanceTo(furnace.coolant.tip) < 1e-8,
+      );
+      assert(mist, "visible steam shares the same outlet");
+      for (const dx of [-0.3, 0, 0.3]) {
+        roofRay.set(
+          tip.clone().add(new THREE.Vector3(dx, 0.01, 0)),
+          new THREE.Vector3(0, 1, 0),
+        );
+        assert.equal(
+          roofRay.intersectObject(patch.root, true).length,
+          0,
+          "return pipe and hood leave the vent clear",
+        );
+      }
+    }
     for (const o of [...patch.plan.kilns, ...patch.plan.piers]) {
       assert.equal(game.canMove(x + o.x, z + o.z, 0), false);
       for (const f of map.features)
@@ -234,6 +280,51 @@ test("nine built forge halls preserve approaches and camera headroom, and share 
     });
   }
   const patch = game.forgePatches[1];
+  for (const hall of game.forgePatches)
+    for (const furnace of hall.furnaces) {
+      const body = furnace.body;
+      assert.equal(body.bodyPadding, 0.65);
+      assert.equal(stationSupport(body, body.x, body.z), null);
+      assert.equal(
+        stationBlocked(body, body.x, body.bounds.min.y - 2, body.z),
+        false,
+      );
+      assert.equal(
+        stationBlocked(body, body.x, body.bounds.max.y + 0.02, body.z),
+        false,
+      );
+    }
+  const old = { x: 368.5, z: 192.5, y: profile.height(368.5, 192.5) },
+    progress = structuredClone(game.progress);
+  for (const crouching of [false, true]) {
+    game.crouching = crouching;
+    assert.equal(
+      game.canMove(old.x, old.z, 0),
+      false,
+      "recorded occupied firebox front",
+    );
+    const safe = safeArrival(game, old);
+    assert(safe && Math.hypot(safe.x - old.x, safe.z - old.z) <= 1.5);
+    assert(
+      game.canMove(safe.x, safe.z, safe.y - profile.height(safe.x, safe.z)),
+    );
+    assert.deepEqual(game.progress, progress);
+  }
+  game.crouching = false;
+  game.player.position.set(old.x, profile.height(old.x, old.z + 2), old.z + 2);
+  Object.assign(game, {
+    jumpY: 0,
+    velocityY: 0,
+    grounded: true,
+    moveVelocity: { x: 0, z: 0 },
+    airVelocity: null,
+  });
+  for (let i = 0; i < 180; i++) advanceCharacter(game, { x: 0, z: -4 }, 1 / 60);
+  assert(
+    game.player.position.z >= old.z + 0.65 &&
+      game.player.position.z <= old.z + 0.9,
+    "normal movement stops before the occupied front",
+  );
   game.progress.field = EXPEDITIONS.embers[0].tasks.map((t) => t.id);
   updateForgeArchitecture(game, 1);
   updateSoundSources(game);
