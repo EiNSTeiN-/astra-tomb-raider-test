@@ -5,6 +5,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile, buildHorizon } from "../src/terrain.js";
 import { updateAtmosphere } from "../src/atmosphere.js";
 import { bakeAndeanLight, sampleAndeanHeight } from "../src/andean-geology.js";
+import { CLOUD_CONTACT_FADE } from "../src/cloud-ground.js";
 import {
   andeanGeometry,
   andeanHeight,
@@ -220,6 +221,9 @@ function fixture(t) {
   t.after(() => {
     g.world.traverse((o) => {
       o.geometry?.dispose();
+      o.material?.userData.additionalTextures?.forEach((texture) =>
+        texture.dispose(),
+      );
       o.material?.dispose();
     });
     g.darkMat.map.dispose();
@@ -241,6 +245,14 @@ test("valley clouds stay below crossing and objective heights without changing t
     g.cloudCity.bank.material.uniforms.cloudRise.value,
     CLOUD_BANK_RISE,
   );
+  const material = g.cloudCity.bank.material,
+    ground = material.uniforms.cloudGround.value;
+  assert.deepEqual(material.userData.additionalTextures, [ground]);
+  assert.equal(material.uniforms.contactFade.value, CLOUD_CONTACT_FADE);
+  assert.deepEqual(material.uniforms.groundGrid.value.toArray(), [
+    g.terrainProfile.width,
+    g.terrainProfile.step,
+  ]);
   const top = CLOUD_BANK_FLOOR + CLOUD_BANK_RISE;
   for (const b of g.terrainProfile.bridges)
     assert.ok(

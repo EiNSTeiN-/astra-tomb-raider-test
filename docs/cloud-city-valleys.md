@@ -71,8 +71,10 @@ close after their checks.
 
 The new rear coverage exposes repeated flat chamber crowns, which remain a
 composition follow-up. Final-court side overlooks also show a very straight
-grass/cloud boundary; its actual terrain extent and cloud-depth interaction
-need inspection before diagnosing a missing cliff face. Wider field, discovery,
+grass/cloud boundary. The subsequent [bank and cloud inspection](cloud-contact.md)
+finds actual descending terrain at the sampled edge and softens hard cloud
+intersections on its lower face. The straight terrace silhouette remains a
+shape follow-up. Wider field, discovery,
 traversal and water routes, moving-body contact and the full
 [visual audit](visual-audit.md) remain open. These measurements do not establish
 consumer-device performance, subjective audio quality or complete visual

@@ -9,6 +9,7 @@ import {
   skyGroundSupported,
 } from "../src/sky-geology.js";
 import { woodlandLayout } from "../src/habitat.js";
+import { cloudGroundTexture } from "../src/cloud-ground.js";
 
 const level = LEVELS[5],
   map = createMap(level),
@@ -139,6 +140,17 @@ test("fine terrain chunks keep shared edges, upward normals and matching exposed
   const game = { level, terrainProfile: profile, world: new THREE.Group() };
   buildTerrainSurface(game);
   await game.terrainTexturesReady;
+  const cloudGround = cloudGroundTexture(profile);
+  t.after(() => cloudGround.dispose());
+  assert.equal(cloudGround.image.width, profile.width);
+  assert.equal(cloudGround.image.height, profile.width);
+  assert.equal(cloudGround.type, THREE.FloatType);
+  assert.equal(cloudGround.format, THREE.RedFormat);
+  assert.equal(cloudGround.minFilter, THREE.NearestFilter);
+  assert.equal(cloudGround.magFilter, THREE.NearestFilter);
+  assert.equal(cloudGround.generateMipmaps, false);
+  assert.equal(cloudGround.flipY, false);
+  assert.equal(cloudGround.colorSpace, THREE.NoColorSpace);
   t.after(() => {
     game.terrainMeshes.forEach((mesh) => mesh.geometry.dispose());
     const material = game.terrainMeshes[0].material;
@@ -173,6 +185,14 @@ test("fine terrain chunks keep shared edges, upward normals and matching exposed
         z = p.getZ(i),
         key = `${x},${z}`;
       assert.equal(p.getY(i), Math.fround(profile.height(x, z)));
+      assert.equal(
+        cloudGround.image.data[
+          Math.round(z / profile.step) * profile.width +
+            Math.round(x / profile.step)
+        ],
+        p.getY(i),
+        "cloud contact reads the delivered terrain vertex, including seams and edges",
+      );
       assert.equal(d.getX(i), Math.fround(profile.geology.depth(x, z)));
       assert.ok(n.getY(i) > 0);
       assert.ok(

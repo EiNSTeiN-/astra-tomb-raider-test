@@ -1,5 +1,10 @@
 import * as THREE from "three";
 import { andeanGeometry } from "./andean-geology.js";
+import {
+  CLOUD_CONTACT_FADE,
+  cloudGroundShader,
+  cloudGroundTexture,
+} from "./cloud-ground.js";
 export { andeanGeometry, andeanHeight } from "./andean-geology.js";
 
 export const CLOUD_BANK_FLOOR = -34;
@@ -123,7 +128,9 @@ function ridgeMaterial(game, layer) {
 }
 
 function cloudBank(game, time) {
-  const extent = game.map.size * 7;
+  const extent = game.map.size * 7,
+    profile = game.terrainProfile,
+    ground = cloudGroundTexture(profile);
   const geometry = new THREE.PlaneGeometry(extent * 7, extent * 7, 128, 128);
   geometry.rotateX(-Math.PI / 2);
   geometry.translate(extent / 2, CLOUD_BANK_FLOOR, extent / 2);
@@ -136,6 +143,9 @@ function cloudBank(game, time) {
       time,
       cloudRise: { value: CLOUD_BANK_RISE },
       sunDirection: { value: game.sunOffset.clone().normalize() },
+      cloudGround: { value: ground },
+      groundGrid: { value: new THREE.Vector2(profile.width, profile.step) },
+      contactFade: { value: CLOUD_CONTACT_FADE },
     },
     vertexShader: `varying vec3 vCloud;uniform float time,cloudRise;
       ${cloudNoise}
@@ -145,6 +155,7 @@ function cloudBank(game, time) {
         gl_Position.z=min(gl_Position.z,gl_Position.w*.9997);}`,
     fragmentShader: `varying vec3 vCloud;uniform float time;uniform vec3 sunDirection;
       ${cloudNoise}
+      ${cloudGroundShader}
       void main(){vec2 p=vCloud.xz*.009+vec2(time*.0008,time*.00022);
         float f=cloudFbm(p),shadow=cloudFbm(p+normalize(sunDirection.xz)*.2);
         vec3 cloudNormal=normalize(cross(dFdx(vCloud),dFdy(vCloud)));
@@ -154,11 +165,14 @@ function cloudBank(game, time) {
         float farFade=1.-exp(-distance(vCloud,cameraPosition)*.0011);
         color=mix(color,vec3(.38,.5,.56),farFade*.7);
         float opacity=mix(.68,.97,smoothstep(.28,.65,f));
+        opacity*=smoothstep(0.,contactFade,vCloud.y-cloudGroundHeight(vCloud.xz));
         gl_FragColor=vec4(color,opacity);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   });
+  // Adventure's material cleanup owns textures referenced through uniforms.
+  material.userData.additionalTextures = [ground];
   const mesh = new THREE.Mesh(geometry, material);
   mesh.name = "Clouds below the sky bridges";
   mesh.renderOrder = -5;

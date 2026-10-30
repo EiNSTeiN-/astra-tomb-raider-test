@@ -1680,3 +1680,10 @@ quality and simulation time. Lossless WebP exports retain the decoded pixels
 and dimensions of their sources. The range revision extends the project's
 original Andean height shaping and reuses the existing credited rock textures,
 clouds and lighting; no external asset is added.
+
+The [cloud-contact comparison](cloud-contact.md) contains two lossless exports
+of actual prepared game captures, retaining their decoded pixels and dimensions.
+The shared diagnostic camera sits ten metres above the recorded standing
+observer to expose the lower bank. The control removes only the new opacity
+factor. The cloud-contact code and height texture are original project work
+using the existing credited terrain; no external asset is added.

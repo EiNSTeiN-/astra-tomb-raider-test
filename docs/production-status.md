@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cloud-bank contact](cloud-contact.md) softens hard white intersections
+  between the valley cloud sheet and lower island cliffs. Forty selected tests,
+  the build and 560 browser shader samples against delivered terrain rays pass.
+  All 22 final development captures are reviewed. Same-chapter reload and a
+  chapter change each release the outgoing height texture, geometry and material
+  once. Independent screen/profile rays and cloud-hidden views also reject the
+  sampled missing-cliff suspicion; the conspicuously straight cap remains a
+  shape follow-up. Built keyboard/High and portrait-touch/Performance cases
+  operate a wind duct, exercise movement and preserve the complete local save
+  through three reloads each, excluding play timestamps. All twelve release
+  captures are reviewed and owned verification resources close under the shared
+  five-CPU cap. Wider composition, body contact and listening/device acceptance
+  remain open.
 - The [cloud-city valleys](cloud-city-valleys.md) open the three Andean ranges
   with staggered passes, wider spacing and gentler fine crest displacement.
   Thirty-three selected tests, the strengthened whole-triangle clearance check
