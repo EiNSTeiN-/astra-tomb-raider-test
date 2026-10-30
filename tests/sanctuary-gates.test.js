@@ -147,6 +147,63 @@ test("coastal masonry reserves the posed body beside all 45 finite wall and jamb
   }
 });
 
+test("forge walls and jambs reserve body clearance and recover the recorded occupied boundary", (t) => {
+  const { game } = fixture(t, 4, null, true);
+  let count = 0;
+  for (const gate of game.fieldGates) {
+    assert.equal(gate.masonrySolids.length, 5);
+    for (const solid of gate.masonrySolids) {
+      assert(solid.forgeMasonry);
+      assert.equal(solid.bodyPadding, 0.65);
+      assert.equal(stationSupport(solid, solid.x, solid.z), null);
+      assert.equal(
+        stationBlocked(solid, solid.x, solid.bounds.max.y + 0.02, solid.z),
+        false,
+      );
+      assert.equal(
+        stationBlocked(solid, solid.x, solid.bounds.min.y - 1, solid.z, 0.2),
+        false,
+      );
+      count++;
+    }
+  }
+  assert.equal(count, 40);
+  const x = 265.65,
+    z = 359.4,
+    y = game.groundHeight(x, z);
+  const before = structuredClone(game.progress);
+  for (const crouching of [false, true]) {
+    game.crouching = crouching;
+    assert.equal(game.canMove(x, z, 0), false);
+    const arrival = safeArrival(game, { x, y, z });
+    assert(arrival && Math.hypot(arrival.x - x, arrival.z - z) <= 1.5);
+    assert(
+      game.canMove(
+        arrival.x,
+        arrival.z,
+        arrival.y - game.groundHeight(arrival.x, arrival.z),
+      ),
+    );
+    assert.deepEqual(game.progress, before);
+  }
+  game.crouching = false;
+  game.player.position.set(x - 1.5, game.groundHeight(x - 1.5, z), z);
+  Object.assign(game, {
+    jumpY: 0,
+    velocityY: 0,
+    grounded: true,
+    moveVelocity: { x: 0, z: 0 },
+    airVelocity: null,
+  });
+  for (let i = 0; i < 240; i++) advanceCharacter(game, { x: 4, z: 0 }, 1 / 60);
+  assert(
+    game.player.position.x >= x - 0.85 && game.player.position.x <= x - 0.6,
+  );
+  assert(
+    game.canMove(game.player.position.x, game.player.position.z, game.jumpY),
+  );
+});
+
 test("normal coastal walking stops before the reproduced rear foundation instead of entering its low stone", (t) => {
   const { game } = fixture(t, 3, null, true),
     gate = game.fieldGates[1],
@@ -613,8 +670,16 @@ test("regional chamber walls have sealed deep recesses and buried full-width foo
         for (const cx of wall.bays) {
           let deepest = 0,
             cameraDepth = 0;
-          for (const dx of [-0.32, 0.12, 0.42])
-            for (const t of [0.24, 0.46, 0.68]) {
+          // The forge's wider cases and diaphragms occupy the old central
+          // probes. Include their surrounding gaps to observe the actual back.
+          const offsets = index === 4
+            ? [-0.82, -0.32, 0.12, 0.42, 0.82]
+            : [-0.32, 0.12, 0.42];
+          const fractions = index === 4
+            ? [0.14, 0.24, 0.46, 0.68, 0.86]
+            : [0.24, 0.46, 0.68];
+          for (const dx of offsets)
+            for (const t of fractions) {
               const y = wall.bottom + (wall.top - wall.bottom) * t;
               const start = point(cx + wall.radius * dx, y, 2);
               ray.set(start, direction);
@@ -640,7 +705,7 @@ test("regional chamber walls have sealed deep recesses and buried full-width foo
           );
           assert.ok(
             cameraDepth > 1.9 && cameraDepth < 2.5,
-            "camera retains recess and closed backing after batching",
+            `${index}/${gate.stage}/${wall.side}: camera retains recess and closed backing after batching (${cameraDepth})`,
           );
           niches++;
         }

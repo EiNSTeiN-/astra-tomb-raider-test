@@ -1583,3 +1583,14 @@ with identical decoded pixels and dimensions. The material comparison restores
 the preceding shader and flat maps in the same current world, observer and
 simulation time, with the character hidden. The portrait shows the built game
 after native touch movement and reload, with its pause dialog hidden.
+
+The [forge chamber bays](forge-wall-bays.md) use original profiles, closed
+fittings and placement code in `src/forge-wall-art.js`, integrated with the
+existing chamber masonry. They reuse the project's gear and dressed-stone
+construction and the credited forge rock, paving and corroded-metal maps.
+No external model, texture, recording, music or dependency is added.
+Four documentation images are actual game captures exported as lossless WebP
+with identical decoded pixels and dimensions. The paired wall views share
+observer and simulation time; development views hide the character. The
+portrait shows the built game after touch movement and reload, with its pause
+dialog hidden.

@@ -10,6 +10,11 @@ import { solarPanelGeometry } from "./desert-architecture.js";
 import { timberGeometry } from "./monastery-architecture.js";
 import { crystalBayContour, addCrystalBayInlay } from "./crystal-wall-art.js";
 import { buildCoastalWallArt } from "./coastal-wall-art.js";
+import {
+  forgeWallPlan,
+  forgeBayContour,
+  buildForgeWallBay,
+} from "./forge-wall-art.js";
 
 export const CHAMBER_WALL_BIOMES = new Set([
   "jungle",
@@ -50,6 +55,7 @@ export function chamberWallPlan(biome, length, stage, side) {
       { length: count },
       (_, i) => (i + 0.5) * step - length / 2,
     ),
+    ...(biome === "volcano" ? forgeWallPlan(length, stage) : {}),
   };
 }
 
@@ -57,6 +63,7 @@ export function chamberWallPlan(biome, length, stage, side) {
 // use that same polygon for the masonry and inset; joints cannot expose sky.
 function aperture(plan, stage) {
   const { biome, radius: r, bottom, top } = plan;
+  if (biome === "volcano") return forgeBayContour(plan);
   if (biome === "desert")
     return [
       [-r, bottom],
@@ -603,28 +610,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
           -0.074 + insetOffset,
         );
     } else if (biome === "volcano") {
-      for (const sign of [-1, 1]) {
-        block(0.27, 4.6, 0.3, m.trim, cx + sign * (r + 0.2), 3.45, 0.49);
-        for (const y of [1.55, 3.25, 5.25])
-          block(0.45, 0.2, 0.4, m.metal, cx + sign * (r + 0.2), y, 0.49);
-      }
-      for (let j = 0; j < contour.length; j++)
-        bar(
-          contour[j].map((n, k) => n + (k === 0 ? cx : 0)),
-          contour[(j + 1) % contour.length].map(
-            (n, k) => n + (k === 0 ? cx : 0),
-          ),
-          0.13,
-          m.metal,
-          0.3,
-        );
-      for (let dx = -r + 0.24; dx < r - 0.1; dx += 0.32)
-        block(0.065, 3.48, 0.08, m.metal, cx + dx, 3.1, 0.01);
-      for (const y of [1.65, 3.1, 4.55])
-        block(r * 1.9, 0.13, 0.14, m.metal, cx, y, 0.07);
-      for (const sign of [-1, 1])
-        for (const y of [1.65, 3.1, 4.55])
-          block(0.16, 0.17, 0.38, m.metal, cx + sign * (r - 0.04), y, 0.16);
+      buildForgeWallBay(plan, cx, i, m, add);
     } else if (biome === "crystal") {
       for (let j = 0; j < contour.length; j++) {
         const a = contour[j],

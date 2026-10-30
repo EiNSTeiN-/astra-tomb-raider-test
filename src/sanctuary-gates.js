@@ -258,17 +258,19 @@ export function buildSanctuaryGate(game, feature, materials) {
   const regionalWalls = CHAMBER_WALL_BIOMES.has(game.level.biome);
   const fittedSkyWalls = design.panel === "lattice";
   gate.walls = [];
-  if (design.panel === "sluice") gate.masonrySolids = [];
+  const fittedMasonry = ["sluice", "forge"].includes(design.panel);
+  if (fittedMasonry) gate.masonrySolids = [];
   const masonrySolid = (size, position) => {
     const solid = stationSolid(
       game,
-      { id: `sluice-masonry-${gate.stage}-${gate.masonrySolids.length}` },
+      { id: `${design.panel}-masonry-${gate.stage}-${gate.masonrySolids.length}` },
       root,
       size,
       position,
       { bodyPadding: 0.65, support: false },
     );
-    solid.coastalMasonry = true;
+    if (design.panel === "sluice") solid.coastalMasonry = true;
+    else solid.forgeMasonry = true;
     gate.masonrySolids.push(solid);
   };
   // Fit wall construction and both kinds of collision to the same room span.
@@ -399,7 +401,7 @@ export function buildSanctuaryGate(game, feature, materials) {
         (floor + 7.38) / 2,
         center.z - (fittedSkyWalls && back ? 0.15 : 0),
       );
-    if (design.panel === "sluice") {
+    if (fittedMasonry) {
       // The old root-only box allowed boots and clothing inside the wider
       // foundation. Reserve low footwear through a crouch transition and
       // diagonal bank approach, with finite bounds around the buried base.
@@ -449,6 +451,8 @@ export function buildSanctuaryGate(game, feature, materials) {
         );
     block(1.7, 0.3, 1.78, m.trim, side * halfWidth, 8.35, 6.5);
     cameraBox(1.7, 8.5, 1.8, side * halfWidth, 4.25, 6.5);
+    if (design.panel === "forge")
+      masonrySolid([1.7, 8.5, 1.8], [side * halfWidth, 4.25, 6.5]);
     if (design.panel === "sluice")
       add(flutedColumnGeometry(7.55, 0.57), m.trim, side * 6.5, 0.45, 7.05);
     for (const yy of [1.0, 3.4, 6.8])
