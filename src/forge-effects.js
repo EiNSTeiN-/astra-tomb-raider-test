@@ -76,8 +76,13 @@ export function moltenMaterial(time, heat, surface = false) {
 
 // Soft plumes originate inside the hollow flue or coolant outlet. GPU lifetimes
 // avoid allocating new particles and stop with the same paused game clock.
-export function forgePlume(time, amount, steam = false, seed = 0) {
-  const count = steam ? 14 : 24;
+export function forgePlume(
+  time,
+  amount,
+  steam = false,
+  seed = 0,
+  count = steam ? 14 : 24,
+) {
   const values = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     values[i * 3] = (i + 0.5) / count;

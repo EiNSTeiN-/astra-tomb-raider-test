@@ -1649,3 +1649,10 @@ actual prepared development captures, before and after the support correction.
 Their follow cameras frame the respective recorded player positions. Both are
 lossless WebP exports with identical decoded pixels and dimensions; there is no
 cropping or image retouching. The repair adds no external asset.
+
+The [geothermal vents](fumaroles.md) use original annular geometry and mineral
+colour variation in `src/fumaroles.js`, reusing the credited Rock Face 03 maps by
+Dario Barresi and Rico Cilliers. Steam extends the project's existing particle
+and synthesized audio sources. No external asset is added. The two images are
+lossless exports of actual game captures with identical decoded pixels and
+dimensions: a prepared development view and a built-game touch rim-save arrival.

@@ -870,6 +870,10 @@ two local light slots. The
 [landing contact repair](docs/forge-interior-landings.md) also removes observed
 hovering beside the gears and hopper after a jump.
 
+Seven [geothermal vents](docs/fumaroles.md) add mineral-coated rock, drifting
+steam and positional hissing between the volcanic courts. Their hollow mouths
+and fitted skirts have physical surfaces for jumps and landings.
+
 The surrounding [forge flats now use gravel and ash](docs/forge-ground.md), with smaller fragments and broad mineral staining that distinguish them from the larger rock faces on the banks. The credited ground maps preserve terrain geometry and walking routes; High/Low material views and resource cleanup are checked.
 
 The objective chambers now have [63 task-specific wall bays](docs/forge-wall-bays.md): intake louvers, pressure diaphragms, gear cases, smelting feeds, pilot registers, cooling fins and heart-engine impellers. Their fitted recesses replace repeated grilles. The accompanying body survey repairs a foundation collision defect with finite wall and jamb bounds.
