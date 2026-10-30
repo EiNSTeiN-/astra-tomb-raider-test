@@ -460,6 +460,12 @@ reuses the existing explorer rig, calibrated hand solver, credited forge
 materials and original mechanical synthesis. No external assets were added.
 See [lift-control notes](cinder-relay-levers.md).
 
+The relay's arched trusses, bearing plates, web braces and rivets in
+`src/pressure-frame-art.js` are original project geometry. They reuse the
+original closed gantry construction in `src/forge-furnace-art.js` and the
+existing relay iron and bronze materials. No external model, image, recording,
+music or dependency was added. See [the crown comparison](cinder-relay-crown.md).
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658

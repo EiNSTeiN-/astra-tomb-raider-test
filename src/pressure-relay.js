@@ -177,9 +177,6 @@ export function buildPressureRelay(game) {
       wall(1.4, 27, 1.4, px, 13.3, pz);
       box(2.1, 0.6, 2.1, px, 26.8, pz, bronze);
     }
-  box(44, 1.1, 1.7, 0, 27.7, -21);
-  box(44, 1.1, 1.7, 0, 27.7, 21);
-  for (const px of [-21, 21]) box(1.7, 1.1, 44, px, 27.7, 0);
   for (const [i, d] of PRESSURE_DECKS.entries()) {
     const v = deck(d.x, d.z, d.w * 2, d.d * 2, d.y);
     v.rest = i;

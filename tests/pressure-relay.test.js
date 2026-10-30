@@ -15,6 +15,7 @@ import { CameraSurfaces } from "../src/camera-collision.js";
 import { advanceCharacter, supportAt } from "../src/character-motion.js";
 import { restoreTraversal } from "../src/traversal.js";
 import { RELAY_RAM_LENGTH, RELAY_CABLE_TOP } from "../src/pressure-art.js";
+import { pressureFramePlan } from "../src/pressure-frame-art.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import {
@@ -488,7 +489,76 @@ test("dressed gallery and piston panels retain supported contact through every t
     triangles +=
       (o.geometry.index?.count || o.geometry.attributes.position.count) / 3;
   });
-  assert(triangles < 135000, `chamber geometry budget exceeded: ${triangles}`);
+  assert(triangles < 150000, `chamber geometry budget exceeded: ${triangles}`);
+});
+
+test("the foundry crown joins the pier caps, preserves open truss bays and captures its actual members", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay,
+    frame = h.art.frame;
+  assert.deepEqual(frame.plan, pressureFramePlan());
+  assert.equal(frame.plan.length, 8);
+  const meshes = frame.root.children.filter((o) => o.isMesh);
+  assert.equal(
+    meshes.length,
+    2,
+    "the static crown must batch by its two materials",
+  );
+  let triangles = 0;
+  for (const mesh of meshes) {
+    triangles += mesh.geometry.attributes.position.count / 3;
+    assert(mesh.geometry.attributes.position.array.every(Number.isFinite));
+    assert(mesh.geometry.attributes.normal.array.every(Number.isFinite));
+  }
+  assert(triangles < 18000, `crown geometry budget exceeded: ${triangles}`);
+  const bounds = new THREE.Box3().setFromObject(frame.root);
+  assert(
+    Math.abs(bounds.min.y - 27.1) < 1e-5,
+    "bearing plates must rest on the capstones",
+  );
+  assert(bounds.max.y < 32.3);
+  const ray = new THREE.Raycaster();
+  for (const span of frame.plan) {
+    for (let i = 1; i < span.points.length - 1; i++) {
+      const [along, y] = span.points[i];
+      const point = new THREE.Vector3(
+        span.axis === "x" ? along : span.fixed,
+        y,
+        span.axis === "x" ? span.fixed : along,
+      );
+      const normal =
+        span.axis === "x"
+          ? new THREE.Vector3(0, 0, 1)
+          : new THREE.Vector3(1, 0, 0);
+      const a = point.clone().addScaledVector(normal, -2),
+        b = point.clone().addScaledVector(normal, 2);
+      ray.set(a, normal);
+      ray.far = 4;
+      assert(
+        ray.intersectObject(frame.root, true).length,
+        "a closed upper girder must cover every node",
+      );
+      assert(
+        g.cameraSurfaces.entry(a, b, 0) < 1,
+        "camera bounds must follow the baked girder transform",
+      );
+      assert(pressureBlocked(g, point.x, point.z, point.y));
+    }
+  }
+  const a = new THREE.Vector3(1.75, 30.9, -23),
+    b = new THREE.Vector3(1.75, 30.9, -19);
+  ray.set(a, new THREE.Vector3(0, 0, 1));
+  ray.far = 4;
+  assert.equal(
+    ray.intersectObject(frame.root, true).length,
+    0,
+    "the web leaves a real opening",
+  );
+  assert.equal(
+    g.cameraSurfaces.entry(a, b, 0),
+    1,
+    "the camera must see through an open bay",
+  );
 });
 
 test("return-cable ends, guide rollers and moving posts track the car and freeze with it", () => {

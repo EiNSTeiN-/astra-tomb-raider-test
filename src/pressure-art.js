@@ -4,6 +4,8 @@ import { stoneBlockGeometry } from "./temple-architecture.js";
 import { campTube } from "./camp-geometry.js";
 import { mergeArchitecture } from "./visuals.js";
 
+import { buildPressureFrame } from "./pressure-frame-art.js";
+
 export const RELAY_RAM_LENGTH = 4.65;
 export const RELAY_CABLE_TOP = 29.4;
 
@@ -241,6 +243,7 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
         beam([pier.x, 24.8, pier.z], [pier.x, 27.3, z], 0.2, 0.23, metal);
     }
   }
+  buildPressureFrame(game, materials, solid);
   delete h.walls;
   delete h.piers;
 
