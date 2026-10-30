@@ -1656,3 +1656,8 @@ Dario Barresi and Rico Cilliers. Steam extends the project's existing particle
 and synthesized audio sources. No external asset is added. The two images are
 lossless exports of actual game captures with identical decoded pixels and
 dimensions: a prepared development view and a built-game touch rim-save arrival.
+
+The two [cooling-column bank-contact images](basalt-bank-contact.md) are lossless
+exports of actual prepared development observers, with identical decoded pixels
+and dimensions. They use the existing credited volcanic geometry and maps; no
+new external asset is added.

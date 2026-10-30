@@ -78,6 +78,6 @@ development view; the portrait restores a prepared rim save in the built game,
 with its pause dialog hidden for the photograph.
 
 Broader landscape composition, other continuous routes and moving-body coverage
-remain open in the [playable-world audit](visual-audit.md). Distant
-cooling-column silhouettes against the ash banks are queued for closer
-terrain-contact review.
+remain open in the [playable-world audit](visual-audit.md). The subsequent
+[cooling-column base inspection](basalt-bank-contact.md) finds buried undersides
+at the sampled positions behind the two suspect distant silhouettes.
