@@ -99,9 +99,20 @@ export function volcanicOutcropPlan(game) {
       const length = long * scale,
         width = wide * scale,
         cells = basaltCells(seed, length, width);
-      for (const radius of [36, 43, 50, 58]) {
+      for (const radius of [36, 43, 50, 58, 66, 74]) {
         for (const offset of [
-          0, 0.4, -0.4, 0.8, -0.8, 1.2, -1.2, 1.6, -1.6, 2.4,
+          0,
+          0.4,
+          -0.4,
+          0.8,
+          -0.8,
+          1.2,
+          -1.2,
+          1.6,
+          -1.6,
+          2.4,
+          -2.4,
+          Math.PI,
         ]) {
           const angle = desired + offset,
             yaw = angle + Math.PI / 2;

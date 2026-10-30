@@ -857,6 +857,11 @@ The [eight objective chambers now have distinct roof profiles](docs/forge-art.md
 
 Nine [foundry workyards](docs/forge-workyards.md) now furnish these courts with ore and ingot bins, pipe cradles, crucibles, moulds, anvils, bellows and cooling troughs. Their individually seated bays follow the slopes around open aisles; character contact, walking routes, saves and resource cleanup are checked.
 
+Eighteen [foundry forecourts](docs/forge-forecourts.md) extend their surroundings
+with worn paving, retaining terraces, loading partitions, covered galleries,
+dry casting beds, a quenching basin and an engine gateway. Their different pairs
+give the nine main courts more varied foregrounds and walking space.
+
 The surrounding [forge flats now use gravel and ash](docs/forge-ground.md), with smaller fragments and broad mineral staining that distinguish them from the larger rock faces on the banks. The credited ground maps preserve terrain geometry and walking routes; High/Low material views and resource cleanup are checked.
 
 The objective chambers now have [63 task-specific wall bays](docs/forge-wall-bays.md): intake louvers, pressure diaphragms, gear cases, smelting feeds, pilot registers, cooling fins and heart-engine impellers. Their fitted recesses replace repeated grilles. The accompanying body survey repairs a foundation collision defect with finite wall and jamb bounds.

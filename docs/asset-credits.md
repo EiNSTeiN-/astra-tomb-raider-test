@@ -1622,3 +1622,13 @@ with identical decoded pixels and dimensions. The paired smelting views share
 observer and simulation time; development views hide the character. The active
 vent uses prepared completed objectives, and the portrait shows the built game
 after touch input and reload with the pause dialog hidden.
+
+The [foundry forecourts](forge-forecourts.md) use original layout, masonry,
+gallery, gateway and casting-bed construction in `src/forge-forecourt-plan.js`
+and `src/forge-forecourts.js`. They reuse the credited volcanic stone and metal
+materials, and Charlotte Baglioni's Volcanic Rock Tiles for the worn aprons.
+No external model, texture, recording, music or dependency is added.
+The two documentation images are direct game captures exported as lossless
+WebP with identical decoded pixels and dimensions. The gateway uses a prepared
+development view; the portrait shows the built game after touch input and
+reload, with its pause dialog hidden.
