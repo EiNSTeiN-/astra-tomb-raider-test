@@ -862,6 +862,12 @@ with worn paving, retaining terraces, loading partitions, covered galleries,
 dry casting beds, a quenching basin and an engine gateway. Their different pairs
 give the nine main courts more varied foregrounds and walking space.
 
+The eight [foundry service halls](docs/forge-interiors.md) now have distinct
+interior arrangements of ducts, refractory baffles, pressure vessels, gear
+stands, casting beds, burner columns, cooling fins and engine cradles. Fitted
+bases follow the shallow floor steps, and barred wall lamps reuse the forge's
+two local light slots.
+
 The surrounding [forge flats now use gravel and ash](docs/forge-ground.md), with smaller fragments and broad mineral staining that distinguish them from the larger rock faces on the banks. The credited ground maps preserve terrain geometry and walking routes; High/Low material views and resource cleanup are checked.
 
 The objective chambers now have [63 task-specific wall bays](docs/forge-wall-bays.md): intake louvers, pressure diaphragms, gear cases, smelting feeds, pilot registers, cooling fins and heart-engine impellers. Their fitted recesses replace repeated grilles. The accompanying body survey repairs a foundation collision defect with finite wall and jamb bounds.

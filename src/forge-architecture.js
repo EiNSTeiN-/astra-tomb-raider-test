@@ -499,6 +499,12 @@ export function updateForgeArchitecture(game, dt) {
     const d = position.distanceTo(game.player.position);
     if (d < 40) lights.push({ position, heat: 0.55, score: 0.55 / (d + 2) });
   }
+  for (const hall of game.forgeInteriors || []) {
+    for (const position of hall.lamps) {
+      const d = position.distanceTo(game.player.position);
+      if (d < 18) lights.push({ position, heat: 0.85, score: 0.85 / (d + 2) });
+    }
+  }
   lights.sort((a, b) => b.score - a.score);
   game.forgeLights.forEach((light, i) => {
     const selected = lights[i];

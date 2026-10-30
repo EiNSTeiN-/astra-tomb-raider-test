@@ -1632,3 +1632,14 @@ The two documentation images are direct game captures exported as lossless
 WebP with identical decoded pixels and dimensions. The gateway uses a prepared
 development view; the portrait shows the built game after touch input and
 reload, with its pause dialog hidden.
+
+The [foundry service halls](forge-interiors.md) use original project layouts and
+geometry in `src/forge-interior-art.js` and `src/forge-interiors.js`. Their ducts,
+screens, vessels, gears, beds, burners, fins, cradles and wall lamps reuse the
+credited volcanic stone and corroded-metal maps. No external model, texture,
+recording, music or dependency is added.
+
+The two documentation images are actual game captures exported as lossless
+WebP with identical decoded pixels and dimensions. The gear hall uses a prepared
+development view; the portrait shows the built game after touch movement and
+reload, with its pause dialog hidden.
