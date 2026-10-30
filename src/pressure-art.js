@@ -112,6 +112,14 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     mesh.removeFromParent();
     mesh.geometry.dispose();
   };
+  const furniture = (x, y, z, w, t, d) => {
+    art.furniture.push(solid(x, y, z, w, t, d));
+    // These furnishings are below the ordinary two-metre capture threshold,
+    // but can still surround the lens or hide the explorer during a low orbit.
+    const proxy = add(new THREE.BoxGeometry(w, t, d), metal, x, y, z);
+    game.cameraSurfaces?.capture(proxy, { small: true });
+    remove(proxy);
+  };
   const clear = (group) => {
     for (const mesh of [...group.children]) {
       if (mesh.geometry) remove(mesh);
@@ -755,7 +763,7 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     for (const x of [-0.74, 0.74])
       for (const z of [-0.45, 0.45])
         pin(0.032, 0.025, x, 0.91, z, bronze, g, "y", 6);
-    art.furniture.push(solid(x, y + 0.46, z, 1.8, 0.94, 1.2));
+    furniture(x, y + 0.46, z, 1.8, 0.94, 1.2);
     mergeArchitecture(g);
   };
   chest(18.1, 0.18, 12.7);
@@ -775,7 +783,10 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
   face.add(label);
   for (let row = 0; row < 3; row++)
     block(0.5, 0.008, 0.006, 0, -0.04 - row * 0.035, 0.036, bronze, face);
-  art.furniture.push(solid(19.5, 0.18 + 0.65, 8.65, 0.8, 1.3, 0.56));
+  furniture(19.5, 0.18 + 0.65, 8.65, 0.8, 1.3, 0.56);
+  // Leave room for the posed boots and crouched body beside low furnishings.
+  // Keep the lens bounds fitted to the objects; only the body needs this margin.
+  for (const bound of art.furniture) bound.bodyPadding = 0.65;
   mergeArchitecture(face);
   mergeArchitecture(tablet);
   // Labels receive physical backing; the overhead entry title sits on its lintel.

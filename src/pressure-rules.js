@@ -96,8 +96,8 @@ export function pressureBlocked(game, x, z, y, clearance = 1.8) {
   return (
     h.solids.some(
       (o) =>
-        Math.abs(x - o.x) < o.w + 0.2 &&
-        Math.abs(z - o.z) < o.d + 0.2 &&
+        Math.abs(x - o.x) < o.w + (o.bodyPadding ?? 0.2) &&
+        Math.abs(z - o.z) < o.d + (o.bodyPadding ?? 0.2) &&
         y < o.top - 0.01 &&
         y + clearance > o.bottom,
     ) ||

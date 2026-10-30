@@ -1107,8 +1107,10 @@ export class Adventure {
       this.player.position.x,
       this.player.position.z,
     );
-    restoreTraversal(this);
+    // Recover an occupied relay save on its recorded gallery before generic
+    // arrival search can step off the low intake deck onto the surrounding floor.
     restorePressureArrival(this);
+    restoreTraversal(this);
     restoreOrbitArrival(this);
     restoreCausewayArrival(this);
     restoreSurveyArrival(this);

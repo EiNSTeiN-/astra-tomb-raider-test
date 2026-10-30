@@ -79,7 +79,9 @@ At the intake, the supported local position `(14, 0.18, 10)` with yaw `0.9` and
 pitch `-0.18` produces a view obstructed by nearby relay machinery. It occurs
 in both the preceding and revised builds, in High and Performance, despite a
 legal player position and full avatar opacity. Another intake orientation is
-clear. The precise obstruction and camera response still need investigation.
+clear. The subsequent [furnishing clearance pass](relay-furniture-clearance.md)
+identifies the uncaptured intake chest and repairs this view, along with nearby
+body-boundary contacts and older-save recovery.
 
 The wider court survey also retains broad sparse ground and repeated lower
 chamber arrangements. This crown pass does not close those composition findings,

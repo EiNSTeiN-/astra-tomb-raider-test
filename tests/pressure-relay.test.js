@@ -561,6 +561,53 @@ test("the foundry crown joins the pier caps, preserves open truss bays and captu
   );
 });
 
+test("small relay furnishings reject the formerly occupied lens and leave space above and beside them", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  const oldLens = new THREE.Vector3(18.084557569, 0.731143261, 13.241305347);
+  const chest = new THREE.Vector3(14, 1.48, 10);
+  assert(
+    g.cameraSurfaces.entry(chest, oldLens, 0) < 1,
+    "the intake chest must block the old camera arm before its lens enters the casting",
+  );
+  for (const [x, z] of [
+    [18.1, 12.7],
+    [-19, 17],
+    [19.5, 8.65],
+  ]) {
+    const o = h.art.furniture.find((o) => o.x === x && o.z === z);
+    assert(o);
+    const y = (o.bottom + o.top) / 2;
+    const a = new THREE.Vector3(x, y, z + o.d + 0.8);
+    const b = new THREE.Vector3(x, y, z);
+    const ray = new THREE.Raycaster(
+      a,
+      b.clone().sub(a).normalize(),
+      0,
+      a.distanceTo(b),
+    );
+    assert(
+      ray.intersectObject(h.root, true).length,
+      "the observer must cross rendered furniture",
+    );
+    assert(
+      g.cameraSurfaces.entry(a, b, 0) < 1,
+      "small furnishings need captured bounds",
+    );
+    for (const [dx, dy] of [
+      [o.w + 0.15, 0],
+      [0, o.top - y + 0.15],
+    ]) {
+      const shift = new THREE.Vector3(dx, dy, 0);
+      assert.equal(
+        g.cameraSurfaces.entry(a.clone().add(shift), b.clone().add(shift), 0),
+        1,
+        "the camera must retain the clear space around the finite furnishing",
+      );
+    }
+  }
+});
+
 test("return-cable ends, guide rollers and moving posts track the car and freeze with it", () => {
   const g = pressureFixture(),
     h = g.pressureRelay;
@@ -598,7 +645,9 @@ test("return-cable ends, guide rollers and moving posts track the car and freeze
 test("older gallery saves occupied by new cargo recover on the same supported floor", () => {
   for (const [x, z, height, rest] of [
     [18.1, 12.7, 0.18, 0],
+    [18.1, 13.7, 0.18, 0],
     [12.2, -18.15, 24.2, 3],
+    [12.2, -18.55, 24.2, 3],
   ]) {
     const g = pressureFixture({
       pressureRelay: {
@@ -612,8 +661,8 @@ test("older gallery saves occupied by new cargo recover on the same supported fl
     });
     assert(!g.canMove(x, z, height));
     g.player.position.set(x, 0, z);
-    restoreTraversal(g);
     restorePressureArrival(g);
+    restoreTraversal(g);
     assert.equal(g.player.position.y, height);
     assert(g.canMove(g.player.position.x, g.player.position.z, height));
     pressureTick(g, 30);

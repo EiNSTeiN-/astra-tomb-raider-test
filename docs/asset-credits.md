@@ -466,6 +466,11 @@ original closed gantry construction in `src/forge-furnace-art.js` and the
 existing relay iron and bronze materials. No external model, image, recording,
 music or dependency was added. See [the crown comparison](cinder-relay-crown.md).
 
+The [relay furnishing clearance](relay-furniture-clearance.md) adds original
+camera bounds, body margins and arrival handling around the existing chests,
+tablet and cargo. It adds no external asset or new rendered artwork. Comparison
+images are direct game captures; the credited relay materials remain unchanged.
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658
