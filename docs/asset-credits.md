@@ -1557,3 +1557,13 @@ uses the same current world, observer and simulation time; it is not the full
 preceding release. The forge context is another ground observer. The portrait
 pair compares an obstructed static survey with an active sixth-regulator release
 touch interface; those two captures use different prepared progress states.
+
+The [foundry workyards](forge-workyards.md) use original bay, shelter, furnishing
+and placement code in `src/forge-workyard-art.js` and `src/forge-workyards.js`.
+They reuse the project's gear and vessel construction and existing credited
+volcanic stone, corroded metal and court-paving materials. No external model,
+texture, recording, music or dependency is added. Three intentional documentation
+images are actual game captures exported as lossless WebP with identical decoded
+pixels and dimensions. The casting-yard view is a prepared ground observer with
+the character hidden; the keyboard and portrait touch images show the built
+release from prepared saves, with the pause dialog hidden for the photograph.

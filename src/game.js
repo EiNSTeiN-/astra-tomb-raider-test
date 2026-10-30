@@ -1,4 +1,5 @@
 import { buildVolcanicOutcrops } from "./volcanic-outcrops.js";
+import { buildForgeWorkyards } from "./forge-workyards.js";
 import { buildStationYards } from "./station-yards.js";
 import { buildPalaceFurnishings } from "./palace-furnishings.js";
 import { FoliageFraming } from "./foliage-framing.js";
@@ -1051,6 +1052,7 @@ export class Adventure {
     buildDesertForecourts(this);
     buildPalaceFurnishings(this);
     buildVolcanicOutcrops(this);
+    buildForgeWorkyards(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
     this.cameraSurfaces.rebuild();
