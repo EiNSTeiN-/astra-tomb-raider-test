@@ -1534,3 +1534,14 @@ pair switches the old flat planes and new terrain shading at the same observer
 camera and time; the approach uses the follow camera with prepared progress.
 The portrait image shows the built release after native touch movement, with
 its pause dialog hidden for the photograph.
+
+The [forge chamber roofs](forge-art.md#objective-chamber-roofs) use original
+profile, panel, gable, vent and lantern geometry in `src/forge-vaults.js`.
+They reuse the existing credited volcanic rock, corroded metal and masonry
+materials. No external texture, model, recording, music or dependency is added.
+Four intentional documentation images are actual game captures; their lossless
+WebP exports preserve decoded pixels and dimensions. The preceding/current
+barrel pair shares its observer camera, fresh progress and simulation time.
+The twin-ridge view is another chamber in that survey. The portrait view uses
+the built game after movement and reload at its prepared first-objective approach,
+with the pause dialog hidden.

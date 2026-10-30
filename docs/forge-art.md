@@ -47,7 +47,7 @@ The first three views use the same 900 × 650 viewport and camera. All images ar
 
 The selected Performance view changed from **310,968 triangles / 170 calls** to **268,116 / 193**. The selected High view submitted **1,036,565 triangles / 616 calls** across its rendering passes. Each hall has 5,500 structural/gear triangles and four main draws: two static material batches and two rotating gears. Detail and effects add separate draws. The actual chapter uses 549 camera surfaces. These are selected workload measurements, not hardware frame-rate results.
 
-## Verification and limits
+## Original forge verification and limits
 
 All **144 tests** pass, including seven new forge tests covering partial/completed/legacy objective state, finite and correctly wound geometry, open gear hubs and chimney tops, court approaches, camera clearance, furnace front/back occlusion, state shared by visuals and sound, gear ratios, immediate lava restoration, caldera seams and placement, texture hashes, and the hiss's level and spectral distinction from wind. The release build passes with the existing Three.js chunk-size advisory.
 
@@ -61,7 +61,7 @@ The palace and snow chapters subsequently prepared with no asset errors and no l
 
 After the foundation fix, the final High production build loaded all ten maps with HTTP 200 and the expected byte counts, opened its briefing at zero play time, and exposed no development hook. Native keyboard input changed the saved position from `(385, 224, height 0)` to `(384.9371832627515, 224.20415439605796, height 0)`. Pause recorded **3.864299999952316 active seconds**. A subsequent reload held a required rock-map request until another tab gained focus; preparation then opened paused and restored the exact position and elapsed time. Test saves were cleared from development and preview, restoring High quality.
 
-Browser verification uses Chromium ANGLE/SwiftShader software rendering. The short movement check traveled only a small distance and does not establish sustained responsiveness or supported-device performance. Subjective listening on more devices, full-length chapter playtests, approximately one-hour pacing, and modern AAA visual quality remain open. The original production goal is not complete.
+Browser verification uses Chromium ANGLE/SwiftShader software rendering. The short movement check traveled only a small distance and does not establish sustained responsiveness or supported-device performance. Subjective listening on more devices, broader chapter playtests and the whole-world visual audit remain open. There is no minimum chapter duration; AAA is the artistic direction. The production goal is not complete.
 
 Development review helper:
 
@@ -70,3 +70,86 @@ const review = await import("/scripts/verify-forge-art-browser.js");
 review.inspectForge(__vesper.game);
 review.forgeView(__vesper.game, 0); // changes the review observer/camera without saving
 ```
+
+## Objective chamber roofs
+
+The eight objective chambers now have distinct roof profiles above their existing
+iron doors and working gears. Their silhouettes follow the thermal objectives:
+a barrel over the cold-air circuit, an offset ignition ridge, a raised pressure
+monitor, a crossing ridge over the gear jacket, paired smelting ridges, a pilot
+lantern, an opposed tempering ridge, and a taller barrel with a lantern over the
+heart engine. This addresses the repeated flat chamber crowns recorded in VA-136.
+The paired rear furnaces and their wider setting still need composition review.
+
+Closed metal roof panels, basalt risers and end gables form the enclosure.
+Ten roof openings have fitted curbs; two have raised, open-sided lantern caps.
+Nine front ventilation slots are actual openings between metal grille bars.
+Panel joints and transverse seams follow the delivered triangular roof surface.
+Side and rear bearings reach the continuous wall core underneath the old cornice
+joints. Existing materials supply basalt, corroded iron and dressed trim.
+
+The added geometry participates in camera clearance, physical obstruction,
+raised footing and sight obstruction. The lower rooms, door drives and puzzle
+controls retain their existing placement and saved state. The new geometry
+reuses existing textures and materials.
+
+Each roof uses three material batches and 7,248–8,880 triangles; all eight
+add 60,876 triangles and 24 batches before view culling and rendering passes.
+These counts describe geometry before culling, not frame-rate performance.
+
+Two construction regressions check outward closed surfaces, clear roof and
+front openings, seated wall bearings, and agreement between visible surfaces
+and physical support. Fittings use the actual two-triangle roof cells instead
+of evaluating the curved design between vertices. An independent triangle
+intersection check distinguishes the two methods by more than one centimetre.
+
+The overview survey reviews 34 current High/Low frames and 18 preceding views.
+All 18 preceding/current observer cameras, targets and quality settings match.
+The chapter's original furnace/thermal regression checks remain part of this
+revision's validation.
+
+The first route survey selected an uncooled pool beside the tempering chamber.
+Damage tracing confirmed a normal nine-point lava hit. The review planner now
+avoids hot pools; the game hazard rules are unchanged.
+
+All 24 selected game checks pass: the two roof regressions, seven existing
+forge checks, ten thermal checks, and five gate construction/motion/save checks.
+Formatting and the release build pass; the build retains its existing large-chunk
+advisory. The three CPU-guard checks also pass.
+
+Sixteen assisted entry/exit legs cover 243.70 metres through all eight chambers
+using 3,644 fixed controller steps. All finish at full health; opacity sampled
+at controller-batch boundaries remains 1. All 24 route captures are reviewed.
+Reloading this chapter and changing to the jungle each dispose of all 24 merged
+roof geometries exactly once. Current-source hashes match both browser runs.
+
+Release checks use the ordinary interface on High keyboard (1280 × 800) and
+Low portrait touch (540 × 900), starting from a prepared save with the first
+field tasks and counterweights complete. Both turn a thermal valve, crouch,
+walk and open the map. Look and jump inputs are also exercised. The committed
+valve state and subsequent movement survive three complete-save comparisons
+per case, excluding only the
+play timestamp. All twelve release captures are reviewed. The served character
+model hash and production bundle names match the local delivery, with no
+development hook, browser errors or application warnings.
+
+The one browser and selected test workers share the locked five-CPU allowance.
+Owned browsers and preview servers close after each check; temporary profiles
+are removed. These runs use software rendering and muted audio.
+
+![Previous flat chamber crown](images/forge-roofs-before.webp)
+![Cold-air chamber with its barrel roof and front vent](images/forge-roofs-barrel.webp)
+![Paired ridges over the smelting chamber](images/forge-roofs-twin.webp)
+![Portrait release view after movement and reload](images/forge-roofs-touch.webp)
+
+The first pair shares the same 1280 × 800 observer camera, fresh progress and
+simulation time. The third image shows another chamber in that static survey.
+The portrait image uses the built game after movement and reload at a prepared
+first-objective approach, with its pause dialog hidden for the photograph.
+All four are actual browser captures exported losslessly with identical decoded
+pixels and dimensions.
+
+This is a local construction and composition revision. The assisted routes use
+prepared progress and do not run enemies or complete the chapter. Muted browser
+checks do not evaluate the sound mix. Consumer GPU performance, wider landscapes,
+full-body contact elsewhere and the whole-world acceptance audit remain open.

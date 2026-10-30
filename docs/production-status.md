@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [forge chamber roofs](forge-art.md#objective-chamber-roofs) give eight
+  objective halls distinct profiles, fitted bearings and open vents. Twenty-four
+  selected game checks, three CPU-guard checks and the build pass. All 34 current
+  High/Low overview views, 18 preceding views and 24 successful route captures
+  are reviewed. Sixteen assisted entry/exit legs cover 243.70 m at full health.
+  Keyboard/touch valve turns and complete-save reloads pass; twelve release
+  captures are reviewed. Reload and chapter change each release all 24 merged
+  roof geometries once. This addresses VA-136's repeated flat crowns; broader
+  volcanic composition and whole-world acceptance remain open.
 - The [swimmer-clearance revision](water-ripples.md#swimmer-clearance) repairs
   VA-135's head/arm intersection at the harbor pillar with stroke and turn
   clearance, compact treading near masonry and bounded old-save recovery.

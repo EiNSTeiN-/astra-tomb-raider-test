@@ -34,6 +34,7 @@ import { buildCrystalEnclosure } from "./crystal-enclosures.js";
 import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
 import { stationSolid } from "./field-station-solids.js";
 import { buildCoastalVault } from "./coastal-vaults.js";
+import { buildForgeVault } from "./forge-vaults.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -621,6 +622,7 @@ export function buildSanctuaryGate(game, feature, materials) {
       gate.wheels.push(gear);
     }
     block(9, 0.42, 1.2, m.trim, 0, 9.15, 6.5, root, true);
+    buildForgeVault(game, gate, m);
   } else {
     for (let i = 0; i < 3; i++)
       block(
