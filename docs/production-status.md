@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal bank shoulders](coastal-bank-shoulders.md) soften the steep grid
+  lips in the recorded court fronts. Reproduced delivered-triangle grades fall
+  from 2.924–2.930 to 0.237–0.240 m/m; all 35,341 walking-footprint and 956
+  basin-footprint vertices retain their preceding heights. Thirty-five selected
+  tests and the build pass. All 24 development views and sixteen local-return/
+  production images are reviewed. Twenty-four resting and 88 sampled moving
+  body poses clear the actual terrain; eight local legs cover 31.38 m over 472
+  controller updates. Keyboard/High and portrait-touch/Performance hydraulic
+  input and eight complete-save reload comparisons pass, excluding play
+  timestamps. Owned resources close under the shared locked five-CPU cap.
+  Broader shore composition, offset observers, continuous routes, moving contact
+  and listening/device acceptance remain open.
 - The [crystal light-clearance repair](crystal-light-clearance.md) moves the four
   pooled sources above their emitting crystal or instrument geometry. All 66
   delivered candidates clear their actual source triangles and the cave ceiling.

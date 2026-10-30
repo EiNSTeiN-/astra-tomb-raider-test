@@ -32,6 +32,10 @@ seed-bearing stems and flowering cushions beside the palace ruins. Rooted
 clusters replace the shared short grass while leaving routes and working
 lanes clear. Broader court and landscape composition remains under review.
 
+The [coastal bank shoulders](docs/coastal-bank-shoulders.md) replace the recorded
+steep grid lips with broader shoreline slopes while retaining the complete
+walking-cell and reservoir terrain footprints.
+
 The [coastal floors](docs/coastal-floors.md) now give the ten palace courts
 different limestone bonds, orientations and mosaics tied to their hydraulic
 work. The panels fit the dry rear bays, and fine grout softens at distance.

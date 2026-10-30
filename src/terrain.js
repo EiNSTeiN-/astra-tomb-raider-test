@@ -37,6 +37,7 @@ import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { buildJungleFringe } from "./jungle-fringe.js";
 import { regionalBankRise } from "./terrain-banks.js";
+import { coastalBankDrop } from "./coastal-banks.js";
 import { courtTerrain } from "./court-terrain.js";
 
 const smooth = (a, b, value) => {
@@ -179,10 +180,10 @@ export function createTerrainProfile(map, level) {
               ),
             );
           }
-        const rise = 1 - Math.exp(-distance * 0.72);
         if (walkingDistances) walkingDistances[iz * width + ix] = distance;
         if (biome === "sky") height -= skyBankDrop(x, z, distance, level.seed);
-        else if (biome === "water") height -= rise * 7;
+        else if (biome === "water")
+          height -= coastalBankDrop(x, z, distance, level.seed);
         else if (biome === "desert")
           height += desertBankRise(x, z, distance, level.seed);
         else height += regionalBankRise(x, z, distance, level.seed, biome);

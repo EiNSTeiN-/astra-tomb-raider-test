@@ -1667,3 +1667,9 @@ prepared development captures at the same recorded camera and simulation time.
 Both images are lossless WebP exports with identical decoded pixels and
 dimensions. The light-position repair reuses the existing credited geometry,
 materials and textures and adds no external asset.
+
+The [coastal bank-shoulder comparison](coastal-bank-shoulders.md) uses actual
+prepared game captures at the same recorded camera and simulation time. Both
+images are lossless WebP exports with identical decoded pixels and dimensions.
+The terrain repair reuses the existing credited coastal materials and geometry,
+with original project height-shaping code and no new external asset.
