@@ -14,6 +14,7 @@ import { mergeArchitecture } from "./visuals.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { quartzGeometry } from "./cavern-geometry.js";
 import { mineralMaterial } from "./cavern-material.js";
+import { mineralLightPosition } from "./mineral-art.js";
 import { hydraulicPlaque } from "./hydraulic-geometry.js";
 import { poseHands } from "./pose.js";
 import { pbrMaterial } from "./visuals.js";
@@ -329,6 +330,7 @@ export function buildResonanceCourts(game) {
         display: state.values[index],
         lastLabel: state.values[index],
       };
+      node.lightPosition = mineralLightPosition(node.center, [body]);
       site.nodes.push(node);
       game.obstacles.push({
         x: root.position.x + x,

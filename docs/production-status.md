@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [crystal light-clearance repair](crystal-light-clearance.md) moves the four
+  pooled sources above their emitting crystal or instrument geometry. All 66
+  delivered candidates clear their actual source triangles and the cave ceiling.
+  Nineteen selected regressions and the production build pass. The reproduced
+  square-tip view falls from about 41,286 to 61.3 peak linear HDR luminance.
+  All 22 development views and fourteen production captures are reviewed.
+  Keyboard/High and portrait-touch/Performance cases solve the ascending array,
+  exercise movement and preserve complete saves through three reloads each,
+  excluding play timestamps. Owned browsers and previews close under the shared
+  locked five-of-sixteen CPU allowance. The preceding 154-view main-court overview
+  is a coverage checkpoint; offset views, broader composition, continuous routes
+  and separate listening/device acceptance remain open.
 - The [basalt outcrops](basalt-outcrops.md) add five formations with 181 separated,
   grounded columns and 27,040 triangles. All 41 selected checks and the build
   pass. Ten assisted local legs cover 119.71 m at full health and visibility;

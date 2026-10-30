@@ -24,6 +24,7 @@ import { CameraSurfaces, constrainCamera } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
 import { normalizeSave } from "../src/storage.js";
 import { coursePlan } from "../src/traversal-courses.js";
+import { meshPointDistance } from "./mesh-point-distance.js";
 
 const level = LEVELS[6],
   map = createMap(level),
@@ -273,6 +274,27 @@ test("saved resonance work controls the same gradual mineral glow and positional
   assert.equal(source.activity, 1);
   assert.equal(game.cavernLights.length, 4);
   assert.ok(game.cavernLights.every((l) => !l.castShadow));
+});
+
+test("pooled mineral lights clear actual cluster surfaces and the cave ceiling", (t) => {
+  const game = fixture(t);
+  let checked = 0;
+  for (const patch of game.cavernPatches)
+    for (const center of patch.centers) {
+      game.player.position.copy(center);
+      updateCaverns(game, 0);
+      const light = game.cavernLights[0];
+      assert(light.visible && light.intensity > 0);
+      assert.equal(light.position.x, center.x);
+      assert.equal(light.position.z, center.z);
+      assert(meshPointDistance(patch.root, light.position) > 0.74);
+      assert(
+        light.position.y <
+          game.cavernProfile.height(light.position.x, light.position.z) - 0.1,
+      );
+      checked++;
+    }
+  assert.equal(checked, 33);
 });
 
 test("drip streaks, impact rings and sound follow the same drained water surface", (t) => {

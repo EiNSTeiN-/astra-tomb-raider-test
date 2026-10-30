@@ -19,6 +19,24 @@ import {
   resonatorStaveGeometry,
   resonatorFootingGeometry,
 } from "../src/resonator-frames.js";
+import { meshPointDistance } from "./mesh-point-distance.js";
+
+test("all resonator light anchors clear the delivered crystal and housing", (t) => {
+  const game = fixture(t);
+  let checked = 0;
+  for (const site of game.resonanceSites)
+    for (const node of site.nodes) {
+      assert.equal(node.lightPosition.x, node.center.x);
+      assert.equal(node.lightPosition.z, node.center.z);
+      assert(meshPointDistance(node.body, node.lightPosition) > 0.74);
+      assert(
+        node.lightPosition.y <
+          game.cavernProfile.height(node.center.x, node.center.z) - 0.1,
+      );
+      checked++;
+    }
+  assert.equal(checked, 33);
+});
 
 function closed(geometry) {
   const g = geometry.index ? geometry.toNonIndexed() : geometry;

@@ -13,6 +13,7 @@ import {
   mineralBedGeometry,
 } from "./cavern-geometry.js";
 import { cavernRock, mineralMaterial } from "./cavern-material.js";
+import { mineralLightPosition } from "./mineral-art.js";
 import { buildCavernFormations } from "./cavern-formations.js";
 import { buildCavernDeposits } from "./cavern-deposits.js";
 
@@ -54,7 +55,8 @@ export function buildCaverns(game) {
       root = new THREE.Group();
     root.name = `Mineral chamber ${room.index}`;
     game.world.add(root);
-    const centers = [];
+    const centers = [],
+      lightPositions = [];
     const candidates = [
       [14, -12],
       [-17, -11],
@@ -97,6 +99,7 @@ export function buildCaverns(game) {
       bed.name = "Grounded mineral bed";
       bed.position.set(px, py, pz);
       root.add(bed);
+      const crystals = [bed];
       game.cameraSurfaces?.capture(bed);
       game.obstacles.push({
         x: px,
@@ -123,8 +126,10 @@ export function buildCaverns(game) {
           Math.sin(angle) * (j ? 0.27 : 0.08),
         );
         root.add(crystal);
+        crystals.push(crystal);
         game.cameraSurfaces?.capture(crystal);
       }
+      lightPositions.push(mineralLightPosition(center, crystals));
     }
     const primary = centers[0];
     for (const [cluster, center] of centers.entries()) {
@@ -221,6 +226,7 @@ export function buildCaverns(game) {
       root,
       index: room.index,
       centers,
+      lightPositions,
       primary,
       color,
       restoration,
@@ -263,9 +269,10 @@ export function updateCaverns(game, dt) {
       2,
       dt,
     );
-    for (const center of patch.centers)
+    for (const [index, center] of patch.centers.entries())
       candidates.push({
         center,
+        lightPosition: patch.lightPositions[index],
         patch,
         distance: center.distanceTo(game.player.position),
       });
@@ -274,6 +281,7 @@ export function updateCaverns(game, dt) {
     for (const node of site.nodes)
       candidates.push({
         center: node.center,
+        lightPosition: node.lightPosition,
         patch: { color: node.color, restoration: node.level },
         distance: node.center.distanceTo(game.player.position),
       });
@@ -285,7 +293,7 @@ export function updateCaverns(game, dt) {
       light.intensity = 0;
       return;
     }
-    light.position.copy(candidate.center).y += 4;
+    light.position.copy(candidate.lightPosition);
     light.color.copy(candidate.patch.color);
     light.intensity =
       (85 + candidate.patch.restoration.value * 55) *

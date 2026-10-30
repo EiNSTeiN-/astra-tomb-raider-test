@@ -1661,3 +1661,9 @@ The two [cooling-column bank-contact images](basalt-bank-contact.md) are lossles
 exports of actual prepared development observers, with identical decoded pixels
 and dimensions. They use the existing credited volcanic geometry and maps; no
 new external asset is added.
+
+The [crystal light-clearance comparison](crystal-light-clearance.md) uses actual
+prepared development captures at the same recorded camera and simulation time.
+Both images are lossless WebP exports with identical decoded pixels and
+dimensions. The light-position repair reuses the existing credited geometry,
+materials and textures and adds no external asset.

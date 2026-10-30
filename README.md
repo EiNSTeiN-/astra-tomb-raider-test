@@ -97,6 +97,8 @@ instruments eight bronze constructions, mounted wheel bearings and dressed
 stone bases. Delivered hardware protects the explorer and camera, and older
 occupied saves recover nearby. [Nearby camera recovery](docs/crystal-camera-recovery.md)
 also lowers a retained overhead view after crystal turns.
+[Crystal light clearance](docs/crystal-light-clearance.md) keeps the four pooled
+lights above their emitting geometry, removing the recorded square tip halos.
 [Dry working ground](docs/crystal-working-ground.md) keeps reservoir water
 beside the instruments and their operating positions.
 [Gentler walking camera turns](docs/walking-camera-turns.md) reduce sharp

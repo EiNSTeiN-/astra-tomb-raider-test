@@ -79,6 +79,19 @@ export function quartzGeometry(radius, height, phase = 0) {
   return geometry;
 }
 
+// Keep the pooled point source clear of its crystal and housing. A shared
+// root-height offset can put it directly on a terminal facet.
+export function mineralLightPosition(center, objects) {
+  const bounds = new THREE.Box3();
+  for (const object of objects) {
+    object.updateWorldMatrix(true, true);
+    bounds.expandByObject(object);
+  }
+  if (bounds.isEmpty())
+    throw new Error("A mineral light needs visible geometry.");
+  return new THREE.Vector3(center.x, bounds.max.y + 0.75, center.z);
+}
+
 const declarations = /* glsl */ `
 uniform float restoration;
 varying vec4 vMineralCoord;
