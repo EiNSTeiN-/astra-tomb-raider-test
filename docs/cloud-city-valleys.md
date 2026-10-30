@@ -69,8 +69,9 @@ All verification uses the shared locked five-of-sixteen CPU allowance, at most
 two test workers and one browser at a time. Owned previews, workers and browsers
 close after their checks.
 
-The new rear coverage exposes repeated flat chamber crowns, which remain a
-composition follow-up. Final-court side overlooks also show a very straight
+The new rear coverage exposes repeated flat chamber crowns. The subsequent
+[wind-chamber pass](wind-chamber-crowns.md) gives all nine upper assemblies
+different entrance, rear and return profiles. Final-court side overlooks also show a very straight
 grass/cloud boundary. The subsequent [bank and cloud inspection](cloud-contact.md)
 finds actual descending terrain at the sampled edge and softens hard cloud
 intersections on its lower face. The straight terrace silhouette remains a

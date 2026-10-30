@@ -26,7 +26,6 @@ import {
   weatherGateTimber,
   buildSkyGateLeaf,
   buildSkyGateJamb,
-  buildSkyGateCrown,
 } from "./sky-gate-art.js";
 import { buildSkyChamberWall } from "./sky-chamber-walls.js";
 import { buildCrystalVault } from "./crystal-vaults.js";
@@ -35,6 +34,7 @@ import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
 import { stationSolid } from "./field-station-solids.js";
 import { buildCoastalVault } from "./coastal-vaults.js";
 import { buildForgeVault } from "./forge-vaults.js";
+import { buildWindChamberCrown } from "./wind-chamber-crowns.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -263,7 +263,9 @@ export function buildSanctuaryGate(game, feature, materials) {
   const masonrySolid = (size, position) => {
     const solid = stationSolid(
       game,
-      { id: `${design.panel}-masonry-${gate.stage}-${gate.masonrySolids.length}` },
+      {
+        id: `${design.panel}-masonry-${gate.stage}-${gate.masonrySolids.length}`,
+      },
       root,
       size,
       position,
@@ -540,7 +542,10 @@ export function buildSanctuaryGate(game, feature, materials) {
     true,
   );
   if (design.crown === "wind") {
-    buildSkyGateCrown({ m, add, block, root, detail, halfWidth });
+    gate.crown = buildWindChamberCrown(game, gate, m, add);
+    // Preserve the delivered leaf joinery and its seeded chips. The preceding
+    // sky crown consumed eleven blocks from this local sequence.
+    serial += 11;
   } else if (design.panel === "sluice") {
     buildCoastalVault(game, gate, m);
   } else if (design.crown === "arch") {

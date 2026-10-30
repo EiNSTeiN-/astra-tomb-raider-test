@@ -1687,3 +1687,11 @@ The shared diagnostic camera sits ten metres above the recorded standing
 observer to expose the lower bank. The control removes only the new opacity
 factor. The cloud-contact code and height texture are original project work
 using the existing credited terrain; no external asset is added.
+
+The [nine wind-chamber upper profiles](wind-chamber-crowns.md) use original
+geometry in `src/wind-chamber-crowns.js`, extending the existing fitted granite,
+dressed stone, timber and bronze reliefs. They reuse their credited materials
+and introduce no external asset or recording. The four comparison images are
+actual prepared game captures. Each before/after pair shares its camera,
+quality and simulation time; the lossless WebP exports retain source pixels
+and dimensions without cropping or retouching.

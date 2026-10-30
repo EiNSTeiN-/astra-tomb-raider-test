@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [nine wind chambers](docs/wind-chamber-crowns.md) now have distinct fitted
+stone and timber upper profiles, extending around their open-air courts.
+
 The [cloud-bank contact](docs/cloud-contact.md) fades valley clouds near the
 rendered island terrain, softening hard white intersections on the lower cliffs.
 
@@ -911,6 +914,11 @@ The [support correction](docs/citadel-supports.md) joins upper towers to their
 damaged walls and closes gaps beneath intact coping stones.
 
 The nine cloud-city mechanism chambers now share that masonry, with recessed niches and framed timber wind screens. Bronze straps, hinge barrels and drives move with the opening leaves; their positional creaks follow motion and stop at rest. [Sky gate art notes](docs/sky-gate-art.md) include closed/open views, sound approaches, material details and verification.
+
+Their [nine upper profiles](docs/wind-chamber-crowns.md) now distinguish the wind
+trials with paired towers, garden terraces, a timber screen, an asymmetric stair
+and an eagle-wing crest. Fitted stone and coping continue around the rear and
+side walls, with physical upper surfaces beneath the open sky.
 
 Nine physical wind engines now occupy the cloud-city courts. Their 121 castings include 110 turning ducts and eleven fixed bearings, with four grid sizes and nine distinct routes. Turn the numbered handwheels, follow visible airflow, and activate the receiver when its turbine spins. Air and bearing sounds follow the actual machinery and fade with distance beneath the quiet cloud-city score. Every turn saves, and the focused controls operate the same ducts. [Wind engine notes](docs/wind-engines.md) describe the layouts, controls, persistence and verification.
 

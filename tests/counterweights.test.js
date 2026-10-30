@@ -34,6 +34,7 @@ import {
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { frameCounterweightGrip } from "../src/counterweight-camera.js";
 import { followClearCamera } from "../src/camera-follow.js";
+import { stationAssemblySolid } from "../src/field-station-solids.js";
 
 function fixture(level = LEVELS[0], groundHeight = () => 0) {
   const memory = new Map(),
@@ -454,6 +455,50 @@ test("a thin world obstacle between free tiles prevents the entire stone slide",
   updateCounterweightGrip(game, 1, action.pull ? -1 : 1);
   assert.equal(c.saved.moves, 0);
   assert.equal(game.blockGrip.move, undefined);
+});
+
+test("counterweight sweeps pass beneath a hollow triangle assembly and still reject its thin ground-level member", () => {
+  for (const blocked of [false, true]) {
+    const { game } = fixture(LEVELS[5]),
+      c = game.counterweights,
+      action = solveCounterweights(c.trial).path[0];
+    assert(action.pull);
+    for (const cell of action.walking) walk(game, point(cell));
+    walk(
+      game,
+      point(c.saved.positions[action.index]).add(
+        new THREE.Vector3(-action.axis[0] * 1.25, 0, -action.axis[1] * 1.25),
+      ),
+    );
+    assert(counterweightInteract(game));
+    const middle = point(action.from).lerp(point(action.to), 0.5),
+      material = new THREE.MeshBasicMaterial(),
+      parts = [];
+    const piece = (w, h, d, x, y, z) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+      mesh.position.set(x, y, z);
+      game.world.add(mesh);
+      parts.push(mesh);
+    };
+    for (const x of [-5, 5])
+      for (const z of [-5, 5])
+        piece(0.2, 2.6, 0.2, middle.x + x, 1.3, middle.z + z);
+    piece(10, 0.2, 10, middle.x, 2.7, middle.z);
+    if (blocked) piece(0.035, 1.2, 0.035, middle.x, 0.6, middle.z);
+    const solid = stationAssemblySolid(
+      game,
+      { id: "counterweight-frame-control" },
+      parts,
+    );
+    assert(solid.bounds.min.x < middle.x && solid.bounds.max.x > middle.x);
+    assert(Math.abs(solid.bounds.min.y) < 1e-6);
+    for (let frame = 0; frame < 60; frame++)
+      updateCounterweightGrip(game, 1 / 60, -1);
+    assert.equal(c.saved.moves, blocked ? 0 : 1);
+    releaseCounterweight(game);
+    parts.forEach((p) => p.geometry.dispose());
+    material.dispose();
+  }
 });
 
 test("the first sanctuary rejects activation until its counterweights latch", () => {

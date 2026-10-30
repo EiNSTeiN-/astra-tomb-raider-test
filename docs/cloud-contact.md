@@ -64,7 +64,8 @@ software-driver readback diagnostics are kept separately. These prepared
 fifth-engine cases do not establish complete campaign or device acceptance.
 
 The two comparison images are lossless exports retaining the source captures'
-pixels and dimensions. Wider bank composition,
-repeated chamber crowns, field/discovery/traversal/water coverage, moving body
+pixels and dimensions. The subsequent [wind-chamber pass](wind-chamber-crowns.md)
+varies the nine repeated upper assemblies. Wider bank composition,
+field/discovery/traversal/water coverage, moving body
 contact and listening/device acceptance remain part of the open
 [visual audit](visual-audit.md).

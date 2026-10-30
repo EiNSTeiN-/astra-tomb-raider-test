@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [nine wind-chamber upper profiles](wind-chamber-crowns.md) replace the
+  repeated stepped entrance and flat returns with trial-specific fitted stone,
+  coping and timber screens. All 122 selected tests and the build pass; 1,092
+  course bearings, 756 cap/camera samples and 189 door states pass, retaining
+  the eighteen delivered leaves and positioned drive sources. All forty final
+  scenery and nineteen route/contact views are reviewed. Eighteen assisted
+  entry/return legs cover 121.79 m at full health and visibility; forty-six
+  resting body poses clear independent chamber/terrain observers at the 15 mm
+  threshold. The accompanying counterweight sweep repair passes beneath hollow
+  assemblies while retaining their ground members as blockers. Reload and
+  chapter change each dispose all 44 fixed batch geometries once and detach
+  their physical assemblies. Built keyboard/High and portrait-touch/Performance
+  cases pull the first stone and turn a wind duct; eight complete-save reload
+  comparisons pass and all twenty-two release captures are reviewed. A separate
+  prepared raised-cap check recreates the saved key and preserves the complete
+  store and supported position; its additional view is reviewed. Owned resources
+  close under the shared locked five-CPU cap. Broader composition, moving contact and
+  listening/device acceptance remain open.
 - The [cloud-bank contact](cloud-contact.md) softens hard white intersections
   between the valley cloud sheet and lower island cliffs. Forty selected tests,
   the build and 560 browser shader samples against delivered terrain rays pass.
@@ -41,7 +59,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   movement and six complete-save reload comparisons pass, excluding play
   timestamps. All 112,640 mountain triangles remain beyond the map, with
   conservative projected clearances of at least 231.88 m. Owned resources close
-  under the shared locked five-CPU cap. Repeated chamber crowns, straight
+  under the shared locked five-CPU cap. The subsequent wind-chamber pass
+  addresses the repeated upper profiles. Straight
   grass/cloud boundaries in the final-court side views, wider routes/contact
   and listening/device acceptance remain open.
 - The [coastal bank shoulders](coastal-bank-shoulders.md) soften the steep grid

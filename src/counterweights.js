@@ -134,12 +134,46 @@ function standClear(game, position, ignore) {
     ignore.h = height;
   }
 }
-function slideClear(game, from, to, ignore, radius) {
+function slideClear(game, from, to, ignore, radius, height = 1.3) {
   const extra = Math.max(0, radius - 0.45);
   for (const obstacle of game.obstacles) {
     if (obstacle === ignore || obstacle.h <= 0.2) continue;
+    if (obstacle.triangles) {
+      // A compound crown contains empty court space below its upper masonry.
+      // Sweep against its individual closed pieces and finite vertical bounds;
+      // the assembly's outer rectangle is not a solid column through the board.
+      for (const { bounds } of obstacle.triangles.solids) {
+        if (
+          bounds.max.y <= Math.min(from.y, to.y) + 0.015 ||
+          bounds.min.y >= Math.max(from.y, to.y) + height - 0.015
+        )
+          continue;
+        if (
+          boxEntry(
+            from,
+            to,
+            {
+              min: {
+                x: bounds.min.x - radius,
+                y: from.y - 1,
+                z: bounds.min.z - radius,
+              },
+              max: {
+                x: bounds.max.x + radius,
+                y: from.y + height + 1,
+                z: bounds.max.z + radius,
+              },
+            },
+            0,
+            true,
+          ) !== null
+        )
+          return false;
+      }
+      continue;
+    }
     const base = game.groundHeight(obstacle.x, obstacle.z);
-    if (base + obstacle.h <= from.y + 0.05 || base >= from.y + 1.3) continue;
+    if (base + obstacle.h <= from.y + 0.05 || base >= from.y + height) continue;
     if (
       boxEntry(
         from,
@@ -305,6 +339,7 @@ export function updateCounterweightGrip(game, dt, direction) {
         playerTarget,
         grip.block.obstacle,
         0.45,
+        1.8,
       )
     ) {
       grip.move = {
