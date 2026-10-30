@@ -1643,3 +1643,9 @@ The two documentation images are actual game captures exported as lossless
 WebP with identical decoded pixels and dimensions. The gear hall uses a prepared
 development view; the portrait shows the built game after touch movement and
 reload, with its pause dialog hidden.
+
+The two [service-hall landing comparison](forge-interior-landings.md) images are
+actual prepared development captures, before and after the support correction.
+Their follow cameras frame the respective recorded player positions. Both are
+lossless WebP exports with identical decoded pixels and dimensions; there is no
+cropping or image retouching. The repair adds no external asset.

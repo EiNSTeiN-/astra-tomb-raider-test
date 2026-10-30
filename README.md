@@ -866,7 +866,9 @@ The eight [foundry service halls](docs/forge-interiors.md) now have distinct
 interior arrangements of ducts, refractory baffles, pressure vessels, gear
 stands, casting beds, burner columns, cooling fins and engine cradles. Fitted
 bases follow the shallow floor steps, and barred wall lamps reuse the forge's
-two local light slots.
+two local light slots. The
+[landing contact repair](docs/forge-interior-landings.md) also removes observed
+hovering beside the gears and hopper after a jump.
 
 The surrounding [forge flats now use gravel and ash](docs/forge-ground.md), with smaller fragments and broad mineral staining that distinguish them from the larger rock faces on the banks. The credited ground maps preserve terrain geometry and walking routes; High/Low material views and resource cleanup are checked.
 

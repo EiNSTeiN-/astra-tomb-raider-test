@@ -59,7 +59,14 @@ export function buildForgeInteriors(game) {
         game,
         { id: `forge-interior-${gate.stage}-${record.assemblies.length}` },
         parts,
-        { bodyPadding: 0.8, supportRadius: 0.8, layeredSupport: true },
+        {
+          bodyPadding: 0.8,
+          // Reserve shoulders beside machinery, but catch landings only within
+          // the normal movement disk. The wider body margin can touch a ledge
+          // whose top is beyond either boot's resting reach.
+          supportRadius: 0.55,
+          layeredSupport: true,
+        },
       );
       record.assemblies.push({ kind, solid });
       return solid;

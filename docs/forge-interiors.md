@@ -42,8 +42,8 @@ axle cradle, reaching 84.65 mm. A plinth cap slightly above the neighboring stai
 tread became the body's support surface, causing foot placement to reach toward
 the furnishing's raised trim. Seating the 20 cm plinths just below the next
 tread keeps that tread as the walking surface. A regression check covers this
-support selection. The fixtures also reserve an 80 cm body/support margin; the
-ignition banks are narrower to preserve their aisle. Each gear uses one closed
+support selection. The fixtures reserve an 80 cm body margin and now use a
+55 cm landing-support disk; the ignition banks are narrower to preserve their aisle. Each gear uses one closed
 six-arm web instead of overlapping bars.
 
 The final browser survey covers 46 standing/crouched contact poses across all
@@ -79,3 +79,7 @@ This is an interior furnishing and lighting milestone. It does not establish
 human playthrough duration, consumer-hardware performance, subjective audio
 quality or AAA graphics. Wider landscape composition and broader moving and
 elevated contact coverage remain open in the [playable-world audit](visual-audit.md).
+
+The subsequent [landing contact repair](forge-interior-landings.md) removes
+unsupported gear-stand and hopper rests exposed by ordinary jumps, and expands
+the moving, raised and older-position checks.
