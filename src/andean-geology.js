@@ -31,6 +31,40 @@ const peaks = [
   ],
 ];
 
+// Broad, slightly staggered passes open the valley through all three ranges.
+// Increasing separation keeps nearby rock from becoming one continuous wall
+// behind the courts while retaining the high massifs between these openings.
+const rangeSetbacks = [140, 200, 260];
+const valleyPasses = [
+  [
+    [4.14, 0.29, 0.75],
+    [1.63, 0.35, 0.7],
+    [3.05, 0.24, 0.65],
+  ],
+  [
+    [4.16, 0.36, 0.76],
+    [1.7, 0.42, 0.72],
+    [3, 0.33, 0.72],
+  ],
+  [
+    [4.2, 0.42, 0.7],
+    [1.78, 0.46, 0.65],
+    [3.04, 0.39, 0.65],
+  ],
+];
+
+function passEnvelope(angle, layer) {
+  let opening = 0;
+  for (const [center, width, depth] of valleyPasses[layer]) {
+    const delta = Math.atan2(
+      Math.sin(angle - center),
+      Math.cos(angle - center),
+    );
+    opening = Math.max(opening, depth * Math.exp(-Math.pow(delta / width, 2)));
+  }
+  return 1 - opening;
+}
+
 // Sampling on a circle keeps every noise octave and warped drainage channel
 // periodic. Nearby angles share spurs; they are not independent random peaks.
 function circleNoise(angle, scale, seed, radial = 0) {
@@ -53,7 +87,7 @@ export function andeanHeight(angle, across, layer) {
   // Sharp subsidiary summits break the broad massifs at two physical scales.
   const crag = 1 - Math.abs(circleNoise(angle, 15, seed + 1) * 2 - 1);
   const tooth = 1 - Math.abs(circleNoise(angle, 43, seed + 2) * 2 - 1);
-  peak *= 0.83 + crag * 0.13 + tooth * 0.035;
+  peak *= 0.83 + crag * 0.13 + tooth * 0.015;
   const crest = 0.37 + (circleNoise(angle, 6, seed + 3) - 0.5) * 0.12;
   const flank = clamp(t < crest ? t / crest : (1 - t) / (1 - crest));
   const warp = circleNoise(angle, 7, seed + 4, t * 1.3) - 0.5;
@@ -81,11 +115,17 @@ export function andeanHeight(angle, across, layer) {
     circleNoise(angle, 57 + t * 43, seed + 8, t * 27) * 0.55 +
     circleNoise(angle, 117 + t * 61, seed + 9, t * 49) * 0.3 +
     circleNoise(angle, 213 + t * 97, seed + 10, t * 81) * 0.15;
+  // Retain fractured flanks, but soften their finest displacement at the crest
+  // so the distant skyline reads as massifs rather than repeated small teeth.
   const shattered =
-    (fracture - 0.5) * 0.19 * Math.pow(Math.sin(Math.PI * t), 0.65);
+    (fracture - 0.5) *
+    (0.19 - 0.16 * smooth(0.55, 0.9, flank)) *
+    Math.pow(Math.sin(Math.PI * t), 0.65);
   return (
     [-125, -160, -210][layer] +
-    Math.max(0, apron - incision + spur + bedding + shattered) * peak
+    Math.max(0, apron - incision + spur + bedding + shattered) *
+      peak *
+      passEnvelope(angle, layer)
   );
 }
 
@@ -174,7 +214,7 @@ export function andeanGeometry(
 ) {
   const segments = [512, 448, 384][layer],
     rings = [48, 40, 36][layer];
-  const radius = extent * [0.93, 1.55, 2.25][layer],
+  const radius = extent * [0.93, 1.55, 2.25][layer] + rangeSetbacks[layer],
     width = [520, 760, 1150][layer];
   const positions = [],
     indices = [];

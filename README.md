@@ -894,6 +894,11 @@ The bridge anchors now match the fitted-stone city, with supported timber header
 
 Layered Andean-inspired ranges now surround these crossings, with slowly moving high clouds and a displaced cloud bank below the routes. Warmer direct light and cooler fill distinguish bronze machinery from stone; local waterfalls retain their surfaces and positioned sounds. [Cloud-city atmosphere notes](docs/cloud-city-atmosphere.md) include matched views, geometry costs and clearance checks.
 
+[Broad cloud valleys](docs/cloud-city-valleys.md) now separate the three mountain
+ranges, with wider spacing and gentler crest detail. Matched court views and new
+side overlooks show the revised composition; broader chamber and terrain-edge
+review remains open.
+
 The [mountain relief pass](docs/andean-ridges.md) adds irregular crests, branching
 gullies, fractured rock and baked mountain shadows. It also corrects depth
 ordering between slopes while keeping the distant ranges behind playable scenery.

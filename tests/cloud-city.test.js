@@ -79,6 +79,78 @@ test("Andean ranges close their seams with finite upward normals outside the ent
   assert.notDeepEqual(silhouettes[1], silhouettes[2]);
 });
 
+test("the camp valley opens the recorded central sky rays while retaining flanking massifs", (t) => {
+  const extent = 427,
+    material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    ranges = [0, 1, 2].map((layer) => {
+      const mesh = new THREE.Mesh(andeanGeometry(extent, layer), material);
+      mesh.updateMatrixWorld();
+      return mesh;
+    });
+  t.after(() => {
+    ranges.forEach((mesh) => mesh.geometry.dispose());
+    material.dispose();
+  });
+  // Recorded High camp observer before the composition revision. Its three
+  // central rays previously hit the near range, even near the frame's top edge.
+  const camera = new THREE.PerspectiveCamera(58, 1280 / 800, 0.1, 10000);
+  camera.position.set(99.809989255061, 12.52503287155694, 65.10939721747098);
+  camera.lookAt(84, 13.226346015930176, 42);
+  camera.updateMatrixWorld();
+  const ray = new THREE.Raycaster();
+  for (const y of [0.05, 0.15, 0.3]) {
+    ray.setFromCamera(new THREE.Vector2(0, 1 - y * 2), camera);
+    assert.equal(ray.intersectObjects(ranges).length, 0, `Closed sky at ${y}`);
+  }
+  for (const x of [0.1, 0.9]) {
+    ray.setFromCamera(new THREE.Vector2(x * 2 - 1, 0.4), camera);
+    assert(ray.intersectObjects(ranges).length > 0, "Retain the side massifs");
+  }
+  for (const [layer, mesh] of ranges.entries()) {
+    const positions = mesh.geometry.attributes.position,
+      indices = mesh.geometry.index;
+    let closest = Infinity;
+    // Each projected face lies inside this enclosing rectangle. Its separation
+    // gives a conservative bound for the complete triangle, independently of
+    // the generator's radius metadata or vertex-only distance samples.
+    for (let i = 0; i < indices.count; i += 3) {
+      const a = indices.getX(i),
+        b = indices.getX(i + 1),
+        c = indices.getX(i + 2),
+        minX = Math.min(
+          positions.getX(a),
+          positions.getX(b),
+          positions.getX(c),
+        ),
+        maxX = Math.max(
+          positions.getX(a),
+          positions.getX(b),
+          positions.getX(c),
+        ),
+        minZ = Math.min(
+          positions.getZ(a),
+          positions.getZ(b),
+          positions.getZ(c),
+        ),
+        maxZ = Math.max(
+          positions.getZ(a),
+          positions.getZ(b),
+          positions.getZ(c),
+        );
+      closest = Math.min(
+        closest,
+        Math.hypot(
+          Math.max(0, -maxX, minX - extent),
+          Math.max(0, -maxZ, minZ - extent),
+        ),
+      );
+    }
+    t.diagnostic(`range ${layer}: conservative face clearance ${closest} m`);
+    assert(closest > [230, 550, 905][layer]);
+    assert.equal(mesh.geometry.index.count / 3, [49152, 35840, 27648][layer]);
+  }
+});
+
 test("baked mountain shadows follow an intervening ridge and the sun direction", () => {
   const geometry = new THREE.BufferGeometry(),
     positions = [],

@@ -1673,3 +1673,10 @@ prepared game captures at the same recorded camera and simulation time. Both
 images are lossless WebP exports with identical decoded pixels and dimensions.
 The terrain repair reuses the existing credited coastal materials and geometry,
 with original project height-shaping code and no new external asset.
+
+The four [cloud-valley comparison images](cloud-city-valleys.md) are actual
+prepared game captures. Each before/after pair shares its recorded camera,
+quality and simulation time. Lossless WebP exports retain the decoded pixels
+and dimensions of their sources. The range revision extends the project's
+original Andean height shaping and reuses the existing credited rock textures,
+clouds and lighting; no external asset is added.

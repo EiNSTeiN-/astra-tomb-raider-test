@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cloud-city valleys](cloud-city-valleys.md) open the three Andean ranges
+  with staggered passes, wider spacing and gentler fine crest displacement.
+  Thirty-three selected tests, the strengthened whole-triangle clearance check
+  and the build pass. All 41 final High/Performance views and twelve native
+  release captures are reviewed. Eighteen rear offsets expose the nine chamber
+  exteriors previously hidden by enclosing walls. Keyboard/touch wind turns,
+  movement and six complete-save reload comparisons pass, excluding play
+  timestamps. All 112,640 mountain triangles remain beyond the map, with
+  conservative projected clearances of at least 231.88 m. Owned resources close
+  under the shared locked five-CPU cap. Repeated chamber crowns, straight
+  grass/cloud boundaries in the final-court side views, wider routes/contact
+  and listening/device acceptance remain open.
 - The [coastal bank shoulders](coastal-bank-shoulders.md) soften the steep grid
   lips in the recorded court fronts. Reproduced delivered-triangle grades fall
   from 2.924–2.930 to 0.237–0.240 m/m; all 35,341 walking-footprint and 956
