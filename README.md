@@ -668,6 +668,10 @@ overhead beams with eight riveted iron trusses, seated on the existing piers.
 The [furnishing clearance pass](docs/relay-furniture-clearance.md) keeps the
 camera outside the chests and tablet, reserves body space around the cargo,
 and restores occupied older saves on their recorded gallery.
+The [furnishing landing pass](docs/relay-furniture-landings.md) lets jumps land
+on their rendered tops, clears the edges when walking off, and preserves saves
+on those supported surfaces.
+The dispatch canopy also stops upward jumps from the cargo caps.
 See [valve operation and hand-contact checks](docs/cinder-relay-hands.md).
 The [return-lift levers](docs/cinder-relay-levers.md) now use a visible right-hand
 pull; movement cancels an unfinished command, and release follows the moving car.

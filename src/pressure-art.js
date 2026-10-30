@@ -5,6 +5,10 @@ import { campTube } from "./camp-geometry.js";
 import { mergeArchitecture } from "./visuals.js";
 
 import { buildPressureFrame } from "./pressure-frame-art.js";
+import {
+  pressureFurnitureSolid,
+  pressureFittedSolid,
+} from "./pressure-furniture.js";
 
 export const RELAY_RAM_LENGTH = 4.65;
 export const RELAY_CABLE_TOP = 29.4;
@@ -112,8 +116,10 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     mesh.removeFromParent();
     mesh.geometry.dispose();
   };
-  const furniture = (x, y, z, w, t, d) => {
-    art.furniture.push(solid(x, y, z, w, t, d));
+  const furniture = (x, y, z, w, t, d, group) => {
+    art.furniture.push(
+      pressureFurnitureSolid(game, solid(x, y, z, w, t, d), group),
+    );
     // These furnishings are below the ordinary two-metre capture threshold,
     // but can still surround the lens or hide the explorer during a low orbit.
     const proxy = add(new THREE.BoxGeometry(w, t, d), metal, x, y, z);
@@ -684,9 +690,20 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
 
   // The dispatch canopy and refuge cargo make the ledger's story visible.
   // Cantilevered supports leave every gallery and approach clear.
+  const canopy = [];
   for (const x of [10.5, 14, 17.5]) {
-    beam([x, 27.453, -19.6], [x, 28.457, -14.65], 0.14, 0.2, metal, root, true);
-    beam([x, 27.453, -19.6], [21, 27.3, -21], 0.12, 0.17, metal);
+    canopy.push(
+      beam(
+        [x, 27.453, -19.6],
+        [x, 28.457, -14.65],
+        0.14,
+        0.2,
+        metal,
+        root,
+        true,
+      ),
+    );
+    canopy.push(beam([x, 27.453, -19.6], [21, 27.3, -21], 0.12, 0.17, metal));
   }
   for (let panel = 0; panel < 12; panel++) {
     const x = 9.8 + (panel + 0.5) * 0.7;
@@ -694,7 +711,16 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     roof.rotation.x = -0.2;
     const seam = block(0.05, 0.05, 5.2, x - 0.32, 28.18, -17.1, bronze);
     seam.rotation.x = -0.2;
+    canopy.push(roof, seam);
   }
+  // A jump from a jar starts higher than a gallery jump. The visible canopy
+  // must stop the rising body, with empty space preserved below and beside it.
+  art.canopySolid = pressureFittedSolid(
+    game,
+    "pressure-dispatch-canopy",
+    canopy,
+  );
+  art.canopySolid.ceiling = true;
   const jarMat = new THREE.MeshStandardMaterial({
     name: "Relay fired clay jars",
     color: 0x997d55,
@@ -735,7 +761,13 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     ring(0.29, 0.018, x, 0.4, 0, bronze, cargo);
     pin(0.14, 0.06, x, 0.98, 0, stone, cargo, "y", 12);
   }
-  art.furniture.push(solid(12.2, 24.2 + 0.56, -17.6, 2.7, 1.12, 0.85));
+  art.furniture.push(
+    pressureFurnitureSolid(
+      game,
+      solid(12.2, 24.2 + 0.56, -17.6, 2.7, 1.12, 0.85),
+      cargo,
+    ),
+  );
   const cargoBounds = block(
     2.7,
     1.12,
@@ -763,7 +795,7 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
     for (const x of [-0.74, 0.74])
       for (const z of [-0.45, 0.45])
         pin(0.032, 0.025, x, 0.91, z, bronze, g, "y", 6);
-    furniture(x, y + 0.46, z, 1.8, 0.94, 1.2);
+    furniture(x, y + 0.46, z, 1.8, 0.94, 1.2, g);
     mergeArchitecture(g);
   };
   chest(18.1, 0.18, 12.7);
@@ -783,7 +815,7 @@ export function buildPressureArt(game, { add, solid, sign, materials }) {
   face.add(label);
   for (let row = 0; row < 3; row++)
     block(0.5, 0.008, 0.006, 0, -0.04 - row * 0.035, 0.036, bronze, face);
-  furniture(19.5, 0.18 + 0.65, 8.65, 0.8, 1.3, 0.56);
+  furniture(19.5, 0.18 + 0.65, 8.65, 0.8, 1.3, 0.56, tablet);
   // Leave room for the posed boots and crouched body beside low furnishings.
   // Keep the lens bounds fitted to the objects; only the body needs this margin.
   for (const bound of art.furniture) bound.bodyPadding = 0.65;

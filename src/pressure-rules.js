@@ -1,4 +1,5 @@
 import { boxEntry } from "./camera-collision.js";
+import { stationBlocked, stationSupport } from "./field-station-solids.js";
 
 export const PRESSURE_DECKS = [
   { x: 14, z: 10, y: 0.18, w: 6, d: 4, name: "The intake gallery" },
@@ -94,12 +95,13 @@ export function pressureBlocked(game, x, z, y, clearance = 1.8) {
   const h = game.pressureRelay;
   if (!h) return false;
   return (
-    h.solids.some(
-      (o) =>
-        Math.abs(x - o.x) < o.w + (o.bodyPadding ?? 0.2) &&
-        Math.abs(z - o.z) < o.d + (o.bodyPadding ?? 0.2) &&
-        y < o.top - 0.01 &&
-        y + clearance > o.bottom,
+    h.solids.some((o) =>
+      o.station
+        ? stationBlocked(o.station, x, y, z, clearance)
+        : Math.abs(x - o.x) < o.w + (o.bodyPadding ?? 0.2) &&
+          Math.abs(z - o.z) < o.d + (o.bodyPadding ?? 0.2) &&
+          y < o.top - 0.01 &&
+          y + clearance > o.bottom,
     ) ||
     h.decks.some(
       (d) =>
@@ -173,6 +175,20 @@ export function pressureSavePosition(game) {
   const h = game.pressureRelay,
     p = game.player?.position;
   if (!insidePressure(game) || !p || !h) return null;
+  // A stationary landing on a furnishing is now real support. Keep that saved
+  // height; only unsupported/moving relay positions need the refuge anchor.
+  if (
+    game.grounded &&
+    h.art?.furniture.some((o) => {
+      const top = o.station && stationSupport(o.station, p.x, p.z, p.y, 0.55);
+      return (
+        top != null &&
+        Math.abs(top - p.y) < 0.015 &&
+        game.canMove(p.x, p.z, p.y - game.groundHeight(p.x, p.z))
+      );
+    })
+  )
+    return null;
   const stable = h.rests.some(
     (d) =>
       Math.abs(p.x - d.x) < d.w &&

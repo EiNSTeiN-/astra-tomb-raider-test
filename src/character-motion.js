@@ -111,6 +111,13 @@ function clearStationVerticalMotion(game, before) {
       !stationBlocked(o, p.x, before, p.z),
   );
   if (!contacts.length) return;
+  // Broad authored roofs stop a rising body without nudging an otherwise
+  // stationary jump sideways along their slope.
+  if (p.y > before && contacts.some((o) => o.ceiling)) {
+    p.y = before;
+    game.velocityY = 0;
+    return;
+  }
   // A descending body can meet a neighboring part after leaving a cap.
   // Clear the same margin used by its side collision before settling beside it.
   const limit = Math.max(

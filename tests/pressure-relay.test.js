@@ -12,6 +12,7 @@ import { torchHandsBusy } from "../src/torch.js";
 import { Adventure } from "../src/game.js";
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
+import { stationBlocked } from "../src/field-station-solids.js";
 import { advanceCharacter, supportAt } from "../src/character-motion.js";
 import { restoreTraversal } from "../src/traversal.js";
 import { RELAY_RAM_LENGTH, RELAY_CABLE_TOP } from "../src/pressure-art.js";
@@ -640,6 +641,152 @@ test("return-cable ends, guide rollers and moving posts track the car and freeze
   g.paused = true;
   updatePressureRelay(g, 4);
   assert.deepEqual(snapshot(), before);
+});
+
+test("ordinary jumps land on all four furnishings, leave them freely and retain supported saves", () => {
+  const cases = [
+    { name: "intake chest", x: 18.1, z: 12.7, startZ: 11, height: 0.18 },
+    { name: "floor chest", x: -19, z: 17, startZ: 19, height: 0 },
+    { name: "crew tablet", x: 19.5, z: 8.65, startZ: 10.1, height: 0.18 },
+    { name: "dispatch cargo", x: 12.2, z: -17.6, startZ: -15.7, height: 24.2 },
+  ];
+  for (const c of cases) {
+    const g = pressureFixture({
+      pressureRelay: {
+        visited: true,
+        opened: 3,
+        rest: 3,
+        recovered: true,
+        lift: 1,
+      },
+    });
+    g.player.position.set(c.x, c.height, c.startZ);
+    g.jumpY = g.fallPeak = c.height;
+    const moveTo = (z, jump) => {
+      for (let frame = 0; frame < 120; frame++) {
+        const dz = z - g.player.position.z;
+        pressureTick(
+          g,
+          1,
+          { x: 0, z: Math.sign(dz) * Math.min(6, Math.abs(dz) * 60) },
+          jump && frame === 0,
+        );
+        assert(
+          g.canMove(g.player.position.x, g.player.position.z, g.jumpY),
+          `${c.name}: legal contact at frame ${frame}`,
+        );
+      }
+    };
+    moveTo(c.z, true);
+    assert(g.grounded, c.name);
+    assert(g.player.position.y > c.height + 0.8, `${c.name}: real top landing`);
+    assert.equal(g.health, 100);
+    assert.equal(
+      pressureSavePosition(g),
+      null,
+      `${c.name}: retain the landed position`,
+    );
+    const landed = g.player.position.clone();
+    g.progress.position = { x: landed.x, z: landed.z, height: g.jumpY };
+    g.player.position.y = 0;
+    restorePressureArrival(g);
+    restoreTraversal(g);
+    assert(
+      g.player.position.distanceTo(landed) < 1e-6,
+      `${c.name}: restored support`,
+    );
+    moveTo(c.startZ, false);
+    assert(g.grounded, `${c.name}: walk off and settle`);
+    assert(Math.abs(g.player.position.z - c.startZ) < 0.01);
+    assert(Math.abs(g.player.position.y - c.height) < 0.01);
+    assert.equal(g.health, 100);
+    g.world.traverse((o) => o.geometry?.dispose());
+  }
+});
+
+test("furnishing point support follows rendered caps and keeps the space between cargo jars", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  const ray = new THREE.Raycaster();
+  for (const [x, z] of [
+    [18.1, 12.7],
+    [-19, 17],
+    [19.5, 8.65],
+    [12.2, -17.6],
+    [12.65, -17.6],
+  ]) {
+    const o = h.art.furniture.find(
+      (o) => Math.abs(o.x - x) <= o.w && Math.abs(o.z - z) <= o.d,
+    );
+    assert(o?.station?.triangles);
+    const from = new THREE.Vector3(x, o.top + 0.3, z);
+    ray.set(from, new THREE.Vector3(0, -1, 0));
+    ray.far = o.top - o.bottom + 0.4;
+    const hit = ray
+      .intersectObject(h.root, true)
+      .find((hit) => ![hit.object.material].flat().some((m) => m.transparent));
+    assert(hit);
+    const support = supportAt(g, x, z, o.top + 0.3);
+    assert(
+      Math.abs(support.height - hit.point.y) < 2e-6,
+      `real surface at ${x}, ${z}`,
+    );
+  }
+  const between = supportAt(g, 12.65, -17.6, 26);
+  assert(
+    between.height < 24.35,
+    "the gap between jars has only the low cargo tray",
+  );
+  assert(
+    g.canMove(12.2, -17.6, 20),
+    "raised cargo does not create a column down to ground",
+  );
+  g.world.traverse((o) => o.geometry?.dispose());
+});
+
+test("a jump from dispatch cargo stops beneath the finite canopy and lands back on its cap", () => {
+  const g = pressureFixture(),
+    h = g.pressureRelay;
+  const x = 12.2,
+    z = -17.6,
+    top = supportAt(g, x, z, 26, 0.55).height;
+  g.player.position.set(x, top, z);
+  g.jumpY = g.fallPeak = top;
+  const ray = new THREE.Raycaster(
+    new THREE.Vector3(x, top + 1.8, z),
+    new THREE.Vector3(0, 1, 0),
+    0,
+    3,
+  );
+  const ceiling = ray.intersectObject(h.root, true)[0];
+  assert(ceiling, "the actual roof is above the jar cap");
+  let peak = top;
+  for (let frame = 0; frame < 120; frame++) {
+    pressureTick(g, 1, { x: 0, z: 0 }, frame === 0);
+    const p = g.player.position;
+    peak = Math.max(peak, p.y);
+    assert(
+      g.canMove(p.x, p.z, g.jumpY),
+      `clear ceiling contact at frame ${frame}`,
+    );
+    assert(
+      p.y + 1.8 <= ceiling.point.y + 0.015,
+      "the jump cannot pass through the roof",
+    );
+  }
+  assert(peak > top + 0.3, "there is still room to jump below the canopy");
+  assert(g.grounded);
+  assert(Math.abs(g.player.position.y - top) < 1e-5);
+  assert.equal(g.player.position.x, x);
+  assert.equal(g.player.position.z, z);
+  assert.equal(g.health, 100);
+  assert.equal(
+    stationBlocked(h.art.canopySolid, x, 24.2, z),
+    false,
+    "the canopy does not create a column down to the gallery",
+  );
+  assert(g.canMove(8, z, 28), "space beside the canopy remains clear");
+  g.world.traverse((o) => o.geometry?.dispose());
 });
 
 test("older gallery saves occupied by new cargo recover on the same supported floor", () => {

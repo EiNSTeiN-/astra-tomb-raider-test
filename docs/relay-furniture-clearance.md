@@ -91,3 +91,8 @@ This is a local repair within the open [visual audit](visual-audit.md). It does
 not establish complete moving or airborne body coverage, human playthroughs,
 subjective sound quality or consumer-hardware performance. The wider volcanic
 ground composition and repeated lower chamber arrangements remain open.
+
+The subsequent [furnishing landing pass](relay-furniture-landings.md) replaces
+the four coarse body boxes with contacts derived from their rendered pieces.
+It retains the fitted camera bounds and the 0.65-metre posed-body clearance,
+and adds landing, walk-off and saved-top coverage.

@@ -471,6 +471,12 @@ camera bounds, body margins and arrival handling around the existing chests,
 tablet and cargo. It adds no external asset or new rendered artwork. Comparison
 images are direct game captures; the credited relay materials remain unchanged.
 
+The [relay furnishing landing pass](relay-furniture-landings.md) derives body
+contact and foot support from those existing rendered pieces, and adds finite
+contact beneath the dispatch canopy. Its geometry queries and save handling are
+original project code. No external art, recording,
+music, font or dependency was added; the illustrations are direct game captures.
+
 The regional bird geometry, plumage shader and perch animation in
 `src/bird-geometry.js` and `src/birds.js` are original project code. They add no
 external model, texture or audio files and reuse the bird recording by isaiah658
