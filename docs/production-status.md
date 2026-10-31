@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Meridian planting pass](meridian-planting.md) expands the final chapter's
+  silver grasses, dry stems and cushions into fuller colonies. All 48 refreshed
+  volcanic/final-chapter baseline views and 26 revised Meridian views are
+  reviewed. The latter retain their preceding player, camera and simulation
+  time. All 19,459,116 tested root points across 53,077 plants find ground, with
+  no exposed roots or reservation failures. Altered-root and render-matrix
+  controls fail as expected; quality changes retain authored transforms and
+  correct render packing. All 63 supported feature approaches, 22 sound-source
+  fronts and thirty local ground legs pass, covering 16,105 physics updates.
+  Tracked planting resources dispose once on chapter change and retire from the
+  active scene. The 24 focused tests, build, native keyboard/High and portrait
+  touch/Performance controls and four complete-store reload comparisons pass;
+  all fourteen release captures are reviewed. Volcanic foregrounds, repeated
+  large installations and broader whole-world acceptance remain open.
 - The [contextual HUD pass](context-status.md) backs quiet, wind-braced and
   guardian-alert labels plus waypoint distances. All 47 revised contrast
   observations pass, with a 7.073:1 minimum, alongside 37 style controls.

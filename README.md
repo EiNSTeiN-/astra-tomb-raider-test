@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [Meridian planting pass](docs/meridian-planting.md) adds fuller silver grasses,
+dry stems and low cushions beside the final chapter's clear routes. A refreshed
+volcanic/final-chapter court review retains wider composition work.
+
 The [contextual status pass](docs/context-status.md) backs crouch and guardian
 warnings and keeps whole waypoint markers clear of HUD panels and screen edges.
 Compact landscape controls now clear the objective, minimap, health and air panels.

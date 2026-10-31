@@ -25,6 +25,11 @@ confirm that the observation persists at High, rather than being explained
 solely by the lower graphics preset. Improve their visual rhythm and nearby
 interest while preserving the route, mechanical access and ground contact.
 
+The later [Meridian planting pass](meridian-planting.md) adds fuller colonies
+beside the final chapter's routes and refreshes its eleven courts. The images
+above retain this earlier entrance baseline. Volcanic foregrounds, repeated
+large installations and wider composition remain under review.
+
 All eight standing controllers are legal. Independent terrain observations
 inspect 384,760 delivered character vertex records, with no missing or invalid
 samples and no overlap beyond the observer's 15 mm threshold. Shaders link and

@@ -1786,3 +1786,11 @@ The two [current High entrance images](entry-review.md) are actual prepared
 WebP exports preserve the decoded pixels and dimensions without cropping or
 retouching. This inspection reuses the existing credited scenery and character
 assets, and adds no world geometry or external asset.
+
+The [Meridian planting comparisons](meridian-planting.md) are six actual
+1280 × 800 High-preset game captures. Each pair retains its recorded player,
+camera and simulation time; lossless WebP exports preserve source pixels and
+dimensions without cropping or retouching. The larger grasses, dry stems and
+cushions adapt the project's original folded-leaf geometry and reuse the
+existing credited world, explorer, materials and lighting. The pass introduces
+no external asset, recording or dependency.

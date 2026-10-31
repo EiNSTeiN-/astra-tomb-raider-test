@@ -1,5 +1,9 @@
 # Observatory grounds
 
+This page records the earlier grounds milestone. The later
+[Meridian planting pass](meridian-planting.md) expands the plant forms and
+colonies; its current counts and checks supersede the planting counts below.
+
 The Last Meridian now has patches of silver bunchgrass, dry flowering stems
 and low broad-leaf cushions beside its routes. Muted mineral and oxide washes
 break up the ground texture, and weathered radial paving connects the eleven

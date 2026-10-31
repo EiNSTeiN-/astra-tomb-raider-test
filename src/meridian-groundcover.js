@@ -16,14 +16,15 @@ export const MERIDIAN_COVER_RANGES = {
 // Adapt the project's folded leaves into silver bunchgrass, dry flowering
 // stems and broad low cushions. All tiers retain the same rooted leaves.
 export function meridianCoverSpecimens() {
-  return skyMeadowSpecimens().map((shape, variant) => {
+  const shapes = skyMeadowSpecimens({ grassLeaves: 84, cushionLeaves: 72 });
+  return shapes.map((shape, variant) => {
     const scale = [
-        [0.7, 0.65, 0.7],
-        [0.8, 0.9, 0.65],
-        [1.25, 1.4, 1.25],
+        [0.95, 0.85, 0.95],
+        [0.85, 1, 0.85],
+        [1.85, 1.9, 1.85],
       ][variant],
       bottom = new THREE.Color([0x303c37, 0x494038, 0x354842][variant]),
-      top = new THREE.Color([0x909980, 0xa28b61, 0x899a82][variant]),
+      top = new THREE.Color([0x9eab96, 0xbbb18f, 0x9daa91][variant]),
       roots = new Map();
     let radius = 0,
       height = 0;
@@ -162,11 +163,11 @@ export function buildMeridianGroundcover(game) {
       roughness: 1,
     });
   coverWind(material, time);
-  for (let gz = 2; gz < game.terrainProfile.extent - 2; gz += 1.55)
-    for (let gx = 2; gx < game.terrainProfile.extent - 2; gx += 1.55) {
+  for (let gz = 2; gz < game.terrainProfile.extent - 2; gz += 0.9)
+    for (let gx = 2; gx < game.terrainProfile.extent - 2; gx += 0.9) {
       // Consume candidate randomness before consulting any reservation.
-      const x = gx + (rng() - 0.5) * 1.1,
-        z = gz + (rng() - 0.5) * 1.1,
+      const x = gx + (rng() - 0.5) * 0.8,
+        z = gz + (rng() - 0.5) * 0.8,
         pick = rng(),
         kind = rng(),
         size = 0.72 + rng() * 0.55,
@@ -175,8 +176,12 @@ export function buildMeridianGroundcover(game) {
         density = desertNoise(x * 0.068, z * 0.043, game.level.seed + 59),
         shelter = desertNoise(x * 0.021, z * 0.028, game.level.seed + 97),
         variant = kind < 0.24 ? 2 : shelter > 0.52 ? 0 : 1,
-        shape = specimens[variant];
-      if (pick > Math.max(0, density - 0.31) * 1.65) continue;
+        shape = specimens[variant],
+        fertility = THREE.MathUtils.clamp((density - 0.38) / 0.28, 0, 1),
+        // Continuous colonies leave bare mineral breaks between dense cores,
+        // with occasional outlying tufts rather than a uniform planted grid.
+        colony = fertility * fertility * (3 - 2 * fertility);
+      if (pick > 0.025 + colony * 0.88) continue;
       // Plant beside accessible routes, not throughout distant mountains.
       const ix = Math.round(x / 7),
         iz = Math.round(z / 7);
