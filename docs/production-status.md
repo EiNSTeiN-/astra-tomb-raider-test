@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [guardian sole-contact pass](guardian-ground-contact.md) repairs sloping
+  and paving-edge intersections, folded legs after distance culling and excessive
+  reach while patrol torsos turn. All forty selected tests and the build pass.
+  Both geometry tiers at all 122 initial guardian positions and 576 sampled
+  moving poses inspect 3,110,688 delivered foot vertices against independent
+  terrain/paving triangles. Twenty-four patrol segments cover 197.54 m over
+  5,760 enemy controller updates; planted minimum gaps remain about 3 mm with no
+  embedded or missing samples. All sixteen preceding and sixteen revised
+  diagnostic views are reviewed, including their occluded camera limitations.
+  Keyboard/High and portrait-touch/Performance each defeat the warden with five
+  native fire inputs and preserve the complete store through three reloads;
+  all sixteen final release captures are reviewed. The first touch case reached
+  an existing jungle grid edge; its revised return covers 2.10 m without changing
+  the movement assertion. That visible-ground boundary remains open. Owned
+  helpers close under the shared locked five-CPU cap.
+  Wider body/solid contact, apparent shadow separation, world composition and
+  listening/device acceptance remain open.
 - The [cloud-island outline pass](sky-island-outlines.md) extends the rectangular
   caps into varied shelves with ordinary shallow-bank movement and explored-map
   coverage. All 89 selected regressions and the build pass, retaining original

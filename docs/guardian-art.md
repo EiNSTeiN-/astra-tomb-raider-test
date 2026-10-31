@@ -29,6 +29,12 @@ Footfalls are positional, limited to nearby guardians, and rate-limited per guar
 
 ## Verification and remaining work
 
+The later [sole-contact and patrol recovery pass](guardian-ground-contact.md)
+checks the delivered foot surfaces as well as ankles. It fits soles to slopes
+and treads, replants returning culled models, seats the boot bindings and leads
+steps along actual travel during torso turns. Its eight-chapter observations
+and selected regressions retain explicit whole-body and camera limits.
+
 `tests/guardian-art.test.js` checks the actual runtime geometry: finite attributes, normalized rigid weights, valid bone indices, bounded triangles, distinct equipment geometry, distant detail reduction, shared skeletons, pose bounds, planted feet, slope/turn contact, positional footfalls, projectile origin, and detail hysteresis. Existing combat tests cover damage and recovery timing; an added check verifies that tracers meet the shield or core consistently with the damage result.
 
 The full suite passes **101 tests**. Selected encounters rendered in all eight chapter worlds without console warnings or errors. The [High jungle encounter](images/guardian-jungle-high.png) also exercised shadows and contact occlusion; its selected view reported 2,199,656 triangles and 298 calls across the rendering work. Actual-world ankle positions matched the sampled terrain height. The browser uses ANGLE/SwiftShader software rendering, so these checks do not establish a consumer-GPU frame rate. A desert-load regression in the shared bolt function was fixed: stationary dart emitters retain their existing origin while sentries use the animated staff lens. A regression test now fires the actual trap's three-bolt volley.

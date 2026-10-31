@@ -79,8 +79,10 @@ retains all 6,692 recorded courier vertices, and the final checks above use that
 corrected source.
 
 Sparse fields, repeated furnishings and wider discovery/traversal/water coverage
-remain open. Guardian feet look high in several stills; actual posed contact
-needs measurement before diagnosis. Slab edges on uneven ground also warrant
+remain open. The subsequent [guardian contact pass](guardian-ground-contact.md)
+measures and repairs sole intersections, culling recovery and turning-step reach.
+Wider body contact and apparent shadow separation remain under review.
+Slab edges on uneven ground also warrant
 closer contact review. This milestone adds no audio content and does not establish
 subjective listening quality, consumer-device performance, AAA parity or complete
 visual acceptance. The [playable-world audit](visual-audit.md) remains open.

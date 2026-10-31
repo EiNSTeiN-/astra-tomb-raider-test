@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [guardian contact repair](docs/guardian-ground-contact.md) fits rigid soles
+to slopes and paving, replants returning patrols, and keeps step lead aligned
+with movement while their torsos turn.
+
 The [cloud-island outlines](docs/sky-island-outlines.md) now extend into varied
 upper shelves, with shallow walking ground included on the explored map.
 

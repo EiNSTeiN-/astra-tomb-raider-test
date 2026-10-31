@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [guardian sole-contact repair](guardian-ground-contact.md) uses original
+pose, foot-geometry fitting and boot-binding code with the existing guardian
+materials. No external model, texture, audio or dependency is added. Its
+four documentation comparisons use actual diagnostic browser captures,
+converted losslessly to WebP with identical decoded pixels and dimensions.
+
 The [cloud-island outlines](sky-island-outlines.md) use original heightfield,
 movement and chart code, with the existing credited terrain maps, plants and
 character. No external asset, audio or dependency is added. Four intentional

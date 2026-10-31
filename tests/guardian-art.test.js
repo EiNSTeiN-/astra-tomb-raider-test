@@ -170,7 +170,19 @@ test("turning steps follow sloping ground and emit bounded positional footfalls"
         .copy(enemy.group.position)
         .add(new THREE.Vector3(0, 4, 10));
       game.elapsed += 0.05;
+      const previousSounds = sounds.length;
       animateGuardian(game, enemy, 0.05);
+      for (const sound of sounds.slice(previousSounds))
+        assert.ok(
+          Math.min(
+            ...enemy.art.legs.map((leg) =>
+              leg[2]
+                .getWorldPosition(new THREE.Vector3())
+                .distanceTo(sound.position),
+            ),
+          ) < 0.07,
+          `${kind} footfall follows a posed ankle`,
+        );
       for (let i = 0; i < 2; i++) {
         const actual = enemy.art.legs[i][2].getWorldPosition(
           new THREE.Vector3(),
@@ -184,13 +196,6 @@ test("turning steps follow sloping ground and emit bounded positional footfalls"
     assert.ok(sounds.length > 5);
     sounds.forEach((sound, i) => {
       assert.ok(sound.position.toArray().every(Number.isFinite));
-      assert.ok(
-        Math.abs(
-          sound.position.y -
-            game.groundHeight(sound.position.x, sound.position.z) -
-            0.17 * enemy.art.scale,
-        ) < 1e-6,
-      );
       if (i) assert.ok(sound.time - sounds[i - 1].time >= 0.12);
     });
   }

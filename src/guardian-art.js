@@ -8,6 +8,11 @@ import { courtWalkingHeight } from "./court-dais-rules.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { pbrMaterial } from "./visuals.js";
 import { poseFeet } from "./pose.js";
+import {
+  guardianFootContactPoints,
+  guardianFootHeight,
+  fitGuardianFoot,
+} from "./guardian-foot-contact.js";
 
 // Rigidly weighted armor pieces share three skinned draws. Their joints remain
 // mechanical; no stone surface stretches when a knee or elbow bends.
@@ -486,9 +491,9 @@ function geometryFor(kind, detail) {
         `${side}Foot`,
         1,
         [
-          [-0.16, -0.005 - j * 0.02, 0.21 + j * 0.07],
-          [0, 0.025 - j * 0.02, 0.21 + j * 0.07],
-          [0.16, -0.005 - j * 0.02, 0.21 + j * 0.07],
+          [-0.16, -0.005 - j * 0.02, 0.17 + j * 0.045],
+          [0, 0.025 - j * 0.02, 0.17 + j * 0.045],
+          [0.16, -0.005 - j * 0.02, 0.17 + j * 0.045],
         ],
         0.01,
       );
@@ -830,6 +835,15 @@ export function buildGuardianArt(game, kind, color) {
       tier: 0,
       scale,
       feet: null,
+      footRotations: null,
+      footContacts: legs.map((leg) => {
+        const index = bones.indexOf(leg[2]);
+        return guardianFootContactPoints(
+          tiers.flat(),
+          index,
+          skeletonData.boneInverses[index],
+        );
+      }),
       step: null,
       nextFoot: 0,
       previous: null,
@@ -844,6 +858,7 @@ function updateFeet(game, enemy, dt, distance) {
     model = rig.model,
     p = enemy.group.position;
   model.updateWorldMatrix(true, true);
+  const heading = model.getWorldQuaternion(new THREE.Quaternion());
   const desired = rig.legs.map((_, i) => {
     const position = model.localToWorld(
       new THREE.Vector3((i ? 1 : -1) * 0.32, 0, 0.02),
@@ -853,13 +868,24 @@ function updateFeet(game, enemy, dt, distance) {
     return position;
   });
   if (!rig.feet || (rig.previous && p.distanceTo(rig.previous) > 4)) {
-    rig.feet = desired.map((v) => v.clone());
+    const fitted = desired.map((v, i) =>
+      fitGuardianFoot(game, v.clone(), heading, rig.footContacts[i], rig.scale),
+    );
+    rig.feet = fitted.map((f) => f.position);
+    rig.footRotations = fitted.map((f) => f.rotation);
     rig.step = null;
   }
   const moving = distance > 0.001,
     speed = dt ? distance / dt : 0;
-  const yaw = enemy.group.rotation.y,
-    forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
+  // Patrol torsos turn gradually, so they can initially face away from their
+  // actual travel. Lead the step along displacement, not the delayed heading.
+  const forward = moving
+    ? new THREE.Vector3(
+        p.x - rig.previous.x,
+        0,
+        p.z - rig.previous.z,
+      ).normalize()
+    : new THREE.Vector3();
   if (!rig.step) {
     const errors = rig.feet.map((v, i) => v.distanceTo(desired[i]));
     let index = rig.nextFoot;
@@ -871,11 +897,19 @@ function updateFeet(game, enemy, dt, distance) {
           forward,
           moving ? Math.min(1.2, 0.22 + speed * 0.2) * rig.scale : 0,
         );
-      to.y = courtWalkingHeight(game, to.x, to.z) + 0.17 * rig.scale;
+      const fitted = fitGuardianFoot(
+        game,
+        to,
+        heading,
+        rig.footContacts[index],
+        rig.scale,
+      );
       rig.step = {
         index,
         from: rig.feet[index].clone(),
         to,
+        fromRotation: rig.footRotations[index].clone(),
+        toRotation: fitted.rotation,
         time: 0,
         duration: THREE.MathUtils.clamp(0.62 / Math.max(speed, 1.5), 0.04, 0.3),
       };
@@ -889,6 +923,23 @@ function updateFeet(game, enemy, dt, distance) {
     rig.feet[step.index].lerpVectors(step.from, step.to, smooth(t));
     rig.feet[step.index].y +=
       Math.sin(t * Math.PI) * (enemy.state === "rush" ? 0.3 : 0.19) * rig.scale;
+    rig.footRotations[step.index].slerpQuaternions(
+      step.fromRotation,
+      step.toRotation,
+      smooth(t),
+    );
+    // The swing also clears intermediate slopes and tread edges, not just its
+    // landing. Keep the authored lift whenever it already clears the surface.
+    rig.feet[step.index].y = Math.max(
+      rig.feet[step.index].y,
+      guardianFootHeight(
+        game,
+        rig.feet[step.index],
+        rig.footRotations[step.index],
+        rig.footContacts[step.index],
+        rig.scale,
+      ),
+    );
     if (t === 1) {
       if (
         game.elapsed - rig.footfall > 0.12 &&
@@ -913,12 +964,11 @@ function updateFeet(game, enemy, dt, distance) {
     );
   }
   poseFeet({ rig: { model, legs: rig.legs }, avatar: enemy.group }, rig.feet);
-  const inverse = model.getWorldQuaternion(new THREE.Quaternion());
-  for (const leg of rig.legs) {
+  for (const [index, leg] of rig.legs.entries()) {
     const parent = leg[2].parent
       .getWorldQuaternion(new THREE.Quaternion())
       .invert();
-    leg[2].quaternion.copy(parent.multiply(inverse));
+    leg[2].quaternion.copy(parent.multiply(rig.footRotations[index]));
   }
 }
 
@@ -947,7 +997,14 @@ export function animateGuardian(game, enemy, dt) {
       m.geometry = rig.tiers[nextTier][i];
     });
   }
+  const wasVisible = rig.model.visible;
   rig.model.visible = cameraDistance < (low ? 80 : 125);
+  // Patrols continue while their art is culled. Their old world-space anchors
+  // no longer belong to the current stance when the model comes back into view.
+  if (rig.model.visible && !wasVisible) {
+    rig.feet = null;
+    rig.step = null;
+  }
   const windup = enemy.state === "windup",
     recover = enemy.state === "recover",
     rush = enemy.state === "rush",
