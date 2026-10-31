@@ -43,6 +43,13 @@ for (const name of ["island_tree_01", "island_tree_02"]) {
             3,
           ),
         );
+        geometry.setAttribute(
+          "uv",
+          new THREE.BufferAttribute(
+            primitive.getAttribute("TEXCOORD_0").getArray(),
+            2,
+          ),
+        );
         geometry.setIndex(
           new THREE.BufferAttribute(primitive.getIndices().getArray(), 1),
         );

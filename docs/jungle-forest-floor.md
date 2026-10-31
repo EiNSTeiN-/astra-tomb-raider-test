@@ -104,10 +104,11 @@ close after their checks.
 
 ## Remaining review
 
-VA-161's reproduced grass boundary is repaired. Wider world composition remains
-under review, including VA-163's pale lower-trunk strips in the west view and
-possible masonry-base/soil gaps exposed by forest-side approaches. Those
-observations still need independent geometry or material checks. VA-162's
+VA-161's reproduced grass boundary is repaired. The subsequent
+[tree-base repair](jungle-tree-bases.md) identifies VA-163's pale lower-trunk
+strips as captured ground in the scans and seats them beneath the soil.
+Possible masonry-base/soil gaps exposed by forest-side approaches still need
+independent geometry checks, and wider world composition remains open. VA-162's
 portrait heading/objective contrast has the subsequent [HUD repair](hud-readability.md),
 and VA-165's raised root stance has the
 [natural foothold repair](natural-footholds.md). VA-164's

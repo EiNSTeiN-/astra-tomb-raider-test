@@ -1744,3 +1744,11 @@ and introduce no external asset or recording. The four comparison images are
 actual prepared game captures. Each before/after pair shares its camera,
 quality and simulation time; the lossless WebP exports retain source pixels
 and dimensions without cropping or retouching.
+
+The two [jungle tree-base comparison images](jungle-tree-bases.md) are actual
+prepared High-preset canvas captures sharing their player, camera and world
+time. Their lossless WebP exports preserve source pixels and 1280 × 800
+dimensions without cropping or retouching. The repair changes specimen seating
+and exposed-foothold selection using the existing credited tree scans,
+character, terrain and lighting. It adds no external asset, recording or
+dependency and leaves the runtime asset files unchanged.

@@ -5,6 +5,41 @@ import { TriangleSolids } from "../src/triangle-solids.js";
 import { palaceVesselGeometry } from "../src/palace-furnishing-art.js";
 import { restingFoothold } from "../src/explorer-foothold.js";
 
+test("rejecting a buried nearest tread still finds a farther exposed face", () => {
+  const geometry = new THREE.BoxGeometry(0.2, 1, 0.2),
+    material = new THREE.MeshBasicMaterial(),
+    matrices = [20, 20.5].map((x) =>
+      new THREE.Matrix4().makeTranslation(x, 0.5, 30),
+    ),
+    solids = new TriangleSolids([{ geometry, matrices }]),
+    ankle = new THREE.Vector3(20.15, 1.2, 30);
+  try {
+    const closest = restingFoothold({ triangles: solids }, ankle, 1);
+    assert(closest.point.x < 20.3);
+    const exposed = restingFoothold(
+      { triangles: solids },
+      ankle,
+      1,
+      0.65,
+      (point) => point.x > 20.3,
+    );
+    assert(exposed && exposed.point.x > 20.3);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.matrixAutoUpdate = false;
+    mesh.matrix.copy(matrices[1]);
+    mesh.updateMatrixWorld(true);
+    const ray = new THREE.Raycaster(
+        exposed.point.clone().add(new THREE.Vector3(0, 0.03, 0)),
+        new THREE.Vector3(0, -1, 0),
+      ),
+      hit = ray.intersectObject(mesh)[0];
+    assert(hit && hit.point.distanceTo(exposed.point) < 1e-6);
+  } finally {
+    geometry.dispose();
+    material.dispose();
+  }
+});
+
 test("a resting foothold reaches the real hollow rim after placement and unequal vertical scaling", () => {
   for (const basin of [false, true]) {
     const geometry = palaceVesselGeometry(basin);

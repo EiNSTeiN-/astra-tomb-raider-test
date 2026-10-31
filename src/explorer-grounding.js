@@ -287,6 +287,10 @@ export function groundExplorer(game, dt, moving, sprinting) {
   };
   let plant = null;
   if (!moving && finiteSupport && !bodySupport.surface.groundingSlope) {
+    // A scan may support the body beside a rising bank while its nearest
+    // tread is covered by soil. Plant only on the exposed part of a surface.
+    const exposed = (point) =>
+      point.y >= game.groundHeight(point.x, point.z) - 0.002;
     const old = state.plant,
       oldAnkle = old?.foot.bone.getWorldPosition(new THREE.Vector3());
     if (
@@ -295,6 +299,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       old.surface === bodySupport.surface &&
       Math.hypot(root.x - old.root.x, root.z - old.root.z) < 0.02 &&
       Math.abs(old.facing.dot(facing)) > 0.9995 &&
+      exposed(old.point) &&
       support(old.point.x, old.point.z)
     ) {
       plant = old;
@@ -302,7 +307,13 @@ export function groundExplorer(game, dt, moving, sprinting) {
       let distance = 0.55 * 0.55;
       for (const foot of state.feet) {
         const ankle = foot.bone.getWorldPosition(new THREE.Vector3());
-        const tread = restingFoothold(bodySupport.surface, ankle, root.y);
+        const tread = restingFoothold(
+          bodySupport.surface,
+          ankle,
+          root.y,
+          0.65,
+          exposed,
+        );
         if (!tread) continue;
         const { point, normal } = tread;
         const d = (point.x - ankle.x) ** 2 + (point.z - ankle.z) ** 2;

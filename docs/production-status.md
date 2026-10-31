@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [jungle tree-base repair](jungle-tree-bases.md) identifies photographed
+  ground patches in the scans and seats their complete surfaces beneath soil,
+  retaining all 1,771 horizontal tree positions. An independent observer finds
+  no exposed points among 8,469,190 samples of the recorded ground islands;
+  final live placements match that audit. Resting boots also reject treads
+  covered by rising banks, retaining the genuine narrow root's 7.454 mm
+  sole-triangle gap. All 117 selected tests, six High scenery views, three
+  tree approaches and six valley routes pass, covering 7,650 controller updates
+  and 45 sampled moving poses. All nine scenery/approach and four older-save
+  captures are reviewed. The affected older raised save receives its expected
+  height correction and stays exact on reload; other fields are preserved.
+  The build, native keyboard/High and portrait-touch/Performance controls and
+  four complete-store reload comparisons pass; all ten release images are
+  reviewed. Owned resources close under the shared locked five-CPU cap.
+  VA-163's pale tree-base strips are repaired; possible masonry/soil gaps,
+  VA-166's faint labels, wider contact, world composition and listening/device
+  acceptance remain open.
 - The [chapter/objective readability pass](hud-readability.md) adds consistent
   backing, larger mobile labels and a flowing two-row layout above world
   markers. Thirty revised observations pass pixel-contrast and layout checks,

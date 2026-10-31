@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { natureRockAllowed } from "./nature-rocks.js";
 import { inCipherCourt } from "./cipher-rules.js";
+import { jungleApronTriangles } from "./jungle-apron.js";
 
 // Keep the delivered scale, but use the trunk base as the planting origin.
 // The second island scan's canopy centre is several metres from its trunk.
@@ -22,15 +23,16 @@ export function jungleSpecimen(scenes) {
       : new THREE.Box3().setFromObject(scenes[0]),
     scale = 15 / (bounds.max.y - bounds.min.y),
     samples = new Map(),
+    apronSamples = new Map(),
     rootBounds = new THREE.Box3();
-  const add = (point) => {
+  const add = (point, target = samples) => {
     const key = point
       .toArray()
       .map((v) => Math.round(v * scale * 1e5))
       .join();
-    if (!samples.has(key)) {
-      samples.set(key, point.clone());
-      rootBounds.expandByPoint(point);
+    if (!target.has(key)) {
+      target.set(key, point.clone());
+      if (target === samples) rootBounds.expandByPoint(point);
     }
   };
   for (const tier of sources)
@@ -44,7 +46,8 @@ export function jungleSpecimen(scenes) {
         bottom = geometry.boundingBox.min.y,
         rim = [],
         a = new THREE.Vector3(),
-        b = new THREE.Vector3();
+        b = new THREE.Vector3(),
+        c = new THREE.Vector3();
       for (let i = 0; i < p.count; i++) {
         rim[i] = (p.getY(i) - bottom) * scale <= 0.25;
         if (rim[i]) add(a.fromBufferAttribute(p, i));
@@ -65,6 +68,39 @@ export function jungleSpecimen(scenes) {
           for (let step = 1; step < steps; step++)
             add(a.clone().lerp(b, step / steps));
         }
+      // The pale captured ground can rise above the lowest 25 cm rim. Sample
+      // each complete low ground island, including triangle interiors, so its
+      // material does not emerge as a flat shelf beside the forest soil.
+      for (const face of jungleApronTriangles(geometry, scale)) {
+        a.fromBufferAttribute(p, index ? index.getX(face * 3) : face * 3);
+        b.fromBufferAttribute(
+          p,
+          index ? index.getX(face * 3 + 1) : face * 3 + 1,
+        );
+        c.fromBufferAttribute(
+          p,
+          index ? index.getX(face * 3 + 2) : face * 3 + 2,
+        );
+        const steps = Math.max(
+            1,
+            Math.ceil(
+              (Math.max(a.distanceTo(b), a.distanceTo(c), b.distanceTo(c)) *
+                scale) /
+                0.1,
+            ),
+          ),
+          ab = b.clone().sub(a),
+          ac = c.clone().sub(a);
+        for (let i = 0; i <= steps; i++)
+          for (let j = 0; j <= steps - i; j++)
+            add(
+              a
+                .clone()
+                .addScaledVector(ab, i / steps)
+                .addScaledVector(ac, j / steps),
+              apronSamples,
+            );
+      }
       geometry.dispose();
     }
   if (!samples.size) throw new Error("Jungle specimen has no trunk footprint");
@@ -74,8 +110,11 @@ export function jungleSpecimen(scenes) {
     roots = [...samples.values()].map((p) =>
       p.sub(origin).multiplyScalar(scale),
     ),
+    apron = [...apronSamples.values()].map((p) =>
+      p.sub(origin).multiplyScalar(scale),
+    ),
     radius = Math.max(...roots.map((p) => Math.hypot(p.x, p.z)));
-  return { sources, origin, scale, roots, radius };
+  return { sources, origin, scale, roots, apron, radius };
 }
 
 export function jungleTreeAllowed(game, x, z, radius) {
@@ -111,7 +150,7 @@ export function plantJungleTrees(anchors, models, { height, allowed }) {
       c = Math.cos(anchor.rotation),
       s = Math.sin(anchor.rotation),
       radius = model.radius * anchor.scale,
-      roots = model.roots.map((p) => ({
+      roots = [...model.roots, ...(model.apron || [])].map((p) => ({
         x: (c * p.x + s * p.z) * anchor.scale,
         y: p.y * anchor.scale,
         z: (-s * p.x + c * p.z) * anchor.scale,

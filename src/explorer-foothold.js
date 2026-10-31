@@ -17,7 +17,13 @@ function clipHeight(polygon, height, above) {
 // Project onto a real upward face close to the supported root height. Work
 // from the copied physical triangles, so batching and rendered LOD do not
 // invalidate the target. The caller bounds the actual ankle displacement.
-export function restingFoothold(surface, ankle, height, radius = 0.65) {
+export function restingFoothold(
+  surface,
+  ankle,
+  height,
+  radius = 0.65,
+  accept = () => true,
+) {
   const parts = surface.shape
     ? [surface]
     : surface.triangles?.nearby(
@@ -77,6 +83,7 @@ export function restingFoothold(surface, ankle, height, radius = 0.65) {
           .multiplyScalar(bary.x)
           .addScaledVector(points[1], bary.y)
           .addScaledVector(points[2], bary.z);
+        if (!accept(point)) continue;
         const d = (point.x - ankle.x) ** 2 + (point.z - ankle.z) ** 2;
         if (d < distance) {
           distance = d;

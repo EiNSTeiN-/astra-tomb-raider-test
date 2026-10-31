@@ -13,6 +13,7 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { woodlandLayout } from "../src/habitat.js";
 import { buildJungleFringe } from "../src/jungle-fringe.js";
+import { jungleApronTriangles } from "../src/jungle-apron.js";
 
 async function delivered(t) {
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
@@ -36,6 +37,13 @@ async function delivered(t) {
             new THREE.BufferAttribute(
               primitive.getAttribute("POSITION").getArray(),
               3,
+            ),
+          );
+          geometry.setAttribute(
+            "uv",
+            new THREE.BufferAttribute(
+              primitive.getAttribute("TEXCOORD_0").getArray(),
+              2,
             ),
           );
           if (primitive.getIndices())
@@ -83,16 +91,158 @@ function fixture(t) {
 }
 
 test("both delivered jungle trunks use a centred base and a common footprint across three LODs", async (t) => {
-  for (const model of await delivered(t)) {
+  for (const [variant, model] of (await delivered(t)).entries()) {
     const b = new THREE.Box3().setFromPoints(model.roots),
       center = b.getCenter(new THREE.Vector3());
     assert(Math.abs(center.x) < 1e-6 && Math.abs(center.z) < 1e-6);
     assert(Math.abs(b.min.y) < 1e-6 && b.max.y < 0.28);
     assert(model.roots.length > 100 && model.radius > 1 && model.radius < 2);
     assert.equal(model.sources.length, 3);
-    for (const sources of model.sources)
+    assert(model.apron.length > 100);
+    assert(
+      model.apron.every((p) => Math.hypot(p.x, p.z) <= model.radius + 1e-6),
+    );
+    for (const sources of model.sources) {
       assert(sources.some((s) => /^island_tree_\d+$/.test(s.material.name)));
+      const source = sources.find((s) =>
+          /^island_tree_\d+$/.test(s.material.name),
+        ),
+        geometry = source.geometry.clone().applyMatrix4(source.matrixWorld);
+      assert.equal(
+        jungleApronTriangles(geometry, model.scale).length,
+        [577, 344][variant],
+      );
+      geometry.dispose();
+    }
   }
+});
+
+test("the recorded pale scan bases sit below independent terrain triangles, while their geometry remains intact", async (t) => {
+  const model = (await delivered(t))[1],
+    profile = createTerrainProfile(createMap(LEVELS[0]), LEVELS[0]),
+    source = model.sources[0].find((s) => s.material.name === "island_tree_02"),
+    geometry = source.geometry.clone().applyMatrix4(source.matrixWorld),
+    faces = jungleApronTriangles(geometry, model.scale),
+    position = geometry.attributes.position,
+    index = geometry.index;
+  t.after(() => geometry.dispose());
+  assert.equal(faces.length, 344);
+  for (const face of [571, 579, 591, 646, 734]) assert(faces.includes(face));
+  assert(
+    !faces.includes(599),
+    "the neighboring upright bark remains above ground",
+  );
+  const placements = [
+      [
+        -0.7141485214233398, 0, -0.43756207823753357, 0, 0, 0.8375372886657715,
+        0, 0, 0.43756207823753357, 0, -0.7141485214233398, 0, 41.9117546081543,
+        1.8340338468551636, 218.38174438476562, 1,
+      ],
+      [
+        -1.1692025661468506, 0, -0.7403592467308044, 0, 0, 1.3838953971862793,
+        0, 0, 0.7403592467308044, 0, -1.1692025661468506, 0, 42.304954528808594,
+        1.7847706079483032, 212.02088928222656, 1,
+      ],
+    ].map((values) => new THREE.Matrix4().fromArray(values)),
+    anchors = placements.map((m) => ({
+      x: m.elements[12],
+      z: m.elements[14],
+      rotation: Math.atan2(m.elements[8], m.elements[0]),
+      scale: Math.hypot(m.elements[0], m.elements[2]),
+      variant: 0,
+    })),
+    planted = plantJungleTrees(anchors, [model], {
+      height: (x, z) => rockGroundHeight(profile, x, z),
+      allowed: () => true,
+    });
+  assert.equal(planted.length, 2);
+  const ray = new THREE.Ray(new THREE.Vector3(), new THREE.Vector3(0, -1, 0)),
+    a = new THREE.Vector3(),
+    b = new THREE.Vector3(),
+    c = new THREE.Vector3(),
+    d = new THREE.Vector3(),
+    hit = new THREE.Vector3(),
+    ground = (point) => {
+      const x = Math.floor(point.x / profile.step) * profile.step,
+        z = Math.floor(point.z / profile.step) * profile.step;
+      a.set(x, Math.fround(profile.height(x, z)), z);
+      b.set(
+        x,
+        Math.fround(profile.height(x, z + profile.step)),
+        z + profile.step,
+      );
+      c.set(
+        x + profile.step,
+        Math.fround(profile.height(x + profile.step, z + profile.step)),
+        z + profile.step,
+      );
+      d.set(
+        x + profile.step,
+        Math.fround(profile.height(x + profile.step, z)),
+        z,
+      );
+      ray.origin.set(point.x, 1000, point.z);
+      assert(
+        ray.intersectTriangle(a, b, d, false, hit) ||
+          ray.intersectTriangle(b, c, d, false, hit),
+      );
+      return hit.y;
+    };
+  let before = -Infinity,
+    after = -Infinity,
+    samples = 0;
+  for (const [i, tree] of planted.entries()) {
+    assert.equal(tree.x, anchors[i].x);
+    assert.equal(tree.z, anchors[i].z);
+    const matrix = new THREE.Matrix4().compose(
+      new THREE.Vector3(tree.x, tree.y, tree.z),
+      new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        tree.rotation,
+      ),
+      new THREE.Vector3().setScalar(tree.scale),
+    );
+    for (const face of faces) {
+      const vertices = [0, 1, 2].map((k) =>
+        new THREE.Vector3()
+          .fromBufferAttribute(
+            position,
+            index ? index.getX(face * 3 + k) : face * 3 + k,
+          )
+          .sub(model.origin)
+          .multiplyScalar(model.scale),
+      );
+      for (let u = 0; u <= 8; u++)
+        for (let v = 0; v <= 8 - u; v++) {
+          const local = vertices[0]
+              .clone()
+              .multiplyScalar(1 - (u + v) / 8)
+              .addScaledVector(vertices[1], u / 8)
+              .addScaledVector(vertices[2], v / 8),
+            old = local.clone().applyMatrix4(placements[i]),
+            current = local.clone().applyMatrix4(matrix);
+          before = Math.max(before, old.y - ground(old));
+          after = Math.max(after, current.y - ground(current));
+          samples++;
+        }
+    }
+  }
+  t.diagnostic(
+    JSON.stringify({
+      samples,
+      before,
+      after,
+      shifts: planted.map((tree, i) => tree.y - placements[i].elements[13]),
+    }),
+  );
+  assert(
+    before > 0.05,
+    "the previous planting exposes the photographed ground",
+  );
+  assert(
+    after < -0.02,
+    "the complete captured ground lies beneath the delivered terrain",
+  );
 });
 
 test("jungle roots meet actual walking-terrain triangles without entering paths or losing the forest density", async (t) => {

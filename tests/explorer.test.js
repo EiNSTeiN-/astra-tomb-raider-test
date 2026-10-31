@@ -353,6 +353,51 @@ test("a raw scanned support carries a real resting sole when its body margin rea
   }
 });
 
+test("a resting boot follows the bank instead of planting on a scanned tread buried below it", async () => {
+  const g = await groundedActor(),
+    geometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32),
+    material = new THREE.MeshBasicMaterial({ name: "island_tree_01" }),
+    mesh = new THREE.Mesh(geometry, material),
+    matrix = new THREE.Matrix4().makeTranslation(20, 0.5, 30);
+  mesh.matrixAutoUpdate = false;
+  mesh.matrix.copy(matrix);
+  mesh.updateMatrixWorld(true);
+  g.jungleTreeSolids = new JungleTreeSolids([
+    { tiers: [[mesh]], matrices: [matrix] },
+  ]);
+  g.groundHeight = (x) => 0.9 - (x - 20.65) * 0.5;
+  g.canMove = Adventure.prototype.canMove;
+  g.walkable = () => true;
+  g.actualMoveSpeed = 0;
+  g.moveVelocity = { x: 0, z: 0 };
+  g.player.position.set(20.65, 1, 30);
+  const root = g.player.position.clone();
+  try {
+    for (const facing of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
+      g.rig.mixer.stopAllAction();
+      g.rig.actions.Idle.reset().play();
+      g.rig.grounding = undefined;
+      g.avatar.position.set(0, 0, 0);
+      g.avatar.rotation.y = facing;
+      for (let i = 0; i < 40; i++) animateExplorer(g, 1 / 60, false, false);
+      const plant = g.rig.grounding.plant;
+      assert(
+        !plant ||
+          plant.point.y >= g.groundHeight(plant.point.x, plant.point.z) - 0.002,
+        "a buried scan is not a visible foothold",
+      );
+      const contact = inspectExplorerTerrain(g, (x, z) => g.groundHeight(x, z));
+      assert.equal(contact.embedded, 0, JSON.stringify(contact));
+      assert.equal(contact.missing, 0);
+      assert(g.player.position.equals(root));
+      assert(g.canMove(root.x, root.z, 0.1));
+    }
+  } finally {
+    geometry.dispose();
+    material.dispose();
+  }
+});
+
 test("a frozen first-view pose clears the delivered body on chapter ground without advancing time or the saved root", async (t) => {
   const game = await groundedActor();
   Object.assign(game, {
