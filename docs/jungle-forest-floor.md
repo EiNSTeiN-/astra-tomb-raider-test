@@ -90,8 +90,9 @@ The release review also finds apparent lower-leg concealment by the rising
 foreground soil in the immediate portrait reload view at x = 377.40 m,
 z = 49 m. Its controller position and saved height restore exactly, but the
 settled diagnostic poses above do not inspect this immediate native pose.
-VA-164 retains that rendered-contact observation for independent measurement
-and repair; successful save comparisons do not close it.
+Successful save comparisons did not close that rendered-contact observation.
+The subsequent [explorer arrival repair](explorer-arrival.md) measures the
+119.213 mm overlap and fits the rig before the paused first view.
 
 The three documentation images preserve their source pixels and dimensions in
 lossless WebP. The CPU-budget helper's three thread/child, nesting and exit-status
@@ -107,7 +108,8 @@ VA-161's reproduced grass boundary is repaired. Wider world composition remains
 under review, including VA-163's pale lower-trunk strips in the west view and
 possible masonry-base/soil gaps exposed by forest-side approaches. Those
 observations still need independent geometry or material checks. VA-162's
-portrait text contrast and VA-164's immediate reload pose remain open.
+portrait text contrast and VA-165's raised root stance remain open. VA-164's
+immediate reload overlap has the separate arrival repair above.
 Other chapters' visible-ground boundaries, continuous moving contact,
 subjective audio quality and device performance also need
 broader acceptance. This milestone does not establish a finished visual audit

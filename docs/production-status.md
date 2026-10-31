@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [explorer first-view contact repair](explorer-arrival.md) fits the loaded
+  rig before a paused arrival is exposed. The recorded jungle reload changes
+  from 675 embedded vertices and 119.213 mm maximum depth to no overlap and
+  approximately 6 mm minimum terrain clearance, preserving the saved root and
+  animation time. All 59 selected tests and the build pass. A frozen-pose
+  fixture covers 44 poses and 2,116,180 vertex observations across eight chapter
+  terrains. All eight live High chapter starts and two raised root saves pass
+  first-render terrain observations; all ten views are reviewed. Native
+  keyboard/High and portrait-touch/Performance inputs and four complete-store
+  reload comparisons pass; all ten release captures are reviewed. Owned resources
+  close under the shared locked five-CPU cap. VA-164's reproduced first-view
+  overlap is repaired; the raised root stance, broader contact, composition and
+  listening/device acceptance remain open.
 - The [jungle forest floor](jungle-forest-floor.md) opens the recorded visible
   grass beyond its old grid limit and encloses the valley with terrain faces.
   All 71 selected tests and the build pass, retaining the complete original
@@ -29,8 +42,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   triangles. Actual Performance keyboard/touch movement, map pixels and four
   complete-store reload comparisons pass; all ten release captures are reviewed.
   VA-161's reproduced boundary is repaired. Pale root strips, possible masonry
-  gaps, portrait contrast and apparent lower-leg/soil contact in the immediate
-  touch reload pose remain open. These checks do not establish continuous
+  gaps and portrait contrast remain open; the immediate lower-leg/soil contact
+  has the separate first-view repair above. These checks do not establish continuous
   whole-body clearance or a complete objective playthrough. Owned resources
   close under the shared locked five-CPU cap; all three budget-helper tests pass.
 - The [jungle trunk contact](jungle-trunk-contact.md) adds body, lens, cover,

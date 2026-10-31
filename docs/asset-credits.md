@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [explorer first-view contact repair](explorer-arrival.md) uses original
+loading and pose-initialization code with the existing credited explorer and
+terrain. It adds no external model, texture, audio or dependency. The two
+documentation comparisons are actual browser captures, converted losslessly
+to WebP with identical decoded pixels and dimensions.
+
 The [jungle forest-floor revision](jungle-forest-floor.md) adds original terrain,
 movement and chart code using the existing credited ground materials, Island
 Tree delivery models and explorer. It adds no external model, texture, audio or

@@ -1086,8 +1086,9 @@ export class Adventure {
         this.save();
       }
       // Arrival can render while the welcome dialog pauses player updates.
-      // The asynchronously loaded rig needs its swimming pose before then.
-      if (this.assetBatch === batch && this.swimming)
+      // Fit the loaded rig to the final ground, platforms or water before that
+      // first view. Zero time preserves its animation clock and saved position.
+      if (this.assetBatch === batch)
         animateExplorer(this, 0, false, false);
       batch.seal(results);
       if (this.assetBatch === batch) this.renderOnce = true;

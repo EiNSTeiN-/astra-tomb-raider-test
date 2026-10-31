@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [explorer arrival pose](docs/explorer-arrival.md) now runs foot fitting
+before a paused first view. The recorded jungle reload clears the buried lower
+legs while preserving the saved position.
+
 The [jungle forest floor](docs/jungle-forest-floor.md) now opens the visible
 entrance grass beyond its old walking-grid limit. A wooded terrain escarpment
 encloses the valley, while the explored chart includes newly surveyed ground.

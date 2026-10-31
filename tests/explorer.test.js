@@ -39,6 +39,7 @@ import {
 } from "../src/fire-vault-motion.js";
 import { normalizeFireVault } from "../src/fire-vault-rules.js";
 import { Adventure } from "../src/game.js";
+import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { ExplorerContact } from "../src/explorer-contact.js";
 import { activeWindGrip } from "../src/wind-pose.js";
 import { windLayout, windPosition } from "../src/wind-rules.js";
@@ -98,6 +99,67 @@ async function groundedActor() {
     },
   };
 }
+
+test("a frozen first-view pose clears the delivered body on chapter ground without advancing time or the saved root", async (t) => {
+  const game = await groundedActor();
+  Object.assign(game, {
+    paused: true,
+    actualMoveSpeed: 0,
+    moveVelocity: { x: 0, z: 0 },
+    progress: { stage: 0, field: [], time: 77 },
+    canMove: Adventure.prototype.canMove,
+    walkable: () => true,
+  });
+  let observations = 0,
+    reproduced = 0,
+    poses = 0;
+  for (const level of LEVELS) {
+    const map = createMap(level),
+      profile = createTerrainProfile(map, level),
+      positions = [[map.spawn.x * 7, map.spawn.z * 7]];
+    if (level.id === "verdant")
+      positions.push([377.4, 49], [375.9648, 49], [379.5, 49]);
+    Object.assign(game, {
+      level,
+      map,
+      terrainProfile: profile,
+      groundHeight: profile.surfaceHeight,
+    });
+    for (const [x, z] of positions)
+      for (const facing of [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2]) {
+        game.player.position.set(x, game.groundHeight(x, z), z);
+        game.avatar.position.set(0, 0, 0);
+        game.avatar.rotation.y = facing;
+        game.rig.mixer.stopAllAction();
+        game.rig.actions.Idle.reset().play();
+        game.rig.mixer.update(0.1); // The asynchronously delivered initial pose.
+        game.rig.grounding = undefined;
+        game.progress.position = { x, z, height: 0 };
+        const root = game.player.position.clone(),
+          progress = structuredClone(game.progress),
+          time = game.rig.actions.Idle.time;
+        if (level.id === "verdant" && x === 377.4 && facing > 4)
+          reproduced = inspectExplorerTerrain(game, game.groundHeight).embedded;
+        animateExplorer(game, 0, false, false);
+        const body = inspectExplorerTerrain(game, game.groundHeight);
+        assert.equal(body.samples, 48095);
+        assert.equal(body.embedded, 0, `${level.id}/${x}/${z}/${facing}`);
+        assert.equal(body.missing, 0);
+        assert.equal(body.invalid, 0);
+        assert(game.player.position.equals(root));
+        assert.deepEqual(game.progress, progress);
+        assert.equal(game.rig.actions.Idle.time, time);
+        assert.equal(game.elapsed, 0);
+        assert(game.paused);
+        assert(game.rig.grounding.active);
+        observations += body.samples;
+        poses++;
+      }
+  }
+  assert(reproduced > 500, "the unfitted recorded reload must expose the defect");
+  assert.equal(poses, 44);
+  t.diagnostic(JSON.stringify({ poses, observations, reproduced }));
+});
 
 test("the delivered explorer fits the parallel cloud paths beside bridge excavations in all recorded standing directions", async () => {
   const level = LEVELS[5],
