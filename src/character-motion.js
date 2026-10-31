@@ -17,6 +17,7 @@ import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
 import { stationSupport, stationBlocked } from "./field-station-solids.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
+import { clearNaturalDescent } from "./nature-contact.js";
 import {
   terrainBodyClear,
   clearTerrainDescent,
@@ -28,11 +29,20 @@ import {
 
 // Vertical motion is in world coordinates: walking off a ledge must lose
 // support, and crossing uneven ground in the air must not lift the jump arc.
-export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
+export function supportAt(
+  game,
+  x,
+  z,
+  maxY = Infinity,
+  rockRadius = 0,
+  scanMinUp = rockRadius ? 0.65 : 0,
+) {
   let height = game.groundHeight(x, z),
     surface = null;
   for (const solids of [game.natureRockSolids, game.jungleTreeSolids]) {
-    const contact = solids?.support(x, z, maxY, rockRadius);
+    // The body can rest on an upward tread. Point queries still read every
+    // face for boot fitting; a steep scan side must not hold the body in air.
+    const contact = solids?.support(x, z, maxY, rockRadius, scanMinUp);
     if (contact && contact.height > height) {
       height = contact.height;
       surface = contact.surface;
@@ -329,6 +339,7 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         else game.grounded = false;
       }
     }
+    clearNaturalDescent(game, before);
     // The newly open jungle includes the foot of real, steep valley faces.
     // Descending there must clear the legs sideways before accepting support.
     if (game.terrainProfile?.jungleRim) clearTerrainDescent(game, before);

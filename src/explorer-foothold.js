@@ -18,23 +18,34 @@ function clipHeight(polygon, height, above) {
 // from the copied physical triangles, so batching and rendered LOD do not
 // invalidate the target. The caller bounds the actual ankle displacement.
 export function restingFoothold(surface, ankle, height, radius = 0.65) {
-  const kernel = surface.triangles;
-  if (!kernel) return null;
+  const parts = surface.shape
+    ? [surface]
+    : surface.triangles?.nearby(
+        ankle.x - radius,
+        ankle.z - radius,
+        ankle.x + radius,
+        ankle.z + radius,
+      );
+  if (!parts) return null;
   const query = new Vector3(ankle.x, 0, ankle.z);
   const flat = new Triangle(),
     nearest = new Vector3(),
     bary = new Vector3();
   let best = null,
     distance = radius * radius;
-  for (const part of kernel.nearby(
-    ankle.x - radius,
-    ankle.z - radius,
-    ankle.x + radius,
-    ankle.z + radius,
-  )) {
+  for (const part of parts) {
     if (part.bounds.max.y < height - 0.012 || part.bounds.min.y > height + 0.02)
       continue;
+    const local = ankle.clone().applyMatrix4(part.inverse),
+      reach = radius / part.horizontalScale;
     for (const triangle of part.shape.triangles) {
+      if (
+        triangle.bounds.max.x < local.x - reach ||
+        triangle.bounds.min.x > local.x + reach ||
+        triangle.bounds.max.z < local.z - reach ||
+        triangle.bounds.min.z > local.z + reach
+      )
+        continue;
       const vertices = triangle.vertices.map((v) =>
         v.clone().applyMatrix4(part.matrix),
       );

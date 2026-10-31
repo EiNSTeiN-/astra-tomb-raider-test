@@ -71,10 +71,12 @@ descendants close after verification.
 
 ## Remaining review
 
-VA-164's reproduced first-view terrain overlap is repaired. The raised view
-near x = 370.5731 m, z = 35.3944 m still makes the resting boots look unsupported
-beside the trunk. VA-165 retains that observation for an independent wood/sole
-measurement; a legal capsule and an unchanged elevated save do not prove foot
-contact. Broader moving contact and the world visual audit remain incomplete,
+VA-164's reproduced first-view terrain overlap is repaired. The subsequent
+[natural foothold review](natural-footholds.md) independently measures VA-165's
+raised root stance and repairs steep-side support and sole fitting. The two
+root elevations recorded above describe this arrival milestone; later support
+validation recovers those invalid older saves onto nearby clear soil instead
+of preserving their unsupported heights. Broader moving contact and the world
+visual audit remain incomplete,
 including the jungle tree-base, masonry and text-contrast findings. Muted
 rendering checks do not establish subjective sound quality or device performance.

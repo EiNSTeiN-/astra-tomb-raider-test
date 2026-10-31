@@ -59,13 +59,20 @@ function makeFeet(model) {
       shoe,
       indices: [...indices],
       clearanceIndices: candidates,
+      soleIndices: candidates.filter((i) => position.getY(i) <= 0.025),
       lifted: false,
     };
   });
 }
 
 function probes(foot, complete = false) {
-  return (complete ? foot.clearanceIndices : foot.indices).map((i) =>
+  return (
+    complete === "sole"
+      ? foot.soleIndices
+      : complete
+        ? foot.clearanceIndices
+        : foot.indices
+  ).map((i) =>
     foot.shoe
       .getVertexPosition(i, new THREE.Vector3())
       .applyMatrix4(foot.shoe.matrixWorld),
@@ -249,8 +256,12 @@ export function groundExplorer(game, dt, moving, sprinting) {
     root.y,
     NATURE_BODY_RADIUS,
   );
+  const finiteSupport =
+    bodySupport.surface?.triangles || bodySupport.surface?.shape;
   const support = (x, z) => {
-    const result = supportAt(game, x, z, root.y + 0.45);
+    // A steep side beside a root tread is a wall, not a higher floor for the
+    // boot. Follow upward scan faces while the collision queries retain sides.
+    const result = supportAt(game, x, z, root.y + 0.45, 0, 0.65);
     // A boot beside a finite cap can reach its steep bevel while the other
     // boot stands on top. Lowering the pelvis toward that edge bends the knee
     // through the cap. Treat a substantial drop as an unsupported foothold.
@@ -261,8 +272,11 @@ export function groundExplorer(game, dt, moving, sprinting) {
           (bodySupport.surface.triangles.support(x, z, root.y + 0.45, 0, 0.65)
             ?.height ?? -Infinity),
       ) < 0.08;
+    // Natural roots and stones can continue onto a lower nearby foothold;
+    // authored finite caps retain their stricter edge-drop rejection.
     if (
-      bodySupport.surface?.triangles &&
+      finiteSupport &&
+      !bodySupport.surface?.shape &&
       !continuousSlope &&
       root.y - result.height > 0.12
     )
@@ -272,11 +286,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       : null;
   };
   let plant = null;
-  if (
-    !moving &&
-    bodySupport.surface?.triangles &&
-    !bodySupport.surface.groundingSlope
-  ) {
+  if (!moving && finiteSupport && !bodySupport.surface.groundingSlope) {
     const old = state.plant,
       oldAnkle = old?.foot.bone.getWorldPosition(new THREE.Vector3());
     if (
@@ -328,17 +338,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       local.z * (state.stride - 1) + crouch * (moving ? 0.14 + recovery : 0),
     ).applyQuaternion(facing);
     ankle.add(offset);
-    if (foot === plant?.foot) {
-      const dx = plant.point.x - ankle.x,
-        dz = plant.point.z - ankle.z;
-      if (Math.hypot(dx, dz) <= 0.55) {
-        offset.x += dx;
-        offset.z += dz;
-        ankle.x += dx;
-        ankle.z += dz;
-      }
-    }
-
+    let anchorIndex;
     const rotation = foot.bone.getWorldQuaternion(new THREE.Quaternion());
     if (foot === plant?.foot) {
       rotation.premultiply(
@@ -348,8 +348,33 @@ export function groundExplorer(game, dt, moving, sprinting) {
         ),
       );
       setWorldRotation(foot.bone, rotation);
+      // Plant the nearest real outsole point. A narrow tread can carry the
+      // boot's edge while the rest of the sole stays outside the steep side.
+      let anchor,
+        nearest = Infinity;
+      for (const [i, point] of probes(foot, "sole").entries()) {
+        point.add(offset);
+        const distance =
+          (point.x - plant.point.x) ** 2 + (point.z - plant.point.z) ** 2;
+        if (distance < nearest) {
+          nearest = distance;
+          anchor = point;
+          anchorIndex = foot.soleIndices[i];
+        }
+      }
+      const dx = plant.point.x - anchor.x,
+        dz = plant.point.z - anchor.z;
+      if (Math.hypot(dx, dz) <= 0.65) {
+        offset.x += dx;
+        offset.z += dz;
+        ankle.x += dx;
+        ankle.z += dz;
+      }
     }
-    const center = support(ankle.x, ankle.z);
+    const center =
+      foot === plant?.foot
+        ? support(plant.point.x, plant.point.z)
+        : support(ankle.x, ankle.z);
     const samples = [
       support(ankle.x - 0.12, ankle.z),
       support(ankle.x + 0.12, ankle.z),
@@ -379,20 +404,16 @@ export function groundExplorer(game, dt, moving, sprinting) {
     }
     const clearances = probes(foot).flatMap((p) => {
       p.add(offset);
+      if (foot === plant?.foot) {
+        const n = plant.normal,
+          floor =
+            plant.point.y -
+            (n.x * (p.x - plant.point.x) + n.z * (p.z - plant.point.z)) / n.y;
+        return [p.y - floor];
+      }
       const floor = support(p.x, p.z);
       return floor ? [p.y - floor.height] : [];
     });
-    if (foot === plant?.foot && !clearances.length) {
-      const low = foot.clearanceIndices
-        .filter((i) => foot.shoe.geometry.attributes.position.getY(i) <= 0.025)
-        .map(
-          (i) =>
-            foot.shoe
-              .getVertexPosition(i, new THREE.Vector3())
-              .applyMatrix4(foot.shoe.matrixWorld).y,
-        );
-      clearances.push(Math.min(...low) - plant.point.y);
-    }
     const valid = clearances.length > 0;
     const shift = valid
       ? THREE.MathUtils.clamp(
@@ -401,7 +422,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
           0.42,
         )
       : 0;
-    return { foot, ankle, rotation, lift, valid, center, shift };
+    return { foot, ankle, rotation, lift, valid, center, shift, anchorIndex };
   });
   // On a narrow tread, carry the visual hips over the planted ankle instead
   // of leaving the torso suspended beside it. Preserve both targets on a
@@ -476,6 +497,33 @@ export function groundExplorer(game, dt, moving, sprinting) {
     applyPelvis,
     crouchSupport,
   );
+  // Refit the actual planted material point after leg IK. Weighted boot/toe
+  // vertices can differ slightly from the rigid planning pose on a steep root.
+  const planted = plans.findIndex((p) => p.foot === plant?.foot);
+  if (planted >= 0 && plans[planted].anchorIndex !== undefined) {
+    const plan = plans[planted];
+    for (let pass = 0; pass < 2; pass++) {
+      const actual = plan.foot.shoe
+          .getVertexPosition(plan.anchorIndex, new THREE.Vector3())
+          .applyMatrix4(plan.foot.shoe.matrixWorld),
+        correction = plant.point
+          .clone()
+          .add(new THREE.Vector3(0, 0.006, 0))
+          .sub(actual);
+      if (correction.length() < 0.0001) break;
+      correction.clampLength(0, 0.03);
+      ankleTargets[planted].add(correction);
+      state.pelvis = Math.max(-0.3, state.pelvis + Math.min(0, correction.y));
+      applyPelvis(state.pelvis);
+      state.pelvis = fitCrouchTerrain(
+        game,
+        state.pelvis,
+        drop,
+        applyPelvis,
+        crouchSupport,
+      );
+    }
+  }
   // Re-solving a deeply bent leg can shift the posed sole slightly from its
   // planned clearance. Check the delivered sole after IK, then fit the knees
   // again if an ankle needs lifting. Keep this bounded and visual only.
@@ -483,13 +531,27 @@ export function groundExplorer(game, dt, moving, sprinting) {
     let adjusted = false;
     for (const [index, p] of plans.entries()) {
       if (!p.valid) continue;
+      let bevel = null;
       // A continuous bank can rise inside the sole perimeter, and toe weights
       // can bend its medial vertices below the outline. Read the complete low
       // footwear here; keep the small perimeter for orientation and footsteps.
       const gaps = probes(p.foot, true).flatMap((point) => {
         const floor = support(point.x, point.z);
-        return floor ? [point.y - floor.height] : [];
+        let corrected = false;
+        if (bodySupport.surface?.shape)
+          for (const scans of [game.natureRockSolids, game.jungleTreeSolids]) {
+            const escape = scans?.pointExit(point.x, point.y, point.z);
+            if (!escape) continue;
+            corrected = true;
+            if (!bevel || escape.lengthSq() > bevel.lengthSq()) bevel = escape;
+          }
+        return corrected || !floor ? [] : [point.y - floor.height];
       });
+      if (bevel) {
+        ankleTargets[index].add(bevel);
+        state.pelvis = Math.max(-0.3, state.pelvis + Math.min(0, bevel.y));
+        adjusted = true;
+      }
       const lift = Math.min(0.03, 0.006 - Math.min(...gaps));
       if (lift > 0.0001) {
         ankleTargets[index].y += lift;

@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [natural foothold repair](docs/natural-footholds.md) rejects steep bark as
+standing support and plants the explorer's boots on actual root treads. Older
+unsupported root saves recover onto nearby clear ground.
+
 The [explorer arrival pose](docs/explorer-arrival.md) now runs foot fitting
 before a paused first view. The recorded jungle reload clears the buried lower
 legs while preserving the saved position.

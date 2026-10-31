@@ -1088,8 +1088,7 @@ export class Adventure {
       // Arrival can render while the welcome dialog pauses player updates.
       // Fit the loaded rig to the final ground, platforms or water before that
       // first view. Zero time preserves its animation clock and saved position.
-      if (this.assetBatch === batch)
-        animateExplorer(this, 0, false, false);
+      if (this.assetBatch === batch) animateExplorer(this, 0, false, false);
       batch.seal(results);
       if (this.assetBatch === batch) this.renderOnce = true;
       return batch.ready;
@@ -2167,7 +2166,7 @@ export class Adventure {
         // Support queries normally allow a 20 cm landing/step tolerance. A
         // reload must not repeatedly climb that allowance up a curved root.
         .map((solids) =>
-          solids?.support(p.x, p.z, y - 0.2 + 1e-6, NATURE_BODY_RADIUS),
+          solids?.support(p.x, p.z, y - 0.2 + 1e-6, NATURE_BODY_RADIUS, 0.65),
         )
         .filter(Boolean)
         .sort((a, b) => b.height - a.height)[0];

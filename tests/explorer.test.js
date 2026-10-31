@@ -3,6 +3,7 @@ import test from "node:test";
 import { poseCounterweight } from "../src/counterweights.js";
 import assert from "node:assert/strict";
 import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { animateExplorer, explorerGait } from "../src/explorer.js";
@@ -39,6 +40,8 @@ import {
 } from "../src/fire-vault-motion.js";
 import { normalizeFireVault } from "../src/fire-vault-rules.js";
 import { Adventure } from "../src/game.js";
+import { JungleTreeSolids } from "../src/jungle-tree-solids.js";
+import { jungleSpecimen } from "../src/jungle-grounding.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { ExplorerContact } from "../src/explorer-contact.js";
 import { activeWindGrip } from "../src/wind-pose.js";
@@ -100,6 +103,256 @@ async function groundedActor() {
   };
 }
 
+test("a real root rest fits the tread without lifting the sole onto the neighboring steep bark", async (t) => {
+  const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
+    document = await io.read("public/assets/models/island_tree_01/near.glb");
+  for (const texture of document.getRoot().listTextures()) texture.dispose();
+  const bytes = await io.writeBinary(document),
+    gltf = await new GLTFLoader().parseAsync(
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+      "",
+    ),
+    specimen = jungleSpecimen([gltf.scene]),
+    source = specimen.sources[0].find(
+      (m) => m.material.name === "island_tree_01",
+    ),
+    geometry = source.geometry.clone().applyMatrix4(source.matrixWorld);
+  geometry.translate(
+    -specimen.origin.x,
+    -specimen.origin.y,
+    -specimen.origin.z,
+  );
+  geometry.scale(specimen.scale, specimen.scale, specimen.scale);
+  const matrix = new THREE.Matrix4().fromArray([
+      0.6408843447681636, 0, 1.1835787787063246, 0, 0, 1.3459537394624204, 0, 0,
+      -1.1835787787063246, 0, 0.6408843447681636, 0, 383.78052401263267,
+      0.10429617339637816, 51.09800897259265, 1,
+    ]),
+    material = new THREE.MeshBasicMaterial({
+      name: "island_tree_01",
+      side: THREE.DoubleSide,
+    }),
+    mesh = new THREE.Mesh(geometry, material),
+    g = await groundedActor(),
+    profile = createTerrainProfile(createMap(LEVELS[0]), LEVELS[0]);
+  mesh.matrixAutoUpdate = false;
+  mesh.matrix.copy(matrix);
+  mesh.updateMatrixWorld(true);
+  Object.assign(g, {
+    level: LEVELS[0],
+    terrainProfile: profile,
+    groundHeight: profile.surfaceHeight,
+    actualMoveSpeed: 0,
+    moveVelocity: { x: 0, z: 0 },
+    canMove: Adventure.prototype.canMove,
+    walkable: () => true,
+    jungleTreeSolids: new JungleTreeSolids([
+      { tiers: [[mesh]], matrices: [matrix] },
+    ]),
+  });
+  g.player.position.set(
+    383.32468202907273,
+    1.8272803410305136,
+    51.114763275401145,
+  );
+  g.avatar.rotation.y = Math.PI / 2;
+  const root = g.player.position.clone(),
+    ray = new THREE.Raycaster(),
+    up = new THREE.Vector3(0, 1, 0),
+    normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
+  assert(g.canMove(root.x, root.z, root.y - g.groundHeight(root.x, root.z)));
+  try {
+    for (let i = 0; i < 40; i++) animateExplorer(g, 1 / 60, false, false);
+    g.avatar.updateWorldMatrix(true, false);
+    g.rig.model.updateMatrixWorld(true);
+    let contacts = 0,
+      inside = 0;
+    for (const foot of sampleStrideSoles(strideSoles(g.rig.model)))
+      for (const point of foot) {
+        ray.set(
+          new THREE.Vector3(point.x, root.y + 0.7, point.z),
+          new THREE.Vector3(0, -1, 0),
+        );
+        const hit = ray
+          .intersectObject(mesh)
+          .find(
+            (h) =>
+              h.face.normal.clone().applyNormalMatrix(normalMatrix).dot(up) >=
+              0.65,
+          );
+        const floor = Math.max(
+            g.groundHeight(point.x, point.z),
+            hit?.point.y ?? -Infinity,
+          ),
+          gap = point.y - floor;
+        assert(gap >= -0.015, "the actual sole must not enter the tread");
+        if (gap < 0.045) contacts++;
+      }
+    const plant = g.rig.grounding.plant,
+      shoe = g.rig.model.getObjectByName("shoes04"),
+      bakedGeometry = shoe.geometry.clone();
+    for (let i = 0; i < bakedGeometry.attributes.position.count; i++) {
+      const v = shoe
+        .getVertexPosition(i, new THREE.Vector3())
+        .applyMatrix4(shoe.matrixWorld);
+      bakedGeometry.attributes.position.setXYZ(i, v.x, v.y, v.z);
+    }
+    const overlaps = [];
+    for (let i = 0; i < bakedGeometry.attributes.position.count; i++) {
+      const point = new THREE.Vector3().fromBufferAttribute(
+        bakedGeometry.attributes.position,
+        i,
+      );
+      ray.set(point, new THREE.Vector3(0.314, 0.913, 0.259).normalize());
+      const hits = ray.intersectObject(mesh),
+        unique = hits.filter(
+          (h, i) => !i || h.distance - hits[i - 1].distance > 1e-6,
+        );
+      if (unique.length % 2) {
+        inside++;
+        overlaps.push({
+          vertex: i,
+          point: point.clone(),
+          kernel: g.jungleTreeSolids.blocked(point.x, point.y, point.z, 0, 0),
+        });
+      }
+    }
+    const inverse = matrix.clone().invert(),
+      position = geometry.attributes.position,
+      index = geometry.index,
+      triangle = new THREE.Triangle(),
+      nearest = new THREE.Vector3();
+    for (const overlap of overlaps) {
+      const local = overlap.point.clone().applyMatrix4(inverse);
+      let distance = Infinity,
+        sign = 0;
+      for (let j = 0; j < (index?.count ?? position.count); j += 3) {
+        const v = [0, 1, 2].map((k) =>
+          new THREE.Vector3().fromBufferAttribute(
+            position,
+            index ? index.getX(j + k) : j + k,
+          ),
+        );
+        triangle.set(...v);
+        triangle.closestPointToPoint(local, nearest);
+        const d = local.distanceTo(nearest);
+        if (d < distance) {
+          distance = d;
+          sign = local
+            .clone()
+            .sub(nearest)
+            .dot(triangle.getNormal(new THREE.Vector3()));
+        }
+      }
+      overlap.depth =
+        distance * Math.hypot(matrix.elements[0], matrix.elements[2]);
+      overlap.sign = sign;
+      overlap.bindY = shoe.geometry.attributes.position.getY(overlap.vertex);
+      overlap.point = overlap.point.toArray();
+    }
+    bakedGeometry.computeBoundingBox();
+    bakedGeometry.computeBoundingSphere();
+    const baked = new THREE.Mesh(bakedGeometry, material);
+    baked.updateMatrixWorld(true);
+    let triangleGap = null;
+    if (plant) {
+      ray.set(
+        plant.point.clone().addScaledVector(plant.normal, 0.02),
+        plant.normal.clone().negate(),
+      );
+      const wood = ray.intersectObject(mesh)[0];
+      assert(
+        wood && wood.point.distanceTo(plant.point) < 1e-5,
+        "the proposed tread lies on independently raycast wood",
+      );
+      ray.set(
+        plant.point.clone().addScaledVector(plant.normal, -0.02),
+        plant.normal,
+      );
+      const actual = ray.intersectObject(baked)[0];
+      if (actual) {
+        triangleGap = actual.distance - 0.02;
+        if (triangleGap >= -0.015 && triangleGap < 0.045) contacts++;
+      }
+    }
+    bakedGeometry.dispose();
+    t.diagnostic(
+      JSON.stringify({
+        contacts,
+        inside,
+        triangleGap,
+        shoeVertices: shoe.geometry.attributes.position.count,
+        overlaps,
+      }),
+    );
+    assert(contacts > 0, "the delivered soles must meet a real upward face");
+    assert(
+      triangleGap !== null && triangleGap >= 0 && triangleGap < 0.015,
+      "the actual sole triangle remains close to its independently raycast tread",
+    );
+    assert.equal(inside, 0, "the sole must also clear the adjacent steep wood");
+    assert(g.player.position.equals(root));
+  } finally {
+    geometry.dispose();
+    material.dispose();
+  }
+});
+
+test("a raw scanned support carries a real resting sole when its body margin reaches beyond the tread", async () => {
+  const g = await groundedActor(),
+    geometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32),
+    material = new THREE.MeshBasicMaterial({
+      name: "island_tree_01",
+      side: THREE.DoubleSide,
+    }),
+    mesh = new THREE.Mesh(geometry, material),
+    matrix = new THREE.Matrix4().makeTranslation(20, 0.5, 30);
+  mesh.matrixAutoUpdate = false;
+  mesh.matrix.copy(matrix);
+  mesh.updateMatrixWorld(true);
+  g.jungleTreeSolids = new JungleTreeSolids([
+    { tiers: [[mesh]], matrices: [matrix] },
+  ]);
+  g.canMove = Adventure.prototype.canMove;
+  g.walkable = () => true;
+  g.actualMoveSpeed = 0;
+  g.moveVelocity = { x: 0, z: 0 };
+  g.player.position.set(20.65, 1, 30);
+  const root = g.player.position.clone(),
+    ray = new THREE.Raycaster();
+  try {
+    for (const facing of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
+      g.rig.mixer.stopAllAction();
+      g.rig.actions.Idle.reset().play();
+      g.rig.grounding = undefined;
+      g.avatar.position.set(0, 0, 0);
+      g.avatar.rotation.y = facing;
+      for (let i = 0; i < 40; i++) animateExplorer(g, 1 / 60, false, false);
+      g.avatar.updateWorldMatrix(true, false);
+      g.rig.model.updateMatrixWorld(true);
+      let contact = 0;
+      for (const foot of sampleStrideSoles(strideSoles(g.rig.model)))
+        for (const point of foot) {
+          ray.set(
+            new THREE.Vector3(point.x, 1.1, point.z),
+            new THREE.Vector3(0, -1, 0),
+          );
+          const hit = ray.intersectObject(mesh)[0];
+          if (!hit) continue;
+          const gap = point.y - hit.point.y;
+          assert(gap >= -0.015, `Boot enters the actual tread at ${facing}`);
+          if (gap < 0.045) contact++;
+        }
+      assert(contact > 0, `No delivered sole on the raw support at ${facing}`);
+      assert(g.player.position.equals(root));
+      assert(g.canMove(root.x, root.z, 1));
+    }
+  } finally {
+    geometry.dispose();
+    material.dispose();
+  }
+});
+
 test("a frozen first-view pose clears the delivered body on chapter ground without advancing time or the saved root", async (t) => {
   const game = await groundedActor();
   Object.assign(game, {
@@ -156,7 +409,10 @@ test("a frozen first-view pose clears the delivered body on chapter ground witho
         poses++;
       }
   }
-  assert(reproduced > 500, "the unfitted recorded reload must expose the defect");
+  assert(
+    reproduced > 500,
+    "the unfitted recorded reload must expose the defect",
+  );
   assert.equal(poses, 44);
   t.diagnostic(JSON.stringify({ poses, observations, reproduced }));
 });

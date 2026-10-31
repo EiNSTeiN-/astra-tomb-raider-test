@@ -381,6 +381,132 @@ export class TriangleSolids {
     return false;
   }
 
+  // A descending cylinder can meet the side of a scan after its horizontal
+  // move was clear. Project it away from a clipped blocking face; the caller
+  // checks the complete world and repeats for neighboring faces if needed.
+  separation(x, y, z, clearance = 1.8, radius = DEFAULT_BODY_RADIUS) {
+    let best = null;
+    for (const solid of this.nearby(
+      x - radius,
+      z - radius,
+      x + radius,
+      z + radius,
+    )) {
+      if (
+        y >= solid.bounds.max.y - 0.015 ||
+        y + clearance < solid.bounds.min.y + 0.015
+      )
+        continue;
+      const p = new THREE.Vector3(x, y, z).applyMatrix4(solid.inverse),
+        bottom = p.y + 0.015 / solid.verticalScale,
+        top = p.y + (clearance - 0.015) / solid.verticalScale,
+        r = radius / solid.horizontalScale;
+      for (const triangle of candidates(solid.shape, p.x, p.z, r)) {
+        if (triangle.bounds.max.y < bottom || triangle.bounds.min.y > top)
+          continue;
+        const polygon = clipHeight(
+          clipHeight(triangle.vertices, bottom, true),
+          top,
+          false,
+        );
+        if (!polygonTouchesDisk(polygon, p.x, p.z, r)) continue;
+        let distance2 = Infinity,
+          nearestX = 0,
+          nearestZ = 0;
+        for (let i = 0; i < polygon.length; i++) {
+          const a = polygon[i],
+            b = polygon[(i + 1) % polygon.length],
+            dx = b.x - a.x,
+            dz = b.z - a.z,
+            length = dx * dx + dz * dz,
+            t =
+              length > EPSILON
+                ? THREE.MathUtils.clamp(
+                    ((p.x - a.x) * dx + (p.z - a.z) * dz) / length,
+                    0,
+                    1,
+                  )
+                : 0,
+            px = a.x + dx * t,
+            pz = a.z + dz * t,
+            d2 = (p.x - px) ** 2 + (p.z - pz) ** 2;
+          if (d2 < distance2) {
+            distance2 = d2;
+            nearestX = px;
+            nearestZ = pz;
+          }
+        }
+        const inside = polygonTouchesDisk(polygon, p.x, p.z, 0),
+          distance = Math.sqrt(distance2);
+        let dx = inside ? nearestX - p.x : p.x - nearestX,
+          dz = inside ? nearestZ - p.z : p.z - nearestZ;
+        if (distance < 1e-8) {
+          const normal = triangle.vertices[1]
+            .clone()
+            .sub(triangle.vertices[0])
+            .cross(triangle.vertices[2].clone().sub(triangle.vertices[0]));
+          dx = normal.x;
+          dz = normal.z;
+        }
+        if (Math.hypot(dx, dz) < 1e-8) continue;
+        const push = new THREE.Vector3(dx, 0, dz)
+          .normalize()
+          .transformDirection(solid.matrix)
+          .multiplyScalar(
+            (inside ? r + distance : r - distance) * solid.horizontalScale +
+              0.0005,
+          );
+        if (!best || push.lengthSq() > best.lengthSq()) best = push;
+      }
+    }
+    return best;
+  }
+
+  // Bounded visual contact correction for a deformed boot/bevel. Find the
+  // nearest actual surface in world space, including unequal vertical scale.
+  pointExit(x, y, z, limit = 0.03) {
+    const point = new THREE.Vector3(x, y, z),
+      nearest = new THREE.Vector3(),
+      triangle = new THREE.Triangle();
+    let result = null,
+      best = limit;
+    for (const solid of this.nearby(
+      x - limit,
+      z - limit,
+      x + limit,
+      z + limit,
+    )) {
+      if (y < solid.bounds.min.y || y > solid.bounds.max.y) continue;
+      const local = point.clone().applyMatrix4(solid.inverse);
+      if (!contains(solid.shape, local.x, local.y, local.z)) continue;
+      for (const face of candidates(
+        solid.shape,
+        local.x,
+        local.z,
+        limit / solid.horizontalScale,
+      )) {
+        if (
+          local.y < face.bounds.min.y - limit / solid.verticalScale ||
+          local.y > face.bounds.max.y + limit / solid.verticalScale
+        )
+          continue;
+        triangle.set(
+          ...face.vertices.map((v) => v.clone().applyMatrix4(solid.matrix)),
+        );
+        triangle.closestPointToPoint(point, nearest);
+        const distance = nearest.distanceTo(point);
+        if (distance > 1e-8 && distance < best) {
+          best = distance;
+          result = nearest
+            .clone()
+            .sub(point)
+            .multiplyScalar((distance + 0.001) / distance);
+        }
+      }
+    }
+    return result;
+  }
+
   // Sight and sound use the actual triangle surface without the body margin.
   entry(from, to) {
     const start = new THREE.Vector3(),

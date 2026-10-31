@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [natural foothold repair](natural-footholds.md) rejects steep scan sides
+  as standing treads, clears descending bodies from those sides and fits actual
+  boot material points to narrow roots. All 104 selected tests pass. Three live
+  tree approaches and six valley routes cover 7,650 legal controller updates;
+  45 sampled moving poses clear the terrain observer's 15 mm threshold. The
+  reproduced genuine root tread has 7.454 mm sole-triangle separation and no
+  inspected shoe vertices inside its supporting wood. Older unsupported raised
+  saves recover onto nearby clear soil. All twelve High first-view cases pass
+  across eight chapter starts, two valid root saves and two older invalid saves;
+  both valid heights are retained and all twelve images are reviewed. The build,
+  native keyboard/High and portrait-touch/Performance cases and four complete-store
+  reload comparisons pass; all ten release images are reviewed. Owned resources
+  close under the shared locked five-CPU cap. VA-165's reproduced stance is
+  repaired; broader body/solid contact, composition and listening/device
+  acceptance remain open.
 - The [explorer first-view contact repair](explorer-arrival.md) fits the loaded
   rig before a paused arrival is exposed. The recorded jungle reload changes
   from 675 embedded vertices and 119.213 mm maximum depth to no overlap and

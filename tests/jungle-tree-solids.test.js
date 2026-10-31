@@ -94,6 +94,43 @@ function game(solids) {
   });
 }
 
+test("the recorded steep trunk side is not a standing tread and a falling body slides clear", () => {
+  const matrix = new THREE.Matrix4().fromArray([
+    0.8312395475657146, 0, -0.7075141923819876, 0, 0, 1.0915747880283742, 0, 0,
+    0.7075141923819876, 0, 0.8312395475657146, 0, 372.72309826873243,
+    -0.6184441827341617, 35.39440362062305, 1,
+  ]);
+  const solids = new JungleTreeSolids([patch(specimens[0], [matrix])]),
+    g = game(solids),
+    profile = createTerrainProfile(createMap(LEVELS[0]), LEVELS[0]);
+  g.groundHeight = profile.surfaceHeight;
+  g.terrainProfile = profile;
+  g.level = LEVELS[0];
+  const x = 370.57309826873285,
+    z = 35.39440362062305,
+    y = 2.1729428090092937;
+  g.player.position.set(x, y, z);
+  assert(g.canMove(x, z, y - g.groundHeight(x, z)));
+  assert.equal(solids.support(x, z, y, 0.55, 0.65), null);
+  assert.equal(supportAt(g, x, z, y, 0.55).height, g.groundHeight(x, z));
+  for (let i = 0; i < 450; i++) {
+    advanceCharacter(g, { x: 0, z: 0 }, 1 / 60);
+    const p = g.player.position;
+    assert(
+      g.canMove(p.x, p.z, g.jumpY),
+      `Body enters wood at ${i}: ${p.toArray()}`,
+    );
+    assert(p.y >= g.groundHeight(p.x, p.z) - 1e-6);
+  }
+  assert(g.grounded);
+  assert(
+    Math.abs(
+      g.player.position.y -
+        g.groundHeight(g.player.position.x, g.player.position.z),
+    ) < 1e-6,
+  );
+});
+
 test("both delivered trunks keep identical positions and triangles across all detail tiers", () => {
   for (const sources of specimens) {
     for (const source of sources.slice(1)) {

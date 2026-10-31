@@ -22,27 +22,25 @@ test("a resting foothold reaches the real hollow rim after placement and unequal
     const radius = Math.max(bounds.max.x - 20, bounds.max.z - 30) + 0.4;
     for (const dx of [0, 0.35, -0.35]) {
       const ankle = new THREE.Vector3(20 + dx, height + 0.12, 30);
-      const tread = restingFoothold(
-        { triangles: kernel },
-        ankle,
-        height,
-        radius,
-      );
-      assert(tread, "the hollow centre still has a reachable rim");
-      assert(
-        Math.hypot(tread.point.x - ankle.x, tread.point.z - ankle.z) <= radius,
-      );
-      assert(tread.normal.y >= 0.65);
-      const ray = new THREE.Raycaster(
-        tread.point.clone().add(new THREE.Vector3(0, 0.03, 0)),
-        new THREE.Vector3(0, -1, 0),
-      );
-      const hit = ray.intersectObject(mesh)[0];
-      assert(hit);
-      assert(
-        Math.abs(hit.point.y - tread.point.y) < 1e-5,
-        "projected point lies on actual rendered triangles",
-      );
+      for (const surface of [{ triangles: kernel }, kernel.solids[0]]) {
+        const tread = restingFoothold(surface, ankle, height, radius);
+        assert(tread, "the hollow centre still has a reachable rim");
+        assert(
+          Math.hypot(tread.point.x - ankle.x, tread.point.z - ankle.z) <=
+            radius,
+        );
+        assert(tread.normal.y >= 0.65);
+        const ray = new THREE.Raycaster(
+          tread.point.clone().add(new THREE.Vector3(0, 0.03, 0)),
+          new THREE.Vector3(0, -1, 0),
+        );
+        const hit = ray.intersectObject(mesh)[0];
+        assert(hit);
+        assert(
+          Math.abs(hit.point.y - tread.point.y) < 1e-5,
+          "projected point lies on actual rendered triangles",
+        );
+      }
     }
     geometry.dispose();
     material.dispose();

@@ -1720,6 +1720,15 @@ observer to expose the lower bank. The control removes only the new opacity
 factor. The cloud-contact code and height texture are original project work
 using the existing credited terrain; no external asset is added.
 
+The three [natural foothold images](natural-footholds.md) are actual prepared
+game captures using the existing credited character, wood, terrain and lighting.
+The unsupported and recovered arrivals show the same older save before and
+after physical recovery; their positions and automatically fitted cameras
+differ. The earned-root image shows a separate live approach to a genuine
+tread. Lossless WebP exports preserve every decoded pixel and the original
+1280 × 800 dimensions, without cropping or retouching. The contact changes add
+no external asset or recording.
+
 The [nine wind-chamber upper profiles](wind-chamber-crowns.md) use original
 geometry in `src/wind-chamber-crowns.js`, extending the existing fitted granite,
 dressed stone, timber and bronze reliefs. They reuse their credited materials
