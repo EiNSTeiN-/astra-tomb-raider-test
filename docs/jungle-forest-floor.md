@@ -107,12 +107,14 @@ close after their checks.
 VA-161's reproduced grass boundary is repaired. The subsequent
 [tree-base repair](jungle-tree-bases.md) identifies VA-163's pale lower-trunk
 strips as captured ground in the scans and seats them beneath the soil.
-Possible masonry-base/soil gaps exposed by forest-side approaches still need
-independent geometry checks, and wider world composition remains open. VA-162's
+The subsequent [pier contact review](jungle-pier-contact.md) does not reproduce
+detached masonry in those forest-side views. Wider world composition remains
+open. VA-162's
 portrait heading/objective contrast has the subsequent [HUD repair](hud-readability.md),
 and VA-165's raised root stance has the
 [natural foothold repair](natural-footholds.md). VA-164's
 immediate reload overlap has the separate arrival repair above.
+VA-166's lower-label contrast has the [remaining HUD label repair](hud-secondary.md).
 Other chapters' visible-ground boundaries, continuous moving contact,
 subjective audio quality and device performance also need
 broader acceptance. This milestone does not establish a finished visual audit

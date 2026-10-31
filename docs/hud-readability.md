@@ -87,8 +87,10 @@ their checks. No external asset, font or recording is added.
 
 VA-162's recorded heading/objective readability problem is repaired. This is
 not a complete accessibility or HUD audit: the observer measures these two
-panels, not every label, anti-aliased glyph or moving view. The snow and extreme
-background reviews still show weak health/supply-label contrast; other HUD
-elements need a separate pass. Tree-base strips, possible masonry/soil gaps,
-broader composition, body/solid contact and listening/device acceptance remain
-open. The graphics acceptance goal remains incomplete.
+panels, not every label, anti-aliased glyph or moving view. The subsequent
+[health, supply and navigation-label pass](hud-secondary.md) addresses the
+recorded snow/extreme-background problem and shared static controls.
+[Tree-base strips](jungle-tree-bases.md) also have a repair, while the
+[pier contact review](jungle-pier-contact.md) does not reproduce the suspected
+detached masonry. Broader composition, body/solid contact and listening/device
+acceptance remain open. The graphics acceptance goal remains incomplete.

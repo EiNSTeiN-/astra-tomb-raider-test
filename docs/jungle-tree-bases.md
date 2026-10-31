@@ -80,9 +80,11 @@ after their checks.
 
 ## Remaining review
 
-This repairs VA-163's reproduced pale tree-base strips. Possible masonry-base
-and soil gaps remain open, as do VA-166's faint health/supply labels, wider
-world composition and moving contact. Prepared cases mark guardians defeated;
+This repairs VA-163's reproduced pale tree-base strips. The subsequent
+[pier contact review](jungle-pier-contact.md) does not reproduce detached
+masonry in the recorded views, and the [remaining HUD label pass](hud-secondary.md)
+addresses VA-166's faint health/supply labels. Wider world composition and
+moving contact remain open. Prepared cases here mark guardians defeated;
 they do not establish combat or a complete objective playthrough. Muted browser
 checks do not establish subjective sound quality or consumer-device performance.
 The whole-world visual audit and listening/device acceptance remain incomplete.

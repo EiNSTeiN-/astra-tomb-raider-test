@@ -19,6 +19,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [health, supplies and navigation label pass](hud-secondary.md) adds
+  consistent backing, larger mobile labels and darker touch-button states.
+  All 42 revised contrast/layout observations and 24 preceding-style controls
+  cover eight chapter starts, four viewport sizes, extreme backgrounds,
+  desktop hints and six synthetic air/torch layouts. The minimum revised
+  sampled ratio is 6.374:1. The build and native keyboard/High and portrait
+  touch/Performance movement, crouch, map/pause and four complete-store reload
+  comparisons pass; all 32 revised contrast captures and fourteen release
+  images are reviewed. VA-166's sampled label problem is repaired. Faint crouch
+  status over snow is recorded as VA-167; wider contextual prompts, world
+  composition and listening/device acceptance remain open. Owned resources
+  close under the shared locked five-CPU allowance.
+- The [jungle pier contact review](jungle-pier-contact.md) does not reproduce
+  detached masonry in VA-163's recorded views. All 98 pier bases across nine
+  courts have continuous occupied stone in 7,938 independent terrain-to-cap
+  sections through their inner footprint. The copied-masonry raised control
+  opens all 7,938 sections. Three current High views are reviewed, with the
+  projecting mouldings and sampling limits documented. Together with the
+  preceding tree repair, this resolves the recorded VA-163 observations;
+  broader masonry and moving-contact coverage remain open. Owned resources
+  close under the shared locked five-CPU allowance.
 - The [jungle tree-base repair](jungle-tree-bases.md) identifies photographed
   ground patches in the scans and seats their complete surfaces beneath soil,
   retaining all 1,771 horizontal tree positions. An independent observer finds

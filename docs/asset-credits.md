@@ -1752,3 +1752,19 @@ dimensions without cropping or retouching. The repair changes specimen seating
 and exposed-foothold selection using the existing credited tree scans,
 character, terrain and lighting. It adds no external asset, recording or
 dependency and leaves the runtime asset files unchanged.
+
+The four [secondary HUD comparison images](hud-secondary.md) are actual
+prepared Performance-preset captures using the existing credited world,
+character and interface assets. Each pair shares a frozen world, camera and
+pose; the preceding control replaces the stylesheet, with CSS transitions
+frozen for both. Two 540 × 900 portrait images and two 1280 × 800 desktop
+images are exported as lossless WebP with identical source pixels and
+dimensions, without cropping or retouching. The CSS backing and type changes
+add no external asset, font or recording.
+
+The [jungle pier contact image](jungle-pier-contact.md) is an actual prepared
+High-preset canvas capture using the existing credited temple masonry,
+vegetation, explorer and lighting. Its lossless WebP export retains source
+pixels and 1280 × 800 dimensions without cropping or retouching. The review
+adds an original inspection helper, with no change to the masonry or external
+assets.

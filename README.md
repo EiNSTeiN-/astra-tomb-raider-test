@@ -2,6 +2,11 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [health, supplies and navigation labels](docs/hud-secondary.md) now have
+consistent backing and clearer mobile type, including touch controls and
+desktop keyboard hints. The [jungle pier review](docs/jungle-pier-contact.md)
+also verifies soil contact beneath the recorded suspected masonry gaps.
+
 The [jungle tree-base repair](docs/jungle-tree-bases.md) seats the photographed
 ground patches in the delivered scans beneath the forest soil. Resting boots
 also reject root treads covered by rising banks, while genuine exposed treads
