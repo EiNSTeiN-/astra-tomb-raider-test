@@ -1768,3 +1768,21 @@ vegetation, explorer and lighting. Its lossless WebP export retains source
 pixels and 1280 × 800 dimensions without cropping or retouching. The review
 adds an original inspection helper, with no change to the masonry or external
 assets.
+
+The four [contextual HUD comparison images](context-status.md) are actual
+prepared High-preset captures using the existing credited world, explorer and
+interface assets. Each pair shares a frozen world, camera and pose; the control
+restores the preceding stylesheet while both retain the current marker policy.
+The detected-state pair uses a UI-state fixture. Lossless WebP exports preserve
+the source pixels and dimensions without cropping or retouching. The backing,
+visibility and compact-layout changes add no external asset, font or recording.
+The fifth contextual-HUD image is an actual 812 × 375 production Performance
+capture after native touch input, with the game paused and its dialog hidden.
+Its lossless WebP export also retains every source pixel and dimension without
+cropping or retouching.
+
+The two [current High entrance images](entry-review.md) are actual prepared
+1280 × 800 raw-canvas captures of the volcanic and final chapters. Their lossless
+WebP exports preserve the decoded pixels and dimensions without cropping or
+retouching. This inspection reuses the existing credited scenery and character
+assets, and adds no world geometry or external asset.

@@ -19,6 +19,25 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [contextual HUD pass](context-status.md) backs quiet, wind-braced and
+  guardian-alert labels plus waypoint distances. All 47 revised contrast
+  observations pass, with a 7.073:1 minimum, alongside 37 style controls.
+  Seventy-two marker probes across six sizes and eight compact-landscape
+  layout/hit observations pass. The latter retain a 6.374:1 permanent-label
+  minimum and clear movement controls of health, air and torch panels. The
+  build, native keyboard/High and portrait/landscape touch/Performance cases,
+  actual landscape forward touch and six complete-store reload comparisons
+  pass. All 47 contextual panels, eight landscape layouts and 22 release
+  captures are reviewed. Three CPU-guard checks pass; owned resources close
+  under the shared locked five-of-sixteen allowance. VA-167 and the recorded
+  VA-169 compact overlap are repaired within these checks' scope.
+- A [fresh High-preset entrance review](entry-review.md) inspects all eight
+  chapters after the recent world changes. Standing controllers, 384,760
+  delivered terrain/body vertex records, shader linking and sampled HDR output
+  pass. All eight views are reviewed. The volcanic and final-chapter approaches
+  still have broad sparse foregrounds at High, recorded as VA-168. Wider courts,
+  optional spaces, moving contact, full routes and listening/device acceptance
+  remain open; the entrance checks do not close whole-world composition.
 - The [health, supplies and navigation label pass](hud-secondary.md) adds
   consistent backing, larger mobile labels and darker touch-button states.
   All 42 revised contrast/layout observations and 24 preceding-style controls

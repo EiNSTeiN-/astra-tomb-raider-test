@@ -1657,6 +1657,7 @@ kbd {
 }
 .stealth-status {
   position: absolute;
+  z-index: 1;
   top: 28%;
   left: 50%;
   transform: translateX(-50%);
@@ -1667,6 +1668,17 @@ kbd {
   text-align: center;
   text-shadow: 0 1px 4px #000;
   pointer-events: none;
+  isolation: isolate;
+}
+.stealth-status::before {
+  content: "";
+  position: absolute;
+  inset: -6px -10px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--hud-surface);
+  border-radius: 3px;
+  box-shadow: 0 4px 18px #0002;
 }
 .stealth-bearing { display: block; font-size: 25px; width: 30px; margin: 0 auto 6px; }
 .stealth-track { height: 3px; margin: 9px 20px 0; background: #151d1ccd; box-shadow: 0 0 0 1px #fff2; }
@@ -1876,6 +1888,17 @@ kbd {
   font-size: 9px;
   line-height: 1.7;
   color: #f3e4b9;
+  position: relative;
+  isolation: isolate;
+}
+.waypoint > span::before {
+  content: "";
+  position: absolute;
+  inset: -2px -6px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--hud-surface);
+  border-radius: 2px;
 }
 .toast {
   pointer-events: none;
@@ -3547,6 +3570,116 @@ body:has(.bell-focus) #game-screen > :not(#game-canvas) {
   }
   .interaction-prompt {
     bottom: 40%;
+  }
+}
+@media (min-width: 551px) and (max-height: 500px) {
+  .hud-top {
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    row-gap: 20px;
+  }
+  .hud-chapter h2 {
+    font-size: 20px;
+  }
+  .hud-chapter {
+    max-width: min(240px, calc(50vw - 134px));
+  }
+  .hud-location {
+    display: none;
+  }
+  .hud-objective {
+    max-width: min(240px, calc(50vw - 122px));
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .hud-objective > div:last-child {
+    min-width: 0;
+  }
+  .objective-diamond {
+    font-size: 20px;
+  }
+  .hud-objective p {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+  #objective-detail {
+    display: block;
+    max-width: 180px;
+    font-size: 8px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #objective-distance {
+    font-size: 8px;
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+  .stealth-status {
+    top: 100px;
+    bottom: auto;
+  }
+  #game-screen .hud-bottom {
+    left: 18px;
+    right: 18px;
+    bottom: 10px;
+  }
+  .vitals {
+    width: 140px;
+  }
+  .vitals::before {
+    inset: -6px;
+  }
+  .vital-label svg {
+    width: 10px;
+    height: 10px;
+  }
+  .health-track {
+    margin-top: 5px;
+  }
+  .stamina-track {
+    margin-top: 3px;
+  }
+  .supplies {
+    margin-top: 6px;
+  }
+  #dive-vitals,
+  #torch-status {
+    position: absolute;
+    left: 156px;
+    bottom: 0;
+    width: 140px;
+    margin: 0;
+    padding: 6px;
+    background: var(--hud-surface);
+    border-radius: 3px;
+  }
+  .dive-air-label {
+    margin-top: 0;
+  }
+  .hud-controls {
+    display: none;
+  }
+  .minimap-wrap {
+    position: fixed;
+    top: 66px;
+    right: 18px;
+    width: 104px;
+    height: 104px;
+  }
+  .minimap-wrap > span {
+    top: 4px;
+  }
+  .touch-pad {
+    position: fixed;
+    left: 18px;
+    bottom: 66px;
+    height: 84px;
+  }
+  .touch-actions {
+    margin-left: auto;
   }
 }
 

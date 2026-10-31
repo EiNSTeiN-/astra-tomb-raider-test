@@ -94,8 +94,9 @@ pier review image, retain identical decoded pixels and dimensions.
 
 This addresses VA-166's recorded health/supply-label contrast and the shared
 static navigation/control labels tested above. It does not close the broader
-world, body/solid contact, device or subjective audio review. The native snow
-crouch capture still shows faint quiet-steps status, recorded as VA-167. Other
-contextual prompts and moving views remain outside this contrast observer's
-scope; unbacked world-marker distance labels also remain weak in the artificial
-white-background controls.
+world, body/solid contact, device or subjective audio review. Its native snow
+crouch capture exposed faint quiet-steps status, recorded as VA-167. The later
+[contextual status pass](context-status.md) repairs that message and backs the
+world-marker distance labels, with independent measurements and visibility
+checks. Other contextual prompts and moving views remain outside these
+observers' scope.

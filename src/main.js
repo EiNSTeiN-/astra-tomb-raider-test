@@ -833,6 +833,56 @@ function updateHUD(s) {
   updateWaypoint(s);
   positionToast();
 }
+function hudBounds(element) {
+  const rect = element.getBoundingClientRect(),
+    before = getComputedStyle(element, "::before"),
+    backed = before.content !== "none" && before.content !== "normal";
+  return {
+    left: rect.left + (backed ? parseFloat(before.left) || 0 : 0),
+    right: rect.right - (backed ? parseFloat(before.right) || 0 : 0),
+    top: rect.top + (backed ? parseFloat(before.top) || 0 : 0),
+    bottom: rect.bottom - (backed ? parseFloat(before.bottom) || 0 : 0),
+  };
+}
+function waypointCovered(element) {
+  const marker = hudBounds(element),
+    label = hudBounds(element.querySelector("span")),
+    bounds = {
+      left: Math.min(marker.left, label.left),
+      right: Math.max(marker.right, label.right),
+      top: Math.min(marker.top, label.top),
+      bottom: Math.max(marker.bottom, label.bottom),
+    };
+  if (
+    bounds.left < 2 ||
+    bounds.top < 2 ||
+    bounds.right > innerWidth - 2 ||
+    bounds.bottom > innerHeight - 2
+  )
+    return true;
+  return [
+    ...document.querySelectorAll(
+      ".hud-chapter, .hud-objective, .hud-compass, #game-saved, .hud-top-actions button, #stealth-status, .vitals, #dive-vitals, #torch-status, .hud-controls, .minimap-wrap, .minimap-wrap > span, .touch-controls button",
+    ),
+  ].some((panel) => {
+    const style = getComputedStyle(panel),
+      rect = panel.getBoundingClientRect();
+    if (
+      !rect.width ||
+      !rect.height ||
+      style.visibility === "hidden" ||
+      Number(style.opacity) === 0
+    )
+      return false;
+    const other = hudBounds(panel);
+    return (
+      bounds.left < other.right &&
+      bounds.right > other.left &&
+      bounds.top < other.bottom &&
+      bounds.bottom > other.top
+    );
+  });
+}
 function updateWaypoint(s) {
   const el = document.querySelector("#waypoint");
   if (!s.target || !game || s.distance <= 6) {
@@ -856,6 +906,7 @@ function updateWaypoint(s) {
     el.style.left = `${(point.x * 0.5 + 0.5) * 100}%`;
     el.style.top = `${(-point.y * 0.5 + 0.5) * 100}%`;
     el.querySelector("span").textContent = `${s.distance} m`;
+    el.style.visibility = waypointCovered(el) ? "hidden" : "visible";
   }
 }
 function drawMap(canvas, full = false, s = game?.state()) {

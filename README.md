@@ -2,6 +2,12 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [contextual status pass](docs/context-status.md) backs crouch and guardian
+warnings and keeps whole waypoint markers clear of HUD panels and screen edges.
+Compact landscape controls now clear the objective, minimap, health and air panels.
+A [fresh High-preset entrance review](docs/entry-review.md) also records the
+remaining volcanic and final-chapter foreground composition work.
+
 The [health, supplies and navigation labels](docs/hud-secondary.md) now have
 consistent backing and clearer mobile type, including touch controls and
 desktop keyboard hints. The [jungle pier review](docs/jungle-pier-contact.md)
