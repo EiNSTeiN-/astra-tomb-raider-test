@@ -1720,6 +1720,14 @@ observer to expose the lower bank. The control removes only the new opacity
 factor. The cloud-contact code and height texture are original project work
 using the existing credited terrain; no external asset is added.
 
+The four [HUD readability images](hud-readability.md) are actual prepared game
+captures using the existing credited world and explorer assets. Each pair
+shares a frozen world, camera, pose and Performance preset. The control restores
+the preceding HUD placement, styling and type sizes; the revision displays the
+current interface. The original 540 × 900 images are exported as lossless WebP,
+without cropping or retouching. The layout and CSS backing are original project
+work and add no external asset, font or recording.
+
 The three [natural foothold images](natural-footholds.md) are actual prepared
 game captures using the existing credited character, wood, terrain and lighting.
 The unsupported and recovered arrivals show the same older save before and

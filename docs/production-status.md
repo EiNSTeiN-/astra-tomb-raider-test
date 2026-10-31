@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [chapter/objective readability pass](hud-readability.md) adds consistent
+  backing, larger mobile labels and a flowing two-row layout above world
+  markers. Thirty revised observations pass pixel-contrast and layout checks,
+  alongside 21 preceding-style controls: nine scenery cases at two portrait
+  widths and white/black/checkerboard controls at four viewport sizes. The
+  lowest revised sampled ratio is 7.207:1. All eighteen revised scenery and
+  four white-background captures are reviewed, and the build passes. Native
+  keyboard/High and portrait-touch/Performance movement, map/pause controls and
+  four complete-store reload comparisons pass; all twelve release captures are
+  reviewed. Owned resources close under the shared locked five-CPU cap.
+  VA-162's recorded panel problem is repaired; faint health/supply labels over
+  snow remain open as VA-166. Broader world and listening/device acceptance
+  remain incomplete.
 - The [natural foothold repair](natural-footholds.md) rejects steep scan sides
   as standing treads, clears descending bodies from those sides and fits actual
   boot material points to narrow roots. All 104 selected tests pass. Three live

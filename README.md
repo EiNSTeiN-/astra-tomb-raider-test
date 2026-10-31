@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [chapter and objective HUD](docs/hud-readability.md) now has consistent dark
+backing, clearer mobile type and a layout that follows the heading's height.
+Projected world markers pass beneath those panels.
+
 The [natural foothold repair](docs/natural-footholds.md) rejects steep bark as
 standing support and plants the explorer's boots on actual root treads. Older
 unsupported root saves recover onto nearby clear ground.

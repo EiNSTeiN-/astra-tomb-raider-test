@@ -1412,6 +1412,7 @@ kbd {
 }
 /* Playable world */
 #game-screen {
+  --hud-surface: linear-gradient(110deg, #101b23f5, #101b23eb);
   position: fixed;
   inset: 0;
   background: #101914;
@@ -1438,13 +1439,32 @@ kbd {
 }
 .hud-top {
   position: absolute;
+  z-index: 2;
   top: 32px;
   left: 38px;
   right: 38px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 42px 24px;
   justify-content: space-between;
   align-items: start;
   pointer-events: none;
+}
+.hud-chapter {
+  position: relative;
+  isolation: isolate;
+  width: max-content;
+  max-width: 100%;
+}
+.hud-chapter::before {
+  content: "";
+  position: absolute;
+  inset: -10px -12px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--hud-surface);
+  border-radius: 3px;
+  box-shadow: 0 4px 18px #0002;
 }
 .hud-chapter > .eyebrow {
   font-size: 8px;
@@ -1468,6 +1488,7 @@ kbd {
 }
 .hud-compass {
   position: absolute;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1492,7 +1513,10 @@ kbd {
   color: var(--gold);
 }
 .hud-top-actions {
+  grid-column: 2;
+  grid-row: 1;
   display: flex;
+  flex-shrink: 0;
   gap: 9px;
   align-items: center;
   pointer-events: auto;
@@ -1517,15 +1541,19 @@ kbd {
   height: 32px;
 }
 .hud-objective {
-  position: absolute;
-  top: 151px;
-  left: 38px;
+  position: relative;
+  z-index: 2;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: start;
+  width: fit-content;
   display: flex;
   gap: 14px;
   pointer-events: none;
   max-width: 310px;
   padding: 12px 16px 12px 12px;
-  background: linear-gradient(110deg, #101b23eb 0%, #101b23c9 78%, #101b238c 100%);
+  background: var(--hud-surface);
+  box-shadow: 0 4px 18px #0002;
   border-left: 1px solid #dfc5857a;
   border-radius: 0 3px 3px 0;
 }
@@ -2149,9 +2177,6 @@ body:has(#game-screen:not(.hidden)) {
     left: 25px;
     right: 25px;
   }
-  .hud-objective {
-    left: 25px;
-  }
 }
 @media (max-width: 800px) {
   .topbar {
@@ -2290,9 +2315,7 @@ body:has(#game-screen:not(.hidden)) {
   }
   .hud-top {
     top: 22px;
-  }
-  .hud-objective {
-    top: 128px;
+    row-gap: 32px;
   }
   .minimap-wrap {
     width: 110px;
@@ -2721,15 +2744,17 @@ body:has(#game-screen:not(.hidden)) {
     top: 18px;
     left: 18px;
     right: 18px;
+    row-gap: 24px;
   }
   .hud-chapter > .eyebrow {
-    font-size: 6px;
+    font-size: 8px;
+    letter-spacing: 1.5px;
   }
   .hud-chapter h2 {
     font-size: 24px;
   }
   .hud-location {
-    font-size: 6px;
+    font-size: 8px;
     letter-spacing: 1px;
   }
   .hud-top-actions {
@@ -2747,16 +2772,14 @@ body:has(#game-screen:not(.hidden)) {
     height: 16px;
   }
   .hud-objective {
-    left: 18px;
-    top: 113px;
     gap: 9px;
     max-width: 270px;
   }
   .hud-objective .eyebrow {
-    font-size: 6px;
+    font-size: 7px;
   }
   .hud-objective p {
-    font-size: 10px;
+    font-size: 12px;
     margin-top: 6px;
   }
   .hud-objective .eyebrow span {
@@ -2766,7 +2789,7 @@ body:has(#game-screen:not(.hidden)) {
     font-size: 24px;
   }
   #objective-distance {
-    font-size: 8px;
+    font-size: 9px;
   }
   .hud-bottom {
     left: 18px;

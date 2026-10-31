@@ -108,7 +108,9 @@ VA-161's reproduced grass boundary is repaired. Wider world composition remains
 under review, including VA-163's pale lower-trunk strips in the west view and
 possible masonry-base/soil gaps exposed by forest-side approaches. Those
 observations still need independent geometry or material checks. VA-162's
-portrait text contrast and VA-165's raised root stance remain open. VA-164's
+portrait heading/objective contrast has the subsequent [HUD repair](hud-readability.md),
+and VA-165's raised root stance has the
+[natural foothold repair](natural-footholds.md). VA-164's
 immediate reload overlap has the separate arrival repair above.
 Other chapters' visible-ground boundaries, continuous moving contact,
 subjective audio quality and device performance also need
