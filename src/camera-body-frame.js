@@ -85,7 +85,10 @@ export function cameraBodyVisibility(surfaces, camera, targets, game) {
       const point = position.clone().addScaledVector(right, side);
       if (!terrainOnly) {
         sceneryCount++;
-        if ((surfaces?.entry(point, camera, 0.02) ?? 1) >= 0.999999)
+        if (
+          (surfaces?.entry(point, camera, 0.02) ?? 1) >= 0.999999 &&
+          (game?.jungleTreeSolids?.entry(point, camera) ?? 1) >= 0.999999
+        )
           sceneryClear++;
       }
       if (game?.groundHeight) {

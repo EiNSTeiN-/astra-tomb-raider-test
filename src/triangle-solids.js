@@ -70,6 +70,53 @@ function candidates(shape, x, z, radius) {
   return result;
 }
 
+// Walk only the cells crossed by a ray. A scanned trunk can have thousands of
+// triangles; testing every one for each camera-body ray scales poorly. The
+// triangle index already includes every cell touched by its bounding box.
+function segmentCandidates(shape, start, end) {
+  const result = new Set(),
+    dx = end.x - start.x,
+    dz = end.z - start.z,
+    sx = Math.sign(dx),
+    sz = Math.sign(dz),
+    endX = Math.floor(end.x / TRIANGLE_CELL),
+    endZ = Math.floor(end.z / TRIANGLE_CELL),
+    visit = (x, z) => {
+      for (const triangle of shape.grid.get(`${x},${z}`) || [])
+        result.add(triangle);
+    };
+  let x = Math.floor(start.x / TRIANGLE_CELL),
+    z = Math.floor(start.z / TRIANGLE_CELL),
+    tx = sx
+      ? ((x + (sx > 0 ? 1 : 0)) * TRIANGLE_CELL - start.x) / dx
+      : Infinity,
+    tz = sz
+      ? ((z + (sz > 0 ? 1 : 0)) * TRIANGLE_CELL - start.z) / dz
+      : Infinity;
+  const stepX = sx ? TRIANGLE_CELL / Math.abs(dx) : Infinity,
+    stepZ = sz ? TRIANGLE_CELL / Math.abs(dz) : Infinity,
+    count = Math.abs(endX - x) + Math.abs(endZ - z) + 3;
+  for (let i = 0; i < count; i++) {
+    visit(x, z);
+    if (x === endX && z === endZ) break;
+    if (Math.abs(tx - tz) < 1e-12) {
+      visit(x + sx, z);
+      visit(x, z + sz);
+      x += sx;
+      z += sz;
+      tx += stepX;
+      tz += stepZ;
+    } else if (tx < tz) {
+      x += sx;
+      tx += stepX;
+    } else {
+      z += sz;
+      tz += stepZ;
+    }
+  }
+  return result;
+}
+
 function inTriangle(vertices, x, z) {
   const [a, b, c] = vertices;
   const determinant = (b.x - a.x) * (c.z - a.z) - (b.z - a.z) * (c.x - a.x);
@@ -353,8 +400,13 @@ export class TriangleSolids {
       if (contains(solid.shape, start.x, start.y, start.z)) return 0;
       const length = start.distanceTo(end);
       if (length < EPSILON) continue;
+      const triangles = segmentCandidates(solid.shape, start, end),
+        low = Math.min(start.y, end.y),
+        high = Math.max(start.y, end.y);
       ray.set(start, end.sub(start).normalize());
-      for (const triangle of solid.shape.triangles) {
+      for (const triangle of triangles) {
+        if (triangle.bounds.min.y > high || triangle.bounds.max.y < low)
+          continue;
         if (!ray.intersectTriangle(...triangle.vertices, false, hit)) continue;
         const t = hit.distanceTo(start) / length;
         if (t <= 1 && (result === null || t < result)) result = t;

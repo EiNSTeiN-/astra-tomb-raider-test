@@ -854,6 +854,7 @@ export class Adventure {
     this.detailPatches = [];
     this.naturePatches = [];
     this.natureRockSolids = null;
+    this.jungleTreeSolids = null;
     this.rockGrounding = null;
     this.desertScatter = null;
     this.skyMeadow = null;
@@ -1568,6 +1569,13 @@ export class Adventure {
         z,
         clearance,
         clearance ? undefined : 0,
+      ) ||
+      this.jungleTreeSolids?.blocked(
+        x,
+        worldY,
+        z,
+        clearance,
+        clearance ? undefined : 0,
       )
     )
       return false;
@@ -1628,6 +1636,7 @@ export class Adventure {
     const from = { x: a.x, y: a.y + fromHeight, z: a.z },
       to = { x: b.x, y: b.y + toHeight, z: b.z };
     if (this.natureRockSolids?.entry(from, to) != null) return false;
+    if (this.jungleTreeSolids?.entry(from, to) != null) return false;
     if (hoistOccludes(this, from, to)) return false;
     if (surveyOccludes(this, from, to)) return false;
     if (arcadeOccludes(this, from, to)) return false;
@@ -2123,7 +2132,10 @@ export class Adventure {
     this.cb.update?.(this.state());
   }
   cameraSpace(p) {
-    if (this.natureRockSolids?.blocked(p.x, p.y - 0.28, p.z, 0.56, 0.28))
+    if (
+      this.natureRockSolids?.blocked(p.x, p.y - 0.28, p.z, 0.56, 0.28) ||
+      this.jungleTreeSolids?.blocked(p.x, p.y - 0.28, p.z, 0.56, 0.28)
+    )
       return false;
     return galleryAt(this, p.x, p.y, p.z)
       ? galleryClear(this, p.x, p.y, p.z, 0.15, 0.22)
@@ -2138,7 +2150,7 @@ export class Adventure {
             );
   }
   restoreNatureArrival(saved) {
-    if (!this.natureRockSolids) return false;
+    if (!this.natureRockSolids && !this.jungleTreeSolids) return false;
     const p = this.player.position,
       proposed = p.clone();
     // A save on a scan cannot be restored until the asynchronous geometry is
@@ -2150,12 +2162,14 @@ export class Adventure {
     ) {
       const ground = this.groundHeight(p.x, p.z),
         y = ground + saved.height;
-      const rock = this.natureRockSolids.support(
-        p.x,
-        p.z,
-        y,
-        NATURE_BODY_RADIUS,
-      );
+      const rock = [this.natureRockSolids, this.jungleTreeSolids]
+        // Support queries normally allow a 20 cm landing/step tolerance. A
+        // reload must not repeatedly climb that allowance up a curved root.
+        .map((solids) =>
+          solids?.support(p.x, p.z, y - 0.2 + 1e-6, NATURE_BODY_RADIUS),
+        )
+        .filter(Boolean)
+        .sort((a, b) => b.height - a.height)[0];
       if (
         rock &&
         rock.height > ground &&

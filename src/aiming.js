@@ -82,6 +82,8 @@ export function shotCover(game, from, to) {
   let fraction = game.cameraSurfaces?.entry(from, to, 0) ?? 1;
   const rock = game.natureRockSolids?.entry(from, to);
   if (rock != null) fraction = Math.min(fraction, rock);
+  const trunk = game.jungleTreeSolids?.entry(from, to);
+  if (trunk != null) fraction = Math.min(fraction, trunk);
   for (const o of game.obstacles || []) {
     if (o.fieldStation) {
       const entry = stationEntry(o, from, to);

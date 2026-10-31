@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [jungle trunk contact](jungle-trunk-contact.md) adds body, lens, cover,
+  support and environmental-occlusion queries using the delivered wood.
+  All 27 focused checks pass; the broader campaign sweep was stopped after
+  1,054 reported passes and is incomplete. The live jungle registers all 752
+  interior trees using two shared kernels. Of 63,264 sampled trunk-intersecting
+  positions, none were legal under the preceding walking rules. Four instance
+  rays match independent rendered-mesh raycasts. Five reviewed landscape and
+  portrait contexts retain legal feet and clear independent terrain observations.
+  Another 51,978 grid samples retain all 2,079 sampled path centers; one edge
+  stop has an independent bark vertex witness within the standing envelope.
+  The build and Performance keyboard/touch camp inputs pass, with four complete
+  save reload comparisons and all eight release captures reviewed. The helper's
+  development detail changes do not establish the complete High preset.
+  Owned resources close under the shared locked five-CPU cap.
+  This prepares for forest-floor expansion; VA-161 remains open.
+  Wider composition, moving contact and listening/device acceptance remain open.
 - The [guardian sole-contact pass](guardian-ground-contact.md) repairs sloping
   and paving-edge intersections, folded legs after distance culling and excessive
   reach while patrol torsos turn. All forty selected tests and the build pass.

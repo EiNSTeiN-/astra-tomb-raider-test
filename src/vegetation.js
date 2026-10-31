@@ -46,6 +46,7 @@ import {
   updateMeridianGroundcover,
 } from "./meridian-groundcover.js";
 import { NatureRockSolids } from "./nature-rock-solids.js";
+import { JungleTreeSolids } from "./jungle-tree-solids.js";
 import {
   buildDesertGroundcover,
   updateDesertGroundcover,
@@ -269,6 +270,13 @@ export async function loadForest(game) {
       }
       game.jungleFringe.patches.push(patch);
     }
+  }
+  if (game.level.biome === "jungle") {
+    world.updateMatrixWorld(true);
+    game.jungleTreeSolids = new JungleTreeSolids(
+      game.forestPatches,
+      world.matrixWorld,
+    );
   }
   updateForest(game);
   game.renderOnce = true;

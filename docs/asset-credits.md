@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The [jungle trunk contact](jungle-trunk-contact.md) adds original collision,
+indexed-ray and arrival-restoration code using the existing credited Island
+Tree 01 and Island Tree 02 delivery models. Their geometry and textures retain
+the attribution below.
+
 The [guardian sole-contact repair](guardian-ground-contact.md) uses original
 pose, foot-geometry fitting and boot-binding code with the existing guardian
 materials. No external model, texture, audio or dependency is added. Its

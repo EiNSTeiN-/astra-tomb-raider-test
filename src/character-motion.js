@@ -28,10 +28,12 @@ import {
 export function supportAt(game, x, z, maxY = Infinity, rockRadius = 0) {
   let height = game.groundHeight(x, z),
     surface = null;
-  const rock = game.natureRockSolids?.support(x, z, maxY, rockRadius);
-  if (rock && rock.height > height) {
-    height = rock.height;
-    surface = rock.surface;
+  for (const solids of [game.natureRockSolids, game.jungleTreeSolids]) {
+    const contact = solids?.support(x, z, maxY, rockRadius);
+    if (contact && contact.height > height) {
+      height = contact.height;
+      surface = contact.surface;
+    }
   }
   for (const o of game.obstacles) {
     if (o.fieldStation) {
@@ -191,6 +193,23 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         p.y = ceiling;
         game.velocityY = 0;
       }
+      // An overhead trunk fork can enter the head during a stationary jump.
+      // Horizontal clearance alone cannot stop that vertical motion.
+      if (
+        p.y > before &&
+        game.jungleTreeSolids?.blocked(p.x, p.y, p.z) &&
+        !game.jungleTreeSolids.blocked(p.x, before, p.z)
+      ) {
+        let lo = before,
+          hi = p.y;
+        for (let j = 0; j < 12; j++) {
+          const middle = (lo + hi) / 2;
+          if (game.jungleTreeSolids.blocked(p.x, middle, p.z)) hi = middle;
+          else lo = middle;
+        }
+        p.y = lo;
+        game.velocityY = 0;
+      }
     }
     const escape = campEscapeVelocity(game, step),
       motion = escape || velocity,
@@ -204,9 +223,12 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         step;
     const free = (x, z) => {
       let y = p.y;
-      if (game.grounded && game.natureRockSolids) {
+      if (game.grounded && (game.natureRockSolids || game.jungleTreeSolids)) {
         const support = supportAt(game, x, z, p.y + 0.25, NATURE_BODY_RADIUS);
-        if (support.surface?.natureRock && support.height <= p.y + 0.45)
+        if (
+          (support.surface?.natureRock || support.surface?.jungleTrunk) &&
+          support.height <= p.y + 0.45
+        )
           y = Math.max(y, support.height);
       }
       const footing = game.grounded
