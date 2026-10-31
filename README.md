@@ -6,6 +6,9 @@ The [Meridian planting pass](docs/meridian-planting.md) adds fuller silver grass
 dry stems and low cushions beside the final chapter's clear routes. A refreshed
 volcanic/final-chapter court review retains wider composition work.
 
+The [foundry floor courses](docs/forge-floors.md) give the volcanic chapter's
+nine work areas distinct worn rails, rings, gear outlines and quench channels.
+
 The [contextual status pass](docs/context-status.md) backs crouch and guardian
 warnings and keeps whole waypoint markers clear of HUD panels and screen edges.
 Compact landscape controls now clear the objective, minimap, health and air panels.

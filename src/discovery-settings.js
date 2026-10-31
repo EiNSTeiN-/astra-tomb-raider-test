@@ -29,7 +29,7 @@ export function buildDiscoverySettings(game) {
     m = { ...camp, stone, dark, bronze, trim },
     batch = new THREE.Group(),
     floors = new THREE.Group(),
-    paving = pavingMaterial(biome);
+    paving = pavingMaterial(biome, game.map);
   stone.name = "Discovery setting dressed stone";
   stone.normalScale.setScalar(0.42);
   dark.name = "Discovery setting recessed stone";

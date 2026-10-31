@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [foundry floor courses](forge-floors.md) give all nine volcanic work
+  aprons distinct worn rails, fan channels, rings, gear outlines and quench
+  courses. All 74 render captures are reviewed, including 31 frozen control/
+  revised pairs, nine player views and three quality presets. Drawn terrain
+  and paving programs receive the expected uniforms, link and produce finite
+  sampled HDR output. Geometry buffers and transforms remain identical across
+  140 checked meshes when toggling the treatment. All 54 supported feature
+  approaches and eighteen local apron legs pass, covering 4,330 physics updates
+  on prepared completed progress. Five floor materials and nine terrain textures
+  dispose once on chapter change. The 31 focused tests, build, native keyboard/
+  High and portrait touch/Performance controls and four complete-store reload
+  comparisons pass; all fourteen release captures are reviewed. Checks use the
+  shared locked five-of-sixteen CPU allowance and owned jobs close. Broad ash
+  fields, repeated large installations and whole-world acceptance remain open.
 - The [Meridian planting pass](meridian-planting.md) expands the final chapter's
   silver grasses, dry stems and cushions into fuller colonies. All 48 refreshed
   volcanic/final-chapter baseline views and 26 revised Meridian views are

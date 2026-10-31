@@ -1794,3 +1794,13 @@ dimensions without cropping or retouching. The larger grasses, dry stems and
 cushions adapt the project's original folded-leaf geometry and reuse the
 existing credited world, explorer, materials and lighting. The pass introduces
 no external asset, recording or dependency.
+
+The [foundry floor courses](forge-floors.md) are original project-authored
+procedural material patterns. They reuse the existing credited paving, terrain,
+world and explorer assets, without a new external asset, texture or recording.
+The six actual 1280 × 800 High-preset comparison captures share frozen cameras,
+player positions and simulation times. Their controls disable only the new
+floor treatment. The receiving approach uses the explorer's follow camera;
+the pressure and heart views use elevated inspection cameras. Lossless WebP
+exports preserve their source pixels and dimensions without cropping or
+retouching.

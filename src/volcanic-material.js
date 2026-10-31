@@ -1,5 +1,13 @@
 // World-space cooling joints and ash shade the terrain. Scattered scans receive
 // a matching charcoal tint. Fine seams fade with their screen footprint.
+import {
+  forgeFloorDeclarations,
+  forgeFloorColor,
+  forgeFloorNormal,
+  forgeFloorRoughness,
+} from "./forge-floor-material.js";
+export { forgeFloorUniforms } from "./forge-floor-material.js";
+
 export const volcanicDeclarations = /* glsl */ `
 #ifdef TERRAIN_FORGE
 vec3 volcanicJoint(vec3 p) {
@@ -25,6 +33,7 @@ vec3 volcanicReliefNormal(vec3 base,float height) {
   vec3 gradient=sign(determinant)*(dFdx(height)*rx+dFdy(height)*ry);
   return normalize(max(abs(determinant),1.e-8)*base-gradient);
 }
+${forgeFloorDeclarations}
 #endif
 `;
 
@@ -64,18 +73,21 @@ export const volcanicColor = /* glsl */ `
   pavingWeight*=smoothstep(.15,.72,vCourt+terrainNoise(vTerrainPosition.xz*.19)*.21);
   float coolingRelief=(min(.32,cooling.x)*.12-joint*.014-seam*.012)*jointDetail;
   terrainDamp=0.;
+${forgeFloorColor}
 #endif
 `;
 export const volcanicNormal = /* glsl */ `
 #ifdef TERRAIN_FORGE
   cliffN=volcanicReliefNormal(cliffN,coolingRelief);
   earthN=normalize(mix(earthN,normal,ashDrift*.4));
+${forgeFloorNormal}
 #endif
 `;
 export const volcanicRoughness = /* glsl */ `
 #ifdef TERRAIN_FORGE
   rockRough=mix(.79,.98,max(fracture,ash));
   terrainRough=mix(terrainRough,.98,ashDrift*(1.-pavingWeight));
+${forgeFloorRoughness}
 #endif
 `;
 

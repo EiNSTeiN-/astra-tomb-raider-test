@@ -35,6 +35,7 @@ import {
   volcanicColor,
   volcanicNormal,
   volcanicRoughness,
+  forgeFloorUniforms,
 } from "./volcanic-material.js";
 import {
   desertTerrainDeclarations,
@@ -366,7 +367,14 @@ export function terrainMaterial(game) {
         : [new THREE.Vector4(0, 0, 0, 0)],
     };
   }
-  if (biome === "volcano") material.defines = { TERRAIN_FORGE: 1 };
+  if (biome === "volcano") {
+    const floors = forgeFloorUniforms(game.map);
+    material.defines = {
+      TERRAIN_FORGE: 1,
+      FORGE_FLOOR_COUNT: floors.forgeFloorSites.value.length,
+    };
+    Object.assign(uniforms, floors);
+  }
   if (biome === "sky") {
     material.defines = { TERRAIN_SKY: 1 };
     Object.assign(uniforms, {
@@ -420,6 +428,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1" : ""}`;
   return material;
 }

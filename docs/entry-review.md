@@ -30,6 +30,10 @@ beside the final chapter's routes and refreshes its eleven courts. The images
 above retain this earlier entrance baseline. Volcanic foregrounds, repeated
 large installations and wider composition remain under review.
 
+The subsequent [foundry floor pass](forge-floors.md) gives all nine volcanic
+work aprons distinct worn courses. Its current comparisons retain broader ash
+fields and repeated large installations as open composition work.
+
 All eight standing controllers are legal. Independent terrain observations
 inspect 384,760 delivered character vertex records, with no missing or invalid
 samples and no overlap beyond the observer's 15 mm threshold. Shaders link and

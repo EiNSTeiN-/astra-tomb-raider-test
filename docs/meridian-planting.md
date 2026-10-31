@@ -49,6 +49,10 @@ The planting improves the reviewed surroundings. Broad volcanic paving and ash
 remain sparse, and repeated large court installations remain composition work.
 This pass does not close the [whole-world visual audit](visual-audit.md).
 
+The subsequent [foundry floor pass](forge-floors.md) adds distinct worn courses
+to the nine volcanic work aprons. Broad ash fields and repeated installations
+remain open in that refreshed review.
+
 ## Grounding, access and cleanup
 
 An independent observer reads delivered terrain triangles and rounds plant

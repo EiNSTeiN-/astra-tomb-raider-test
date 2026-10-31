@@ -14,8 +14,12 @@ import { patinatedBronze } from "./observatory-geometry.js";
 import { STATION_STYLES } from "./field-station-art.js";
 import { stationSolid } from "./field-station-solids.js";
 import { mergeArchitecture, pbrMaterial } from "./visuals.js";
+import {
+  forgeFloorUniforms,
+  forgeFloorDeclarations,
+} from "./forge-floor-material.js";
 
-export function pavingMaterial(biome) {
+export function pavingMaterial(biome, map) {
   const name =
     {
       jungle: "moss",
@@ -32,7 +36,9 @@ export function pavingMaterial(biome) {
   material.polygonOffsetFactor = -1;
   material.polygonOffsetUnits = -1;
   material.normalScale.setScalar(0.55);
+  const floors = biome === "volcano" ? forgeFloorUniforms(map) : null;
   material.onBeforeCompile = (shader) => {
+    if (floors) Object.assign(shader.uniforms, floors);
     shader.vertexShader =
       "attribute vec3 inlayUv; varying vec3 vInlayUv; varying vec2 vPavingUv;\n" +
       shader.vertexShader;
@@ -69,8 +75,50 @@ export function pavingMaterial(biome) {
       diffuseColor.rgb *= mix(.84, 1.0, smoothstep(.04, .15, edge - wear));
     `,
     );
+    if (floors) {
+      shader.vertexShader =
+        "varying vec3 vFoundryPosition, vFoundryNormal;\n" +
+        shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\nvFoundryPosition=(modelMatrix*vec4(transformed,1.)).xyz; vFoundryNormal=normalize(mat3(modelMatrix)*normal);",
+      );
+      // MeshStandardMaterial clones reset custom defines. Keep the array size
+      // with this copied shader hook, as the existing paving clones already do.
+      shader.fragmentShader =
+        `#define FORGE_FLOOR_COUNT ${floors.forgeFloorSites.value.length}\nvarying vec3 vFoundryPosition, vFoundryNormal;\n#define vTerrainNormal vFoundryNormal\n#define terrainNoise inlayNoise\n` +
+        shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <common>",
+        "#include <common>\n" + forgeFloorDeclarations,
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <map_fragment>",
+        `#include <map_fragment>
+        ForgeFloor foundryInlay=foundryFloor(vFoundryPosition.xz);
+        vec3 basePaving=diffuseColor.rgb;
+        float grayPaving=dot(basePaving,vec3(.2126,.7152,.0722));
+        vec3 foundryPaving=mix(basePaving,vec3(grayPaving)*vec3(.88,.96,1.06),.65)*foundryInlay.tone;
+        foundryPaving*=1.-foundryInlay.joint*.6;
+        foundryPaving=mix(foundryPaving,mix(vec3(.16,.13,.085),foundryPaving*.38,.35),foundryInlay.inlay*.85);
+        diffuseColor.rgb=mix(basePaving,foundryPaving,foundryInlay.coverage);`,
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <normal_fragment_maps>",
+        `#include <normal_fragment_maps>
+        vec3 foundryN=foundryReliefNormal(normalize(mix(normal,nonPerturbedNormal,foundryInlay.inlay*.65)),foundryInlay.relief);
+        normal=normalize(mix(normal,foundryN,foundryInlay.coverage));`,
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <roughnessmap_fragment>",
+        `#include <roughnessmap_fragment>
+        roughnessFactor=mix(roughnessFactor,.9+foundryInlay.joint*.07-foundryInlay.inlay*(.17+foundryInlay.quench*.07),foundryInlay.coverage);`,
+      );
+    }
   };
-  material.customProgramCacheKey = () => "worn-court-paving-v1";
+  material.customProgramCacheKey = () =>
+    "worn-court-paving-v1" +
+    (floors ? `-foundry-floors-${floors.forgeFloorSites.value.length}-1` : "");
   return material;
 }
 
@@ -121,7 +169,7 @@ export function buildStationYards(game) {
   metal.color.setHex(STATION_STYLES[game.level.biome].metal);
   metal.roughness = 0.6;
   for (const m of [stone, dark, metal]) m.vertexColors = true;
-  const paving = pavingMaterial(game.level.biome),
+  const paving = pavingMaterial(game.level.biome, game.map),
     inlay = paving.clone();
   inlay.name = "Worn court border";
   inlay.onBeforeCompile = paving.onBeforeCompile;
