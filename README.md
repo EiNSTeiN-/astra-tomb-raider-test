@@ -2,9 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
-The [jungle trunk contact](docs/jungle-trunk-contact.md) uses the delivered wood
-for physical contact and cover queries, preparing for further forest-floor
-exploration. The visible-ground walking boundary remains open work.
+The [jungle forest floor](docs/jungle-forest-floor.md) now opens the visible
+entrance grass beyond its old walking-grid limit. A wooded terrain escarpment
+encloses the valley, while the explored chart includes newly surveyed ground.
+The [physical trunks](docs/jungle-trunk-contact.md) retain contact and cover.
 
 The [guardian contact repair](docs/guardian-ground-contact.md) fits rigid soles
 to slopes and paving, replants returning patrols, and keeps step lead aligned

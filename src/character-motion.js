@@ -17,7 +17,10 @@ import { skyDeckAt } from "./sky-bridge-rules.js";
 import { vaultDeckAt } from "./fire-vault-rules.js";
 import { stationSupport, stationBlocked } from "./field-station-solids.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
-import { terrainBodyClear } from "./terrain-body-clearance.js";
+import {
+  terrainBodyClear,
+  clearTerrainDescent,
+} from "./terrain-body-clearance.js";
 import {
   clearCampVerticalContact,
   campEscapeVelocity,
@@ -236,7 +239,10 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         : y;
       const settled =
         footing >= p.y - 0.42 && footing <= p.y + 0.45 ? footing : y;
-      if (game.groundHeight(x, z) > y + 0.45) return null;
+      // Grounded feet can step up. Airborne feet must meet the slope before
+      // crossing it, or a rising target floor can pass above their fall sweep.
+      if (game.groundHeight(x, z) > y + (game.grounded ? 0.45 : 1e-6))
+        return null;
       const clear = (height) =>
         terrainBodyClear(game, x, height, z) &&
         game.canMove(x, z, height - game.groundHeight(x, z));
@@ -323,6 +329,9 @@ export function advanceCharacter(game, velocity, dt, jump = false) {
         else game.grounded = false;
       }
     }
+    // The newly open jungle includes the foot of real, steep valley faces.
+    // Descending there must clear the legs sideways before accepting support.
+    if (game.terrainProfile?.jungleRim) clearTerrainDescent(game, before);
     if (game.grounded) game.fallPeak = p.y;
     else game.fallPeak = Math.max(game.fallPeak || before, before, p.y);
     if (wasGrounded && !game.grounded && game.velocityY <= 0) game.coyote = 0.1;

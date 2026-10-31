@@ -8,7 +8,7 @@ import { desertRouteDistance } from "../src/desert-geology.js";
 // inside walking cells. Working-pad baseline digests are checked separately in
 // court-terrain.test.js; these checks continue to bound enclosing path slopes.
 for (const chapter of ["verdant", "frost", "embers", "crystal", "eclipse"]) {
-  test(`${chapter} broad banks avoid the repeated steep path edges`, () => {
+  test(`${chapter} broad interior banks avoid the repeated steep path edges`, () => {
     const level = LEVELS.find((l) => l.id === chapter),
       map = createMap(level),
       p = createTerrainProfile(map, level),
@@ -21,6 +21,14 @@ for (const chapter of ["verdant", "frost", "embers", "crystal", "eclipse"]) {
           const wx = (x + offset) * p.step,
             wz = (z + offset) * p.step,
             d = desertRouteDistance(map, wx, wz);
+          // The jungle now ends at an authored escarpment. Its deliberately
+          // steep outer faces have separate body/jump and boundary checks;
+          // retain these shallow-bank limits across the unchanged interior.
+          if (
+            p.jungleRim &&
+            Math.min(wx, wz, p.extent - wx, p.extent - wz) < 28 + p.step
+          )
+            continue;
           if (d > 0 && d <= 5.25) {
             slopes.push(
               Math.hypot(

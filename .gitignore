@@ -26,6 +26,8 @@ venv/
 *.pfx
 credentials*.json
 secrets*.json
+/.aws/
+/.ssh/
 *.sqlite*
 *.db
 /private/

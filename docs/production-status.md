@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [jungle forest floor](jungle-forest-floor.md) opens the recorded visible
+  grass beyond its old grid limit and encloses the valley with terrain faces.
+  All 71 selected tests and the build pass, retaining the complete original
+  walking, reservoir and inner-terrain height digests. Six live valley routes
+  and three tree approaches cover 7,650 controller updates with legal bodies
+  and grounded final rests. All eighteen revised development captures are
+  reviewed; their 865,710 posed vertex observations clear independent terrain
+  triangles. Actual Performance keyboard/touch movement, map pixels and four
+  complete-store reload comparisons pass; all ten release captures are reviewed.
+  VA-161's reproduced boundary is repaired. Pale root strips, possible masonry
+  gaps, portrait contrast and apparent lower-leg/soil contact in the immediate
+  touch reload pose remain open. These checks do not establish continuous
+  whole-body clearance or a complete objective playthrough. Owned resources
+  close under the shared locked five-CPU cap; all three budget-helper tests pass.
 - The [jungle trunk contact](jungle-trunk-contact.md) adds body, lens, cover,
   support and environmental-occlusion queries using the delivered wood.
   All 27 focused checks pass; the broader campaign sweep was stopped after

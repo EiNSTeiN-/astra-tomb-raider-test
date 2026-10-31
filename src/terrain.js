@@ -43,6 +43,7 @@ import { buildJungleFringe } from "./jungle-fringe.js";
 import { regionalBankRise } from "./terrain-banks.js";
 import { coastalBankDrop } from "./coastal-banks.js";
 import { courtTerrain } from "./court-terrain.js";
+import { createJungleRim } from "./jungle-rim.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -255,6 +256,14 @@ export function createTerrainProfile(map, level) {
       }
       courts[iz * width + ix] = Math.max(paving, coastal?.coverage(x, z) || 0);
     }
+  const jungleRim =
+    biome === "jungle" ? createJungleRim(map, level.seed) : null;
+  if (jungleRim)
+    for (let iz = 0; iz < width; iz++)
+      for (let ix = 0; ix < width; ix++) {
+        const rise = jungleRim.rise(ix * step, iz * step);
+        if (rise) heights[iz * width + ix] += rise;
+      }
   const sample = (data, x, z) => {
     const fx = Math.max(0, Math.min(width - 1.001, x / step)),
       fz = Math.max(0, Math.min(width - 1.001, z / step));
@@ -371,6 +380,7 @@ export function createTerrainProfile(map, level) {
     courts,
     trail,
     coastal,
+    jungleRim,
     geology: null,
     height: (x, z) => sample(heights, x, z),
     court: (x, z) => sample(courts, x, z),
@@ -416,6 +426,32 @@ export function createTerrainProfile(map, level) {
       for (let x = 0; x < map.size; x++)
         if (!map.grid[z][x] && terrain.walkableBank(x * 7, z * 7))
           terrain.bankMap[z * map.size + x] = 1;
+  }
+  if (jungleRim) {
+    // The authored room grid still controls furnishing and planting, while
+    // ordinary exploration follows the complete interior terrain surface.
+    // Actual slopes, scans, water and structures retain their physical tests.
+    terrain.walkableBank = (x, z) =>
+      x >= 0 && z >= 0 && x <= extent && z <= extent;
+    terrain.bankMap = new Uint8Array(map.size * map.size);
+    for (let z = 1; z < map.size; z++)
+      for (let x = 1; x < map.size; x++) {
+        if (map.grid[z][x]) continue;
+        const px = x * 7,
+          pz = z * 7,
+          floor = terrain.surfaceHeight(px, pz);
+        let clear = true;
+        for (let i = 0; i < 16 && clear; i++) {
+          const angle = (i * Math.PI) / 8;
+          clear =
+            terrain.surfaceHeight(
+              px + Math.cos(angle) * 0.55,
+              pz + Math.sin(angle) * 0.55,
+            ) <=
+            floor + 0.6;
+        }
+        if (clear) terrain.bankMap[z * map.size + x] = 1;
+      }
   }
   return terrain;
 }

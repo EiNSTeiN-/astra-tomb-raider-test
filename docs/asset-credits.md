@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [jungle forest-floor revision](jungle-forest-floor.md) adds original terrain,
+movement and chart code using the existing credited ground materials, Island
+Tree delivery models and explorer. It adds no external model, texture, audio or
+dependency.
+Its three intentional documentation images are actual diagnostic browser
+captures, converted losslessly to WebP with identical decoded pixels and
+dimensions. The preceding and revised flank images have different endpoints,
+poses and cameras after the same outward controller input.
+
 The [jungle trunk contact](jungle-trunk-contact.md) adds original collision,
 indexed-ray and arrival-restoration code using the existing credited Island
 Tree 01 and Island Tree 02 delivery models. Their geometry and textures retain
