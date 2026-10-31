@@ -122,6 +122,8 @@ and its sampled score bar contains only pad and bass events. Audio content is
 unchanged; these observations verify playback and reactive mixing rather than
 subjective listening quality.
 
+The later [island-outline pass](sky-island-outlines.md) varies the upper cap and
+adds shallow shelf movement while retaining protected foundations.
 The [playable-world audit](visual-audit.md) remains open. Broad bare court shoulders,
 repeated field/discovery footprints, later continuous routes and the other
 chapters' landscape composition still need review. This milestone does not

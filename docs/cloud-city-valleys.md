@@ -74,8 +74,8 @@ The new rear coverage exposes repeated flat chamber crowns. The subsequent
 different entrance, rear and return profiles. Final-court side overlooks also show a very straight
 grass/cloud boundary. The subsequent [bank and cloud inspection](cloud-contact.md)
 finds actual descending terrain at the sampled edge and softens hard cloud
-intersections on its lower face. The straight terrace silhouette remains a
-shape follow-up. Wider field, discovery,
+intersections on its lower face. The later [island-outline pass](sky-island-outlines.md)
+extends the upper edge into varied shelves. Wider field, discovery,
 traversal and water routes, moving-body contact and the full
 [visual audit](visual-audit.md) remain open. These measurements do not establish
 consumer-device performance, subjective audio quality or complete visual

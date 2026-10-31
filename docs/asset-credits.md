@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [cloud-island outlines](sky-island-outlines.md) use original heightfield,
+movement and chart code, with the existing credited terrain maps, plants and
+character. No external asset, audio or dependency is added. Four intentional
+documentation images are actual browser captures converted losslessly to WebP;
+decoded pixels and dimensions match their sources.
+
 The [swimmer clearance revision](water-ripples.md#swimmer-clearance) uses original
 controller and character-pose code. It adds no external model, texture, recording,
 music or dependency. Existing character and coastal masonry attribution below

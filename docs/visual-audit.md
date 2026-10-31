@@ -82,6 +82,13 @@ opening-route views and eight native production views are reviewed; terrain-root
 working-space, restored-layout, positional-audio and save checks pass. The broader
 composition target remains open.
 
+The later [cloud-island outlines](sky-island-outlines.md) vary the rectangular
+upper caps and add shallow shelf movement and explored-map coverage. Forty-five
+scenery, forty-three route/contact and fourteen native input views are reviewed;
+forty local movement legs, eighty-one resting body poses and six complete-save
+release comparisons pass. Sparse fields and possible guardian/slab contact
+remain follow-ups; broader moving contact and whole-world acceptance remain open.
+
 The [cloud-bank shoulders](sky-bank-shoulders.md) widen the square cliff caps
 while retaining every recorded walking-grid vertex, working-pad sample and
 bridge/reservoir record. Their 78 matched bank views and repeated 92 ground
@@ -326,6 +333,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-156 | Dense, jagged Andean ranges form a continuous mountain wall behind the cloud courts; the nearest range supplies fifteen of seventeen sampled opaque camp-background hits. | [Coordinated cloud valleys](cloud-city-valleys.md) add broad passes, greater range separation and gentler crest detail while retaining mountain topology and physical-world exclusions. All 33 selected tests, complete-triangle clearance and the build pass. All 41 final views and twelve native captures are reviewed; keyboard/touch wind turns and six complete-save reload comparisons pass. | Composition improved in the reviewed orientations; subsequent VA-157 softens sampled cloud intersections and VA-158 varies chamber upper profiles; whole-world acceptance remains open |
 | VA-157 | The lower valley cloud sheet cuts hard white patches into the jagged sky-city banks. | [Terrain-aware cloud contact](cloud-contact.md) fades opacity near the delivered triangle surface. Forty selected tests, the build and 560 independent browser shader/ray samples pass. All 22 final development and twelve native captures are reviewed; keyboard/touch wind turns and six complete-save reload comparisons pass. Chapter reload/change each dispose the outgoing cloud texture, material and geometry once. | Recorded lower-bank cloud cutouts softened; subsequent VA-158 varies chamber upper profiles; straight terrace silhouettes and whole-world acceptance remain open |
 | VA-158 | The nine wind-engine chambers repeat one stepped entrance crown above otherwise flat wall tops. | [Nine trial-specific upper profiles](wind-chamber-crowns.md) add fitted stone, coping and timber screens across fronts, rear walls and returns. All 122 selected tests, 1,092 bearing samples, 756 cap/camera locations, 189 door states and the build pass. All forty final scenery, nineteen route/contact and twenty-two native captures are reviewed; eighteen local legs and forty-six resting body poses pass. A counterweight obstruction is repaired with finite member bounds. Native keyboard/touch controls pass eight complete-save reload comparisons; a separate raised-cap rerun proves an actual save write and preserves position, with its additional view reviewed. | Repeated chamber upper profiles varied and sampled contact checked; broader composition, continuous moving contact and whole-world acceptance remain open |
+| VA-159 | The upper sky-island cap still follows long rectangular grid edges above the rounded lower banks. | [Varied island outlines](sky-island-outlines.md) extend shallow shelves into continuous lobes and include them in ordinary walking and explored maps. All 89 selected tests and the build pass, retaining original walking, shore, working-pad and courier heights. All 45 scenery, 43 route/contact and fourteen native captures are reviewed; forty local legs, 81 resting body poses and six release store comparisons pass. An early courier-course height regression was repaired before final acceptance. | Recorded upper contour varied; sparse fields, possible guardian/slab contact, broader moving contact and whole-world acceptance remain open |
 
 
 

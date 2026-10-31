@@ -888,7 +888,10 @@ function drawMap(canvas, full = false, s = game?.state()) {
   c.fillStyle = "#536457";
   for (let z = 0; z < size; z++)
     for (let x = 0; x < size; x++)
-      if (game.map.grid[z][x] && game.explored.has(`${x},${z}`))
+      if (
+        (game.map.grid[z][x] || game.terrainProfile?.bankMap?.[z * size + x]) &&
+        game.explored.has(`${x},${z}`)
+      )
         c.fillRect(
           ox + x * scale,
           oz + z * scale,

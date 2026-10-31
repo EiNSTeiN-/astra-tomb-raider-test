@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [cloud-island outlines](docs/sky-island-outlines.md) now extend into varied
+upper shelves, with shallow walking ground included on the explored map.
+
 The [nine wind chambers](docs/wind-chamber-crowns.md) now have distinct fitted
 stone and timber upper profiles, extending around their open-air courts.
 

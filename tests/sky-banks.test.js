@@ -3,7 +3,14 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
-import { skyBankDrop, skyBridgePathWeight } from "../src/sky-banks.js";
+import {
+  skyBankDrop,
+  skyBankExtension,
+  skyBridgePathWeight,
+  createSkyShoulders,
+} from "../src/sky-banks.js";
+import { Adventure } from "../src/game.js";
+import { courierCorridor } from "../src/courier-rules.js";
 import { spanCoordinates } from "../src/sky-bridge-rules.js";
 
 const level = LEVELS[5],
@@ -13,22 +20,118 @@ const digest = (data) => createHash("sha256").update(data).digest("hex");
 const heightsDigest = (values) =>
   digest(Buffer.from(new Float32Array(values).buffer));
 
-test("sky shoulders have a shallow, varied cap before descending into the ravine", () => {
-  const caps = [];
+test("sky shoulders extend into varied upper lobes before descending monotonically into the ravine", () => {
+  const contours = [];
   for (let z = 0; z < profile.extent; z += 11.3)
     for (let x = 0; x < profile.extent; x += 9.7) {
       assert.equal(skyBankDrop(x, z, 0, level.seed), 0);
+      const extension = skyBankExtension(x, z, level.seed);
+      assert(extension >= 1.25 && extension <= 9.75);
+      assert.equal(skyBankDrop(x, z, extension, level.seed), 0);
       const cap = skyBankDrop(x, z, 1.75, level.seed);
-      assert(cap > 0.9 && cap < 2, `Abrupt cap at ${x},${z}: ${cap}`);
-      caps.push(cap);
+      assert(cap >= 0 && cap < 0.3, `Abrupt cap at ${x},${z}: ${cap}`);
       let previous = 0;
+      let contour;
       for (let distance = 0.25; distance <= 36; distance += 0.25) {
         const drop = skyBankDrop(x, z, distance, level.seed);
         assert(drop >= previous && drop <= 64);
+        if (contour === undefined && drop >= 3) contour = distance;
         previous = drop;
       }
+      contours.push(contour);
     }
-  assert(Math.max(...caps) - Math.min(...caps) > 0.6);
+  assert(Math.max(...contours) - Math.min(...contours) > 7);
+});
+
+test("new island lobes blend away from every receiving shore and bridge approach", () => {
+  const layout = createSkyShoulders(map, profile.waters, level.seed);
+  for (const w of profile.waters)
+    for (const x of [w.x - w.width / 2 - 2, w.x, w.x + w.width / 2 + 2])
+      for (const z of [w.z - w.length / 2 - 2, w.z, w.z + w.length / 2 + 2])
+        assert.equal(layout.extension(x, z), 0);
+  for (const bridge of map.bridges) {
+    const p = spanCoordinates(bridge, bridge.ax, bridge.az);
+    for (let along = 0; along <= p.length; along += 1.75)
+      for (const across of [-12, -5, 0, 5, 12]) {
+        const x = bridge.ax + p.ux * along + p.uz * across,
+          z = bridge.az + p.uz * along - p.ux * across;
+        assert(layout.extension(x, z) < 1e-20);
+        assert.equal(profile.walkableBank(x, z), false);
+      }
+  }
+  const water = [];
+  for (let iz = 0; iz < profile.width; iz++)
+    for (let ix = 0; ix < profile.width; ix++) {
+      const x = ix * profile.step,
+        z = iz * profile.step;
+      if (
+        profile.waters.some(
+          (w) =>
+            Math.abs(x - w.x) <= w.width / 2 + 2 &&
+            Math.abs(z - w.z) <= w.length / 2 + 2,
+        )
+      )
+        water.push(profile.heights[iz * profile.width + ix]);
+    }
+  assert.equal(water.length, 672);
+  // Recorded on a66c837 before the island outlines changed.
+  assert.equal(
+    heightsDigest(water),
+    "fce90a76e781c1517e41e0442a175b657d2d5a809ac9353b67ca2ad38f789aa0",
+  );
+});
+
+test("flat new shelves outside the old grid accept the ordinary movement footprint", () => {
+  const game = Object.assign(Object.create(Adventure.prototype), {
+    level,
+    map,
+    terrainProfile: profile,
+    groundHeight: profile.surfaceHeight,
+    obstacles: [],
+    jumpY: 0,
+  });
+  let accessible = 0;
+  for (let z = 14; z < profile.extent - 14; z += 3.5)
+    for (let x = 14; x < profile.extent - 14; x += 3.5) {
+      if (map.grid[Math.round(z / 7)]?.[Math.round(x / 7)]) continue;
+      if (courierCorridor(map, x, z)) continue;
+      if (
+        profile.geology.referenceHeight(x, z) - profile.surfaceHeight(x, z) >
+        0.02
+      )
+        continue;
+      if (!game.canMove(x, z, 0)) continue;
+      assert(profile.walkableBank(x, z));
+      for (const dx of [-0.45, 0.45])
+        for (const dz of [-0.45, 0.45]) assert(game.walkable(x + dx, z + dz));
+      accessible++;
+    }
+  assert(accessible > 200, `Only ${accessible} usable new shelf samples`);
+  for (const [x, z] of [
+    [-1, 0],
+    [0, -1],
+    [profile.extent + 1, 0],
+    [0, profile.extent + 1],
+  ])
+    assert.equal(profile.walkableBank(x, z), false);
+});
+
+test("all delivered courier-corridor terrain vertices retain their heights outside the ordinary grid", () => {
+  const values = [];
+  for (let iz = 0; iz < profile.width; iz++)
+    for (let ix = 0; ix < profile.width; ix++) {
+      const x = ix * profile.step,
+        z = iz * profile.step;
+      if (!courierCorridor(map, x, z)) continue;
+      values.push(profile.heights[iz * profile.width + ix]);
+      assert.equal(profile.walkableBank(x, z), false);
+    }
+  assert.equal(values.length, 6692);
+  // All actual courier land, landings and underlying chasm on a66c837.
+  assert.equal(
+    heightsDigest(values),
+    "0daf05401cddd1a78857e70e62b9f5ac80f5e523f6185e1b7673585caa7b04e7",
+  );
 });
 
 test("shoulder shaping retains the previously shipped deep ravine beyond 26 metres", () => {

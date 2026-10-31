@@ -1555,7 +1555,9 @@ export class Adventure {
       return true;
     const gx = Math.round(x / CELL),
       gz = Math.round(z / CELL);
-    return !!this.map.grid[gz]?.[gx];
+    return (
+      !!this.map.grid[gz]?.[gx] || !!this.terrainProfile?.walkableBank?.(x, z)
+    );
   }
   canMove(x, z, height = this.jumpY, clearance = 1.8) {
     const worldY = this.groundHeight(x, z) + height;

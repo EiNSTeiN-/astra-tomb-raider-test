@@ -32,7 +32,11 @@ import { terrainMaterial } from "./terrain-material.js";
 import { trailSampler } from "./habitat.js";
 import { coastalLayout } from "./coastal-layout.js";
 import { refineSkyTerrain } from "./sky-geology.js";
-import { skyBankDrop, skyBridgePathWeight } from "./sky-banks.js";
+import {
+  skyBankDrop,
+  skyBridgePathWeight,
+  createSkyShoulders,
+} from "./sky-banks.js";
 import { createSunkenGallery } from "./sunken-gallery-layout.js";
 import { cutTerrainGeometry } from "./terrain-cut.js";
 import { buildJungleFringe } from "./jungle-fringe.js";
@@ -58,6 +62,9 @@ export function createTerrainProfile(map, level) {
   const biome = level.biome;
   const waters = waterSites(map, level);
   const upperHeights = biome === "sky" ? new Float32Array(width * width) : null;
+  const skyShoulders = upperHeights
+    ? createSkyShoulders(map, waters, level.seed)
+    : null;
   const walkingDistances = upperHeights
     ? new Float32Array(width * width)
     : null;
@@ -181,7 +188,14 @@ export function createTerrainProfile(map, level) {
             );
           }
         if (walkingDistances) walkingDistances[iz * width + ix] = distance;
-        if (biome === "sky") height -= skyBankDrop(x, z, distance, level.seed);
+        if (biome === "sky")
+          height -= skyBankDrop(
+            x,
+            z,
+            distance,
+            level.seed,
+            skyShoulders.extension(x, z),
+          );
         else if (biome === "water")
           height -= coastalBankDrop(x, z, distance, level.seed);
         else if (biome === "desert")
@@ -381,6 +395,28 @@ export function createTerrainProfile(map, level) {
   // Keep the generation/masking field intact. Walking and camera clearance
   // follow the float32 triangle planes that buildTerrainSurface delivers.
   terrain.surfaceHeight ||= createTerrainSurfaceSampler(terrain);
+  if (skyShoulders) {
+    terrain.walkableBank = (x, z) => {
+      if (x < 0 || z < 0 || x > extent || z > extent) return false;
+      const extension = skyShoulders.extension(x, z);
+      if (extension < 0.25) return false;
+      // The visible upper shelf is playable too. Stop on the descending rock
+      // shoulder, using the delivered triangle height rather than its smooth
+      // generation field. Deep bridge cuts and receiving pools stay excluded.
+      return (
+        sample(walkingDistances, x, z) <= extension + 1.25 &&
+        terrain.geology.referenceHeight(x, z) - terrain.surfaceHeight(x, z) <
+          1.2
+      );
+    };
+    // The chart uses the same coarse cell convention as existing rooms. Cache
+    // static bank eligibility once, rather than querying geology every HUD draw.
+    terrain.bankMap = new Uint8Array(map.size * map.size);
+    for (let z = 0; z < map.size; z++)
+      for (let x = 0; x < map.size; x++)
+        if (!map.grid[z][x] && terrain.walkableBank(x * 7, z * 7))
+          terrain.bankMap[z * map.size + x] = 1;
+  }
   return terrain;
 }
 

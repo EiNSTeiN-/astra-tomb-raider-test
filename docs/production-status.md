@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cloud-island outline pass](sky-island-outlines.md) extends the rectangular
+  caps into varied shelves with ordinary shallow-bank movement and explored-map
+  coverage. All 89 selected regressions and the build pass, retaining original
+  walking, shore, working-pad and courier-course heights. Forty assisted local
+  legs cover 415.96 m over 4,100 controller updates; 81 resting body poses clear
+  independent terrain/nearby-rock observers. All 45 scenery, 43 route/contact
+  and fourteen native input captures are reviewed. Keyboard/High and portrait
+  touch/Performance pass six complete-save reload comparisons and actual map
+  pixel checks; a separate actual-write shelf reload restores the same position.
+  Reload and chapter change release outgoing terrain and cloud resources once.
+  Owned helpers close under the shared locked five-CPU cap. Sparse fields,
+  possible guardian/slab contact, moving contact and listening/device acceptance
+  remain open.
 - The [nine wind-chamber upper profiles](wind-chamber-crowns.md) replace the
   repeated stepped entrance and flat returns with trial-specific fitted stone,
   coping and timber screens. All 122 selected tests and the build pass; 1,092
@@ -43,8 +56,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   All 22 final development captures are reviewed. Same-chapter reload and a
   chapter change each release the outgoing height texture, geometry and material
   once. Independent screen/profile rays and cloud-hidden views also reject the
-  sampled missing-cliff suspicion; the conspicuously straight cap remains a
-  shape follow-up. Built keyboard/High and portrait-touch/Performance cases
+  sampled missing-cliff suspicion; the subsequent island-outline pass above
+  varies the straight upper cap. Built keyboard/High and portrait-touch/Performance
+  cases
   operate a wind duct, exercise movement and preserve the complete local save
   through three reloads each, excluding play timestamps. All twelve release
   captures are reviewed and owned verification resources close under the shared
@@ -60,8 +74,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   timestamps. All 112,640 mountain triangles remain beyond the map, with
   conservative projected clearances of at least 231.88 m. Owned resources close
   under the shared locked five-CPU cap. The subsequent wind-chamber pass
-  addresses the repeated upper profiles. Straight
-  grass/cloud boundaries in the final-court side views, wider routes/contact
+  addresses the repeated upper profiles; the island-outline pass varies the
+  final-court grass/cloud boundary. Wider routes/contact
   and listening/device acceptance remain open.
 - The [coastal bank shoulders](coastal-bank-shoulders.md) soften the steep grid
   lips in the recorded court fronts. Reproduced delivered-triangle grades fall

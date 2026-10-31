@@ -111,6 +111,7 @@ body clears both independent observers. Its additional capture is reviewed.
 The initial assisted reload's store equality is excluded as fresh-write
 evidence because that helper had left the game in its preparation state.
 
-Broader landscape composition,
-straight terrace silhouettes, field/discovery/traversal/water coverage and
-listening/device acceptance remain in the open [visual audit](visual-audit.md).
+The subsequent [island-outline pass](sky-island-outlines.md) varies the straight
+terrace caps. Broader landscape composition, field/discovery/traversal/water
+coverage and listening/device acceptance remain in the open
+[visual audit](visual-audit.md).

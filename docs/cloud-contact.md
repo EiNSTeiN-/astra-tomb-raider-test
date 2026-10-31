@@ -25,7 +25,8 @@ surfaces, mechanisms and positioned sound sources retain their construction.
 The preceding straight grass/cloud silhouette is a separate terrace-shape
 finding: ten screen rays, a double-sided control and twenty-nine bank-profile
 rays found actual descending terrain. Cloud-hidden views retain the straight
-cap outline. Its composition remains open.
+cap outline. The subsequent [island-outline pass](sky-island-outlines.md)
+varies that upper edge; broader composition remains open.
 
 All forty selected cloud-city, architecture, geology and crossing tests pass,
 as does the production build with its existing bundle-size advisory. Every
