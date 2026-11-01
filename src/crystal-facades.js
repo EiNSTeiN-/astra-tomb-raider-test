@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { mergeArchitecture } from "./visuals.js";
 import { stationAssemblySolid } from "./field-station-solids.js";
 import { footprintMinimum } from "./masonry-foundations.js";
+import { projectStoneUVs } from "./stone-uv.js";
 
 const BASE = 7.76;
 const rectangle = (x, y, w, h) => [
@@ -202,10 +203,7 @@ function extrusion(outline, holes, depth, front) {
     curveSegments: 1,
   });
   geometry.translate(0, 0, front - depth);
-  const p = geometry.attributes.position,
-    uv = geometry.attributes.uv;
-  for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / 2, p.getY(i) / 2);
-  return geometry;
+  return projectStoneUVs(geometry);
 }
 
 function clip(points, axis, value, sign) {
@@ -484,14 +482,22 @@ export function buildCrystalFacade(game, gate, materials) {
         (s, p) => [s[0] + p[0] / window.length, s[1] + p[1] / window.length],
         [0, 0],
       ),
-      rim = window.map(([x, y]) => {
-        const d = Math.hypot(x - center[0], y - center[1]);
-        return [
-          x + ((x - center[0]) * 0.09) / d,
-          y + ((y - center[1]) * 0.09) / d,
-        ];
-      });
-    add(extrusion(rim, [window], 0.2, 7.29), materials.inlay, 1, false);
+      outset = (distance) =>
+        window.map(([x, y]) => {
+          const d = Math.hypot(x - center[0], y - center[1]);
+          return [
+            x + ((x - center[0]) * distance) / d,
+            y + ((y - center[1]) * distance) / d,
+          ];
+        });
+    // Keep the trim's inner return outside the stone aperture. Sharing its
+    // exact plane makes their overlapping depth faces fight through the hole.
+    add(
+      extrusion(outset(0.09), [outset(0.022)], 0.2, 7.29),
+      materials.inlay,
+      1,
+      false,
+    );
   }
   cameraSections += captureScreen(game, root, plan);
   const solid = stationAssemblySolid(

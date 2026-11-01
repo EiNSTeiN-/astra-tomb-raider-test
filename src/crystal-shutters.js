@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { stoneBlockGeometry } from "./temple-architecture.js";
+import { projectStoneUVs } from "./stone-uv.js";
 
 const rectangle = (x, y, w, h, cut = 0.09) => [
   [x - w / 2 + cut, y],
@@ -188,10 +189,7 @@ function slab(outline, holes, back, depth, bevel = 0) {
     bevelThickness: bevel,
   });
   geometry.translate(0, 0, back);
-  const p = geometry.attributes.position,
-    uv = geometry.attributes.uv;
-  for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / 2, p.getY(i) / 2);
-  return geometry;
+  return projectStoneUVs(geometry);
 }
 
 // Broad recessed stone is visible at distance; the small metal lips, cramps and

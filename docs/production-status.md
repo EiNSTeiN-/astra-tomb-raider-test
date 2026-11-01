@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [archive return repair](crystal-returns.md) removes collapsed texture
+  coordinates from the leaf/front geometry and separates overlapping window
+  trim. The complete comparison reduces 20,406 collapsed texture triangles to
+  zero; only nine rim groups change non-UV geometry. All 90 obstacle envelopes,
+  13,080 camera surfaces and drive sources retain their data. Nine selected tests,
+  22 UV-isolation views, eight final views and the build pass. All thirty images
+  are reviewed and owned browsers/previews close under the shared locked
+  five-of-sixteen CPU allowance. Wider composition and world acceptance remain
+  open.
 - The [carved archive shutters](crystal-shutters.md) give all eight cavern
   door pairs different recessed stone and bronze compositions on both faces.
   All 25 selected tests pass, including all 69 chapter gates, closed components,

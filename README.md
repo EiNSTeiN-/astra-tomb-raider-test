@@ -5,6 +5,8 @@ An original, browser-based third-person archaeological adventure built with Thre
 The [carved archive shutters](docs/crystal-shutters.md) replace repeated blue
 veins with eight recessed stone and bronze compositions, carved on both faces.
 Their moving camera bounds follow the deeper relief through the descent.
+The [stone-return repair](docs/crystal-returns.md) removes stretched textures
+inside those recesses and separates overlapping window trim.
 
 The [windowed archive fronts](docs/crystal-facades.md) give the eight cavern
 entrances distinct stone profiles, open windows and grounded pier footings.

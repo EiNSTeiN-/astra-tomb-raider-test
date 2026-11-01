@@ -1857,3 +1857,12 @@ dependency is added. Six actual 1280 × 800 High captures compare published
 `67f6abb` with the revised application at matching prepared standing positions,
 follow cameras and zero elapsed simulation time. Lossless WebP exports preserve
 decoded source pixels and dimensions without cropping or retouching.
+
+The [archive return and rim comparisons](crystal-returns.md) use existing
+credited stone, inlay, cavern and explorer assets with original project-authored
+projection and trim adjustments. No external model, texture, recording or
+dependency is added. Four actual 1280 × 800 High inspection-camera captures
+compare reconstructed published `8c8abe6` projection buffers with the final
+revised application at matching cameras, prepared player positions and zero
+elapsed simulation time. Lossless WebP exports preserve decoded source pixels
+and dimensions without cropping or retouching.
