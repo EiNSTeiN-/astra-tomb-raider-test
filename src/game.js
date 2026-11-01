@@ -356,6 +356,7 @@ import { advanceCausewayWheel } from "./fire-vault-motion.js";
 import { advancePressureOperation } from "./pressure-motion.js";
 import { advanceOrbitBearing } from "./orbit-motion.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
+import { buildCavernFlowstone } from "./cavern-flowstone.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
 import {
@@ -1059,6 +1060,7 @@ export class Adventure {
     buildForgeWorkyards(this);
     buildForgeForecourts(this);
     buildForgeInteriors(this);
+    buildCavernFlowstone(this);
     buildFumaroles(this);
     buildTorch(this);
     prepareGuardianPatrols(this);

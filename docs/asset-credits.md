@@ -1866,3 +1866,12 @@ compare reconstructed published `8c8abe6` projection buffers with the final
 revised application at matching cameras, prepared player positions and zero
 elapsed simulation time. Lossless WebP exports preserve decoded source pixels
 and dimensions without cropping or retouching.
+
+The [cavern limestone terraces](cavern-flowstone.md) use original project-authored
+closed shelf geometry and calcite shading with the existing credited cavern rock
+textures, explorer and environment assets. No external model, texture, recording
+or dependency is added. Four actual 1280 × 800 High captures compare the new
+scenery hidden and visible in the same paused revised application, at matching
+prepared player positions, follow cameras and zero elapsed simulation time.
+Lossless WebP exports preserve decoded source pixels and dimensions without
+cropping or retouching.

@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cavern limestone terraces](cavern-flowstone.md) add eleven grounded
+  calcite aprons in six chamber areas. All 31 selected tests and thirty reviewed
+  development views pass, including closed surfaces, actual batched contact,
+  1,110 retained clear path-centre samples, eleven assisted walk/jump legs,
+  tracked resource disposal and the build. Native keyboard/High and portrait
+  touch/Performance movement, occupied older-save recovery and three reload
+  comparisons of the complete saved state pass. All nine release captures are
+  reviewed. Owned browsers and previews close under the shared locked
+  five-of-sixteen CPU limit. Central forecourts and wider cave composition
+  remain open; this local pass does not establish whole-world acceptance.
+
 - The [archive return repair](crystal-returns.md) removes collapsed texture
   coordinates from the leaf/front geometry and separates overlapping window
   trim. The complete comparison reduces 20,406 collapsed texture triangles to
