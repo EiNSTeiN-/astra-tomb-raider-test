@@ -1812,3 +1812,12 @@ dependency is added. Six actual 1280 × 800 High-preset follow-camera captures
 compare the new fragments and ground treatment hidden/disabled against their
 normal rendering in the same frozen physical world. Lossless WebP exports
 preserve their source pixels and dimensions without cropping or retouching.
+
+The [Rainkeeper masonry revision](rainkeeper-masonry.md) adds original closed
+corbel and relief geometry in `src/rainkeeper-masonry.js`, adapting the project's
+botanical carvings and reusing the existing credited temple material and world.
+No external model, texture, recording or dependency is added. Its four actual
+1280 × 800 High-preset follow-camera captures are exported losslessly to WebP;
+decoded pixels and dimensions match their sources. The entrance comparison
+uses the preceding published build and the revised build at the same prepared
+position, heading and simulation time.

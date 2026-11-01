@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Rainkeeper masonry revision](rainkeeper-masonry.md) adds eight connected
+  corbels, fourteen coursed piers, twelve exterior reliefs and a stepped entrance
+  to the optional jungle tomb. All 72 sampled roof bearings and 126 terrain/pier
+  sections are connected in the batched render geometry. Registered platform
+  surfaces repair the reproduced upward camera view into a raised landing.
+  Eleven focused tests, eighteen High/Performance follow-camera views, the
+  continuous six-platform swim/climb and three-lamp/archive return route, live
+  audio states, resource disposal, the build and native release persistence
+  checks pass. Health remains 100 on the route and 93 in isolated release
+  fixtures. A refreshed 138-view survey of the other six chapters retains
+  repeated court structures and wider composition as open work. Owned jobs
+  close under the shared locked five-of-sixteen CPU allowance.
 - The [scoria bank pass](scoria-banks.md) adds 4,560 grounded fragments and
   matching exposed ground between the volcanic courts. All 68 paired scenery
   captures are reviewed, covering four entrance headings, eighteen court fronts/

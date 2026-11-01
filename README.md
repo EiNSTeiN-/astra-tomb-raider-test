@@ -2,6 +2,11 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [Rainkeeper masonry revision](docs/rainkeeper-masonry.md) gives the optional
+jungle tomb supported corbels, coursed piers, framed carvings and a stepped
+entrance. Registered platform surfaces also keep upward camera views clear of
+the raised landings.
+
 The [Meridian planting pass](docs/meridian-planting.md) adds fuller silver grasses,
 dry stems and low cushions beside the final chapter's clear routes. A refreshed
 volcanic/final-chapter court review retains wider composition work.

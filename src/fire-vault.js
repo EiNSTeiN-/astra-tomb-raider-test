@@ -19,6 +19,7 @@ import {
   causewayWheelMoving,
 } from "./fire-vault-motion.js";
 import { mergeArchitecture } from "./visuals.js";
+import { buildRainkeeperMasonry } from "./rainkeeper-masonry.js";
 
 export function insideFireVault(game) {
   const v = game.fireVault,
@@ -149,7 +150,7 @@ export function buildFireVault(game) {
     return o;
   };
   const platform = (px, pz, w, d, h = 1.92) => {
-    block(w, h, d, px, h / 2, pz);
+    block(w, h, d, px, h / 2, pz, root, stone, true);
     obstacle(px, pz, w / 2, d / 2, h, true);
     block(w + 0.08, 0.09, d + 0.08, px, h - 0.055, pz, root, bronze);
   };
@@ -243,22 +244,8 @@ export function buildFireVault(game) {
     }
     block(44, 0.5, 1.5, 0, 6.1, pz, root, stone, true);
   }
-  // Broken roof ribs preserve a view of the jungle canopy and shafts of daylight.
-  for (const pz of [-23, -7, 9, 25])
-    for (const side of [-1, 1]) {
-      for (let tier = 0; tier < 4; tier++)
-        block(
-          3.5,
-          0.55,
-          1.4,
-          side * (20 - tier * 2.35),
-          6.5 + tier * 0.45,
-          pz,
-          root,
-          stone,
-          true,
-        );
-    }
+  // Keep the existing deck and wheel stone seeds stable as the roof is rebuilt.
+  serial += 32;
   for (const [i, [px, pz]] of VAULT_CELLS.entries()) {
     platform(px, pz, 3.4, 3.4);
     const pivot = new THREE.Group();
@@ -522,6 +509,7 @@ export function buildFireVault(game) {
     kind: "record",
     position: new THREE.Vector3(x, y + 1.92, z + 31.3),
   });
+  buildRainkeeperMasonry(game, v, stone);
   mergeArchitecture(root);
   updateFireVault(game, 0, true);
 }

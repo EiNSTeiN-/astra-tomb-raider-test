@@ -5,6 +5,20 @@ chapters with local saves, and a rich, polished playable world without observed
 placement or geometry defects. There is no minimum chapter duration. AAA is the
 artistic direction. **The audit is open.**
 
+## October 31–November 1 refresh
+
+At `8a1b707`, a new High-preset survey reviewed 138 views across the jungle,
+desert, snow, coastal, cloud-island and cavern chapters: four entrance headings
+per chapter and 114 court front/rear views. All expected stances were captured;
+intervening trees and architecture still obscure parts of some courts. These
+static views retain distinct atmospheres but show repeated large structural
+forms and plain wall backs. They complement the recent volcanic/final-chapter
+reviews and do not establish complete surface or route coverage.
+
+The [Rainkeeper masonry revision](rainkeeper-masonry.md) follows that survey with
+a local optional-tomb improvement and the reproduced platform-camera repair.
+Wider court composition and continuous moving contact remain open.
+
 ## Coverage on September 12, 2026
 
 The first survey captured 154 ground-level observer views, from the front and
@@ -352,6 +366,8 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-167 | The crouch/quiet-steps status remains faint over bright snow in the native High keyboard release view. | The [contextual HUD pass](context-status.md) backs quiet, wind-braced and guardian-alert states plus waypoint-distance text. All 47 revised observations pass, with a lowest sampled ratio of 7.073:1 across actual High views and extreme backgrounds. Seventy-two marker probes across six viewports keep the complete marker clear of panels and screen edges. | Recorded contextual-label contrast and marker clipping repaired; other prompts, moving views and broader accessibility remain open |
 | VA-168 | Volcanic and final-chapter entrances retain broad, sparse foregrounds even at High. | The [entrance baseline](entry-review.md) reproduces both approaches. [Meridian planting](meridian-planting.md) adds fuller final-chapter colonies, and [foundry floor courses](forge-floors.md) distinguish nine volcanic work aprons. The subsequent [scoria banks](scoria-banks.md) add 4,560 grounded fragments and matching exposed ground. All 68 final render captures are reviewed; 3,791,781 downward-face points, quality/physical packing, 54 supported approaches, eighteen local legs, disposal and native input/reloads pass. Broad ash gaps and repeated large installations remain visible. | Final-chapter planting, volcanic aprons and bank detail improved; wider landscape composition, repeated installations and broader routes remain open |
 | VA-169 | Short landscape layouts put health/objective panels over the movement controls; growing air/torch status compounds the overlap. | The [compact landscape repair](context-status.md) separates the heading, objective, map, movement pad and action grid, with air/torch status beside health. All eight 667 × 375 and 812 × 375 normal/air/critical-air/torch observations pass text, panel-clearance and button-center hit checks. Actual production touch also exercises the formerly covered forward button. | Reproduced compact-layout overlap repaired at the surveyed sizes; broader layouts and moving views remain open |
+| VA-170 | The Rainkeeper tomb has a plain entrance facade and repeated roof stacks; 48 of 72 sampled roof bearings have small wall-cap gaps, up to 13.8 mm. | [Continuous corbels, grounded piers and exterior carvings](rainkeeper-masonry.md) add a stepped entrance and unequal surviving roof lengths. All 72 roof bearings and 126 pier/terrain sections pass against batched render geometry. The complete assisted swim/climb, lamp/archive and return route retains 100 health and its dry flame. | Recorded bearing gaps repaired and local facade improved; broader repeated structures and world composition remain open |
+| VA-171 | A steep upward follow-camera pose inside the Rainkeeper tomb enters the raised entrance landing. | [Registering the visible platform stone bodies](rainkeeper-masonry.md) adds camera surfaces for static banks, treads, wheel platforms and the archive landing. The reproduced upward view clears the floor; focused camera rays and the eighteen High/Performance views pass. | Reproduced landing-camera case repaired; wider continuous camera and contact coverage remains open |
 
 
 

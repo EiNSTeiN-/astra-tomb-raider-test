@@ -4,6 +4,11 @@ A flooded side tomb now stands south of the entrance camp in The Verdant Veil.
 It adds a spatial crossing puzzle and a recoverable story about the sanctuary's
 former role as shelter. It is optional and does not advance the main sun gates.
 
+The later [masonry and platform-camera revision](rainkeeper-masonry.md) adds
+supported corbels, exterior carvings and a stepped entrance, and registers the
+raised platforms with camera collision. The images and verification below
+describe earlier tomb milestones.
+
 ![Flooded hall with raised stone crossings](images/rainkeeper-causeway.png)
 
 Six fixed platforms have handwheels and bronze channels. Press **E / Use** to turn
