@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [carved archive shutters](docs/crystal-shutters.md) replace repeated blue
+veins with eight recessed stone and bronze compositions, carved on both faces.
+Their moving camera bounds follow the deeper relief through the descent.
+
 The [windowed archive fronts](docs/crystal-facades.md) give the eight cavern
 entrances distinct stone profiles, open windows and grounded pier footings.
 Physical support keeps the explorer within reach of their actual caps.

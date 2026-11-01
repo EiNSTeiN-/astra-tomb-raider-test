@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [carved archive shutters](crystal-shutters.md) give all eight cavern
+  door pairs different recessed stone and bronze compositions on both faces.
+  All 25 selected tests pass, including all 69 chapter gates, closed components,
+  sampled coffer backs and complete moving camera bounds at six descent poses.
+  Thirty-eight development views are reviewed across approach, front/interior,
+  three quality settings and half/full openings. Local assisted routes, control
+  and sound access, live attenuation, disposal of all 80 tracked door geometries
+  and five shared materials, and the build pass. The shared locked five-of-sixteen
+  CPU allowance remains in force. Native keyboard/High and portrait
+  touch/Performance inputs earn the last field restoration, then pass tuning,
+  stage advancement and four full-store reload comparisons from prepared field
+  and tablet starts; all twelve final release views are reviewed and owned jobs
+  close. Broader cave-floor composition, repeated
+  instruments and drives, continuous contact and listening/device acceptance
+  remain open.
 - The [glossy crystal lighting follow-up](crystal-light-clearance.md) increases
   source-bound clearance to three metres. Two matched High views reduce scene
   HDR peaks from 268.93/829.32 to 16.91/15.77 while retaining the optical

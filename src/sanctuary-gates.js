@@ -35,6 +35,7 @@ import { stationSolid } from "./field-station-solids.js";
 import { buildCoastalVault } from "./coastal-vaults.js";
 import { buildForgeVault } from "./forge-vaults.js";
 import { buildWindChamberCrown } from "./wind-chamber-crowns.js";
+import { buildCrystalShutter } from "./crystal-shutters.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -683,7 +684,15 @@ export function buildSanctuaryGate(game, feature, materials) {
           : m.metal;
     if (design.panel !== "lattice")
       block(6.15, 7.4, 0.48, bodyMaterial, cx, 3.7, 0, leaf);
-    cameraBox(leafWidth, 7.4, 0.6, cx, 3.7, 0, leaf);
+    cameraBox(
+      leafWidth,
+      7.4,
+      design.panel === "crystal" ? 1.26 : 0.6,
+      cx,
+      3.7,
+      design.panel === "crystal" ? 0.05 : 0,
+      leaf,
+    );
     const leafDetail = new THREE.Group();
     leaf.add(leafDetail);
     if (design.panel === "lattice") {
@@ -839,44 +848,14 @@ export function buildSanctuaryGate(game, feature, materials) {
             leafDetail,
           );
     } else if (design.panel === "crystal") {
-      for (let branch = 0; branch < 4; branch++) {
-        const points = Array.from(
-          { length: 7 },
-          (_, i) =>
-            new THREE.Vector3(
-              cx +
-                (branch - 1.5) * 1.05 +
-                Math.sin(i * 2 + branch + feature.stage) * 0.45,
-              0.55 + i * 1.03,
-              0.35,
-            ),
-        );
-        add(
-          new THREE.TubeGeometry(
-            new THREE.CatmullRomCurve3(points),
-            24,
-            0.055 + branch * 0.006,
-            5,
-            false,
-          ),
-          m.inlay,
-          0,
-          0,
-          0,
-          leafDetail,
-        );
-      }
-      for (let i = 0; i < 5; i++) {
-        const gem = add(
-          new THREE.IcosahedronGeometry(0.24, 0),
-          m.inlay,
-          cx + Math.sin(i * 2 + feature.stage) * 1.8,
-          1.1 + i * 1.25,
-          0.4,
-          leafDetail,
-        );
-        gem.scale.set(0.7, 1.6, 0.6);
-      }
+      buildCrystalShutter({
+        gate,
+        leaf,
+        detail: leafDetail,
+        side,
+        cx,
+        materials: m,
+      });
     } else {
       for (let ring = 0; ring < 3; ring++) {
         const orbit = add(

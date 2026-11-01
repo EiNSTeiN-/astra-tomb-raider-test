@@ -1849,3 +1849,11 @@ captures share prepared standing positions, follow cameras and zero elapsed
 simulation time within each before/after pair. Before runtime source hashes
 match published `7b9f2c5`. Lossless WebP exports preserve decoded source pixels
 and dimensions without cropping or retouching.
+
+The [carved archive shutters](crystal-shutters.md) use original project-authored
+recess layouts and stone/bronze geometry with the existing credited cavern,
+explorer, material and sound assets. No external model, texture, recording or
+dependency is added. Six actual 1280 × 800 High captures compare published
+`67f6abb` with the revised application at matching prepared standing positions,
+follow cameras and zero elapsed simulation time. Lossless WebP exports preserve
+decoded source pixels and dimensions without cropping or retouching.

@@ -61,7 +61,7 @@ export const GATE_DESIGNS = {
     trimTint: 0xacaea1,
   },
   crystal: {
-    name: "Veined archive shutters",
+    name: "Carved archive shutters",
     motion: "sink",
     crown: "angular",
     panel: "crystal",

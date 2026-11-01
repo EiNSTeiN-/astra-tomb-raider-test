@@ -848,7 +848,7 @@ test("open leaves never show through the exterior side-wall recesses", (t) => {
 });
 
 test("both door motions carry camera collision and hardware through opening without stale closed bounds", (t) => {
-  for (const index of [0, 2, 5]) {
+  for (const index of [0, 2, 5, 6]) {
     const { game, gate, hits } = fixture(t, index),
       c = gate.root.position;
     const a = c.clone().add(new THREE.Vector3(0, 2, 4)),
@@ -883,6 +883,40 @@ test("both door motions carry camera collision and hardware through opening with
     assert.equal(gate.wheels[0].rotation.z, end);
     assert.equal(hits.length, 1);
   }
+});
+
+test("all archive shutter relief vertices stay inside moving camera bounds through the full descent", (t) => {
+  const { game } = fixture(t, 6, null, true);
+  let vertices = 0;
+  for (const amount of [0, 0.25, 0.5, 0.75, 0.99, 1])
+    for (const gate of game.fieldGates) {
+      gate.amount = amount;
+      updateSanctuaryGate(game, gate, 0);
+      game.cameraSurfaces.withSnapshot(() => {
+        for (const leaf of gate.leaves) {
+          const surfaces = game.cameraSurfaces.dynamic.filter(
+            (s) => s.parent === leaf.group,
+          );
+          assert.equal(surfaces.length, 1);
+          const bounds = surfaces[0].bounds.clone().expandByScalar(0.005),
+            p = new THREE.Vector3();
+          leaf.group.updateWorldMatrix(true, true);
+          leaf.group.traverse((o) => {
+            if (!o.isMesh) return;
+            const attribute = o.geometry.attributes.position;
+            for (let i = 0; i < attribute.count; i++) {
+              p.fromBufferAttribute(attribute, i).applyMatrix4(o.matrixWorld);
+              assert(
+                bounds.containsPoint(p),
+                `complete relief ${gate.stage}/${leaf.side}/${amount}`,
+              );
+              vertices++;
+            }
+          });
+        }
+      });
+    }
+  assert(vertices > 100000);
 });
 
 test("three field seals display partial restoration and the moving drive is silent at either resting state", (t) => {
