@@ -1821,3 +1821,13 @@ No external model, texture, recording or dependency is added. Its four actual
 decoded pixels and dimensions match their sources. The entrance comparison
 uses the preceding published build and the revised build at the same prepared
 position, heading and simulation time.
+
+The [cavern mineral fields](mineral-fields.md) use original project-authored
+quartz arrangements, heel seating and optical shader changes. They reuse the
+existing credited cave, stone, explorer, lighting and sound assets. No external
+model, texture, recording or dependency is added. Six actual 1280 × 800 High
+captures compare published `c5d57ec` with the revised application at matching
+player positions, cameras and zero elapsed simulation time. The entrance uses
+the follow camera, the first court uses a prepared ground observer and the
+detail uses a fixed art camera. Lossless WebP exports preserve decoded source
+pixels and dimensions without cropping or retouching.

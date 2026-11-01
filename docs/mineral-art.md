@@ -1,5 +1,11 @@
 # Quartz formations and tuning crystals
 
+This page records an earlier quartz-art milestone. Its piece counts, collision
+envelopes, material settings and captures describe that version. The subsequent
+[cavern mineral fields](mineral-fields.md) vary all 33 natural formations,
+revise the shared optical surface and use their actual physical triangles.
+Current acceptance criteria are in [production status](production-status.md).
+
 Natural mineral formations and mounted tuning crystals now share a more detailed quartz shape and optical material. Each solid has six broad shaft faces, narrow corner facets, a beveled base, an uneven shoulder and an offset termination. The geometry has 96 triangles per crystal and stays inside the original radius and height envelope. Main shaft faces remain planar; variation is deterministic.
 
 The full chapter contains 456 quartz pieces: 324 in natural formations and 132 in the tuning apparatus. Together they use 43,776 triangles in 141 mesh geometries, with 42 materials carrying the individual restoration values.

@@ -8,7 +8,6 @@ import { mergeArchitecture } from "./visuals.js";
 import { createCavernProfile, crystalRestoration } from "./cavern-profile.js";
 import {
   cavernChunks,
-  quartzGeometry,
   stalactiteGeometry,
   mineralBedGeometry,
 } from "./cavern-geometry.js";
@@ -16,6 +15,7 @@ import { cavernRock, mineralMaterial } from "./cavern-material.js";
 import { mineralLightPosition } from "./mineral-art.js";
 import { buildCavernFormations } from "./cavern-formations.js";
 import { buildCavernDeposits } from "./cavern-deposits.js";
+import { buildMineralCluster } from "./mineral-clusters.js";
 
 export function buildCaverns(game) {
   game.cavernProfile = null;
@@ -56,6 +56,7 @@ export function buildCaverns(game) {
     root.name = `Mineral chamber ${room.index}`;
     game.world.add(root);
     const centers = [],
+      clusters = [],
       lightPositions = [];
     const candidates = [
       [14, -12],
@@ -99,37 +100,20 @@ export function buildCaverns(game) {
       bed.name = "Grounded mineral bed";
       bed.position.set(px, py, pz);
       root.add(bed);
-      const crystals = [bed];
       game.cameraSurfaces?.capture(bed);
-      game.obstacles.push({
-        x: px,
-        z: pz,
-        w: 2.2,
-        d: 2.1,
-        h: 5.8,
-        cavernMineral: true,
-      });
-      for (let j = 0; j < 9; j++) {
-        const angle = j * 2.399 + room.index;
-        const radius = j ? 0.65 + rng() * 1.2 : 0;
-        const cx = px + Math.cos(angle) * radius,
-          cz = pz + Math.sin(angle) * radius;
-        const h = j ? 1.2 + rng() * 3.6 : 5.5 + (room.index % 3) * 0.7;
-        const crystal = new THREE.Mesh(
-          quartzGeometry(j ? 0.22 + rng() * 0.35 : 0.75, h, rng()),
-          material,
-        );
-        crystal.position.set(cx, game.groundHeight(cx, cz) - 0.12, cz);
-        crystal.rotation.set(
-          Math.cos(angle) * (j ? 0.27 : 0.08),
-          rng(),
-          Math.sin(angle) * (j ? 0.27 : 0.08),
-        );
-        root.add(crystal);
-        crystals.push(crystal);
-        game.cameraSurfaces?.capture(crystal);
-      }
-      lightPositions.push(mineralLightPosition(center, crystals));
+      const formation = buildMineralCluster(
+        game,
+        root,
+        bed,
+        center,
+        room.index,
+        centers.length - 1,
+        rng,
+        material,
+      );
+      lightPositions.push(mineralLightPosition(center, formation.meshes));
+      delete formation.meshes; // Batching releases the original render objects.
+      clusters.push(formation);
     }
     const primary = centers[0];
     for (const [cluster, center] of centers.entries()) {
@@ -139,12 +123,23 @@ export function buildCaverns(game) {
           ? Math.sign(x - center.x)
           : 0;
       const faceZ = faceX ? 0 : Math.sign(z - center.z);
+      const bounds = clusters[cluster].bounds;
       game.cavernSources.push({
         id: `crystal-${room.index}${cluster ? `-${cluster}` : ""}`,
         kind: "crystal",
-        x: center.x + faceX * 2.45,
-        y: center.y + 3,
-        z: center.z + faceZ * 2.35,
+        x: faceX
+          ? faceX > 0
+            ? bounds.max.x + 0.35
+            : bounds.min.x - 0.35
+          : center.x,
+        y:
+          center.y +
+          Math.max(1.45, Math.min(3, (bounds.max.y - center.y) * 0.55)),
+        z: faceZ
+          ? faceZ > 0
+            ? bounds.max.z + 0.35
+            : bounds.min.z - 0.35
+          : center.z,
         faceX,
         faceZ,
         rate: 0.9 + (room.index % 5) * 0.075,
@@ -226,6 +221,7 @@ export function buildCaverns(game) {
       root,
       index: room.index,
       centers,
+      clusters,
       lightPositions,
       primary,
       color,

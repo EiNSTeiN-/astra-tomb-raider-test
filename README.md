@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [cavern mineral fields](docs/mineral-fields.md) now use six formation
+profiles, young crystal growth and calmer internal fractures. Their physical
+surfaces follow the rendered quartz, with hum emitters beyond the real bounds.
+
 The [Rainkeeper masonry revision](docs/rainkeeper-masonry.md) gives the optional
 jungle tomb supported corbels, coursed piers, framed carvings and a stepped
 entrance. Registered platform surfaces also keep upward camera views clear of

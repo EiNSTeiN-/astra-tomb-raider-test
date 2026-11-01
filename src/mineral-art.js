@@ -112,20 +112,25 @@ float mineralNoise(vec3 p) {
 const surface = /* glsl */ `
 vec3 mineralP=vMineralCoord.xyz;
 float mineralSeed=vMineralCoord.w*17.;
-float mineralCloud=mineralNoise(mineralP*vec3(2.7,1.4,2.7)+mineralSeed);
-mineralCloud=mineralCloud*.68+mineralNoise(mineralP*7.1+mineralSeed+9.)*.32;
-mineralCloud=smoothstep(.36,.75,mineralCloud);
-float mineralPlane=dot(mineralP,vec3(1.2,.47,-.61))*7.+mineralSeed;
-mineralPlane+=mineralNoise(mineralP*3.7+13.)*.7;
-float mineralAA=max(.008,fwidth(mineralPlane));
-float mineralFracture=(1.-smoothstep(.018+mineralAA,.065+mineralAA,abs(sin(mineralPlane))))
-  *smoothstep(.28,.57,mineralNoise(mineralP*4.3+3.))*(1.-smoothstep(.5,2.,mineralAA));
+float mineralCloud=mineralNoise(mineralP*vec3(.9,.25,.9)+mineralSeed)*.7;
+mineralCloud+=mineralNoise(mineralP*vec3(3.2,.8,3.2)+mineralSeed+9.)*.2;
+mineralCloud+=mineralNoise(mineralP*7.1+mineralSeed+17.)*.1;
+mineralCloud=smoothstep(.49,.79,mineralCloud);
+vec3 mineralQ=mineralP/vec3(vMineralShape.x,vMineralShape.y,vMineralShape.x);
+// One sparse internal cleavage, rather than repeating bright sinusoidal bands.
+float mineralPlane=mineralQ.y-(.32+.22*fract(mineralSeed*.73))
+  +mineralQ.x*.13-mineralQ.z*.08;
+mineralPlane+=(mineralNoise(mineralQ*2.1+mineralSeed)-.5)*.035;
+float mineralAA=max(.0003,fwidth(mineralPlane));
+float mineralFracture=(1.-smoothstep(.0008+mineralAA,.0035+mineralAA,abs(mineralPlane)))
+  *smoothstep(.45,.7,mineralNoise(mineralQ*4.3+mineralSeed));
 float mineralBase=1.-smoothstep(.01,.24,mineralP.y/vMineralShape.y);
 float mineralStrataPhase=mineralP.y*92.+mineralNoise(mineralP*3.)*.7;
 float mineralStrata=sin(mineralStrataPhase)*(1.-smoothstep(.7,2.6,fwidth(mineralStrataPhase)));
-float mineralEtch=mineralStrata*.00009+mineralFracture*.00005;
-vec3 mineralBody=mix(vec3(.77,.82,.88),vec3(1.12,1.11,1.09),mineralCloud*.72+mineralFracture*.28);
+float mineralEtch=mineralStrata*.00065+mineralFracture*.00005;
+vec3 mineralBody=mix(vec3(.82,.87,.92),vec3(1.06,1.07,1.08),mineralCloud*.7+mineralFracture*.12);
 mineralBody*=mix(1.,.58,mineralBase);
+mineralBody*=1.+mineralStrata*.007;
 diffuseColor.rgb*=mineralBody;
 `;
 
@@ -136,16 +141,16 @@ export function mineralMaterial(color, restoration) {
     color: new THREE.Color(0xffffff).lerp(tint, 0.38),
     emissive: tint,
     emissiveIntensity: 0.38,
-    roughness: 0.13,
+    roughness: 0.11,
     metalness: 0,
     ior: 1.46,
-    transmission: 0.46,
+    transmission: 0.68,
     thickness: 1,
     attenuationColor: tint.clone().lerp(new THREE.Color(0xffffff), 0.38),
-    attenuationDistance: 2.4,
+    attenuationDistance: 3.1,
     clearcoat: 0.45,
-    clearcoatRoughness: 0.17,
-    envMapIntensity: 1.15,
+    clearcoatRoughness: 0.13,
+    envMapIntensity: 1.35,
   });
   material.userData.mineralRestoration = restoration;
   const optics = { shaders: new Set(), targets: new Set() };
@@ -174,7 +179,7 @@ export function mineralMaterial(color, restoration) {
       .replace("#include <map_fragment>", surface)
       .replace(
         "#include <roughnessmap_fragment>",
-        "float roughnessFactor=clamp(roughness+mineralCloud*.14+mineralFracture*.16+mineralBase*.16,.1,.65);",
+        "float roughnessFactor=clamp(roughness+mineralCloud*.1+mineralFracture*.1+mineralBase*.18,.08,.55);",
       )
       .replace(
         "#include <normal_fragment_maps>",
@@ -190,7 +195,7 @@ export function mineralMaterial(color, restoration) {
         "#include <emissivemap_fragment>",
         /* glsl */ `
         float mineralRim=pow(1.-abs(dot(normal,normalize(vViewPosition))),3.);
-        totalEmissiveRadiance*=(.12+mineralRim*.6+mineralFracture*.25)*(.4+restoration*.85);
+        totalEmissiveRadiance*=(.12+mineralRim*.35+mineralFracture*.06)*(.4+restoration*.85);
       `,
       )
       .replace(
@@ -198,7 +203,7 @@ export function mineralMaterial(color, restoration) {
         THREE.ShaderChunk.transmission_fragment
           .replace(
             "material.transmission = transmission;",
-            "material.transmission = transmission * (1.-mineralCloud*.38-mineralFracture*.28-mineralBase*.25);",
+            "material.transmission = transmission * (1.-mineralCloud*.22-mineralFracture*.1-mineralBase*.28);",
           )
           .replace(
             "material.thickness = thickness;",
@@ -206,7 +211,7 @@ export function mineralMaterial(color, restoration) {
           ),
       );
   };
-  material.customProgramCacheKey = () => "vesper-quartz-optics-1";
+  material.customProgramCacheKey = () => "vesper-quartz-optics-2";
   return material;
 }
 

@@ -31,7 +31,21 @@ export function inspectCaverns(game) {
     .filter((f) => f.type !== "guardian")
     .map((f) => {
       const course = game.traversalCourses.find((c) => c.id === f.id),
-        summit = course?.ledges.at(-1);
+        summit = course?.ledges.at(-1),
+        site = game.resonanceSites?.find((s) => s.feature.id === f.id);
+      // Mounted tuning controls stand in front of the closed gates. Their
+      // retired map centres lie inside those gates, outside the working aisle.
+      if (site && site.stage > 0) {
+        const controls = [site.tablet, ...site.nodes.map((n) => n.control)];
+        return {
+          id: f.id,
+          targets: controls.map((control) => control.id),
+          clear: controls.every((control) => {
+            const p = control.group.position;
+            return game.canMove(p.x, p.z, p.y - game.groundHeight(p.x, p.z));
+          }),
+        };
+      }
       return {
         id: f.id,
         clear:

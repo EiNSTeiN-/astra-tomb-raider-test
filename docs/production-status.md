@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cavern mineral fields](mineral-fields.md) vary 33 natural formations
+  across six profiles and 693 crystals, with terrain-seated heels, physical
+  triangle contact and hum sources outside their rendered bounds. All 29
+  distinct selected tests, 69 accepted development views, 41 tuning-area legs,
+  33 mineral approach/return pairs, live attenuation state and tracked resource
+  disposal pass. Nine prepared inspection views were replaced to keep observers
+  on dry ground and frame their subjects; four unusable older detail slots are
+  excluded. The build, native keyboard/High and portrait touch/Performance
+  tuning, four complete-store reload comparisons and one separate older-save
+  recovery/reload pass. All ten release images are reviewed. Checks share the
+  locked five-of-sixteen CPU allowance and owned resources close. Broad cave
+  floors, repeated large buildings, continuous contact, full routes and
+  listening/device acceptance remain open.
 - The [Rainkeeper masonry revision](rainkeeper-masonry.md) adds eight connected
   corbels, fourteen coursed piers, twelve exterior reliefs and a stepped entrance
   to the optional jungle tomb. All 72 sampled roof bearings and 126 terrain/pier

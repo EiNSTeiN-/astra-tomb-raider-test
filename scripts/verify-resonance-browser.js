@@ -190,7 +190,12 @@ export function walkResonanceCourts(game) {
         site.tablet,
         ...site.nodes.map((n) => n.control),
         site.tablet,
-      ].map((f) => ({ x: f.x * 7, z: f.z * 7 }));
+      ].map((f) => ({
+        x: f.x * 7,
+        // Stay in the interaction range while leaving room for the planner's
+        // extra corner margin in front of the wheel castings.
+        z: f.z * 7 + (f.kind === "tablet" ? 0 : 0.35),
+      }));
       for (let i = 1; i < points.length; i++) {
         const a = points[i - 1],
           b = points[i],

@@ -63,6 +63,25 @@ function fixture(t) {
   return game;
 }
 
+function renderedClusterBounds(patch, cluster) {
+  const phases = new Set(cluster.pieces.map((piece) => piece.phase)),
+    bounds = new THREE.Box3(),
+    point = new THREE.Vector3();
+  patch.root.updateWorldMatrix(true, true);
+  patch.root.traverse((mesh) => {
+    const q = mesh.geometry?.attributes.mineralCoord,
+      p = mesh.geometry?.attributes.position;
+    if (!q) return;
+    for (let i = 0; i < p.count; i++)
+      if (phases.has(q.getW(i)))
+        bounds.expandByPoint(
+          point.fromBufferAttribute(p, i).applyMatrix4(mesh.matrixWorld),
+        );
+  });
+  assert(!bounds.isEmpty());
+  return bounds;
+}
+
 test("every mineral-bed perimeter stays below both the visible triangles and sampled floor", (t) => {
   const game = fixture(t);
   let probes = 0;
@@ -233,9 +252,11 @@ test("mineral clusters leave feature approaches, guardian spawns and their visib
         assert.ok(Math.hypot(center.x - f.x * 7, center.z - f.z * 7) >= 7);
   for (const s of game.soundSources.filter((s) => s.cavernRoom !== undefined)) {
     const center = game.cavernPatches[s.cavernRoom].centers[s.cavernCluster];
-    assert.equal(s.x, center.x + s.faceX * 2.45);
-    assert.equal(s.y, center.y + 3);
-    assert.equal(s.z, center.z + s.faceZ * 2.35);
+    const patch = game.cavernPatches[s.cavernRoom],
+      bounds = renderedClusterBounds(patch, patch.clusters[s.cavernCluster]);
+    if (s.faceX) assert(s.faceX > 0 ? s.x > bounds.max.x : s.x < bounds.min.x);
+    else assert(s.faceZ > 0 ? s.z > bounds.max.z : s.z < bounds.min.z);
+    assert(s.y >= center.y + 1.4 && s.y < bounds.max.y + 0.1);
     assert.ok(
       game.lineOfSight(
         new THREE.Vector3(
@@ -248,6 +269,102 @@ test("mineral clusters leave feature approaches, guardian spawns and their visib
       s.id,
     );
   }
+});
+
+test("every rendered mineral heel enters the delivered terrain after leaning and batching", (t) => {
+  const game = fixture(t),
+    point = new THREE.Vector3();
+  let sampled = 0;
+  for (const patch of game.cavernPatches)
+    patch.root.traverse((mesh) => {
+      const p = mesh.geometry?.attributes.position,
+        q = mesh.geometry?.attributes.mineralCoord,
+        shape = mesh.geometry?.attributes.mineralShape;
+      if (!q) return;
+      for (let i = 0; i < p.count; i += 3) {
+        if (
+          [0, 1, 2].some(
+            (j) => q.getY(i + j) > shape.getY(i + j) * 0.035 + 1e-6,
+          )
+        )
+          continue;
+        const vertices = [0, 1, 2].map((j) =>
+          new THREE.Vector3()
+            .fromBufferAttribute(p, i + j)
+            .applyMatrix4(mesh.matrixWorld),
+        );
+        for (const [a, b, c] of [
+          [1, 0, 0],
+          [0, 1, 0],
+          [0, 0, 1],
+          [0.5, 0.5, 0],
+          [0, 0.5, 0.5],
+          [0.5, 0, 0.5],
+          [1 / 3, 1 / 3, 1 / 3],
+        ]) {
+          point
+            .set(0, 0, 0)
+            .addScaledVector(vertices[0], a)
+            .addScaledVector(vertices[1], b)
+            .addScaledVector(vertices[2], c);
+          assert(
+            point.y < game.groundHeight(point.x, point.z),
+            `exposed root at ${point.toArray()}`,
+          );
+          sampled++;
+        }
+      }
+    });
+  assert(sampled > 70000);
+});
+
+test("mineral collision rays match the delivered leaned crystals and beds rather than enclosing empty space", (t) => {
+  const game = fixture(t),
+    ray = new THREE.Raycaster();
+  let hits = 0,
+    misses = 0;
+  for (const patch of game.cavernPatches)
+    for (const [i, center] of patch.centers.entries()) {
+      const solid = patch.clusters[i].solid;
+      for (const angle of [0, 0.7, 1.8, 2.6, 3.8, 5.1]) {
+        const from = new THREE.Vector3(
+            center.x + Math.cos(angle) * 6,
+            center.y + 1.65,
+            center.z + Math.sin(angle) * 6,
+          ),
+          to = new THREE.Vector3(center.x, center.y + 1.65, center.z),
+          length = from.distanceTo(to);
+        ray.set(from, to.clone().sub(from).normalize());
+        ray.far = length;
+        const actual = ray
+            .intersectObject(patch.root, true)
+            .find((h) => h.object.isMesh),
+          expected = solid.triangles.entry(from, to);
+        if (actual) {
+          assert(expected !== null);
+          // World batching rounds to Float32; grazing faces amplify that
+          // rounding. Require sub-millimetre surface agreement.
+          assert(
+            Math.abs(expected * length - actual.distance) < 0.001,
+            JSON.stringify({
+              room: patch.index,
+              cluster: i,
+              angle,
+              expected,
+              actual: actual.distance / length,
+              point: actual.point.toArray(),
+              material: actual.object.material.name,
+            }),
+          );
+          hits++;
+        } else {
+          assert.equal(expected, null);
+          misses++;
+        }
+      }
+    }
+  assert(hits > 100);
+  assert(misses > 0, "some rays pass through genuine spaces between crystals");
 });
 
 test("saved resonance work controls the same gradual mineral glow and positional drone", (t) => {
