@@ -1,5 +1,10 @@
 # Crystal archive vaults
 
+This page records the earlier open-rib milestone. The subsequent
+[windowed archive fronts](crystal-facades.md) replace its front arches, add
+terrain-seated pier footings and retain the remaining interior ribs. Camera
+bounds now follow individual arch stones instead of enclosing entire spans.
+
 The eight archive chambers in The Night Below now have distinct vaulted
 crowns in place of their repeated front corbel. Their masonry rises from the
 existing chamber walls, corner jambs and entrance lintels. Open ribs retain the

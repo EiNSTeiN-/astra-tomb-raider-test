@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { vaultStoneGeometry } from "./palace-geometry.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
+import { buildCrystalFacade } from "./crystal-facades.js";
 
 const SPRING = 7.16;
 const rib = (z, rise, options = {}) => ({ z, x: 0, yaw: 0, rise, ...options });
@@ -53,7 +54,13 @@ export function crystalVaultPlan(stage) {
   ];
   const plan = plans[stage];
   if (!plan) throw new RangeError("Unknown crystal chamber");
-  return { ...plan, stage, spring: SPRING };
+  // The old front rib is replaced by the chapter's windowed stone facade.
+  return {
+    ...plan,
+    ribs: plan.ribs.filter((r) => r.z !== 6.5),
+    stage,
+    spring: SPRING,
+  };
 }
 
 export function crystalRibGeometry(rib, segment) {
@@ -83,6 +90,9 @@ export function buildCrystalVault(game, gate, materials) {
     mesh.position.set(x, y, z);
     mesh.castShadow = mesh.receiveShadow = true;
     root.add(mesh);
+    // Keep each arch stone's bounds before batching. One box around a whole
+    // vault would also occupy its open span and the new facade windows.
+    game.cameraSurfaces?.capture(mesh, { small: true, thin: true });
     return mesh;
   };
   const ribs = [...plan.ribs];
@@ -113,24 +123,6 @@ export function buildCrystalVault(game, gate, materials) {
       ).rotation.y = r.yaw;
     }
   }
-  // Small keyed inlays sit against the front arch, rather than floating above
-  // its crown. Their colour belongs to the same archive masonry material.
-  const front = plan.ribs.find((r) => r.z === 6.5),
-    top = SPRING + 6.78 * front.rise;
-  add(
-    stoneBlockGeometry(0.76, 0.68, 0.94, 100 + gate.stage),
-    materials.wall,
-    0,
-    top - 0.2,
-    6.5,
-  );
-  add(
-    new THREE.OctahedronGeometry(0.28),
-    materials.inlay,
-    0,
-    top - 0.23,
-    7.02,
-  ).scale.set(0.85, 1.25, 0.3);
   if (plan.boss || plan.lantern) {
     const height = SPRING + 6.16 * plan.spine;
     const collar = add(
@@ -194,7 +186,7 @@ export function buildCrystalVault(game, gate, materials) {
     );
   }
   mergeArchitecture(root);
-  for (const mesh of root.children) game.cameraSurfaces?.capture(mesh);
   gate.vault = { root, plan, ribs, stones };
+  buildCrystalFacade(game, gate, materials);
   return gate.vault;
 }

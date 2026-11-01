@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [windowed archive fronts](docs/crystal-facades.md) give the eight cavern
+entrances distinct stone profiles, open windows and grounded pier footings.
+Physical support keeps the explorer within reach of their actual caps.
+
 The [cavern mineral fields](docs/mineral-fields.md) now use six formation
 profiles, young crystal growth and calmer internal fractures. Their physical
 surfaces follow the rendered quartz, with hum emitters beyond the real bounds.

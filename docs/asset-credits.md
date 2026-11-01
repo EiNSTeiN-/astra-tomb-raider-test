@@ -1831,3 +1831,13 @@ player positions, cameras and zero elapsed simulation time. The entrance uses
 the follow camera, the first court uses a prepared ground observer and the
 detail uses a fixed art camera. Lossless WebP exports preserve decoded source
 pixels and dimensions without cropping or retouching.
+
+The [windowed archive fronts](crystal-facades.md) are original project-authored
+profiles, pierced masonry, dressed courses and grounded footings. They reuse
+the existing credited cavern, stone, explorer and sound assets, with no new
+external model, texture, recording or dependency. Six actual 1280 × 800 High
+comparison captures share prepared ground-observer cameras, player positions
+and zero elapsed simulation time. Baseline runtime source hashes match
+published `df1fb19`; revised images include the new fronts and footings.
+Lossless WebP exports preserve decoded source pixels and dimensions without
+cropping or retouching.

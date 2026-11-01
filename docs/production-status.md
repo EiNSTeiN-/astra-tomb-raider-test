@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [windowed archive fronts](crystal-facades.md) give eight cavern entrances
+  distinct stone profiles and twenty-four real openings. Sixteen fitted pier
+  footings close sampled terrain gaps up to 1.601 m, and physical contact follows
+  the visible piers and new stone. All 21 selected tests pass, including 192
+  terrain/jamb sections, 448 lower-face points, 2,440 physical/rendered rays,
+  window-centre camera paths and a continuous crown walk-off. All 62 architecture
+  views and sixteen additional views after the cap-support correction are
+  reviewed. All 53 static masonry meshes retain identical buffers across that
+  support-only correction. Local routes, source access, live attenuation and
+  resource cleanup pass under the shared locked five-of-sixteen CPU allowance.
+  The final build, keyboard/High and portrait touch/Performance controls and
+  five complete-store reload comparisons pass, including the occupied older
+  cap save; all eleven final release images are reviewed. Owned jobs close.
+  Broader lower-door repetition, cave-floor composition, continuous contact,
+  full routes and listening/device acceptance remain open.
 - The [cavern mineral fields](mineral-fields.md) vary 33 natural formations
   across six profiles and 693 crystals, with terrain-seated heels, physical
   triangle contact and hum sources outside their rendered bounds. All 29

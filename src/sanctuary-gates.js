@@ -176,6 +176,7 @@ export function buildSanctuaryGate(game, feature, materials) {
     weights: [],
     sources: [],
     foundations: [],
+    jambMeshes: [],
     seals: null,
     obstacle: { x, z: z + 6.5, w: halfWidth, d: 0.9, h: open ? 0 : 7.5 },
   };
@@ -442,16 +443,20 @@ export function buildSanctuaryGate(game, feature, materials) {
       buildSkyGateJamb({ side, m, add, block, halfWidth });
     else
       for (let row = 0; row < 8; row++)
-        block(
-          1.48,
-          row === 0 ? 1.05 : 0.98,
-          1.55,
-          m.trim,
-          side * 6.5,
-          row + 0.55,
-          6.5,
+        gate.jambMeshes.push(
+          block(
+            1.48,
+            row === 0 ? 1.05 : 0.98,
+            1.55,
+            m.trim,
+            side * 6.5,
+            row + 0.55,
+            6.5,
+          ),
         );
-    block(1.7, 0.3, 1.78, m.trim, side * halfWidth, 8.35, 6.5);
+    gate.jambMeshes.push(
+      block(1.7, 0.3, 1.78, m.trim, side * halfWidth, 8.35, 6.5),
+    );
     cameraBox(1.7, 8.5, 1.8, side * halfWidth, 4.25, 6.5);
     if (design.panel === "forge")
       masonrySolid([1.7, 8.5, 1.8], [side * halfWidth, 4.25, 6.5]);
@@ -951,6 +956,7 @@ export function buildSanctuaryGate(game, feature, materials) {
   gate.dust = new THREE.Points(dustGeometry, m.dust);
   gate.dust.frustumCulled = false;
   root.add(gate.dust);
+  delete gate.jambMeshes; // Crystal kernels copied these before batching.
   mergeArchitecture(root);
   mergeArchitecture(detail);
   updateSanctuaryGate(game, gate, 0);
