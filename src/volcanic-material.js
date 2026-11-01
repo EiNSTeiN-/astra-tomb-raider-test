@@ -10,6 +10,8 @@ export { forgeFloorUniforms } from "./forge-floor-material.js";
 
 export const volcanicDeclarations = /* glsl */ `
 #ifdef TERRAIN_FORGE
+varying float vScoria;
+uniform float scoriaStrength;
 vec3 volcanicJoint(vec3 p) {
   vec2 drift=vec2(terrainNoise(p.xz*.31+vec2(p.y*.045,9.)),terrainNoise(p.xz*.27+vec2(31.,p.y*.053)))-.5;
   vec2 q=p.xz*.43+vec2(p.y*.019,-p.y*.013)+drift*.23;
@@ -69,6 +71,10 @@ export const volcanicColor = /* glsl */ `
   cooledRock=mix(cooledRock,vec3(.12,.064,.036)*(0.65+groundGray*2.),oxide*.46);
   vec3 ashColor=vec3(groundGray)*vec3(.62,.63,.59);
   earthColor=mix(cooledRock,ashColor,ashDrift*.68);
+  float scoriaCoverage=smoothstep(.025,.62,vScoria)*scoriaStrength;
+  vec3 scoriaRock=vec3(groundGray)*vec3(.12,.145,.17)*(0.85+cooling.z*.3);
+  earthColor=mix(earthColor,scoriaRock,scoriaCoverage*.88);
+  cliffColor=mix(cliffColor,cliffColor*.46,scoriaCoverage*.75);
   cliffColor=mix(cliffColor,vec3(basaltGray)*vec3(1.16,.83,.64),oxide*.19);
   pavingWeight*=smoothstep(.15,.72,vCourt+terrainNoise(vTerrainPosition.xz*.19)*.21);
   float coolingRelief=(min(.32,cooling.x)*.12-joint*.014-seam*.012)*jointDetail;
@@ -80,6 +86,7 @@ export const volcanicNormal = /* glsl */ `
 #ifdef TERRAIN_FORGE
   cliffN=volcanicReliefNormal(cliffN,coolingRelief);
   earthN=normalize(mix(earthN,normal,ashDrift*.4));
+  earthN=normalize(mix(earthN,volcanicReliefNormal(earthN,coolingRelief*.5),scoriaCoverage));
 ${forgeFloorNormal}
 #endif
 `;
@@ -87,6 +94,7 @@ export const volcanicRoughness = /* glsl */ `
 #ifdef TERRAIN_FORGE
   rockRough=mix(.79,.98,max(fracture,ash));
   terrainRough=mix(terrainRough,.98,ashDrift*(1.-pavingWeight));
+  terrainRough=mix(terrainRough,.9+joint*.08,scoriaCoverage*(1.-pavingWeight));
 ${forgeFloorRoughness}
 #endif
 `;

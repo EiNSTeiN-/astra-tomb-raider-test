@@ -83,3 +83,7 @@ areas and repeated large installations remain composition work. This pass
 does not close the [whole-world visual audit](visual-audit.md), continuous body
 contact, complete routes or listening/device acceptance. No external asset,
 recording or dependency is added.
+
+The later [scoria bank pass](scoria-banks.md) adds grounded deposits and exposed
+rock variation between the volcanic courts. The images above retain this
+earlier floor-treatment comparison.

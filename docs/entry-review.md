@@ -34,6 +34,9 @@ The subsequent [foundry floor pass](forge-floors.md) gives all nine volcanic
 work aprons distinct worn courses. Its current comparisons retain broader ash
 fields and repeated large installations as open composition work.
 
+The later [scoria bank pass](scoria-banks.md) adds broken-rock deposits and
+matching ground variation across those slopes. Wider composition remains open.
+
 All eight standing controllers are legal. Independent terrain observations
 inspect 384,760 delivered character vertex records, with no missing or invalid
 samples and no overlap beyond the observer's 15 mm threshold. Shaders link and

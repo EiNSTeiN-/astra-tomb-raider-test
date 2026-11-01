@@ -75,6 +75,7 @@ test("volcanic fractures vary the enclosing ridges while preserving walking cell
             profile.height(px, pz),
             profile.volcanic.originalHeight(px, pz),
           );
+          assert.equal(profile.volcanic.scoria(px, pz), 0);
           protectedCount++;
         }
     }
@@ -128,7 +129,9 @@ test("volcanic terrain chunks keep finite shared edge positions and normals with
       assert(Number.isFinite(p.getY(i)));
       assert(n.getY(i) > 0);
       const key = `${p.getX(i)},${p.getZ(i)}`,
-        sample = [p.getY(i), n.getX(i), n.getY(i), n.getZ(i)];
+        scoria = mesh.geometry.attributes.scoria.getX(i),
+        sample = [p.getY(i), n.getX(i), n.getY(i), n.getZ(i), scoria];
+      assert(Number.isFinite(scoria) && scoria >= 0 && scoria <= 1);
       if (edges.has(key)) assert.deepEqual(sample, edges.get(key));
       else edges.set(key, sample);
     }

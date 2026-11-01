@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [scoria bank pass](scoria-banks.md) adds 4,560 grounded fragments and
+  matching exposed ground between the volcanic courts. All 68 paired scenery
+  captures are reviewed, covering four entrance headings, eighteen court fronts/
+  backs, nine nearby bank views and three quality presets. Current shaders link,
+  sampled HDR output is finite and terrain strength reaches the current GPU
+  program. All 3,791,781 tested downward-face points are below delivered terrain;
+  a raised-rock control fails and restoration clears it. Authored/physical
+  matrices and active render packing match across quality changes. All 54
+  supported approaches and eighteen local legs pass, and tracked resources
+  dispose once and retire on chapter change. The 27 focused tests, build, native
+  keyboard/High and portrait touch/Performance controls and four complete-store
+  reload comparisons pass; all fourteen release captures are reviewed. Owned
+  resources close under the shared locked five-of-sixteen CPU allowance.
+  Wider landscape composition, repeated large installations, continuous
+  moving contact, full routes and listening/device acceptance remain open.
 - The [foundry floor courses](forge-floors.md) give all nine volcanic work
   aprons distinct worn rails, fan channels, rings, gear outlines and quench
   courses. All 74 render captures are reviewed, including 31 frozen control/

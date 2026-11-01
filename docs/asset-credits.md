@@ -1804,3 +1804,11 @@ floor treatment. The receiving approach uses the explorer's follow camera;
 the pressure and heart views use elevated inspection cameras. Lossless WebP
 exports preserve their source pixels and dimensions without cropping or
 retouching.
+
+The [scoria banks](scoria-banks.md) use original project-authored deformations
+of Three.js geometry primitives, original deposit noise and the existing
+credited forge stone materials. No external artwork, texture, recording or
+dependency is added. Six actual 1280 × 800 High-preset follow-camera captures
+compare the new fragments and ground treatment hidden/disabled against their
+normal rendering in the same frozen physical world. Lossless WebP exports
+preserve their source pixels and dimensions without cropping or retouching.

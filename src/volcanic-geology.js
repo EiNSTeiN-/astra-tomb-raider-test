@@ -11,6 +11,13 @@ const smooth = (a, b, v) => {
   return t * t * (3 - 2 * t);
 };
 
+// The same deposits guide both the exposed ground and its broken surface rock.
+export function scoriaDeposit(x, z, seed) {
+  const warp = rockNoise(x * 0.018, z * 0.024, seed + 71),
+    deposit = rockNoise(x * 0.046 + warp * 1.5, z * 0.073, seed + 193);
+  return smooth(0.32, 0.72, deposit) * 0.83;
+}
+
 // Break up the exposed crests while retaining two whole sample cells around
 // walking boundaries. Bilinear movement and saved foundations therefore keep
 // their exact previous heights; the new relief belongs to the enclosing banks.
@@ -71,6 +78,12 @@ export function refineVolcanicTerrain(profile, map, seed) {
     ...profile,
     heights,
     height: sample,
-    volcanic: { originalHeight: profile.height },
+    volcanic: {
+      originalHeight: profile.height,
+      scoria: (x, z) =>
+        scoriaDeposit(x, z, seed) *
+        smooth(2.8, 7, desertRouteDistance(map, x, z)) *
+        (1 - smooth(0.18, 0.46, profile.court(x, z))),
+    },
   };
 }

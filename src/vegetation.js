@@ -1,6 +1,7 @@
 import { snowBoulderMaterial } from "./snow-terrain-material.js";
 import { meridianBoulderMaterial } from "./meridian-terrain-material.js";
 import { buildVolcanicScree } from "./volcanic-scree.js";
+import { buildVolcanicMantle } from "./volcanic-mantle.js";
 import { volcanicBoulderMaterial } from "./volcanic-material.js";
 import { inWindCourt } from "./wind-rules.js";
 import { inCipherCourt } from "./cipher-rules.js";
@@ -339,6 +340,7 @@ export async function loadNature(game) {
   if (game.world !== world) return;
   game.desertScatter = null;
   game.volcanicScree = null;
+  game.volcanicMantle = null;
   game.rockGrounding = {
     candidates: 0,
     placed: 0,
@@ -535,6 +537,7 @@ export async function loadNature(game) {
     }
   }
   buildVolcanicScree(game);
+  buildVolcanicMantle(game);
   world.updateWorldMatrix(true, false);
   game.natureRockSolids = new NatureRockSolids(
     game.naturePatches,

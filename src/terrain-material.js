@@ -374,6 +374,7 @@ export function terrainMaterial(game) {
       FORGE_FLOOR_COUNT: floors.forgeFloorSites.value.length,
     };
     Object.assign(uniforms, floors);
+    uniforms.scoriaStrength = { value: 1 };
   }
   if (biome === "sky") {
     material.defines = { TERRAIN_SKY: 1 };
@@ -409,6 +410,15 @@ export function terrainMaterial(game) {
   game.terrainTexturesReady = Promise.all(pending);
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
+    if (biome === "volcano") {
+      shader.vertexShader =
+        "attribute float scoria; varying float vScoria;\n" +
+        shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\nvScoria=scoria;",
+      );
+    }
     shader.vertexShader = shader.vertexShader.replace(
       "#include <common>",
       "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_SNOW\nattribute float snowRock; varying float vSnowRock;\n#endif\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif\n#ifdef TERRAIN_DESERT\nattribute float desertRock; varying float vDesertRock;\n#endif\n#ifdef TERRAIN_CAVERN\nattribute float cavernRock; varying float vCavernRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nattribute float meridianRock; varying float vMeridianRock;\n#endif\n#ifdef TERRAIN_SKY\nattribute float skyDepth; varying float vSkyDepth;\n#endif",
@@ -428,6 +438,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : ""}`;
   return material;
 }

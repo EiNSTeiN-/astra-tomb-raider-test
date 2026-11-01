@@ -481,6 +481,7 @@ export function buildTerrainSurface(game) {
         uv = geometry.attributes.uv,
         court = new Float32Array(position.count),
         trail = new Float32Array(position.count),
+        scoria = profile.volcanic ? new Float32Array(position.count) : null,
         snowRock = profile.snow ? new Float32Array(position.count) : null,
         skyDepth = profile.geology ? new Float32Array(position.count) : null,
         meridianRock = profile.meridian
@@ -496,6 +497,7 @@ export function buildTerrainSurface(game) {
         uv.setXY(i, px / 4, pz / 4);
         court[i] = profile.court(px, pz);
         trail[i] = profile.trail(px, pz);
+        if (scoria) scoria[i] = profile.volcanic.scoria(px, pz);
         if (snowRock) snowRock[i] = profile.snow.rock(px, pz);
         if (skyDepth) skyDepth[i] = profile.geology.depth(px, pz);
         if (meridianRock) meridianRock[i] = profile.meridian.rock(px, pz);
@@ -508,6 +510,8 @@ export function buildTerrainSurface(game) {
       }
       geometry.setAttribute("court", new THREE.BufferAttribute(court, 1));
       geometry.setAttribute("trail", new THREE.BufferAttribute(trail, 1));
+      if (scoria)
+        geometry.setAttribute("scoria", new THREE.BufferAttribute(scoria, 1));
       if (snowRock)
         geometry.setAttribute(
           "snowRock",
