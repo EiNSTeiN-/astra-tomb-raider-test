@@ -260,6 +260,41 @@ test("low stones step, high sides stop, jumps land on a real surface and saved r
   }
 });
 
+test("an older save settles onto a lowered scan, removed scan soil, or an earned deck", () => {
+  const geometry = new THREE.BoxGeometry(3, 0.6, 3),
+    matrix = transform(0, 0.2, 0),
+    solids = new NatureRockSolids([patch(geometry, [matrix])]),
+    g = game(solids),
+    saved = { x: 0, z: 0, height: 1.2 };
+  for (const initialHeight of [0, saved.height]) {
+    g.player.position.set(0, initialHeight, 0);
+    assert(g.restoreNatureArrival(saved));
+    assert(Math.abs(g.player.position.y - 0.5) < 1e-7);
+  }
+  assert(g.grounded);
+  assert.equal(g.velocityY, 0);
+  assert.equal(g.restoreNatureArrival({ ...saved, height: g.jumpY }), false);
+
+  g.natureRockSolids = new NatureRockSolids([]);
+  g.player.position.set(0, saved.height, 0);
+  assert(g.restoreNatureArrival(saved));
+  assert.equal(g.player.position.y, 0);
+
+  g.obstacles.push({ x: 0, z: 0, w: 2, d: 2, h: 1.2, stepSupport: true });
+  g.player.position.set(0, saved.height, 0);
+  assert.equal(g.restoreNatureArrival(saved), false);
+  assert.equal(g.player.position.y, saved.height);
+  g.obstacles.length = 0;
+  g.swimming = true;
+  assert.equal(g.restoreNatureArrival(saved), false);
+  assert.equal(
+    g.player.position.y,
+    saved.height,
+    "retain the restored water arrival",
+  );
+  geometry.dispose();
+});
+
 test("the lens, sound/sight and shots respect the raw scan, and LOD buffer repacking cannot change solids", () => {
   const geometry = new THREE.BoxGeometry(2, 2, 2),
     matrix = transform(0, 1, 0),

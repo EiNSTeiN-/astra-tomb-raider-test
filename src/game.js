@@ -439,7 +439,11 @@ import {
   buildTempleArchitecture,
   updateTempleArchitecture,
 } from "./temple-architecture.js";
-import { advanceCharacter, safeArrival } from "./character-motion.js";
+import {
+  advanceCharacter,
+  safeArrival,
+  supportAt,
+} from "./character-motion.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import {
   resetTraversal,
@@ -2155,30 +2159,30 @@ export class Adventure {
     if (!this.natureRockSolids && !this.jungleTreeSolids) return false;
     const p = this.player.position,
       proposed = p.clone();
-    // A save on a scan cannot be restored until the asynchronous geometry is
-    // ready. Keep its earned elevation if the complete body disk is supported.
+    // Refit a dry arrival after asynchronous scans load. An older scan may now
+    // sit lower or be absent; settle onto the current surface, including earned
+    // decks, rather than leave a suspended arrival or search away from its cap.
     if (
       saved &&
       Math.hypot(saved.x - p.x, saved.z - p.z) < 1e-6 &&
-      Number.isFinite(saved.height)
+      Number.isFinite(saved.height) &&
+      !this.swimming &&
+      !this.diving &&
+      !galleryAt(this, p.x, p.y, p.z)
     ) {
       const ground = this.groundHeight(p.x, p.z),
         y = ground + saved.height;
-      const rock = [this.natureRockSolids, this.jungleTreeSolids]
-        // Support queries normally allow a 20 cm landing/step tolerance. A
-        // reload must not repeatedly climb that allowance up a curved root.
-        .map((solids) =>
-          solids?.support(p.x, p.z, y - 0.2 + 1e-6, NATURE_BODY_RADIUS, 0.65),
-        )
-        .filter(Boolean)
-        .sort((a, b) => b.height - a.height)[0];
-      if (
-        rock &&
-        rock.height > ground &&
-        Math.abs(rock.height - y) < 0.25 &&
-        this.canMove(p.x, p.z, rock.height - this.groundHeight(p.x, p.z))
-      )
-        proposed.y = rock.height;
+      // Subtract the normal 20 cm landing allowance so repeated reloads cannot
+      // climb a curved root or reach a higher ledge.
+      const support = supportAt(
+        this,
+        p.x,
+        p.z,
+        y - 0.2 + 1e-6,
+        NATURE_BODY_RADIUS,
+      );
+      if (this.canMove(p.x, p.z, support.height - ground))
+        proposed.y = support.height;
     }
     const arrival = safeArrival(this, proposed);
     if (arrival) proposed.set(arrival.x, arrival.y, arrival.z);

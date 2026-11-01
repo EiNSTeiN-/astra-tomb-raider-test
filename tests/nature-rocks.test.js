@@ -15,6 +15,7 @@ import {
 import { windLayout, windPosition } from "../src/wind-rules.js";
 import { LEVELS, createMap, random } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
+import { placeCavernRock } from "../src/cavern-rock-placement.js";
 
 const doc = await new NodeIO().read(
   new URL(
@@ -181,6 +182,59 @@ test("the observed volcanic rail-side scan cannot retain its hanging underside",
   if (placed)
     assert(Math.max(...gaps(fitted, placed.matrix, ground, 32)) < -0.007);
   else assert.equal(placed, null, "an almost submerged scan is omitted");
+});
+
+test("the observed cavern bank scan keeps a visible, embedded underside", () => {
+  const shape = shapes.find(
+      (s) => s.geometry.attributes.position.count === 1508,
+    ),
+    map = createMap(LEVELS[6]),
+    terrainProfile = createTerrainProfile(map, LEVELS[6]),
+    game = { map, terrainProfile, obstacles: [] },
+    ground = { height: (x, z) => rockGroundHeight(terrainProfile, x, z) },
+    // Delivered transform measured at the eastern archive bank before repair.
+    observed = new THREE.Matrix4().fromArray([
+      -1.3212545210255178, 0, -0.0670385636486823, 0, 0, 1.3229541482403875, 0,
+      0, 0.0670385636486823, 0, -1.3212545210255178, 0, 416.1954313293798,
+      12.824916740358747, 175.8788694422692, 1,
+    ]);
+  assert(shape);
+  const before = gaps(shape, observed, ground, 48);
+  assert(before.length > 600);
+  assert(Math.max(...before) > 0.77, "reproduce the observed hanging edge");
+  const detailed = stoneFootprint(shape.geometry, { edgeProbes: true }),
+    request = {
+      x: observed.elements[12],
+      z: observed.elements[14],
+      size: observed.elements[5],
+      yaw: Math.atan2(observed.elements[8], observed.elements[0]),
+    },
+    placed = placeCavernRock(game, detailed, request);
+  assert(placed.matrix, "find a supported pose for this bank stone");
+  const after = gaps(detailed, placed.matrix, ground, 48);
+  assert(after.length > 600);
+  assert(Math.max(...after) < -0.007);
+  assert(placed.exposed >= 0.12);
+  assert(
+    placed.position.distanceTo(
+      new THREE.Vector3(request.x, placed.position.y, request.z),
+    ) <=
+      2.1 + 1e-8,
+  );
+  assert.deepEqual(
+    placeCavernRock(game, detailed, request).matrix,
+    placed.matrix,
+  );
+  const atSpawn = placeCavernRock(game, detailed, {
+    ...request,
+    x: map.spawn.x * 7,
+    z: map.spawn.z * 7,
+  });
+  assert.equal(
+    atSpawn.reason,
+    "reserved",
+    "a reservation cannot be relocated into play space",
+  );
 });
 
 test("the six delivered rock undersides fit shallow slopes without altering their source geometry", () => {

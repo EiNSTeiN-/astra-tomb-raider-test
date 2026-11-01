@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [cavern boulder repair](docs/cavern-boulders.md) seats narrow scan edges in
+the cave floor, gives all six shapes limestone shading, and refits older cap saves.
+
 The [archive forecourt floors](docs/archive-floors.md) give eight tuning areas
 wider limestone courses, broad inlays and patterns tied to their inscriptions.
 

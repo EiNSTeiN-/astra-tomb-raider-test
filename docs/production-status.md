@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cavern boulder repair](cavern-boulders.md) seats the observed hanging
+  scan edges and adds instance-aware limestone shading. All 62 selected tests,
+  eighteen reviewed baseline/final views, 73,698 sampled underside rays, GPU
+  coordinate observations with a negative control, preserved sampled routes,
+  older-cap restoration, tracked resource disposal and the build pass. The
+  revised cavern retains 314 of its previous 320 rocks; six additional unsupported
+  sites are omitted. Production keyboard/High and portrait touch/Performance
+  tuning, stage advancement, local returns, older-cap recovery and five
+  complete-save reload comparisons pass. Whole-world composition and continuous
+  contact remain open.
+
 - The [archive forecourt floors](archive-floors.md) give eight tuning areas
   wider limestone courses and broader inlays, with shared terrain/paving
   uniforms and fewer texture allocations. All 23 selected tests, sixteen baseline

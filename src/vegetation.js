@@ -1,4 +1,6 @@
 import { snowBoulderMaterial } from "./snow-terrain-material.js";
+import { cavernBoulderMaterial } from "./cavern-boulder-material.js";
+import { placeCavernRock } from "./cavern-rock-placement.js";
 import { meridianBoulderMaterial } from "./meridian-terrain-material.js";
 import { buildVolcanicScree } from "./volcanic-scree.js";
 import { buildVolcanicMantle } from "./volcanic-mantle.js";
@@ -456,7 +458,9 @@ export async function loadNature(game) {
             ? meridianBoulderMaterial(sources[s].material)
             : rock && biome === "snow"
               ? snowBoulderMaterial(sources[s].material)
-              : null;
+              : rock && biome === "crystal"
+                ? cavernBoulderMaterial(sources[s].material)
+                : null;
       const tiers = asset.tiers.map((tier) => {
         const source = tier.find((node) => node.name === sources[s].name);
         if (!source)
@@ -480,7 +484,7 @@ export async function loadNature(game) {
       const chunks = new Map();
       const footprint = rock
         ? stoneFootprint(tiers[0][0].geometry, {
-            edgeProbes: biome === "sky" || biome === "volcano",
+            edgeProbes: ["sky", "volcano", "crystal"].includes(biome),
           })
         : null;
       for (let i = s; i < spots.length; i += sources.length) {
@@ -508,7 +512,9 @@ export async function loadNature(game) {
             continue;
           if (rock) {
             game.rockGrounding.candidates++;
-            const placed = placeNatureRock(game, footprint, {
+            const placed = (
+              biome === "crystal" ? placeCavernRock : placeNatureRock
+            )(game, footprint, {
               x: p.x,
               z: p.z,
               size: dummy.scale.x,

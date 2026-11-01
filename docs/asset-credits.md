@@ -1883,3 +1883,12 @@ actual 1280 × 800 High captures compare published `51aa1b5` with the revised
 application at matching prepared player positions, follow cameras and zero
 elapsed simulation time. Lossless WebP exports preserve decoded source pixels
 and dimensions without cropping or retouching.
+
+The [cavern boulder repair](cavern-boulders.md) reuses the six Rock Moss Set 01
+scans and maps by Kless Gyzen, credited above. Limestone palette, world-space
+mineral shading and detailed seating are original project code. No external
+model, bitmap, recording or dependency is added. Six actual 1280 × 800 High
+comparison captures share prepared player positions, cameras and zero elapsed
+simulation time. Baseline runtime source hashes match published `5cbf7e5`;
+revised hashes match the new application. Lossless WebP exports retain decoded
+source pixels and dimensions without cropping or retouching.
