@@ -18,6 +18,10 @@ import {
   forgeFloorUniforms,
   forgeFloorDeclarations,
 } from "./forge-floor-material.js";
+import {
+  crystalFloorUniforms,
+  crystalFloorDeclarations,
+} from "./crystal-floor-material.js";
 
 export function pavingMaterial(biome, map) {
   const name =
@@ -26,6 +30,7 @@ export function pavingMaterial(biome, map) {
       desert: "sandstone-wall",
       water: "palace-mosaic",
       volcano: "forge-paving",
+      crystal: "rock",
     }[biome] || "stone";
   const material = pbrMaterial(name);
   material.name = "Worn court paving";
@@ -37,8 +42,10 @@ export function pavingMaterial(biome, map) {
   material.polygonOffsetUnits = -1;
   material.normalScale.setScalar(0.55);
   const floors = biome === "volcano" ? forgeFloorUniforms(map) : null;
+  const archive = biome === "crystal" ? crystalFloorUniforms(map) : null;
   material.onBeforeCompile = (shader) => {
     if (floors) Object.assign(shader.uniforms, floors);
+    if (archive) Object.assign(shader.uniforms, archive);
     shader.vertexShader =
       "attribute vec3 inlayUv; varying vec3 vInlayUv; varying vec2 vPavingUv;\n" +
       shader.vertexShader;
@@ -75,6 +82,40 @@ export function pavingMaterial(biome, map) {
       diffuseColor.rgb *= mix(.84, 1.0, smoothstep(.04, .15, edge - wear));
     `,
     );
+    if (archive) {
+      shader.vertexShader =
+        "varying vec3 vArchivePosition, vArchiveNormal;\n" +
+        shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\nvArchivePosition=(modelMatrix*vec4(transformed,1.)).xyz; vArchiveNormal=normalize(mat3(modelMatrix)*normal);",
+      );
+      shader.fragmentShader =
+        "#define TERRAIN_CAVERN\nvarying vec3 vArchivePosition, vArchiveNormal;\n#define vTerrainNormal vArchiveNormal\n#define terrainNoise inlayNoise\n#define terrainHash inlayHash\n" +
+        shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          "#include <common>\n" + crystalFloorDeclarations,
+        )
+        .replace(
+          "#include <map_fragment>",
+          `#include <map_fragment>
+          CrystalFloor archiveInlay=archiveFloor(vArchivePosition.xz);
+          diffuseColor.rgb=mix(diffuseColor.rgb,archiveStoneColor(diffuseColor.rgb,archiveInlay),archiveInlay.coverage);`,
+        )
+        .replace(
+          "#include <normal_fragment_maps>",
+          `#include <normal_fragment_maps>
+          vec3 archiveN=archiveReliefNormal(normalize(mix(normal,nonPerturbedNormal,.35)),archiveInlay.relief);
+          normal=normalize(mix(normal,archiveN,archiveInlay.coverage));`,
+        )
+        .replace(
+          "#include <roughnessmap_fragment>",
+          `#include <roughnessmap_fragment>
+          roughnessFactor=mix(roughnessFactor,.85+archiveInlay.joint*.12-archiveInlay.inlay*.2+archiveInlay.dust*.03,archiveInlay.coverage);`,
+        );
+    }
     if (floors) {
       shader.vertexShader =
         "varying vec3 vFoundryPosition, vFoundryNormal;\n" +
@@ -118,7 +159,8 @@ export function pavingMaterial(biome, map) {
   };
   material.customProgramCacheKey = () =>
     "worn-court-paving-v1" +
-    (floors ? `-foundry-floors-${floors.forgeFloorSites.value.length}-1` : "");
+    (floors ? `-foundry-floors-${floors.forgeFloorSites.value.length}-1` : "") +
+    (archive ? "-archive-floors-2" : "");
   return material;
 }
 

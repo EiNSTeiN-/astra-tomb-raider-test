@@ -1875,3 +1875,11 @@ scenery hidden and visible in the same paused revised application, at matching
 prepared player positions, follow cameras and zero elapsed simulation time.
 Lossless WebP exports preserve decoded source pixels and dimensions without
 cropping or retouching.
+
+The [archive forecourt floors](archive-floors.md) use original project-authored
+slab courses, inlays and weathering with the existing credited Rock Boulder Dry
+textures. No external model, texture, recording or dependency is added. Six
+actual 1280 × 800 High captures compare published `51aa1b5` with the revised
+application at matching prepared player positions, follow cameras and zero
+elapsed simulation time. Lossless WebP exports preserve decoded source pixels
+and dimensions without cropping or retouching.

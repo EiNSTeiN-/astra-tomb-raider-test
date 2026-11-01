@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [archive forecourt floors](archive-floors.md) give eight tuning areas
+  wider limestone courses and broader inlays, with shared terrain/paving
+  uniforms and fewer texture allocations. All 23 selected tests, sixteen baseline
+  and twenty final reviewed views, two field-court inspections, the GPU uniform
+  checks, unchanged recorded geometry during the layer toggle, tracked
+  material/texture disposal and the
+  build pass. Native keyboard/High and portrait touch/Performance tuning,
+  reset, stage advancement, 5.7 m returns and four complete-save reload
+  comparisons also pass; all eight release views are reviewed. Owned browsers
+  and previews close under the shared locked five-of-sixteen CPU allowance.
+  Gentler terrain curves still show through the paving, and repeated instruments
+  and broader world composition remain open.
+
 - The [cavern limestone terraces](cavern-flowstone.md) add eleven grounded
   calcite aprons in six chamber areas. All 31 selected tests and thirty reviewed
   development views pass, including closed surfaces, actual batched contact,

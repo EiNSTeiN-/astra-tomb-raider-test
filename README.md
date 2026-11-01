@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [archive forecourt floors](docs/archive-floors.md) give eight tuning areas
+wider limestone courses, broad inlays and patterns tied to their inscriptions.
+
 The [cavern limestone terraces](docs/cavern-flowstone.md) add grounded calcite
 shelves along selected chamber margins, with physical support and clear routes.
 

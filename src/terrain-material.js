@@ -291,12 +291,28 @@ export function terrainMaterial(game) {
         ? "forge-rock"
         : "rock";
   const uniforms = {
-    pavingMap: { value: load(paving, "color") },
-    pavingNormal: { value: load(paving, "normal") },
-    pavingRoughness: { value: load(paving, "roughness") },
-    cliffMap: { value: load(cliff, "color") },
-    cliffNormal: { value: load(cliff, "normal") },
-    cliffRoughness: { value: load(cliff, "roughness") },
+    // Cavern slabs are cut from the surrounding limestone. Share its already
+    // owned maps rather than loading six duplicate paving/bank textures.
+    pavingMap: {
+      value: biome === "crystal" ? material.map : load(paving, "color"),
+    },
+    pavingNormal: {
+      value: biome === "crystal" ? material.normalMap : load(paving, "normal"),
+    },
+    pavingRoughness: {
+      value:
+        biome === "crystal" ? material.roughnessMap : load(paving, "roughness"),
+    },
+    cliffMap: {
+      value: biome === "crystal" ? material.map : load(cliff, "color"),
+    },
+    cliffNormal: {
+      value: biome === "crystal" ? material.normalMap : load(cliff, "normal"),
+    },
+    cliffRoughness: {
+      value:
+        biome === "crystal" ? material.roughnessMap : load(cliff, "roughness"),
+    },
     cliffTint: {
       value: new THREE.Color(
         {
@@ -438,6 +454,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2" : ""}`;
   return material;
 }
