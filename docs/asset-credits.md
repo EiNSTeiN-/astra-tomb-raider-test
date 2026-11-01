@@ -1841,3 +1841,11 @@ and zero elapsed simulation time. Baseline runtime source hashes match
 published `df1fb19`; revised images include the new fronts and footings.
 Lossless WebP exports preserve decoded source pixels and dimensions without
 cropping or retouching.
+
+The [glossy crystal light-clearance follow-up](crystal-light-clearance.md) reuses
+the existing credited cavern, stone, quartz, explorer and sound assets. It adds
+no external model, texture, recording or dependency. Four actual 1280 × 800 High
+captures share prepared standing positions, follow cameras and zero elapsed
+simulation time within each before/after pair. Before runtime source hashes
+match published `7b9f2c5`. Lossless WebP exports preserve decoded source pixels
+and dimensions without cropping or retouching.

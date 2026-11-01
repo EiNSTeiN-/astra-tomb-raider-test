@@ -28,7 +28,7 @@ test("all resonator light anchors clear the delivered crystal and housing", (t) 
     for (const node of site.nodes) {
       assert.equal(node.lightPosition.x, node.center.x);
       assert.equal(node.lightPosition.z, node.center.z);
-      assert(meshPointDistance(node.body, node.lightPosition) > 0.74);
+      assert(meshPointDistance(node.body, node.lightPosition) > 2.99);
       assert(
         node.lightPosition.y <
           game.cavernProfile.height(node.center.x, node.center.z) - 0.1,

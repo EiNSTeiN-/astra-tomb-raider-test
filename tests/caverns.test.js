@@ -404,7 +404,7 @@ test("pooled mineral lights clear actual cluster surfaces and the cave ceiling",
       assert(light.visible && light.intensity > 0);
       assert.equal(light.position.x, center.x);
       assert.equal(light.position.z, center.z);
-      assert(meshPointDistance(patch.root, light.position) > 0.74);
+      assert(meshPointDistance(patch.root, light.position) > 2.99);
       assert(
         light.position.y <
           game.cavernProfile.height(light.position.x, light.position.z) - 0.1,

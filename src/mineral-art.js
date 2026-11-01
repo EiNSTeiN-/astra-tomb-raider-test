@@ -80,7 +80,8 @@ export function quartzGeometry(radius, height, phase = 0) {
 }
 
 // Keep the pooled point source clear of its crystal and housing. A shared
-// root-height offset can put it directly on a terminal facet.
+// root-height offset can put it directly on a terminal facet. Leave room for
+// inverse-square falloff above the glossy tips as well as geometric separation.
 export function mineralLightPosition(center, objects) {
   const bounds = new THREE.Box3();
   for (const object of objects) {
@@ -89,7 +90,7 @@ export function mineralLightPosition(center, objects) {
   }
   if (bounds.isEmpty())
     throw new Error("A mineral light needs visible geometry.");
-  return new THREE.Vector3(center.x, bounds.max.y + 0.75, center.z);
+  return new THREE.Vector3(center.x, bounds.max.y + 3, center.z);
 }
 
 const declarations = /* glsl */ `

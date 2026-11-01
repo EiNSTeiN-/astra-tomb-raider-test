@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [glossy crystal lighting follow-up](crystal-light-clearance.md) increases
+  source-bound clearance to three metres. Two matched High views reduce scene
+  HDR peaks from 268.93/829.32 to 16.91/15.77 while retaining the optical
+  materials and bloom. All 21 selected tests, 34 reviewed development views,
+  66 live pool selections, local assisted routes, attenuation and tracked
+  resource disposal pass. The build and three CPU-guard checks pass under the
+  shared locked five-of-sixteen allowance. Native keyboard/High and portrait
+  touch/Performance controls, stage advancement and four complete-store reload
+  comparisons pass; all eight release views are reviewed and owned jobs close.
+  Small edge glints, wider cave-floor composition and repeated lower doors
+  remain visible; whole-world visual,
+  continuous-contact and listening/device acceptance remain open.
 - The [windowed archive fronts](crystal-facades.md) give eight cavern entrances
   distinct stone profiles and twenty-four real openings. Sixteen fitted pier
   footings close sampled terrain gaps up to 1.601 m, and physical contact follows

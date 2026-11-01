@@ -5,6 +5,8 @@ An original, browser-based third-person archaeological adventure built with Thre
 The [windowed archive fronts](docs/crystal-facades.md) give the eight cavern
 entrances distinct stone profiles, open windows and grounded pier footings.
 Physical support keeps the explorer within reach of their actual caps.
+The [crystal light-clearance follow-up](docs/crystal-light-clearance.md) moves
+the pooled lights farther above the glossy quartz to reduce square tip halos.
 
 The [cavern mineral fields](docs/mineral-fields.md) now use six formation
 profiles, young crystal growth and calmer internal fractures. Their physical
