@@ -41,6 +41,7 @@ export function stationSolid(
     fieldStation: feature.id,
     radius: options.radius,
     bodyPadding: options.bodyPadding,
+    supportRadius: options.supportRadius,
     supportable: options.support !== false,
     surfaceHeight: options.surfaceHeight,
     node: options.node,
@@ -181,7 +182,16 @@ export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
         ?.height ?? null
     );
   }
-  if (!stationContains(solid, x, z, 0.4)) return null;
+  // Existing stations keep their historical support margin. An explicit
+  // footprint gives moving slabs full body support and exact point queries,
+  // including the shared edge where two closed covers meet.
+  const footprint =
+    solid.supportRadius === undefined
+      ? 0.4
+      : radius
+        ? solid.supportRadius
+        : 1e-8;
+  if (!stationContains(solid, x, z, footprint)) return null;
   const top = solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y;
   return top <= maxY + 0.2 ? top : null;
 }

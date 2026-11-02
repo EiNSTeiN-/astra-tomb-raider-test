@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- Nine [Desert sliding thresholds](solar-thresholds.md) replace the recorded
+  dark floor strips with fitted sandstone beds, coping and framed covers.
+  The shutters descend before the covers close; moving physical and camera
+  bounds follow their translation. All 139 selected tests and the build pass,
+  including 3,618 opening/reverse poses, 693 independent floor/camera probes,
+  54 terrain route legs and the existing mirror-control/counterweight routes.
+  Twenty revised threshold views, fourteen posed body checks covering 1,346,660
+  records, eighteen actual controller bank approaches and 45 tracked geometry
+  disposals pass. Keyboard/touch movement and five complete-save reload
+  comparisons retain older soil arrivals and an earned raised floor. Broader
+  court composition, continuous campaign contact and listening/device
+  acceptance remain open.
+
 - Eight [Desert optical tables](solar-tables.md) replace repeated generic
   stands with individual sandstone supports and protected miniature optics.
   Their mirrors follow the real reflectors; light strips use the actual

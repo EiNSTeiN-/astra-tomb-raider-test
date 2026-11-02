@@ -1974,3 +1974,13 @@ player and camera positions differ between the occupied and recovered arrivals.
 Six 1280 × 800 High exports use lossless WebP with identical decoded source
 pixels and dimensions, without cropping or retouching. Preceding runtime hashes
 match published `613e732`; revised captures match the current application.
+
+The [Desert sliding thresholds](solar-thresholds.md) use original project-authored
+geometry with the existing credited sandstone maps and procedural bronze.
+No external model, bitmap, recording or dependency is added. Six actual
+1280 × 800 High gameplay and construction figures use lossless WebP conversion
+with identical decoded source pixels and dimensions, without cropping or
+retouching. The before/after departure shares its recorded camera; the revised
+explorer stands on the new support. Other cameras and prepared motion states
+vary by figure. Baseline runtime hashes match published `de0c00d`, and revised
+hashes match the new application. Existing material attribution remains applicable.

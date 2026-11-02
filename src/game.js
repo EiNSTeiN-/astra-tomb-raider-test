@@ -451,6 +451,7 @@ import {
 } from "./character-motion.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import { restoreMeridianThresholdArrival } from "./meridian-thresholds.js";
+import { restoreSolarThresholdArrival } from "./solar-thresholds.js";
 import {
   resetTraversal,
   restoreTraversal,
@@ -1130,6 +1131,7 @@ export class Adventure {
     // arrival search can step off the low intake deck onto the surrounding floor.
     restorePressureArrival(this);
     restoreMeridianThresholdArrival(this);
+    restoreSolarThresholdArrival(this);
     restoreTraversal(this);
     restoreOrbitArrival(this);
     restoreCausewayArrival(this);

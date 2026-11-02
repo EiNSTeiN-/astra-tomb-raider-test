@@ -489,7 +489,10 @@ test("all 69 chapter gates retain regional construction, clear restored panels a
     assert.equal(game.cameraSurfaces.pending.length, 0);
     assert.equal(
       game.cameraSurfaces.dynamic.length,
-      game.fieldGates.length * 2,
+      game.fieldGates.reduce(
+        (count, gate) => count + 2 + (gate.solarThreshold?.covers.length || 0),
+        0,
+      ),
     );
     game.world.traverse((o) => {
       if (!o.geometry) return;

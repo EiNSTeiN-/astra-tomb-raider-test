@@ -39,6 +39,11 @@ import { buildWindChamberCrown } from "./wind-chamber-crowns.js";
 import { buildCrystalShutter } from "./crystal-shutters.js";
 import { buildMeridianDoor } from "./meridian-doors.js";
 import { buildMeridianGateCrown } from "./meridian-gate-crowns.js";
+import {
+  buildSolarThreshold,
+  solarThresholdPose,
+  updateSolarThreshold,
+} from "./solar-thresholds.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -671,9 +676,11 @@ export function buildSanctuaryGate(game, feature, materials) {
   }
   // Descending slabs disappear into a narrow, framed floor slot.
   if (design.motion === "sink") {
-    block(12.45, 0.045, 0.85, m.dark, 0, 0.025, 6.5);
-    for (const side of [-1, 1])
-      block(12.7, 0.065, 0.1, m.metal, 0, 0.05, 6.5 + side * 0.52);
+    if (game.level.biome !== "desert") {
+      block(12.45, 0.045, 0.85, m.dark, 0, 0.025, 6.5);
+      for (const side of [-1, 1])
+        block(12.7, 0.065, 0.1, m.metal, 0, 0.05, 6.5 + side * 0.52);
+    }
     game.obstacles.push(gate.obstacle);
   }
   for (const side of [-1, 1]) {
@@ -692,7 +699,11 @@ export function buildSanctuaryGate(game, feature, materials) {
     cameraBox(
       leafWidth,
       design.panel === "orrery" ? 7.44 : 7.4,
-      design.panel === "crystal" ? 1.26 : design.panel === "orrery" ? 1.12 : 0.6,
+      design.panel === "crystal"
+        ? 1.26
+        : design.panel === "orrery"
+          ? 1.12
+          : 0.6,
       cx,
       3.7,
       design.panel === "crystal" ? 0.05 : 0,
@@ -922,6 +933,7 @@ export function buildSanctuaryGate(game, feature, materials) {
   root.add(gate.dust);
   delete gate.jambMeshes; // Crystal kernels copied these before batching.
   buildMeridianThreshold(game, gate, m.trim);
+  buildSolarThreshold(game, gate, m);
   mergeArchitecture(root);
   mergeArchitecture(detail);
   updateSanctuaryGate(game, gate, 0);
@@ -938,7 +950,9 @@ export function updateSanctuaryGate(game, gate, dt) {
   if (Math.abs(Number(gate.open) - gate.amount) < 0.0001)
     gate.amount = Number(gate.open);
   gate.motion = Math.abs(gate.amount - before) / Math.max(0.001, dt);
-  const eased = gateEase(gate.amount),
+  const eased = gate.solarThreshold
+      ? solarThresholdPose(gate.amount).door
+      : gateEase(gate.amount),
     c = gate.root.position;
   if (gate.design.motion === "sink") {
     gate.door.position.y = -7.65 * eased;
@@ -963,6 +977,7 @@ export function updateSanctuaryGate(game, gate, dt) {
     }
   }
   gate.door.visible = gate.design.motion === "hinge" || gate.amount < 1;
+  updateSolarThreshold(game, gate);
   gate.wheels.forEach(
     (wheel, i) => (wheel.rotation.z = (i % 2 ? -1 : 1) * eased * Math.PI * 5),
   );
