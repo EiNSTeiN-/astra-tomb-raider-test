@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Desert sunlight revision](solar-light.md) gives all nine reflected-light
+  circuits transparent gold cores and soft edges, with quieter completed paths.
+  The matched High sepulchre view reduces near-white beam pixels from 37,855
+  to zero; its Performance counterpart drops from 42,267 to 88. All nine
+  centre-line routes and saved mirror values match the preceding build.
+  Twenty solar regressions and 64 related cases pass, together with 33 reviewed
+  development captures, 64 local movement legs, all 77 checked control positions,
+  tracked disposal and the build. Production keyboard/touch mechanism checks
+  and four complete-save reload comparisons also pass from prepared progress.
+  Broader court composition, continuous campaign contact and listening/device
+  acceptance remain open.
+
 - The [nine Desert sanctuaries](solar-sanctuaries.md) replace plain inner walls
   and repeated arches with 27 recessed faces, individual roof structures and
   stone entrance crowns. All 145 selected tests and the build pass, including

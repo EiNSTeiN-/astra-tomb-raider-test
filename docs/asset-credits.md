@@ -1996,3 +1996,13 @@ positions; other construction views and the prepared roof landing use different
 positions. All 399 baseline runtime hashes match published `58a54fc`; the 400
 revised runtime hashes match the new application. Existing attribution remains
 applicable.
+
+The [Desert sunlight revision](solar-light.md) uses original project-authored
+shader code, cylinder profiles and per-circuit light styling. Existing credited
+environment materials, models and audio remain in use; no external model,
+bitmap, recording or dependency is added. Six actual 1280 × 800 prepared-state
+figures cover High, Performance and Balanced rendering. Their lossless WebP
+exports retain identical decoded source pixels and dimensions without cropping
+or retouching. The before/after pairs share player and camera positions;
+current-objective figures use separate prepared states. All 400 baseline runtime
+hashes match published `d4e77df`; the 401 revised hashes match the new application.

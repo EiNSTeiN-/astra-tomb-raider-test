@@ -17,6 +17,7 @@ import {
 } from "./solar-instrument-art.js";
 import { stationMeshSolid } from "./field-station-solids.js";
 import { terrainInlayGeometry } from "./terrain-inlay.js";
+import { solarBeamMaterials, SOLAR_BEAM_RADII } from "./solar-beam-material.js";
 
 export function solarReady(game, site) {
   if (!site) return false;
@@ -72,11 +73,13 @@ export function buildSolarChambers(game) {
     clearcoat: 0.5,
     side: THREE.DoubleSide,
   });
-  const coreMaterial = new THREE.MeshBasicMaterial({
+  const beamMaterials = solarBeamMaterials();
+  // The small sense markers and source feed retain their own presentation.
+  const markerMaterial = new THREE.MeshBasicMaterial({
     color: new THREE.Color(3.2, 2.1, 0.7),
     toneMapped: false,
   });
-  const haloMaterial = new THREE.MeshBasicMaterial({
+  const feedMaterial = new THREE.MeshBasicMaterial({
     color: 0xffdb87,
     transparent: true,
     opacity: 0.14,
@@ -134,7 +137,7 @@ export function buildSolarChambers(game) {
     const marker = (group, x = 0) => {
       const m = add(
         new THREE.OctahedronGeometry(0.13),
-        coreMaterial,
+        markerMaterial,
         x,
         3.4,
         0,
@@ -295,7 +298,7 @@ export function buildSolarChambers(game) {
           .multiplyScalar(9);
         const feed = add(
           new THREE.CylinderGeometry(0.12, 0.035, 9, 8),
-          haloMaterial,
+          feedMaterial,
           sun.x / 2,
           beamY - ground + sun.y / 2,
           sun.z / 2,
@@ -341,9 +344,9 @@ export function buildSolarChambers(game) {
       }
       mergeArchitecture(group);
     }
-    site.beams = [coreMaterial, haloMaterial].map((mat) => {
+    site.beams = beamMaterials.map((mat) => {
       const mesh = new THREE.InstancedMesh(
-        new THREE.CylinderGeometry(1, 1, 1, 6),
+        new THREE.CylinderGeometry(1, 1, 1, 12, 1, true),
         mat,
         48,
       );
@@ -479,7 +482,7 @@ export function updateSolarChambers(game, dt) {
       site.beamY - site.shutter.parent.position.y + (site.active ? 1.7 : 0);
     site.sourceLens.emissiveIntensity = site.active ? 1.5 : 0.1;
     site.feed.visible = site.active;
-    const signature = `${values.join("")}:${[...moving]}:${site.active}:${game.fieldGates?.[site.stage]?.obstacle.h}:${game.fieldGates?.[site.stage]?.amount?.toFixed(3)}`;
+    const signature = `${values.join("")}:${[...moving]}:${site.active}:${completed}:${game.fieldGates?.[site.stage]?.obstacle.h}:${game.fieldGates?.[site.stage]?.amount?.toFixed(3)}`;
     if (site.signature !== signature) {
       site.signature = signature;
       site.trace = traceSolar(site.state, moving);
@@ -514,16 +517,19 @@ export function updateSolarChambers(game, dt) {
       site.aligned = site.active && site.trace.hit && moving.size === 0;
       site.beams.forEach((mesh, pass) => {
         mesh.count = Math.min(site.segments.length, 48);
+        const tint = new THREE.Color().setScalar(completed ? 0.65 : 1);
         site.segments.slice(0, 48).forEach(([a, b], i) => {
           const direction = b.clone().sub(a),
             length = direction.length();
           dummy.position.copy(a).add(b).multiplyScalar(0.5);
           dummy.quaternion.setFromUnitVectors(axis, direction.normalize());
-          dummy.scale.set(pass ? 0.11 : 0.027, length, pass ? 0.11 : 0.027);
+          dummy.scale.set(SOLAR_BEAM_RADII[pass], length, SOLAR_BEAM_RADII[pass]);
           dummy.updateMatrix();
           mesh.setMatrixAt(i, dummy.matrix);
+          mesh.setColorAt(i, tint);
         });
         mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
       });
     }
     const near =

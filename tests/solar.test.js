@@ -796,6 +796,42 @@ test("older completed sectors restore lit optics and leaving the desert releases
   assert.equal(solarTarget(g), null);
 });
 
+test("completing an aligned circuit quiets its light without moving or retracing the route", (t) => {
+  const { game: g } = fixture(t),
+    site = g.solarSites[0];
+  const beamTint = (mesh) => {
+    const color = new THREE.Color();
+    mesh.getColorAt(0, color);
+    return color.toArray();
+  };
+  ready(g, 0);
+  g.progress.solar[0] = { values: [...site.state.target], moves: 4 };
+  updateSolarChambers(g, 100);
+  assert(site.aligned);
+  const path = site.segments.map((pair) => pair.map((p) => p.toArray())),
+    before = site.beams.map((mesh) => ({
+      count: mesh.count,
+      matrices: Array.from(mesh.instanceMatrix.array),
+      tint: beamTint(mesh),
+    }));
+  g.progress.stage = 1;
+  updateSolarChambers(g, 0);
+  assert(site.active && site.aligned);
+  assert.deepEqual(site.segments.map((pair) => pair.map((p) => p.toArray())), path);
+  for (const [i, mesh] of site.beams.entries()) {
+    const tint = beamTint(mesh);
+    assert.equal(mesh.count, before[i].count);
+    assert.deepEqual(Array.from(mesh.instanceMatrix.array), before[i].matrices);
+    assert(tint.every((v, j) => v > 0 && v < before[i].tint[j]));
+  }
+  // Revisiting an active saved objective must also refresh the shared shader's
+  // per-instance tint when its mirror values have not changed.
+  g.progress.stage = 0;
+  updateSolarChambers(g, 0);
+  for (const [i, mesh] of site.beams.entries())
+    assert.deepEqual(beamTint(mesh), before[i].tint);
+});
+
 test("optical animation follows real elapsed time in a slow frame while paused field simulation stays still", (t) => {
   const { game: g } = fixture(t);
   ready(g, 1);

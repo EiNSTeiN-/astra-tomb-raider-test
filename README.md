@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [Desert sunlight revision](docs/solar-light.md) replaces broad white beam
+bands with thinner transparent gold paths, with quieter light on completed circuits.
+
 The [nine Desert sanctuaries](docs/solar-sanctuaries.md) now have individual
 roof structures, recessed inner walls and stone entrance crowns, from an open
 aqueduct vault to a shaded corbelled sepulchre.
