@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eight fitted monastery upper houses](monastery-upper-houses.md) replace
+  repeated blank backs with clipped footprints and 80 recessed windows on all
+  four elevations. Roof-seated walls and primary trusses clear the old ceiling
+  protrusions. All 155 selected regressions, 48 reviewed final development views
+  and nine assisted roof approaches pass. The latter inspect 432,855 rendered
+  body records with no overlap beyond 15 mm and retain bearing contact under
+  both boots. All forty bell-control positions, sixteen local passage legs and
+  109 sound origins pass. Chapter replacement disposes 49 tracked resources
+  once and retires all nine pavilion camera assemblies. Seven native production
+  keyboard/touch scenarios pass nine complete-store reload comparisons, including
+  two new pavilion-roof positions and the prior archive-room roof regression.
+  Broader court massing, continuous campaign contact and listening/device
+  acceptance remain open.
+
 - The [shared monastery roof lining](monastery-roof-timber.md) adds timber
   boarding and fitted ceiling battens to 108 pitched roofs. All 135 selected
   regressions, 55 reviewed final development views, nineteen chamber body

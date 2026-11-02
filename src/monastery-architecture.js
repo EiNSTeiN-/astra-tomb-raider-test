@@ -5,6 +5,10 @@ import { monasteryRoofGeometry } from "./monastery-roof.js";
 import { dressMonasteryRoof } from "./roof-timber.js";
 import { buildBannerLine } from "./monastery-cloth.js";
 import { masonryFoundation } from "./masonry-foundations.js";
+import {
+  buildPavilionHouse,
+  upperRoomMaterials,
+} from "./monastery-upper-rooms.js";
 
 export function monasteryPlan(room) {
   const i = room.index % 9;
@@ -133,6 +137,13 @@ export function buildMonasteryArchitecture(game) {
   roof.name = "Monastery slate roof";
   snow.name = "Drifted roof snow";
   red.name = "Oxide painted timber";
+  const houseMaterials = upperRoomMaterials({
+    stone,
+    wood,
+    plaster,
+    red,
+    shadow,
+  });
   let serial = game.level.seed;
   for (const room of game.map.rooms) {
     const x = room.x * 7,
@@ -236,6 +247,7 @@ export function buildMonasteryArchitecture(game) {
           pz + (Math.cos(angle) * side * depth) / 2,
           angle,
         );
+      return deck;
     };
     for (const post of plan.posts) {
       const floor = ground(post.x, post.z),
@@ -360,30 +372,14 @@ export function buildMonasteryArchitecture(game) {
     }
     for (const px of [-5.5, 5.5])
       block(0.65, 0.6, 8, wood, px, 10.45, -18, 0, true);
-    roofAt(17.4, 12.4, 3.6, 0, 11, -18);
+    const mainDeck = roofAt(17.4, 12.4, 3.6, 0, 11, -18);
+    let upperDeck = null;
     if (plan.upper) {
-      block(6.8, 2.95, 4.7, plaster, 0, 15.22, -18, 0, true);
-      for (const px of [-3.25, 3.25])
-        for (const pz of [-20.3, -15.7])
-          block(0.3, 3.3, 0.3, red, px, 15.35, pz);
-      block(7.3, 0.38, 5.2, wood, 0, 16.85, -18, 0, true);
-      roofAt(10.2, 8.2, plan.upperRise, 0, 17.05, -18);
-      for (const px of [-1.8, 0, 1.8]) {
-        block(1.05, 1.65, 0.12, shadow, px, 15.3, -15.57, 0, false, detail);
-        for (let bar = 0; bar < 4; bar++)
-          block(
-            0.09,
-            1.8,
-            0.16,
-            red,
-            px - 0.45 + bar * 0.3,
-            15.3,
-            -15.48,
-            0,
-            false,
-            detail,
-          );
-      }
+      // Retain the independent seed sequence of the surrounding wings and
+      // roof fascias while replacing the old body and front-only windows.
+      serial += 6;
+      upperDeck = roofAt(10.2, 8.2, plan.upperRise, 0, 17.05, -18);
+      serial += 15;
       const top = 17.05 + plan.upperRise;
       add(
         new THREE.CylinderGeometry(0.06, 0.3, 0.95, 12),
@@ -394,6 +390,14 @@ export function buildMonasteryArchitecture(game) {
       );
       add(new THREE.SphereGeometry(0.22, 12, 8), bronze, 0, top + 1.1, -18);
     }
+    const house = buildPavilionHouse(
+      game,
+      root,
+      room.index,
+      mainDeck,
+      upperDeck,
+      houseMaterials,
+    );
     const bell = new THREE.Group();
     bell.position.set(0, 9.05, -18);
     bell.userData.animated = true;
@@ -510,6 +514,7 @@ export function buildMonasteryArchitecture(game) {
       detail,
       detailBounds,
       foundations,
+      house,
       roofs,
       bells,
       flags,
