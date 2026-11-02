@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [monastery bell ropes](docs/monastery-ropes.md) now use smoother three-ply
+hand loops, warmer hemp shading and shared geometry with distance-based detail.
+
 The [eight monastery door pairs](docs/monastery-doors.md) now carry distinct
 painted timber records, recessed panels and fitted pulls on both faces.
 

@@ -2017,3 +2017,10 @@ dimensions, without cropping or retouching. The two before/after approaches
 share prepared player and follow-camera positions; the memory and reverse
 figures use construction cameras. All 401 baseline runtime hashes match
 published `fcf6358`; the 402 revised hashes match the delivered application.
+
+The [monastery bell ropes](monastery-ropes.md) use original project-authored
+closed three-ply geometry, a procedural hemp shader and shared detail tiers.
+The two documentation figures are lossless exports of actual game captures;
+their close fitting views use diagnostic cameras. Existing credited timber,
+stone, character and environmental audio assets remain in use. No external
+model, bitmap, recording or dependency is added by this revision.

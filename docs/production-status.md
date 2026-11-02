@@ -19,6 +19,16 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [32 monastery bell hand loops](monastery-ropes.md) replace overlapping
+  five-sided strands with closed three-ply surfaces, warmer hemp shading and
+  three shared detail tiers. All 92 selected regressions, eight reviewed
+  development views, tracked chapter-change disposal and the build pass.
+  Triangle checks cover closure, normals, the interaction envelope and actual
+  timber-bar contact. Production keyboard/touch rope inputs, tablet activation
+  and all six complete-store reload comparisons pass from prepared progress.
+  Broader world composition, continuous campaign contact,
+  consumer performance and listening/device acceptance remain open.
+
 - The [eight monastery door pairs](monastery-doors.md) replace repeated crossed
   braces with individual painted timber records on both faces. All 90 selected
   regressions and the build pass, including 1,044 closed pieces, real finger

@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { timberGeometry } from "./monastery-architecture.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { mergeArchitecture } from "./visuals.js";
 import { stationSolid } from "./field-station-solids.js";
+import { buildBellRopeLoop } from "./bell-rope.js";
 
 export const BELL_PLATFORM_WIDTH = 7.6;
 export const BELL_POST_X = 3.3;
@@ -380,37 +380,6 @@ export function positionBellWrap(bell, start) {
   return new THREE.Vector3(bell.hinge.position.x, 4.29 + ty, 0.9 + tz);
 }
 
-export function braidedRingGeometry(radius = 0.18, thickness = 0.04) {
-  const strands = [];
-  for (let strand = 0; strand < 3; strand++) {
-    const points = [];
-    for (let i = 0; i < 96; i++) {
-      const t = (i / 96) * Math.PI * 2,
-        twist = t * 12 + (strand * Math.PI * 2) / 3,
-        r = radius + Math.cos(twist) * thickness * 0.42;
-      points.push(
-        new THREE.Vector3(
-          Math.sin(t) * r,
-          Math.cos(t) * r,
-          Math.sin(twist) * thickness * 0.42,
-        ),
-      );
-    }
-    strands.push(
-      new THREE.TubeGeometry(
-        new THREE.CatmullRomCurve3(points, true),
-        96,
-        thickness * 0.54,
-        5,
-        true,
-      ),
-    );
-  }
-  const geometry = mergeGeometries(strands);
-  strands.forEach((g) => g.dispose());
-  return geometry;
-}
-
 export function buildBellGrip(game, site, x, materials, name) {
   const { wood, rope, bronze } = materials,
     grip = new THREE.Group();
@@ -421,7 +390,7 @@ export function buildBellGrip(game, site, x, materials, name) {
     grip,
     game.level.seed + site.stage * 31,
   );
-  add(braidedRingGeometry(), rope, 0, 0, 0);
+  grip.add(buildBellRopeLoop(materials));
   const handle = add(
     new THREE.CylinderGeometry(0.027, 0.033, 0.3, 10),
     wood,

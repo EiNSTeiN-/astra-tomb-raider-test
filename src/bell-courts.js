@@ -4,6 +4,7 @@ import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { restorePuzzle, isSolved } from "./puzzles.js";
 import { poseHands } from "./pose.js";
+import { bellRopeMaterial, updateBellRopeDetail } from "./bell-rope.js";
 import {
   BELL_FREQUENCIES,
   BELL_INTERVAL,
@@ -65,10 +66,7 @@ export function buildBellCourts(game) {
   if (game.level.biome !== "snow") return false;
   const bronze = patinatedBronze(),
     wood = pbrMaterial("monastery-wood", 0x866956);
-  const ropeMaterial = new THREE.MeshStandardMaterial({
-    color: 0xc9b99a,
-    roughness: 0.95,
-  });
+  const ropeMaterial = bellRopeMaterial();
   const materials = {
     bronze,
     wood,
@@ -248,6 +246,7 @@ export function buildBellCourts(game) {
         vertical,
         wrap,
         grip,
+        ropeLoop: grip.getObjectByName("Braided hemp loop"),
         control,
         scale,
         struck: -100,
@@ -383,6 +382,11 @@ export function updateBellCourts(game, dt) {
       bell.glow.emissiveIntensity = envelope * 3 + (complete ? 0.16 : 0);
       const gripY = 1.3 - envelope * 0.24;
       bell.grip.position.y = gripY;
+      updateBellRopeDetail(
+        bell.ropeLoop,
+        game.camera,
+        game.store.data.settings.quality,
+      );
       bell.vertical.position.set(
         bell.hinge.position.x,
         (4.29 + gripY + BELL_GRIP_JOIN) / 2,
