@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eight painted monastery halls](monastery-sanctuaries.md) add 90 recessed
+  fresco bays, distinct timber roof structures and a supported light-screen
+  service walk. All 164 selected regressions, 43 reviewed development views,
+  56 posed-body checks covering 2,693,320 records, sixteen local passage legs
+  and 872 sound-origin queries pass. All forty bell control positions remain
+  legal; chapter replacement releases 66 tracked resources and all eighteen
+  roof camera kernels. Six production keyboard/touch scenarios retain complete
+  stores through eight reload comparisons, including two roof positions.
+  Broader court massing, roof lining, continuous campaign contact, consumer
+  performance and listening/device acceptance remain open.
+
 - The [32 monastery bell hand loops](monastery-ropes.md) replace overlapping
   five-sided strands with closed three-ply surfaces, warmer hemp shading and
   three shared detail tiers. All 92 selected regressions, eight reviewed

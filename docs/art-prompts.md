@@ -46,3 +46,27 @@ Exact final prompt:
 ```text
 Use case: stylized-concept. Asset type: grayscale height/displacement map for a carved stone wall frieze in an original archaeological adventure game. Create one wide rectangular ancient maritime memorial carving, viewed perfectly straight-on and orthographic, filling the canvas with a clean continuous rectangular edge. Its central composition shows three modest oared evacuation boats carrying small robed adult and child silhouettes, above rhythmic layered wave bands, with an understated braided-rope border. These are symbolic shallow relief figures, not living people or a photographic scene. The fictional seafaring civilization honors ordinary families who escaped a flooded city; quiet, dignified, beautifully crafted archaeological detail. Use grayscale to encode physical elevation only: the recessed background is a uniform dark gray, stone faces and boat hulls are higher pale gray, the highest softly rounded carving edges are nearly white. Smooth sculpted transitions, carefully separated silhouettes, broad readable forms with restrained fine chisel detail. No cast shadows, no directional lighting, no shiny highlights, no perspective, no sky, no scenery outside the panel, no text, no lettering, no logos, no watermark, no tiled copies. Landscape approximately 2:1 composition. It will be converted into actual shallow stone geometry and lit in real time.
 ```
+
+
+## Monastery fresco atlas
+
+Generated with the built-in image generation tool. The playable file is `public/assets/textures/monastery-records-atlas.webp`. The original 1536 × 1024 PNG remains locally at `asset-sources/monastery-records/atlas-generated.png` as an excluded source intermediate. The tracked [source manifest](../asset-sources/monastery-records/sources.json) records hashes, dimensions, story order and the repeatable atlas-packing command. All eight painted cell regions preserve their generated pixels; only copied edge gutters and lossless WebP encoding are added. The paintings depict a fictional mountain civilization, without claims of historical accuracy.
+
+Exact final prompt:
+
+```text
+Use case: illustration-story.
+Asset type: ONE color texture atlas for the painted inner walls of an original archaeological adventure game, VESPER. This is flat artwork consumed on physical plaster, not a scene render.
+Create one cohesive sheet divided into exactly TWO columns and FOUR equal rows: eight full-bleed panoramic fresco cells, each approximately 3:1 wide. Overall image aspect ratio 3:2, target 1536 by 1024. No gaps, labels, numbers or frames between the cells. Keep every painting inside its cell so the game can sample the grid.
+Medium: richly detailed original hand-painted mineral-pigment frescos on warm ivory aged plaster, worn matte tempera, subtle irregular brushwork, fine natural craquelure, faded ochre, muted rust red, deep smoky blue, moss and chalk. The style is sophisticated archaeological wall painting rather than computer icons, modern illustration or photographic scenery. Tiny painted robed travelers, vegetation and animals should read as historical pictorial storytelling; no recognizable copyrighted characters or real religious portraits. Even flat illumination without baked cast shadows.
+Reading order across rows:
+1. A long mountain pilgrimage: tiny travelers and pack animals winding toward a refuge through snow peaks, stone gateways, pale sunrise and painted geometric earth bands.
+2. The valley of bells: bronze bells suspended between mountain pavilions, small keepers below, layered valleys and broad flowing echo-cloud motifs.
+3. A listening mountain garden: windswept alpine trees, birds, ribbons and streaming cloud bands crossing a quiet blue mountain landscape.
+4. The stair of voices: a long climbing stone stair between mountain terraces with tiny travelers calling across the valley, warm rust and chalk.
+5. The memory garden: a weathered circular floral memory-wheel mandala at the center, small alpine shrubs and mountain scenes extending to both sides, smoky blue and faded gold.
+6. Woven wind: interwoven painted cloud ribbons, cloth banners, cranes and alpine plants, a rich patterned rhythm in mineral blue and ochre.
+7. Summit vigil: an old radiant sun above a high mountain refuge and tiered peaks, tiny pilgrims, rust red, warm gold and ivory, a solemn spacious composition.
+8. The archive: an old mountain library told as painted scroll shelves, robed record keepers, star charts, moon and mountain windows, restrained smoky blue and ochre.
+Give each cell a continuous narrative panorama, beautiful and detailed at full resolution, with quieter edges and a clear central composition. Keep enough visible pale plaster between painted forms for a convincing worn fresco. No text, calligraphy, modern symbols, photoreal perspective rooms, borders, drop shadows, watermarks or logos.
+```

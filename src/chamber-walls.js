@@ -11,6 +11,7 @@ import { timberGeometry } from "./monastery-architecture.js";
 import { crystalBayContour, addCrystalBayInlay } from "./crystal-wall-art.js";
 import { buildCoastalWallArt } from "./coastal-wall-art.js";
 import { buildSolarInnerWall } from "./solar-sanctuaries.js";
+import { buildMonasteryInnerWall } from "./monastery-sanctuaries.js";
 import {
   forgeWallPlan,
   forgeBayContour,
@@ -312,12 +313,19 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     }
   }
   const recessedCoastalRecord = plan.biome === "water" && side === 0 && gate.stage > 0;
-  let solarInterior = null;
+  let solarInterior = null, monasteryInterior = null;
   if (plan.biome === "desert") {
     group.updateMatrix();
     solarInterior = buildSolarInnerWall(game, gate, m, {
       length, side, frame: group.matrix.clone(),
     });
+  } else if (plan.biome === "snow") {
+    group.updateMatrix();
+    monasteryInterior = buildMonasteryInnerWall(game, gate, m, {
+      length, side, frame: group.matrix.clone(), insetOffset,
+    });
+    // Retain the exterior chips after replacing one seeded inner backing.
+    seed++;
   } else if (recessedCoastalRecord) {
     // Keep the exterior bay backing sealed, then dress the four edges of the
     // interior recess. The new relief stays behind the old -0.41 inner face;
@@ -689,7 +697,9 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     }
     // Relief on the inner rear face is shallow enough to preserve chamber
     // working space. Side walls are left clear of the inward-swinging leaves.
-    if (side === 0 && biome !== "desert" && !(biome === "water" && gate.stage > 0)) {
+    // Each preceding snow rear record consumed four frame bars and one sill.
+    if (side === 0 && biome === "snow") seed += 5;
+    if (side === 0 && !["desert", "snow"].includes(biome) && !(biome === "water" && gate.stage > 0)) {
       const interiorTrim = biome === "snow" ? m.wood : m.trim;
       const inner = contour.map(([x, y]) => [
         cx + x * 0.72,
@@ -745,6 +755,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     position: group.position.toArray(),
     angle: group.rotation.y,
     ...(solarInterior ? { solarInterior } : {}),
+    ...(monasteryInterior ? { monasteryInterior } : {}),
     ...(coastalRecord ? { coastalRecord } : {}),
   };
   mergeArchitecture(group);

@@ -46,6 +46,7 @@ import {
 } from "./solar-thresholds.js";
 import { finishSolarSanctuary } from "./solar-sanctuaries.js";
 import { buildMonasteryDoor } from "./monastery-doors.js";
+import { finishMonasterySanctuary } from "./monastery-sanctuaries.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -630,6 +631,7 @@ export function buildSanctuaryGate(game, feature, materials) {
       8.65,
       6.5,
     );
+    finishMonasterySanctuary(game, gate, m);
   } else if (design.crown === "corbel") {
     gate.crown = buildJungleGateCrown(game, gate, m, add);
     // The old crown used thirteen seeded blocks. Retain the subsequent leaf

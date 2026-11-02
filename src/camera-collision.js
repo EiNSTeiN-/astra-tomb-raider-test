@@ -150,7 +150,13 @@ export class CameraSurfaces {
   }
   capture(
     mesh,
-    { small = false, thin = false, cylinderAxis = null, planes = null } = {},
+    {
+      small = false,
+      thin = false,
+      cylinderAxis = null,
+      planes = null,
+      kernel = null,
+    } = {},
   ) {
     if (
       !this.capturing ||
@@ -173,6 +179,7 @@ export class CameraSurfaces {
       box,
       cylinderAxis,
       planes: planes?.map((p) => [...p]) ?? null,
+      kernel,
     });
   }
   rebuild() {
@@ -189,6 +196,7 @@ export class CameraSurfaces {
         box: entry.box,
         cylinderAxis: entry.cylinderAxis,
         planes: entry.planes,
+        kernel: entry.kernel,
         matrix: new THREE.Matrix4(),
         inverse: new THREE.Matrix4(),
         bounds: new THREE.Box3(),
@@ -306,17 +314,19 @@ export class CameraSurfaces {
       this.a.copy(start).applyMatrix4(surface.inverse);
       this.b.copy(end).applyMatrix4(surface.inverse);
       const padding = radius / Math.max(0.001, surface.scale),
-        t = surface.planes
-          ? convexEntry(this.a, this.b, surface.planes, padding)
-          : surface.cylinderAxis
-            ? cylinderEntry(
-                this.a,
-                this.b,
-                surface.box,
-                padding,
-                surface.cylinderAxis,
-              )
-            : boxEntry(this.a, this.b, surface.box, padding);
+        t = surface.kernel
+          ? surface.kernel.entry(this.a, this.b, padding)
+          : surface.planes
+            ? convexEntry(this.a, this.b, surface.planes, padding)
+            : surface.cylinderAxis
+              ? cylinderEntry(
+                  this.a,
+                  this.b,
+                  surface.box,
+                  padding,
+                  surface.cylinderAxis,
+                )
+              : boxEntry(this.a, this.b, surface.box, padding);
       if (t !== null) result = Math.min(result, t);
     }
     return result;

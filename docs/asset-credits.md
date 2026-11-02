@@ -1,5 +1,18 @@
 # Asset credits and provenance
 
+The [eight painted monastery halls](monastery-sanctuaries.md) use original
+project-authored architecture, camera cells and material code. Their one new
+fresco atlas was generated with the built-in image generation tool. The
+[exact prompt](art-prompts.md#monastery-fresco-atlas) and
+[provenance record](../asset-sources/monastery-records/sources.json) preserve its
+story order, source/delivery hashes and deterministic packing command. All
+eight painted regions retain their generated pixels, with copied edge gutters
+and lossless WebP encoding. The paintings depict a fictional mountain culture;
+they are not historical records. Six documentation figures are lossless exports
+of actual game captures, with matching decoded pixels and dimensions. Existing
+credited plaster, timber, slate,
+snow, stone, character and audio remain in use.
+
 The [explorer first-view contact repair](explorer-arrival.md) uses original
 loading and pose-initialization code with the existing credited explorer and
 terrain. It adds no external model, texture, audio or dependency. The two
