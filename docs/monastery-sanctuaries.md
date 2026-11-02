@@ -108,8 +108,9 @@ advisory. All three CPU-guard checks pass, and both preview ports are closed.
 
 This changes eight rooms within the snow chapter. Surrounding pavilion massing,
 broad snowfields, route composition and continuous campaign contact remain
-under review. Roof undersides still share the slate surface of their upper
-shells; lining and finer roof construction remain follow-ups. The portrait
+under review. The subsequent [shared roof lining](monastery-roof-timber.md)
+replaces the slate undersides with timber boarding and fitted battens; finer
+primary framing and exterior massing remain under review. The portrait
 production roof view also shows an ancient-mechanism prompt above the actual
 instrument. The subsequent [mechanism reach repair](mechanism-reach.md) prevents
 that roof prompt and remote activation. Consumer hardware

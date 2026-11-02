@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [monastery roof lining](monastery-roof-timber.md) uses original material,
+geometry and camera integration code with the existing credited timber,
+slate and snow maps. It adds no external asset or dependency. Its five
+documentation images are lossless exports of actual game captures, with
+matching decoded pixels and dimensions.
+
 The [mechanism reach repair](mechanism-reach.md) uses original interaction code
 and the existing credited game assets. Its two documentation images are native
 game captures exported as lossless WebP, with matching dimensions and decoded

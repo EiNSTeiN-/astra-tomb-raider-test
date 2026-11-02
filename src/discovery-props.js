@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { discoveryPlacement } from "./discovery-placement.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { monasteryRoofGeometry } from "./monastery-roof.js";
+import { dressMonasteryRoof } from "./roof-timber.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { campMaterials } from "./camp-materials.js";
 import { stationSolid } from "./field-station-solids.js";
@@ -327,13 +328,15 @@ export function buildDiscoveryProp(game, f, m) {
     if (biome === "snow") {
       for (const x of [-0.7, 0.7])
         box(0.09, 0.81, 0.09, m.wood, x, 1.48, -0.44, construction, true);
-      add(
+      const canopy = add(
         monasteryRoofGeometry({ width: 1.8, depth: 1.3, rise: 0.22 }),
         m.roof || m.trim,
         0,
         1.88,
         -0.08,
-      ).userData.discoverySolid = true;
+      );
+      canopy.userData.discoverySolid = true;
+      dressMonasteryRoof(game, canopy, null, m.wood, { physical: "frame" });
       box(1.52, 0.06, 0.12, m.wood, 0, 1.86, -0.44);
     }
     if (biome === "jungle")
@@ -382,7 +385,8 @@ export function buildDiscoveryProp(game, f, m) {
       centre.toArray(),
       { surfaceHeight: propSupportHeight(mesh) },
     );
-    game.cameraSurfaces.capture(mesh, { small: true, thin: true });
+    if (!mesh.userData.cameraKernel)
+      game.cameraSurfaces.capture(mesh, { small: true, thin: true });
   });
   mergeArchitecture(construction);
   mergeArchitecture(payload.children[0] || payload);

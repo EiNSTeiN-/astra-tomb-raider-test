@@ -9,6 +9,7 @@ import { discoveryFoliageClear } from "./discovery-setting-plan.js";
 import { mergeArchitecture } from "./visuals.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { monasteryRoofGeometry } from "./monastery-roof.js";
+import { dressMonasteryRoof } from "./roof-timber.js";
 
 export function monasteryGardenAllowed(game, x, z, w, d) {
   const radius = Math.hypot(w, d) / 2,
@@ -362,8 +363,16 @@ export function buildMonasteryGardens(game) {
       for (const dx of [-3.2, 3.2])
         block(0.32, 0.3, 2.6, wood, x + dx, y + 0.1, z);
       const options = { width, depth, rise, damage, seed: room.index };
-      add(monasteryRoofGeometry(options), roof, x, y, z, true, true);
-      add(
+      const deck = add(
+        monasteryRoofGeometry(options),
+        roof,
+        x,
+        y,
+        z,
+        true,
+        true,
+      );
+      const snowcap = add(
         monasteryRoofGeometry({ ...options, snow: true }),
         snow,
         x,
@@ -372,6 +381,7 @@ export function buildMonasteryGardens(game) {
         true,
         true,
       );
+      dressMonasteryRoof(game, deck, snowcap, wood, { physical: "frame" });
       record.galleries.push({ ...plan, x: wx, z: wz, y, posts });
     };
     for (const plan of record.plans) {

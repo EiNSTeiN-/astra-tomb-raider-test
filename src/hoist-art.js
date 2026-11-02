@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { HOIST_CARS, HOIST_DECK, HOIST_RISE } from "./bell-hoist-rules.js";
 import { monasteryRoofGeometry } from "./monastery-roof.js";
+import { dressMonasteryRoof } from "./roof-timber.js";
 import { mergeArchitecture } from "./visuals.js";
 
 export const SHEAVE_RADIUS = 0.58;
@@ -383,23 +384,27 @@ export function buildHoistArt(
   pin(0.12, 3.5, 12, upper + 5.38, -13, root, iron, "x");
   // A small slate canopy protects the bell but keeps the valley view open.
   const roof = game.monasteryMaterials?.roof || stone;
+  const canopy = [];
   for (const isSnow of [false, true]) {
-    add(
-      monasteryRoofGeometry({
-        width: 4.6,
-        depth: 3.8,
-        rise: 0.95,
-        snow: isSnow,
-        seed: 781,
-      }),
-      isSnow ? snow : roof,
-      12,
-      upper + 5.8,
-      -13,
-      root,
-      true,
+    canopy.push(
+      add(
+        monasteryRoofGeometry({
+          width: 4.6,
+          depth: 3.8,
+          rise: 0.95,
+          snow: isSnow,
+          seed: 781,
+        }),
+        isSnow ? snow : roof,
+        12,
+        upper + 5.8,
+        -13,
+        root,
+        true,
+      ),
     );
   }
+  dressMonasteryRoof(game, canopy[0], canopy[1], wood);
   for (const x of [10.6, 13.4])
     beam([x, upper + 4.5, -13], [12, upper + 5.5, -13], 0.15, 0.19, wood);
   h.tongue.userData.animated = true;

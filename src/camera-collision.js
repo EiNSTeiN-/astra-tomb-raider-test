@@ -196,7 +196,7 @@ export class CameraSurfaces {
         box: entry.box,
         cylinderAxis: entry.cylinderAxis,
         planes: entry.planes,
-        kernel: entry.kernel,
+        kernel: entry.kernel ?? entry.mesh.userData.cameraKernel ?? null,
         matrix: new THREE.Matrix4(),
         inverse: new THREE.Matrix4(),
         bounds: new THREE.Box3(),

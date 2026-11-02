@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { monasteryRoofGeometry } from "./monastery-roof.js";
+import { dressMonasteryRoof } from "./roof-timber.js";
 import { buildBannerLine } from "./monastery-cloth.js";
 import { masonryFoundation } from "./masonry-foundations.js";
 
@@ -94,6 +95,7 @@ export function bellGeometry() {
 
 export function buildMonasteryArchitecture(game) {
   game.monasteryPatches = [];
+  game.monasteryRoofTimber = [];
   game.monasteryWindSources = {};
   game.monasteryMaterials = null;
   game.monasteryTime = null;
@@ -203,8 +205,17 @@ export function buildMonasteryArchitecture(game) {
     };
     const roofAt = (width, depth, rise, px, py, pz, angle = 0, damage = 0) => {
       const options = { width, depth, rise, damage, seed: room.index };
-      add(monasteryRoofGeometry(options), roof, px, py, pz, angle, root, true);
-      add(
+      const deck = add(
+        monasteryRoofGeometry(options),
+        roof,
+        px,
+        py,
+        pz,
+        angle,
+        root,
+        true,
+      );
+      const snowcap = add(
         monasteryRoofGeometry({ ...options, snow: true }),
         snow,
         px,
@@ -212,6 +223,7 @@ export function buildMonasteryArchitecture(game) {
         pz,
         angle,
       );
+      dressMonasteryRoof(game, deck, snowcap, wood);
       roofs.push({ options, position: [px, py, pz], angle });
       for (const side of [-1, 1])
         block(

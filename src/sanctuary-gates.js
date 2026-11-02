@@ -47,6 +47,7 @@ import {
 import { finishSolarSanctuary } from "./solar-sanctuaries.js";
 import { buildMonasteryDoor } from "./monastery-doors.js";
 import { finishMonasterySanctuary } from "./monastery-sanctuaries.js";
+import { dressMonasteryRoof } from "./roof-timber.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -623,14 +624,15 @@ export function buildSanctuaryGate(game, feature, materials) {
       seed: feature.stage,
       damage: feature.stage === 4 ? 1 : 0,
     };
-    add(monasteryRoofGeometry(roofOptions), m.roof, 0, 8.65, 6.5, root, true);
-    add(
+    const deck = add(monasteryRoofGeometry(roofOptions), m.roof, 0, 8.65, 6.5, root, true);
+    const snowcap = add(
       monasteryRoofGeometry({ ...roofOptions, snow: true }),
       m.snow,
       0,
       8.65,
       6.5,
     );
+    dressMonasteryRoof(game, deck, snowcap, m.wood);
     finishMonasterySanctuary(game, gate, m);
   } else if (design.crown === "corbel") {
     gate.crown = buildJungleGateCrown(game, gate, m, add);

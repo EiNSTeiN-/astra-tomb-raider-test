@@ -12,6 +12,7 @@ import { projectStoneUVs } from "./stone-uv.js";
 import { mergeArchitecture } from "./visuals.js";
 import { stationAssemblySolid } from "./field-station-solids.js";
 import { RoofCamera } from "./roof-camera.js";
+import { dressMonasteryRoof } from "./roof-timber.js";
 
 function flatBox(width, height, depth) {
   const source = new THREE.BoxGeometry(width, height, depth),
@@ -133,7 +134,10 @@ function builder(game, gate, m) {
             w,
             h,
             d,
-            game.level.seed + gate.stage * 337 + r.parts.length,
+            game.level.seed +
+              gate.stage * 337 +
+              r.parts.length -
+              (r.extraTimbers || 0),
           )
         : projectStoneUVs(flatBox(w, h, d));
     geometry.translate(x, y, z);
@@ -329,6 +333,22 @@ export function finishMonasterySanctuary(game, gate, m) {
       "structure",
     );
   };
+  const lining = (ids) =>
+    dressMonasteryRoof(game, r.meshes[ids[0]], r.meshes[ids[1]], m.wood, {
+      physical: false,
+      emit(geometry) {
+        ids.push(r.parts.length);
+        const mesh = add(
+          geometry,
+          m.wood,
+          "fitted ceiling battens",
+          undefined,
+          "roof",
+        );
+        r.extraTimbers = (r.extraTimbers || 0) + 1;
+        return mesh;
+      },
+    });
   const canopy = (width, depth, rise, cx, cz, base = 9.35, damage = 0) => {
     const options = { width, depth, rise, seed: stage, damage },
       ids = [];
@@ -344,6 +364,7 @@ export function finishMonasterySanctuary(game, gate, m) {
         "roof",
       );
     }
+    lining(ids);
     const rows = [cz - depth * 0.23, cz + depth * 0.23];
     rows.forEach(carrier);
     for (const sign of [-1, 1]) {
@@ -575,6 +596,7 @@ export function finishMonasterySanctuary(game, gate, m) {
             position: [0, 11.8, -0.5],
           });
       }
+      lining(r.roofs.at(-1).ids);
       break;
   }
   const structures = r.meshes.filter(
@@ -605,5 +627,6 @@ export function finishMonasterySanctuary(game, gate, m) {
   mergeArchitecture(r.root, 2);
   delete r.meshes;
   delete r.carriers;
+  delete r.extraTimbers;
   return r;
 }

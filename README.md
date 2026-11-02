@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [monastery roof lining](docs/monastery-roof-timber.md) adds timber boarding
+and fitted ceiling battens to 108 pitched roofs across the snow chapter.
+
 The [mechanism reach repair](docs/mechanism-reach.md) removes instrument prompts
 and activation from roofs above them while retaining raised platform controls.
 

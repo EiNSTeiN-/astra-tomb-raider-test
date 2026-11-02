@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [shared monastery roof lining](monastery-roof-timber.md) adds timber
+  boarding and fitted ceiling battens to 108 pitched roofs. All 135 selected
+  regressions, 55 reviewed final development views, nineteen chamber body
+  observations and nine pavilion landing/walk cases pass. All forty bell-control
+  positions and sixteen local passage legs remain usable; 109 sound origins
+  remain clear of the inspected roof/timber meshes. Chapter replacement
+  disposes 256 tracked resources and retires all 312 roof camera kernels.
+  Seven native production scenarios pass nine complete-store reload comparisons.
+  Repeated upper-room backs, broader exterior massing, continuous campaign
+  contact and listening/device acceptance remain open.
+
 - The [mechanism reach repair](mechanism-reach.md) prevents the reproduced
   archive-roof prompt and remote puzzle activation. All 104 selected regressions
   pass, including selection/activation for all 69 authored mechanisms. Actual
