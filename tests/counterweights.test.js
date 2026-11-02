@@ -3,7 +3,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { Adventure } from "../src/game.js";
-import { LEVELS } from "../src/campaign.js";
+import { LEVELS, createMap } from "../src/campaign.js";
+import { createTerrainProfile } from "../src/terrain.js";
 import {
   COUNTERWEIGHTS,
   initialStones,
@@ -313,6 +314,43 @@ test("all eight authored counterweight chambers solve through walking, gripping 
     assert.equal(game.counterweights.saved.moves, solution.path.length);
   }
   assert.equal(layouts.size, 8);
+});
+
+test("the Meridian counterweight route stays usable beside its new threshold on delivered terrain", (t) => {
+  const level = LEVELS[7],
+    map = createMap(level),
+    terrain = createTerrainProfile(map, level),
+    feature = map.features.find((f) => f.type === "mechanism" && f.stage === 0),
+    x = feature.x * 7,
+    z = feature.z * 7,
+    base = terrain.surfaceHeight(x, z),
+    { game } = fixture(
+      level,
+      (px, pz) => terrain.surfaceHeight(x + px - 100, z + pz - 100) - base,
+    );
+  t.after(() => {
+    const materials = new Set(),
+      textures = new Set();
+    game.world.traverse((o) => {
+      o.geometry?.dispose();
+      if (o.material) materials.add(o.material);
+    });
+    for (const material of materials) {
+      for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+      material.dispose();
+    }
+    textures.forEach((texture) => texture.dispose());
+  });
+  assert(game.fieldGates[0].threshold, "exercise the actual raised sill");
+  const solution = solveCounterweights(game.counterweights.trial);
+  for (const action of solution.path) {
+    for (const cell of action.walking) walk(game, point(cell));
+    gripMove(game, action);
+  }
+  assert(
+    weightsSolved(game.counterweights.trial, game.counterweights.saved.positions),
+  );
+  assert.equal(game.counterweights.saved.moves, solution.path.length);
 });
 
 test("pressure totals, named stones and clear tracks are all required; walls and other stones reject movement", () => {

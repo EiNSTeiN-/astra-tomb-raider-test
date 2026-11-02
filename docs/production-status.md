@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Meridian architecture pass](meridian-architecture.md) gives eleven
+  observatories distinct bronze crowns and closes observed gaps beneath five
+  gates with physical stone thresholds. All 60 selected tests and the build pass,
+  including moving roof bounds, all 69 chapter gates, actual rendered floor
+  contact, 15 continuous approach/return pairs, counterweights and older/earned
+  saved arrivals. All 39 final High views are reviewed; sampled roof clearance,
+  sound-anchor registration and 93 tracked resource disposals pass. Production
+  keyboard/High and portrait touch/Performance controls, stage advancement,
+  local returns, older-soil recovery and five complete-save reload comparisons
+  pass. Repeated gate fronts and broader world composition remain open.
+
 - The [cavern boulder repair](cavern-boulders.md) seats the observed hanging
   scan edges and adds instance-aware limestone shading. All 62 selected tests,
   eighteen reviewed baseline/final views, 73,698 sampled underside rays, GPU

@@ -1,22 +1,37 @@
 import * as THREE from "three";
+import { roofFrame } from "./observatory-roof-plan.js";
 
 // A closed curved panel, including its inner face and the four cut edges.
-export function domePanelGeometry(radius, rise, a0, a1, opening = 0.3) {
+export function domePanelGeometry(
+  radius,
+  rise,
+  a0,
+  a1,
+  opening = 0.3,
+  profile = null,
+) {
   const positions = [],
     uv = [],
     indices = [],
-    radial = 8,
-    rings = 9;
+    radial = profile?.radial ?? 8,
+    rings = profile?.rings ?? 9;
   for (const inner of [false, true])
     for (let j = 0; j <= rings; j++)
       for (let i = 0; i <= radial; i++) {
         const theta = opening + ((Math.PI / 2 - opening) * j) / rings;
         const a = a0 + ((a1 - a0) * i) / radial,
-          r = radius - (inner ? 0.18 : 0);
+          frame = profile
+            ? roofFrame(radius, rise, opening, theta, profile)
+            : null,
+          r = frame
+            ? frame.radius - (inner ? 0.18 * frame.normalRadius : 0)
+            : Math.sin(theta) * (radius - (inner ? 0.18 : 0));
         positions.push(
-          Math.cos(a) * Math.sin(theta) * r,
-          Math.cos(theta) * (rise - (inner ? 0.18 : 0)),
-          Math.sin(a) * Math.sin(theta) * r,
+          Math.cos(a) * r,
+          frame
+            ? frame.height - (inner ? 0.18 * frame.normalY : 0)
+            : Math.cos(theta) * (rise - (inner ? 0.18 : 0)),
+          Math.sin(a) * r,
         );
         uv.push((a * radius) / 3, (theta * rise) / 3);
       }

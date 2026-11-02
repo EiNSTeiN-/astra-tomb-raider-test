@@ -297,6 +297,39 @@ test("dome motion updates captured camera surfaces and ring collision preserves 
   assert.equal(patch.aperture, 1);
 });
 
+test("camera envelopes include the complete detailed shutters through their opening sweep", (t) => {
+  const game = fixture(t),
+    point = new THREE.Vector3();
+  let samples = 0;
+  for (const aperture of [0, 1 / 3, 2 / 3, 1]) {
+    for (const patch of game.observatories)
+      for (const { pivot, axis } of patch.petals)
+        pivot.quaternion.setFromAxisAngle(axis, -aperture * Math.PI * 0.78);
+    game.world.updateMatrixWorld(true);
+    game.cameraSurfaces.entry(
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(1, 1, 1),
+    );
+    for (const patch of game.observatories)
+      for (const { pivot } of patch.petals) {
+        const mesh = pivot.children.find((m) => m.isMesh),
+          surface = game.cameraSurfaces.dynamic.find((s) => s.parent === pivot),
+          position = mesh.geometry.attributes.position;
+        assert(surface);
+        for (let i = 0; i < position.count; i += 17) {
+          point.fromBufferAttribute(position, i);
+          assert(surface.box.containsPoint(point));
+          point.applyMatrix4(mesh.matrixWorld);
+          assert(
+            surface.bounds.clone().expandByScalar(1e-8).containsPoint(point),
+          );
+          samples++;
+        }
+      }
+  }
+  assert(samples > 30000);
+});
+
 test("paused instrument presentation moves only the visible mechanism, settles after slow frames and then idles", (t) => {
   const game = fixture(t),
     patch = game.observatories[2];

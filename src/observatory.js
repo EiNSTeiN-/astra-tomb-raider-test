@@ -2,7 +2,9 @@ import * as THREE from "three";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { flutedColumnGeometry, vaultStoneGeometry } from "./palace-geometry.js";
-import { domePanelGeometry, patinatedBronze } from "./observatory-geometry.js";
+import { patinatedBronze } from "./observatory-geometry.js";
+import { observatoryRoofPanel } from "./observatory-roof.js";
+import { observatoryRoofPlan } from "./observatory-roof-plan.js";
 import { observatoryState } from "./observatory-state.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { buildObservatoryEnclosure } from "./observatory-enclosures.js";
@@ -34,7 +36,8 @@ export function buildObservatory(game) {
     const x = room.x * 7,
       z = room.z * 7 - 17,
       radius = 9.6 + (room.index % 3) * 0.3;
-    const state = observatoryState(game.level, game.progress, room.index);
+    const state = observatoryState(game.level, game.progress, room.index),
+      roofPlan = observatoryRoofPlan(room.index);
     const base = Math.max(
       ...Array.from({ length: 24 }, (_, i) =>
         game.groundHeight(
@@ -58,6 +61,7 @@ export function buildObservatory(game) {
       base,
       center: new THREE.Vector3(x, base + 7.8, z),
       state,
+      roofPlan,
       petals: [],
       rings: [],
       instruments: [],
@@ -206,9 +210,9 @@ export function buildObservatory(game) {
       pivot.userData.cameraDynamic = true;
       pivot.position.set(Math.cos(a) * radius, domeY, Math.sin(a) * radius);
       root.add(pivot);
-      const geometry = domePanelGeometry(
+      const geometry = observatoryRoofPanel(
         radius,
-        [4.8, 5.6, 6.1, 5.2][room.index % 4],
+        roofPlan,
         a - Math.PI / 8 + 0.012,
         a + Math.PI / 8 - 0.012,
       );

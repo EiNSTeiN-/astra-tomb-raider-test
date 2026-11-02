@@ -445,6 +445,7 @@ import {
   supportAt,
 } from "./character-motion.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
+import { restoreMeridianThresholdArrival } from "./meridian-thresholds.js";
 import {
   resetTraversal,
   restoreTraversal,
@@ -1123,6 +1124,7 @@ export class Adventure {
     // Recover an occupied relay save on its recorded gallery before generic
     // arrival search can step off the low intake deck onto the surrounding floor.
     restorePressureArrival(this);
+    restoreMeridianThresholdArrival(this);
     restoreTraversal(this);
     restoreOrbitArrival(this);
     restoreCausewayArrival(this);

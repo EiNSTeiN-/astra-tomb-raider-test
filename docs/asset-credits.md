@@ -1892,3 +1892,14 @@ comparison captures share prepared player positions, cameras and zero elapsed
 simulation time. Baseline runtime source hashes match published `5cbf7e5`;
 revised hashes match the new application. Lossless WebP exports retain decoded
 source pixels and dimensions without cropping or retouching.
+
+The [Meridian architecture pass](meridian-architecture.md) adds original
+project-authored roof profiles, closed bronze straps and fasteners, and
+terrain-fitted stone thresholds. They reuse the existing credited bronze and
+stone materials; no external model, bitmap, recording or dependency is added.
+Six actual 1280 × 800 High comparison captures share prepared player positions,
+follow cameras and zero elapsed simulation time. The roof baselines match
+published `4564870`; the doorway baseline is the interim roof-only revision
+before threshold construction. Revised captures match the final application.
+Lossless WebP exports preserve decoded source pixels without cropping or
+retouching.

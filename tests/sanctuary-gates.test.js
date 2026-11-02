@@ -12,7 +12,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { SaveStore } from "../src/storage.js";
 import { CameraSurfaces, constrainCamera } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
-import { advanceCharacter, safeArrival } from "../src/character-motion.js";
+import { advanceCharacter, safeArrival, supportAt } from "../src/character-motion.js";
 import { buildFieldGates } from "../src/field-world.js";
 import {
   buildSanctuaryGate,
@@ -480,6 +480,11 @@ test("all 69 chapter gates retain regional construction, clear restored panels a
   let total = 0;
   for (let index = 0; index < 8; index++) {
     const { game } = fixture(t, index, null, true);
+    const floorOffset = (x, z) => {
+      const ground = game.groundHeight(x, z);
+      // Include low walking sills, while excluding a closed shutter's top.
+      return supportAt(game, x, z, ground + 2).height - ground;
+    };
     assert.equal(game.gateSources.length, game.fieldGates.length * 2);
     assert.equal(game.cameraSurfaces.pending.length, 0);
     assert.equal(
@@ -507,7 +512,7 @@ test("all 69 chapter gates retain regional construction, clear restored panels a
       }
       const c = gate.root.position;
       assert.equal(
-        game.canMove(c.x, c.z + 6.5, 0),
+        game.canMove(c.x, c.z + 6.5, floorOffset(c.x, c.z + 6.5)),
         false,
         `${game.level.id} ${gate.stage} locked`,
       );
@@ -523,13 +528,13 @@ test("all 69 chapter gates retain regional construction, clear restored panels a
             // samples lie on steep banks or excavated coastal beds, where
             // the separate standing-body terrain guard must still reject a
             // grounded pose after the gate has opened.
-            game.canMove(c.x + dx, c.z + dz, 0, 0),
+            game.canMove(c.x + dx, c.z + dz, floorOffset(c.x + dx, c.z + dz), 0),
             true,
             `${game.level.id} ${gate.stage} threshold ${dx},${dz}`,
           );
       for (const dz of [5.8, 6.5, 7.2])
         assert.equal(
-          game.canMove(c.x, c.z + dz, 0),
+          game.canMove(c.x, c.z + dz, floorOffset(c.x, c.z + dz)),
           true,
           `${game.level.id} ${gate.stage} standing centre ${dz}`,
         );

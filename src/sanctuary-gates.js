@@ -19,6 +19,7 @@ import { softParticleMaterial } from "./effects.js";
 import { weatherSkyStone } from "./sky-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { buildSluiceFoundation } from "./sluice-foundations.js";
+import { buildMeridianThreshold } from "./meridian-thresholds.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { CHAMBER_WALL_BIOMES, buildChamberWall } from "./chamber-walls.js";
 import {
@@ -936,6 +937,7 @@ export function buildSanctuaryGate(game, feature, materials) {
   gate.dust.frustumCulled = false;
   root.add(gate.dust);
   delete gate.jambMeshes; // Crystal kernels copied these before batching.
+  buildMeridianThreshold(game, gate, m.trim);
   mergeArchitecture(root);
   mergeArchitecture(detail);
   updateSanctuaryGate(game, gate, 0);

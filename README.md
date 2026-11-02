@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [Meridian architecture pass](docs/meridian-architecture.md) gives eleven
+observatories distinct bronze crowns and seats five raised gates on physical
+stone thresholds, with recovery for saves on their former soil.
+
 The [cavern boulder repair](docs/cavern-boulders.md) seats narrow scan edges in
 the cave floor, gives all six shapes limestone shading, and refits older cap saves.
 
