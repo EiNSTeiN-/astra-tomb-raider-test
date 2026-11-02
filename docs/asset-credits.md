@@ -2006,3 +2006,14 @@ exports retain identical decoded source pixels and dimensions without cropping
 or retouching. The before/after pairs share player and camera positions;
 current-objective figures use separate prepared states. All 400 baseline runtime
 hashes match published `d4e77df`; the 401 revised hashes match the new application.
+
+The [eight monastery door pairs](monastery-doors.md) use original project-authored
+timber profiles, recessed records, bronze fittings and finger recesses. A shared
+red-paint material clones the existing credited timber maps; the wood, pale
+backing and bronze reuse existing material and texture objects. No external
+model, bitmap, recording or dependency is added. Six actual 1280 × 800 High
+figures use lossless WebP exports with identical decoded source pixels and
+dimensions, without cropping or retouching. The two before/after approaches
+share prepared player and follow-camera positions; the memory and reverse
+figures use construction cameras. All 401 baseline runtime hashes match
+published `fcf6358`; the 402 revised hashes match the delivered application.

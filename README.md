@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [eight monastery door pairs](docs/monastery-doors.md) now carry distinct
+painted timber records, recessed panels and fitted pulls on both faces.
+
 The [Desert sunlight revision](docs/solar-light.md) replaces broad white beam
 bands with thinner transparent gold paths, with quieter light on completed circuits.
 

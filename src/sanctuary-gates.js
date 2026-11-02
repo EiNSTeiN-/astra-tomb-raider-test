@@ -45,6 +45,7 @@ import {
   updateSolarThreshold,
 } from "./solar-thresholds.js";
 import { finishSolarSanctuary } from "./solar-sanctuaries.js";
+import { buildMonasteryDoor } from "./monastery-doors.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -697,8 +698,9 @@ export function buildSanctuaryGate(game, feature, materials) {
         : design.panel === "timber"
           ? m.wood
           : m.metal;
-    if (design.panel !== "lattice")
+    if (!["lattice", "timber"].includes(design.panel))
       block(6.15, 7.4, 0.48, bodyMaterial, cx, 3.7, 0, leaf);
+    else if (design.panel === "timber") serial++;
     cameraBox(
       leafWidth,
       design.panel === "orrery" ? 7.44 : 7.4,
@@ -726,33 +728,9 @@ export function buildSanctuaryGate(game, feature, materials) {
         detail: leafDetail,
       });
     } else if (design.panel === "timber") {
-      for (let i = 0; i < 8; i++)
-        block(
-          0.72,
-          7.25,
-          0.17,
-          m.wood,
-          cx + (i - 3.5) * 0.755,
-          3.7,
-          0.32,
-          leaf,
-        );
-      for (const xx of [-2.85, 2.85])
-        block(0.2, 7.4, 0.42, m.wood, cx + xx, 3.7, 0.12, leaf);
-      for (const yy of [1.0, 3.7, 6.4]) {
-        block(6.05, 0.22, 0.2, m.metal, cx, yy, 0.46, leaf);
-        for (let i = 0; i < 8; i++)
-          add(
-            new THREE.SphereGeometry(0.065, 8, 5),
-            m.metal,
-            cx + (i - 3.5) * 0.75,
-            yy,
-            0.58,
-            leafDetail,
-          );
-      }
-      const brace = block(0.18, 7.9, 0.17, m.metal, cx, 3.7, 0.47, leaf);
-      brace.rotation.z = side * Math.atan(5.5 / 5.6);
+      // Preserve the old plank/rail seed sequence for the surrounding masonry.
+      serial += 14;
+      buildMonasteryDoor({ gate, leaf, detail: leafDetail, side, cx, materials: m });
     } else if (design.panel === "relief") {
       add(
         carvedPanelGeometry(4.75, 5.6, (feature.stage + (side + 1) / 2) % 3),
@@ -885,7 +863,7 @@ export function buildSanctuaryGate(game, feature, materials) {
         materials: m,
       });
     }
-    if (design.panel !== "orrery") {
+    if (!["orrery", "timber"].includes(design.panel)) {
       const handle = add(
         new THREE.TorusGeometry(0.25, 0.055, 7, 24),
         m.metal,
@@ -904,8 +882,8 @@ export function buildSanctuaryGate(game, feature, materials) {
         0.4,
         leafDetail,
       );
-    }
-    mergeArchitecture(leaf);
+    } else if (design.panel === "timber") serial++;
+    mergeArchitecture(leaf, design.panel === "timber" ? 2 : 3);
     mergeArchitecture(leafDetail);
     const obstacle = { x: 0, z: 0, w: 0, d: 0, h: 7.5 };
     if (design.motion === "hinge") game.obstacles.push(obstacle);

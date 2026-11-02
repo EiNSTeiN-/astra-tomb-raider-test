@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eight monastery door pairs](monastery-doors.md) replace repeated crossed
+  braces with individual painted timber records on both faces. All 90 selected
+  regressions and the build pass, including 1,044 closed pieces, real finger
+  recesses with supported pulls and 1,085,040 moving-camera vertex comparisons.
+  Twenty-two final reviewed views, 32 body poses covering 1,539,040 delivered
+  records, sixteen local passage legs, drive-source clearance and 90 tracked
+  resource disposals pass. Surrounding masonry and drive origins match the
+  preceding builder. Production keyboard/touch bell controls, stage advancement
+  and four complete-save reload comparisons also pass from prepared progress.
+  Broader court composition, continuous campaign contact and listening/device
+  acceptance remain open.
+
 - The [Desert sunlight revision](solar-light.md) gives all nine reflected-light
   circuits transparent gold cores and soft edges, with quieter completed paths.
   The matched High sepulchre view reduces near-white beam pixels from 37,855
