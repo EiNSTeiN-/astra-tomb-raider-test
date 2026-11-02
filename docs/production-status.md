@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [sanctuary control repair](sanctuary-controls.md) closes an observed body
+  overlap at the rear counterweight control in all eight chapters. Actual
+  triangle contact, terrain seating, camera coverage and sound origins now
+  agree with the small pedestal. A local descent allowance clears the steep
+  crystal, and the seated head's physical coverage follows its visibility.
+  All 88 selected cases pass, including complete counterweight routes, 1,152
+  horizontal surface comparisons, 2,312 support probes and eight sustained
+  approach/return, occupied-arrival and drop/departure checks.
+  Fourteen revised development views, 64 head-state observations, 36 tracked
+  disposals, the build and final production keyboard/touch checks pass. Five
+  complete-save reload comparisons include the older occupied arrival.
+  Broader visual composition, continuous contact and listening/device acceptance
+  remain open.
+
 - The [orrery pedestal pass](orrery-pedestals.md) gives all eleven Meridian
   bases individual closed profiles, lighter course tones and camera envelopes
   along the mouldings. All 113 selected cases pass, including 1,584 paired

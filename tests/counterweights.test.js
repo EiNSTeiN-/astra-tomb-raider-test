@@ -25,7 +25,7 @@ import {
 } from "../src/counterweights.js";
 import { solveCounterweights } from "../scripts/solve-counterweights.js";
 import { buildFieldGates } from "../src/field-world.js";
-import { advanceCharacter } from "../src/character-motion.js";
+import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { resetTraversal } from "../src/traversal.js";
 import {
   CameraSurfaces,
@@ -35,7 +35,12 @@ import {
 import { SaveStore, normalizeSave } from "../src/storage.js";
 import { frameCounterweightGrip } from "../src/counterweight-camera.js";
 import { followClearCamera } from "../src/camera-follow.js";
-import { stationAssemblySolid } from "../src/field-station-solids.js";
+import { buildSoundLandmarks } from "../src/sound-landmarks.js";
+import {
+  stationAssemblySolid,
+  stationEntry,
+  stationSupport,
+} from "../src/field-station-solids.js";
 
 function fixture(level = LEVELS[0], groundHeight = () => 0) {
   const memory = new Map(),
@@ -104,6 +109,181 @@ function fixture(level = LEVELS[0], groundHeight = () => 0) {
 }
 const point = (cell) =>
   new THREE.Vector3(100 + (cell[0] - 2) * TILE, 0, 100 + (cell[1] - 2) * TILE);
+
+test("sanctuary hums originate above their visible rear controls rather than five metres away on the board", () => {
+  for (const level of LEVELS) {
+    const { game, feature } = fixture(level);
+    game.map = { rooms: [] };
+    game.flames = game.waterMeshes = [];
+    buildSoundLandmarks(game);
+    const source = game.soundSources.find((s) => s.id === feature.id),
+      head = feature.core.getWorldPosition(new THREE.Vector3());
+    assert(source);
+    assert(Math.abs(source.x - head.x) < 1e-6);
+    assert(Math.abs(source.z - head.z) < 1e-6);
+    assert(Math.abs(source.y - head.y - 0.6) < 1e-6);
+    assert.equal(source.mechanism, true);
+    assert.equal(source.gain, 0.28);
+  }
+});
+
+test("all eight sanctuary controls keep bodies outside the rendered stone and crystal while retaining nearby access and saved arrivals", () => {
+  const ray = new THREE.Raycaster();
+  let surfaceRays = 0,
+    supportRays = 0;
+  for (const level of LEVELS) {
+    const { game, feature } = fixture(level),
+      control = feature.core.parent;
+    assert.equal(
+      feature.fixedCore,
+      true,
+      "the solid crystal retains its seated pose",
+    );
+    game.world.updateMatrixWorld(true);
+    const centre = control.getWorldPosition(new THREE.Vector3());
+    assert.equal(
+      game.canMove(centre.x, centre.z, 0),
+      false,
+      `${level.id}: a standing explorer cannot occupy the control`,
+    );
+    const solid = game.counterweights.controlSolid,
+      headSolid = game.counterweights.controlHeadSolid,
+      solids = [solid, headSolid];
+    assert(
+      solid,
+      "the rendered assembly retains physical surfaces after batching",
+    );
+    assert.equal(solid.triangles.solids.length, 2);
+    assert.equal(headSolid.triangles.solids.length, 1);
+    assert.equal(game.canMove(centre.x, centre.z, 1.6), true);
+    const cameraParts = [
+      ...new Set([...game.cameraSurfaces.cells.values()].flat()),
+    ].filter((s) => s.parent === control || s.parent === feature.core);
+    assert.equal(
+      cameraParts.length,
+      3,
+      "stone, collar and crystal protect the camera",
+    );
+    const base = control.children[0],
+      vertices = base.geometry.attributes.position;
+    base.geometry.computeBoundingBox();
+    const low = base.geometry.boundingBox.min.y;
+    for (let i = 0; i < vertices.count; i++)
+      if (Math.abs(vertices.getY(i) - low) < 1e-6) {
+        const v = new THREE.Vector3()
+          .fromBufferAttribute(vertices, i)
+          .applyMatrix4(base.matrixWorld);
+        assert(v.y < game.groundHeight(v.x, v.z), "the base enters the ground");
+      }
+    for (let turn = 0; turn < 24; turn++)
+      for (const height of [0.12, 0.45, 0.77, 1.02, 1.21, 1.48]) {
+        const angle = ((turn + 0.137) * Math.PI) / 12,
+          direction = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)),
+          from = centre.clone().addScaledVector(direction, 2).setY(height),
+          to = centre.clone().addScaledVector(direction, -2).setY(height);
+        ray.set(from, direction.clone().negate());
+        ray.far = 4;
+        const hit = ray.intersectObject(control, true)[0],
+          entries = solids
+            .map((s) => stationEntry(s, from, to))
+            .filter((v) => v !== null),
+          entry = entries.length ? Math.min(...entries) : null;
+        assert(hit && entry !== null);
+        assert(Math.abs(entry * 4 - hit.distance) < 2e-6);
+        assert(game.cameraSurfaces.entry(from, to, 0) <= entry + 1e-6);
+        surfaceRays++;
+      }
+    for (let ix = -8; ix <= 8; ix++)
+      for (let iz = -8; iz <= 8; iz++) {
+        const x = centre.x + ix * 0.1 + 0.003,
+          z = centre.z + iz * 0.1 + 0.007;
+        ray.set(new THREE.Vector3(x, 3, z), new THREE.Vector3(0, -1, 0));
+        ray.far = 4;
+        const hit = ray.intersectObject(control, true)[0],
+          heights = solids
+            .map((s) => stationSupport(s, x, z))
+            .filter((v) => v !== null),
+          support = heights.length ? Math.max(...heights) : null;
+        if (hit)
+          assert(support !== null && Math.abs(support - hit.point.y) < 2e-6);
+        else assert.equal(support, null);
+        supportRays++;
+      }
+    feature.core.visible = false;
+    const from = centre.clone().add(new THREE.Vector3(-2, 1.2, 0)),
+      to = centre.clone().add(new THREE.Vector3(2, 1.2, 0));
+    assert.equal(stationEntry(headSolid, from, to), null);
+    assert.equal(stationSupport(headSolid, centre.x, centre.z), null);
+    assert.equal(game.canMove(centre.x, centre.z, 0.81), true);
+    assert.equal(game.cameraSurfaces.entry(from, to, 0), 1);
+    feature.core.visible = true;
+    assert.equal(game.canMove(centre.x, centre.z, 0.81), false);
+    assert(game.cameraSurfaces.entry(from, to, 0) < 1);
+    // The front aisle remains close enough to use the released mechanism.
+    const start = centre.clone().add(new THREE.Vector3(0, 0, 2.2));
+    game.player.position.copy(start);
+    for (let frame = 0; frame < 120; frame++)
+      advanceCharacter(game, new THREE.Vector3(0, 0, -3), 1 / 60);
+    assert(
+      game.player.position.z > centre.z + 1.2,
+      "sustained walking stops before the base",
+    );
+    assert(
+      game.player.position.distanceTo(centre) < 2.4,
+      "the interaction range is retained",
+    );
+    assert(
+      game.canMove(game.player.position.x, game.player.position.z, game.jumpY),
+    );
+    walk(game, start);
+    assert(
+      game.player.position.distanceTo(start) < 0.04,
+      `${level.id}: the approach permits a return to its clear starting point`,
+    );
+    const arrival = safeArrival(game, centre);
+    assert(arrival && game.canMove(arrival.x, arrival.z, arrival.y));
+    assert(
+      Math.abs(arrival.y) < 1e-6,
+      "an occupied old ground save stays on ground",
+    );
+    assert(Math.hypot(arrival.x - centre.x, arrival.z - centre.z) < 2.4);
+    assert.equal(game.health, 100);
+  }
+  assert.equal(surfaceRays, 1152);
+  assert.equal(supportRays, 2312);
+});
+
+test("a descending explorer clears each sanctuary crystal and can leave the resulting support", () => {
+  for (const level of LEVELS) {
+    const { game, feature } = fixture(level),
+      centre = feature.core.parent.getWorldPosition(new THREE.Vector3());
+    game.player.position.copy(centre).add(new THREE.Vector3(0, 2.6, 0));
+    game.grounded = false;
+    game.jumpY = 2.6;
+    for (let frame = 0; frame < 120; frame++) {
+      advanceCharacter(game, new THREE.Vector3(), 1 / 60);
+      assert(
+        game.canMove(
+          game.player.position.x,
+          game.player.position.z,
+          game.jumpY,
+        ),
+        `${level.id}: crystal drop frame ${frame} at ${game.player.position.toArray()}`,
+      );
+    }
+    assert(game.grounded, `${level.id}: the drop settles`);
+    const settled = game.player.position.clone();
+    for (let frame = 0; frame < 60; frame++)
+      advanceCharacter(game, new THREE.Vector3(3, 0, 0), 1 / 60);
+    assert(
+      game.player.position.x > settled.x + 1.4,
+      `${level.id}: clear departure`,
+    );
+    assert(
+      game.canMove(game.player.position.x, game.player.position.z, game.jumpY),
+    );
+  }
+});
 function walk(game, target) {
   for (let step = 0; step < 240; step++) {
     const delta = target.clone().sub(game.player.position);
@@ -336,7 +516,8 @@ test("the Meridian counterweight route stays usable beside its new threshold on 
       if (o.material) materials.add(o.material);
     });
     for (const material of materials) {
-      for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+      for (const value of Object.values(material))
+        if (value?.isTexture) textures.add(value);
       material.dispose();
     }
     textures.forEach((texture) => texture.dispose());
@@ -348,7 +529,10 @@ test("the Meridian counterweight route stays usable beside its new threshold on 
     gripMove(game, action);
   }
   assert(
-    weightsSolved(game.counterweights.trial, game.counterweights.saved.positions),
+    weightsSolved(
+      game.counterweights.trial,
+      game.counterweights.saved.positions,
+    ),
   );
   assert.equal(game.counterweights.saved.moves, solution.path.length);
 });

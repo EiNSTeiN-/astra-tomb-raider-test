@@ -237,6 +237,9 @@ export function freeCell(trial, positions, cell, player = false) {
     z >= -edge &&
     x <= 4 + edge &&
     z <= 4 + edge &&
+    // The rear sanctuary control occupies the middle of the north service
+    // aisle. Grip and walking plans must route around its physical base.
+    !(player && x === 2 && z === -1) &&
     !trial.walls.some((wall) => sameCell(wall, cell)) &&
     !positions.some((p) => sameCell(p, cell))
   );

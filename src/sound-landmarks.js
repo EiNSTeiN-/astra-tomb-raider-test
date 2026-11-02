@@ -139,15 +139,17 @@ export function buildSoundLandmarks(game) {
       );
   }
   for (const f of game.items)
-    if (f.type === "mechanism")
+    if (f.type === "mechanism") {
+      const anchor = f.soundAnchor;
       source(
         f.id,
         biome === "crystal" || biome === "eclipse" ? "crystal" : "machine",
-        f.x * 7,
-        f.group.position.y + 1.8,
-        f.z * 7,
+        anchor?.x ?? f.x * 7,
+        anchor?.y ?? f.group.position.y + 1.8,
+        anchor?.z ?? f.z * 7,
         { stage: f.stage, mechanism: true, gain: 0.28 },
       );
+    }
   for (const basin of game.waterMeshes.filter(
     (w) => w.userData.fall !== undefined,
   )) {

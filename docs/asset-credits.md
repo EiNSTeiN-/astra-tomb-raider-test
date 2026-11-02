@@ -1943,3 +1943,12 @@ prepared player positions, fixed inspection cameras and zero elapsed simulation
 time. Baseline runtime source hashes match published `4266011`; final hashes
 match the new application. Lossless WebP exports preserve decoded source pixels
 and dimensions without cropping or retouching.
+
+The [sanctuary control repair](sanctuary-controls.md) reuses the existing
+counterweight stone, metal and crystal materials. The extended lower stone,
+physical contact and emitter placement are original project code, with no new
+external model, texture, recording or dependency. The two documentation figures
+preserve actual gameplay pixels from a recorded occupied stance and a recovered
+older arrival. Their player and camera positions differ because the old stance
+is now rejected. These are prepared-state gameplay renders. Existing
+attribution remains applicable.

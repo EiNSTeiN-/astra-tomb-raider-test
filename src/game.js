@@ -2389,7 +2389,7 @@ export class Adventure {
         updateRelicArtwork(this, f);
       } else if (f.type === "mechanism") {
         f.marker.visible = f.stage === this.progress.stage;
-        f.core.rotation.y = this.elapsed;
+        f.core.rotation.y = f.fixedCore ? 0 : this.elapsed;
         f.core.visible = f.stage >= this.progress.stage;
       } else if (
         f.core &&

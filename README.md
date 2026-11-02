@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [sanctuary control repair](docs/sanctuary-controls.md) gives eight small
+pedestals matching physical contact, terrain seating and sound origins.
+
 The [orrery bases](docs/orrery-pedestals.md) replace eleven plain drums with
 individual stone profiles and camera clearance fitted to their mouldings.
 

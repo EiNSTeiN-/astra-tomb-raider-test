@@ -5,6 +5,11 @@ import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { weatherSkyStone } from "./sky-architecture.js";
 import { windMetal, windSurface } from "./wind-art.js";
 import { skyWindReliefGeometry } from "./sky-chamber-walls.js";
+import {
+  stationAssemblySolid,
+  stationMeshSolid,
+} from "./field-station-solids.js";
+import { footprintMinimum } from "./masonry-foundations.js";
 
 function masonryCopy(source) {
   const material = source.clone();
@@ -290,10 +295,30 @@ export function buildCounterweightArt(game, chamber, label) {
   block(1.9, 0.12, 0.1, worn, 0, 2.28, 0, cage);
   chamber.cage = cage;
   const control = new THREE.Group();
+  control.name = "Counterweight sanctuary control";
   control.position.z = -5;
   group.add(control);
-  add(new THREE.CylinderGeometry(0.6, 0.78, 0.7, 16), trim, 0, 0.4, 0, control);
-  cylinder(0.48, 0.06, bronze, 0, 0.77, 0, control);
+  // Keep the original head and upper seat, but bury the lower edge across
+  // the terrain footprint instead of leaving a five-centimetre air gap.
+  const bottom =
+      footprintMinimum(
+        (x, z) => game.groundHeight(x, z),
+        group.position.x,
+        group.position.z - 5,
+        1.56,
+        1.56,
+      ) -
+      group.position.y -
+      0.08,
+    base = add(
+      new THREE.CylinderGeometry(0.6, 0.78, 0.75 - bottom, 16),
+      trim,
+      0,
+      (bottom + 0.75) / 2,
+      0,
+      control,
+    ),
+    collar = cylinder(0.48, 0.06, bronze, 0, 0.77, 0, control);
   const core = add(
     new THREE.OctahedronGeometry(0.36),
     game.glowMat,
@@ -303,6 +328,36 @@ export function buildCounterweightArt(game, chamber, label) {
     control,
   );
   feature.core = core;
+  feature.fixedCore = true;
+  core.visible = feature.stage >= game.progress.stage;
+  chamber.controlSolid = stationAssemblySolid(game, feature, [base, collar], {
+    bodyPadding: 0.55,
+    // A drop onto the steep crystal must clear its head, then the broad
+    // lower base, before settling on nearby ground or a real cap.
+    descentEscapeRadius: 0.78 + 0.55,
+  });
+  chamber.controlHeadSolid = stationMeshSolid(game, feature, core, {
+    bodyPadding: 0.55,
+    descentEscapeRadius: 0.36 + 0.55,
+    node: core,
+  });
+  for (const mesh of [base, collar])
+    game.cameraSurfaces?.capture(mesh, {
+      small: true,
+      thin: true,
+      cylinderAxis: "y",
+    });
+  // The regional courts and completed stages may hide this head. A child
+  // proxy keeps camera coverage attached to that same visibility state.
+  const headProxy = new THREE.Mesh(core.geometry, core.material);
+  core.add(headProxy);
+  game.cameraSurfaces?.capture(headProxy, { small: true });
+  core.remove(headProxy);
+  // The rear control is five metres from the board's centre. Place its hum
+  // just above the crystal, clear of the new physical shell.
+  feature.soundAnchor = group.position
+    .clone()
+    .add(new THREE.Vector3(0, 1.8, -5));
   // A seated tablet carries lettering at the slab's own tilt. The cloud's
   // forecourt keeps the reader and reset stance clear of its wind stands;
   // the crystal's right aisle clears its tall

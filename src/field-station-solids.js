@@ -75,6 +75,8 @@ export function stationMeshSolid(game, feature, mesh, options = {}) {
     h: bounds.max.y - game.groundHeight(x, z),
     fieldStation: feature.id,
     bodyPadding: options.bodyPadding ?? 0.4,
+    descentEscapeRadius: options.descentEscapeRadius,
+    node: options.node,
     supportRadius: options.supportRadius,
     groundingSlope: options.groundingSlope,
     supportable: options.support !== false,
@@ -118,6 +120,7 @@ export function stationAssemblySolid(game, feature, meshes, options = {}) {
       h: bounds.max.y - game.groundHeight(x, z),
       fieldStation: feature.id,
       bodyPadding: options.bodyPadding ?? 0.4,
+      descentEscapeRadius: options.descentEscapeRadius,
       supportRadius: options.supportRadius,
       supportable: options.support !== false,
       bodySupport: options.bodySupport !== false,
@@ -191,6 +194,7 @@ export function stationBlocked(
   clearance = 1.8,
   padding = solid.bodyPadding ?? 0.4,
 ) {
+  if (solid.node && !solid.node.visible) return false;
   if (solid.campFire)
     return (
       clearance > 0 &&

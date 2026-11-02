@@ -139,7 +139,7 @@ function clearStationVerticalMotion(game, before) {
     0.2,
     ...contacts.map((o) => {
       if (!o.triangles || p.y >= before) return 0.2;
-      return (o.bodyPadding ?? 0.4) + 0.02;
+      return Math.max(o.bodyPadding ?? 0.4, o.descentEscapeRadius ?? 0) + 0.02;
     }),
   );
   for (let radius = 0.02; radius <= limit + 1e-6; radius += 0.02) {
