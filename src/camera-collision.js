@@ -32,6 +32,33 @@ export function boxEntry(a, b, box, padding = 0, allowInside = false) {
   return (inside && !allowInside) || near < 0 || near > 1 ? null : near;
 }
 
+// Convex camera envelopes use unit halfspaces n·p <= d. A camera radius
+// expands each face plane; this is conservative at edges like the box margin.
+export function convexEntry(a, b, planes, padding = 0, allowInside = false) {
+  let near = 0,
+    far = 1,
+    inside = true,
+    solidInside = true;
+  for (const [x, y, z, d] of planes) {
+    const raw = a.x * x + a.y * y + a.z * z - d,
+      da = raw - padding,
+      delta = (b.x - a.x) * x + (b.y - a.y) * y + (b.z - a.z) * z;
+    inside &&= da <= 0;
+    solidInside &&= raw <= 0;
+    if (Math.abs(delta) < 1e-12) {
+      if (da > 0) return null;
+      continue;
+    }
+    const t = -da / delta;
+    if (delta < 0) near = Math.max(near, t);
+    else far = Math.min(far, t);
+    if (near > far) return null;
+  }
+  if (inside && !solidInside && !allowInside)
+    return convexEntry(a, b, planes, 0, true) === null ? null : 0;
+  return (inside && !allowInside) || near < 0 || near > 1 ? null : near;
+}
+
 // Rounded clearance around a capped circular casting. Expanding its box or
 // cylinder independently along each axis also blocks the empty corners beside
 // wheels. This distance is to the solid cylinder, with a spherical margin.
@@ -121,7 +148,10 @@ export class CameraSurfaces {
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
   }
-  capture(mesh, { small = false, thin = false, cylinderAxis = null } = {}) {
+  capture(
+    mesh,
+    { small = false, thin = false, cylinderAxis = null, planes = null } = {},
+  ) {
     if (
       !this.capturing ||
       !mesh.material.isMeshStandardMaterial ||
@@ -137,7 +167,13 @@ export class CameraSurfaces {
       (!thin && Math.min(size.x, size.y, size.z) < 0.12)
     )
       return;
-    this.pending.push({ mesh, parent: mesh.parent, box, cylinderAxis });
+    this.pending.push({
+      mesh,
+      parent: mesh.parent,
+      box,
+      cylinderAxis,
+      planes: planes?.map((p) => [...p]) ?? null,
+    });
   }
   rebuild() {
     this.world.updateMatrixWorld(true);
@@ -152,6 +188,7 @@ export class CameraSurfaces {
         local: entry.mesh.matrix.clone(),
         box: entry.box,
         cylinderAxis: entry.cylinderAxis,
+        planes: entry.planes,
         matrix: new THREE.Matrix4(),
         inverse: new THREE.Matrix4(),
         bounds: new THREE.Box3(),
@@ -269,15 +306,17 @@ export class CameraSurfaces {
       this.a.copy(start).applyMatrix4(surface.inverse);
       this.b.copy(end).applyMatrix4(surface.inverse);
       const padding = radius / Math.max(0.001, surface.scale),
-        t = surface.cylinderAxis
-          ? cylinderEntry(
-              this.a,
-              this.b,
-              surface.box,
-              padding,
-              surface.cylinderAxis,
-            )
-          : boxEntry(this.a, this.b, surface.box, padding);
+        t = surface.planes
+          ? convexEntry(this.a, this.b, surface.planes, padding)
+          : surface.cylinderAxis
+            ? cylinderEntry(
+                this.a,
+                this.b,
+                surface.box,
+                padding,
+                surface.cylinderAxis,
+              )
+            : boxEntry(this.a, this.b, surface.box, padding);
       if (t !== null) result = Math.min(result, t);
     }
     return result;

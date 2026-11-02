@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [orrery pedestal pass](orrery-pedestals.md) gives all eleven Meridian
+  bases individual closed profiles, lighter course tones and camera envelopes
+  along the mouldings. All 113 selected cases pass, including 1,584 paired
+  probes that keep the lower body skin behind its overlapping footing. Actual
+  support and camera probes, 120 movement approaches, seventeen reviewed
+  High/Performance views, twenty-two unburied sound anchors, tracked disposal
+  and the build pass.
+  Final production keyboard/touch mechanism checks and five complete-save
+  reload comparisons also pass from prepared progress, including an older
+  soil-height arrival.
+  Broader composition, continuous body contact and listening/device acceptance
+  remain open.
+
 - The [Meridian gate crowns](meridian-gate-crowns.md) replace all ten repeated
   arches with individual celestial silhouettes, closed backing, dressed faces
   and matching physical/camera coverage. All 65 selected regressions, an

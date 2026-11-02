@@ -1934,3 +1934,12 @@ standing positions, gameplay follow cameras and zero elapsed simulation time.
 Baseline runtime source hashes match published `32a9d76`; revised hashes match
 the new application. Lossless WebP exports preserve decoded source pixels and
 dimensions without cropping or retouching.
+
+The [orrery pedestals](orrery-pedestals.md) use original project-authored stone
+profiles and course tones with the existing credited palace-stone maps. One
+shared material reuses those maps; no external model, bitmap, recording or
+dependency is added. Six actual 1280 × 800 High comparison captures share
+prepared player positions, fixed inspection cameras and zero elapsed simulation
+time. Baseline runtime source hashes match published `4266011`; final hashes
+match the new application. Lossless WebP exports preserve decoded source pixels
+and dimensions without cropping or retouching.

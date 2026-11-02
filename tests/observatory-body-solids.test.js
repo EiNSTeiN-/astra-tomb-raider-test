@@ -147,7 +147,8 @@ test("all 374 observatory masonry kernels agree with the delivered closed parts 
           count = kernel.shape.triangles.length * 3,
           matches = parts.filter(
             (p) =>
-              p.mesh.geometry.attributes.position.count === count &&
+              (p.mesh.geometry.index?.count ??
+                p.mesh.geometry.attributes.position.count) === count &&
               p.bounds.min.distanceTo(solid.bounds.min) < 3e-5 &&
               p.bounds.max.distanceTo(solid.bounds.max) < 3e-5,
           );
@@ -158,12 +159,13 @@ test("all 374 observatory masonry kernels agree with the delivered closed parts 
         );
         const part = matches[0],
           position = part.mesh.geometry.attributes.position,
+          index = part.mesh.geometry.index,
           point = new THREE.Vector3();
         assert(cablePartClosed(part));
         assert.equal(solid.supportable, true);
         for (let i = 0; i < count; i++) {
           point
-            .fromBufferAttribute(position, i)
+            .fromBufferAttribute(position, index ? index.getX(i) : i)
             .applyMatrix4(part.mesh.matrixWorld);
           const physical = kernel.shape.triangles[Math.floor(i / 3)].vertices[
             i % 3

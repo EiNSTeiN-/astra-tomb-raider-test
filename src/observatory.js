@@ -8,10 +8,13 @@ import { observatoryRoofPlan } from "./observatory-roof-plan.js";
 import { observatoryState } from "./observatory-state.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 import { buildObservatoryEnclosure } from "./observatory-enclosures.js";
+import {
+  orreryPedestalGeometry,
+  captureOrreryPedestal,
+} from "./orrery-pedestals.js";
 import { stationMeshSolid } from "./field-station-solids.js";
 import {
   pedestalFootingGeometry,
-  pedestalStoneUV,
   seatMeridianMark,
 } from "./observatory-footings.js";
 
@@ -25,7 +28,11 @@ export function buildObservatory(game) {
   const stone = pbrMaterial("temple", 0xc0c4bf),
     bronze = patinatedBronze();
   const dark = pbrMaterial("palace-stone", 0x606e78);
-  game.observatoryMaterials = { stone, dark, bronze };
+  const pedestal = dark.clone();
+  pedestal.name = "Dressed celestial instrument stone";
+  pedestal.color.setHex(0xa5afad);
+  pedestal.vertexColors = true;
+  game.observatoryMaterials = { stone, dark, bronze, pedestal };
   const glow = new THREE.MeshStandardMaterial({
     color: 0xdde3cd,
     emissive: 0xc7daca,
@@ -245,21 +252,19 @@ export function buildObservatory(game) {
       top: base + ground + 0.035,
       radius: 4,
     });
-    masonrySolid(
-      add(
-        pedestalStoneUV(
-          new THREE.CylinderGeometry(3.15, 4, 3 - ground, 32),
-          (ground + 3) / 2,
-        ),
-        dark,
-        0,
-        (ground + 3) / 2,
-        0,
-        root,
-        true,
-      ),
-      "pedestal-core",
+    const body = add(
+      orreryPedestalGeometry(room.index, ground),
+      pedestal,
+      0,
+      0,
+      0,
     );
+    body.name = `Instrument pedestal: ${body.geometry.userData.pedestal.name}`;
+    patch.pedestal = {
+      mesh: body,
+      solid: masonrySolid(body, "pedestal-core"),
+      cameraSections: captureOrreryPedestal(game, body, room.index, ground),
+    };
     add(
       new THREE.CylinderGeometry(0.7, 1.2, 4.8, 24),
       bronze,

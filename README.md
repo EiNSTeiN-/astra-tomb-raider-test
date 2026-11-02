@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [orrery bases](docs/orrery-pedestals.md) replace eleven plain drums with
+individual stone profiles and camera clearance fitted to their mouldings.
+
 The [Meridian gate crowns](docs/meridian-gate-crowns.md) give all ten approaches
 individual stone silhouettes, from lunar horns to seven archive stelae.
 
