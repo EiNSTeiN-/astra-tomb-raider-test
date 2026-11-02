@@ -731,7 +731,8 @@ test("the first sanctuary rejects activation until its counterweights latch", ()
   game.cb.counterweights = () => guides++;
   game.cb.puzzle = () => puzzles++;
   game.nearest = feature;
-  game.player.position.set(100, 0, 95);
+  // This approach stance is inside the mechanism's five-metre prompt range.
+  game.player.position.set(100, 0, 95.1);
   game.interact();
   assert.equal(guides, 1);
   assert.equal(puzzles, 0);

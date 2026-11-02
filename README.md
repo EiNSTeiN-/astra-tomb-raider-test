@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [mechanism reach repair](docs/mechanism-reach.md) removes instrument prompts
+and activation from roofs above them while retaining raised platform controls.
+
 The [eight monastery halls](docs/monastery-sanctuaries.md) now have recessed
 fresco panoramas and varied timber roofs, from an open light screen to an archive lantern.
 

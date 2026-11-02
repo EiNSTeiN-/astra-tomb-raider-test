@@ -1,5 +1,10 @@
 # Asset credits and provenance
 
+The [mechanism reach repair](mechanism-reach.md) uses original interaction code
+and the existing credited game assets. Its two documentation images are native
+game captures exported as lossless WebP, with matching dimensions and decoded
+pixels. This repair adds no external model, texture, audio or dependency.
+
 The [eight painted monastery halls](monastery-sanctuaries.md) use original
 project-authored architecture, camera cells and material code. Their one new
 fresco atlas was generated with the built-in image generation tool. The

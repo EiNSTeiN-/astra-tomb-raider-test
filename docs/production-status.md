@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [mechanism reach repair](mechanism-reach.md) prevents the reproduced
+  archive-roof prompt and remote puzzle activation. All 104 selected regressions
+  pass, including selection/activation for all 69 authored mechanisms. Actual
+  constructed stances retain access to all 17 monastery/cloud-city mechanisms,
+  with 34 remote-height rejections. Seven native production keyboard/touch
+  scenarios pass nine complete-store reload comparisons. Broader interactions,
+  continuous route coverage, world composition and listening/device acceptance
+  remain open.
+
 - The [eight painted monastery halls](monastery-sanctuaries.md) add 90 recessed
   fresco bays, distinct timber roof structures and a supported light-screen
   service walk. All 164 selected regressions, 43 reviewed development views,

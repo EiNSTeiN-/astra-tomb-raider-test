@@ -111,6 +111,7 @@ broad snowfields, route composition and continuous campaign contact remain
 under review. Roof undersides still share the slate surface of their upper
 shells; lining and finer roof construction remain follow-ups. The portrait
 production roof view also shows an ancient-mechanism prompt above the actual
-instrument; vertical prompt reach is recorded for a separate interaction pass. Consumer hardware
+instrument. The subsequent [mechanism reach repair](mechanism-reach.md) prevents
+that roof prompt and remote activation. Consumer hardware
 performance and subjective music/soundscape acceptance also remain open in the
 [visual audit](visual-audit.md).

@@ -14,6 +14,7 @@ import { terrainBodyClear } from "./terrain-body-clearance.js";
 import { mantlePoint, mantleEdge } from "./mantle-motion.js";
 import { buildWindTerrace } from "./wind-terraces.js";
 import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
+import { mechanismReachable } from "./mechanism-reach.js";
 import { buildDiscoverySettings } from "./discovery-settings.js";
 import { arrivalCamera } from "./camera-arrival.js";
 import { normalizeCamera } from "./camera-state.js";
@@ -1974,6 +1975,10 @@ export class Adventure {
     )
       this.damage(9);
     this.survey();
+    this.updateInteractionTarget();
+  }
+  updateInteractionTarget() {
+    const p = this.player.position;
     let nearest = null,
       dist = 5;
     for (const f of this.items) {
@@ -1993,7 +1998,8 @@ export class Adventure {
               f.sunHeight !== undefined ||
               f.shutterHeight !== undefined) &&
               Math.abs(p.y - f.group.position.y) > 0.8))) ||
-        (f.type === "mechanism" && f.stage < this.progress.stage) ||
+        (f.type === "mechanism" &&
+          (f.stage < this.progress.stage || !mechanismReachable(this, f, p))) ||
         (f.type === "solar" &&
           (f.stage !== this.progress.stage ||
             !solarReady(this, this.solarSites[f.stage]))) ||
@@ -2507,6 +2513,13 @@ export class Adventure {
       return;
     }
     const f = this.nearest;
+    // Input can arrive after the target was chosen but before the next motion
+    // frame. Revalidate here so an old prompt cannot open a remote mechanism.
+    if (f.type === "mechanism" && !mechanismReachable(this, f)) {
+      this.nearest = null;
+      this.cb.toast?.("Move closer on the mechanism’s platform to interact.");
+      return;
+    }
     this.keys.clear();
     if (
       f.yOffset &&
