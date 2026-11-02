@@ -1925,3 +1925,12 @@ inspection cameras, player positions and zero elapsed simulation time. These
 are shader-toggle comparisons, rather than full application revision captures.
 Lossless WebP exports preserve decoded source pixels and dimensions without
 cropping or retouching.
+
+The [Meridian gate crowns](meridian-gate-crowns.md) use original project-authored
+stone profiles, fitted masonry and bronze marks, reusing the existing credited
+stone and bronze materials. No external model, bitmap, recording or dependency
+is added. Eight actual 1280 × 800 High comparison captures share prepared
+standing positions, gameplay follow cameras and zero elapsed simulation time.
+Baseline runtime source hashes match published `32a9d76`; revised hashes match
+the new application. Lossless WebP exports preserve decoded source pixels and
+dimensions without cropping or retouching.

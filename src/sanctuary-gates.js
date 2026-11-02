@@ -38,6 +38,7 @@ import { buildForgeVault } from "./forge-vaults.js";
 import { buildWindChamberCrown } from "./wind-chamber-crowns.js";
 import { buildCrystalShutter } from "./crystal-shutters.js";
 import { buildMeridianDoor } from "./meridian-doors.js";
+import { buildMeridianGateCrown } from "./meridian-gate-crowns.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -556,6 +557,8 @@ export function buildSanctuaryGate(game, feature, materials) {
     serial += 11;
   } else if (design.panel === "sluice") {
     buildCoastalVault(game, gate, m);
+  } else if (design.panel === "orrery") {
+    gate.crown = buildMeridianGateCrown(game, gate, m);
   } else if (design.crown === "arch") {
     for (let i = 0; i < 15; i++) {
       const a = (i * Math.PI) / 15 + 0.006,

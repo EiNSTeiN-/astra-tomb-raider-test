@@ -1,5 +1,9 @@
 # Celestial records on the Meridian doors
 
+The later [bronze highlight repair](bronze-highlights.md) addresses the material
+finding recorded here. [Individual gate crowns](meridian-gate-crowns.md) also
+replace the repeated shallow arches above these moving leaves.
+
 The Last Meridian's ten gate pairs now carry individual bronze and stone
 compositions. Portal niches, Earth-axis registers, opposing lunar crescents,
 seven archive flutes, a solar fan, a western horizon, an astral chart, a celestial

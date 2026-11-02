@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Meridian gate crowns](meridian-gate-crowns.md) replace all ten repeated
+  arches with individual celestial silhouettes, closed backing, dressed faces
+  and matching physical/camera coverage. All 65 selected regressions, an
+  additional continuous roof sweep check and the build pass. Nineteen reviewed
+  revised views include all ten High front approaches,
+  three Performance approaches and six detail inspections. Six observed roof
+  states and 2,752 conservative rotation intervals retain disjoint roof/crown
+  bounds; moving leaf vertices keep at least 0.942 m vertical clearance. All
+  33 tracked crown resources dispose exactly
+  once on each inspected chapter change. Production keyboard/touch mechanism
+  checks and five complete-save reload comparisons pass from prepared progress,
+  including an older soil-height arrival. Broader composition, continuous body
+  contact and listening/device acceptance remain open.
+
 - The [bronze highlight repair](bronze-highlights.md) replaces the aligned
   roughness cells with rotated gradient weathering and gentler roughness detail.
   All 24 selected tests, the build and the GPU field checks pass. Sixty-eight

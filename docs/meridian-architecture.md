@@ -1,5 +1,8 @@
 # Varied Meridian crowns and seated thresholds
 
+The later [gate-head pass](meridian-gate-crowns.md) varies the repeated shallow
+arches recorded in these roof and threshold comparisons.
+
 The Last Meridian's eleven observatories now have individual roof profiles:
 low canopies, pointed crowns, shouldered collars and taller lanterns. Each
 moving bronze panel carries three raised straps, two curved bands and six
