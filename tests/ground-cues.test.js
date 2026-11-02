@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { FoliageFraming } from "../src/foliage-framing.js";
+import { patinatedBronze } from "../src/observatory-geometry.js";
 import {
   projectedRing,
   updateGroundCues,
@@ -26,6 +27,42 @@ function fixture(t) {
   });
   return { game, surface };
 }
+
+test("the real bronze shader composes with projected warnings and restores its own program after retirement", (t) => {
+  const { game, surface } = fixture(t);
+  surface.material.dispose();
+  const bronze = (surface.material = patinatedBronze()),
+    compile = bronze.onBeforeCompile,
+    key = bronze.customProgramCacheKey,
+    positions = surface.geometry.attributes.position.array.slice();
+  const warning = projectedRing(0.8, 1, new THREE.MeshBasicMaterial());
+  game.world.add(warning);
+  game.enemies.push({ id: "bronze-control", hp: 8, warning });
+  updateGroundCues(game);
+  const shader = {
+    uniforms: {},
+    vertexShader: THREE.ShaderLib.standard.vertexShader,
+    fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+  };
+  bronze.onBeforeCompile(shader, {});
+  assert.equal(shader.uniforms.groundCueCount.value, 1);
+  assert.equal(
+    (shader.vertexShader.match(/varying vec3 bronzePosition/g) || []).length,
+    1,
+  );
+  assert.equal(
+    (shader.vertexShader.match(/varying vec3 vGroundCueWorld/g) || []).length,
+    1,
+  );
+  const patchedKey = bronze.customProgramCacheKey();
+  updateGroundCues(game);
+  assert.equal(bronze.customProgramCacheKey(), patchedKey);
+  assert.deepEqual(surface.geometry.attributes.position.array, positions);
+  disposeGroundCues(game);
+  assert.equal(bronze.onBeforeCompile, compile);
+  assert.equal(bronze.customProgramCacheKey, key);
+  assert.equal(shader.uniforms.groundCueCount.value, 0);
+});
 
 test("cue packets preserve world centres, radii, colors and fading through parent transforms and hidden phases", (t) => {
   const { game } = fixture(t),

@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [bronze highlight repair](bronze-highlights.md) replaces the aligned
+  roughness cells with rotated gradient weathering and gentler roughness detail.
+  All 24 selected tests, the build and the GPU field checks pass. Sixty-eight
+  reviewed High/Performance captures cover all eight chapters, with 34 matching
+  geometry/transform comparisons and 2,367 tracked resource disposals. The
+  production keyboard/touch mechanism checks and five complete-save reload
+  comparisons also pass from prepared progress, including the older soil-height
+  arrival. Owned browser and preview processes are closed after verification. The
+  isolated panel's software-renderer median increases from 16.28 to 24.12 ms;
+  consumer device performance, broader composition and motion acceptance remain
+  open.
+
 - The [Meridian door records](meridian-doors.md) replace repeated orbital rings
   on all twenty leaves with ten individual bronze and stone compositions. All
   63 selected tests and the build pass, covering closed geometry, seated emblems,

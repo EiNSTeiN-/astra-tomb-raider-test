@@ -92,29 +92,47 @@ export function patinatedBronze() {
         float bronzeHash(vec3 p) {
           p=fract(p*.1031);p+=dot(p,p.yzx+33.33);return fract((p.x+p.y)*p.z);
         }
+        float bronzeCorner(vec3 cell,vec3 delta) {
+          float h=floor(bronzeHash(cell)*12.);
+          float axis=floor(h*.25);
+          vec2 signs=mod(floor(h/vec2(1.,2.)),2.)*2.-1.;
+          vec3 gradient=axis<1.?vec3(0.,signs):axis<2.?vec3(signs.x,0.,signs.y):vec3(signs,0.);
+          return dot(gradient,delta)*.70710678;
+        }
         float bronzeNoise(vec3 p) {
-          vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
-          return mix(mix(mix(bronzeHash(i),bronzeHash(i+vec3(1,0,0)),f.x),mix(bronzeHash(i+vec3(0,1,0)),bronzeHash(i+vec3(1,1,0)),f.x),f.y),
-            mix(mix(bronzeHash(i+vec3(0,0,1)),bronzeHash(i+vec3(1,0,1)),f.x),mix(bronzeHash(i+vec3(0,1,1)),bronzeHash(i+vec3(1,1,1)),f.x),f.y),f.z);
+          vec3 i=floor(p),d=fract(p),f=d*d*d*(d*(d*6.-15.)+10.);
+          float n=mix(mix(mix(bronzeCorner(i,d),bronzeCorner(i+vec3(1,0,0),d-vec3(1,0,0)),f.x),
+            mix(bronzeCorner(i+vec3(0,1,0),d-vec3(0,1,0)),bronzeCorner(i+vec3(1,1,0),d-vec3(1,1,0)),f.x),f.y),
+            mix(mix(bronzeCorner(i+vec3(0,0,1),d-vec3(0,0,1)),bronzeCorner(i+vec3(1,0,1),d-vec3(1,0,1)),f.x),
+            mix(bronzeCorner(i+vec3(0,1,1),d-vec3(0,1,1)),bronzeCorner(i+vec3(1,1,1),d-vec3(1,1,1)),f.x),f.y),f.z);
+          return clamp(.5+n*.9,0.,1.);
+        }
+        vec3 bronzeRotate(vec3 p) {
+          return mat3(.36,.48,-.8,-.8,.6,0.,.48,.64,.6)*p;
         }
         float bronzeFilteredNoise(vec3 p) {
           float footprint=max(length(dFdx(p)),length(dFdy(p)));
-          return mix(bronzeNoise(p),.5,smoothstep(.35,1.1,footprint));
+          return mix(bronzeNoise(p),.5,smoothstep(.12,.5,footprint));
+        }
+        float bronzeWeather(vec3 p) {
+          vec3 q=bronzeRotate(p)+vec3(7.3,4.1,13.9);
+          return bronzeFilteredNoise(q)*.72
+            +bronzeFilteredNoise(bronzeRotate(q)*2.13+vec3(11.7,-3.4,8.1))*.28;
         }`,
       )
       .replace(
         "#include <color_fragment>",
         `#include <color_fragment>
-        float bronzeCloud=bronzeFilteredNoise(bronzePosition*.85);
-        float bronzeMottle=bronzeFilteredNoise(bronzePosition*6.3);
-        float bronzeGrain=bronzeFilteredNoise(bronzePosition*92.);
-        float tarnish=smoothstep(.32,.73,bronzeCloud*.7+bronzeMottle*.3);
+        float bronzeCloud=bronzeWeather(bronzePosition*.72);
+        float bronzeMottle=bronzeWeather(bronzePosition*4.3+vec3(17.1,3.7,9.2));
+        float bronzeGrain=bronzeFilteredNoise(bronzeRotate(bronzePosition)*92.);
+        float tarnish=smoothstep(.3,.7,bronzeCloud*.92+bronzeMottle*.08);
         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.085,.18,.14),tarnish*.68);
-        diffuseColor.rgb*=mix(.91,1.04,bronzeMottle)*mix(.985,1.015,bronzeGrain);`,
+        diffuseColor.rgb*=mix(.94,1.03,bronzeMottle)*mix(.99,1.01,bronzeGrain);`,
       )
       .replace(
         "#include <roughnessmap_fragment>",
-        "float roughnessFactor=clamp(mix(roughness,.86,tarnish*.9)+(bronzeGrain-.5)*.13,.3,.95);",
+        "float roughnessFactor=clamp(mix(roughness,.78,tarnish*.75)+(bronzeGrain-.5)*.04,.32,.88);",
       )
       .replace(
         "#include <metalnessmap_fragment>",
@@ -123,7 +141,7 @@ export function patinatedBronze() {
       .replace(
         "#include <normal_fragment_maps>",
         `#include <normal_fragment_maps>
-        float bronzePit=(bronzeGrain-.5)*.0009+smoothstep(.46,.7,bronzeMottle)*.00075;
+        float bronzePit=(bronzeGrain-.5)*.00035+smoothstep(.46,.7,bronzeMottle)*.0005;
         vec3 bronzeDx=dFdx(-vViewPosition),bronzeDy=dFdy(-vViewPosition);
         vec3 bronzeR1=cross(bronzeDy,normal),bronzeR2=cross(normal,bronzeDx);
         float bronzeDet=dot(bronzeDx,bronzeR1);
@@ -131,6 +149,6 @@ export function patinatedBronze() {
         normal=normalize(max(abs(bronzeDet),1.e-9)*normal-bronzeGrad);`,
       );
   };
-  m.customProgramCacheKey = () => "observatory-bronze-v2";
+  m.customProgramCacheKey = () => "observatory-bronze-v3";
   return m;
 }

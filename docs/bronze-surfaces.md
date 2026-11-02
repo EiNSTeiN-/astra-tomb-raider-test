@@ -1,5 +1,9 @@
 # Bronze without repeated stripes
 
+The later [highlight refinement](bronze-highlights.md) addresses aligned
+roughness cells in this material. The comparisons and measurements below record
+the preceding stripe-removal revision.
+
 The shared gate and instrument bronze now uses irregular oxidation, roughness
 variation and shallow pitting. The previous shader multiplied its color by a
 fixed sine wave, leaving closely spaced diagonal bands across doors, rings and

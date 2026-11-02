@@ -1914,3 +1914,14 @@ match published `e68c603`; revised source hashes match the new application.
 A seventh High capture uses a rear diagnostic camera and records the shallower
 reliefs and remaining bronze-highlight finding. Lossless WebP conversion
 preserves decoded source pixels and dimensions without cropping or retouching.
+
+The [bronze highlight repair](bronze-highlights.md) uses original
+project-authored procedural gradient weathering and roughness adjustments.
+It retains the existing credited environment, geometry and material assets;
+no external model, bitmap, recording or dependency is added. Six actual
+1280 × 800 High captures compare the exact published `60c0505` bronze shader
+with its revision in the same paused revised application, at matching prepared
+inspection cameras, player positions and zero elapsed simulation time. These
+are shader-toggle comparisons, rather than full application revision captures.
+Lossless WebP exports preserve decoded source pixels and dimensions without
+cropping or retouching.

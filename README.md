@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [bronze highlight repair](docs/bronze-highlights.md) replaces conspicuous
+square weathering with smoother oxidation on shared gate and prop surfaces.
+
 The [Meridian door records](docs/meridian-doors.md) give all ten gate pairs
 individual recessed bronze and stone compositions, detailed on both faces.
 
