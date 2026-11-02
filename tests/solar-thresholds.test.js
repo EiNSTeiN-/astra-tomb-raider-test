@@ -188,8 +188,9 @@ test("all threshold surfaces provide exact point support, safe crossing routes a
           z = c.z + 6.5 + dz;
         ray.set(new T.Vector3(x, c.y + 2, z), new T.Vector3(0, -1, 0));
         ray.far = 5;
+        // Compare the floor below this ray origin, beneath any sanctuary roof.
         const hit = ray.intersectObject(r.root, true)[0],
-          floor = supportAt(g, x, z, Infinity, 0).height;
+          floor = supportAt(g, x, z, c.y + 1.8, 0).height;
         assert(hit);
         assert(
           Math.abs(hit.point.y - floor) < 2e-5,

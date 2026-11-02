@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [nine Desert sanctuaries](solar-sanctuaries.md) replace plain inner walls
+  and repeated arches with 27 recessed faces, individual roof structures and
+  stone entrance crowns. All 145 selected tests and the build pass, including
+  1,437 closed construction pieces, 693 roof support/camera comparisons,
+  86 independent bearing contacts and nine normal-controller roof landings.
+  Thirty-one final development views, 63 posed body checks, 64 local movement
+  legs, all nine restored optical circuits and 36 tracked geometry disposals
+  pass. Final keyboard/touch controls and six complete-save reload comparisons
+  retain partial mechanism progress, chapter advancement and an earned sloping
+  roof position before and after a native downhill walk. Broader exterior
+  composition, continuous campaign contact and listening/device acceptance
+  remain open.
+
 - Nine [Desert sliding thresholds](solar-thresholds.md) replace the recorded
   dark floor strips with fitted sandstone beds, coping and framed covers.
   The shutters descend before the covers close; moving physical and camera

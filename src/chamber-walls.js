@@ -10,6 +10,7 @@ import { solarPanelGeometry } from "./desert-architecture.js";
 import { timberGeometry } from "./monastery-architecture.js";
 import { crystalBayContour, addCrystalBayInlay } from "./crystal-wall-art.js";
 import { buildCoastalWallArt } from "./coastal-wall-art.js";
+import { buildSolarInnerWall } from "./solar-sanctuaries.js";
 import {
   forgeWallPlan,
   forgeBayContour,
@@ -224,7 +225,8 @@ function closedPlaque(face, w, h, segments, vertexColors = false) {
 // Regional blind bays replace the generic outer face. The closed backing is
 // at z=-.13 (.04 beside hinged leaves), the coursed face at .43, and the largest
 // cornice at .74. All remain inside the existing .85 m movement half-width;
-// the inner face stays at -.41.
+// the generic inner face stays at -.41. Desert interiors replace that skin
+// with recessed stonework whose largest projection is -.585.
 export function buildChamberWall(game, gate, m, { length, side, floor, transform, bayLayout }) {
   const plan = {
     ...chamberWallPlan(game.level.biome, length, gate.stage, side),
@@ -310,7 +312,13 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     }
   }
   const recessedCoastalRecord = plan.biome === "water" && side === 0 && gate.stage > 0;
-  if (recessedCoastalRecord) {
+  let solarInterior = null;
+  if (plan.biome === "desert") {
+    group.updateMatrix();
+    solarInterior = buildSolarInnerWall(game, gate, m, {
+      length, side, frame: group.matrix.clone(),
+    });
+  } else if (recessedCoastalRecord) {
     // Keep the exterior bay backing sealed, then dress the four edges of the
     // interior recess. The new relief stays behind the old -0.41 inner face;
     // nominal wall bounds alone do not reserve the explorer's posed body.
@@ -681,7 +689,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     }
     // Relief on the inner rear face is shallow enough to preserve chamber
     // working space. Side walls are left clear of the inward-swinging leaves.
-    if (side === 0 && !(biome === "water" && gate.stage > 0)) {
+    if (side === 0 && biome !== "desert" && !(biome === "water" && gate.stage > 0)) {
       const interiorTrim = biome === "snow" ? m.wood : m.trim;
       const inner = contour.map(([x, y]) => [
         cx + x * 0.72,
@@ -736,6 +744,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     floor,
     position: group.position.toArray(),
     angle: group.rotation.y,
+    ...(solarInterior ? { solarInterior } : {}),
     ...(coastalRecord ? { coastalRecord } : {}),
   };
   mergeArchitecture(group);

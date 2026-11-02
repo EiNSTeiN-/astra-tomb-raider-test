@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [nine Desert sanctuaries](docs/solar-sanctuaries.md) now have individual
+roof structures, recessed inner walls and stone entrance crowns, from an open
+aqueduct vault to a shaded corbelled sepulchre.
+
 The [Desert sliding thresholds](docs/solar-thresholds.md) cover all nine shutter
 slots with supported sandstone crossings after their bronze leaves descend.
 

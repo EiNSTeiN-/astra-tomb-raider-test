@@ -1984,3 +1984,15 @@ retouching. The before/after departure shares its recorded camera; the revised
 explorer stands on the new support. Other cameras and prepared motion states
 vary by figure. Baseline runtime hashes match published `de0c00d`, and revised
 hashes match the new application. Existing material attribution remains applicable.
+
+The [nine Desert sanctuaries](solar-sanctuaries.md) use original project-authored
+recessed masonry, roof structures, stone crowns and bronze witness marks. Their
+materials and texture objects reuse the existing credited sandstone maps and
+procedural bronze. No external model, bitmap, recording or dependency is added.
+Eight actual 1280 × 800 High gameplay and construction figures are lossless WebP
+exports with identical decoded source pixels and dimensions, without cropping
+or retouching. The two before/after approaches share prepared player and camera
+positions; other construction views and the prepared roof landing use different
+positions. All 399 baseline runtime hashes match published `58a54fc`; the 400
+revised runtime hashes match the new application. Existing attribution remains
+applicable.

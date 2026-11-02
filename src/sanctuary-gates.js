@@ -44,6 +44,7 @@ import {
   solarThresholdPose,
   updateSolarThreshold,
 } from "./solar-thresholds.js";
+import { finishSolarSanctuary } from "./solar-sanctuaries.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -564,6 +565,8 @@ export function buildSanctuaryGate(game, feature, materials) {
     buildCoastalVault(game, gate, m);
   } else if (design.panel === "orrery") {
     gate.crown = buildMeridianGateCrown(game, gate, m);
+  } else if (design.panel === "sun") {
+    finishSolarSanctuary(game, gate, m);
   } else if (design.crown === "arch") {
     for (let i = 0; i < 15; i++) {
       const a = (i * Math.PI) / 15 + 0.006,
