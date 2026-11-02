@@ -337,6 +337,10 @@ import {
   focusObservatory,
 } from "./observatory.js";
 import {
+  buildMeridianConsole,
+  updateMeridianConsoles,
+} from "./meridian-consoles.js";
+import {
   buildTorch,
   useTorch,
   updateTorch,
@@ -1392,6 +1396,8 @@ export class Adventure {
     this.world.add(grass);
   }
   buildFeatures() {
+    this.meridianConsoles = [];
+    this.meridianConsoleMaterials = null;
     for (const f of this.map.features) {
       const group = new THREE.Group(),
         x = f.x * CELL,
@@ -1428,7 +1434,7 @@ export class Adventure {
       } else if (f.type === "mechanism") {
         if (hasCounterweights(f)) {
           buildCounterweights(this, f, group);
-        } else {
+        } else if (!buildMeridianConsole(this, f, group)) {
           this.cylinder(1.8, 2.1, 0.8, this.darkMat, 0, 0.5, 0, group);
           this.cylinder(1.4, 1.6, 0.35, this.goldMat, 0, 1.05, 0, group);
           const ring = new THREE.Mesh(
@@ -1468,7 +1474,7 @@ export class Adventure {
           color: f.type === "camp" ? 0x9ebd8a : 0xe3c184,
         }),
       );
-      marker.position.y = 3.4;
+      marker.position.y = f.markerHeight ?? 3.4;
       group.add(marker);
       f.marker = marker;
       this.items.push(f);
@@ -2353,6 +2359,7 @@ export class Adventure {
     updateEchoGallery(this, dt);
     updateFireVault(this, dt);
     updateObservatory(this, observatoryDt);
+    updateMeridianConsoles(this);
     updateCaverns(this, dt);
     updateSkyBridges(this, dt);
     syncCounterweights(this, dt);
@@ -2410,7 +2417,8 @@ export class Adventure {
           (f.type === "relic" ? 2 : 1) +
           Math.sin(this.elapsed * 2 + f.x) * 0.12;
       }
-      f.marker.position.y = 3.4 + Math.sin(this.elapsed * 2) * 0.15;
+      f.marker.position.y =
+        (f.markerHeight ?? 3.4) + Math.sin(this.elapsed * 2) * 0.15;
       f.marker.scale.setScalar(this.sense > 0 ? 2 : 1);
       if (f.type === "relic" && !f.relicArt)
         f.group.visible =

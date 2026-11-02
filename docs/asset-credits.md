@@ -1952,3 +1952,14 @@ preserve actual gameplay pixels from a recorded occupied stance and a recovered
 older arrival. Their player and camera positions differ because the old stance
 is now rejected. These are prepared-state gameplay renders. Existing
 attribution remains applicable.
+
+The [Meridian consoles](meridian-consoles.md) are original project-authored
+geometry. Their feet reuse the project's orrery profiles, and their dressed
+stone shares the existing credited observatory texture objects. The bronze,
+ivory hands and glass use project material code. No new external model,
+bitmap, recording or dependency is added. Six actual 1280 × 800 High gameplay
+and inspection figures record the preceding occupied position, the recovered
+arrival and four revised consoles. Camera and player positions vary by view.
+Lossless WebP exports preserve decoded pixels and dimensions without cropping
+or retouching; preceding source hashes match published `c02fba7`, and revised
+hashes match the new application.

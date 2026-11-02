@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [nine Meridian consoles](docs/meridian-consoles.md) replace repeated podiums
+with individual stone instruments, saved dial displays and matching physical contact.
+
 The [sanctuary control repair](docs/sanctuary-controls.md) gives eight small
 pedestals matching physical contact, terrain seating and sound origins.
 

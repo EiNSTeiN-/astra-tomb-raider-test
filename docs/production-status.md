@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [nine Meridian consoles](meridian-consoles.md) replace repeated gold-ring
+  stands with individual stone profiles, bronze borders and protected dials
+  that show saved ring positions. Their 146 closed structural pieces share
+  physical support and fitted camera coverage on the raised paving. All 95
+  selected tests, nineteen reviewed development views, nine prepared routes
+  covering 72 legs, source-anchor and shared-map checks, 81 tracked disposals
+  and the build pass. Final production keyboard/touch controls,
+  stage 1-to-2 advancement and five
+  complete-save reload comparisons also pass, including an occupied arrival
+  that retains its raised floor after moving clear of the console. Broader
+  room composition, continuous contact and listening/device acceptance remain
+  open.
+
 - The [sanctuary control repair](sanctuary-controls.md) closes an observed body
   overlap at the rear counterweight control in all eight chapters. Actual
   triangle contact, terrain seating, camera coverage and sound origins now
