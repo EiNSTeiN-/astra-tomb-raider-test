@@ -1903,3 +1903,14 @@ published `4564870`; the doorway baseline is the interim roof-only revision
 before threshold construction. Revised captures match the final application.
 Lossless WebP exports preserve decoded source pixels without cropping or
 retouching.
+
+The [Meridian door records](meridian-doors.md) are original project-authored
+bronze plates, recess backs, stone emblems, borders and fittings. They reuse
+existing credited stone and inlay materials and the existing procedural
+patinated bronze. No external model, bitmap, recording or dependency is added.
+Six actual 1280 × 800 High comparison captures share prepared player positions,
+follow cameras and zero elapsed simulation time. Their baseline source hashes
+match published `e68c603`; revised source hashes match the new application.
+A seventh High capture uses a rear diagnostic camera and records the shallower
+reliefs and remaining bronze-highlight finding. Lossless WebP conversion
+preserves decoded source pixels and dimensions without cropping or retouching.

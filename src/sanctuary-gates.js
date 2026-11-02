@@ -37,6 +37,7 @@ import { buildCoastalVault } from "./coastal-vaults.js";
 import { buildForgeVault } from "./forge-vaults.js";
 import { buildWindChamberCrown } from "./wind-chamber-crowns.js";
 import { buildCrystalShutter } from "./crystal-shutters.js";
+import { buildMeridianDoor } from "./meridian-doors.js";
 
 export function gateMaterials(level) {
   const design = GATE_DESIGNS[level.biome];
@@ -687,8 +688,8 @@ export function buildSanctuaryGate(game, feature, materials) {
       block(6.15, 7.4, 0.48, bodyMaterial, cx, 3.7, 0, leaf);
     cameraBox(
       leafWidth,
-      7.4,
-      design.panel === "crystal" ? 1.26 : 0.6,
+      design.panel === "orrery" ? 7.44 : 7.4,
+      design.panel === "crystal" ? 1.26 : design.panel === "orrery" ? 1.12 : 0.6,
       cx,
       3.7,
       design.panel === "crystal" ? 0.05 : 0,
@@ -857,56 +858,36 @@ export function buildSanctuaryGate(game, feature, materials) {
         cx,
         materials: m,
       });
-    } else {
-      for (let ring = 0; ring < 3; ring++) {
-        const orbit = add(
-          new THREE.TorusGeometry(0.9 + ring * 0.6, 0.055, 6, 56),
-          m.metal,
-          cx,
-          3.75,
-          0.37 + ring * 0.035,
-          leafDetail,
-        );
-        orbit.scale.y = 0.66 + ring * 0.12;
-        orbit.rotation.z = (ring - 1) * 0.48;
-        const a = feature.stage * 0.8 + ring * 1.7 + side;
-        add(
-          new THREE.SphereGeometry(0.13, 12, 8),
-          m.inlay,
-          cx + Math.cos(a) * (ring * 0.6 + 0.9),
-          3.75 + Math.sin(a) * (ring * 0.6 + 0.9) * 0.8,
-          0.52,
-          leafDetail,
-        );
-      }
-      for (let i = 0; i < 7; i++)
-        add(
-          new THREE.OctahedronGeometry(0.08),
-          m.metal,
-          cx + Math.sin(i * 13 + feature.stage) * 2.5,
-          0.75 + i * 0.96,
-          0.39,
-          leafDetail,
-        );
+    } else if (design.panel === "orrery") {
+      buildMeridianDoor({
+        gate,
+        leaf,
+        detail: leafDetail,
+        side,
+        cx,
+        materials: m,
+      });
     }
-    const handle = add(
-      new THREE.TorusGeometry(0.25, 0.055, 7, 24),
-      m.metal,
-      cx - side * (leafWidth / 2 - 0.9),
-      3.45,
-      0.55,
-      leafDetail,
-    );
-    block(
-      0.22,
-      0.4,
-      0.28,
-      m.metal,
-      cx - side * (leafWidth / 2 - 0.9),
-      3.7,
-      0.4,
-      leafDetail,
-    );
+    if (design.panel !== "orrery") {
+      const handle = add(
+        new THREE.TorusGeometry(0.25, 0.055, 7, 24),
+        m.metal,
+        cx - side * (leafWidth / 2 - 0.9),
+        3.45,
+        0.55,
+        leafDetail,
+      );
+      block(
+        0.22,
+        0.4,
+        0.28,
+        m.metal,
+        cx - side * (leafWidth / 2 - 0.9),
+        3.7,
+        0.4,
+        leafDetail,
+      );
+    }
     mergeArchitecture(leaf);
     mergeArchitecture(leafDetail);
     const obstacle = { x: 0, z: 0, w: 0, d: 0, h: 7.5 };

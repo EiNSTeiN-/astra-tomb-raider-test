@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Meridian door records](meridian-doors.md) replace repeated orbital rings
+  on all twenty leaves with ten individual bronze and stone compositions. All
+  63 selected tests and the build pass, covering closed geometry, seated emblems,
+  physical texture scale, moving camera coverage, all 69 gates, folded-door
+  shielding, counterweights, thresholds and saved arrivals. All 28 final High
+  views are reviewed; 30 sampled open passages, sound-anchor bounds and 105
+  tracked resource disposals pass. Production keyboard/touch controls, stage
+  advancement, local returns and five complete-save reload comparisons pass.
+  Repeated surrounds, square bronze-highlight mottling, instruments and broader
+  world composition remain open.
+
 - The [Meridian architecture pass](meridian-architecture.md) gives eleven
   observatories distinct bronze crowns and closes observed gaps beneath five
   gates with physical stone thresholds. All 60 selected tests and the build pass,

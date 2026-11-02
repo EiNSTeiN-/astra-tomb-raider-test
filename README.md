@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [Meridian door records](docs/meridian-doors.md) give all ten gate pairs
+individual recessed bronze and stone compositions, detailed on both faces.
+
 The [Meridian architecture pass](docs/meridian-architecture.md) gives eleven
 observatories distinct bronze crowns and seats five raised gates on physical
 stone thresholds, with recovery for saves on their former soil.
