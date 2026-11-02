@@ -1963,3 +1963,14 @@ arrival and four revised consoles. Camera and player positions vary by view.
 Lossless WebP exports preserve decoded pixels and dimensions without cropping
 or retouching; preceding source hashes match published `c02fba7`, and revised
 hashes match the new application.
+
+The [Desert optical tables](solar-tables.md) use original project-authored
+geometry with the existing solar casting and plate helpers. Their sandstone
+maps share the chapter's existing credited textures. Bronze, enamel, ivory
+mirror marks, glass and miniature sunlight use project material code. No new
+external model, bitmap, recording or dependency is added. The documentation
+figures are actual gameplay and construction renders from prepared states;
+player and camera positions differ between the occupied and recovered arrivals.
+Six 1280 × 800 High exports use lossless WebP with identical decoded source
+pixels and dimensions, without cropping or retouching. Preceding runtime hashes
+match published `613e732`; revised captures match the current application.

@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [Desert optical tables](docs/solar-tables.md) show their chambers' actual
+mirror turns and light paths inside eight distinct sandstone assemblies.
+
 The [nine Meridian consoles](docs/meridian-consoles.md) replace repeated podiums
 with individual stone instruments, saved dial displays and matching physical contact.
 

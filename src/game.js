@@ -340,6 +340,7 @@ import {
   buildMeridianConsole,
   updateMeridianConsoles,
 } from "./meridian-consoles.js";
+import { buildSolarTable, updateSolarTables } from "./solar-tables.js";
 import {
   buildTorch,
   useTorch,
@@ -1398,6 +1399,8 @@ export class Adventure {
   buildFeatures() {
     this.meridianConsoles = [];
     this.meridianConsoleMaterials = null;
+    this.solarTables = [];
+    this.solarTableMaterials = null;
     for (const f of this.map.features) {
       const group = new THREE.Group(),
         x = f.x * CELL,
@@ -1434,7 +1437,10 @@ export class Adventure {
       } else if (f.type === "mechanism") {
         if (hasCounterweights(f)) {
           buildCounterweights(this, f, group);
-        } else if (!buildMeridianConsole(this, f, group)) {
+        } else if (
+          !buildMeridianConsole(this, f, group) &&
+          !buildSolarTable(this, f, group)
+        ) {
           this.cylinder(1.8, 2.1, 0.8, this.darkMat, 0, 0.5, 0, group);
           this.cylinder(1.4, 1.6, 0.35, this.goldMat, 0, 1.05, 0, group);
           const ring = new THREE.Mesh(
@@ -2427,6 +2433,7 @@ export class Adventure {
     }
     updateFieldWorld(this, dt);
     updateSolarChambers(this, solarDt);
+    updateSolarTables(this);
     updateBellCourts(this, solarDt);
     updateHydraulicCourts(this, solarDt);
     updateThermalCourts(this, solarDt);

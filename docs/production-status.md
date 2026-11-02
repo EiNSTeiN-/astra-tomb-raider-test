@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- Eight [Desert optical tables](solar-tables.md) replace repeated generic
+  stands with individual sandstone supports and protected miniature optics.
+  Their mirrors follow the real reflectors; light strips use the actual
+  chamber beam segments. The 212 structural pieces retain body support and
+  camera coverage on the raised paving. All 102 selected tests pass, including
+  precise render/physics comparisons and vertical deck landings followed by
+  smooth departures. Eighteen revised views, 64 local route legs, all nine
+  restored optical circuits, 118 tracked disposals and the build pass. Final
+  keyboard/touch advancement and five complete-save reload comparisons pass,
+  including an older occupied arrival. Broader court composition, continuous
+  campaign contact and listening/device acceptance remain open.
+
 - The [nine Meridian consoles](meridian-consoles.md) replace repeated gold-ring
   stands with individual stone profiles, bronze borders and protected dials
   that show saved ring positions. Their 146 closed structural pieces share
