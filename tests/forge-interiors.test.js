@@ -63,13 +63,31 @@ test("eight furnished halls retain front approaches and fit their stepped floors
   const ray = new THREE.Raycaster();
   let triangles = 0;
   for (const hall of g.forgeInteriors) {
-    assert.equal(hall.root.children.length, 4, "bounded material batches");
+    assert(
+      hall.root.children.length >= 3 && hall.root.children.length <= 4,
+      "bounded material batches, including the first hall's wall lighting",
+    );
     assert.equal(hall.lamps.length, 2);
     triangles += hall.triangles;
     for (const mesh of hall.root.children)
       for (const value of mesh.geometry.attributes.position.array)
         assert(Number.isFinite(value));
     const c = hall.root.position;
+    if (hall.stage === 0) {
+      const board = [-3.2, -1.6, 0, 1.6, 3.2],
+        stances = board.flatMap((x) => board.map((z) => [x, z]));
+      for (const side of [-1, 1])
+        for (const cell of board)
+          stances.push([side * 4.45, cell], [cell, side * 4.45]);
+      for (const [dx, z] of stances) {
+        const x = c.x + dx,
+          y = courtWalkingHeight(g, x, z);
+        assert(
+          !hall.assemblies.some((a) => stationBlocked(a.solid, x, y, z, 2.25)),
+          `first hall furnishings leave board and grip stance ${dx}, ${z} clear`,
+        );
+      }
+    }
     // A 1.3-metre-wide approach remains clear to the original central altar.
     for (let z = 7.5; z >= 2.5; z -= 0.1)
       for (const dx of [-0.65, 0, 0.65]) {

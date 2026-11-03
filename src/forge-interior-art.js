@@ -8,7 +8,9 @@ import { workyardPipeGeometry } from "./forge-workyard-art.js";
 export function forgeInteriorPlan(stage) {
   const part = (kind, x, z, w, d) => ({ kind, x, z, w, d });
   const plans = [
-    [part("duct", -3.8, -3.7, 1.7, 2.2), part("duct", 3.8, -3.7, 1.7, 2.2)],
+    // The first hall is a working counterweight board. Its outer cells and
+    // grip lanes need the rear corners previously occupied by furnace ducts.
+    [],
     [part("baffle", -4.35, -0.9, 1.1, 5.4), part("baffle", 4.35, -2, 1.1, 3.2)],
     [-3.7, 0, 3.7].map((x) => part("vessel", x, -4.25, 1.6, 1.6)),
     [

@@ -19,6 +19,28 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [counterweight mount pass](counterweight-mounts.md) places receiver names
+  below painted recesses and adds grounded lifting channels, cornice ties and
+  a moving cable to all eight first sanctuaries. Finite header collision and
+  moving camera surfaces follow the guard. The route check also finds two
+  existing furnace ducts blocking required cells in the first forge hall;
+  removing those ducts preserves its board and wall lighting. All 68 selected
+  regressions, three CPU-budget checks and the build pass. All eight browser
+  boards complete 121 moves, with 9,754 legal-root walking updates and sixteen
+  resting body checks across 769,520 character vertices. The final forge width
+  adjustment passes a separate fourteen-move repeat and preserves identical
+  construction in the other seven themes. Sixteen preceding, sixteen paired,
+  nine all-chapter and four final forge views are reviewed; two obscured forge
+  comparisons in each paired set are excluded from construction coverage.
+  Native keyboard/High and portrait touch/Performance each move one stone,
+  walk 1.50 m and pass complete-store reload comparisons apart from timestamps,
+  with all eight release images reviewed. A first 30-second capture timeout
+  is replaced by a bounded longer observation; no app error is recorded.
+  All 423 final runtime hashes and 800 frozen inputs match. Tracked frame
+  geometries dispose once, and owned helpers close under the shared
+  five-of-sixteen CPU allowance. Broader scenery, continuous contact and
+  listening/device acceptance remain open.
+
 - The [eight cavern archive roof webs](crystal-vault-webs.md) add coursed
   limestone above the retained ribs, with an open porch, rising/descending
   profiles, a western breach and a lantern aperture. All 64 selected

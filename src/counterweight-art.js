@@ -8,6 +8,7 @@ import { skyWindReliefGeometry } from "./sky-chamber-walls.js";
 import {
   stationAssemblySolid,
   stationMeshSolid,
+  stationSolid,
 } from "./field-station-solids.js";
 import { footprintMinimum } from "./masonry-foundations.js";
 
@@ -204,6 +205,11 @@ export function buildCounterweightArt(game, chamber, label) {
       h: 2.15,
     });
   }
+  const receiverX = trial.goals.map(
+    (goal) =>
+      goal.cells.reduce((sum, cell) => sum + (cell[0] - 2) * TILE, 0) /
+      goal.cells.length,
+  );
   trial.goals.forEach((goal, index) => {
     const material = windMetal("worn");
     material.emissive.setHex(0x355440);
@@ -229,13 +235,30 @@ export function buildCounterweightArt(game, chamber, label) {
       plate.add(name);
       return plate;
     });
-    // The existing rear wall's inner face is z=-6.09. These plaque backs
-    // enter it by 2 cm, so the readable text has a physical mounting surface.
-    const x = -3.5 + index * 2.35;
-    block(1.98, 0.55, 0.16, bronze, x, 2.65, -6.03);
-    block(1.83, 0.42, 0.018, iron, x, 2.65, -5.946);
-    const sign = label(goal.name, 1.55);
-    sign.position.set(x, 2.65, -5.933);
+    // Mount to the solid lower wall band, clear of recessed paintings. The
+    // lettering aligns with the actual receiver rather than an unrelated row.
+    const x = receiverX[index],
+      width = Math.min(
+        1.98,
+        ...receiverX
+          .filter((_, i) => i !== index)
+          .map((other) => Math.abs(other - x) - 0.12),
+      );
+    for (const side of [-1, 1])
+      block(
+        0.22,
+        0.34,
+        0.68,
+        stone,
+        x + side * (width / 2 - 0.25),
+        0.83,
+        -6.35,
+      );
+    block(width, 0.55, 0.16, bronze, x, 0.83, -6.03);
+    block(width - 0.15, 0.42, 0.018, iron, x, 0.83, -5.946);
+    const sign = label(goal.name, width - 0.43);
+    sign.position.set(x, 0.83, -5.933);
+    sign.userData.counterweightReceiver = index;
     group.add(sign);
     chamber.plates.push({ goal, material, meshes: plates, active: false });
   });
@@ -291,9 +314,95 @@ export function buildCounterweightArt(game, chamber, label) {
   cage.userData.cameraDynamic = true;
   cage.position.set(0, 0, -5);
   group.add(cage);
-  for (const x of [-0.9, 0.9]) block(0.1, 2.25, 0.1, bronze, x, 1.15, 0, cage);
-  block(1.9, 0.12, 0.1, worn, 0, 2.28, 0, cage);
+  for (const x of [-0.9, 0.9]) {
+    const post = block(0.1, 2.25, 0.1, bronze, x, 1.15, 0, cage);
+    game.cameraSurfaces?.capture(post, { small: true, thin: true });
+  }
+  const header = block(1.9, 0.12, 0.1, worn, 0, 2.28, 0, cage);
+  game.cameraSurfaces?.capture(header, { small: true, thin: true });
   chamber.cage = cage;
+  chamber.cageHeaderSolid = stationSolid(
+    game,
+    feature,
+    group,
+    [1.9, 0.12, 0.1],
+    [0, 2.28, -5],
+    { bodyPadding: 0.4, descentEscapeRadius: 0.65, support: false, node: cage },
+  );
+  chamber.cageHeaderSolid.ceiling = true;
+
+  // Grounded channels carry the sliding posts. Their diagonal ties enter the
+  // rear cornice, above the wall imagery, and the cable meets the moving head.
+  const fixed = [];
+  const keep = (mesh) => {
+    fixed.push(mesh);
+    return mesh;
+  };
+  for (const x of [-0.9, 0.9]) {
+    const sample = (px, pz) => game.groundHeight(px, pz) - group.position.y;
+    const wx = group.position.x + x,
+      wz = group.position.z - 5.04;
+    const low = footprintMinimum(sample, wx, wz, 0.4, 0.44) - 0.08;
+    const high =
+      -footprintMinimum((px, pz) => -sample(px, pz), wx, wz, 0.4, 0.44) + 0.11;
+    keep(block(0.4, high - low, 0.44, trim, x, (high + low) / 2, -5.04));
+    keep(block(0.24, 5.15 - high, 0.045, iron, x, (high + 5.15) / 2, -5.125));
+    for (const side of [-1, 1])
+      keep(
+        block(
+          0.04,
+          5.15 - high,
+          0.22,
+          bronze,
+          x + side * 0.1,
+          (high + 5.15) / 2,
+          -5.035,
+        ),
+      );
+    cameraSolid(0.3, 5.15 - low, 0.46, x, (low + 5.15) / 2, -5.04);
+    const a = new THREE.Vector3(x, 5.15, -5.04),
+      b = new THREE.Vector3(x, 7.04, -6.49),
+      delta = b.clone().sub(a),
+      length = delta.length(),
+      q = new THREE.Quaternion().setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        delta.normalize(),
+      ),
+      mid = a.clone().add(b).multiplyScalar(0.5);
+    const shape = new THREE.CylinderGeometry(0.035, 0.035, length, 12);
+    const proxy = new THREE.Mesh(shape.clone(), stone);
+    proxy.position.copy(mid);
+    proxy.quaternion.copy(q);
+    group.add(proxy);
+    game.cameraSurfaces?.capture(proxy, {
+      small: true,
+      thin: true,
+      cylinderAxis: "y",
+    });
+    group.remove(proxy);
+    proxy.geometry.dispose();
+    shape.applyQuaternion(q).translate(mid.x, mid.y, mid.z);
+    keep(add(shape, iron, 0, 0, 0));
+    const anchor = keep(block(0.3, 0.28, 0.32, bronze, x, 7.02, -6.49));
+    game.cameraSurfaces?.capture(anchor, { small: true, thin: true });
+  }
+  const beam = keep(block(2.16, 0.16, 0.24, worn, 0, 5.15, -5.04));
+  game.cameraSurfaces?.capture(beam, { small: true, thin: true });
+  chamber.cageGuideSolid = stationAssemblySolid(game, feature, fixed, {
+    bodyPadding: 0.4,
+    support: false,
+  });
+  chamber.cageGuideSolid.counterweightGuide = true;
+  const cable = add(
+    new THREE.CylinderGeometry(0.018, 0.018, 1, 8),
+    iron,
+    0,
+    0,
+    -5,
+    group,
+  );
+  cable.userData.animated = true;
+  chamber.hoistCable = cable;
   const control = new THREE.Group();
   control.name = "Counterweight sanctuary control";
   control.position.z = -5;

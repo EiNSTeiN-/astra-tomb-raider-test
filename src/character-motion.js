@@ -138,7 +138,8 @@ function clearStationVerticalMotion(game, before) {
   const limit = Math.max(
     0.2,
     ...contacts.map((o) => {
-      if (!o.triangles || p.y >= before) return 0.2;
+      if (p.y >= before) return 0.2;
+      if (!o.triangles && !Number.isFinite(o.descentEscapeRadius)) return 0.2;
       return Math.max(o.bodyPadding ?? 0.4, o.descentEscapeRadius ?? 0) + 0.02;
     }),
   );

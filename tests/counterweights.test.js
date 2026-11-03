@@ -38,6 +38,7 @@ import { followClearCamera } from "../src/camera-follow.js";
 import { buildSoundLandmarks } from "../src/sound-landmarks.js";
 import {
   stationAssemblySolid,
+  stationBlocked,
   stationEntry,
   stationSupport,
 } from "../src/field-station-solids.js";
@@ -141,6 +142,9 @@ test("all eight sanctuary controls keep bodies outside the rendered stone and cr
     );
     game.world.updateMatrixWorld(true);
     const centre = control.getWorldPosition(new THREE.Vector3());
+    // The rear control becomes accessible after its guard has lifted.
+    game.counterweights.saved.solved = true;
+    syncCounterweights(game, 0);
     assert.equal(
       game.canMove(centre.x, centre.z, 0),
       false,
@@ -210,8 +214,9 @@ test("all eight sanctuary controls keep bodies outside the rendered stone and cr
         supportRays++;
       }
     feature.core.visible = false;
-    const from = centre.clone().add(new THREE.Vector3(-2, 1.2, 0)),
-      to = centre.clone().add(new THREE.Vector3(2, 1.2, 0));
+    // Isolate the head's visibility between the new permanent guide channels.
+    const from = centre.clone().add(new THREE.Vector3(-0.6, 1.2, 0)),
+      to = centre.clone().add(new THREE.Vector3(0.6, 1.2, 0));
     assert.equal(stationEntry(headSolid, from, to), null);
     assert.equal(stationSupport(headSolid, centre.x, centre.z), null);
     assert.equal(game.canMove(centre.x, centre.z, 0.81), true);
@@ -357,6 +362,187 @@ test("regional counterweight labels remain attached to physical backing after ba
           `${mesh.userData.counterweightLabel}: seated face, distance ${hit.distance}`,
         );
       }
+    }
+  }
+});
+
+test("receiver plaques align with their floor plates and bear continuously into the real rear masonry", () => {
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+  for (const level of LEVELS) {
+    const { game } = fixture(level),
+      c = game.counterweights;
+    game.world.updateMatrixWorld(true);
+    const architecture = [],
+      fittings = [],
+      labels = [];
+    game.world.traverse((mesh) => {
+      if (!mesh.isMesh) return;
+      let parent = mesh;
+      while (parent && parent !== c.group) parent = parent.parent;
+      if (!parent) architecture.push(mesh);
+      else if (Number.isInteger(mesh.userData.counterweightReceiver))
+        labels.push(mesh);
+      else if (!mesh.userData.counterweightLabel) fittings.push(mesh);
+    });
+    assert.equal(labels.length, c.plates.length);
+    const proxies = [...architecture, ...fittings].map((mesh) => {
+      const proxy = new THREE.Mesh(mesh.geometry, material);
+      proxy.matrixWorld.copy(mesh.matrixWorld);
+      return proxy;
+    });
+    const masonry = proxies.slice(0, architecture.length);
+    for (const label of labels) {
+      const index = label.userData.counterweightReceiver,
+        p = label.getWorldPosition(new THREE.Vector3()),
+        receivers = c.plates[index].meshes.map((m) =>
+          m.getWorldPosition(new THREE.Vector3()),
+        );
+      assert(
+        Math.abs(
+          p.x - receivers.reduce((sum, v) => sum + v.x, 0) / receivers.length,
+        ) < 1e-6,
+      );
+      assert(
+        p.y - c.group.position.y + 0.275 < 1.2,
+        "the complete plaque clears the painted recess",
+      );
+      const textWidth = new THREE.Box3()
+        .setFromObject(label)
+        .getSize(new THREE.Vector3()).x;
+      for (const side of [-1, 1])
+        for (const dy of [-0.06, 0.04]) {
+          const origin = new THREE.Vector3(
+              p.x + side * textWidth * 0.45 + 0.003,
+              p.y + dy,
+              c.group.position.z - 5.7,
+            ),
+            direction = new THREE.Vector3(0, 0, -1),
+            ray = new THREE.Raycaster(origin, direction, 0, 2),
+            wall = ray.intersectObjects(masonry, false)[0];
+          assert(wall, `${level.id}: real rear wall behind the plaque`);
+          const events = ray.intersectObjects(proxies, false),
+            intervals = [];
+          let depth = 0,
+            start = null,
+            last = null;
+          for (const hit of events) {
+            const normal = hit.face.normal
+                .clone()
+                .transformDirection(hit.object.matrixWorld),
+              entering = normal.dot(direction) < 0;
+            if (
+              last &&
+              last.object === hit.object &&
+              Math.abs(last.distance - hit.distance) < 1e-6 &&
+              last.entering === entering
+            )
+              continue;
+            last = { object: hit.object, distance: hit.distance, entering };
+            if (entering) {
+              if (depth++ === 0) start = hit.distance;
+            } else if (--depth === 0 && start !== null)
+              intervals.push([start, hit.distance]);
+          }
+          assert(
+            intervals.some(([a, b]) => a < 0.29 && b > wall.distance + 0.02),
+            `${level.id}: plaque, anchor and masonry form a closed bearing`,
+          );
+        }
+    }
+    // Above the iron insets and anchor pads, only the bronze plaque fronts
+    // occupy this strip. Two entering faces reveal overlapping coplanar backs.
+    for (let step = 0; step < 129; step++) {
+      const ray = new THREE.Raycaster(
+          new THREE.Vector3(
+            c.group.position.x - 4.3 + (step * 8.6) / 128 + 0.00137,
+            c.group.position.y + 1.07317,
+            c.group.position.z - 5.8,
+          ),
+          new THREE.Vector3(0, 0, -1),
+          0,
+          0.4,
+        ),
+        fronts = ray
+          .intersectObjects(proxies.slice(architecture.length), false)
+          .filter(
+            (hit) =>
+              hit.face.normal.clone().transformDirection(hit.object.matrixWorld)
+                .z > 0.95,
+          );
+      assert(
+        fronts.length <= 1,
+        `${level.id}: neighboring plaques must not overlap`,
+      );
+    }
+  }
+  material.dispose();
+});
+
+test("the taut hoist cable and its camera and physical header follow closed, moving and raised cages", () => {
+  for (const level of LEVELS) {
+    const { game } = fixture(level),
+      c = game.counterweights;
+    for (const [solved, dt] of [
+      [false, 0],
+      [true, 0.1],
+      [true, 0.1],
+      [true, 0],
+      [false, 0.1],
+      [false, 0],
+    ]) {
+      c.saved.solved = solved;
+      syncCounterweights(game, dt);
+      game.world.updateMatrixWorld(true);
+      const header = c.cage.children.find((mesh) => {
+          mesh.geometry.computeBoundingBox();
+          return (
+            mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x >
+            1
+          );
+        }),
+        bounds = new THREE.Box3().setFromObject(header),
+        cable = new THREE.Box3().setFromObject(c.hoistCable),
+        center = bounds.getCenter(new THREE.Vector3()),
+        from = center.clone().add(new THREE.Vector3(0, 0, 1)),
+        to = center.clone().add(new THREE.Vector3(0, 0, -1)),
+        ray = new THREE.Raycaster(from, new THREE.Vector3(0, 0, -1), 0, 2),
+        hit = ray.intersectObject(header, false)[0],
+        entry = stationEntry(c.cageHeaderSolid, from, to);
+      assert(hit && entry !== null);
+      assert(Math.abs(hit.distance - entry * 2) < 0.03);
+      assert(game.cameraSurfaces.entry(from, to, 0) <= entry + 0.015);
+      assert(Math.abs(c.cageHeaderSolid.bounds.min.y - bounds.min.y) < 0.03);
+      assert(Math.abs(c.cageHeaderSolid.bounds.max.y - bounds.max.y) < 0.03);
+      assert(
+        stationBlocked(
+          c.cageHeaderSolid,
+          center.x,
+          center.y - 0.04,
+          center.z,
+          0.08,
+        ),
+      );
+      assert(
+        !stationBlocked(
+          c.cageHeaderSolid,
+          center.x,
+          bounds.min.y - 0.3,
+          center.z,
+          0.2,
+        ),
+      );
+      assert(
+        cable.min.y > bounds.min.y && cable.min.y < bounds.max.y,
+        "cable enters the moving header",
+      );
+      assert(
+        Math.abs(cable.max.y - c.group.position.y - 5.1) < 1e-6,
+        "upper end remains seated in the fixed beam",
+      );
+      assert(
+        c.hoistCable.userData.animated,
+        "batching retains the moving cable",
+      );
     }
   }
 });

@@ -112,6 +112,19 @@ export function syncCounterweights(game, dt) {
   chamber.cage.position.y +=
     ((chamber.open ? 2.5 : 0) - chamber.cage.position.y) *
     (dt === 0 ? 1 : Math.min(1, dt * 3));
+  const crown = chamber.cage.position.y + 2.28;
+  if (chamber.hoistCable) {
+    const length = Math.max(0.02, 5.1 - crown);
+    chamber.hoistCable.scale.y = length;
+    chamber.hoistCable.position.y = crown + length / 2;
+  }
+  if (chamber.cageHeaderSolid) {
+    const solid = chamber.cageHeaderSolid,
+      centre = chamber.group.position.y + crown;
+    solid.bounds.min.y = centre - 0.06;
+    solid.bounds.max.y = centre + 0.06;
+    solid.h = solid.bounds.max.y - game.groundHeight(solid.x, solid.z);
+  }
 }
 function available(game) {
   return (

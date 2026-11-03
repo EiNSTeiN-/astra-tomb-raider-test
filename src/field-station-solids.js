@@ -41,6 +41,7 @@ export function stationSolid(
     fieldStation: feature.id,
     radius: options.radius,
     bodyPadding: options.bodyPadding,
+    descentEscapeRadius: options.descentEscapeRadius,
     supportRadius: options.supportRadius,
     supportable: options.support !== false,
     surfaceHeight: options.surfaceHeight,
