@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [fitted snow foreland](alpine-foreland.md) joins the delivered terrain
+  boundary to the first mountain ring, closing the recorded bright background
+  gap VA-200. All 24 focused regressions, three CPU-guard checks and the build
+  pass. All 29 final development views are reviewed; four projection
+  comparisons match exactly, twelve foreground probes stay visible and four
+  oblique clipping comparisons remain within tolerance. Chapter replacement
+  disposes sixteen tracked resources once. The 414 runtime source hashes agree
+  between the view, depth/cleanup and production runs. Four production keyboard
+  and touch scenarios pass four complete-save reload comparisons. Broader
+  landscape composition, sparse ground, the inherited coastal stance regression
+  VA-201 and listening and device acceptance remain open.
+
 - The [eighteen monastery verandas](monastery-verandas.md) replace sealed side
   wings with recessed window bays, timber ramps, open loft circulation and
   thirteen gallery links. All 38 focused regressions, 85 reviewed final

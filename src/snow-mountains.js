@@ -2,6 +2,10 @@ import * as THREE from "three";
 
 import { desertNoise as rockNoise } from "./desert-geology.js";
 import { alpineMaterial } from "./alpine-material.js";
+import {
+  alpineForelandGeometry,
+  alpineForelandMaterial,
+} from "./alpine-foreland.js";
 
 const depth = 640;
 
@@ -111,6 +115,28 @@ export function buildSnowMountains(game) {
       snowMountainGeometry(game.map.size * 7, layer),
       material,
     );
+    if (layer === 0) {
+      const foreland = new THREE.Mesh(
+        alpineForelandGeometry(
+          game.terrainProfile,
+          game.terrainMeshes,
+          mountain.geometry,
+        ),
+        alpineForelandMaterial(
+          game.terrainMeshes[0].material,
+          game.darkMat,
+          game.scene.fog.color,
+          game.terrainProfile.extent,
+        ),
+      );
+      foreland.name = "Alpine foreland";
+      foreland.renderOrder = -11;
+      foreland.frustumCulled = false;
+      foreland.receiveShadow = true;
+      foreland.userData.excludeContact = true;
+      foreland.userData.animated = true;
+      game.world.add(foreland);
+    }
     mountain.name = `Alpine range ${layer}`;
     // Both shells share the same full-precision background depth interval.
     // Clear it only after the second shell, before the playable world renders.

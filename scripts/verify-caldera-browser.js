@@ -10,6 +10,9 @@ export function verifyCalderaDepth(
     name = "Eroded caldera rim",
     names = [name],
     createMaterial = calderaMaterial,
+    createReference = null,
+    clipHeight = 60,
+    clipCameraHeight = null,
   } = {},
 ) {
   const sources = names.map((name) => {
@@ -23,6 +26,7 @@ export function verifyCalderaDepth(
     previousClear = renderer.autoClear;
   const scene = new THREE.Scene();
   scene.background = game.scene.fog.color.clone();
+  if (createReference) scene.fog = game.scene.fog.clone();
   scene.environment = game.scene.environment;
   scene.environmentIntensity = game.scene.environmentIntensity;
   scene.add(game.daylightSky.clone());
@@ -35,30 +39,37 @@ export function verifyCalderaDepth(
     const rim = new THREE.Mesh(source.geometry, source.material);
     rim.frustumCulled = false;
     rim.renderOrder = source.renderOrder;
+    rim.receiveShadow = source.receiveShadow;
     scene.add(rim);
     return rim;
   });
-  const reference = createMaterial(game.darkMat, game.scene.fog.color);
+  const references = createReference
+    ? sources.map((source) => createReference(source, game))
+    : [createMaterial(game.darkMat, game.scene.fog.color)];
   const setReference = (enabled) =>
     rims.forEach((rim, i) => {
-      rim.material = enabled ? reference : sources[i].material;
+      rim.material = enabled
+        ? references[createReference ? i : 0]
+        : sources[i].material;
       rim.onAfterRender = enabled ? () => {} : sources[i].onAfterRender;
     });
-  const compile = reference.onBeforeCompile;
-  reference.onBeforeCompile = (shader) => {
-    compile(shader);
-    const code = /float backgroundDepth=.*\n\s*gl_Position\.z=.*;/;
-    if (!code.test(shader.vertexShader))
-      throw new Error("Reference projection replacement was not found.");
-    shader.vertexShader = shader.vertexShader.replace(code, "");
-  };
-  reference.customProgramCacheKey = () =>
-    `vesper-distant-perspective-reference-${name}`;
+  references.forEach((reference, i) => {
+    const compile = reference.onBeforeCompile;
+    reference.onBeforeCompile = (shader) => {
+      compile(shader);
+      const code = /float backgroundDepth=.*\n\s*gl_Position\.z=.*;/;
+      if (!code.test(shader.vertexShader))
+        throw new Error("Reference projection replacement was not found.");
+      shader.vertexShader = shader.vertexShader.replace(code, "");
+    };
+    reference.customProgramCacheKey = () =>
+      `vesper-distant-perspective-reference-${name}${createReference ? "-" + i : ""}`;
+  });
   const camera = new THREE.PerspectiveCamera(58, 512 / 320, 0.1, 450);
   scene.add(camera);
   const marker = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x25e76b }),
+    new THREE.MeshBasicMaterial({ color: 0x25e76b, fog: false }),
   );
   marker.visible = false;
   camera.add(marker);
@@ -162,16 +173,30 @@ export function verifyCalderaDepth(
         foreground.push({ distance, ...delta });
       }
       marker.visible = false;
+      if (clipCameraHeight !== null) {
+        camera.position.y = clipCameraHeight;
+        camera.lookAt(...toward);
+        camera.updateMatrixWorld(true);
+      }
+      // An oblique near plane must face away from an eye outside its retained
+      // half-space. Putting the eye above this upward plane reverses the
+      // conventional reference's depth ordering instead of testing reflection
+      // clipping. Reflected cameras sit below the retained water surface.
+      if (camera.position.y >= clipHeight)
+        throw new Error(
+          "The oblique reference eye must sit below its clip plane.",
+        );
       camera.far = 1600;
       camera.updateProjectionMatrix();
-      clipAtHeight(60);
       setReference(true);
+      const unclippedReference = capture();
+      clipAtHeight(clipHeight);
       const clippedReference = capture();
-      if (difference(expected, clippedReference).changed < 1000)
+      if (difference(unclippedReference, clippedReference).changed < 1000)
         throw new Error(`${name}: the oblique plane did not clip the ridge`);
       camera.far = 450;
       camera.updateProjectionMatrix();
-      clipAtHeight(60);
+      clipAtHeight(clipHeight);
       setReference(false);
       const clipping = difference(capture(), clippedReference);
       if (clipping.mean > 0.04 || clipping.changed / clipping.channels > 0.002)
@@ -184,7 +209,7 @@ export function verifyCalderaDepth(
   } finally {
     renderer.setRenderTarget(previousTarget);
     renderer.autoClear = previousClear;
-    reference.dispose();
+    references.forEach((reference) => reference.dispose());
     marker.geometry.dispose();
     marker.material.dispose();
     target.dispose();
