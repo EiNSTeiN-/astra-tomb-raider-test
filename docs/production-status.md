@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [quartz facet shading repair](quartz-facets.md) removes observed horizontal
+  ridges caused by a periodic etched normal and matching color wave. Controlled
+  browser comparisons isolate the cause; twelve material and 48 geometry
+  comparisons preserve the physical optics and geometry. All 25 selected tests,
+  three CPU-budget checks, the 393,216-sample GPU comparison and the build pass.
+  All 38 development images and ten production images are reviewed; four closer
+  supported relay captures replace three obstructed views for surface coverage.
+  Chapter replacement releases all 201 tracked mineral resources once and clears
+  old transmission samplers. Both keyboard/touch memory and movement cases retain
+  complete stores through two reload comparisons. The 419 runtime source hashes
+  and 791 frozen inputs match. Broader scenery, continuous contact and subjective
+  listening/device acceptance remain open.
+
 - The [Listening Gallery masonry and foundations](gallery-masonry.md) add six
   staggered courses and limestone coping to 38 permanent walls. A joined backing
   and fitted first courses close sampled footing and end-face defects

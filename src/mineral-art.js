@@ -126,12 +126,9 @@ float mineralAA=max(.0003,fwidth(mineralPlane));
 float mineralFracture=(1.-smoothstep(.0008+mineralAA,.0035+mineralAA,abs(mineralPlane)))
   *smoothstep(.45,.7,mineralNoise(mineralQ*4.3+mineralSeed));
 float mineralBase=1.-smoothstep(.01,.24,mineralP.y/vMineralShape.y);
-float mineralStrataPhase=mineralP.y*92.+mineralNoise(mineralP*3.)*.7;
-float mineralStrata=sin(mineralStrataPhase)*(1.-smoothstep(.7,2.6,fwidth(mineralStrataPhase)));
-float mineralEtch=mineralStrata*.00065+mineralFracture*.00005;
+float mineralEtch=mineralFracture*.00005;
 vec3 mineralBody=mix(vec3(.82,.87,.92),vec3(1.06,1.07,1.08),mineralCloud*.7+mineralFracture*.12);
 mineralBody*=mix(1.,.58,mineralBase);
-mineralBody*=1.+mineralStrata*.007;
 diffuseColor.rgb*=mineralBody;
 `;
 
@@ -212,7 +209,7 @@ export function mineralMaterial(color, restoration) {
           ),
       );
   };
-  material.customProgramCacheKey = () => "vesper-quartz-optics-2";
+  material.customProgramCacheKey = () => "vesper-quartz-optics-3";
   return material;
 }
 
