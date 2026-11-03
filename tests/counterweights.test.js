@@ -289,6 +289,78 @@ test("a descending explorer clears each sanctuary crystal and can leave the resu
     );
   }
 });
+test("the fixed hoist beam catches a clear-air fall without a sideways jump and permits a clear departure", () => {
+  for (const dx of [-0.35, 0, 0.35])
+    for (const dz of [-0.04, 0.04]) {
+      const { game } = fixture();
+      game.player.position.set(100 + dx, 5.7, 95 + dz);
+      game.jumpY = 5.7;
+      game.grounded = false;
+      const start = game.player.position.clone();
+      assert(
+        game.canMove(
+          game.player.position.x,
+          game.player.position.z,
+          game.jumpY,
+        ),
+        "the drop starts in clear air",
+      );
+      for (let frame = 0; frame < 180; frame++) {
+        advanceCharacter(game, new THREE.Vector3(), 1 / 60);
+        assert(
+          game.canMove(
+            game.player.position.x,
+            game.player.position.z,
+            game.jumpY,
+          ),
+          `hoist beam drop ${dx}, ${dz}, frame ${frame}: ${game.player.position.toArray()}`,
+        );
+      }
+      assert(game.grounded, "the explorer reaches real support");
+      assert(Math.abs(game.player.position.x - start.x) < 1e-8);
+      assert(Math.abs(game.player.position.z - start.z) < 1e-8);
+      const support = stationSupport(
+        game.counterweights.cageBeamSolid,
+        game.player.position.x,
+        game.player.position.z,
+        Infinity,
+        0.55,
+      );
+      assert(
+        Math.abs(game.player.position.y - support) < 1e-8,
+        "the rendered beam is the landing surface",
+      );
+      for (let frame = 0; frame < 90; frame++) {
+        advanceCharacter(game, new THREE.Vector3(), 1 / 60, frame === 0);
+        assert(
+          game.canMove(
+            game.player.position.x,
+            game.player.position.z,
+            game.jumpY,
+          ),
+          "a jump from the beam stays clear of the overhead fittings",
+        );
+      }
+      assert(game.grounded, "the jump returns to real support");
+      const settled = game.player.position.clone();
+      for (let frame = 0; frame < 120; frame++) {
+        advanceCharacter(game, new THREE.Vector3(0, 0, 3), 1 / 60);
+        assert(
+          game.canMove(
+            game.player.position.x,
+            game.player.position.z,
+            game.jumpY,
+          ),
+          "departure stays outside the frame",
+        );
+      }
+      assert(
+        game.player.position.z > settled.z + 1.4,
+        "the landing leaves a usable departure",
+      );
+    }
+});
+
 function walk(game, target) {
   for (let step = 0; step < 240; step++) {
     const delta = target.clone().sub(game.player.position);

@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [fixed hoist beam landing repair](hoist-guide-contact.md) adds actual
+  upper-face support and underside contact to the existing member. Six clear
+  drop/jump/departure regressions retain legal movement, and all 69 selected
+  tests, three CPU-budget checks and the build pass. Four delivered jungle
+  falls cover 720 legal movement updates and twelve rendered body poses across
+  577,140 vertices, without horizontal displacement or overlap beyond 15 mm.
+  Six valid chapter-fixture center drops pass; occupied water/forge air
+  starts and diagonal-brace starts are excluded. All eight regional geometry
+  comparisons remain identical. Seven final developer images are reviewed.
+  Native keyboard/High and portrait touch/Performance both restore the beam
+  stance without recovery, crouch, jump and move 0.30 m / 0.40 m at full health.
+  Two complete-store reload comparisons pass apart from timestamps, retaining
+  the supported height; all ten release captures are reviewed. All 423 runtime
+  source hashes and 800 frozen inputs match. Owned browsers and previews close
+  under the shared five-of-sixteen CPU allowance. Broader world, earned rooftop
+  routes, continuous airborne contact and listening/device acceptance remain
+  open.
+
 - The [counterweight mount pass](counterweight-mounts.md) places receiver names
   below painted recesses and adds grounded lifting channels, cornice ties and
   a moving cable to all eight first sanctuaries. Finite header collision and

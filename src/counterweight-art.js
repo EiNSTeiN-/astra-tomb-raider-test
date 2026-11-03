@@ -388,8 +388,18 @@ export function buildCounterweightArt(game, chamber, label) {
   }
   const beam = keep(block(2.16, 0.16, 0.24, worn, 0, 5.15, -5.04));
   game.cameraSurfaces?.capture(beam, { small: true, thin: true });
+  // The fixed horizontal member catches a descending explorer on its actual
+  // top. The channels, diagonal ties and moving guard remain non-platforms.
+  chamber.cageBeamSolid = stationMeshSolid(game, feature, beam, {
+    bodyPadding: 0.4,
+    supportRadius: 0.4,
+  });
+  chamber.cageBeamSolid.ceiling = true;
   chamber.cageGuideSolid = stationAssemblySolid(game, feature, fixed, {
     bodyPadding: 0.4,
+    // A fall across the head beam must clear its half-depth as well as the
+    // body margin; the narrow frame does not provide a walking platform.
+    descentEscapeRadius: 0.65,
     support: false,
   });
   chamber.cageGuideSolid.counterweightGuide = true;
