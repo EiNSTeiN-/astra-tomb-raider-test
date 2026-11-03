@@ -3,6 +3,7 @@ import { vaultStoneGeometry } from "./palace-geometry.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
 import { buildCrystalFacade } from "./crystal-facades.js";
+import { buildCrystalWebs } from "./crystal-vault-webs.js";
 
 const SPRING = 7.16;
 const rib = (z, rise, options = {}) => ({ z, x: 0, yaw: 0, rise, ...options });
@@ -188,5 +189,6 @@ export function buildCrystalVault(game, gate, materials) {
   mergeArchitecture(root);
   gate.vault = { root, plan, ribs, stones };
   buildCrystalFacade(game, gate, materials);
+  buildCrystalWebs(game, gate, materials);
   return gate.vault;
 }

@@ -19,6 +19,26 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eight cavern archive roof webs](crystal-vault-webs.md) add coursed
+  limestone above the retained ribs, with an open porch, rising/descending
+  profiles, a western breach and a lantern aperture. All 64 selected
+  regressions, three CPU-budget checks and the build pass. Independent tests
+  check 2,718 closed blocks, 5,203 render/physical/camera roof rays and 5,400
+  retained working-floor body queries. The rendered-body observer passes 128
+  supported chamber/roof poses across 6,156,160 vertices. Eight local controller
+  runs cover 38.1 m over 384 updates; the guide run ends 0.30 m from its start,
+  and seven return exactly. Chapter replacement releases twelve tracked
+  resources and clears eight roof camera indices. Sixteen baseline and 39
+  current development images are reviewed. Two original exterior stances and
+  one partial alternate are excluded from roof coverage; clear alternate
+  construction views inspect both affected roofs. Follow views check gameplay
+  framing and often crop ceilings. Native keyboard/touch jump/landing and two
+  complete-store reload comparisons pass, with all ten release images reviewed.
+  All 423 runtime source hashes and 800 frozen inputs match. Existing columns
+  and all 187 sound anchors retain their positions. Owned helpers close under
+  the shared five-of-sixteen CPU cap. Broader scenery, rooftop access/continuous
+  contact and listening/device acceptance remain open.
+
 - The [four cavern reservoir beds](cavern-pool-beds.md) replace bent submerged
   paving joints with wet limestone, calcite and sediment. All 57 selected
   regressions, three CPU-budget checks and the build pass. Nineteen final
