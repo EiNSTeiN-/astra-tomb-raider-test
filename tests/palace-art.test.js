@@ -201,9 +201,9 @@ test("built palace preserves open arches and water banks, blocks their masonry, 
       spring = patch.plan.spring;
     assert.ok(patch.root.children.length <= 3, "structure batches by material");
     assert.ok(
-      // Closed gallery heads add at most 960 triangles to an existing court.
-      // Keep a bounded allowance for the new stone and its real silhouettes.
-      patch.triangles < 61000,
+      // Keep the preceding court budget and a bounded allowance for each
+      // clerestory's closed cut courses, blue reveal and two dressed mouths.
+      patch.triangles < 61000 + patch.court.lights.length * 2000,
       `${i}: ${patch.triangles} structural triangles`,
     );
     for (const [dx, dz] of [

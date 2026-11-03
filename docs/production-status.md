@@ -19,6 +19,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal hall windows](palace-hall-lights.md) replace blank upper flanks
+  with 92 real openings on twenty-eight walls across all ten coastal courts
+  (VA-205). Six profiles use blue reveals and beveled stone edges. All 1,203
+  campaign tests, three CPU-guard checks and the build pass; all 784 frozen
+  source/test/script/build inputs match. All 72 final images are reviewed,
+  including both wall faces, ten High follow views and four Performance views.
+  Seventy-six assisted controller/camera route legs retain full character
+  opacity and health over 5,910 updates. All 36 hydraulic controls, 54 field
+  approaches, both climbing loops and 139 previously recorded dry listening
+  positions pass. Two production keyboard/touch cases preserve complete stores
+  through six reload comparisons; all ten native captures are reviewed.
+  Chapter replacement disposes 42 tracked court resources once
+  and retires all 146 tracked camera kernels. The original columns, roofs,
+  furnishings and bird perches retain exact invariant hashes. Checks share the
+  five-of-sixteen CPU allowance and close their browsers and preview servers.
+  Broader court massing, sparse coastal ground, moving campaign contact and
+  listening/device acceptance remain open.
+
 - The [coastal resting-pose repair](coastal-ankle-balance.md) fixes archive
   balance, raised scroll crouches, chest boot overlap and the chest crouch that
   straightened around a low cuff (VA-201–204). All 1,199 final campaign tests,

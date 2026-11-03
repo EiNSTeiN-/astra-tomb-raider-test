@@ -5,6 +5,13 @@ import { mergeArchitecture } from "./visuals.js";
 import { stationMeshSolid } from "./field-station-solids.js";
 import { palaceRoofCells, palaceRoofHeight } from "./palace-court-plan.js";
 import { HYDRAULIC_TRIALS } from "./hydraulic-rules.js";
+import { FacadeCamera } from "./fitted-facades.js";
+import {
+  palaceHallLights,
+  palaceLightFrame,
+  palaceLightIntersects,
+  palaceLightWallCell,
+} from "./palace-hall-lights.js";
 
 function heightPrism(cell, bottom, top) {
   const { x0, x1, z0, z1 } = cell,
@@ -127,12 +134,12 @@ export function buildPalaceCourt(game, root, materials, plan, spring, tint) {
   const block = (w, h, d, material, x, y, z, angle = 0) =>
     add(stoneBlockGeometry(w, h, d, ++serial, 0.018), material, x, y, z, angle);
   let cameraRuns = 0;
-  const capture = (geometry, x = 0, y = 0, z = 0, angle = 0) => {
+  const capture = (geometry, x = 0, y = 0, z = 0, angle = 0, kernel = null) => {
     const mesh = new THREE.Mesh(geometry, materials.stone);
     mesh.position.set(x, y, z);
     mesh.rotation.y = angle;
     root.add(mesh);
-    game.cameraSurfaces?.capture(mesh, { small: true, thin: true });
+    game.cameraSurfaces?.capture(mesh, { small: true, thin: true, kernel });
     root.remove(mesh);
     geometry.dispose();
     cameraRuns++;
@@ -214,9 +221,11 @@ export function buildPalaceCourt(game, root, materials, plan, spring, tint) {
     }
     roofs.push({ ...roof, cells, cameraRuns: runs.length });
   }
-  const walls = [];
+  const walls = [],
+    lightWalls = [];
   for (const wall of plan.walls) {
-    const c = Math.cos(wall.angle),
+    const lights = palaceHallLights(plan.index, wall),
+      c = Math.cos(wall.angle),
       s = Math.sin(wall.angle),
       point = (u, depth = 0) => ({
         x: wall.x + u * c + depth * s,
@@ -244,38 +253,67 @@ export function buildPalaceCourt(game, root, materials, plan, spring, tint) {
       ];
     if (wall.height > head) spans.push([a, b, head, wall.height]);
     for (const [start, end, bottom, top] of spans) {
-      const p = point((start + end) / 2);
-      add(
-        new THREE.BoxGeometry(end - start, top - bottom, 0.9),
-        materials.stone,
-        p.x,
-        (top + bottom) / 2,
-        p.z,
-        wall.angle,
-      );
-      capture(
-        new THREE.BoxGeometry(end - start, top - bottom, 1.16),
-        p.x,
-        (top + bottom) / 2,
-        p.z,
-        wall.angle,
-      );
+      const p = point((start + end) / 2),
+        rect = { x0: start, x1: end, y0: bottom, y1: top };
+      if (lights.some((light) => palaceLightIntersects(rect, light))) {
+        add(
+          palaceLightWallCell(rect, lights, 0.9),
+          materials.stone,
+          wall.x,
+          0,
+          wall.z,
+          wall.angle,
+        );
+        const proxy = palaceLightWallCell(rect, lights, 1.16);
+        capture(proxy, wall.x, 0, wall.z, wall.angle, new FacadeCamera(proxy));
+      } else {
+        add(
+          new THREE.BoxGeometry(end - start, top - bottom, 0.9),
+          materials.stone,
+          p.x,
+          (top + bottom) / 2,
+          p.z,
+          wall.angle,
+        );
+        capture(
+          new THREE.BoxGeometry(end - start, top - bottom, 1.16),
+          p.x,
+          (top + bottom) / 2,
+          p.z,
+          wall.angle,
+        );
+      }
       for (let y = bottom; y < top; y += 0.88)
         for (let x = start; x < end; x += 2.1) {
           const x1 = Math.min(end, x + 2.1),
             y1 = Math.min(top, y + 0.88),
             q = point((x + x1) / 2);
           if (x1 - x < 0.03 || y1 - y < 0.03) continue;
-          block(
-            x1 - x - 0.018,
-            y1 - y - 0.014,
-            1.0,
-            materials.stone,
-            q.x,
-            (y + y1) / 2,
-            q.z,
-            wall.angle,
-          );
+          const tile = {
+            x0: x + 0.009,
+            x1: x1 - 0.009,
+            y0: y + 0.007,
+            y1: y1 - 0.007,
+          };
+          if (lights.some((light) => palaceLightIntersects(tile, light))) {
+            const geometry = palaceLightWallCell(tile, lights, 1.0);
+            // Retain the original dressed block's two seed advances, so
+            // masonry outside these cuts keeps its existing variation.
+            serial++;
+            if (geometry)
+              add(geometry, materials.stone, wall.x, 0, wall.z, wall.angle);
+            else if (materials.stone.vertexColors) serial++;
+          } else
+            block(
+              x1 - x - 0.018,
+              y1 - y - 0.014,
+              1.0,
+              materials.stone,
+              q.x,
+              (y + y1) / 2,
+              q.z,
+              wall.angle,
+            );
         }
       if (end - start > 2.3 && wall.height > 3.2 && bottom < 1) {
         for (const facing of [-1, 1]) {
@@ -365,8 +403,33 @@ export function buildPalaceCourt(game, root, materials, plan, spring, tint) {
         );
       }
     }
-    walls.push({ ...wall, minimum, head, spans });
+    walls.push({ ...wall, minimum, head, spans, lights });
+    lightWalls.push({ wall, lights });
   }
+  let lightTriangles = 0;
+  const lights = [];
+  for (const { wall, lights: windows } of lightWalls)
+    for (const light of windows) {
+      const frame = palaceLightFrame(light);
+      for (const [part, material] of [
+        [frame.reveal, materials.plaster],
+        [frame.front, materials.stone],
+        [frame.back, materials.stone],
+      ]) {
+        lightTriangles +=
+          (part.index?.count ?? part.attributes.position.count) / 3;
+        add(part, material, wall.x, 0, wall.z, wall.angle);
+      }
+      capture(
+        frame.camera,
+        wall.x,
+        0,
+        wall.z,
+        wall.angle,
+        new FacadeCamera(frame.camera),
+      );
+      lights.push({ ...light, wall: wall.id });
+    }
   assembly.updateWorldMatrix(true, true);
   const triangles = assembly.children.reduce(
     (n, m) =>
@@ -382,5 +445,14 @@ export function buildPalaceCourt(game, root, materials, plan, spring, tint) {
   // batches into the column assembly so the court still uses three materials.
   for (const mesh of [...assembly.children]) root.add(mesh);
   root.remove(assembly);
-  return { name: plan.name, roofs, walls, solids, triangles, cameraRuns };
+  return {
+    name: plan.name,
+    roofs,
+    walls,
+    lights,
+    lightTriangles,
+    solids,
+    triangles,
+    cameraRuns,
+  };
 }
