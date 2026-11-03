@@ -40,6 +40,12 @@ clears the end-face intersections found in the first draft (VA-208). All 32
 gallery cells and the five listening-stone surroundings are included in the
 51-view review. Wider cavern composition and continuous contact remain open.
 
+The [cavern fresco records](cavern-frescoes.md) follow a current `8a62f72`
+22-view chamber survey with eight original painted memories in the existing
+recessed wall panels. The 43-view final review retains the broader floor,
+repeated-building and roof-construction findings; the local wall imagery is
+varied without relocating the retained structural triangles.
+
 ## Coverage on September 12, 2026
 
 The first survey captured 154 ground-level observer views, from the front and
@@ -427,6 +433,8 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-207 | Outer gallery ground drops below the preceding wall bases, leaving uncovered footing samples. | [Terrain-fitted first courses and backing](gallery-masonry.md) cover 25,146 independent rays, including 2,016 below-floor probes and 748 shared-end probes. Reconstructed original bases miss 204 samples. Outer floor samples reach about 16 cm below the nominal base. | Fixed for the sampled gallery footing coverage; continuous body contact and broader world acceptance remain open |
 | VA-208 | The first gallery masonry draft shows dark triangular patches where its backing intersects chipped stone ends. | A [single joined, recessed backing](gallery-masonry.md) removes the overlapping core faces and separates the exposed ends. All 1,368 end-clearance rays and 51 reviewed final views pass. | Fixed in the revised gallery construction; broader material and placement acceptance remain open |
 | VA-209 | Native cavern entrance views show repeated horizontal ridges across planar crystal faces. | The [quartz facet repair](quartz-facets.md) removes the periodic etched normal and matching color wave. Eight controlled browser comparisons isolate the cause; twelve material and 48 geometry comparisons preserve the physical optics and geometry. All 25 selected tests, the 393,216-sample GPU comparison, chapter resource cleanup and two production input/save cases pass. | Fixed for the observed crystal banding; broader material, placement and scenery acceptance remain open |
+| VA-210 | Current cavern archive recesses repeat small purple line emblems across large stone surfaces. | [Eight painted memory stories](cavern-frescoes.md) retain the sealed panels and replace the emblems. All 25 selected tests, 43 reviewed final development views, 49,152 GPU color comparisons and ten tracked disposals pass. The 483,864 retained triangles, wall plans, sound anchors and 1,936 sampled movement results match their preceding construction. | Local wall imagery improved; broader cavern composition and continuous placement/contact remain open |
+| VA-211 | The generated guide-light painting gives its wayfinder an extra arm. | A [localized image-tool correction](art-prompts.md#cavern-fresco-correction) gives the figure two arms, a three-lamp yoke and walking staff. Only its corrected atlas cell is selected; the other seven retain their original pixels. Refreshed scene captures and the current-texture production case show the revised figure. | Fixed in the delivered fresco; broader artwork and world acceptance remain open |
 
 
 

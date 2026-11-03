@@ -8,7 +8,8 @@ import {
 import { vaultStoneGeometry, shellReliefGeometry } from "./palace-geometry.js";
 import { solarPanelGeometry } from "./desert-architecture.js";
 import { timberGeometry } from "./monastery-architecture.js";
-import { crystalBayContour, addCrystalBayInlay } from "./crystal-wall-art.js";
+import { crystalBayContour, crystalBayLines } from "./crystal-wall-art.js";
+import { cavernMuralMaterial, cavernMuralCoordinates } from "./cavern-murals.js";
 import { buildCoastalWallArt } from "./coastal-wall-art.js";
 import { buildSolarInnerWall } from "./solar-sanctuaries.js";
 import { buildMonasteryInnerWall } from "./monastery-sanctuaries.js";
@@ -233,8 +234,13 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     ...chamberWallPlan(game.level.biome, length, gate.stage, side),
     ...bayLayout,
   };
+  if (plan.biome === "crystal")
+    m.cavernMural ??= cavernMuralMaterial(m.chamberInset);
   // Fully opened leaf backs reach .06 m inward of the wall centerline. Their
   // existing pocket needs a thicker core behind the exterior blind bays.
+  const emblemMarks = plan.biome === "crystal"
+    ? crystalBayLines(gate.stage).reduce((count, path) => count + path.length - 1, 0)
+    : 0;
   const insetOffset = side !== 0 && gate.design.motion === "hinge" ? 0.17 : 0;
   const group = new THREE.Group();
   group.name = `${plan.biome} chamber wall ${side}`;
@@ -420,9 +426,12 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     const { radius: r, biome, bottom, top } = plan;
     // The inset is sealed against the wall core; all fittings sit within the
     // recess. No new smoke, fire or sound claims are implied by these cold bays.
+    const inset = prism(contour, 0.045);
+    if (biome === "crystal")
+      cavernMuralCoordinates(inset, { stage: gate.stage, radius: r, bottom, top });
     add(
-      prism(contour, 0.045),
-      m.chamberInset,
+      inset,
+      biome === "crystal" ? m.cavernMural : m.chamberInset,
       cx,
       0,
       -0.106 + insetOffset,
@@ -633,10 +642,9 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
           b = contour[(j + 1) % contour.length];
         bar([a[0] + cx, a[1]], [b[0] + cx, b[1]], 0.2, m.trim, 0.46);
       }
-      addCrystalBayInlay(gate.stage, r, bottom, top, cx, bar, m.inlay);
-      const gem = new THREE.OctahedronGeometry(0.25, 0);
-      gem.scale(0.7, 1.5 + ((gate.stage + i) % 3) * 0.2, 0.3);
-      add(gem, m.inlay, cx, 3.13, -0.04, false);
+      // Preserve subsequent stone-chip seeds after replacing the old line
+      // emblem and facet token with the painted narrative.
+      seed += emblemMarks;
     } else {
       for (let j = 0; j < 20; j++)
         add(
@@ -705,7 +713,14 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
         cx + x * 0.72,
         1.45 + (y - 1.2) * 0.76,
       ]);
-      add(prism(inner, 0.055), m.chamberInset, 0, 0, -0.438);
+      const innerInset = prism(inner, 0.055);
+      if (biome === "crystal")
+        cavernMuralCoordinates(innerInset, {
+          stage: gate.stage, radius: r * 0.72, center: cx,
+          bottom: 1.45 + (bottom - 1.2) * 0.76,
+          top: 1.45 + (top - 1.2) * 0.76, interior: true,
+        });
+      add(innerInset, biome === "crystal" ? m.cavernMural : m.chamberInset, 0, 0, -0.438);
       for (let j = 0; j < inner.length; j++)
         bar(inner[j], inner[(j + 1) % inner.length], 0.12, interiorTrim, -0.47);
       block(
@@ -728,9 +743,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
         );
         relief.rotation.y = Math.PI;
       } else if (biome === "crystal") {
-        addCrystalBayInlay(gate.stage, r, bottom, top, cx, bar, m.inlay, {
-          interior: true,
-        });
+        seed += emblemMarks;
       } else if (biome === "jungle") {
         const relief = add(
           carvedPlaque(r * 1.15, 1.84, gate.stage + i, [24, 40]),

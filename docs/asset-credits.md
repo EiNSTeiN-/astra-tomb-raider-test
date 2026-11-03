@@ -1,5 +1,16 @@
 # Asset credits and provenance
 
+The [cavern fresco records](cavern-frescoes.md) use an original eight-story
+painting atlas generated with the built-in image generation tool. The
+[exact prompt](art-prompts.md#cavern-fresco-atlas) and
+[provenance record](../asset-sources/cavern-records/sources.json) retain its
+story order, source/delivery hashes and reproducible packing command. Every
+selected source pixel survives packing; copied edge columns and gutters fill the common
+cell dimensions without resampling. These paintings depict a fictional cavern
+culture and are not historical records or scans. Existing credited limestone,
+normal/roughness maps, character, lighting and audio remain in use. The optional
+generated sources are ignored; the playable texture and provenance are tracked.
+
 The [monastery roof lining](monastery-roof-timber.md) uses original material,
 geometry and camera integration code with the existing credited timber,
 slate and snow maps. It adds no external asset or dependency. Its five

@@ -2,6 +2,28 @@
 
 The artwork below was generated with the built-in image generation tool and retained in the project; the memorial delivery asset was converted into geometry. No API-key CLI fallback was used. The chapter atlas is cropped with CSS, preserving each panel’s aspect ratio.
 
+## Cavern fresco atlas
+
+Generated with the built-in image generation tool for this project. These are
+fictional archaeological paintings. The delivered source is 1254×1254; the prompt
+requested 2048×2048. The packing script preserves the original cells, repeats one
+edge column in the narrower cells, and adds copied gutters without resampling.
+
+Exact prompt:
+
+> Use case: stylized-concept. Asset type: ONE square albedo texture atlas for eight ancient cavern archive wall frescoes in an original archaeological browser adventure. Produce a 2048 by 2048 square texture with an exact regular grid of FOUR columns and TWO rows: eight separate equal portrait panels, no gaps, each 512 wide by 1024 tall. Each panel is an entire flat front-on weathered limestone fresco, not a painting of a room, no perspective. All important imagery stays in the central 75% width and central 70% height of each cell, leaving softly worn neutral limestone around its edges. Consistent desaturated blue-grey limestone background, traces of dusty ochre, charcoal, faded copper and blue mineral pigment. Fine believable chipped plaster, soft worn carved contours, delicate mineral accretions and hairline cracks. Subtle ambient uniform illumination suitable for game albedo: NO baked spotlight, cast shadow, shine, glow or bright white highlights. Original fictional ancient visual culture, elegant and tactile, quiet archaeological narrative relief painting rather than modern vector symbols. TOP ROW, left to right: (1) a robed wayfinder holding three small lamps beneath stepped stars; (2) a solitary traveler descending many cave steps, with successive faint repeated silhouettes suggesting an echo; (3) two robed archivists facing opposite sides of a tall mirrored stone slab, with tiny reflected faces; (4) a procession of four small travelers carrying lamps upward along diagonal stone steps. BOTTOM ROW, left to right: (5) two musicians facing each other across branching wave patterns; (6) two separated hands reaching across a repaired fracture, with five small fragments of a broken vessel carefully joined below; (7) two intertwined quiet wave-shaped ribbons forming a heart-like paired rhythm around a central standing figure; (8) a lone woman and her older reflected self on opposite sides of a faceted octagonal stone, with eight faint radiating etched paths. Composition in every cell is refined tall continuous narrative fresco with layered architectural and natural details; no lettering, labels, numbers, typography, watermark, UI, frame or visible grid lines. Each fresco must fill its cell and the precise grid must remain aligned. This is a production texture atlas, not a contact sheet or concept board.
+
+## Cavern fresco correction
+
+The built-in image generation tool corrected the guide-light figure's extra arm.
+The atlas packer selects only the corrected top-left cell from this edit, keeping
+the other seven cells from the original source pixel-identical. Both source
+hashes and the selected region are retained in the provenance manifest.
+
+Exact edit prompt:
+
+> Use case: precise-object-edit. Edit target: the supplied 1254 by 1254 pixel 4-column, 2-row fresco texture atlas. Correct ONLY the top-left cell, x=0..313, y=0..626. Its wayfinder currently has three arms, an anatomical error. Replace that figure's arm arrangement with EXACTLY TWO natural arms attached to the two shoulders: one raised hand holds a single horizontal wooden yoke from which THREE small oil lamps hang by three chains, while the other hand rests naturally on a slim walking staff at the figure's side. No additional hands, arms or repeated arm silhouettes. Preserve her head, robes, standing stance, stepped stars, limestone backdrop and overall tall composition. Keep the same subtle blue-grey, dusty ochre and copper pigment, fine worn plaster and mineral grain, soft flat albedo illumination. Keep the other SEVEN cells absolutely unchanged. Preserve the exact square size, four-column two-row grid, all cell edges and orientation. Do not add text, glow, frame, perspective, cast shadows, or decorative limbs. This is a localized correction to an archaeological game texture.
+
 ## Cinematic key art
 
 Final file: `public/assets/verdant-temple.png`

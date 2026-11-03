@@ -1,0 +1,59 @@
+{
+  "asset": "Eight cavern fresco records",
+  "provenance": "Original project artwork generated with the built-in image_gen tool, then packed without changing the painted pixels.",
+  "prompt": "docs/art-prompts.md#cavern-fresco-atlas",
+  "source": {
+    "file": "atlas-generated.png",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "b8b9a589996e57bb7bcaf42347327a4a2c6313f0f1451413046bed4f40518e01"
+  },
+  "correction": {
+    "file": "guide-light-corrected.png",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "ddedf50b3c614f7eadfda4d6ca0263f6402425a80d9bbbee2de73da48d5ff986",
+    "usedRegion": {
+      "left": 0,
+      "top": 0,
+      "width": 314,
+      "height": 627
+    },
+    "prompt": "docs/art-prompts.md#cavern-fresco-correction",
+    "purpose": "Replace the guide-light figure's extra arm with two arms, a three-lamp yoke and walking staff. Only this cell is selected from the edited atlas; all seven other original cells remain pixel-identical."
+  },
+  "delivery": {
+    "file": "public/assets/textures/cavern-records-atlas.webp",
+    "width": 1320,
+    "height": 1286,
+    "sha256": "0b900c961813dff60adc91817b327d6c388087024859d18b99e528d73d63c19f",
+    "bytes": 2619576
+  },
+  "atlas": {
+    "columns": 4,
+    "rows": 2,
+    "cellWidth": 314,
+    "cellHeight": 627,
+    "gutter": 8,
+    "sourceColumnEdges": [
+      0,
+      314,
+      627,
+      941,
+      1254
+    ],
+    "order": [
+      "Guide lights",
+      "Descending echo",
+      "Mirrored archive",
+      "Ascending chamber",
+      "Violet counterpoint",
+      "Broken conversation",
+      "Paired heart",
+      "Remembered prism"
+    ]
+  },
+  "conversion": "python3 scripts/run-with-cpu-budget.py ./local/bin/node scripts/build-cavern-fresco.mjs asset-sources/cavern-records/atlas-generated.png asset-sources/cavern-records/guide-light-corrected.png",
+  "verification": "Seven original source-cell RGBA buffers and the corrected first-cell RGBA buffer equal their delivered inner regions. Only copied edge columns, gutters and lossless format encoding are added.",
+  "limitations": "Original fictional cavern paintings, not historical documentation or scans. The generated source is 1254 square despite the prompt requesting 2048 square. The 313-pixel-wide cells repeat one rightmost column to fill a uniform 314-pixel cell, preserving all original pixels. The optional generated source is excluded from publication; the playable atlas and this provenance record are tracked."
+}

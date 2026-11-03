@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eight cavern fresco stories](cavern-frescoes.md) replace repeated purple
+  wall emblems with original weathered paintings fitted to the existing sealed
+  recesses. Narrow panels crop the artwork while preserving its proportions.
+  All 25 selected tests, three CPU-budget checks and the build pass. Independent
+  construction retains 483,864 triangles and retires 76,352 decorative triangles;
+  all 1,936 movement queries and sixteen gate sound anchors match the baseline.
+  The 22 baseline and 43 final development views are reviewed, including each
+  story's outer/inner panels and four Performance repeats. The GPU atlas check
+  passes all 49,152 color-channel comparisons; chapter replacement disposes its
+  ten tracked resources once. Native keyboard/touch controls and the final
+  corrected-texture case retain complete stores through three reloads, with all
+  eleven production images reviewed. Broader cavern floors, roof construction, repeated
+  installations, continuous contact and listening/device acceptance remain open.
+
 - The [quartz facet shading repair](quartz-facets.md) removes observed horizontal
   ridges caused by a periodic etched normal and matching color wave. Controlled
   browser comparisons isolate the cause; twelve material and 48 geometry
