@@ -32,6 +32,13 @@ import {
   dripGroundNormal,
 } from "./cavern-drip-ground.js";
 import {
+  cavernFloorUniforms,
+  cavernFloorDeclarations,
+  cavernFloorColor,
+  cavernFloorRoughness,
+  cavernFloorNormal,
+} from "./cavern-floor-karst.js";
+import {
   meridianDeclarations,
   meridianColor,
   meridianNormal,
@@ -99,6 +106,7 @@ ${meridianDeclarations}
 ${cavernTerrainDeclarations}
 ${crystalFloorDeclarations}
 ${dripGroundDeclarations}
+${cavernFloorDeclarations}
 ${snowDeclarations}
 ${frozenDeclarations}
 `;
@@ -168,6 +176,7 @@ terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 ${coastalAlbedo}
 ${skyTerrainAlbedo}
 ${crystalFloorColor}
+${cavernFloorColor}
 ${dripGroundColor}
 ${frozenColor}
 diffuseColor.rgb *= terrainAlbedo * mix(.87, 1.04, terrainNoise(vTerrainPosition.xz * .013));
@@ -197,6 +206,7 @@ terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
 ${crystalFloorRoughness}
 float roughnessFactor = roughness * clamp(terrainRough, .42, 1.0);
+${cavernFloorRoughness}
 ${dripGroundRoughness}
 ${frozenRoughness}
 `;
@@ -237,6 +247,7 @@ terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
 #endif
 ${skyGroundNormal}
 ${crystalFloorNormal}
+${cavernFloorNormal}
 ${dripGroundNormal}
 ${frozenNormal}
 normal = terrainN;
@@ -366,6 +377,7 @@ export function terrainMaterial(game) {
     material.defines = { TERRAIN_CAVERN: 1 };
     Object.assign(uniforms, crystalFloorUniforms(game.map));
     Object.assign(uniforms, dripGroundUniforms(game.map, game.terrainProfile));
+    Object.assign(uniforms, cavernFloorUniforms(game.map));
   }
   if (biome === "eclipse") {
     const rooms = game.map?.rooms || [];
@@ -466,6 +478,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1" : ""}`;
   return material;
 }

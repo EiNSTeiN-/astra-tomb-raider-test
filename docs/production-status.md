@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cavern limestone floor treatment](cavern-floor-pavement.md) adds
+  irregular plates, solution joints and sediment pockets across exposed ground,
+  sharing its field between terrain and paving. All 27 selected checks, three
+  CPU-budget checks and the production build pass. The 53 reviewed images cover
+  matched entrance/court views, Performance follow views and startup rendering
+  across all eight chapters. The isolated GPU check passes 245,760 field/color
+  samples and material controls after a corrected private diagnostic setup.
+  All eight chapters retain their terrain/paving vertex shaders and texture
+  sets; chapter replacement disposes 129 tracked resources once. Two native
+  keyboard/touch cases and complete-store reload comparisons pass, with all
+  eight release screenshots reviewed. All 418 runtime hashes and 789 frozen
+  inputs match. Owned helpers close under the shared five-of-sixteen CPU cap.
+  Broader scenery, repeated installations, continuous campaign contact and
+  listening/device acceptance remain open.
+
 - The [cavern receiving-ground and ripple repair](cavern-drip-ground.md) adds
   source-centered calcite fans and damp channels at nine impacts and repairs a
   reproduced ripple buried in sloping ground (VA-206). All 23 selected checks,

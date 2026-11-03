@@ -26,6 +26,10 @@ import {
   dripGroundUniforms,
   dripGroundDeclarations,
 } from "./cavern-drip-ground.js";
+import {
+  cavernFloorUniforms,
+  cavernFloorDeclarations,
+} from "./cavern-floor-karst.js";
 
 export function pavingMaterial(biome, map) {
   const name =
@@ -48,10 +52,12 @@ export function pavingMaterial(biome, map) {
   const floors = biome === "volcano" ? forgeFloorUniforms(map) : null;
   const archive = biome === "crystal" ? crystalFloorUniforms(map) : null;
   const drips = archive ? dripGroundUniforms(map) : null;
+  const karst = archive ? cavernFloorUniforms(map) : null;
   material.onBeforeCompile = (shader) => {
     if (floors) Object.assign(shader.uniforms, floors);
     if (archive) Object.assign(shader.uniforms, archive);
     if (drips) Object.assign(shader.uniforms, drips);
+    if (karst) Object.assign(shader.uniforms, karst);
     shader.vertexShader =
       "attribute vec3 inlayUv; varying vec3 vInlayUv; varying vec2 vPavingUv;\n" +
       shader.vertexShader;
@@ -97,20 +103,23 @@ export function pavingMaterial(biome, map) {
         "#include <begin_vertex>\nvArchivePosition=(modelMatrix*vec4(transformed,1.)).xyz; vArchiveNormal=normalize(mat3(modelMatrix)*normal);",
       );
       shader.fragmentShader =
-        "#define TERRAIN_CAVERN\nvarying vec3 vArchivePosition, vArchiveNormal;\n#define vTerrainNormal vArchiveNormal\n#define terrainNoise inlayNoise\n#define terrainHash inlayHash\n" +
+        "#define TERRAIN_CAVERN\nvarying vec3 vArchivePosition, vArchiveNormal;\n#define vTerrainNormal vArchiveNormal\n#define terrainNoise inlayNoise\n#define terrainHash inlayHash\n#define karstNoise inlayNoise\n#define karstHash inlayHash\n" +
         shader.fragmentShader;
       shader.fragmentShader = shader.fragmentShader
         .replace(
           "#include <common>",
           "#include <common>\n" +
             crystalFloorDeclarations +
-            dripGroundDeclarations,
+            dripGroundDeclarations +
+            cavernFloorDeclarations,
         )
         .replace(
           "#include <map_fragment>",
           `#include <map_fragment>
           CrystalFloor archiveInlay=archiveFloor(vArchivePosition.xz);
           diffuseColor.rgb=mix(diffuseColor.rgb,archiveStoneColor(diffuseColor.rgb,archiveInlay),archiveInlay.coverage);
+          CavePavement pavingKarst=cavePavement(vArchivePosition.xz,normalize(vArchiveNormal),archiveInlay.coverage);
+          diffuseColor.rgb=cavePavementColor(diffuseColor.rgb,pavingKarst);
           DripGround pavingDrip=dripGround(vArchivePosition.xz,normalize(vArchiveNormal));
           diffuseColor.rgb=dripGroundColor(diffuseColor.rgb,pavingDrip);`,
         )
@@ -119,12 +128,14 @@ export function pavingMaterial(biome, map) {
           `#include <normal_fragment_maps>
           vec3 archiveN=archiveReliefNormal(normalize(mix(normal,nonPerturbedNormal,.35)),archiveInlay.relief);
           normal=normalize(mix(normal,archiveN,archiveInlay.coverage));
+          normal=archiveReliefNormal(normal,pavingKarst.relief);
           normal=archiveReliefNormal(normal,pavingDrip.relief);`,
         )
         .replace(
           "#include <roughnessmap_fragment>",
           `#include <roughnessmap_fragment>
           roughnessFactor=mix(roughnessFactor,.85+archiveInlay.joint*.12-archiveInlay.inlay*.2+archiveInlay.dust*.03,archiveInlay.coverage);
+          roughnessFactor=mix(roughnessFactor,mix(.84,.96,pavingKarst.silt),pavingKarst.coverage*.7);
           roughnessFactor=mix(roughnessFactor,.24,pavingDrip.wet*.8);`,
         );
     }
@@ -172,7 +183,7 @@ export function pavingMaterial(biome, map) {
   material.customProgramCacheKey = () =>
     "worn-court-paving-v1" +
     (floors ? `-foundry-floors-${floors.forgeFloorSites.value.length}-1` : "") +
-    (archive ? "-archive-floors-2-drip-ground-1" : "");
+    (archive ? "-archive-floors-2-drip-ground-1-floor-karst-1" : "");
   return material;
 }
 

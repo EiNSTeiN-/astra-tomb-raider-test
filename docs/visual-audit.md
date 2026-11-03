@@ -26,6 +26,13 @@ calcite/damp fields enrich the drip areas; an offset impact view reproduces
 the flat-ring burial repaired as VA-206 below. The broad composition audit
 remains open.
 
+The subsequent [limestone floor treatment](cavern-floor-pavement.md) adds
+irregular plates, solution joints and sediment pockets across exposed cavern
+ground, with a shared field on terrain and paving. Its 53 reviewed views retain
+the larger-volume and repeated-installation findings in VA-178. This improves
+the floor material while broader composition and continuous contact remain
+open.
+
 ## Coverage on September 12, 2026
 
 The first survey captured 154 ground-level observer views, from the front and
