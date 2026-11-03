@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal resting-pose repair](coastal-ankle-balance.md) fixes archive
+  balance, raised scroll crouches, chest boot overlap and the chest crouch that
+  straightened around a low cuff (VA-201–204). All 1,199 final campaign tests,
+  three CPU-guard checks and the build pass; all 627 frozen source/test inputs
+  match. The 39-pose retained regression and 80-pose furnishing preflight pass.
+  All 124 assembled-world poses pass 5,963,780 independent rendered body records,
+  sole contact, legal support and actual stance checks. Archive hip offsets stay
+  below 7.308 cm; every controller-survey crouch lowers the hips by at least
+  20.737 cm. All 92 development and 25 production images are reviewed. Five
+  production keyboard/touch cases preserve complete stores through fifteen
+  reload comparisons, with no application errors or warnings. The 414 runtime
+  hashes agree; browsers and preview servers close, and all verification uses
+  the shared five-of-sixteen CPU allowance. Broader composition, sparse and
+  repeated surroundings, continuous campaign contact and listening/device
+  acceptance remain open.
+
 - The [fitted snow foreland](alpine-foreland.md) joins the delivered terrain
   boundary to the first mountain ring, closing the recorded bright background
   gap VA-200. All 24 focused regressions, three CPU-guard checks and the build
@@ -28,8 +44,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   disposes sixteen tracked resources once. The 414 runtime source hashes agree
   between the view, depth/cleanup and production runs. Four production keyboard
   and touch scenarios pass four complete-save reload comparisons. Broader
-  landscape composition, sparse ground, the inherited coastal stance regression
-  VA-201 and listening and device acceptance remain open.
+  landscape composition, sparse ground and listening/device acceptance remain
+  open. The inherited coastal stance regression was tracked as VA-201 and is
+  repaired in the resting-pose follow-up above.
 
 - The [eighteen monastery verandas](monastery-verandas.md) replace sealed side
   wings with recessed window bays, timber ramps, open loft circulation and
@@ -44,7 +61,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   retired roof skirt. The complete campaign run initially passed 1,191 of
   1,194 tests: the new footing and obsolete cavern assertion are repaired and
   retested; the coastal archive hip-balance assertion also fails on published
-  `064c8a9` and remains open as VA-201. The observed landscape gap is VA-200.
+  `064c8a9` and was recorded as VA-201, repaired in the resting-pose follow-up
+  above. The observed landscape gap is VA-200.
   Broader composition, continuous campaign contact and listening/device
   acceptance remain open.
 

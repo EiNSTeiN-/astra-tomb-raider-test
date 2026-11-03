@@ -44,14 +44,26 @@ test("delivered boots and crouched clothing clear the recorded raised coastal fu
   g.walkable = Adventure.prototype.walkable.bind(g);
   let closed;
   try {
+    const standingHips = new Map();
     const poses = [
       ...[
         [2, 0, 333.95747190662365, 1.9910324305295943, 48.7994385538968],
         [2, 1, 366.04252809337635, 2.864167058467865, 48.7994385538968],
       ].flatMap((point) =>
-        [0, Math.PI].flatMap((angle) =>
+        [0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2].flatMap((angle) =>
           [false, true].map((crouch) => [...point, angle, crouch]),
         ),
+      ),
+      ...[0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2].flatMap((angle) =>
+        [false, true].map((crouch) => [
+          1,
+          1,
+          226.21039468246883,
+          1.4169456005096435,
+          49.02708039597873,
+          angle,
+          crouch,
+        ]),
       ),
       ...[false, true].map((crouch) => [
         0,
@@ -116,6 +128,30 @@ test("delivered boots and crouched clothing clear the recorded raised coastal fu
       g.rig.state = "Idle";
       g.rig.grounding = undefined;
       g.rig.crouchBlend = 0;
+      if (court === 1 && wall === 1 && angle === 0) {
+        // The assembled-world witness occurred one second into idle, before
+        // the retained standing/crouching transition sequence below.
+        g.crouching = crouch;
+        for (let frame = 0; frame < 60; frame++)
+          animateExplorer(g, 1 / 60, false, false);
+        const early = inspectExplorerSolids(g, read);
+        assert(early.samples > 48000);
+        assert.equal(early.invalid, 0);
+        assert.equal(early.embedded, 0, JSON.stringify(early.witnesses));
+        const hip = g.rig.model
+          .getObjectByName("mixamorigHips")
+          .getWorldPosition(new THREE.Vector3());
+        if (!crouch) standingHips.set("early-chest", hip.y);
+        else
+          assert(
+            standingHips.get("early-chest") - hip.y >= 0.05,
+            "the one-second chest crouch lowers the hips by at least 5 cm",
+          );
+        g.rig.mixer.stopAllAction();
+        g.rig.actions.Idle.reset().play();
+        g.rig.grounding = undefined;
+        g.rig.crouchBlend = 0;
+      }
       for (const stance of [crouch, !crouch]) {
         g.crouching = stance;
         for (let frame = 0; frame < 45; frame++)
@@ -159,8 +195,27 @@ test("delivered boots and crouched clothing clear the recorded raised coastal fu
           );
         assert(
           Math.hypot(hip.x - planted.x, hip.z - planted.z) < 0.11,
-          "the archive resting stance carries its hips over the supporting boot",
+          `the archive resting stance carries its hips over the supporting boot: ${JSON.stringify({ wall, angle, crouch, hip: hip.toArray(), ankle: planted.toArray(), contact: g.rig.grounding.plant.point.toArray() })}`,
         );
+        const key = `${wall}:${angle}`;
+        if (!crouch) standingHips.set(key, hip.y);
+        else
+          assert(
+            hip.y <= standingHips.get(key) - 0.1,
+            `an archive crouch lowers the hips by at least 10 cm: ${JSON.stringify({ wall, angle, standing: standingHips.get(key), crouching: hip.y })}`,
+          );
+      }
+      if (court === 1 && wall === 1) {
+        const hip = g.rig.model
+            .getObjectByName("mixamorigHips")
+            .getWorldPosition(new THREE.Vector3()),
+          key = `chest:${angle}`;
+        if (!crouch) standingHips.set(key, hip.y);
+        else
+          assert(
+            standingHips.get(key) - hip.y >= 0.05,
+            `the chest crouch lowers the hips by at least 5 cm: ${angle}`,
+          );
       }
       const report = inspectExplorerSolids(g, read);
       assert(report.samples > 48000);

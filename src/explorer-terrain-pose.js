@@ -57,8 +57,8 @@ export function lowerBodyProbes(model) {
 }
 
 // Uneven ground can put an uphill ankle above a deeply crouched hip. Retain
-// ankle targets and raise the visual pelvis only enough for the clothed knees
-// to clear. The caller bounds this below the ordinary standing origin, so the
+// ankle targets and fit the visual pelvis so the clothed knees clear. The
+// caller bounds this below the ordinary standing origin, so the
 // player's existing standing movement envelope still contains the entire pose.
 export function fitCrouchTerrain(
   game,
@@ -80,12 +80,35 @@ export function fitCrouchTerrain(
   const clear = () => {
     for (const { mesh, index } of probes) {
       mesh.getVertexPosition(index, point).applyMatrix4(mesh.matrixWorld);
-      const height = supportHeight(point.x, point.z);
+      const height = supportHeight(
+        point.x,
+        point.z,
+        point.y,
+        mesh.geometry.attributes.position.getY(index),
+      );
       if (height !== null && point.y - height < 0.03) return false;
     }
     return true;
   };
   if (clear()) return pelvis;
+  // A leg folded around a fixed ankle may clear a rim by bending farther.
+  // Try bounded lower poses before straightening it, checking the same skin
+  // probes at every trial and retaining the existing standing height limit.
+  for (const trial of [Math.max(-0.3, pelvis - 0.06), -0.3]) {
+    if (trial >= pelvis) continue;
+    applyPelvis(trial);
+    if (!clear()) continue;
+    let lower = trial,
+      upper = pelvis;
+    for (let i = 0; i < 5; i++) {
+      const middle = (lower + upper) / 2;
+      applyPelvis(middle);
+      if (clear()) lower = middle;
+      else upper = middle;
+    }
+    applyPelvis(lower);
+    return lower;
+  }
   let lo = pelvis,
     hi = maximum;
   applyPelvis(hi);

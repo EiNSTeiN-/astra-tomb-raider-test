@@ -6,7 +6,7 @@ import { waterAt } from "./hydrology.js";
 import { CROUCH_DROP, playerFootstep, footstepSurface } from "./stealth.js";
 import { strideScale } from "./stride.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
-import { fitCrouchTerrain } from "./explorer-terrain-pose.js";
+import { fitCrouchTerrain, lowerBodyProbes } from "./explorer-terrain-pose.js";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -443,8 +443,12 @@ export function groundExplorer(game, dt, moving, sprinting) {
   if (plant && supported.length === 1) {
     const hips = rig.model.getObjectByName("mixamorigHips");
     if (hips) {
-      const hip = hips.getWorldPosition(new THREE.Vector3());
-      balance.set(plant.point.x - hip.x, 0, plant.point.z - hip.z);
+      const hip = hips.getWorldPosition(new THREE.Vector3()),
+        ankle = plans.find((p) => p.foot === plant.foot).ankle;
+      // The planted material point may lie on a toe or sole edge. Balance
+      // over the fitted ankle rather than carrying that contact offset into
+      // the torso; the sole keeps its independently fitted tread target.
+      balance.set(ankle.x - hip.x, 0, ankle.z - hip.z);
       const distance = balance.length();
       if (distance > 0.06)
         balance.multiplyScalar(Math.min(0.6, distance - 0.06) / distance);
@@ -489,7 +493,29 @@ export function groundExplorer(game, dt, moving, sprinting) {
       );
   const drop = (rig.crouchBlend || 0) * CROUCH_DROP,
     crouchSupport = bodySupport.surface
-      ? (x, z) => support(x, z)?.height ?? null
+      ? (x, z, y, restHeight) => {
+          const ground = game.groundHeight(x, z);
+          if (y - ground < 0.03) return ground;
+          const floor = support(x, z);
+          if (!floor) return null;
+          const triangles = floor.surface?.triangles;
+          // Low cuffs can pass below a curved rim or overhang. Their actual
+          // volume contact matters; the highest surface above them is not
+          // necessarily a floor. Knees retain the conservative floor fit.
+          if (restHeight < 0.18 && triangles?.layeredSupport) {
+            if (!triangles.blocked(x, y, z, 0, 0)) return null;
+            // Use the same small contact skin as the collision surfaces.
+            // A near-side cuff contact must not force it above the object's
+            // upper face. The escape must clear the complete assembly.
+            const escape = triangles.pointExit(x, y, z, 0.014);
+            if (
+              escape &&
+              !triangles.blocked(x + escape.x, y + escape.y, z + escape.z, 0, 0)
+            )
+              return null;
+          }
+          return floor.height;
+        }
       : (x, z) => game.groundHeight(x, z),
     ankleTargets = plans.map((p) =>
       p.ankle.clone().add(new THREE.Vector3(0, p.shift, 0)),
@@ -501,6 +527,66 @@ export function groundExplorer(game, dt, moving, sprinting) {
       updateSkin(game);
     };
   applyPelvis(state.pelvis);
+  if (drop > 0.02 && bodySupport.surface?.triangles?.layeredSupport) {
+    if (rig.terrainCrouch?.model !== rig.model)
+      rig.terrainCrouch = {
+        model: rig.model,
+        probes: lowerBodyProbes(rig.model),
+      };
+    const cuffs = (rig.terrainCrouch.cuffs ??= rig.terrainCrouch.probes.flatMap(
+      ({ mesh, index }) => {
+        if (mesh.geometry.attributes.position.getY(index) >= 0.18) return [];
+        const { skinWeight, skinIndex } = mesh.geometry.attributes;
+        let dominant = 0;
+        for (let k = 1; k < 4; k++)
+          if (
+            skinWeight.getComponent(index, k) >
+            skinWeight.getComponent(index, dominant)
+          )
+            dominant = k;
+        const bone = mesh.skeleton.bones[
+            skinIndex.getComponent(index, dominant)
+          ].name,
+          side = bone.includes("Left")
+            ? "Left"
+            : bone.includes("Right")
+              ? "Right"
+              : null,
+          foot = plans.findIndex((p) =>
+            p.foot.bone.name.includes(`${side}Foot`),
+          );
+        return foot < 0 ? [] : [{ mesh, index, foot }];
+      },
+    ));
+    // A folded cuff can enter a curved lid while its outsole still contacts
+    // the tread. Fit that ankle before asking the pelvis to straighten the
+    // whole body. Keep the contact skin and bound each visual correction.
+    for (let pass = 0; pass < 3; pass++) {
+      const corrections = plans.map(() => null);
+      for (const { mesh, index, foot } of cuffs) {
+        const point = mesh
+            .getVertexPosition(index, new THREE.Vector3())
+            .applyMatrix4(mesh.matrixWorld),
+          escape = bodySupport.surface.triangles.pointExit(
+            point.x,
+            point.y,
+            point.z,
+            0.08,
+          );
+        if (!escape || escape.length() <= 0.015) continue;
+        if (
+          !corrections[foot] ||
+          escape.lengthSq() > corrections[foot].lengthSq()
+        )
+          corrections[foot] = escape;
+      }
+      if (corrections.every((correction) => !correction)) break;
+      corrections.forEach((correction, i) => {
+        if (correction) ankleTargets[i].add(correction.clampLength(0, 0.03));
+      });
+      applyPelvis(state.pelvis);
+    }
+  }
   state.pelvis = fitCrouchTerrain(
     game,
     state.pelvis,
@@ -514,6 +600,17 @@ export function groundExplorer(game, dt, moving, sprinting) {
   if (planted >= 0 && plans[planted].anchorIndex !== undefined) {
     const plan = plans[planted];
     for (let pass = 0; pass < 2; pass++) {
+      // Weighted toes can move the originally chosen material point while a
+      // neighboring part of the real outsole is already on the same tread.
+      // Keep that contact instead of pulling the ankle through the curved rim.
+      if (
+        probes(plan.foot, "sole").some((point) => {
+          const floor = support(point.x, point.z),
+            gap = floor ? point.y - floor.height : Infinity;
+          return floor?.surface === plant.surface && gap >= 0 && gap <= 0.012;
+        })
+      )
+        break;
       const actual = plan.foot.shoe
           .getVertexPosition(plan.anchorIndex, new THREE.Vector3())
           .applyMatrix4(plan.foot.shoe.matrixWorld),
@@ -538,7 +635,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
   // Re-solving a deeply bent leg can shift the posed sole slightly from its
   // planned clearance. Check the delivered sole after IK, then fit the knees
   // again if an ankle needs lifting. Keep this bounded and visual only.
-  for (let pass = 0; pass < 3; pass++) {
+  for (let pass = 0; pass < 5; pass++) {
     let adjusted = false;
     for (const [index, p] of plans.entries()) {
       if (!p.valid) continue;
@@ -549,8 +646,13 @@ export function groundExplorer(game, dt, moving, sprinting) {
       const gaps = probes(p.foot, true).flatMap((point) => {
         const floor = support(point.x, point.z);
         let corrected = false;
-        if (bodySupport.surface?.shape)
-          for (const scans of [game.natureRockSolids, game.jungleTreeSolids]) {
+        if (
+          bodySupport.surface?.shape ||
+          bodySupport.surface?.triangles?.layeredSupport
+        )
+          for (const scans of bodySupport.surface.shape
+            ? [game.natureRockSolids, game.jungleTreeSolids]
+            : [bodySupport.surface.triangles]) {
             const escape = scans?.pointExit(point.x, point.y, point.z);
             if (!escape) continue;
             corrected = true;
