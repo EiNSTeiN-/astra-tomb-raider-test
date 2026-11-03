@@ -77,6 +77,12 @@ export function playerNoise(
   if (events.length > 16) events.splice(0, events.length - 16);
 }
 
+export function footstepSurface(game, surface) {
+  return surface?.woodenDeck || surface?.skyBridge || surface?.courier
+    ? "wood"
+    : game.level?.biome;
+}
+
 export function playerFootstep(game, surface, sprint, position) {
   game.audio?.footstep?.(surface, sprint, position, game.crouching ? 0.3 : 1);
   playerNoise(

@@ -542,6 +542,7 @@ import {
   updateCrouch,
   playerNoise,
   playerFootstep,
+  footstepSurface,
   stealthState,
   guardianEngaged,
 } from "./stealth.js";
@@ -1964,7 +1965,12 @@ export class Adventure {
         waterSplash(this, p, 0.6);
         playerNoise(this, 12, "splash");
       } else if (!this.rig?.grounding?.active)
-        playerFootstep(this, this.level.biome, sprint, p);
+        playerFootstep(
+          this,
+          footstepSurface(this, supportAt(this, p.x, p.z, p.y + 0.05).surface),
+          sprint,
+          p,
+        );
       this.stepDistance = 0;
     }
     if (

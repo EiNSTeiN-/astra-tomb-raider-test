@@ -109,12 +109,22 @@ test("cavern bank chunks agree at shared edges and retain their geometry count a
     m.geometry.dispose();
   }
   assert.equal(triangles, 2 * (p.width - 1) ** 2);
-  assert.equal(
-    g.terrainMeshes[0].material.userData.additionalTextures.length,
-    6,
-  );
-  const mat = g.terrainMeshes[0].material;
+  const mat = g.terrainMeshes[0].material,
+    uniforms = mat.userData.terrainUniforms;
+  // Cavern paving and banks reuse the three limestone maps. They no longer
+  // own six duplicate textures; require the shared handles in every channel.
+  assert.equal(mat.userData.additionalTextures.length, 0);
+  for (const [channel, texture] of [
+    ["Map", mat.map],
+    ["Normal", mat.normalMap],
+    ["Roughness", mat.roughnessMap],
+  ]) {
+    assert.equal(uniforms["paving" + channel].value, texture);
+    assert.equal(uniforms["cliff" + channel].value, texture);
+  }
   assert.deepEqual(mat.defines, { TERRAIN_CAVERN: 1 });
+  for (const texture of new Set([mat.map, mat.normalMap, mat.roughnessMap]))
+    texture.dispose();
   mat.dispose();
 });
 test("mineral beds have closed outward faces, buried irregular rims and finite normals on uneven ground", () => {

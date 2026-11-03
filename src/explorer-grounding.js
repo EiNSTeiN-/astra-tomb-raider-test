@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { supportAt } from "./character-motion.js";
 import { poseFeet } from "./pose.js";
 import { waterAt } from "./hydrology.js";
-import { CROUCH_DROP, playerFootstep } from "./stealth.js";
+import { CROUCH_DROP, playerFootstep, footstepSurface } from "./stealth.js";
 import { strideScale } from "./stride.js";
 import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import { fitCrouchTerrain } from "./explorer-terrain-pose.js";
@@ -606,9 +606,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       ) {
         playerFootstep(
           game,
-          p.center?.surface?.skyBridge || p.center?.surface?.courier
-            ? "wood"
-            : game.level?.biome,
+          footstepSurface(game, p.center?.surface),
           sprinting,
           contact.point,
         );

@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [eighteen monastery verandas](docs/monastery-verandas.md) now have open
+walkways, recessed window bays, timber ramps and thirteen gallery connections.
+
 The [monastery roof lining](docs/monastery-roof-timber.md) adds timber boarding
 and fitted ceiling battens to 108 pitched roofs across the snow chapter.
 

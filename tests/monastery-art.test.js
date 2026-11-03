@@ -194,6 +194,22 @@ test("built monastery grounds its supports, preserves routes under upper rooms a
       patch.root.children.length < 15,
       "static structure batches per material",
     );
+    assert(
+      patch.joinery.children.length <= 6,
+      "three fitted buildings share a material batch",
+    );
+    for (const building of [patch.house, ...patch.wings]) {
+      assert.equal(building.root.children.length, 0);
+      assert.equal(building.renderRoot, patch.joinery);
+    }
+    for (const mesh of patch.joinery.children) {
+      const tag = mesh.geometry.attributes.monasteryBuilding;
+      assert(tag);
+      for (let i = 0; i < tag.count; i += 3)
+        assert(
+          tag.getX(i) === tag.getX(i + 1) && tag.getX(i) === tag.getX(i + 2),
+        );
+    }
     assert.equal(patch.flags.mesh.parent, patch.root);
     assert.equal(patch.flags.cord.parent, patch.root);
     for (const [dx, dz] of [

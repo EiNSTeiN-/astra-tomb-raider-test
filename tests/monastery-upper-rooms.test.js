@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as T from "three";
+import { createHash } from "node:crypto";
 import { monasteryRoofGeometry } from "../src/monastery-roof.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { stationBlocked } from "../src/field-station-solids.js";
@@ -252,6 +253,42 @@ test("roof joint samples agree with independent triangle rays and new trusses me
       );
     }
     if (upper) assert(roofFaceHeight(upper, false)(0, -18) > 19);
+    cleanup(f);
+  }
+});
+
+// Geometry reference from published 064c8a9, before extracting shared facade
+// code. Quantization ignores sub-ten-micrometre platform rounding; UVs are
+// intentionally excluded because this revision repairs their collapsed axes.
+test("the shared facade extraction preserves the nine published upper-house constructions", () => {
+  const reference = [
+    "3aef4ac14ab00484fccd922f21e0535137f2be8b3e22fe75b45cc09d34049998",
+    "afc0b72638f86f905d7a60bf0e0871e01340f006e79742462094d98788d0d5f3",
+    "1510f8879bd032c36ef23b80509f5e91b9532142229c303394dd556d37140356",
+    "57f9eb97e95968c6ae0140a005467d48c8b71bcafe437747cc7820cde818cde2",
+    "0f829645cbf690ca8ac6616dae1094e77d248e8634ddc6d202b6dc48b9225872",
+    "d94035ecd9aa3ddd1b893e3889d204d81fa22570f58fc84eb43306f2c35264b6",
+    "49a234cad6326ae0329e09b27b92defb4544cccce1b5fdf6d3aee30cd7fb6c54",
+    "08f138a3286c4bf0fc8398cc78338b573857f486b98e5ec72b8146d4150db336",
+    "e717d0dee58c414b7d3bc0a3ce4c63c77ffad5ddb66f7a9743ee84c2cc06ac40",
+  ];
+  for (let index = 0; index < 9; index++) {
+    const f = fixture(index),
+      h = createHash("sha256");
+    for (const mesh of [...f.house.root.children].sort((a, b) =>
+      a.material.name.localeCompare(b.material.name),
+    )) {
+      h.update(mesh.material.name);
+      for (const key of ["position", "normal"])
+        h.update(
+          JSON.stringify(
+            Array.from(mesh.geometry.attributes[key].array, (v) =>
+              Math.round(v * 1e5),
+            ),
+          ),
+        );
+    }
+    assert.equal(h.digest("hex"), reference[index], `court ${index}`);
     cleanup(f);
   }
 });

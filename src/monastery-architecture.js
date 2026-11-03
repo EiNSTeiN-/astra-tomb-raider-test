@@ -6,6 +6,15 @@ import { dressMonasteryRoof } from "./roof-timber.js";
 import { buildBannerLine } from "./monastery-cloth.js";
 import { masonryFoundation } from "./masonry-foundations.js";
 import {
+  buildMonasteryWing,
+  verandaDeckMaterial,
+  connectMonasteryGallery,
+} from "./monastery-wings.js";
+import {
+  monasteryGallerySides,
+  monasteryGalleryRoofPlan,
+} from "./monastery-wing-plan.js";
+import {
   buildPavilionHouse,
   upperRoomMaterials,
 } from "./monastery-upper-rooms.js";
@@ -19,17 +28,7 @@ export function monasteryPlan(room) {
     for (const x of [7.7, 19])
       for (const z of [-22, -17])
         posts.push({ x: side * x, z, width: 1.5, top: 6.35 });
-  const galleries = [
-    [-1, 1],
-    [1],
-    [-1],
-    [-1, 1],
-    [1],
-    [-1, 1],
-    [-1],
-    [1],
-    [-1, 1],
-  ][i];
+  const galleries = monasteryGallerySides(i);
   for (const side of galleries)
     for (const z of [-5, 7, 18])
       posts.push({ x: side * 19, z, width: 1.45, top: 5.7 });
@@ -40,6 +39,41 @@ export function monasteryPlan(room) {
     wingDamage: [0, 1, 0, 2, 2, 0, 1, 2, 0][i],
     upperRise: [2.7, 2.4, 3, 2.7, 0, 2.4, 3, 2.7, 3.5][i],
   };
+}
+
+// Keep logical frames for captured camera kernels while combining their
+// static rendering by material. The attribute identifies each real building
+// in the delivered batch for contact observers and construction checks.
+export function batchMonasteryBuildings(parent, buildings) {
+  const renderRoot = new THREE.Group();
+  renderRoot.name = "Monastery fitted buildings";
+  parent.add(renderRoot);
+  for (const [index, building] of buildings.entries()) {
+    building.root.updateMatrix();
+    for (const mesh of [...building.root.children]) {
+      if (!mesh.isMesh) continue;
+      mesh.updateMatrix();
+      mesh.geometry.applyMatrix4(
+        building.root.matrix.clone().multiply(mesh.matrix),
+      );
+      mesh.geometry.setAttribute(
+        "monasteryBuilding",
+        new THREE.Float32BufferAttribute(
+          new Float32Array(mesh.geometry.attributes.position.count).fill(index),
+          1,
+        ),
+      );
+      mesh.position.set(0, 0, 0);
+      mesh.quaternion.identity();
+      mesh.scale.set(1, 1, 1);
+      mesh.updateMatrix();
+      renderRoot.add(mesh);
+    }
+    building.renderRoot = renderRoot;
+    building.renderIndex = index;
+  }
+  mergeArchitecture(renderRoot, 2);
+  return renderRoot;
 }
 
 function colored(geometry, tint = 1) {
@@ -144,6 +178,7 @@ export function buildMonasteryArchitecture(game) {
     red,
     shadow,
   });
+  const wingDeck = verandaDeckMaterial(houseMaterials.wood);
   let serial = game.level.seed;
   for (const room of game.map.rooms) {
     const x = room.x * 7,
@@ -159,7 +194,8 @@ export function buildMonasteryArchitecture(game) {
     const ground = (px, pz) => game.groundHeight(x + px, z + pz) - base;
     const foundations = [],
       roofs = [],
-      bells = [];
+      bells = [],
+      wings = [];
     const add = (
       g,
       mat,
@@ -214,7 +250,17 @@ export function buildMonasteryArchitecture(game) {
       root.remove(m);
       g.dispose();
     };
-    const roofAt = (width, depth, rise, px, py, pz, angle = 0, damage = 0) => {
+    const roofAt = (
+      width,
+      depth,
+      rise,
+      px,
+      py,
+      pz,
+      angle = 0,
+      damage = 0,
+      connected = null,
+    ) => {
       const options = { width, depth, rise, damage, seed: room.index };
       const deck = add(
         monasteryRoofGeometry(options),
@@ -234,7 +280,8 @@ export function buildMonasteryArchitecture(game) {
         pz,
         angle,
       );
-      dressMonasteryRoof(game, deck, snowcap, wood);
+      const battens = dressMonasteryRoof(game, deck, snowcap, wood);
+      connected?.([deck, snowcap, battens].filter(Boolean));
       roofs.push({ options, position: [px, py, pz], angle });
       for (const side of [-1, 1])
         block(
@@ -419,57 +466,21 @@ export function buildMonasteryArchitecture(game) {
     for (const side of [-1, 1]) {
       const px = side * 13.35,
         damage = side < 0 ? plan.wingDamage : room.index === 5 ? 1 : 0;
-      block(12.75, 0.52, 6.35, wood, px, 6.32, -19.5, 0, true);
-      block(11.6, 3.55, 5.4, plaster, px, 8.35, -19.5, 0, true);
-      for (const zFace of [-22.25, -16.75]) {
-        block(12.8, 0.35, 0.4, red, px, 9.96, zFace, 0, true);
-        block(12.7, 0.22, 0.42, wood, px, 6.78, zFace);
-        for (let window = 0; window < 4; window++) {
-          const wx = px - 4.25 + window * 2.82;
-          if (damage && window === 0 && zFace === -16.75) continue;
-          block(
-            1.62,
-            1.95,
-            0.12,
-            shadow,
-            wx,
-            8.4,
-            zFace + (zFace > -20 ? 0.08 : -0.08),
-            0,
-            false,
-            detail,
-          );
-          for (let bar = 0; bar < 5; bar++)
-            block(
-              0.11,
-              2.13,
-              0.2,
-              wood,
-              wx - 0.78 + bar * 0.39,
-              8.4,
-              zFace + (zFace > -20 ? 0.18 : -0.18),
-              0,
-              false,
-              detail,
-            );
-          for (const yy of [7.4, 8.45, 9.4])
-            block(
-              1.9,
-              0.13,
-              0.22,
-              red,
-              wx,
-              yy,
-              zFace + (zFace > -20 ? 0.2 : -0.2),
-              0,
-              false,
-              detail,
-            );
-        }
-        for (const dx of [-6.15, -2.05, 2.05, 6.15])
-          block(0.28, 3.5, 0.32, red, px + dx, 8.25, zFace, 0, true);
-      }
-      roofAt(14.7, 8.3, 2.15, px, 10.15, -19.5, 0, damage);
+      // The old wing blocks consumed 86 seeds, or nine fewer where a front
+      // window was missing. Keep the surrounding roof fascia sequence stable.
+      serial += 86 - (damage ? 9 : 0);
+      const deck = roofAt(14.7, 8.3, 2.15, px, 10.15, -19.5, 0, damage);
+      wings.push(
+        buildMonasteryWing(
+          game,
+          root,
+          room.index,
+          side,
+          deck,
+          houseMaterials,
+          wingDeck,
+        ),
+      );
     }
     for (const side of plan.galleries) {
       for (const [za, zb] of [
@@ -480,15 +491,23 @@ export function buildMonasteryArchitecture(game) {
         const center = (za + zb) / 2,
           length = zb - za;
         block(0.5, 0.45, length + 0.8, wood, side * 19, 5.58, center, 0, true);
+        const gallery = monasteryGalleryRoofPlan(za, zb);
         roofAt(
-          length + 1.6,
-          5,
-          1.2,
+          gallery.width,
+          gallery.depth,
+          gallery.rise,
           side * 19,
-          5.95,
-          center,
-          Math.PI / 2,
+          gallery.y,
+          gallery.z,
+          gallery.angle,
           room.index % 3 === 1 && za === 7 ? 1 : 0,
+          za === -17
+            ? (meshes) =>
+                connectMonasteryGallery(
+                  wings.find((w) => w.plan.side === side),
+                  meshes,
+                )
+            : null,
         );
       }
     }
@@ -504,6 +523,7 @@ export function buildMonasteryArchitecture(game) {
       y: base + 5.3,
       z: z - 17,
     };
+    const joinery = batchMonasteryBuildings(root, [house, ...wings]);
     mergeArchitecture(root);
     mergeArchitecture(detail);
     const detailBounds = new THREE.Box3()
@@ -515,6 +535,8 @@ export function buildMonasteryArchitecture(game) {
       detailBounds,
       foundations,
       house,
+      wings,
+      joinery,
       roofs,
       bells,
       flags,

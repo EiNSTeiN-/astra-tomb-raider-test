@@ -229,9 +229,19 @@ export function stationBlocked(
     // A small step tolerance lets the root leave before descending clear.
     if (solid.groundingSlope) {
       const face = solid.groundingFace || solid,
-        floor = face.triangles.support(x, z, Infinity, 0, 0.65);
-      if (floor && y >= floor.height - 0.015) return false;
-      if (!floor) {
+        // A connected deck can have a ramp beneath an upper landing. A
+        // lower face must not cancel a real ceiling above the explorer.
+        floor =
+          !face.requireContact || y >= b.min.y - 0.45
+            ? face.triangles.support(x, z, Infinity, 0, 0.65)
+            : null;
+      if (
+        floor &&
+        y >= floor.height - 0.015 &&
+        (!face.requireContact || y - floor.height <= 0.12)
+      )
+        return false;
+      if (!floor && !face.requireContact) {
         for (let r = 0.02; r <= radius + 0.02; r += 0.02) {
           let nearest = Infinity;
           for (let i = 0; i < 16; i++) {

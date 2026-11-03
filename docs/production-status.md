@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eighteen monastery verandas](monastery-verandas.md) replace sealed side
+  wings with recessed window bays, timber ramps, open loft circulation and
+  thirteen gallery links. All 38 focused regressions, 85 reviewed final
+  development views, eighteen assisted controller routes and 54 posed body
+  checks pass. The latter inspect 2,597,130 rendered records with no overlap
+  beyond 15 mm; both boots retain rendered-floor contact. All 720 stone-foot
+  probes, 582 roof bearings, forty control positions, sixteen passage legs and
+  109 sound origins pass. Switching chapters releases 68 tracked resources
+  once and retires 27 camera assemblies. Eight production keyboard/touch cases
+  pass ten complete-store reload comparisons, including an older arrival on a
+  retired roof skirt. The complete campaign run initially passed 1,191 of
+  1,194 tests: the new footing and obsolete cavern assertion are repaired and
+  retested; the coastal archive hip-balance assertion also fails on published
+  `064c8a9` and remains open as VA-201. The observed landscape gap is VA-200.
+  Broader composition, continuous campaign contact and listening/device
+  acceptance remain open.
+
 - The [eight fitted monastery upper houses](monastery-upper-houses.md) replace
   repeated blank backs with clipped footprints and 80 recessed windows on all
   four elevations. Roof-seated walls and primary trusses clear the old ceiling
