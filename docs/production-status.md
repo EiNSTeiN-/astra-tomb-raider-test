@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [lower bank-camera recovery](bank-camera-recovery.md) tries comfortable
+  shorter distances before steep overhead detours, preserving the selected look.
+  The reproduced violet reservoir view settles lower with clear posed-body sight
+  targets. All 156 selected regressions, three CPU-budget checks and the build
+  pass. Thirteen development images are reviewed; all eight chapter-start solver
+  comparisons retain their preceding positions. A 48-update assisted approach
+  and return keeps full sampled body sight and returns to its start. Native
+  keyboard/touch controls and two complete-store reload comparisons pass,
+  preserving the selected look; all eight release images are reviewed. All 421
+  runtime hashes and 796 frozen inputs match. Owned helpers close under the
+  shared five-of-sixteen CPU cap. Broader constrained views, continuous contact,
+  scenery and listening/device acceptance remain open.
+
 - The [eighteen cavern limestone columns](cavern-columns.md) add vertical
   structure across all nine chambers. Fitted floor/roof joins, closed triangle
   contact and narrow camera bands preserve working spaces. All 89 selected

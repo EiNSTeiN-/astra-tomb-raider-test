@@ -208,9 +208,16 @@ function followClearCameraStep(
     lowerNearbyFirst =
       retained &&
       MathUtils.clamp(viewPitch + retained[1], -0.65, 1.05) - viewPitch > 0.2,
+    shortenedRetained = retained && retained[2] < 1,
+    shorterScales = [
+      ...new Set([4.2, 3.4].map((arm) => Math.min(1, arm / distance))),
+    ].filter((scale) => scale < 1),
     candidates = [
       ...(retained && !lowerNearbyFirst ? [retained] : []),
       ...nearbyCandidates,
+      // Keep a settled shorter view after checking the immediate lower
+      // neighborhood. Re-extending through the same bank causes pitching.
+      ...(lowerNearbyFirst && shortenedRetained ? [retained] : []),
       // Try a moderate sideways view before lifting above the explorer. A
       // remembered upward detour must yield when the lower neighborhood opens.
       ...[-0.45, 0.45, -0.6, 0.6, -0.9, 0.9].flatMap((yaw) =>
@@ -219,7 +226,15 @@ function followClearCameraStep(
       ...[0, -0.15, 0.15, -0.3, 0.3, -0.45, 0.45, -0.6, 0.6, -0.9, 0.9].flatMap(
         (yaw) => [-0.4, 0.4].map((pitch) => [yaw, pitch]),
       ),
-      ...(lowerNearbyFirst ? [retained] : []),
+      // A bank can hide the boots from a distant lens while a nearer lens
+      // clears the whole body. Try comfortable shorter arms before a steep
+      // overhead detour; every candidate keeps the same swept clearance.
+      ...[0, -0.2, 0.2, -0.4, 0.4, 0.6].flatMap((pitch) =>
+        [0, -0.3, 0.3, -0.6, 0.6].flatMap((yaw) =>
+          shorterScales.map((scale) => [yaw, pitch, scale]),
+        ),
+      ),
+      ...(lowerNearbyFirst && !shortenedRetained ? [retained] : []),
       // A steep foreground bank can cover the boots while the central arm
       // clears it. Lift the view before swinging far around the explorer.
       ...[0, -0.15, 0.15, -0.3, 0.3].flatMap((yaw) =>
@@ -245,17 +260,25 @@ function followClearCameraStep(
     game.cameraContactRecovery = steering ? recovery : null;
   };
   let best, shorter;
-  for (const [index, [yawOffset, pitchOffset]] of candidates.entries()) {
+  for (const [
+    index,
+    [yawOffset, pitchOffset, distanceScale = 1],
+  ] of candidates.entries()) {
     if (index === nearbyCandidates.length && best && !bodyRecovery) break;
     const yaw = game.yaw + yawOffset,
       pitch = MathUtils.clamp(viewPitch + pitchOffset, -0.65, 1.05),
+      armDistance = distance * distanceScale,
+      recovery =
+        distanceScale === 1
+          ? [yawOffset, pitchOffset]
+          : [yawOffset, pitchOffset, distanceScale],
       end = target
         .clone()
         .add(
           new Vector3(
-            Math.sin(yaw) * Math.cos(pitch) * distance,
-            Math.sin(pitch) * distance + lift,
-            Math.cos(yaw) * Math.cos(pitch) * distance,
+            Math.sin(yaw) * Math.cos(pitch) * armDistance,
+            Math.sin(pitch) * armDistance + lift,
+            Math.cos(yaw) * Math.cos(pitch) * armDistance,
           ),
         ),
       safe = constrainCamera(target, end, surfaces, canOccupy);
@@ -280,15 +303,14 @@ function followClearCameraStep(
     // distance. Keep that option only if the full search finds no longer view.
     if (safeLength < 3.2) {
       if (!shorter || score > shorter.score)
-        shorter = { next, safe, score, recovery: [yawOffset, pitchOffset] };
+        shorter = { next, safe, score, recovery };
       continue;
     }
-    if (!best || score > best.score)
-      best = { next, safe, score, recovery: [yawOffset, pitchOffset] };
+    if (!best || score > best.score) best = { next, safe, score, recovery };
     if (length >= 3.2 && visible === 1 && endVisible === 1) {
       // Arm recovery needs the same continuity as body recovery: otherwise a
       // clear interpolated arm can fall straight back toward a blocked request.
-      rememberRecovery([yawOffset, pitchOffset]);
+      rememberRecovery(recovery);
       return next;
     }
   }

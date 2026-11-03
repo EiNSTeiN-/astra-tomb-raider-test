@@ -961,3 +961,110 @@ test("a coastal canal approach keeps a visible safe camera while preserving the 
     }
   }
 });
+
+test("a bank recovery uses a comfortable shorter arm before an overhead view", (t) => {
+  const world = new Group(),
+    surfaces = new CameraSurfaces(world),
+    model = new Group(),
+    game = {
+      player: new Group(),
+      camera: new PerspectiveCamera(),
+      cameraSurfaces: surfaces,
+      rig: { model },
+      yaw: 0,
+      pitch: -0.45,
+      grounded: true,
+      groundHeight: (x, z) => Math.max(0, Math.min(0.8, (z - 0.5) * 0.8)),
+    };
+  surfaces.rebuild();
+  for (const [name, x, y] of [
+    ["LeftFoot", -0.15, 0.05],
+    ["RightFoot", 0.15, 0.05],
+    ["Head", 0, 1.7],
+  ]) {
+    const bone = new THREE.Bone();
+    bone.name = name;
+    bone.position.set(x, y, 0);
+    model.add(bone);
+  }
+  game.player.add(model);
+  game.player.updateWorldMatrix(true, true);
+  const target = new Vector3(0, 1.3, 0),
+    desired = target
+      .clone()
+      .add(
+        new Vector3(
+          0,
+          Math.sin(game.pitch) * 5.3 + 0.2,
+          Math.cos(game.pitch) * 5.3,
+        ),
+      ),
+    space = (p) => p.y >= game.groundHeight(p.x, p.z) + 0.28,
+    body = cameraBodyTargets(game),
+    short = target
+      .clone()
+      .add(new Vector3(0, Math.sin(0.15) * 3.4 + 0.2, Math.cos(0.15) * 3.4)),
+    long = target
+      .clone()
+      .add(new Vector3(0, Math.sin(0.15) * 5.3 + 0.2, Math.cos(0.15) * 5.3));
+  assert.equal(
+    cameraBodyVisibility(surfaces, short, body, game),
+    1,
+    "the shorter low view clears the whole body",
+  );
+  assert(
+    cameraBodyVisibility(surfaces, long, body, game) < 1,
+    "the same pitch at full distance puts the bank in front of the feet",
+  );
+  game.camera.position
+    .copy(target)
+    .add(new Vector3(0, Math.sin(0.55) * 5.3 + 0.2, Math.cos(0.55) * 5.3));
+  game.cameraFollowTarget = target.clone();
+  game.cameraBodyRecovery = [0, 1];
+  const feet = game.player.position.clone(),
+    settled = [];
+  for (let frame = 0; frame < 240; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, space),
+    );
+    game.cameraFollowTarget.copy(target);
+    assert(space(game.camera.position));
+    assert.equal(surfaces.entry(target, game.camera.position), 1);
+    assert.equal(
+      cameraBodyVisibility(surfaces, game.camera.position, body, game),
+      1,
+    );
+    assert(game.camera.position.distanceTo(target) >= 3.2);
+    if (frame >= 180) settled.push(game.camera.position.clone());
+  }
+  const arm = game.camera.position.clone().sub(target),
+    pitch = Math.atan2(arm.y - 0.2, Math.hypot(arm.x, arm.z));
+  assert(pitch <= 0.15 + 1e-5, `bank view tilts too far down: ${pitch}`);
+  assert(arm.length() < 4.6, "recovery deliberately shortens the arm");
+  assert(
+    settled.every((p) => p.distanceTo(settled[0]) < 1e-4),
+    "shortened recovery settles without repeated extension",
+  );
+  assert(game.player.position.equals(feet));
+  assert.equal(game.yaw, 0);
+  assert.equal(game.pitch, -0.45);
+
+  game.groundHeight = () => 0;
+  for (let frame = 0; frame < 240; frame++) {
+    game.camera.position.copy(
+      followClearCamera(game, target, desired, 1 / 60, space),
+    );
+    game.cameraFollowTarget.copy(target);
+    assert(space(game.camera.position));
+    assert.equal(
+      cameraBodyVisibility(surfaces, game.camera.position, body, game),
+      1,
+    );
+  }
+  assert(
+    game.camera.position.distanceTo(target) > 4.6,
+    "the shorter arm releases when the bank no longer blocks a longer view",
+  );
+  assert.equal(game.yaw, 0);
+  assert.equal(game.pitch, -0.45);
+});
