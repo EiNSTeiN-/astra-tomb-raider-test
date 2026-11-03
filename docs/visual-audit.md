@@ -33,6 +33,13 @@ the larger-volume and repeated-installation findings in VA-178. This improves
 the floor material while broader composition and continuous contact remain
 open.
 
+The [Listening Gallery masonry](gallery-masonry.md) replaces its continuous
+dark upper outlines and long slab courses with staggered ashlar. Terrain-fitted
+foundations repair the sampled outer base gaps (VA-207), and a joined backing
+clears the end-face intersections found in the first draft (VA-208). All 32
+gallery cells and the five listening-stone surroundings are included in the
+51-view review. Wider cavern composition and continuous contact remain open.
+
 ## Coverage on September 12, 2026
 
 The first survey captured 154 ground-level observer views, from the front and
@@ -417,6 +424,8 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-204 | The first chest boot-clearance repair cancels the crouch, raising the hips by 1.649 cm after one second. | [Fitting low cuffs at their ankles](coastal-ankle-balance.md) before raising the pelvis lowers the two High controller-settled crouches by 20.738 cm and 32.062 cm. The retained regression checks both one-second stances and four resting headings. All 124 assembled-world furnishing poses pass 5,963,780 body records, rendered sole contact and actual stance checks. | Fixed for the recorded chest crouches; broader moving contact remains open |
 | VA-205 | Tall upper marble flanks behind the coastal capacity records remain blank and repeated in the court survey. | The [coastal hall windows](palace-hall-lights.md) add ninety-two real cuts on twenty-eight walls with six profiles, blue reveals and beveled stone edges. All 1,203 campaign tests and 72 reviewed final views pass, including both sides of each changed wall. The original lower passages, columns, roofs, furnishings and perches are preserved; all 76 assisted door/aisle route legs pass. | Improved local upper-wall composition; broader court massing and sparse coastal surroundings remain open |
 | VA-206 | The entrance's flat drip-impact ring disappears into the sloping cavern floor. | [Terrain-fitted expanding ripples](cavern-drip-ground.md) follow the actual ground or water at all nine impacts. The original 40-segment controls reproduce 327 buried vertices. All 90,720 independent samples pass across nine rings, three phases and dry/flooded/drained fixtures; 32 final views and native keyboard/touch input/reloads pass. Source-centered calcite fans also improve the local receiving ground. | Fixed for the reproduced ring contact and sampled states; broader ground, continuous effects and whole-world acceptance remain open |
+| VA-207 | Outer gallery ground drops below the preceding wall bases, leaving uncovered footing samples. | [Terrain-fitted first courses and backing](gallery-masonry.md) cover 25,146 independent rays, including 2,016 below-floor probes and 748 shared-end probes. Reconstructed original bases miss 204 samples. Outer floor samples reach about 16 cm below the nominal base. | Fixed for the sampled gallery footing coverage; continuous body contact and broader world acceptance remain open |
+| VA-208 | The first gallery masonry draft shows dark triangular patches where its backing intersects chipped stone ends. | A [single joined, recessed backing](gallery-masonry.md) removes the overlapping core faces and separates the exposed ends. All 1,368 end-clearance rays and 51 reviewed final views pass. | Fixed in the revised gallery construction; broader material and placement acceptance remain open |
 
 
 

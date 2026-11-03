@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Listening Gallery masonry and foundations](gallery-masonry.md) add six
+  staggered courses and limestone coping to 38 permanent walls. A joined backing
+  and fitted first courses close sampled footing and end-face defects
+  (VA-207/208). All 20 selected checks, three CPU-budget checks and the build
+  pass. Geometry coverage includes 49,468 closed triangles, 25,146 independent
+  surface rays and 1,368 exposed-end clearance rays. All six baseline and 51
+  final views are reviewed, including all 32 cells, stone-adjacent walls,
+  Performance/follow views and both shortcut doors in partial/raised states.
+  Logical obstacle bounds, doors, controls and sound anchors match the baseline.
+  Chapter replacement disposes 72 tracked resources once. Two native cases
+  record gallery memories, exercise controls and retain complete saves through
+  two reload comparisons; all ten release images are reviewed. All 419 runtime
+  hashes and 791 frozen inputs match. Owned helpers close under the shared
+  five-of-sixteen CPU cap. Broader scenery, moving-panel art, continuous contact
+  and listening/device acceptance remain open.
+
 - The [cavern limestone floor treatment](cavern-floor-pavement.md) adds
   irregular plates, solution joints and sediment pockets across exposed ground,
   sharing its field between terrain and paving. All 27 selected checks, three

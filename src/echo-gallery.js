@@ -5,6 +5,10 @@ import { quartzGeometry } from "./cavern-geometry.js";
 import { cavernRock, mineralMaterial } from "./cavern-material.js";
 import { mergeArchitecture } from "./visuals.js";
 import {
+  galleryWallGeometry,
+  galleryBackingGeometry,
+} from "./echo-gallery-masonry.js";
+import {
   ECHO_STONES,
   ECHO_ORDER,
   echoCell,
@@ -62,6 +66,11 @@ export function buildEchoGallery(game) {
   const rock = cavernRock(),
     bronze = game.goldMat,
     dark = game.darkMat;
+  const coping = rock.clone();
+  coping.name = "Dressed limestone gallery coping";
+  coping.color.setHex(0xd6cfbb);
+  coping.onBeforeCompile = rock.onBeforeCompile;
+  coping.customProgramCacheKey = rock.customProgramCacheKey;
   let serial = 19000;
   const add = (geometry, material, x, py, z, parent = fixed, camera = true) => {
     const mesh = new THREE.Mesh(geometry, material);
@@ -95,11 +104,29 @@ export function buildEchoGallery(game) {
       block(5.5, 0.08, 0.16, p.x, -0.005, p.z + side * 2.65, bronze);
     }
   }
-  for (const wall of echoWalls()) {
+  const walls = echoWalls();
+  add(
+    galleryBackingGeometry(
+      walls.filter((w) => !w.after),
+      (x, z) => game.groundHeight(x, z) - y,
+    ),
+    dark,
+    0,
+    0,
+    0,
+    fixed,
+    false,
+  );
+  for (const wall of walls) {
     if (!wall.after) {
-      for (let row = 0; row < 4; row++)
-        block(wall.w, 1.7, wall.d, wall.x, 0.85 + row * 1.7, wall.z);
-      block(wall.w + 0.16, 0.2, wall.d + 0.16, wall.x, 6.8, wall.z, dark);
+      const geometry = galleryWallGeometry(
+        wall,
+        serial,
+        (x, z) => game.groundHeight(x, z) - y,
+      );
+      serial += 5;
+      add(geometry.facing, rock, wall.x, 0, wall.z);
+      add(geometry.cap, coping, wall.x, 0, wall.z);
       obstacle(wall.x, wall.z, wall.w, wall.d, 6.9);
     } else {
       const moving = new THREE.Group();
