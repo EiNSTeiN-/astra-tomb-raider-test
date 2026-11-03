@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [eighteen cavern limestone columns](cavern-columns.md) add vertical
+  structure across all nine chambers. Fitted floor/roof joins, closed triangle
+  contact and narrow camera bands preserve working spaces. All 89 selected
+  regressions, three CPU-budget checks and the build pass. Independent rendered
+  containment checks cover 3,462,840 character vertices in 72 supported poses;
+  eighteen local controller legs cover 32.4 m. All 2,586 sampled path queries
+  match with the new solids enabled or omitted, retaining 2,301 clear positions.
+  All 187 sound anchors match, and chapter replacement disposes nineteen tracked
+  resources once. The 32 development images are reviewed; three original
+  constrained views are excluded from column coverage and have additional views.
+  Native keyboard/touch controls and an occupied-save recovery pass; three
+  complete-store reload comparisons retain progress, with all twelve release
+  images reviewed. All 421 runtime hashes and 796 frozen inputs match. Owned
+  helpers close under the shared five-of-sixteen CPU cap. Broader scenery,
+  continuous body and camera contact, and listening/device acceptance remain open.
+
 - The [eight cavern fresco stories](cavern-frescoes.md) replace repeated purple
   wall emblems with original weathered paintings fitted to the existing sealed
   recesses. Narrow panels crop the artwork while preserving its proportions.

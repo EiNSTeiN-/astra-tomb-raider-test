@@ -363,6 +363,7 @@ import { advancePressureOperation } from "./pressure-motion.js";
 import { advanceOrbitBearing } from "./orbit-motion.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { buildCavernFlowstone } from "./cavern-flowstone.js";
+import { buildCavernColumns } from "./cavern-columns.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
 import {
@@ -1074,6 +1075,7 @@ export class Adventure {
     buildForgeForecourts(this);
     buildForgeInteriors(this);
     buildCavernFlowstone(this);
+    buildCavernColumns(this);
     buildFumaroles(this);
     buildTorch(this);
     prepareGuardianPatrols(this);
