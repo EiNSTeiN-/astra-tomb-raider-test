@@ -22,6 +22,10 @@ import {
   crystalFloorUniforms,
   crystalFloorDeclarations,
 } from "./crystal-floor-material.js";
+import {
+  dripGroundUniforms,
+  dripGroundDeclarations,
+} from "./cavern-drip-ground.js";
 
 export function pavingMaterial(biome, map) {
   const name =
@@ -43,9 +47,11 @@ export function pavingMaterial(biome, map) {
   material.normalScale.setScalar(0.55);
   const floors = biome === "volcano" ? forgeFloorUniforms(map) : null;
   const archive = biome === "crystal" ? crystalFloorUniforms(map) : null;
+  const drips = archive ? dripGroundUniforms(map) : null;
   material.onBeforeCompile = (shader) => {
     if (floors) Object.assign(shader.uniforms, floors);
     if (archive) Object.assign(shader.uniforms, archive);
+    if (drips) Object.assign(shader.uniforms, drips);
     shader.vertexShader =
       "attribute vec3 inlayUv; varying vec3 vInlayUv; varying vec2 vPavingUv;\n" +
       shader.vertexShader;
@@ -96,24 +102,30 @@ export function pavingMaterial(biome, map) {
       shader.fragmentShader = shader.fragmentShader
         .replace(
           "#include <common>",
-          "#include <common>\n" + crystalFloorDeclarations,
+          "#include <common>\n" +
+            crystalFloorDeclarations +
+            dripGroundDeclarations,
         )
         .replace(
           "#include <map_fragment>",
           `#include <map_fragment>
           CrystalFloor archiveInlay=archiveFloor(vArchivePosition.xz);
-          diffuseColor.rgb=mix(diffuseColor.rgb,archiveStoneColor(diffuseColor.rgb,archiveInlay),archiveInlay.coverage);`,
+          diffuseColor.rgb=mix(diffuseColor.rgb,archiveStoneColor(diffuseColor.rgb,archiveInlay),archiveInlay.coverage);
+          DripGround pavingDrip=dripGround(vArchivePosition.xz,normalize(vArchiveNormal));
+          diffuseColor.rgb=dripGroundColor(diffuseColor.rgb,pavingDrip);`,
         )
         .replace(
           "#include <normal_fragment_maps>",
           `#include <normal_fragment_maps>
           vec3 archiveN=archiveReliefNormal(normalize(mix(normal,nonPerturbedNormal,.35)),archiveInlay.relief);
-          normal=normalize(mix(normal,archiveN,archiveInlay.coverage));`,
+          normal=normalize(mix(normal,archiveN,archiveInlay.coverage));
+          normal=archiveReliefNormal(normal,pavingDrip.relief);`,
         )
         .replace(
           "#include <roughnessmap_fragment>",
           `#include <roughnessmap_fragment>
-          roughnessFactor=mix(roughnessFactor,.85+archiveInlay.joint*.12-archiveInlay.inlay*.2+archiveInlay.dust*.03,archiveInlay.coverage);`,
+          roughnessFactor=mix(roughnessFactor,.85+archiveInlay.joint*.12-archiveInlay.inlay*.2+archiveInlay.dust*.03,archiveInlay.coverage);
+          roughnessFactor=mix(roughnessFactor,.24,pavingDrip.wet*.8);`,
         );
     }
     if (floors) {
@@ -160,7 +172,7 @@ export function pavingMaterial(biome, map) {
   material.customProgramCacheKey = () =>
     "worn-court-paving-v1" +
     (floors ? `-foundry-floors-${floors.forgeFloorSites.value.length}-1` : "") +
-    (archive ? "-archive-floors-2" : "");
+    (archive ? "-archive-floors-2-drip-ground-1" : "");
   return material;
 }
 

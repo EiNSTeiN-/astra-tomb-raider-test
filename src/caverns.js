@@ -3,7 +3,6 @@ import * as THREE from "three";
 import { inEchoGallery } from "./echo-gallery-rules.js";
 import { inResonanceCourt } from "./resonance-rules.js";
 import { random } from "./campaign.js";
-import { waterAt } from "./hydrology.js";
 import { mergeArchitecture } from "./visuals.js";
 import { createCavernProfile, crystalRestoration } from "./cavern-profile.js";
 import {
@@ -16,6 +15,11 @@ import { mineralLightPosition } from "./mineral-art.js";
 import { buildCavernFormations } from "./cavern-formations.js";
 import { buildCavernDeposits } from "./cavern-deposits.js";
 import { buildMineralCluster } from "./mineral-clusters.js";
+import {
+  dripReceivingHeight,
+  dripRingGeometry,
+  fitDripRing,
+} from "./cavern-drip-rings.js";
 
 export function buildCaverns(game) {
   game.cavernProfile = null;
@@ -155,11 +159,7 @@ export function buildCaverns(game) {
     const dx = x - 10,
       dz = z + 8;
     const roof = profile.height(dx, dz),
-      floor =
-        Math.max(
-          game.groundHeight(dx, dz),
-          waterAt(game, dx, dz)?.y ?? -Infinity,
-        ) + 0.06;
+      floor = dripReceivingHeight(game, dx, dz);
     const tip = Math.max(floor + 12, roof - 3.2);
     const stalactite = new THREE.Mesh(
       stalactiteGeometry(0.9, roof - tip + 0.3, room.index),
@@ -169,7 +169,7 @@ export function buildCaverns(game) {
     root.add(stalactite);
     game.cameraSurfaces?.capture(stalactite);
     const ring = new THREE.Mesh(
-      new THREE.RingGeometry(0.48, 0.54, 40),
+      dripRingGeometry(),
       new THREE.MeshBasicMaterial({
         color: 0x91a8b4,
         transparent: true,
@@ -178,10 +178,9 @@ export function buildCaverns(game) {
         depthWrite: false,
       }),
     );
-    ring.rotation.x = -Math.PI / 2;
     ring.position.set(dx, floor, dz);
     game.world.add(ring);
-    drips.push({
+    const drip = {
       id: `drips-${room.index}`,
       x: dx,
       z: dz,
@@ -189,7 +188,9 @@ export function buildCaverns(game) {
       floor,
       ring,
       phase: room.index * 0.713,
-    });
+    };
+    fitDripRing(game, drip, 1);
+    drips.push(drip);
     game.cavernSources.push({
       id: `drips-${room.index}`,
       kind: "drips",
@@ -298,14 +299,8 @@ export function updateCaverns(game, dt) {
   const { drops, sites } = game.cavernDrips,
     positions = drops.geometry.attributes.position;
   for (const [i, site] of sites.entries()) {
-    site.floor =
-      Math.max(
-        game.groundHeight(site.x, site.z),
-        waterAt(game, site.x, site.z)?.y ?? -Infinity,
-      ) + 0.06;
-    site.ring.position.y = site.floor;
     const phase = (game.elapsed * 0.62 + site.phase) % 1;
-    site.ring.scale.setScalar(0.2 + phase * 1.8);
+    fitDripRing(game, site, 0.2 + phase * 1.8);
     site.ring.material.opacity = (1 - phase) * 0.28;
     for (let j = 0; j < 3; j++) {
       const t = (phase + j / 3) % 1,

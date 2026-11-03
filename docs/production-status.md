@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cavern receiving-ground and ripple repair](cavern-drip-ground.md) adds
+  source-centered calcite fans and damp channels at nine impacts and repairs a
+  reproduced ripple buried in sloping ground (VA-206). All 23 selected checks,
+  three CPU-guard checks and the build pass. Independent terrain rays cover
+  90,720 ring samples across nine sites, three phases and three receiving
+  states; the original 40-segment flat controls reproduce 327 buried vertices.
+  All 22 current baseline and 32 final views are reviewed, with 180,224 finite
+  GPU field samples and startup rendering across all eight chapters. Terrain
+  and paving vertex shaders and texture sets retain their preceding results.
+  Chapter replacement disposes 103 tracked resources once. Two native
+  keyboard/touch cases retain full health and complete stores through two
+  reload comparisons; all eight production images are reviewed. All 417 runtime
+  hashes and 788 frozen inputs match. Owned helpers close and checks share the
+  five-of-sixteen CPU cap. Broader cave floors, repeated buildings, continuous
+  campaign contact and listening/device acceptance remain open.
+
 - The [coastal hall windows](palace-hall-lights.md) replace blank upper flanks
   with 92 real openings on twenty-eight walls across all ten coastal courts
   (VA-205). Six profiles use blue reveals and beveled stone edges. All 1,203

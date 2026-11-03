@@ -434,7 +434,7 @@ test("drip streaks, impact rings and sound follow the same drained water surface
   game.elapsed = 2;
   updateCaverns(game, 0.1);
   updateSoundSources(game);
-  assert.equal(site.floor, ground + 0.06);
+  assert.equal(site.floor, ground + 0.025);
   assert.equal(source.y, site.floor + 0.3);
   assert.ok(
     game.cavernDrips.drops.geometry.attributes.position.array.every(
