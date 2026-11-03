@@ -30,6 +30,10 @@ import {
   cavernFloorUniforms,
   cavernFloorDeclarations,
 } from "./cavern-floor-karst.js";
+import {
+  cavernPoolUniforms,
+  cavernPoolDeclarations,
+} from "./cavern-pool-material.js";
 
 export function pavingMaterial(biome, map) {
   const name =
@@ -53,11 +57,13 @@ export function pavingMaterial(biome, map) {
   const archive = biome === "crystal" ? crystalFloorUniforms(map) : null;
   const drips = archive ? dripGroundUniforms(map) : null;
   const karst = archive ? cavernFloorUniforms(map) : null;
+  const pools = archive ? cavernPoolUniforms(map) : null;
   material.onBeforeCompile = (shader) => {
     if (floors) Object.assign(shader.uniforms, floors);
     if (archive) Object.assign(shader.uniforms, archive);
     if (drips) Object.assign(shader.uniforms, drips);
     if (karst) Object.assign(shader.uniforms, karst);
+    if (pools) Object.assign(shader.uniforms, pools);
     shader.vertexShader =
       "attribute vec3 inlayUv; varying vec3 vInlayUv; varying vec2 vPavingUv;\n" +
       shader.vertexShader;
@@ -111,7 +117,8 @@ export function pavingMaterial(biome, map) {
           "#include <common>\n" +
             crystalFloorDeclarations +
             dripGroundDeclarations +
-            cavernFloorDeclarations,
+            cavernFloorDeclarations +
+            cavernPoolDeclarations,
         )
         .replace(
           "#include <map_fragment>",
@@ -121,7 +128,9 @@ export function pavingMaterial(biome, map) {
           CavePavement pavingKarst=cavePavement(vArchivePosition.xz,normalize(vArchiveNormal),archiveInlay.coverage);
           diffuseColor.rgb=cavePavementColor(diffuseColor.rgb,pavingKarst);
           DripGround pavingDrip=dripGround(vArchivePosition.xz,normalize(vArchiveNormal));
-          diffuseColor.rgb=dripGroundColor(diffuseColor.rgb,pavingDrip);`,
+          diffuseColor.rgb=dripGroundColor(diffuseColor.rgb,pavingDrip);
+          CavePool inlayPool=cavePool(vArchivePosition,normalize(vArchiveNormal));
+          diffuseColor.a*=1.-inlayPool.coverage;`,
         )
         .replace(
           "#include <normal_fragment_maps>",
@@ -183,7 +192,9 @@ export function pavingMaterial(biome, map) {
   material.customProgramCacheKey = () =>
     "worn-court-paving-v1" +
     (floors ? `-foundry-floors-${floors.forgeFloorSites.value.length}-1` : "") +
-    (archive ? "-archive-floors-2-drip-ground-1-floor-karst-1" : "");
+    (archive
+      ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1"
+      : "");
   return material;
 }
 

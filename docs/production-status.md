@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [four cavern reservoir beds](cavern-pool-beds.md) replace bent submerged
+  paving joints with wet limestone, calcite and sediment. All 57 selected
+  regressions, three CPU-budget checks and the build pass. Nineteen final
+  development images are reviewed, including matched wide/close pool views;
+  the violet close view is partly occluded and has wide/follow coverage.
+  The 13,504-point GPU observer preserves all 4,224 dry instrument samples,
+  detects displaced water-plane heights and passes finite field checks.
+  Forty-eight local movement updates retain player/lens legality and full
+  sampled body sight. Terrain positions/indices/court attributes, four water
+  planes and all 187 sound anchors match the preceding version. Chapter
+  replacement disposes thirteen tracked resources once. Native keyboard/touch
+  input and two complete-store reload comparisons pass, with all eight release
+  images reviewed. All 422 runtime hashes and 798 frozen inputs match. Owned
+  helpers close under the shared five-of-sixteen CPU cap. Broader ground,
+  continuous contact and listening/device acceptance remain open.
+
 - The [lower bank-camera recovery](bank-camera-recovery.md) tries comfortable
   shorter distances before steep overhead detours, preserving the selected look.
   The reproduced violet reservoir view settles lower with clear posed-body sight
