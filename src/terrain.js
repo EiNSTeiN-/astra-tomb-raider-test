@@ -29,7 +29,7 @@ import { buildCoastalHorizon } from "./coastal-horizon.js";
 import { bridgeCut, bridgeDeckY, bridgeGaps } from "./sky-bridge-rules.js";
 import { waterSites, basinDepression, protectedGround } from "./hydrology.js";
 import { terrainMaterial } from "./terrain-material.js";
-import { trailSampler } from "./habitat.js";
+import { trailSampler, woodlandLayout } from "./habitat.js";
 import { coastalLayout } from "./coastal-layout.js";
 import { refineSkyTerrain } from "./sky-geology.js";
 import {
@@ -257,7 +257,9 @@ export function createTerrainProfile(map, level) {
       courts[iz * width + ix] = Math.max(paving, coastal?.coverage(x, z) || 0);
     }
   const jungleRim =
-    biome === "jungle" ? createJungleRim(map, level.seed) : null;
+    biome === "jungle"
+      ? createJungleRim(map, level.seed, waters, woodlandLayout(map, level, raw))
+      : null;
   if (jungleRim)
     for (let iz = 0; iz < width; iz++)
       for (let ix = 0; ix < width; ix++) {

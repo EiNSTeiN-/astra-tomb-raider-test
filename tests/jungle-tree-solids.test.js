@@ -384,9 +384,9 @@ test("the complete planted forest retains path centers and blocks a delivered ov
         ),
       ),
     );
-  // In this bare fixture the escarpment rejects 23 former tree seats. The full
-  // level also reserves structure footprints and has its own browser count.
-  assert.equal(trees.length, 729);
+  // Retained soil caps keep the wooded rim while accepting two additional seats.
+  // The full level reserves structure footprints and has its own browser count.
+  assert.equal(trees.length, 731);
   let samples = 0,
     centerSamples = 0;
   const blocked = [],

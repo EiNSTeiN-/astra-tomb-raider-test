@@ -87,6 +87,9 @@ const declarations = /* glsl */ `
 uniform sampler2D pavingMap, pavingNormal, pavingRoughness;
 uniform sampler2D cliffMap, cliffNormal, cliffRoughness;
 uniform vec3 cliffTint;
+#ifdef TERRAIN_JUNGLE
+uniform float jungleExtent;
+#endif
 uniform float courtStrength;
 #ifdef TERRAIN_JUNGLE
 uniform sampler2D pavingHeight, trackMap, trackNormal, verdureMap, verdureNormal;
@@ -141,6 +144,18 @@ terrainWeights /= max(.0001, terrainWeights.x + terrainWeights.y + terrainWeight
 vec3 cliffColor = texture2D(cliffMap, cliffUvX).rgb * terrainWeights.x
   + texture2D(cliffMap, cliffUvY).rgb * terrainWeights.y
   + texture2D(cliffMap, cliffUvZ).rgb * terrainWeights.z;
+#ifdef TERRAIN_JUNGLE
+  float rimDistance = min(min(vTerrainPosition.x, vTerrainPosition.z),
+    min(jungleExtent - vTerrainPosition.x, jungleExtent - vTerrainPosition.z));
+  float rimRock = 1.0 - smoothstep(24.5, 30.0, rimDistance);
+  float runoff = terrainNoise(vec2((vTerrainPosition.x + vTerrainPosition.z) * .17,
+    vTerrainPosition.y * .014));
+  float bedding = terrainNoise(vec2(vTerrainPosition.y * .53
+    + vTerrainPosition.x * .027, vTerrainPosition.z * .019));
+  vec3 rimTint = vec3(.46, .44, .38) * mix(.67, 1.08, runoff)
+    * mix(.8, 1.07, bedding);
+  cliffColor *= mix(vec3(1.0), rimTint / cliffTint, rimRock);
+#endif
 float terrainSlope = 1.0 - smoothstep(.48, .85, abs(vTerrainNormal.y));
 float pavingWeight = vCourt * courtStrength;
 float trailWeight = 0.0;
@@ -450,6 +465,7 @@ export function terrainMaterial(game) {
   if (biome === "jungle") {
     material.defines = { TERRAIN_JUNGLE: 1 };
     Object.assign(uniforms, {
+      jungleExtent: { value: game.terrainProfile?.extent ?? game.map.size * 7 },
       pavingHeight: { value: load("moss", "height") },
       trackMap: { value: load("ground", "color") },
       trackNormal: { value: load("ground", "normal") },

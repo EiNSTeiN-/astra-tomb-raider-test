@@ -55,7 +55,8 @@ test("airborne feet land before entering an uphill terrain step", () => {
 test("the jungle rim retains all shipped walking, basin and interior terrain vertices", () => {
   const walking = [],
     waters = [],
-    inner = [];
+    inner = [],
+    fringeEdge = [];
   for (let iz = 0; iz < profile.width; iz++)
     for (let ix = 0; ix < profile.width; ix++) {
       const x = ix * profile.step,
@@ -65,6 +66,8 @@ test("the jungle rim retains all shipped walking, basin and interior terrain ver
         walking.push(height);
       if (Math.min(x, z, profile.extent - x, profile.extent - z) >= 28)
         inner.push(height);
+      if (Math.min(x, z, profile.extent - x, profile.extent - z) <= 1.75)
+        fringeEdge.push(height);
       if (
         profile.waters.some(
           (w) =>
@@ -89,6 +92,11 @@ test("the jungle rim retains all shipped walking, basin and interior terrain ver
   assert.equal(
     hash(inner),
     "88d6a903d637a0d34b3907700b94f5be570c618a90acc38bc50c8823a989d901",
+  );
+  assert.equal(fringeEdge.length, 1944);
+  assert.equal(
+    hash(fringeEdge),
+    "d06f4ec317fc3bc81954c67274e7f59ace8b0b29752de901d2702890f83e9404",
   );
 });
 

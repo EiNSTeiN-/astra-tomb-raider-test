@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [wooded jungle escarpment](jungle-escarpment.md) varies 1,647 outer-rim
+  terrain vertices and the exposed rock treatment while retaining its tree
+  groups. All protected walking, water, interior and edge-strip vertex digests
+  pass; the other seven terrain profiles and water descriptions remain
+  identical. The full jungle plants 731 trees. All 89 selected regressions,
+  three CPU-budget checks and the build pass. Twenty-two final overviews and
+  ten nearby/stopped poses are reviewed; six rim legs and three tree approaches
+  cover 7,650 legal controller updates. All 480,950 sampled body vertices clear
+  the rendered terrain at the 15 mm tolerance. Keyboard/High and portrait
+  touch/Performance movement and complete-store reload comparisons pass; all
+  six release images are reviewed. All 424 runtime hashes match, and owned
+  helpers close. Large smooth faces, wider court composition and continuous
+  contact remain open.
+
 - The [jungle trial reliefs](jungle-trial-reliefs.md) follow a frozen current
   survey of 186 High views across all eight chapters. Eight mirrored carved
   compositions now accompany the jungle objectives on closed slabs seated in

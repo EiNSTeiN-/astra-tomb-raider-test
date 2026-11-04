@@ -20,6 +20,13 @@ Their closed relief slabs join the stone leaves and fit the moving camera
 envelope. This varies one part of the repeated installations; the broader
 composition and contact audit remains open.
 
+The [wooded escarpment treatment](jungle-escarpment.md) follows height-field
+diagnosis of the entrance's large natural rim faces. Selected erosion retains
+soil caps for tree groups, and the exposed rock gains a limestone treatment.
+The final world plants 731 trees. Protected floor/water/interior/edge digests,
+89 selected regressions and the sampled rim movements and body poses pass.
+Large smooth silhouettes and the wider landscape finding remain open.
+
 ## October 31–November 1 refresh
 
 At `8a1b707`, a new High-preset survey reviewed 138 views across the jungle,
