@@ -1,3 +1,4 @@
+import { seatRackCargo } from "./seat-rack-cargo.js";
 import * as THREE from "three";
 import {
   stoneBlockGeometry,
@@ -97,7 +98,8 @@ export function discoverySettingModule(biome, plan, m, bottom = -0.15) {
     for (const dx of [-length * 0.3, length * 0.3])
       ring(0.095, 0.012, m.seam, x + dx, y, z).rotation.y = Math.PI / 2;
   };
-  const plate = (x, y, z, variant) => {
+  const plate = (x, y, z, variant, height = 0.75) => {
+    const first = root.children.length;
     box(0.64, 0.75, 0.045, m.dark, x, y, z);
     if (biome === "jungle") {
       add(
@@ -161,6 +163,11 @@ export function discoverySettingModule(biome, plan, m, bottom = -0.15) {
           z + 0.04,
         );
     }
+    if (height !== 0.75)
+      for (const mesh of root.children.slice(first)) {
+        mesh.position.y = y + ((mesh.position.y - y) * height) / 0.75;
+        mesh.scale.y *= height / 0.75;
+      }
   };
 
   if (plan.kind === "wall") {
@@ -194,41 +201,76 @@ export function discoverySettingModule(biome, plan, m, bottom = -0.15) {
         foot(0.24, 0.24, x, z, 0.17);
         box(0.13, 1.87, 0.13, frame, x, 1.1, z, true);
       }
+    const shelves = [];
     for (const y of [0.46, 1.12, 1.79]) {
-      box(2.42, 0.075, 1.02, frame, 0, y, 0, true);
+      shelves.push(box(2.42, 0.075, 1.02, frame, 0, y, 0, true));
       box(2.45, 0.12, 0.065, m.dark, 0, y + 0.04, -0.5);
     }
     for (let i = 0; i < 3; i++) {
       const x = (i - 1) * 0.68;
+      const stored = (shelf, kind, build) => {
+        const first = root.children.length,
+          rest = build(),
+          parts = root.children.slice(first);
+        seatRackCargo(
+          root,
+          shelf,
+          rest ? [rest] : parts,
+          parts,
+          kind,
+          shelves[shelves.indexOf(shelf) + 1],
+        );
+      };
       if (["snow", "sky", "desert"].includes(biome)) {
-        for (const y of [0.61, 1.27]) roll(x, y, 0, 0.55);
-        box(0.48, 0.23, 0.4, m.wood, x, 1.97, 0, true);
-        box(0.49, 0.03, 0.42, m.cloth, x, 2.1, 0);
+        for (const [row, y] of [0.61, 1.27].entries())
+          stored(shelves[row], "roll", () => {
+            roll(x, y, 0, 0.55);
+          });
+        stored(shelves[2], "box", () => {
+          const base = box(0.48, 0.23, 0.4, m.wood, x, 1.97, 0, true);
+          box(0.49, 0.03, 0.42, m.cloth, x, 2.1, 0);
+          return base;
+        });
       } else if (biome === "water") {
-        for (const y of [0.59, 1.25, 1.92])
+        for (const [row, y] of [0.59, 1.25, 1.92].entries())
           for (let n = 0; n < 3; n++)
-            ring(
-              0.19 - n * 0.047,
-              0.018,
-              m.seam,
-              x,
-              y + n * 0.007,
-              0,
-            ).rotation.x = Math.PI / 2;
+            stored(shelves[row], "rope", () => {
+              const loop = ring(
+                0.19 - n * 0.047,
+                0.018,
+                m.seam,
+                x,
+                y + n * 0.007,
+                0,
+              );
+              loop.rotation.x = Math.PI / 2;
+              return loop;
+            });
       } else if (foundry) {
-        for (const y of [0.66, 1.32, 1.99]) {
-          box(0.47, 0.28, 0.44, m.metal, x, y, 0, true);
-          cylinder(0.12, 0.035, m.dark, x, y + 0.15, 0);
+        for (const [row, y] of [0.66, 1.32, 1.99].entries()) {
+          stored(shelves[row], "box", () => {
+            const base = box(0.47, 0.28, 0.44, m.metal, x, y, 0, true);
+            cylinder(0.12, 0.035, m.dark, x, y + 0.15, 0);
+            return base;
+          });
         }
       } else if (biome === "jungle") {
-        jar(x, 0, 0.5, 0.62);
-        box(0.44, 0.17, 0.42, m.stone, x, 1.24, 0, true);
-        plate(x, 1.47, 0.22, i);
+        stored(shelves[0], "jar", () => {
+          jar(x, 0, 0.5, 0.62);
+        });
+        stored(shelves[1], "box", () => {
+          const base = box(0.44, 0.17, 0.42, m.stone, x, 1.24, 0, true);
+          plate(x, 1.4, 0.22, i, 0.48);
+          return base;
+        });
       } else {
-        for (const y of [0.62, 1.28, 1.95]) {
-          box(0.43, 0.23, 0.44, m.stone, x, y, 0, true);
-          for (const dx of [-0.12, 0.12])
-            box(0.024, 0.02, 0.45, m.bronze, x + dx, y + 0.125, 0);
+        for (const [row, y] of [0.62, 1.28, 1.95].entries()) {
+          stored(shelves[row], "box", () => {
+            const base = box(0.43, 0.23, 0.44, m.stone, x, y, 0, true);
+            for (const dx of [-0.12, 0.12])
+              box(0.024, 0.02, 0.45, m.bronze, x + dx, y + 0.125, 0);
+            return base;
+          });
         }
       }
     }

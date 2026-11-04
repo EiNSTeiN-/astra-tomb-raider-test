@@ -44,6 +44,7 @@ import { regionalBankRise } from "./terrain-banks.js";
 import { coastalBankDrop } from "./coastal-banks.js";
 import { courtTerrain } from "./court-terrain.js";
 import { createJungleRim } from "./jungle-rim.js";
+import { fitTerrainNormals } from "./terrain-shading.js";
 
 const smooth = (a, b, value) => {
   const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -555,6 +556,7 @@ export function buildTerrainSurface(game) {
         ).normalize();
         normals.setXYZ(i, n.x, n.y, n.z);
       }
+      fitTerrainNormals(geometry);
       geometry.computeBoundingSphere();
       const cut = cutTerrainGeometry(geometry, profile.gallery?.volumes);
       if (cut !== geometry) geometry.dispose();

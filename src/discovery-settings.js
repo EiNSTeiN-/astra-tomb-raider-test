@@ -43,6 +43,8 @@ export function buildDiscoverySettings(game) {
   floors.name = "Broken discovery floors";
   game.world.add(batch, floors);
   game.discoverySettings = [];
+  game.discoveryRackSeats = [];
+  let rackPart = 1;
   for (const members of discoveryClusters(game.items)) {
     const plan = discoverySettingPlan(game.level, members),
       setting = {
@@ -78,6 +80,33 @@ export function buildDiscoverySettings(game) {
           y -
           0.15,
         root = discoverySettingModule(biome, p, m, bottom);
+      // Part identities survive material batching. The contact observer reads
+      // delivered triangles rather than repeating the placement calculation.
+      const joints = root.userData.rackSeats || [],
+        tracked = new Set(joints.flatMap((j) => [j.shelf, j.ceiling, ...j.parts])),
+        ids = new Map();
+      root.traverse((mesh) => {
+        if (!mesh.isMesh) return;
+        const id = tracked.has(mesh) ? rackPart++ : 0;
+        if (id) ids.set(mesh, id);
+        mesh.geometry.setAttribute(
+          "discoveryRackPart",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count).fill(id),
+            1,
+          ),
+        );
+      });
+      for (const joint of joints)
+        game.discoveryRackSeats.push({
+          setting: setting.id,
+          kind: joint.kind,
+          shelf: ids.get(joint.shelf),
+          ceiling: ids.get(joint.ceiling) || 0,
+          rests: joint.rests.map((mesh) => ids.get(mesh)),
+          parts: joint.parts.map((mesh) => ids.get(mesh)),
+        });
+      delete root.userData.rackSeats;
       root.position.set(p.x, y, p.z);
       root.rotation.y = p.yaw;
       game.world.add(root);

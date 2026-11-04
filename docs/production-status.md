@@ -13,11 +13,29 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: current 186-view High refresh across all eight chapters, plus earlier local reviews; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the 160-view discovery baseline and current 64-pose repeat; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- The [discovery rack and terrain repairs](discovery-racks-terrain.md) seat
+  floating cargo, clear the jungle rack tablet from its upper board and repair
+  5,090 terrain normals that opposed their delivered faces. All 35 selected
+  checks, three CPU-budget checks and the build pass. In all eight current
+  worlds, 726 stored assemblies pass 19,620 bearing and 126,879 upper-shelf
+  probes; 3,929,439 terrain corners pass the independent normal inspection.
+  Lifted-cargo and reversed-normal controls detect every required probe.
+  The 160-view baseline covers all 144 discovery collection positions; the
+  current repeat checks 64 collection/body poses and eight native-input seeds.
+  Thirty-six current game views and two diagnostic comparisons are reviewed.
+  Positions, UVs, height/water data and unaffected module frames retain their
+  published values. Production keyboard and portrait touch alternate across
+  all eight chapters, collecting the intended discovery at full health and
+  passing eight complete-store reload comparisons. Twenty release captures
+  are reviewed; owned helpers close under the five-of-sixteen CPU cap.
+  Shared arrangements, sparse margins, coarse cliff forms and wider
+  traversal/water and continuous-contact coverage remain open.
 
 - The [winter trail scree](winter-trail-scree.md) adds 2,281 grounded fragments
   in six forms along the snow banks, with exposed stone and textured snow.

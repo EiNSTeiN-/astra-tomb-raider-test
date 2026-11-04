@@ -2097,3 +2097,13 @@ credited Rock Boulder Dry and Snow 01 terrain maps, with an original extension
 to the project-authored snow material.
 The four documentation figures are lossless exports of actual game captures.
 No external model, bitmap, recording, music or dependency is added by this pass.
+
+
+## Discovery rack bearing and terrain normals
+
+The shelf-triangle cargo seating, fitted jungle rack tablet and terrain-normal
+corner repair are original project code. Existing discovery geometry, materials
+and their credited texture maps are reused. The two coastal documentation
+figures are lossless exports of actual game captures; the earlier cargo factory
+is restored only for the comparison image. No external model, bitmap, recording,
+music or dependency is introduced.
