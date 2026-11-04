@@ -8,6 +8,9 @@ import { masonryFoundation } from "./masonry-foundations.js";
 import { buildMonasteryWing, verandaDeckMaterial } from "./monastery-wings.js";
 import { monasteryGallerySides } from "./monastery-wing-plan.js";
 import { buildMonasteryGalleries } from "./monastery-galleries.js";
+import { roofFasciaGeometry } from "./roof-fascia.js";
+import { RoofCamera } from "./roof-camera.js";
+import { stationMeshSolid } from "./field-station-solids.js";
 import {
   buildPavilionHouse,
   upperRoomMaterials,
@@ -285,21 +288,44 @@ export function buildMonasteryArchitecture(game) {
         roofParent,
       );
       const battens = dressMonasteryRoof(game, deck, snowcap, wood);
-      connected?.([deck, snowcap, battens].filter(Boolean));
-      roofs.push({ options, position: [px, py, pz], angle });
-      for (const side of [-1, 1])
-        block(
-          width,
-          0.26,
-          0.24,
-          wood,
-          px + (Math.sin(angle) * side * depth) / 2,
-          py + 0.08,
-          pz + (Math.cos(angle) * side * depth) / 2,
-          angle,
-          false,
-          roofParent,
+      const fascia = add(
+        roofFasciaGeometry(deck.geometry),
+        wood,
+        px,
+        py,
+        pz,
+        angle,
+        roofParent,
+      );
+      fascia.name = "Roof-fitted monastery fascia";
+      fascia.geometry.setAttribute(
+        "monasteryFascia",
+        new THREE.Float32BufferAttribute(
+          new Float32Array(fascia.geometry.attributes.position.count).fill(
+            roofs.length + 1,
+          ),
+          1,
+        ),
+      );
+      if (roofParent === root) {
+        game.cameraSurfaces?.capture(fascia, {
+          kernel: new RoofCamera(fascia.geometry),
+          small: true,
+          thin: true,
+        });
+        const solid = stationMeshSolid(
+          game,
+          { id: `monastery-fascia-${room.index}-${roofs.length}` },
+          fascia,
+          { bodyPadding: 0.55, supportRadius: 0, groundingSlope: true },
         );
+        solid.roofTimber = true;
+      }
+      connected?.([deck, snowcap, battens, fascia].filter(Boolean));
+      roofs.push({ options, position: [px, py, pz], angle });
+      // Preserve the independent fitting seed sequence after retiring the two
+      // straight fascia blocks. Their placement now comes from delivered faces.
+      serial += 2;
       return deck;
     };
     for (const post of plan.posts) {
@@ -511,6 +537,15 @@ export function buildMonasteryArchitecture(game) {
       z: z - 17,
     };
     const joinery = batchMonasteryBuildings(root, [house, ...wings]);
+    for (const mesh of root.children)
+      if (mesh.isMesh && !mesh.geometry.attributes.monasteryFascia)
+        mesh.geometry.setAttribute(
+          "monasteryFascia",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count),
+            1,
+          ),
+        );
     for (const mesh of root.children)
       if (mesh.isMesh && !mesh.geometry.attributes.monasteryGallery)
         mesh.geometry.setAttribute(

@@ -9,7 +9,10 @@ import { buildMonasteryArchitecture } from "../src/monastery-architecture.js";
 import { monasteryGalleryPlan } from "../src/monastery-galleries.js";
 import { monasteryGalleryRoofPlan } from "../src/monastery-wing-plan.js";
 import { monasteryRoofGeometry } from "../src/monastery-roof.js";
-import { verifyMonasteryGalleryBearings } from "../scripts/inspect-monastery-galleries-browser.js";
+import {
+  verifyMonasteryGalleryBearings,
+  verifyMonasteryFascias,
+} from "../scripts/inspect-monastery-galleries-browser.js";
 import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 
 function fixture(t) {
@@ -89,6 +92,14 @@ test("delivered cloister rafters bear on their roof battens after batching, with
   assert(r.liftedFailures > 500);
   assert(g.cameraSurfaces.count < 700);
   t.diagnostic(JSON.stringify(r));
+});
+
+test("all delivered monastery fascias meet their roof skirts, with dropped-board controls", (t) => {
+  const report = verifyMonasteryFascias(fixture(t));
+  assert.deepEqual(report.accepted.failures, []);
+  assert.equal(report.accepted.roofs, 72);
+  assert(report.droppedFailures > 500);
+  t.diagnostic(JSON.stringify(report));
 });
 
 test("all thirteen lodge-to-cloister connections retain grounded controller crossings and save arrival", (t) => {

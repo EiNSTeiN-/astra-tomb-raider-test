@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [fitted monastery eaves](monastery-eaves.md) repair bright corner gaps
+  caused by straight fascia boards beneath lifted roofs. All 72 roofs now use
+  closed bands fitted to actual underside triangles, with finite support and
+  camera clearance. All 57 focused checks, three CPU-budget checks and the
+  build pass. All 45,360 delivered seating probes pass and detect lowered-board
+  controls. Thirteen lodge return routes, 23 roof-joint jumps and 26 older
+  rooftop arrivals pass; 116 roof/snow fixtures and 2,444 ground movement
+  queries match the preceding construction. Thirty-three final development
+  views and six native keyboard/touch images are reviewed. Four complete-store
+  reload comparisons pass. All 431 runtime hashes match and owned helpers
+  close under the shared five-of-sixteen CPU cap. Shared pavilion massing,
+  sparse surroundings and continuous contact remain open.
+
 - The [varied monastery galleries](monastery-galleries.md) give the winter
   courts tall gables, low shelters, pavilion caps, rising end bays and selected
   open bays. All thirteen lodge connections retain their first roofs. Fitted
@@ -31,8 +44,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   Thirty-two development views and six native keyboard/touch images are
   reviewed; four complete-store reload comparisons pass. All 430 runtime hashes
   match and owned helpers close under the shared five-of-sixteen CPU cap.
-  Bright eave-junction gaps, shared main pavilions, sparse surroundings and
-  continuous contact remain open.
+  The eave gaps recorded in that review are repaired above. Shared main
+  pavilions, sparse surroundings and continuous contact remain open.
 
 - The [defined alpine ridges](alpine-ridges.md) replace rounded winter-range
   shoulders with capped summits and descending ribs in the existing mesh.

@@ -126,6 +126,7 @@ export function buildMonasteryGalleries(
       const first = root.children.length,
         id = tag++,
         parts = [],
+        eaves = [],
         bearings = [];
       const { za, zb, roof: r } = bay,
         x = side * 19;
@@ -162,6 +163,7 @@ export function buildMonasteryGalleries(
           r.angle,
           index % 3 === 1 && za === 7 ? 1 : 0,
           (meshes) => {
+            eaves.push(meshes[3]);
             if (bay.bay === 0)
               connectMonasteryGallery(
                 wings.find((w) => w.plan.side === side),
@@ -219,7 +221,8 @@ export function buildMonasteryGalleries(
         }
       }
       if (parts.length) {
-        const cameraParts = parts.map((m) => {
+        const assembly = [...parts, ...eaves],
+          cameraParts = assembly.map((m) => {
             m.updateMatrix();
             m.geometry.computeBoundingBox();
             return {
@@ -229,7 +232,7 @@ export function buildMonasteryGalleries(
             };
           }),
           bounds = new T.Box3();
-        parts.forEach((m) =>
+        assembly.forEach((m) =>
           bounds.union(m.geometry.boundingBox.clone().applyMatrix4(m.matrix)),
         );
         const size = bounds.getSize(new T.Vector3()),
@@ -253,7 +256,7 @@ export function buildMonasteryGalleries(
         const solid = stationAssemblySolid(
           game,
           { id: `cloister-frame-${index}-${side}-${bay.bay}` },
-          parts,
+          assembly,
           { bodyPadding: 0.55, supportRadius: 0 },
         );
         solid.monasteryGallery = index;
@@ -266,7 +269,12 @@ export function buildMonasteryGalleries(
             "monasteryGallery",
             new T.Float32BufferAttribute(
               new Float32Array(count).fill(
-                id + (parts.includes(mesh) ? 0.25 : 0),
+                id +
+                  (eaves.includes(mesh)
+                    ? 0.5
+                    : parts.includes(mesh)
+                      ? 0.25
+                      : 0),
               ),
               1,
             ),

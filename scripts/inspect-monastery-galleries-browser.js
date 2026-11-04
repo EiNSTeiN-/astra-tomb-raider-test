@@ -2,16 +2,17 @@
 // This reader never consults the construction height function or collision mesh.
 import * as T from "three";
 
-function deliveredFaces(root) {
+function deliveredFaces(root, roofsOnly = false) {
   const grid = new Map();
   for (const mesh of root.children) {
     if (!mesh.isMesh) continue;
     const { position: p, monasteryGallery: tag } = mesh.geometry.attributes,
       index = mesh.geometry.index;
-    if (!tag) continue;
+    if (!tag || (roofsOnly && mesh.material.name !== "Monastery slate roof"))
+      continue;
     for (let i = 0; i < (index?.count ?? p.count); i += 3) {
       const id = tag.getX(index ? index.getX(i) : i);
-      if (id < 0) continue;
+      if (id < 0 && !roofsOnly) continue;
       const v = [0, 1, 2].map((j) =>
           new T.Vector3()
             .fromBufferAttribute(p, index ? index.getX(i + j) : i + j)
@@ -172,6 +173,97 @@ export function verifyMonasteryGalleryBearings(game) {
     if (lifted.failures.length < 500)
       throw Error("Detached frame control was not detected");
     return { accepted, liftedFailures: lifted.failures.length };
+  } finally {
+    for (const [p, bytes] of saved) {
+      p.array.set(bytes);
+      p.needsUpdate = true;
+    }
+  }
+}
+
+export function inspectMonasteryFascias(game) {
+  game.world.updateMatrixWorld(true);
+  const report = {
+    roofs: 0,
+    faces: 0,
+    probes: 0,
+    largestGap: -Infinity,
+    largestOverlap: 0,
+    failures: [],
+  };
+  for (const patch of game.monasteryPatches || []) {
+    const read = deliveredFaces(patch.root, true),
+      roofs = new Set();
+    for (const mesh of patch.root.children) {
+      const p = mesh.geometry?.attributes.position,
+        tag = mesh.geometry?.attributes.monasteryFascia,
+        ids = mesh.geometry?.index;
+      if (!tag) continue;
+      for (let i = 0; i < (ids?.count ?? p.count); i += 3) {
+        const id = tag.getX(ids ? ids.getX(i) : i);
+        if (id <= 0) continue;
+        const v = [0, 1, 2].map((j) =>
+            new T.Vector3()
+              .fromBufferAttribute(p, ids ? ids.getX(i + j) : i + j)
+              .applyMatrix4(mesh.matrixWorld),
+          ),
+          triangle = new T.Triangle(...v);
+        if (triangle.getNormal(new T.Vector3()).y <= 1e-6) continue;
+        roofs.add(id);
+        report.faces++;
+        for (const point of [...v, triangle.getMidpoint(new T.Vector3())]) {
+          const underside = read(point.x, point.z)
+              .filter(
+                (h) =>
+                  !h.up &&
+                  h.material === "Monastery slate roof" &&
+                  h.y > point.y - 0.1 &&
+                  h.y < point.y + 0.5,
+              )
+              .sort(
+                (a, b) => Math.abs(a.y - point.y) - Math.abs(b.y - point.y),
+              )[0],
+            gap = underside ? underside.y - point.y : Infinity;
+          report.probes++;
+          report.largestGap = Math.max(report.largestGap, gap);
+          report.largestOverlap = Math.max(report.largestOverlap, -gap);
+          if (!Number.isFinite(gap) || gap > 0.002 || gap < -0.008)
+            report.failures.push({
+              court: patch.root.name,
+              id,
+              point: point.toArray(),
+              gap,
+            });
+        }
+      }
+    }
+    report.roofs += roofs.size;
+  }
+  if (report.roofs !== 72 || report.probes < 500)
+    report.failures.push({ kind: "incomplete fascia coverage" });
+  return report;
+}
+
+export function verifyMonasteryFascias(game) {
+  const accepted = inspectMonasteryFascias(game),
+    saved = [];
+  if (accepted.failures.length)
+    throw Error(JSON.stringify(accepted.failures.slice(0, 5)));
+  try {
+    for (const patch of game.monasteryPatches)
+      for (const mesh of patch.root.children) {
+        const p = mesh.geometry?.attributes.position,
+          tag = mesh.geometry?.attributes.monasteryFascia;
+        if (!tag) continue;
+        saved.push([p, p.array.slice()]);
+        for (let i = 0; i < p.count; i++)
+          if (tag.getX(i) > 0) p.setY(i, p.getY(i) - 0.25);
+        p.needsUpdate = true;
+      }
+    const dropped = inspectMonasteryFascias(game);
+    if (dropped.failures.length < 500)
+      throw Error("Dropped fascia control was not detected");
+    return { accepted, droppedFailures: dropped.failures.length };
   } finally {
     for (const [p, bytes] of saved) {
       p.array.set(bytes);

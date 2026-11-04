@@ -98,9 +98,9 @@ and one browser.
 The gallery silhouettes and local construction have more variety, but the main
 bell pavilions and much of the larger court massing still repeat. Sparse trails
 and surrounding spaces, broader discovery/traversal coverage and continuous
-body contact remain open. Close under-gallery views also show bright angular
-openings at some eave/frame junctions. Their construction needs further review;
-the bearing checks above do not establish that those visible joints are finished.
+body contact remain open. This review also recorded bright angular openings
+at some eave/frame junctions. The subsequent [fitted-eave repair](monastery-eaves.md)
+resolves that finding; the image below retains the preceding construction.
 
 ![Bright angular openings at the gallery eave junctions](images/monastery-galleries/eave-junction.webp)
 
