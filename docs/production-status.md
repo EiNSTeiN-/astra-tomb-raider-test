@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [worn desert court paving](desert-paving.md) gives all ten courts
+  different ground layouts, using processional lines, fan courses, rings,
+  oblique bands, runners and diamond fields. It reuses existing maps and
+  leaves vertex hooks, height data and collision geometry unchanged.
+  Fourteen selected checks, three CPU-budget checks and the build pass.
+  Fifteen final game views are reviewed. Fourteen independent shader
+  comparisons across the other seven themes retain identical pixels; ten
+  desert fields change visibly, and radial-center checks remain finite.
+  Temporary fixture resources return to their starting renderer counts.
+  Keyboard/High and portrait touch/Performance crouch and walk 6.0 m / 6.6 m
+  onto sand at full health, with four complete-store reload comparisons; all
+  six release images are reviewed. All 428 runtime hashes match, and owned
+  helpers close under the shared five-of-sixteen CPU cap. Connecting trails,
+  broader composition and continuous contact remain open.
+
 - The [desert court arcades](desert-arcades.md) now use low lintels, round
   galleries, pointed heads and stepped corbels, with ascending rear spans,
   unequal wings and broken sections. Actual pier tops fit all 184 spring

@@ -64,6 +64,13 @@ import {
   desertTerrainNormal,
   desertTerrainRoughness,
 } from "./desert-terrain-material.js";
+import {
+  desertPavingUniforms,
+  desertPavingDeclarations,
+  desertPavingColor,
+  desertPavingNormal,
+  desertPavingRoughness,
+} from "./desert-paving.js";
 import * as THREE from "three";
 import {
   coastalDeclarations,
@@ -111,6 +118,7 @@ float terrainNoise(vec2 p) {
 ${coastalDeclarations}
 ${skyTerrainDeclarations}
 ${desertTerrainDeclarations}
+${desertPavingDeclarations}
 ${volcanicDeclarations}
 ${meridianDeclarations}
 ${cavernTerrainDeclarations}
@@ -185,6 +193,7 @@ float growthWeight = 0.0;
 ${coastalColor}
 ${skyTerrainColor}
 ${desertTerrainColor}
+${desertPavingColor}
 ${volcanicColor}
 ${meridianColor}
 ${cavernTerrainColor}
@@ -221,6 +230,7 @@ float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
   + texture2D(cliffRoughness, cliffUvZ).g * terrainWeights.z;
 ${skyTerrainRoughness}
 ${desertTerrainRoughness}
+${desertPavingRoughness}
 ${volcanicRoughness}
 ${meridianRoughness}
 ${cavernTerrainRoughness}
@@ -260,6 +270,7 @@ vec3 cliffN = normalize(
 ${coastalNormal}
 ${skyTerrainNormal}
 ${desertTerrainNormal}
+${desertPavingNormal}
 ${volcanicNormal}
 ${meridianNormal}
 ${cavernTerrainNormal}
@@ -398,7 +409,14 @@ export function terrainMaterial(game) {
       });
     }
   }
-  if (biome === "desert") material.defines = { TERRAIN_DESERT: 1 };
+  if (biome === "desert") {
+    const paving = desertPavingUniforms(game.map);
+    material.defines = {
+      TERRAIN_DESERT: 1,
+      DESERT_PAVING_COUNT: paving.desertPavingCourts.value.length,
+    };
+    Object.assign(uniforms, paving);
+  }
   if (biome === "crystal") {
     material.defines = { TERRAIN_CAVERN: 1 };
     Object.assign(uniforms, crystalFloorUniforms(game.map));
@@ -506,6 +524,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : ""}`;
   return material;
 }
