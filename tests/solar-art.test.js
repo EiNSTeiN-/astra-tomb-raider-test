@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
+import { solarReflectorPlan } from "../src/solar-reflectors.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import {
   solarCastingGeometry,
@@ -210,4 +211,188 @@ test("short source pillars protect the follow sight line despite the default cam
   world.traverse((m) => m.geometry?.dispose());
   materials.stone.dispose();
   materials.bronze.dispose();
+});
+
+test("nine reflector outlines triangulate without holes and their metal shells are closed", () => {
+  const bronze = new THREE.MeshStandardMaterial(),
+    glass = new THREE.MeshPhysicalMaterial({ side: THREE.DoubleSide }),
+    silhouettes = new Set();
+  for (let stage = 0; stage < 9; stage++) {
+    const pivot = new THREE.Group(),
+      { face, back, meshes, plan } = addSolarReflectorFrame(
+        {},
+        pivot,
+        bronze,
+        stage,
+        glass,
+      ),
+      polygonArea =
+        Math.abs(
+          plan.glass.reduce((area, a, i, points) => {
+            const b = points[(i + 1) % points.length];
+            return area + a[0] * b[1] - b[0] * a[1];
+          }, 0),
+        ) / 2,
+      p = face.geometry.attributes.position,
+      ids = face.geometry.index.array;
+    let triangleArea = 0;
+    for (let i = 0; i < ids.length; i += 3) {
+      const [a, b, c] = [...ids.slice(i, i + 3)].map((id) =>
+        new THREE.Vector3().fromBufferAttribute(p, id),
+      );
+      triangleArea += b.sub(a).cross(c.sub(a)).length() / 2;
+    }
+    assert(Math.abs(triangleArea - polygonArea) < 1e-6, plan.name);
+    assert(polygonArea > 2.4 && polygonArea < 3.4, plan.name);
+    assert.equal(face.position.z, 0, "optical centre stays on the beam plane");
+    closedSolid(back.geometry);
+    closedSolid(
+      meshes.find((mesh) => mesh.name.endsWith("closed bezel")).geometry,
+    );
+    silhouettes.add(JSON.stringify(plan.glass));
+    pivot.traverse((mesh) => mesh.geometry?.dispose());
+  }
+  assert.equal(silhouettes.size, 9);
+  bronze.dispose();
+  glass.dispose();
+});
+
+test("every shaped aperture stays clear through turns and joins its lower spindle", () => {
+  const materials = {
+      stone: new THREE.MeshStandardMaterial(),
+      bronze: new THREE.MeshStandardMaterial(),
+    },
+    glass = new THREE.MeshPhysicalMaterial({ side: THREE.DoubleSide }),
+    ray = new THREE.Raycaster(),
+    game = { groundHeight: () => 0, terrainProfile: { step: 1.75 } };
+  for (let stage = 0; stage < 9; stage++) {
+    const group = new THREE.Group(),
+      pivot = new THREE.Group();
+    addSolarPedestal(game, group, 2.7, materials, "mirror");
+    group.add(pivot);
+    pivot.position.y = 2.7;
+    addSolarReflectorFrame(game, pivot, materials.bronze, stage, glass);
+    const outline = solarReflectorPlan(stage).glass;
+    for (const angle of [
+      -Math.PI / 4,
+      -Math.PI / 8,
+      0,
+      Math.PI / 8,
+      Math.PI / 4,
+    ]) {
+      pivot.rotation.y = angle;
+      group.updateMatrixWorld(true);
+      // Near-edge and inner probes test the actual nonrectangular aperture.
+      // The outer ring clears the bevel even at the narrow stepped crown.
+      for (const [ex, ey] of outline)
+        for (const radius of [0.3, 0.7, 0.94]) {
+          const from = pivot.localToWorld(
+              new THREE.Vector3(ex * radius, ey * radius, 0.65),
+            ),
+            direction = new THREE.Vector3(0, 0, -1).transformDirection(
+              pivot.matrixWorld,
+            );
+          ray.set(from, direction);
+          ray.far = 1.3;
+          const hit = ray.intersectObject(group, true)[0];
+          assert.equal(
+            hit?.object.material,
+            glass,
+            `${stage}/${angle}/${ex}/${ey}/${radius}`,
+          );
+        }
+      // The rear saddle bears on the fixed collar at every optical angle.
+      const saddleBottom = pivot.localToWorld(
+        new THREE.Vector3(0, -1.26, -0.1),
+      );
+      ray.set(
+        saddleBottom.clone().add(new THREE.Vector3(0, 1, 0)),
+        new THREE.Vector3(0, -1, 0),
+      );
+      ray.far = 2;
+      const bearing = ray.intersectObjects(
+        group.children.filter((mesh) => mesh.isMesh),
+        false,
+      )[0];
+      assert(
+        bearing && bearing.point.y >= saddleBottom.y,
+        `unsupported saddle ${stage}/${angle}`,
+      );
+    }
+    group.traverse((mesh) => mesh.geometry?.dispose());
+  }
+  glass.dispose();
+  materials.stone.dispose();
+  materials.bronze.dispose();
+});
+
+test("turning reflector camera envelopes follow their cases and leave round corners clear", () => {
+  const bronze = new THREE.MeshStandardMaterial(),
+    glass = new THREE.MeshPhysicalMaterial({ side: THREE.DoubleSide });
+  for (let stage = 0; stage < 9; stage++) {
+    const world = new THREE.Group(),
+      pivot = new THREE.Group();
+    pivot.userData.cameraDynamic = true;
+    world.add(pivot);
+    const surfaces = new CameraSurfaces(world),
+      ray = new THREE.Raycaster();
+    addSolarReflectorFrame(
+      { cameraSurfaces: surfaces },
+      pivot,
+      bronze,
+      stage,
+      glass,
+    );
+    surfaces.rebuild();
+    assert.equal(surfaces.dynamic.length, 2);
+    const envelope = surfaces.dynamic.find((surface) => surface.planes);
+    for (const mesh of pivot.children) {
+      if (!mesh.isMesh || mesh.name.endsWith("spindle saddle")) continue;
+      const p = mesh.geometry.attributes.position;
+      for (let i = 0; i < p.count; i++) {
+        const v = new THREE.Vector3()
+          .fromBufferAttribute(p, i)
+          .add(mesh.position);
+        assert(
+          envelope.box.clone().expandByScalar(1e-6).containsPoint(v),
+          `case bevel outside camera bounds ${stage}/${mesh.name}`,
+        );
+        assert(
+          envelope.planes.every(
+            ([x, y, z, d]) => x * v.x + y * v.y + z * v.z <= d + 1e-6,
+          ),
+          `case outside camera planes ${stage}/${mesh.name}`,
+        );
+      }
+    }
+    for (const angle of [-Math.PI / 4, 0, Math.PI / 4]) {
+      pivot.rotation.y = angle;
+      pivot.position.set(stage * 5, 3, 1);
+      world.updateMatrixWorld(true);
+      for (const [x, y] of solarReflectorPlan(stage).glass) {
+        const a = pivot.localToWorld(new THREE.Vector3(x * 0.8, y * 0.8, 2)),
+          b = pivot.localToWorld(new THREE.Vector3(x * 0.8, y * 0.8, -2));
+        ray.set(a, b.clone().sub(a).normalize());
+        ray.far = 4;
+        const hit = ray.intersectObject(pivot, true)[0];
+        assert(hit);
+        assert(
+          surfaces.entry(a, b, 0.01) < hit.distance / 4,
+          `${stage}/${angle}`,
+        );
+      }
+      if (stage === 1) {
+        const a = pivot.localToWorld(new THREE.Vector3(1.02, 1.02, 2)),
+          b = pivot.localToWorld(new THREE.Vector3(1.02, 1.02, -2));
+        assert.equal(
+          surfaces.entry(a, b, 0),
+          1,
+          "empty disc corners do not inherit a square obstruction",
+        );
+      }
+    }
+    world.traverse((mesh) => mesh.geometry?.dispose());
+  }
+  bronze.dispose();
+  glass.dispose();
 });

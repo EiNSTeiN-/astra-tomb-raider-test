@@ -3,6 +3,7 @@ import { pbrMaterial } from "./visuals.js";
 import { weatherDesertStone } from "./desert-architecture.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { footprintMinimum } from "./masonry-foundations.js";
+import { buildSolarReflector } from "./solar-reflectors.js";
 
 export function solarInstrumentMaterials(game) {
   const stone = game?.stoneMat?.clone() || pbrMaterial("sandstone", 0xd6c3a3),
@@ -150,7 +151,7 @@ export function addSolarPedestal(game, group, height, materials, kind) {
       ],
       materials.stone,
     );
-    const shaftTop = height - 0.97;
+    const shaftTop = height - 1.13;
     casting([
       [0, 0.6],
       [0.25, 0.6],
@@ -161,12 +162,12 @@ export function addSolarPedestal(game, group, height, materials, kind) {
       [0, shaftTop],
     ]);
     casting([
-      [0, height - 1.12],
-      [0.24, height - 1.12],
-      [0.29, height - 1.07],
-      [0.29, height - 0.985],
-      [0.24, height - 0.94],
-      [0, height - 0.94],
+      [0, height - 1.28],
+      [0.24, height - 1.28],
+      [0.29, height - 1.23],
+      [0.29, height - 1.145],
+      [0.24, height - 1.1],
+      [0, height - 1.1],
     ]);
   } else {
     casting(
@@ -209,65 +210,14 @@ export function addSolarPedestal(game, group, height, materials, kind) {
   };
 }
 
-export function addSolarReflectorFrame(game, pivot, bronze, stage) {
-  part(
-    game,
-    pivot,
-    solarPlateGeometry(2.03, 1.864, 0.144, [1.75, 1.49]),
-    bronze,
-    0,
-    0,
-    0,
-  );
-  part(game, pivot, solarPlateGeometry(1.95, 1.76, 0.064), bronze, 0, 0, -0.06);
-  for (const x of [-0.38, 0.38])
-    part(
-      game,
-      pivot,
-      solarPlateGeometry(0.085, 1.62, 0.024),
-      bronze,
-      x,
-      0,
-      -0.104,
-    );
-  for (const [r, tube] of [
-    [0.43, 0.018],
-    [0.28, 0.014],
-  ])
-    part(
-      game,
-      pivot,
-      new THREE.TorusGeometry(r, tube, 6, 40),
-      bronze,
-      0,
-      0,
-      -0.108,
-    );
-  const rays = 12 + (stage % 3) * 2;
-  for (let i = 0; i < rays; i++) {
-    const angle = (i * Math.PI * 2) / rays,
-      ray = part(
-        game,
-        pivot,
-        solarPlateGeometry(0.045, 0.115, 0.014),
-        bronze,
-        Math.sin(angle) * 0.51,
-        Math.cos(angle) * 0.51,
-        -0.105,
-      );
-    ray.rotation.z = -angle;
-  }
-  for (const x of [-0.95, 0.95])
-    for (const y of [-0.865, 0.865])
-      part(
-        game,
-        pivot,
-        new THREE.SphereGeometry(0.025, 8, 6),
-        bronze,
-        x,
-        y,
-        0.074,
-      );
+export function addSolarReflectorFrame(
+  game,
+  pivot,
+  bronze,
+  stage,
+  glassMaterial,
+) {
+  return buildSolarReflector(game, pivot, bronze, stage, glassMaterial);
 }
 
 export function addSolarLabelMount(game, group, bronze) {

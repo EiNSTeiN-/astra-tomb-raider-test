@@ -490,6 +490,21 @@ test("all nine built chambers retain clear controls and their solved beams reach
         for (const dz of [-0.18, 0, 0.18])
           assert.ok(g.canMove(f.x * 7 + dx, f.z * 7 + dz, 0), f.id);
     assert.ok(site.mirrors.every((m) => m.pivot.parent && m.wheel.parent));
+    // An upper approach must meet collision before entering any taller case.
+    for (const mirror of site.mirrors) {
+      const parent = mirror.pivot.parent,
+        centre = parent.getWorldPosition(new THREE.Vector3());
+      const obstacle = g.obstacles.find(
+        (o) => o.solar && Math.hypot(o.x - centre.x, o.z - centre.z) < 1e-6,
+      );
+      const bounds = new THREE.Box3().setFromObject(mirror.pivot);
+      assert(obstacle, mirror.feature.id);
+      assert(
+        g.groundHeight(obstacle.x, obstacle.z) + obstacle.h - 0.2 >=
+          bounds.max.y - 1e-6,
+        `case top collision ${mirror.feature.id}`,
+      );
+    }
   }
 });
 
@@ -817,7 +832,10 @@ test("completing an aligned circuit quiets its light without moving or retracing
   g.progress.stage = 1;
   updateSolarChambers(g, 0);
   assert(site.active && site.aligned);
-  assert.deepEqual(site.segments.map((pair) => pair.map((p) => p.toArray())), path);
+  assert.deepEqual(
+    site.segments.map((pair) => pair.map((p) => p.toArray())),
+    path,
+  );
   for (const [i, mesh] of site.beams.entries()) {
     const tint = beamTint(mesh);
     assert.equal(mesh.count, before[i].count);

@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [nine desert reflector forms](solar-reflectors.md) replace identical
+  rectangular cases across all 68 mirrors with court-specific apertures,
+  closed castings and rear ribs. Lower collars clear the glass, while delivered
+  case bounds cover mitred tips in movement and camera queries. All 38 selected
+  regressions, three CPU-budget checks and the build pass. Thirty final High
+  views are reviewed; 77 prepared local circulation legs reach their targets
+  over 7,210 controller updates. All 6,800 aperture rays, 6,935 footing probes
+  and 693 control queries pass. The wide aqueduct view retains foreground
+  occlusion, with close construction coverage. Production keyboard/High and
+  portrait touch/Performance turn, reset, activate and retreat 9.0 m / 9.6 m at
+  full health, with four complete-store reload comparisons and six reviewed
+  release images. All 425 runtime hashes match, and owned browsers/previews
+  close under the shared five-of-sixteen CPU allowance. Repeated gate leaves,
+  pedestals, wider court composition and continuous contact remain open.
+
 - The [wooded jungle escarpment](jungle-escarpment.md) varies 1,647 outer-rim
   terrain vertices and the exposed rock treatment while retaining its tree
   groups. All protected walking, water, interior and edge-strip vertex digests

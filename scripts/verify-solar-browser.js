@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { findRoute } from "../src/navigation.js";
+import { findRoute, clearSegment } from "../src/navigation.js";
 import { advanceCharacter } from "../src/character-motion.js";
 
 export function solarView(game, stage = 1, close = false) {
@@ -102,8 +102,23 @@ export function walkSolarCourts(game) {
   game.updateDecorations(100);
   try {
     for (const site of game.solarSites) {
+      // Prepare a legal local approach to the first wheel. A gate threshold
+      // is a raised surface, so a fixed ground-level gate start is invalid.
+      const first = site.mirrors[0].feature,
+        target = { x: first.x * 7, z: first.z * 7 },
+        canStand = (x, z) => game.canMove(x, z, 0),
+        entrance = [3, 2.5, 2, 1.5]
+          .flatMap((radius) =>
+            Array.from({ length: 24 }, (_, i) => ({
+              x: target.x + Math.cos((i * Math.PI) / 12) * radius,
+              z: target.z + Math.sin((i * Math.PI) / 12) * radius,
+            })),
+          )
+          .find((p) => canStand(p.x, p.z) && clearSegment(canStand, p, target));
+      if (!entrance)
+        throw Error(`No legal local solar approach: ${site.stage}`);
       const points = [
-        { x: site.root.position.x, z: site.root.position.z + 8 },
+        entrance,
         ...site.mirrors.map((m) => ({
           x: m.feature.x * 7,
           z: m.feature.z * 7,
@@ -161,6 +176,9 @@ export function walkSolarCourts(game) {
         }
         results.push({
           stage: site.stage,
+          kind: i === 1 ? "prepared-approach" : "between-controls",
+          start,
+          end,
           leg: i,
           status: route.status,
           arrived,

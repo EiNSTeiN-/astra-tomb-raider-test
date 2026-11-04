@@ -82,36 +82,42 @@ export function inspectSolarInstruments(game) {
         ]) {
           mirror.pivot.rotation.y = angle;
           site.root.updateMatrixWorld(true);
-          for (const x of [-0.68, -0.3, 0, 0.3, 0.68])
-            for (const y of [-0.65, -0.35, 0.35, 0.65]) {
-              const from = new THREE.Vector3(x, y, 0.65).applyMatrix4(
-                  mirror.pivot.matrixWorld,
-                ),
-                direction = new THREE.Vector3(0, 0, -1).transformDirection(
-                  mirror.pivot.matrixWorld,
-                );
-              ray.set(from, direction);
-              ray.far = 1.3;
-              const hit = ray
-                .intersectObject(site.root, true)
-                .find(
-                  (h) =>
-                    h.object.isMesh &&
-                    !h.object.material.isMeshBasicMaterial &&
-                    !h.object.material.transparent,
-                );
-              report.apertureProbes++;
-              if (hit?.object.material.name !== "Silvered solar reflectors")
-                report.failures.push({
-                  stage: site.stage,
-                  index: mirror.feature.index,
-                  query: "aperture",
-                  angle,
-                  x,
-                  y,
-                  material: hit?.object.material.name,
-                });
-            }
+          // Twenty probes follow each delivered aperture, including its sides,
+          // rather than assuming all nine glass outlines are rectangles.
+          const outline = mirror.pivot.userData.solarReflector.glass;
+          for (let probe = 0; probe < 20; probe++) {
+            const [edgeX, edgeY] =
+                outline[Math.floor((probe * outline.length) / 20)],
+              x = edgeX * (probe % 2 ? 0.8 : 0.45),
+              y = edgeY * (probe % 2 ? 0.8 : 0.45);
+            const from = new THREE.Vector3(x, y, 0.65).applyMatrix4(
+                mirror.pivot.matrixWorld,
+              ),
+              direction = new THREE.Vector3(0, 0, -1).transformDirection(
+                mirror.pivot.matrixWorld,
+              );
+            ray.set(from, direction);
+            ray.far = 1.3;
+            const hit = ray
+              .intersectObject(site.root, true)
+              .find(
+                (h) =>
+                  h.object.isMesh &&
+                  !h.object.material.isMeshBasicMaterial &&
+                  !h.object.material.transparent,
+              );
+            report.apertureProbes++;
+            if (hit?.object.material.name !== "Silvered solar reflectors")
+              report.failures.push({
+                stage: site.stage,
+                index: mirror.feature.index,
+                query: "aperture",
+                angle,
+                x,
+                y,
+                material: hit?.object.material.name,
+              });
+          }
         }
       } finally {
         mirror.pivot.rotation.y = original;

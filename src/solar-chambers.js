@@ -125,13 +125,13 @@ export function buildSolarChambers(game) {
       parent.add(mesh);
       return mesh;
     };
-    const obstacle = (p, w = 0.95, d = 0.95) =>
+    const obstacle = (p, w = 0.95, d = 0.95, top = 1) =>
       game.obstacles.push({
         x: root.position.x + p.x,
         z: root.position.z + p.z,
         w,
         d,
-        h: beamY - floor(p) + 1,
+        h: beamY - floor(p) + top,
         solar: true,
       });
     const marker = (group, x = 0) => {
@@ -178,16 +178,13 @@ export function buildSolarChambers(game) {
       group.add(pivot);
       // The two diagonal normals implement the same reflection law as the grid.
       pivot.rotation.y = state.values[index] ? -Math.PI / 4 : Math.PI / 4;
-      const face = add(
-        new THREE.PlaneGeometry(1.78, 1.52),
-        mirrorMaterial,
-        0,
-        0,
-        0,
+      const reflector = addSolarReflectorFrame(
+        game,
         pivot,
+        bronze,
+        stage,
+        mirrorMaterial,
       );
-      face.receiveShadow = false;
-      addSolarReflectorFrame(game, pivot, bronze, stage);
       const wheel = add(
         new THREE.TorusGeometry(0.34, 0.045, 8, 24),
         bronze,
@@ -214,7 +211,13 @@ export function buildSolarChambers(game) {
         "mirror",
         index,
       );
-      obstacle(p);
+      obstacle(
+        p,
+        0.95,
+        0.95,
+        // Legacy obstacles allow a 20 cm step lip; keep it above the case.
+        reflector.top + 0.201,
+      );
       mergeArchitecture(pivot);
       mergeArchitecture(group);
       site.mirrors.push({ pivot, wheel, feature: f, motion: 0 });
@@ -523,7 +526,11 @@ export function updateSolarChambers(game, dt) {
             length = direction.length();
           dummy.position.copy(a).add(b).multiplyScalar(0.5);
           dummy.quaternion.setFromUnitVectors(axis, direction.normalize());
-          dummy.scale.set(SOLAR_BEAM_RADII[pass], length, SOLAR_BEAM_RADII[pass]);
+          dummy.scale.set(
+            SOLAR_BEAM_RADII[pass],
+            length,
+            SOLAR_BEAM_RADII[pass],
+          );
           dummy.updateMatrix();
           mesh.setMatrixAt(i, dummy.matrix);
           mesh.setColorAt(i, tint);
