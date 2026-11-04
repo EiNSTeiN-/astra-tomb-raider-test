@@ -11,6 +11,7 @@ import { buildMonasteryGalleries } from "./monastery-galleries.js";
 import { roofFasciaGeometry } from "./roof-fascia.js";
 import { RoofCamera } from "./roof-camera.js";
 import { stationMeshSolid } from "./field-station-solids.js";
+import { monasteryPavilionPlan } from "./monastery-pavilion-plan.js";
 import {
   buildPavilionHouse,
   upperRoomMaterials,
@@ -25,16 +26,18 @@ export function monasteryPlan(room) {
     for (const x of [7.7, 19])
       for (const z of [-22, -17])
         posts.push({ x: side * x, z, width: 1.5, top: 6.35 });
-  const galleries = monasteryGallerySides(i);
+  const galleries = monasteryGallerySides(i),
+    pavilion = monasteryPavilionPlan(i);
   for (const side of galleries)
     for (const z of [-5, 7, 18])
       posts.push({ x: side * 19, z, width: 1.45, top: 5.7 });
   return {
     posts,
     galleries,
-    upper: i !== 4,
+    pavilion,
+    upper: Boolean(pavilion.upper),
     wingDamage: [0, 1, 0, 2, 2, 0, 1, 2, 0][i],
-    upperRise: [2.7, 2.4, 3, 2.7, 0, 2.4, 3, 2.7, 3.5][i],
+    upperRise: pavilion.upper?.rise ?? 0,
   };
 }
 
@@ -451,13 +454,47 @@ export function buildMonasteryArchitecture(game) {
     }
     for (const px of [-5.5, 5.5])
       block(0.65, 0.6, 8, wood, px, 10.45, -18, 0, true);
-    const mainDeck = roofAt(17.4, 12.4, 3.6, 0, 11, -18);
+    const markPavilion = (id) => (meshes) => {
+      for (const mesh of meshes)
+        mesh.geometry.setAttribute(
+          "monasteryPavilion",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count).fill(id),
+            1,
+          ),
+        );
+    };
+    const main = plan.pavilion.main,
+      mainDeck = roofAt(
+        main.width,
+        main.depth,
+        main.rise,
+        0,
+        11,
+        -18,
+        0,
+        0,
+        markPavilion(1),
+        main.profile,
+      );
     let upperDeck = null;
     if (plan.upper) {
       // Retain the independent seed sequence of the surrounding wings and
       // roof fascias while replacing the old body and front-only windows.
       serial += 6;
-      upperDeck = roofAt(10.2, 8.2, plan.upperRise, 0, 17.05, -18);
+      const cap = plan.pavilion.upper;
+      upperDeck = roofAt(
+        cap.width,
+        cap.depth,
+        cap.rise,
+        0,
+        17.05,
+        -18,
+        0,
+        0,
+        markPavilion(2),
+        cap.profile,
+      );
       serial += 15;
       const top = 17.05 + plan.upperRise;
       add(
@@ -537,6 +574,15 @@ export function buildMonasteryArchitecture(game) {
       z: z - 17,
     };
     const joinery = batchMonasteryBuildings(root, [house, ...wings]);
+    for (const mesh of root.children)
+      if (mesh.isMesh && !mesh.geometry.attributes.monasteryPavilion)
+        mesh.geometry.setAttribute(
+          "monasteryPavilion",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count),
+            1,
+          ),
+        );
     for (const mesh of root.children)
       if (mesh.isMesh && !mesh.geometry.attributes.monasteryFascia)
         mesh.geometry.setAttribute(

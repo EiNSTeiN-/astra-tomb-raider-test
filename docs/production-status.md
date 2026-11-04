@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [varied monastery pavilions](pavilion-volumes.md) give the nine winter
+  courts low hips, long gables and taller pavilion caps. All 17 main/upper
+  roof volumes carry fitted walls, ceiling timber, snow and fascias. Roof
+  triangle breaks now govern the wall joints, and actual roof contact prevents
+  buried upper-room backing from pushing a standing explorer sideways. All
+  59 focused checks, three CPU-budget checks and the build pass. All 444
+  delivered wall joints and 45,336 fascia probes pass their displacement
+  controls. Seventeen cap landings and earlier roof-save arrivals pass.
+  Forty-one final-source views and six release images are reviewed; keyboard
+  and portrait touch pass four complete-store reload comparisons. All 432
+  runtime hashes match and owned helpers close under the shared five-of-sixteen
+  cap. Broad court composition, sparse surroundings and continuous contact
+  remain open.
+
 - The [fitted monastery eaves](monastery-eaves.md) repair bright corner gaps
   caused by straight fascia boards beneath lifted roofs. All 72 roofs now use
   closed bands fitted to actual underside triangles, with finite support and

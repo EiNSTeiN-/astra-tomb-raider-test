@@ -238,6 +238,7 @@ export function dressMonasteryRoof(
       );
     solid.groundingSlope = true;
     solid.roofTimber = true;
+    deck.roofSupportSolid = solid;
   }
   game.monasteryRoofTimber ??= [];
   game.monasteryRoofTimber.push({

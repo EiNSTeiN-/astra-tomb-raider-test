@@ -14,6 +14,8 @@ import {
   verifyMonasteryFascias,
 } from "../scripts/inspect-monastery-galleries-browser.js";
 import { advanceCharacter, safeArrival } from "../src/character-motion.js";
+import { stationBlocked } from "../src/field-station-solids.js";
+import { verifyMonasteryPavilions } from "../scripts/inspect-monastery-pavilions-browser.js";
 
 function fixture(t) {
   t.mock.method(T.TextureLoader.prototype, "load", () => new T.Texture());
@@ -100,6 +102,130 @@ test("all delivered monastery fascias meet their roof skirts, with dropped-board
   assert.equal(report.accepted.roofs, 72);
   assert(report.droppedFailures > 500);
   t.diagnostic(JSON.stringify(report));
+});
+
+test("all delivered pavilion houses meet both varied roof shells after batching, with lowered-house controls", (t) => {
+  const r = verifyMonasteryPavilions(fixture(t));
+  assert.deepEqual(r.accepted.failures, []);
+  assert.equal(r.accepted.roofs, 17);
+  assert.equal(r.loweredFailures, r.accepted.joints);
+  t.diagnostic(JSON.stringify(r));
+});
+
+test("seventeen varied pavilion caps catch actual controller falls and restore earlier roof saves without changing progress", (t) => {
+  const g = fixture(t),
+    ray = new T.Raycaster(),
+    material = new T.MeshBasicMaterial();
+  g.progress = {
+    stage: 3,
+    field: ["frost-trial"],
+    found: ["journal"],
+    health: 87,
+  };
+  const progress = JSON.stringify(g.progress);
+  let caps = 0,
+    relocated = 0;
+  try {
+    for (const [index, patch] of g.monasteryPatches.entries())
+      for (const id of patch.plan.upper ? [1, 2] : [1]) {
+        const c = patch.root.position,
+          x = c.x + (id === 2 ? 1.5 : 0),
+          z = c.z + (id === 2 ? -18 : -23.2);
+        ray.set(new T.Vector3(x, c.y + 50, z), new T.Vector3(0, -1, 0));
+        const hit = ray.intersectObject(patch.root, true).find((h) => {
+          const tag = h.object.geometry.attributes.monasteryPavilion,
+            ids = h.object.geometry.index;
+          return (
+            tag?.getX(ids ? ids.getX(h.faceIndex * 3) : h.faceIndex * 3) === id
+          );
+        });
+        assert(hit);
+        if (index === 6 && id === 2) {
+          const solid = patch.house.stationSolids[0];
+          assert(!stationBlocked(solid, x, hit.point.y, z));
+          solid.groundingSlope = false;
+          assert(
+            stationBlocked(solid, x, hit.point.y, z),
+            "buried-backing regression control",
+          );
+          solid.groundingSlope = true;
+          assert(
+            stationBlocked(solid, x, hit.point.y - 1, z),
+            "roof contact does not open the room below",
+          );
+        }
+        const oldOptions =
+            id === 1
+              ? { width: 17.4, depth: 12.4, rise: 3.6 }
+              : {
+                  width: 10.2,
+                  depth: 8.2,
+                  rise: [2.7, 2.4, 3, 2.7, 0, 2.4, 3, 2.7, 3.5][index],
+                },
+          old = [];
+        try {
+          for (const snow of [false, true]) {
+            const mesh = new T.Mesh(
+              monasteryRoofGeometry({ ...oldOptions, snow, seed: index }),
+              material,
+            );
+            mesh.position.set(c.x, c.y + (id === 1 ? 11 : 17.05), c.z - 18);
+            mesh.updateMatrixWorld(true);
+            old.push(mesh);
+          }
+          const before = ray.intersectObjects(old)[0];
+          assert(before);
+          const arrival = safeArrival(g, { x, y: before.point.y, z });
+          assert(arrival);
+          assert(
+            g.canMove(
+              arrival.x,
+              arrival.z,
+              arrival.y - g.groundHeight(arrival.x, arrival.z),
+            ),
+          );
+          if (Math.hypot(arrival.x - x, arrival.z - z) > 0.001) relocated++;
+          for (const start of [
+            new T.Vector3(x, hit.point.y + 1.6, z),
+            new T.Vector3(arrival.x, arrival.y, arrival.z),
+          ]) {
+            g.player.position.copy(start);
+            g.grounded = false;
+            g.velocityY = 0;
+            g.jumpBuffer = 0;
+            g.airVelocity = null;
+            g.jumpY = start.y - g.groundHeight(start.x, start.z);
+            g.fallPeak = start.y;
+            for (let i = 0; i < 180; i++)
+              advanceCharacter(g, { x: 0, z: 0 }, 1 / 60);
+            const p = g.player.position;
+            assert(g.grounded);
+            assert(g.canMove(p.x, p.z, p.y - g.groundHeight(p.x, p.z)));
+            if (start.x === x && start.z === z && start.y > hit.point.y + 1)
+              assert(
+                Math.abs(p.y - hit.point.y) < 0.015,
+                JSON.stringify({
+                  index,
+                  id,
+                  start: start.toArray(),
+                  landed: p.toArray(),
+                  expected: hit.point.y,
+                }),
+              );
+          }
+          assert.equal(JSON.stringify(g.progress), progress);
+          caps++;
+        } finally {
+          old.forEach((m) => m.geometry.dispose());
+        }
+      }
+  } finally {
+    material.dispose();
+  }
+  assert.equal(caps, 17);
+  t.diagnostic(
+    `${caps} controller landings and earlier roof saves, ${relocated} nearby save relocations`,
+  );
 });
 
 test("all thirteen lodge-to-cloister connections retain grounded controller crossings and save arrival", (t) => {

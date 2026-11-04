@@ -153,6 +153,50 @@ function windowLayout(style, length, side) {
   return rows.filter((r) => Math.abs(r.x) + r.w / 2 + 0.14 < length / 2);
 }
 
+// A facade edge can cross a ridge or a diagonal within a roof grid cell. Fixed
+// wall subdivisions miss those breaks. Keep every intersection with delivered
+// upward roof triangles so the sill, wall and cornice share the exact section.
+function roofBreaks(mesh) {
+  mesh.updateMatrix();
+  const p = mesh.geometry.attributes.position,
+    ids = mesh.geometry.index,
+    edges = [];
+  for (let i = 0; i < (ids?.count ?? p.count); i += 3) {
+    const v = [0, 1, 2].map((j) =>
+      new T.Vector3()
+        .fromBufferAttribute(p, ids ? ids.getX(i + j) : i + j)
+        .applyMatrix4(mesh.matrix),
+    );
+    if (new T.Triangle(...v).getNormal(new T.Vector3()).y <= 1e-6) continue;
+    for (let j = 0; j < 3; j++) edges.push([v[j], v[(j + 1) % 3]]);
+  }
+  return (a, b) => {
+    const dx = b[0] - a[0],
+      dz = b[1] - a[1],
+      length2 = dx * dx + dz * dz,
+      values = [0, 1];
+    for (const [p, q] of edges) {
+      const ex = q.x - p.x,
+        ez = q.z - p.z,
+        denom = dx * ez - dz * ex,
+        px = p.x - a[0],
+        pz = p.z - a[1];
+      if (Math.abs(denom) < 1e-10) {
+        if (Math.abs(px * dz - pz * dx) < 1e-8)
+          for (const v of [p, q]) {
+            const t = ((v.x - a[0]) * dx + (v.z - a[1]) * dz) / length2;
+            if (t > 0 && t < 1) values.push(t);
+          }
+        continue;
+      }
+      const t = (px * ez - pz * ex) / denom,
+        u = (px * dz - pz * dx) / denom;
+      if (t > 0 && t < 1 && u >= -1e-8 && u <= 1 + 1e-8) values.push(t);
+    }
+    return values;
+  };
+}
+
 export function upperRoomMaterials(base) {
   return Object.fromEntries(
     Object.entries(base).map(([name, m]) => {
@@ -282,7 +326,8 @@ export function buildPavilionHouse(
       inset = footprint.map(([x, z]) => [x * 0.947, (z + 18) * 0.925 - 18]),
       low = (x, z) => bottom(x, z) - 0.08,
       high = (x, z) => upper(x, z) + 0.05,
-      core = fittedCore(inset, low, high);
+      core = fittedCore(inset, low, high),
+      sections = [roofBreaks(mainDeck), roofBreaks(upperDeck)];
     emit(
       core,
       materials.plaster,
@@ -304,15 +349,18 @@ export function buildPavilionHouse(
         matrix = new T.Matrix4().makeRotationY(angle).setPosition(cx, 0, cz),
         at = (s, y, d = 0) => [cx + ex * s - ez * d, y, cz + ez * s + ex * d],
         contour = [],
-        steps = Math.ceil(length / 0.18),
+        samples = sections
+          .flatMap((read) => read(a, b))
+          .sort((a, b) => a - b)
+          .filter((t, i, all) => !i || (t - all[i - 1]) * length > 1e-5),
         layout = windowLayout(plan.windows, length, side);
-      for (let j = 0; j <= steps; j++) {
-        const s = -length / 2 + (j * length) / steps,
+      for (const t of samples) {
+        const s = (t - 0.5) * length,
           [x, , z] = at(s, 0);
         contour.push([s, low(x, z)]);
       }
-      for (let j = steps; j >= 0; j--) {
-        const s = -length / 2 + (j * length) / steps,
+      for (const t of samples.toReversed()) {
+        const s = (t - 0.5) * length,
           [x, , z] = at(s, 0);
         contour.push([s, high(x, z)]);
       }
@@ -411,8 +459,8 @@ export function buildPavilionHouse(
         ],
       ]) {
         const edge = [];
-        for (let j = 0; j <= steps; j++) {
-          const s = -length / 2 + (j * length) / steps,
+        for (const t of samples) {
+          const s = (t - 0.5) * length,
             [x, , z] = at(s, 0);
           edge.push([s, height(x, z) + offset]);
         }
@@ -472,10 +520,20 @@ export function buildPavilionHouse(
     proxy.geometry.dispose();
   }
   const record = { id: `pavilion-house-${index}`, root, plan, windows, joints };
-  stationAssemblySolid(game, record, raw, {
+  const solid = stationAssemblySolid(game, record, raw, {
     bodyPadding: 0.55,
     support: false,
   });
+  // A standing collision cylinder extends uphill into the buried backing on
+  // steep caps. Exempt that backing only at the real roof contact; the closed
+  // room and its ceiling remain solid below or away from the roof surface.
+  if (upperDeck?.roofSupportSolid) {
+    solid.groundingSlope = true;
+    solid.groundingFace = {
+      triangles: upperDeck.roofSupportSolid.triangles,
+      requireContact: true,
+    };
+  }
   mergeArchitecture(root, 2);
   return record;
 }
