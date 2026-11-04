@@ -138,7 +138,7 @@ test("regional assemblies fit their reserved footprints, including relief and fi
     for (let variant = 0; variant < 4; variant++) {
       const level = { seed: variant, biome },
         plan = discoverySettingPlan(level, [pickup("note-0", 100, 100)]);
-      for (const p of plan.candidates.filter((p) => p.yaw === 0)) {
+      for (const p of plan.candidates.filter((p) => p.alternative === 0)) {
         const root = discoverySettingModule(biome, p, materials, -0.47),
           bounds = new THREE.Box3().setFromObject(root);
         assert(

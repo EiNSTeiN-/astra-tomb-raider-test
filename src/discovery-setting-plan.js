@@ -8,6 +8,7 @@ import { craneFoundationDistance } from "./astral-crane-rules.js";
 import { temperingFoundationDistance } from "./tempering-cart-rules.js";
 import { inEchoGallery } from "./echo-gallery-rules.js";
 import { inOrbitVault } from "./orbit-rules.js";
+import { discoveryLayout } from "./discovery-composition.js";
 
 export const DISCOVERY_SETTINGS = Object.freeze({
   jungle: { name: "Waterkeeper's wayside archive", fixture: "basin" },
@@ -134,13 +135,46 @@ export function discoverySettingAllowed(game, box) {
 // horizontal extent, including leaves, so it cannot grow through new shelves,
 // cache walls or carved stone. Rocks already use the finite world obstacles.
 export function discoveryFoliageClear(game, x, z, radius) {
-  for (const setting of game.discoverySettings || [])
+  for (const setting of game.discoverySettings || []) {
     for (const p of setting.modules)
       if (
         Math.abs(x - p.x) < p.w / 2 + radius + 0.18 &&
         Math.abs(z - p.z) < p.d / 2 + radius + 0.18
       )
         return false;
+    for (const tile of setting.paving || []) {
+      if (
+        !tile.points ||
+        Math.abs(x - tile.x) > tile.w / 2 + radius + 0.1 ||
+        Math.abs(z - tile.z) > tile.d / 2 + radius + 0.1
+      )
+        continue;
+      let inside = true,
+        sign = 0;
+      for (let i = 0; i < tile.points.length; i++) {
+        const a = tile.points[i],
+          b = tile.points[(i + 1) % tile.points.length],
+          dx = b[0] - a[0],
+          dz = b[1] - a[1],
+          cross = dx * (z - a[1]) - dz * (x - a[0]);
+        if (Math.abs(cross) > 1e-8) {
+          const side = Math.sign(cross);
+          if (sign && side !== sign) inside = false;
+          sign = side;
+        }
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz),
+          ),
+        );
+        if (Math.hypot(x - a[0] - t * dx, z - a[1] - t * dz) <= radius + 0.1)
+          return false;
+      }
+      if (inside) return false;
+    }
+  }
   return !game.items.some(
     (f) =>
       f.discovery &&
@@ -164,24 +198,15 @@ export function discoverySettingPlan(level, members) {
   };
   for (let i = 0; i < members.length; i++) {
     const p = members[i].discovery,
-      side = (index + i) % 2 ? -1 : 1,
-      slots = [
-        {
-          role: "backdrop",
-          kind: variant % 2 ? "rack" : "wall",
-          x: side * 4.6,
-          z: -3.4,
-        },
-        { role: "fixture", kind: style.fixture, x: -side * 4.2, z: -1.7 },
-        { role: "fragment", kind: "column", x: -side * 3.9, z: -4.8 },
-      ];
+      slots = discoveryLayout(level.biome, variant, index + i, style.fixture);
     for (const slot of slots) {
       // Try coherent alternative positions around this stand if a bank or an
       // existing building occupies the first location. Never force a module.
       for (const offset of [0, Math.PI / 2, -Math.PI / 2, Math.PI]) {
-        const yaw = p.stance.yaw + offset,
-          sin = Math.sin(yaw),
-          cos = Math.cos(yaw),
+        const basis = p.stance.yaw + offset,
+          yaw = basis + slot.facing,
+          sin = Math.sin(basis),
+          cos = Math.cos(basis),
           [w, d] = dimensions[slot.kind];
         candidates.push({
           ...slot,
@@ -189,8 +214,9 @@ export function discoverySettingPlan(level, members) {
           x: p.x + slot.x * cos + slot.z * sin,
           z: p.z - slot.x * sin + slot.z * cos,
           yaw,
-          w: Math.abs(w * cos) + Math.abs(d * sin),
-          d: Math.abs(d * cos) + Math.abs(w * sin),
+          alternative: offset,
+          w: Math.abs(w * Math.cos(yaw)) + Math.abs(d * Math.sin(yaw)),
+          d: Math.abs(d * Math.cos(yaw)) + Math.abs(w * Math.sin(yaw)),
           localWidth: w,
           localDepth: d,
           variant,

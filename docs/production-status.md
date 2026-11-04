@@ -13,11 +13,29 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the 160-view discovery baseline and current 64-pose repeat; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the 160-view discovery baseline and current 144-stance/24-body-pose repeat; shared object families and court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- The [regional discovery courts](regional-discovery-courts.md) give notes and
+  caches eight floor compositions with inward-facing, varied furnishing edges.
+  All 30 selected tests, three CPU-budget checks and the build pass. All 2,570
+  delivered pieces pass 124,208 ground probes and independent overlap checks,
+  with lifted-floor and moved-tile controls. Existing rack seating passes at
+  the new orientations. All 144 collection stances remain clear and reachable;
+  24 stopped body poses pass furnishing/setting and terrain checks. Sixteen
+  final High views are reviewed against sixteen matched published-source views.
+  Eight terrain-factory comparisons retain height, physical court, water,
+  bridge, index and non-court attribute data; only 7,105 stored court-shading
+  values change. All 440 final runtime files match the tested application.
+  Production keyboard and portrait touch alternate across all eight chapters,
+  with collection at full health, eight recovered occupied-wall saves and
+  sixteen complete-store reload comparisons. All 28 release images are
+  reviewed; owned helpers close under the shared five-of-sixteen CPU cap.
+  Shared object families, broad court massing, sparse margins, coarse cliff
+  forms, wider traversal/water coverage and continuous contact remain open.
 
 - The [discovery rack and terrain repairs](discovery-racks-terrain.md) seat
   floating cargo, clear the jungle rack tablet from its upper board and repair

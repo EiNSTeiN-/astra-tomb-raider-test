@@ -35,15 +35,17 @@ import {
   cavernPoolDeclarations,
 } from "./cavern-pool-material.js";
 
-export function pavingMaterial(biome, map) {
+export function pavingMaterial(biome, map, surface) {
   const name =
+    surface ||
     {
       jungle: "moss",
       desert: "sandstone-wall",
       water: "palace-mosaic",
       volcano: "forge-paving",
       crystal: "rock",
-    }[biome] || "stone";
+    }[biome] ||
+    "stone";
   const material = pbrMaterial(name);
   material.name = "Worn court paving";
   material.vertexColors = true;

@@ -2107,3 +2107,13 @@ and their credited texture maps are reused. The two coastal documentation
 figures are lossless exports of actual game captures; the earlier cargo factory
 is restored only for the comparison image. No external model, bitmap, recording,
 music or dependency is introduced.
+
+
+## Regional discovery courts
+
+The eight regional floor plans, furnishing layouts, convex terrain-triangle
+clipping, polygon edge wear and shallow relief shading are original project
+code. They reuse the existing credited regional paving and stone maps. The
+four documentation figures are lossless exports of actual game frames, with
+matched elevated inspection cameras and identical decoded source RGB pixels.
+No external bitmap, model, recording, music or dependency is added by this pass.

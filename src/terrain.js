@@ -60,7 +60,8 @@ export function createTerrainProfile(map, level) {
     step = 1.75,
     width = Math.ceil(extent / step) + 1;
   const heights = new Float32Array(width * width),
-    courts = new Float32Array(width * width);
+    courts = new Float32Array(width * width),
+    visualCourts = new Float32Array(width * width);
   const biome = level.biome;
   const waters = waterSites(map, level);
   const upperHeights = biome === "sky" ? new Float32Array(width * width) : null;
@@ -139,7 +140,8 @@ export function createTerrainProfile(map, level) {
       const base = raw(x, z);
       let height = joinedCourts ? joinedCourts[iz * width + ix] : base,
         strongest = 0,
-        paving = 0;
+        paving = 0,
+        visualPaving = 0;
       for (const terrace of terraces) {
         const distance = Math.max(
           Math.abs(x - terrace.x),
@@ -161,15 +163,18 @@ export function createTerrainProfile(map, level) {
         const inner = terrace.main ? 8.5 : terrace.discovery ? 1.2 : 3;
         const organicEdge =
           Math.sin(x * 0.63 + z * 0.39) * 1.5 + Math.sin(z * 0.86) * 0.75;
-        paving = Math.max(
-          paving,
+        const coverage =
           1 -
-            smooth(
-              inner,
-              inner + (terrace.discovery ? 3.6 : 8),
-              distance + organicEdge,
-            ),
-        );
+          smooth(
+            inner,
+            inner + (terrace.discovery ? 3.6 : 8),
+            distance + organicEdge,
+          );
+        paving = Math.max(paving, coverage);
+        // Discovery fragments now carry their regional floor composition.
+        // Keep the old court field for geology and placement, while omitting
+        // its shared square blend from the rendered material coordinates.
+        if (!terrace.discovery) visualPaving = Math.max(visualPaving, coverage);
       }
       if (map.courierFerry) {
         const weight = courierFoundationWeight(x, z);
@@ -254,12 +259,22 @@ export function createTerrainProfile(map, level) {
           raw(CAUSEWAY_SITE.x, CAUSEWAY_SITE.z) * weight -
           causewayChannelDepth(x, z);
         paving *= 1 - weight;
+        visualPaving *= 1 - weight;
       }
       courts[iz * width + ix] = Math.max(paving, coastal?.coverage(x, z) || 0);
+      visualCourts[iz * width + ix] = Math.max(
+        visualPaving,
+        coastal?.coverage(x, z) || 0,
+      );
     }
   const jungleRim =
     biome === "jungle"
-      ? createJungleRim(map, level.seed, waters, woodlandLayout(map, level, raw))
+      ? createJungleRim(
+          map,
+          level.seed,
+          waters,
+          woodlandLayout(map, level, raw),
+        )
       : null;
   if (jungleRim)
     for (let iz = 0; iz < width; iz++)
@@ -387,6 +402,7 @@ export function createTerrainProfile(map, level) {
     geology: null,
     height: (x, z) => sample(heights, x, z),
     court: (x, z) => sample(courts, x, z),
+    visualCourt: (x, z) => sample(visualCourts, x, z),
   };
   profile.gallery = createSunkenGallery(profile, biome);
   let terrain = profile;
@@ -498,7 +514,7 @@ export function buildTerrainSurface(game) {
           pz = position.getZ(i);
         position.setY(i, profile.height(px, pz));
         uv.setXY(i, px / 4, pz / 4);
-        court[i] = profile.court(px, pz);
+        court[i] = (profile.visualCourt || profile.court)(px, pz);
         trail[i] = profile.trail(px, pz);
         if (scoria) scoria[i] = profile.volcanic.scoria(px, pz);
         if (snowRock) snowRock[i] = profile.snow.rock(px, pz);
