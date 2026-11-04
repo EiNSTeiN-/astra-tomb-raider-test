@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [defined alpine ridges](alpine-ridges.md) replace rounded winter-range
+  shoulders with capped summits and descending ribs in the existing mesh.
+  An independent delivered-face comparison clears all 23 opposing lighting
+  corners in the published shells. All 30 selected checks, three CPU-budget
+  checks and the build pass. The new regression covers 589,824 faces across
+  two extents, including deliberately inverted-normal controls. Terrain
+  fingerprints, support/camera/sound records, mesh counts, indices and UVs
+  remain unchanged. Fifteen final development views and six production
+  keyboard/touch images are reviewed; four complete-store reload comparisons
+  pass. All 429 runtime hashes match and owned helpers close under the shared
+  five-of-sixteen CPU cap. Large uniform flanks, sparse paths, shared court
+  massing and continuous contact remain open.
+
 - The [wind-scoured winter slopes](winter-scour.md) expose rock on wind-facing
   banks and mountain shoulders while retaining sheltered snow. Terrain,
   foreland and ranges share the exposure field without changing geometry,

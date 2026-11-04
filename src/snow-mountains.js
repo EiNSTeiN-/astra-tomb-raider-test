@@ -14,9 +14,9 @@ const smooth = (a, b, value) => {
   return t * t * (3 - 2 * t);
 };
 
-// Wider shoulders separate the monastery from the enclosing ranges. Long-wave
-// summits and smaller incisions vary the horizon without narrow repeated snow
-// gullies. Cartesian erosion joins the seam; both aprons stay below the world.
+// Asymmetric ridges rise from broad aprons. A rounded ridge cap avoids a knife
+// edge while retaining steep shoulders; world-space ribs run down the flanks.
+// Cartesian fields join the angular seam and both aprons stay below the world.
 export function mountainHeight(angle, across, layer = 0, extent = 420) {
   across = Math.max(0, Math.min(1, across));
   const radius = extent * (0.94 + layer * 0.64) + across * depth,
@@ -31,15 +31,23 @@ export function mountainHeight(angle, across, layer = 0, extent = 420) {
     layer * 50 +
     Math.pow(rockNoise(cx * 0.006, cz * 0.006, seed + 31), 1.7) * 220 +
     rockNoise(cx * 0.017, cz * 0.017, seed + 79) * 45;
-  const u = Math.min(1, across / crest),
-    flank =
-      Math.pow(Math.sin(u * Math.PI * 0.5), 1.65) *
-      (1 - smooth(crest, 1, across));
-  const wx = x + (rockNoise(x * 0.009, z * 0.009, seed + 137) - 0.5) * 64,
-    wz = z + (rockNoise(x * 0.009, z * 0.009, seed + 211) - 0.5) * 64;
-  const cut = Math.abs(rockNoise(wx * 0.019, wz * 0.019, seed + 317) * 2 - 1),
-    smallCut = Math.abs(rockNoise(wx * 0.041, wz * 0.041, seed + 419) * 2 - 1);
-  return -18 + flank * (peaks - cut * cut * 48 - smallCut * smallCut * 5);
+  const side = (across - crest) / (across < crest ? crest : 1 - crest),
+    cap = 0.055,
+    roundedDistance =
+      (Math.sqrt(side * side + cap * cap) - cap) /
+      (Math.sqrt(1 + cap * cap) - cap),
+    flank = Math.pow(Math.max(0, 1 - roundedDistance), 1.35);
+  // Keep erosion wavelengths resolvable by both shells. Tightly warped cuts
+  // can bend between adjacent vertices and oppose their lighting normals.
+  const wx = x + (rockNoise(x * 0.009, z * 0.009, seed + 137) - 0.5) * 24,
+    wz = z + (rockNoise(x * 0.009, z * 0.009, seed + 211) - 0.5) * 24;
+  const cut = Math.abs(rockNoise(wx * 0.013, wz * 0.013, seed + 317) * 2 - 1),
+    smallCut = Math.abs(rockNoise(wx * 0.024, wz * 0.024, seed + 419) * 2 - 1),
+    rib = rockNoise(cx * 0.027 + across * 0.3, cz * 0.027, seed + 557),
+    ribHeight = (rib - 0.5) * 52 * smooth(0.04, 0.22, across);
+  return (
+    -18 + flank * (peaks + ribHeight - cut * cut * 48 - smallCut * smallCut * 2)
+  );
 }
 
 // Sample the continuous height field in polar coordinates rather than using

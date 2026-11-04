@@ -1,10 +1,38 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import * as THREE from "three";
 import {
   mountainHeight,
   mountainNormal,
   snowMountainGeometry,
 } from "../src/snow-mountains.js";
+
+// Inspect delivered triangles independently of the continuous height function.
+// A valid derivative can still oppose a coarse face if its erosion is too fine.
+function faceAudit(geometry) {
+  const positions = geometry.attributes.position,
+    normals = geometry.attributes.normal,
+    index = geometry.index,
+    corners = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()],
+    triangle = new THREE.Triangle(...corners),
+    face = new THREE.Vector3(),
+    normal = new THREE.Vector3();
+  let minimumAlignment = 1,
+    minimumArea = Infinity,
+    minimumUp = 1;
+  for (let i = 0; i < index.count; i += 3) {
+    for (let j = 0; j < 3; j++)
+      corners[j].fromBufferAttribute(positions, index.getX(i + j));
+    triangle.getNormal(face);
+    minimumArea = Math.min(minimumArea, triangle.getArea());
+    minimumUp = Math.min(minimumUp, face.y);
+    for (let j = 0; j < 3; j++) {
+      normal.fromBufferAttribute(normals, index.getX(i + j));
+      minimumAlignment = Math.min(minimumAlignment, normal.dot(face));
+    }
+  }
+  return { minimumAlignment, minimumArea, minimumUp };
+}
 
 test("continuous mountain normals agree with independent Cartesian derivatives", () => {
   for (const layer of [0, 1]) {
@@ -64,4 +92,28 @@ test("mountain refinement bounds geometry while preserving the submerged aprons"
     }
     geometry.dispose();
   }
+});
+
+test("both delivered shells keep finite upward faces and compatible lighting normals", (t) => {
+  for (const extent of [420, 427])
+    for (const layer of [0, 1]) {
+      const geometry = snowMountainGeometry(extent, layer);
+      try {
+        const audit = faceAudit(geometry);
+        assert(audit.minimumArea > 1);
+        assert(audit.minimumUp > 0);
+        assert(
+          audit.minimumAlignment > 0.65,
+          `lighting normal crosses a sharp unresolved face: ${JSON.stringify(audit)}`,
+        );
+        t.diagnostic(`${extent}, layer ${layer}: ${JSON.stringify(audit)}`);
+        // Turning a delivered normal inward must fail the same observer.
+        const n = geometry.attributes.normal,
+          i = (geometry.userData.segments + 1) * 32 + 123;
+        n.setXYZ(i, -n.getX(i), -n.getY(i), -n.getZ(i));
+        assert(faceAudit(geometry).minimumAlignment < 0);
+      } finally {
+        geometry.dispose();
+      }
+    }
 });
