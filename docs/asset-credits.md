@@ -2087,3 +2087,13 @@ The varied post brackets, beam-triangle clipping and lower shoulder profiles in
 existing credited Wood Planks maps by Amal Kumar through the monastery timber
 material. The four documentation figures are lossless exports of actual game
 captures. No external model, bitmap, recording, music or dependency is added.
+
+
+## Winter trail scree
+
+The six fractured stone forms, their detail tiers and terrain fitting in
+`src/snow-scree.js` are original procedural geometry. They reuse the existing
+credited Rock Boulder Dry and Snow 01 terrain maps, with an original extension
+to the project-authored snow material.
+The four documentation figures are lossless exports of actual game captures.
+No external model, bitmap, recording, music or dependency is added by this pass.

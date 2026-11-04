@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [winter trail scree](winter-trail-scree.md) adds 2,281 grounded fragments
+  in six forms along the snow banks, with exposed stone and textured snow.
+  All 37 selected checks, three CPU-budget checks and the build pass. The
+  delivered observer checks 91,668 underside contacts and detects every lifted
+  control; 29,083 reserved-lane samples find no new obstruction. Twenty-nine
+  final-source views are reviewed, with six controller approach/jump/return
+  sequences and thirteen sampled body poses. All 77 sound origins clear the
+  new geometry, and chapter replacement releases all 37 tracked resources.
+  Production keyboard and portrait touch pass four complete-store reload
+  comparisons at full health; all six release images are reviewed and owned
+  helpers close under the five-of-sixteen CPU cap. Broader landscape
+  composition, court arrangements and continuous contact remain open.
+
 - The [fitted monastery post brackets](monastery-brackets.md) replace 147
   dangling struts with 209 beam-fitted members across all nine winter courts.
   All 69 selected checks, three CPU-budget checks and the build pass, including

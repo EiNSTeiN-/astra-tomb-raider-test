@@ -49,6 +49,7 @@ import {
   updateMeridianGroundcover,
 } from "./meridian-groundcover.js";
 import { NatureRockSolids } from "./nature-rock-solids.js";
+import { buildSnowScree } from "./snow-scree.js";
 import { JungleTreeSolids } from "./jungle-tree-solids.js";
 import {
   buildDesertGroundcover,
@@ -341,6 +342,7 @@ export async function loadNature(game) {
   );
   if (game.world !== world) return;
   game.desertScatter = null;
+  game.snowScree = null;
   game.volcanicScree = null;
   game.volcanicMantle = null;
   game.rockGrounding = {
@@ -544,6 +546,7 @@ export async function loadNature(game) {
   }
   buildVolcanicScree(game);
   buildVolcanicMantle(game);
+  buildSnowScree(game);
   world.updateWorldMatrix(true, false);
   game.natureRockSolids = new NatureRockSolids(
     game.naturePatches,
@@ -572,7 +575,8 @@ export function updateNature(game, dt = 0) {
     updateLodPatch(
       patch,
       game.player.position,
-      NATURE_RANGES[game.store.data.settings.quality][patch.kind],
+      patch.lodRanges?.[game.store.data.settings.quality] ||
+        NATURE_RANGES[game.store.data.settings.quality][patch.kind],
       dt,
       1.5,
     );
