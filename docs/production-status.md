@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [shaped desert entrances](solar-portals.md) replace the shared sun-emblem
+  slabs with arches, a pointed head, paired arches, an asymmetric lintel,
+  pierced shutters and a corbelled opening. Fitted stone surrounds and bonded
+  bronze plates follow those profiles. The combined 97 selected checks,
+  three CPU-budget checks and the build pass. Thirty-two final development
+  views are reviewed. Thirty-six stopped body poses after eighteen prepared
+  crossings inspect 1,731,420 character vertices without overlap beyond 15 mm;
+  the controller legs cover 1,278 updates. All 161 sound origins remain outside
+  the new work, and the other seven gate assemblies retain identical geometry,
+  materials, camera counts and gate-source records. The raised-crossing
+  observer now uses the actual support height. Production keyboard/High and
+  portrait touch/Performance activate, retreat 9.0 m / 9.6 m at full health and
+  pass four complete-store reload comparisons; all six release images are
+  reviewed. All 426 runtime hashes match, and owned helpers close under the
+  shared five-of-sixteen CPU cap. Shared drives, arcades, broad court massing,
+  sparse ground and continuous contact remain open.
+
 - The [nine desert reflector forms](solar-reflectors.md) replace identical
   rectangular cases across all 68 mirrors with court-specific apertures,
   closed castings and rear ribs. Lower collars clear the glass, while delivered

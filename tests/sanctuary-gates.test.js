@@ -12,7 +12,11 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { SaveStore } from "../src/storage.js";
 import { CameraSurfaces, constrainCamera } from "../src/camera-collision.js";
 import { Adventure } from "../src/game.js";
-import { advanceCharacter, safeArrival, supportAt } from "../src/character-motion.js";
+import {
+  advanceCharacter,
+  safeArrival,
+  supportAt,
+} from "../src/character-motion.js";
 import { buildFieldGates } from "../src/field-world.js";
 import {
   buildSanctuaryGate,
@@ -20,6 +24,7 @@ import {
   updateSanctuaryGate,
 } from "../src/sanctuary-gates.js";
 import { GATE_DESIGNS, gateLeafBounds } from "../src/gate-designs.js";
+import { inspectGates } from "../scripts/verify-gates-browser.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 import { buildChamberWall } from "../src/chamber-walls.js";
 import { crystalEnclosureSegments } from "../src/crystal-enclosure-plan.js";
@@ -487,13 +492,34 @@ test("all 69 chapter gates retain regional construction, clear restored panels a
     };
     assert.equal(game.gateSources.length, game.fieldGates.length * 2);
     assert.equal(game.cameraSurfaces.pending.length, 0);
-    assert.equal(
-      game.cameraSurfaces.dynamic.length,
-      game.fieldGates.reduce(
-        (count, gate) => count + 2 + (gate.solarThreshold?.covers.length || 0),
-        0,
-      ),
-    );
+    if (game.level.biome === "desert") {
+      const movingParents = new Set(
+        game.fieldGates.flatMap((gate) => [
+          ...gate.leaves.flatMap((leaf) => [leaf.group, leaf.detail]),
+          ...gate.solarThreshold.covers.map((cover) => cover.group),
+        ]),
+      );
+      assert.equal(game.cameraSurfaces.dynamicGroups.size, movingParents.size);
+      for (const parent of movingParents)
+        assert(
+          game.cameraSurfaces.dynamicGroups.has(parent),
+          "each moving part retains camera surfaces",
+        );
+      for (const surface of game.cameraSurfaces.dynamic)
+        assert(
+          movingParents.has(surface.parent),
+          "static stone does not enter the moving index",
+        );
+    } else {
+      assert.equal(
+        game.cameraSurfaces.dynamic.length,
+        game.fieldGates.reduce(
+          (count, gate) =>
+            count + 2 + (gate.solarThreshold?.covers.length || 0),
+          0,
+        ),
+      );
+    }
     game.world.traverse((o) => {
       if (!o.geometry) return;
       const p = o.geometry.attributes.position;
@@ -531,7 +557,12 @@ test("all 69 chapter gates retain regional construction, clear restored panels a
             // samples lie on steep banks or excavated coastal beds, where
             // the separate standing-body terrain guard must still reject a
             // grounded pose after the gate has opened.
-            game.canMove(c.x + dx, c.z + dz, floorOffset(c.x + dx, c.z + dz), 0),
+            game.canMove(
+              c.x + dx,
+              c.z + dz,
+              floorOffset(c.x + dx, c.z + dz),
+              0,
+            ),
             true,
             `${game.level.id} ${gate.stage} threshold ${dx},${dz}`,
           );
@@ -563,7 +594,11 @@ test("an open jungle gate retains steep-bank standing rejection and a clear adja
   // about 0.743 m. An open shutter cannot make that a safe standing pose.
   assert(highestCorner > 0.7);
   assert.equal(game.canMove(x, z, 0, 0), true, "raised panel clears floor");
-  assert.equal(game.canMove(x, z, 0), false, "steep standing bank remains solid");
+  assert.equal(
+    game.canMove(x, z, 0),
+    false,
+    "steep standing bank remains solid",
+  );
   assert.equal(game.canMove(x, gate.root.position.z + 6.5, 0), true);
   assert.equal(game.canMove(gate.root.position.x, z, 0), true);
 });
@@ -618,35 +653,53 @@ test("coastal sluice footings meet the terrain across their full width and prote
 });
 
 test("stepped crystal bay heads retain the finished face outside their tiered outline", (t) => {
-  t.mock.method(THREE.TextureLoader.prototype, "load", () => new THREE.Texture());
-  const game = { level: LEVELS[6] }, materials = gateMaterials(game.level), roots = [];
+  t.mock.method(
+    THREE.TextureLoader.prototype,
+    "load",
+    () => new THREE.Texture(),
+  );
+  const game = { level: LEVELS[6] },
+    materials = gateMaterials(game.level),
+    roots = [];
   t.after(() => {
     for (const root of roots) root.traverse((mesh) => mesh.geometry?.dispose());
     const textures = new Set();
     for (const material of Object.values(materials)) {
       if (!material?.isMaterial) continue;
-      for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
-      for (const texture of material.userData.additionalTextures || []) textures.add(texture);
+      for (const value of Object.values(material))
+        if (value?.isTexture) textures.add(value);
+      for (const texture of material.userData.additionalTextures || [])
+        textures.add(texture);
       material.dispose();
     }
     for (const texture of textures) texture.dispose();
   });
-  for (const [stage, fraction, scale] of [[0, 0.64, 0.9], [3, 0.7, 0.57]]) {
+  for (const [stage, fraction, scale] of [
+    [0, 0.64, 0.9],
+    [3, 0.7, 0.57],
+  ]) {
     for (const side of [-1, 0, 1]) {
       const gate = { stage, design: materials.design, root: new THREE.Group() };
       roots.push(gate.root);
-      const wall = buildChamberWall(game, gate, materials, { length: 13, side, floor: 0 });
+      const wall = buildChamberWall(game, gate, materials, {
+        length: 13,
+        side,
+        floor: 0,
+      });
       gate.root.updateMatrixWorld(true);
       const matrix = new THREE.Matrix4().makeRotationY(wall.angle);
       matrix.setPosition(new THREE.Vector3(...wall.position));
       const y = wall.bottom + (wall.top - wall.bottom) * fraction + 0.15;
-      const x = wall.bays[Math.floor(wall.bays.length / 2)] + wall.radius * scale;
+      const x =
+        wall.bays[Math.floor(wall.bays.length / 2)] + wall.radius * scale;
       const origin = new THREE.Vector3(x, y, 2).applyMatrix4(matrix);
       const direction = new THREE.Vector3(0, 0, -1).transformDirection(matrix);
       const ray = new THREE.Raycaster(origin, direction);
       const hit = ray.intersectObject(gate.root, true)[0];
-      assert.ok(hit && hit.distance < 1.8,
-        `${stage}/${side}: stone outside the stepped head must retain its finished face`);
+      assert.ok(
+        hit && hit.distance < 1.8,
+        `${stage}/${side}: stone outside the stepped head must retain its finished face`,
+      );
     }
   }
 });
@@ -680,12 +733,12 @@ test("regional chamber walls have sealed deep recesses and buried full-width foo
             cameraDepth = 0;
           // The forge's wider cases and diaphragms occupy the old central
           // probes. Include their surrounding gaps to observe the actual back.
-          const offsets = index === 4
-            ? [-0.82, -0.32, 0.12, 0.42, 0.82]
-            : [-0.32, 0.12, 0.42];
-          const fractions = index === 4
-            ? [0.14, 0.24, 0.46, 0.68, 0.86]
-            : [0.24, 0.46, 0.68];
+          const offsets =
+            index === 4
+              ? [-0.82, -0.32, 0.12, 0.42, 0.82]
+              : [-0.32, 0.12, 0.42];
+          const fractions =
+            index === 4 ? [0.14, 0.24, 0.46, 0.68, 0.86] : [0.24, 0.46, 0.68];
           for (const dx of offsets)
             for (const t of fractions) {
               const y = wall.bottom + (wall.top - wall.bottom) * t;
@@ -907,7 +960,9 @@ for (const index of [0, 6])
               (s) => s.parent === leaf.group,
             );
             assert.equal(surfaces.length, 1);
-            const bounds = surfaces[0].bounds.clone().expandByScalar(index === 0 ? 0.01 : 0.005),
+            const bounds = surfaces[0].bounds
+                .clone()
+                .expandByScalar(index === 0 ? 0.01 : 0.005),
               p = new THREE.Vector3();
             leaf.group.updateWorldMatrix(true, true);
             leaf.group.traverse((o) => {
@@ -1278,4 +1333,26 @@ test("the first cloud court retains solid wider doors and clears the recorded co
       `actual wall and folded door clear the aisle camera ${i}`,
     );
   }
+});
+
+test("the browser gate observer uses the actual raised crossing and restores prepared progress", (t) => {
+  const { game } = fixture(t, 1, null, true);
+  game.renderer = { getContext: () => ({}), info: { programs: [] } };
+  const progress = structuredClone(game.progress);
+  const report = inspectGates(game);
+  assert.equal(report.thresholds.length, 9);
+  assert(report.thresholds.every((row) => row.clear));
+  assert.deepEqual(game.progress, progress);
+  game.progress.completed = true;
+  for (const gate of game.fieldGates) {
+    gate.amount = 1;
+    updateSanctuaryGate(game, gate, 0);
+  }
+  assert(
+    game.fieldGates.some(
+      (gate) =>
+        !game.canMove(gate.root.position.x, gate.root.position.z + 6.5, 0),
+    ),
+    "negative control: terrain-level roots miss the raised threshold",
+  );
 });

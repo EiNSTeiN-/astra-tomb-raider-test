@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { updateSanctuaryGate } from "../src/sanctuary-gates.js";
+import { supportAt } from "../src/character-motion.js";
 import { updateSoundSources } from "../src/sound-landmarks.js";
 
 export function gateView(game, stage = 1, opened = false) {
@@ -48,7 +49,13 @@ export function inspectGates(game) {
       stage: g.stage,
       clear: [-3, 0, 3].every((dx) =>
         [5.8, 6.5, 7.2].every((dz) =>
-          game.canMove(g.root.position.x + dx, g.root.position.z + dz, 0),
+          (() => {
+            const x = g.root.position.x + dx,
+              z = g.root.position.z + dz,
+              ground = game.groundHeight(x, z),
+              floor = supportAt(game, x, z, ground + 1, 0.55).height;
+            return game.canMove(x, z, floor - ground);
+          })(),
         ),
       ),
     }));
