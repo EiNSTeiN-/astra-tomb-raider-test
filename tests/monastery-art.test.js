@@ -17,47 +17,49 @@ import { buildBannerLine, clothDisplacement } from "../src/monastery-cloth.js";
 import { snowMountainGeometry } from "../src/snow-mountains.js";
 
 test("intact and broken roof decks and snow caps are sealed outward-facing solids", () => {
-  for (const damage of [0, 1, 2])
-    for (const snow of [false, true]) {
-      const geometry = monasteryRoofGeometry({
-        width: 14.7,
-        depth: 8.3,
-        rise: 2.15,
-        damage,
-        snow,
-        seed: 4,
-      });
-      const p = geometry.attributes.position,
-        indices = geometry.index.array;
-      assert.ok(p.array.every(Number.isFinite));
-      assert.ok(geometry.attributes.normal.array.every(Number.isFinite));
-      const edges = new Map();
-      let volume = 0;
-      for (let i = 0; i < indices.length; i += 3) {
-        const ids = [...indices.slice(i, i + 3)];
-        const [a, b, c] = ids.map((index) =>
-          new THREE.Vector3().fromBufferAttribute(p, index),
-        );
-        volume += a.dot(b.cross(c)) / 6;
-        for (let j = 0; j < 3; j++) {
-          // Material seams duplicate vertices without opening the physical
-          // surface. Weld exact delivered positions for the closure check.
-          const edge = [ids[j], ids[(j + 1) % 3]]
-            .map((index) =>
-              [p.getX(index), p.getY(index), p.getZ(index)].join(","),
-            )
-            .sort()
-            .join("/");
-          edges.set(edge, (edges.get(edge) || 0) + 1);
+  for (const profile of ["hip", "gable", "pavilion"])
+    for (const damage of [0, 1, 2])
+      for (const snow of [false, true]) {
+        const geometry = monasteryRoofGeometry({
+          width: 14.7,
+          depth: 8.3,
+          rise: 2.15,
+          damage,
+          snow,
+          seed: 4,
+          profile,
+        });
+        const p = geometry.attributes.position,
+          indices = geometry.index.array;
+        assert.ok(p.array.every(Number.isFinite));
+        assert.ok(geometry.attributes.normal.array.every(Number.isFinite));
+        const edges = new Map();
+        let volume = 0;
+        for (let i = 0; i < indices.length; i += 3) {
+          const ids = [...indices.slice(i, i + 3)];
+          const [a, b, c] = ids.map((index) =>
+            new THREE.Vector3().fromBufferAttribute(p, index),
+          );
+          volume += a.dot(b.cross(c)) / 6;
+          for (let j = 0; j < 3; j++) {
+            // Material seams duplicate vertices without opening the physical
+            // surface. Weld exact delivered positions for the closure check.
+            const edge = [ids[j], ids[(j + 1) % 3]]
+              .map((index) =>
+                [p.getX(index), p.getY(index), p.getZ(index)].join(","),
+              )
+              .sort()
+              .join("/");
+            edges.set(edge, (edges.get(edge) || 0) + 1);
+          }
         }
+        assert.ok(
+          volume > 9,
+          `damage=${damage}, snow=${snow}: positive enclosed volume`,
+        );
+        assert.ok([...edges.values()].every((count) => count === 2));
+        geometry.dispose();
       }
-      assert.ok(
-        volume > 9,
-        `damage=${damage}, snow=${snow}: positive enclosed volume`,
-      );
-      assert.ok([...edges.values()].every((count) => count === 2));
-      geometry.dispose();
-    }
 });
 
 test("roof damage removes both slate and snow while the center remains supported", () => {

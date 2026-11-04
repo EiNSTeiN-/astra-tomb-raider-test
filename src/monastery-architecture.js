@@ -5,15 +5,9 @@ import { monasteryRoofGeometry } from "./monastery-roof.js";
 import { dressMonasteryRoof } from "./roof-timber.js";
 import { buildBannerLine } from "./monastery-cloth.js";
 import { masonryFoundation } from "./masonry-foundations.js";
-import {
-  buildMonasteryWing,
-  verandaDeckMaterial,
-  connectMonasteryGallery,
-} from "./monastery-wings.js";
-import {
-  monasteryGallerySides,
-  monasteryGalleryRoofPlan,
-} from "./monastery-wing-plan.js";
+import { buildMonasteryWing, verandaDeckMaterial } from "./monastery-wings.js";
+import { monasteryGallerySides } from "./monastery-wing-plan.js";
+import { buildMonasteryGalleries } from "./monastery-galleries.js";
 import {
   buildPavilionHouse,
   upperRoomMaterials,
@@ -260,8 +254,17 @@ export function buildMonasteryArchitecture(game) {
       angle = 0,
       damage = 0,
       connected = null,
+      profile = "hip",
+      roofParent = root,
     ) => {
-      const options = { width, depth, rise, damage, seed: room.index };
+      const options = {
+        width,
+        depth,
+        rise,
+        damage,
+        seed: room.index,
+        ...(profile === "hip" ? {} : { profile }),
+      };
       const deck = add(
         monasteryRoofGeometry(options),
         roof,
@@ -269,7 +272,7 @@ export function buildMonasteryArchitecture(game) {
         py,
         pz,
         angle,
-        root,
+        roofParent,
         true,
       );
       const snowcap = add(
@@ -279,6 +282,7 @@ export function buildMonasteryArchitecture(game) {
         py,
         pz,
         angle,
+        roofParent,
       );
       const battens = dressMonasteryRoof(game, deck, snowcap, wood);
       connected?.([deck, snowcap, battens].filter(Boolean));
@@ -293,6 +297,8 @@ export function buildMonasteryArchitecture(game) {
           py + 0.08,
           pz + (Math.cos(angle) * side * depth) / 2,
           angle,
+          false,
+          roofParent,
         );
       return deck;
     };
@@ -482,35 +488,16 @@ export function buildMonasteryArchitecture(game) {
         ),
       );
     }
-    for (const side of plan.galleries) {
-      for (const [za, zb] of [
-        [-17, -5],
-        [-5, 7],
-        [7, 18],
-      ]) {
-        const center = (za + zb) / 2,
-          length = zb - za;
-        block(0.5, 0.45, length + 0.8, wood, side * 19, 5.58, center, 0, true);
-        const gallery = monasteryGalleryRoofPlan(za, zb);
-        roofAt(
-          gallery.width,
-          gallery.depth,
-          gallery.rise,
-          side * 19,
-          gallery.y,
-          gallery.z,
-          gallery.angle,
-          room.index % 3 === 1 && za === 7 ? 1 : 0,
-          za === -17
-            ? (meshes) =>
-                connectMonasteryGallery(
-                  wings.find((w) => w.plan.side === side),
-                  meshes,
-                )
-            : null,
-        );
-      }
-    }
+    const galleries = buildMonasteryGalleries(
+      game,
+      root,
+      room.index,
+      plan.galleries,
+      wings,
+      roofAt,
+      wood,
+      red,
+    );
     const flags = buildBannerLine(
       root,
       new THREE.Vector3(-19, 6.25, -17),
@@ -524,6 +511,15 @@ export function buildMonasteryArchitecture(game) {
       z: z - 17,
     };
     const joinery = batchMonasteryBuildings(root, [house, ...wings]);
+    for (const mesh of root.children)
+      if (mesh.isMesh && !mesh.geometry.attributes.monasteryGallery)
+        mesh.geometry.setAttribute(
+          "monasteryGallery",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count).fill(-1),
+            1,
+          ),
+        );
     mergeArchitecture(root);
     mergeArchitecture(detail);
     const detailBounds = new THREE.Box3()
@@ -538,6 +534,7 @@ export function buildMonasteryArchitecture(game) {
       wings,
       joinery,
       roofs,
+      galleries,
       bells,
       flags,
       plan,

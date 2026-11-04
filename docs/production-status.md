@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [varied monastery galleries](monastery-galleries.md) give the winter
+  courts tall gables, low shelters, pavilion caps, rising end bays and selected
+  open bays. All thirteen lodge connections retain their first roofs. Fitted
+  rafters, ties and kingposts supply visible bearing; longitudinal beams meet
+  end to end. All 54 focused checks, three CPU-budget checks and the build pass.
+  The delivered observer checks 1,866 bearings and 104 beam-joint queries,
+  including detached-frame and overlapping-face controls. Thirteen doorway
+  return routes, 23 covered-roof jumps and 26 older rooftop arrivals pass. All 118 legacy roof fixtures
+  and 2,444 sampled ground movement results match the published construction.
+  Thirty-two development views and six native keyboard/touch images are
+  reviewed; four complete-store reload comparisons pass. All 430 runtime hashes
+  match and owned helpers close under the shared five-of-sixteen CPU cap.
+  Bright eave-junction gaps, shared main pavilions, sparse surroundings and
+  continuous contact remain open.
+
 - The [defined alpine ridges](alpine-ridges.md) replace rounded winter-range
   shoulders with capped summits and descending ribs in the existing mesh.
   An independent delivered-face comparison clears all 23 opposing lighting

@@ -1,9 +1,15 @@
 import * as THREE from "three";
 
-export function monasteryRoofHeight(x, z, width, depth, rise) {
+export function monasteryRoofHeight(x, z, width, depth, rise, profile = "hip") {
   const u = Math.abs(x) / (width / 2),
     v = Math.abs(z) / (depth / 2);
-  const hip = Math.max(v, Math.max(0, (u - 0.34) / 0.66));
+  const hip =
+    profile === "gable"
+      ? v
+      : Math.max(
+          v,
+          profile === "pavilion" ? u : Math.max(0, (u - 0.34) / 0.66),
+        );
   const edge = Math.max(u, v);
   const liftedEave = Math.exp(-Math.pow((1 - edge) * 7, 2)) * 0.32;
   const corner = Math.pow(Math.max(0, u * v), 5) * 0.32;
@@ -29,6 +35,7 @@ export function monasteryRoofGeometry({
   snow = false,
   damage = 0,
   seed = 0,
+  profile = "hip",
 }) {
   const nx = Math.ceil(width * (snow ? 3 : 2)),
     nz = Math.ceil(depth * (snow ? 3 : 2));
@@ -45,7 +52,7 @@ export function monasteryRoofGeometry({
       for (let ix = 0; ix <= nx; ix++) {
         const x = (ix / nx - 0.5) * w,
           z = (iz / nz - 0.5) * d;
-        let y = monasteryRoofHeight(x, z, width, depth, rise);
+        let y = monasteryRoofHeight(x, z, width, depth, rise, profile);
         if (snow) {
           const drift =
             0.19 +
@@ -123,6 +130,15 @@ export function monasteryRoofGeometry({
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
-  geometry.userData = { cells, snow, width, depth, rise, damage, seed };
+  geometry.userData = {
+    cells,
+    snow,
+    width,
+    depth,
+    rise,
+    damage,
+    seed,
+    ...(profile === "hip" ? {} : { profile }),
+  };
   return geometry;
 }
