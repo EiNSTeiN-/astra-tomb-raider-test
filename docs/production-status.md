@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [snow-worn monastery courts](monastery-paving.md) give all nine winter
+  floors their own slate courses, inset bands and worn circulation lines.
+  Existing terrain triangles carry the material. All 26 selected tests,
+  three CPU-budget checks and the build pass. Twenty-two final-source game
+  views are reviewed; fourteen independent other-theme GPU fixtures retain
+  identical pixels and all nine disabled winter fixtures match the published
+  factory. Vertex hooks, map/height data and texture requests match across
+  all eight chapters. Production keyboard and portrait touch movement passes
+  at full health, with four complete-store reload comparisons and six reviewed
+  release captures. Owned helpers close under the shared five-of-sixteen cap.
+  Shared court structures and sparse connecting paths remain open.
+
 - The [cast monastery finials](monastery-finials.md) replace the smooth cones
   with fluted bronze forms and fitted slate-bearing mounts on all eight
   enclosed pavilions. Finite camera/body shapes follow the ornaments. The

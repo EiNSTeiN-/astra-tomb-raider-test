@@ -5,6 +5,13 @@ import {
   snowRoughness,
 } from "./snow-terrain-material.js";
 import {
+  monasteryPavingUniforms,
+  monasteryPavingDeclarations,
+  monasteryPavingColor,
+  monasteryPavingNormal,
+  monasteryPavingRoughness,
+} from "./monastery-paving.js";
+import {
   frozenGroundUniforms,
   frozenDeclarations,
   frozenColor,
@@ -127,6 +134,7 @@ ${dripGroundDeclarations}
 ${cavernFloorDeclarations}
 ${cavernPoolDeclarations}
 ${snowDeclarations}
+${monasteryPavingDeclarations}
 ${frozenDeclarations}
 `;
 
@@ -198,6 +206,7 @@ ${volcanicColor}
 ${meridianColor}
 ${cavernTerrainColor}
 ${snowColor}
+${monasteryPavingColor}
 vec3 terrainAlbedo = mix(earthColor, pavingColor, pavingWeight);
 terrainAlbedo = mix(terrainAlbedo, cliffColor * cliffTint, terrainSlope);
 #ifdef TERRAIN_JUNGLE
@@ -235,6 +244,7 @@ ${volcanicRoughness}
 ${meridianRoughness}
 ${cavernTerrainRoughness}
 ${snowRoughness}
+${monasteryPavingRoughness}
 terrainRough = mix(terrainRough, rockRough, terrainSlope);
 terrainRough = mix(terrainRough, .97, growthWeight);
 terrainRough = mix(terrainRough, .48, terrainDamp * .5 * (1.0 - growthWeight));
@@ -275,6 +285,7 @@ ${volcanicNormal}
 ${meridianNormal}
 ${cavernTerrainNormal}
 ${snowNormal}
+${monasteryPavingNormal}
 vec3 terrainN = normalize(mix(earthN, pavingN, pavingWeight));
 terrainN = normalize(mix(terrainN, cliffN, terrainSlope));
 #ifdef TERRAIN_JUNGLE
@@ -398,7 +409,12 @@ export function terrainMaterial(game) {
     },
   };
   if (biome === "snow") {
-    material.defines = { TERRAIN_SNOW: 1 };
+    const paving = monasteryPavingUniforms(game.map);
+    material.defines = {
+      TERRAIN_SNOW: 1,
+      MONASTERY_PAVING_COUNT: paving.monasteryPavingCourts.value.length,
+    };
+    Object.assign(uniforms, paving);
     const frozen = frozenGroundUniforms(game.terrainProfile?.waters || []);
     if (frozen.frozenCenters.value.length) {
       material.defines.FROZEN_PATCH_COUNT = frozen.frozenCenters.value.length;
@@ -524,6 +540,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : biome === "snow" ? "-wind-scour-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : biome === "snow" ? "-wind-scour-1-court-slate-1" : ""}`;
   return material;
 }

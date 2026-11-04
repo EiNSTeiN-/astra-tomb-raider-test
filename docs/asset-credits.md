@@ -2068,3 +2068,13 @@ procedural geometry in `src/monastery-finials.js`. Bronze coloring, exposed edge
 and patina are authored vertex data. Fine surface variation reuses the existing
 `forge-metal-normal.jpg` and `forge-metal-roughness.jpg` maps from Amal Kumar’s
 Rusty Metal 04, credited above. No new external art, recording or music is added.
+
+
+## Snow-worn monastery courts
+
+The nine slate course layouts, worn circulation fields, inset bands and snow
+transitions in `src/monastery-paving.js` are original shader work. Surface detail
+reuses the existing credited Monastery Stone Floor and Rock Boulder Dry maps.
+The documentation figures are lossless exports of actual game captures; the
+before view disables the new layer, verified against the published factory.
+No new external bitmap, model, recording, music or dependency is introduced.

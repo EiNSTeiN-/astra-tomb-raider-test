@@ -79,7 +79,7 @@ test("snow terrain chunks share positions, normals and exposure without adding t
     queueMicrotask(() => onLoad?.(texture));
     return texture;
   });
-  const g = { level, terrainProfile: profile, world: new THREE.Group() };
+  const g = { level, map, terrainProfile: profile, world: new THREE.Group() };
   buildTerrainSurface(g);
   await g.terrainTexturesReady;
   const shared = new Map();
@@ -110,8 +110,19 @@ test("snow terrain chunks share positions, normals and exposure without adding t
   const material = g.terrainMeshes[0].material;
   assert.deepEqual(material.defines, {
     TERRAIN_SNOW: 1,
+    MONASTERY_PAVING_COUNT: map.rooms.length,
     FROZEN_PATCH_COUNT: profile.waters.filter((s) => s.kind === "ice").length,
   });
+  assert.deepEqual(
+    material.userData.terrainUniforms.monasteryPavingCourts.value.map((p) =>
+      p.toArray(),
+    ),
+    map.rooms.map((room) => [room.x * 7, room.z * 7, room.index]),
+  );
   assert.equal(material.userData.additionalTextures.length, 9);
+  const textures = new Set(material.userData.additionalTextures);
+  for (const value of Object.values(material))
+    if (value?.isTexture) textures.add(value);
+  textures.forEach((texture) => texture.dispose());
   material.dispose();
 });
