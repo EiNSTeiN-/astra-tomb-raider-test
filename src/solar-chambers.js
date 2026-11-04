@@ -432,6 +432,11 @@ export function clipSolarSegment(game, a, b) {
   let fraction = 1;
   for (const o of game.obstacles) {
     if (o.solar || o.h <= 0.2) continue;
+    if (o.fieldStation && o.triangles) {
+      const t = o.triangles.entry(a, b);
+      if (t !== null) fraction = Math.min(fraction, t);
+      continue;
+    }
     const y = game.groundHeight(o.x, o.z);
     const t = boxEntry(
       a,

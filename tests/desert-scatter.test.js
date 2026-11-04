@@ -8,15 +8,19 @@ import { NodeIO } from "@gltf-transform/core";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import {
+  desertScatterAllowed,
   desertStoneShape,
   seatDesertStone,
   desertScatterLayout,
   buildDesertScatter,
 } from "../src/desert-scatter.js";
 import { buildDesertArchitecture } from "../src/desert-architecture.js";
+import { TriangleSolids } from "../src/triangle-solids.js";
+import { natureRockAllowed } from "../src/nature-rocks.js";
 import { Adventure } from "../src/game.js";
 import { CameraSurfaces } from "../src/camera-collision.js";
 import { updateNature } from "../src/vegetation.js";
+import { closedMeshReader } from "../scripts/inspect-explorer-solids-browser.js";
 
 const io = new NodeIO();
 const document = await io.read(
@@ -286,10 +290,50 @@ test("built scatter clears the actual courtyard piers, retains gameplay bounds a
     assert(
       game.obstacles.every(
         (o) =>
+          o.arcadeMasonry ||
           Math.abs(s.position.x - o.x) >= o.w + s.radius + 0.2 ||
           Math.abs(s.position.z - o.z) >= o.d + s.radius + 0.2,
       ),
     );
+  // An arcade's overall bounds include empty bays. Query the delivered stone
+  // surfaces independently, using the rendered scatter instance transforms.
+  const courts = game.desertPatches.map((patch) => {
+    const meshes = [];
+    patch.root.traverse((mesh) => {
+      if (mesh.isMesh) meshes.push(mesh);
+    });
+    return {
+      bounds: new THREE.Box3().setFromObject(patch.root),
+      read: closedMeshReader(meshes),
+    };
+  });
+  const vertex = new THREE.Vector3();
+  let stoneQueries = 0;
+  for (const patch of game.naturePatches) {
+    const mesh = patch.tiers[0][0],
+      p = mesh.geometry.attributes.position;
+    for (const matrix of patch.matrices) {
+      const bounds = new THREE.Box3()
+        .setFromBufferAttribute(p)
+        .applyMatrix4(matrix);
+      for (const court of courts) {
+        if (!court.bounds.intersectsBox(bounds)) continue;
+        for (let i = 0; i < p.count; i++) {
+          vertex.fromBufferAttribute(p, i).applyMatrix4(matrix);
+          const depth = court.read(vertex);
+          assert(
+            depth === null || depth < 0.015,
+            "scatter stays outside delivered masonry",
+          );
+          stoneQueries++;
+        }
+      }
+    }
+  }
+  assert(stoneQueries > 1000, "sample actual instances within court bounds");
+  t.diagnostic(
+    `${stoneQueries} delivered scatter vertices checked against courtyard stone`,
+  );
   for (const patch of game.naturePatches) {
     assert(patch.planar);
     assert.equal(patch.tiers[0][0].castShadow, patch.kind === "rock");
@@ -331,4 +375,46 @@ test("gravel visibility follows quality and distance without changing placements
       saved,
     );
   }
+});
+
+test("overhead arcade masonry preserves ground scatter and plants while its real low stone excludes them", () => {
+  const g = fixture();
+  let point;
+  for (const room of g.map.rooms)
+    for (const dx of [-19, 19])
+      for (const dz of [-12, 12]) {
+        const x = room.x * 7 + dx,
+          z = room.z * 7 + dz;
+        if (
+          !point &&
+          desertScatterAllowed(g, x, z, 0.1) &&
+          natureRockAllowed(g, x, z, 0.1, 1.2)
+        )
+          point = { x, z };
+      }
+  assert(point, "a pre-existing allowed ground position");
+  const { x, z } = point,
+    ground = g.groundHeight(x, z),
+    geometry = new THREE.BoxGeometry(10, 1, 8),
+    make = (y) =>
+      new TriangleSolids([
+        { geometry, matrices: [new THREE.Matrix4().makeTranslation(x, y, z)] },
+      ]),
+    obstacle = {
+      x,
+      z,
+      w: 5,
+      d: 4,
+      h: 6,
+      fieldStation: "arcade-test",
+      arcadeMasonry: true,
+      triangles: make(ground + 5.5),
+    };
+  g.obstacles.push(obstacle);
+  assert(desertScatterAllowed(g, x, z, 0.1));
+  assert(natureRockAllowed(g, x, z, 0.1, 1.2));
+  obstacle.triangles = make(ground + 0.5);
+  assert.equal(desertScatterAllowed(g, x, z, 0.1), false);
+  assert.equal(natureRockAllowed(g, x, z, 0.1, 1.2), false);
+  geometry.dispose();
 });

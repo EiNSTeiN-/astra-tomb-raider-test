@@ -21,7 +21,14 @@ export function seatDesertStone(profile, shape, placement) {
   );
 }
 
-export function desertScatterAllowed(game, x, z, radius, large = false) {
+export function desertScatterAllowed(
+  game,
+  x,
+  z,
+  radius,
+  large = false,
+  height = 2.2,
+) {
   const { map, terrainProfile: profile } = game;
   if (
     x < 4 + radius ||
@@ -56,7 +63,15 @@ export function desertScatterAllowed(game, x, z, radius, large = false) {
     game.obstacles?.some(
       (o) =>
         Math.abs(x - o.x) < o.w + radius + 0.2 &&
-        Math.abs(z - o.z) < o.d + radius + 0.2,
+        Math.abs(z - o.z) < o.d + radius + 0.2 &&
+        (!o.arcadeMasonry ||
+          o.triangles.blocked(
+            x,
+            game.groundHeight?.(x, z) ?? profile.height(x, z),
+            z,
+            height,
+            radius + 0.2,
+          )),
     )
   )
     return false;
@@ -81,7 +96,17 @@ export function desertScatterLayout(game, shapes, chip) {
     extent = game.map.size * 7;
   const accept = (out, shape, x, z, size, variant, large) => {
     const radius = size * 0.72;
-    if (!desertScatterAllowed(game, x, z, radius, large)) return;
+    if (
+      !desertScatterAllowed(
+        game,
+        x,
+        z,
+        radius,
+        large,
+        shape.bounds.max.y * size * (large ? 1.06 : 0.68) + 1,
+      )
+    )
+      return;
     if (
       large &&
       stones.some(

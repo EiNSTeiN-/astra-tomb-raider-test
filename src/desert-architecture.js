@@ -3,6 +3,12 @@ import { random } from "./campaign.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { addMasonryFooting } from "./masonry-footings.js";
+import {
+  arcadeCourtStyle,
+  arcadeSpanStyle,
+  makeArcadeHead,
+} from "./desert-arcade-heads.js";
+import { stationAssemblySolid } from "./field-station-solids.js";
 import { buildDesertCrown } from "./desert-crowns.js";
 
 // The court's two crossing axes and the sanctuary approach remain open. Structure
@@ -54,8 +60,12 @@ export function desertPlan(room) {
   }
   return {
     piers,
-    spans,
+    spans: spans.map((span, i) => ({
+      ...span,
+      ...arcadeSpanStyle(room.index, span, i),
+    })),
     wings,
+    style: arcadeCourtStyle(room.index).name,
     spring: [6.4, 6.8, 6.1, 7.2, 6.4, 5.9, 6.8, 6.1, 7.2, 7.5][room.index % 10],
   };
 }
@@ -203,7 +213,36 @@ export function buildDesertArchitecture(game) {
     detail.position.copy(root.position);
     game.world.add(root, detail);
     const ground = (px, pz) => game.groundHeight(x + px, z + pz) - base;
-    const foundations = [];
+    const foundations = [],
+      pierKey = (p) => `${p.x},${p.z}`,
+      pierTops = new Map(
+        plan.piers.map((p) => [
+          pierKey(p),
+          ground(p.x, p.z) + (p.perch ? 9.1 : 2.8),
+        ]),
+      ),
+      heads = plan.spans.map((span, index) => {
+        const length = Math.hypot(span.b.x - span.a.x, span.b.z - span.a.z),
+          central = span.a.x === -5 && span.b.x === 5,
+          head = makeArcadeHead(
+            span.family,
+            length,
+            span.broken,
+            archStoneGeometry,
+            game.level.seed + room.index * 557 + index * 43,
+            !central,
+          ),
+          y =
+            (ground(span.a.x, span.a.z) + ground(span.b.x, span.b.z)) / 2 +
+            plan.spring +
+            span.raise;
+        for (const point of [span.a, span.b])
+          pierTops.set(
+            pierKey(point),
+            Math.max(pierTops.get(pierKey(point)), y + head.foot + 0.08),
+          );
+        return { ...head, span, index, y, central, length };
+      });
     let triangles = 0,
       blocks = 0,
       crown;
@@ -232,7 +271,10 @@ export function buildDesertArchitecture(game) {
       root.add(m);
       blocks++;
       triangles += (geometry.index?.count || count) / 3;
-      if (capture) game.cameraSurfaces?.capture(m);
+      if (capture)
+        game.cameraSurfaces?.capture(m, {
+          planes: geometry.userData.arcadePlanes,
+        });
       return m;
     };
     const block = (w, h, d, px, py, pz, angle = 0, tint = 1, capture = false) =>
@@ -267,24 +309,10 @@ export function buildDesertArchitecture(game) {
       m.receiveShadow = true;
       detail.add(m);
     };
-    const spanBlock = (span, along, py, w, h, d, tint = 1, capture = false) => {
-      const angle = -Math.atan2(span.b.z - span.a.z, span.b.x - span.a.x);
-      return block(
-        w,
-        h,
-        d,
-        (span.a.x + span.b.x) / 2 + along * Math.cos(angle),
-        py,
-        (span.a.z + span.b.z) / 2 - along * Math.sin(angle),
-        angle,
-        tint,
-        capture,
-      );
-    };
     for (const pier of plan.piers) {
       const py = ground(pier.x, pier.z),
         width = pier.width,
-        top = pier.perch ? 9.1 : plan.spring + 0.15;
+        top = pierTops.get(pierKey(pier)) - py;
       const foundation = addMasonryFooting(game, root, {
         x: pier.x,
         z: pier.z,
@@ -371,7 +399,7 @@ export function buildDesertArchitecture(game) {
         0,
         0.86,
       );
-      block(
+      const cap = block(
         width + 0.18,
         0.42,
         width + 0.18,
@@ -381,124 +409,100 @@ export function buildDesertArchitecture(game) {
         0,
         0.92,
       );
+      for (const mesh of root.children)
+        if (mesh.isMesh && !mesh.userData.arcadeRole)
+          mesh.userData.arcadeRole = {
+            kind: mesh === cap ? "pier cap" : "pier",
+            pier: pierKey(pier),
+          };
       panel(width * 0.58, 2.5, pier.x, py + 2, pier.z + width * 0.5 + 0.025);
     }
-    for (const span of plan.spans) {
-      const length = Math.hypot(span.b.x - span.a.x, span.b.z - span.a.z),
-        half = length / 2 - 1.25,
-        thickness = 0.62;
-      const angle = -Math.atan2(span.b.z - span.a.z, span.b.x - span.a.x),
+    for (const head of heads) {
+      const { span, index, y, central } = head,
+        angle = -Math.atan2(span.b.z - span.a.z, span.b.x - span.a.x),
         cx = (span.a.x + span.b.x) / 2,
         cz = (span.a.z + span.b.z) / 2;
-      const py =
-        (ground(span.a.x, span.a.z) + ground(span.b.x, span.b.z)) / 2 +
-        plan.spring;
-      const parts = 12;
-      for (const side of [-1, 1])
-        for (let i = 0; i < parts; i++) {
-          if (span.broken && i > (side < 0 ? 6 : 3)) continue;
-          add(
-            archStoneGeometry(
-              half,
-              thickness,
-              2.35,
-              side,
-              i / parts + 0.002,
-              (i + 1) / parts - 0.002,
-            ),
-            cx,
-            py,
-            cz,
-            angle,
-            i % 3 === 0 ? 0.86 : 1,
-            true,
-          );
-        }
-      if (span.broken) continue;
-      const top = py + pointedArchHeight(half + thickness, 0) + 0.65;
-      // Fill only above the arch curve. Adjacent masonry courses share one
-      // camera bound per column; the voussoirs retain their curved outline.
-      const columns = Math.ceil(length / 1.4),
-        cw = length / columns;
-      for (let col = 0; col < columns; col++) {
-        const along = (col + 0.5) * cw - length / 2;
-        const curveX = Math.max(0, Math.abs(along) - cw / 2);
-        const bottom =
-          Math.abs(along) - cw / 2 < half + thickness
-            ? py + pointedArchHeight(half + thickness, curveX)
-            : py;
-        const rows = Math.max(0, Math.floor((top - bottom) / 0.57));
-        if (rows)
-          cameraBox(
-            cw - 0.018,
-            rows * 0.57,
-            2.25,
-            cx + along * Math.cos(angle),
-            top - (rows * 0.57) / 2,
-            cz - along * Math.sin(angle),
-            angle,
-          );
-        for (let row = 0; row < rows; row++)
-          spanBlock(
-            span,
-            along,
-            top - (row + 0.5) * 0.57,
-            cw - 0.018,
-            0.55,
-            2.25,
-            0.95,
-          );
-      }
-      const pieces = Math.ceil(length / 1.4);
-      cameraBox(length, 0.58, 3.15, cx, top + 0.245, cz, angle);
-      for (let i = 0; i < pieces; i++) {
-        const along = ((i + 0.5) * length) / pieces - length / 2;
-        spanBlock(
-          span,
-          along,
-          top + 0.12,
-          length / pieces - 0.018,
-          0.3,
-          2.9,
-          0.86,
+      for (const piece of head.pieces) {
+        const mesh = add(
+          piece.geometry,
+          cx + piece.x * Math.cos(angle),
+          y + piece.y,
+          cz - piece.x * Math.sin(angle),
+          angle,
+          piece.role.includes("coping") ? 0.9 : 1,
+          piece.capture,
         );
-        spanBlock(
-          span,
-          along,
-          top + 0.4,
-          length / pieces - 0.018,
-          0.25,
-          3.15,
-          1,
-        );
-        if (i % 2 === room.index % 2)
-          spanBlock(span, along, top + 0.95, 0.8, 0.88, 2.55, 0.96, true);
+        mesh.userData.arcadeRole = {
+          kind: piece.role,
+          span: index,
+          side: piece.side,
+          foot: piece.foot,
+        };
       }
+      for (const cell of head.cameraCells) {
+        const proxy = new THREE.Mesh(cell.geometry, material);
+        proxy.position.set(
+          cx + cell.x * Math.cos(angle),
+          y + cell.y,
+          cz - cell.x * Math.sin(angle),
+        );
+        proxy.rotation.y = angle;
+        root.add(proxy);
+        game.cameraSurfaces?.capture(proxy, {
+          small: true,
+          thin: true,
+          planes: cell.geometry.userData.arcadePlanes,
+        });
+        root.remove(proxy);
+        cell.geometry.dispose();
+      }
+      if (head.cap === null) continue;
       if (span.b.x === 19 && span.b.z === 18) {
-        block(0.7, 0.25, 0.7, 19, top + 0.65, 18);
+        const seat = Math.max(pierTops.get("19,18"), y + head.cap),
+          mesh = block(0.7, 0.25, 0.7, 19, seat + 0.105, 18);
+        mesh.userData.arcadeRole = { kind: "perch seat", pier: "19,18" };
         game.desertBirdPerches[room.index] = {
           x: x + 19,
-          y: base + top + 0.775,
+          y: base + seat + 0.23,
           z: z + 18,
         };
       }
-      if (span.a.x === -5 && span.b.x === 5) {
-        // Preserve the pre-existing masonry's serials and shade sequence.
-        serial += 2;
-        rng();
-        rng();
+      if (central)
         crown = buildDesertCrown(game, {
           room,
           x: x + cx,
-          y: base + top + 0.485,
+          y: base + y + head.cap - 0.04,
           z: z + cz,
           stone: material,
           carved: detailMaterial,
           bronze,
           panelGeometry: solarPanelGeometry,
         });
-      }
     }
+    const parts = [];
+    for (const mesh of root.children.filter((child) => child.isMesh)) {
+      const id = parts.length;
+      parts.push({ id, ...(mesh.userData.arcadeRole || { kind: "footing" }) });
+      mesh.geometry.setAttribute(
+        "arcadePart",
+        new THREE.Float32BufferAttribute(
+          new Float32Array(mesh.geometry.attributes.position.count).fill(id),
+          1,
+        ),
+      );
+    }
+    const masonryFeature = { id: `desert-arcade-${room.index}` };
+    const masonrySolid = stationAssemblySolid(
+      game,
+      masonryFeature,
+      root.children.filter((child) => child.isMesh),
+      {
+        bodyPadding: 0.72,
+        supportRadius: 0.035,
+        descentEscapeRadius: 0.72,
+      },
+    );
+    masonrySolid.arcadeMasonry = true;
     mergeArchitecture(root);
     mergeArchitecture(detail);
     const detailBounds = new THREE.Box3()
@@ -509,6 +513,15 @@ export function buildDesertArchitecture(game) {
       detail,
       plan,
       foundations,
+      parts,
+      masonryFeature,
+      heads: heads.map((h) => ({
+        span: h.index,
+        family: h.family,
+        foot: h.foot,
+        y: h.y,
+        cap: h.cap,
+      })),
       blocks,
       triangles,
       detailBounds,

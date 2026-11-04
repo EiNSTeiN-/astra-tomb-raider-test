@@ -1,3 +1,4 @@
+import { TriangleSolids } from "../src/triangle-solids.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
@@ -896,4 +897,52 @@ test("the reserved solar working areas cover every mirror, receiver and circulat
       assert.ok(inSolarCourt(map, room.x * 7 + p.x + 1.5, room.z * 7 + p.z));
     assert.equal(inSolarCourt(map, room.x * 7, room.z * 7 - 12), false);
   }
+});
+
+test("solar clipping follows finite courtyard stone and preserves an empty arch", () => {
+  const post = new THREE.BoxGeometry(1, 5, 2),
+    lintel = new THREE.BoxGeometry(7, 1, 2),
+    triangles = new TriangleSolids([
+      {
+        geometry: post,
+        matrices: [
+          new THREE.Matrix4().makeTranslation(-3, 2.5, 0),
+          new THREE.Matrix4().makeTranslation(3, 2.5, 0),
+        ],
+      },
+      {
+        geometry: lintel,
+        matrices: [new THREE.Matrix4().makeTranslation(0, 5, 0)],
+      },
+    ]),
+    game = {
+      groundHeight: () => 0,
+      obstacles: [
+        {
+          x: 0,
+          z: 0,
+          w: 3.5,
+          d: 1,
+          h: 5.5,
+          fieldStation: "test-arch",
+          triangles,
+        },
+      ],
+    },
+    free = clipSolarSegment(
+      game,
+      new THREE.Vector3(0, 2, -3),
+      new THREE.Vector3(0, 2, 3),
+    ),
+    blocked = clipSolarSegment(
+      game,
+      new THREE.Vector3(3, 2, -3),
+      new THREE.Vector3(3, 2, 3),
+    );
+  assert.equal(free.blocked, false);
+  assert.equal(free.end.z, 3);
+  assert(blocked.blocked);
+  assert(Math.abs(blocked.end.z + 1) < 1e-6);
+  post.dispose();
+  lintel.dispose();
 });

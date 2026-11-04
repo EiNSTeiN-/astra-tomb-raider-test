@@ -42,6 +42,17 @@ export function inspectSolar(game) {
     approaches: game.map.features
       .filter((f) => f.type !== "guardian")
       .map((f) => {
+        // The authored mechanism marker owns the sanctuary's plinth. Its
+        // interaction is delivered at the separate solar receiver console.
+        const receiver = game.solarSites.find(
+          (site) => site.feature.id === f.id,
+        )?.receiver;
+        if (receiver)
+          return {
+            id: f.id,
+            approach: "receiver console",
+            clear: game.canMove(receiver.x * 7, receiver.z * 7, 0),
+          };
         const course = game.traversalCourses.find((c) => c.id === f.id),
           summit = course?.ledges.at(-1);
         return {

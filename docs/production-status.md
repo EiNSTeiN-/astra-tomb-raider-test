@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [desert court arcades](desert-arcades.md) now use low lintels, round
+  galleries, pointed heads and stepped corbels, with ascending rear spans,
+  unequal wings and broken sections. Actual pier tops fit all 184 spring
+  bearings. All 99 selected checks, three CPU-budget checks and the build pass.
+  Nineteen final High views are reviewed. All 59 prepared feature approaches
+  and 77 local optical-control legs pass; five ground approaches and five
+  rooftop falls produce fifteen stopped poses with 721,425 character vertices
+  clear at the 15 mm tolerance. All 161 sound origins clear the new stone.
+  Finite geometry preserves light paths and ground scatter through empty
+  bays. Production keyboard/High and portrait touch/Performance crouch, jump,
+  land and walk 1.8 m / 2.4 m at full health, with four complete-store reload
+  comparisons; all eight release images are reviewed. All 427 runtime hashes
+  match and owned helpers close under the shared five-of-sixteen CPU cap.
+  Sparse surroundings, shared ancillary structures and continuous contact
+  remain open.
+
 - The [shaped desert entrances](solar-portals.md) replace the shared sun-emblem
   slabs with arches, a pointed head, paired arches, an asymmetric lintel,
   pierced shutters and a corbelled opening. Fitted stone surrounds and bonded

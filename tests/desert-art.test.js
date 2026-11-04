@@ -151,13 +151,25 @@ test("built court collision leaves its arch open while blocking piers and overhe
       new THREE.Vector3(x, 2, z - 21),
     );
     assert.equal(clear, 1, `court ${i}: camera passes under central arch`);
-    const archY = patch.plan.spring + pointedArchHeight(3.75, 0) + 0.35;
-    assert.ok(
-      game.cameraSurfaces.entry(
-        new THREE.Vector3(x, archY, z - 15),
-        new THREE.Vector3(x, archY, z - 21),
-      ) < 1,
-      `court ${i}: camera hits the arch crown`,
+    const central = patch.heads.find(
+        (h) =>
+          patch.plan.spans[h.span].a.x === -5 &&
+          patch.plan.spans[h.span].b.x === 5,
+      ),
+      archY = central.y + central.cap - 0.2,
+      start = new THREE.Vector3(x + 0.18, archY, z - 15),
+      end = new THREE.Vector3(x + 0.18, archY, z - 21),
+      ray = new THREE.Raycaster(
+        start,
+        end.clone().sub(start).normalize(),
+        0,
+        6,
+      ),
+      masonry = ray.intersectObject(patch.root, true)[0];
+    assert(masonry, `court ${i}: actual coping closes the crown ray`);
+    assert(
+      game.cameraSurfaces.entry(start, end) < masonry.distance / 6,
+      `court ${i}: camera stops before the delivered coping`,
     );
     assert.ok(
       game.cameraSurfaces.entry(
