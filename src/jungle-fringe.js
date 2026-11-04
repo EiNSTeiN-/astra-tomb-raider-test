@@ -1,15 +1,19 @@
 import * as THREE from "three";
 import { random } from "./campaign.js";
+import { fitTerrainNormals } from "./terrain-shading.js";
 
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
-const RINGS = [0, 1.75, 3.5, 7, 14, 23, 34, 48, 65, 86, 110, 140];
+const RINGS = [
+  0, 1.75, 3.5, 5.25, 7, 10.5, 14, 17.5, 21, 24.5, 28, 31.5, 35,
+  48, 65, 86, 110, 140,
+];
 const smooth = (a, b, x) => {
   const t = clamp((x - a) / (b - a), 0, 1);
   return t * t * (3 - 2 * t);
 };
 
 // The playable height field ends at a square boundary. Extend its exact edge
-// into low wooded banks, rather than letting the last hills meet empty sky.
+// into terraced wooded slopes, rather than letting the last hills meet empty sky.
 // This is scenery only: routes, terrain collision and sound anchors stay inside.
 export function jungleFringeProfile(map, profile) {
   const extent = map.size * 7;
@@ -21,7 +25,10 @@ export function jungleFringeProfile(map, profile) {
       7 +
       Math.sin(x * 0.027 + z * 0.019) * 4 +
       Math.sin(x * 0.065 - z * 0.047) * 2;
-    return edge + smooth(0, 38, d) * bank - smooth(100, 140, d) * 32;
+    return (
+      edge + (profile.jungleRim?.outerRise?.(x, z, d) || 0) +
+      smooth(0, 38, d) * bank - smooth(100, 140, d) * 32
+    );
   };
   return { extent, distance, height };
 }
@@ -103,6 +110,7 @@ export function jungleFringeGeometry(map, profile, side) {
     new THREE.Float32BufferAttribute(new Float32Array(vertices.length / 3), 1),
   );
   geometry.setIndex(indices);
+  geometry.userData.fittedNormalCorners = fitTerrainNormals(geometry);
   geometry.computeBoundingSphere();
   return geometry;
 }

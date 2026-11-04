@@ -384,9 +384,10 @@ test("the complete planted forest retains path centers and blocks a delivered ov
         ),
       ),
     );
-  // Retained soil caps keep the wooded rim while accepting two additional seats.
+  // Retained soil caps keep the wooded rim; the graded boundary accepts three
+  // more seats than the preceding terrain's 731.
   // The full level reserves structure footprints and has its own browser count.
-  assert.equal(trees.length, 731);
+  assert.equal(trees.length, 734);
   let samples = 0,
     centerSamples = 0;
   const blocked = [],

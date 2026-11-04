@@ -6,8 +6,8 @@ const smooth = (a, b, x) => {
 };
 
 // The valley ends at a wooded escarpment, beyond the existing courts and paths.
-// Keep a complete terrain-cell collar around their footprints unchanged. The
-// raised outer edge continues into the existing distant forest-floor meshes.
+// Keep the authored walking surface, water margins and wooded banks. Grade
+// the final boundary cell into a lower edge and carry its height outside.
 export function createJungleRim(map, seed, waters = [], trees = []) {
   const extent = map.size * 7;
   const rimTrees = trees.filter(
@@ -31,6 +31,27 @@ export function createJungleRim(map, seed, waters = [], trees = []) {
     return distance;
   };
   return {
+    // Where a shipped path approaches the last grid row, the old rim rose
+    // its full height in one cell. Grade that edge and carry the larger beds
+    // into the outer forest floor, which shares this exact boundary.
+    outerRise(x, z, distance) {
+      if (distance <= 0) return 0;
+      const cx = Math.max(0, Math.min(extent, x)),
+        cz = Math.max(0, Math.min(extent, z)),
+        strength = 1 - smooth(3.5, 12, walkingDistance(cx, cz)),
+        t = Math.max(0, Math.min(1, distance / 48)),
+        joint =
+          1 - smooth(0.08, 0.32, Math.abs(Math.sin(
+            (x + z) * 0.19 + noise(x * 0.037, z * 0.043, seed + 2617) * 4.2,
+          ))),
+        beds =
+          0.26 * smooth(0, 0.25, t) +
+          0.34 * smooth(0.3, 0.62, t) +
+          0.4 * smooth(0.7, 1, t),
+        channel = joint * Math.sin(t * Math.PI) ** 2 * 0.16,
+        height = 22 + noise(x * 0.021, z * 0.019, seed + 1091) * 12;
+      return height * Math.max(0, beds - channel) * strength;
+    },
     rise(x, z) {
       const edges = [x, z, extent - x, extent - z],
         nearest = Math.min(...edges);
@@ -58,7 +79,8 @@ export function createJungleRim(map, seed, waters = [], trees = []) {
           Math.sin(t * Math.PI) ** 2 *
           0.18;
       const clearance = walkingDistance(x, z);
-      const target = Math.max(0, beds - gully);
+      const target = Math.max(0, beds - gully),
+        edgeRemnant = 0.13 + noise(x * 0.091, z * 0.083, seed + 2417) * 0.09;
       // Added soil approaches need a wide path collar. Erosion can lower an
       // existing wall without making a new steep rise beside that collar.
       let free =
@@ -80,7 +102,9 @@ export function createJungleRim(map, seed, waters = [], trees = []) {
           smooth(6, 10, Math.hypot(x - tree.x, z - tree.z)),
         );
       return (
-        height * (face + (target - face) * free) * smooth(1.75, 3.5, clearance)
+        height * (face + (target - face) * free) * smooth(1.75, 3.5, clearance) *
+        (1 - (1 - edgeRemnant) * (1 - smooth(0, 3.5, nearest)) *
+          (1 - smooth(3.5, 12, clearance)))
       );
     },
   };

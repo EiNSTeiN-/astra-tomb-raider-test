@@ -2117,3 +2117,13 @@ code. They reuse the existing credited regional paving and stone maps. The
 four documentation figures are lossless exports of actual game frames, with
 matched elevated inspection cameras and identical decoded source RGB pixels.
 No external bitmap, model, recording, music or dependency is added by this pass.
+
+
+## Graded jungle boundary and outer terraces
+
+The boundary grade, outer forest-floor beds and erosion channels are original
+procedural code. Corner-specific lighting repair reuses the project's terrain
+normal fitter. Existing credited terrain, rock and woodland maps remain in use.
+The two documentation figures are lossless exports of actual game frames with
+matched prepared player and follow-camera positions. No external bitmap, model,
+recording, music or dependency is added by this revision.

@@ -42,7 +42,8 @@ test("the four banks join the full terrain boundary and each other without holes
       next = geometries[(side + 1) % 4].attributes.position;
     for (let i = 0; i < stride; i++)
       assert(Math.abs(p.getY(i) - profile.height(p.getX(i), p.getZ(i))) < 1e-5);
-    for (let row = 0; row < p.count / stride; row++) {
+    const rows = g.index.count / ((stride - 1) * 6) + 1;
+    for (let row = 0; row < rows; row++) {
       a.fromBufferAttribute(p, row * stride + stride - 1);
       b.fromBufferAttribute(next, row * stride);
       assert(a.distanceTo(b) < 1e-6);
@@ -51,7 +52,14 @@ test("the four banks join the full terrain boundary and each other without holes
       a.fromBufferAttribute(p, g.index.getX(i));
       b.fromBufferAttribute(p, g.index.getX(i + 1));
       c.fromBufferAttribute(p, g.index.getX(i + 2));
-      assert(b.sub(a).cross(c.sub(a)).y > 0);
+      const face = b.sub(a).cross(c.sub(a)).normalize();
+      assert(face.y > 0);
+      for (let j = 0; j < 3; j++) {
+        const normal = new THREE.Vector3().fromBufferAttribute(
+          g.attributes.normal, g.index.getX(i + j),
+        );
+        assert(normal.dot(face) >= -1e-6, "lighting points through its face");
+      }
     }
     for (const attr of Object.values(g.attributes))
       assert([...attr.array].every(Number.isFinite));

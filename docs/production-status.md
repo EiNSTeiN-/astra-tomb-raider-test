@@ -13,11 +13,27 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the 160-view discovery baseline and current 144-stance/24-body-pose repeat; shared object families and court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the discovery baseline and current jungle-boundary repeat; broad cliff faces, shared object families and court massing, sparse spaces and wider discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- The [graded jungle boundary and outer terraces](jungle-boundary-terraces.md)
+  replace the archive's 25.44 m single-cell rock sheet with a 4.58 m edge and
+  joined outer beds. All 78 selected tests, three CPU-budget checks and the
+  build pass. Only 261 main-terrain vertices change; walking, buffered water,
+  interior and court records retain their values, as do the other seven
+  chapters' terrain fields. Thirty-three final development views are reviewed,
+  with three partly obscured court angles retained as limitations. Six boundary
+  legs and three tree approaches complete 7,650 controller updates; eleven
+  stopped poses pass 529,045 rendered-body terrain queries. All eighteen jungle
+  discovery stances, 1,064,866 root samples and 456,768 lighting corners pass,
+  including reversed-normal controls. Production keyboard/touch pass four
+  complete-store reload comparisons; all six release images are reviewed.
+  All 440 runtime files match and owned helpers close under the shared
+  five-of-sixteen CPU cap. Broad eastern rock faces, larger landscape/court
+  composition, wider contact and listening/device review remain open.
 
 - The [regional discovery courts](regional-discovery-courts.md) give notes and
   caches eight floor compositions with inward-facing, varied furnishing edges.

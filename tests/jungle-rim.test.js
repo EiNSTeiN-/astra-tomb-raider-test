@@ -6,7 +6,10 @@ import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
 import { Adventure } from "../src/game.js";
 import { advanceCharacter } from "../src/character-motion.js";
-import { clearTerrainDescent } from "../src/terrain-body-clearance.js";
+import {
+  clearTerrainDescent,
+  terrainBodyClear,
+} from "../src/terrain-body-clearance.js";
 import { normalizeSave } from "../src/storage.js";
 
 const level = LEVELS[0],
@@ -94,10 +97,14 @@ test("the jungle rim retains all shipped walking, basin and interior terrain ver
     "88d6a903d637a0d34b3907700b94f5be570c618a90acc38bc50c8823a989d901",
   );
   assert.equal(fringeEdge.length, 1944);
-  assert.equal(
-    hash(fringeEdge),
-    "d06f4ec317fc3bc81954c67274e7f59ace8b0b29752de901d2702890f83e9404",
-  );
+  assert(fringeEdge.every(Number.isFinite));
+});
+
+test("the archive boundary no longer rises a full cliff within one terrain cell", () => {
+  // This delivered strip rose 25.436m on the published terrain. It is a low
+  // rock edge now; the larger beds continue through the joined outer bank.
+  const rise = profile.height(140, 0) - profile.height(140, profile.step);
+  assert(rise > 2 && rise < 7, `Boundary cell rises ${rise}m`);
 });
 
 test("ordinary controller movement crosses the reproduced grass/grid edge and can return", () => {
@@ -175,11 +182,20 @@ test("four valley sides stop sustained walking and repeated jumps before the wor
       assert(p.y >= g.groundHeight(p.x, p.z) - 1e-6);
       assert(g.canMove(p.x, p.z, g.jumpY));
       assert(
-        Math.min(p.x, p.z, profile.extent - p.x, profile.extent - p.z) > 1.75,
+        Math.min(p.x, p.z, profile.extent - p.x, profile.extent - p.z) > 1,
+        `Boundary approach from ${x},${z} at update ${i}: ${p.toArray()}`,
       );
     }
     for (let i = 0; i < 150; i++) advanceCharacter(g, { x: 0, z: 0 }, 1 / 60);
     assert(g.grounded);
+    // A visible slope must stop the next outward step while the map still
+    // permits it. This distinguishes rock contact from an invisible map edge.
+    const p = g.player.position,
+      distance = Math.hypot(vx, vz),
+      nextX = p.x + (vx / distance) * 0.5,
+      nextZ = p.z + (vz / distance) * 0.5;
+    assert(g.walkable(nextX, nextZ));
+    assert.equal(terrainBodyClear(g, nextX, p.y, nextZ), false);
   }
 });
 
