@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [eight jungle trial reliefs](docs/jungle-trial-reliefs.md) now carry distinct
+carved records, from the rain channels to the sun bridge and living temple heart.
+
 The [eighteen monastery verandas](docs/monastery-verandas.md) now have open
 walkways, recessed window bays, timber ramps and thirteen gallery connections.
 

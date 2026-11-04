@@ -5,6 +5,21 @@ chapters with local saves, and a rich, polished playable world without observed
 placement or geometry defects. There is no minimum chapter duration. AAA is the
 artistic direction. **The audit is open.**
 
+## November 3 refresh
+
+The [jungle trial relief review](jungle-trial-reliefs.md) begins with a frozen
+186-view High survey at `2ceb341`: four entrance headings in every chapter
+and front/rear views at all 77 main courts. All requested stances were captured
+and all retained images reviewed. Trees, stairs, columns and terrain obscure
+parts of some courts; these views do not establish complete route or interior
+coverage. Distinct chapter atmospheres remain, alongside repeated main
+installations, sparse margins and steep bank faces needing local diagnosis.
+
+Eight different jungle leaf compositions now accompany the existing trials.
+Their closed relief slabs join the stone leaves and fit the moving camera
+envelope. This varies one part of the repeated installations; the broader
+composition and contact audit remains open.
+
 ## October 31–November 1 refresh
 
 At `8a1b707`, a new High-preset survey reviewed 138 views across the jungle,
@@ -442,6 +457,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-216 | Receiver names cross recessed wall imagery, while raised sanctuary guards have little visible bearing. | [Mounted plaques and guided lifting frames](counterweight-mounts.md) align the names with their floor receivers and give all eight guards grounded channels, cornice ties and a following cable. All 68 selected regressions pass, including continuous plaque bearing, 1,032 overlap-strip rays and moving header/camera contact. The final forge repeat checks its fitted plaque spacing. | Local construction improved; whole-world composition and continuous moving contact remain open |
 | VA-217 | Two furnace ducts in the first forge hall occupy required counterweight cells and stop the recorded walking solution. | [The first-hall clearance repair](counterweight-mounts.md) removes those two ducts and retains its board and elevated lamps. The target is blocked with the new guard solids omitted, clears without the interior furnishings, and a regression now checks all 25 cells and twenty outer grip stances. | Reproduced conflict repaired; all eight boards complete 121 moves, including two successful fourteen-move forge runs; wider world and continuous contact acceptance remain open |
 | VA-218 | Falling from clear air onto the fixed sanctuary hoist beam enters its physical volume before clearing sideways; three rendered contact poses show boot penetration. | [Actual beam support](hoist-guide-contact.md) catches the fall on the delivered upper face. All 69 selected tests pass, four jungle falls retain 720 legal updates and twelve sampled body poses pass across 577,140 vertices. Initial overlaps and hidden legacy geometry are excluded from fresh visible-contact evidence. Native keyboard/touch jumps, short beam walks and two complete-save reload comparisons pass at the new standing height. | Reproduced beam contact repaired; wider airborne contact, rooftop access and whole-world acceptance remain open |
+| VA-219 | The current all-eight overview survey retains nearly identical jungle leaf motifs despite different sanctuary objectives and crowns. | [Eight trial compositions](jungle-trial-reliefs.md) replace those shared flowers with mirrored pictorial reliefs on closed, seated slabs. Twenty-seven focused checks and twelve reviewed candidate views cover profile variety, construction, camera containment and sampled descent states. The paired final-gate images retain identical observer coordinates and scene time. | Jungle leaves varied; repeated machinery, broad court composition, sparse margins and partial-view coverage remain open |
 
 
 

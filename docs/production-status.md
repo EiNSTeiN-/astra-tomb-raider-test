@@ -13,11 +13,24 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: 194 baseline dry views across eight chapters, plus jungle shrine and route views; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: current 186-view High refresh across all eight chapters, plus earlier local reviews; repeated court massing, sparse spaces and broader discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- The [jungle trial reliefs](jungle-trial-reliefs.md) follow a frozen current
+  survey of 186 High views across all eight chapters. Eight mirrored carved
+  compositions now accompany the jungle objectives on closed slabs seated in
+  the existing leaves, with camera envelopes covering their handles and
+  reliefs. All 27 focused checks, 1,227 full-suite tests and three CPU-budget
+  regressions pass. All twelve candidate captures and six production captures
+  are reviewed. Native keyboard/High and touch/Performance both move at full
+  health and pass complete-store reload comparisons apart from timestamps.
+  All 424 runtime hashes match. The build passes with the existing chunk-size
+  advisory, and owned browsers/previews close. Broader installation repetition,
+  sparse margins, obscured views, continuous routes and listening/device
+  evaluation remain open.
 
 - The [fixed hoist beam landing repair](hoist-guide-contact.md) adds actual
   upper-face support and underside contact to the existing member. Six clear

@@ -1,10 +1,7 @@
 import * as THREE from "three";
 import { GATE_DESIGNS, gateEase, gateLeafBounds } from "./gate-designs.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
-import {
-  stoneBlockGeometry,
-  carvedPanelGeometry,
-} from "./temple-architecture.js";
+import { stoneBlockGeometry } from "./temple-architecture.js";
 import {
   vaultStoneGeometry,
   flutedColumnGeometry,
@@ -32,6 +29,7 @@ import { buildSkyChamberWall } from "./sky-chamber-walls.js";
 import { buildCrystalVault } from "./crystal-vaults.js";
 import { buildCrystalEnclosure } from "./crystal-enclosures.js";
 import { buildJungleGateCrown } from "./jungle-gate-crowns.js";
+import { jungleShutterGeometry } from "./jungle-shutters.js";
 import { stationSolid } from "./field-station-solids.js";
 import { buildCoastalVault } from "./coastal-vaults.js";
 import { buildForgeVault } from "./forge-vaults.js";
@@ -712,10 +710,12 @@ export function buildSanctuaryGate(game, feature, materials) {
         ? 1.26
         : design.panel === "orrery"
           ? 1.12
-          : 0.6,
+          : design.panel === "relief"
+            ? 1
+            : 0.6,
       cx,
       3.7,
-      design.panel === "crystal" ? 0.05 : 0,
+      design.panel === "crystal" ? 0.05 : design.panel === "relief" ? 0.14 : 0,
       leaf,
     );
     const leafDetail = new THREE.Group();
@@ -737,11 +737,11 @@ export function buildSanctuaryGate(game, feature, materials) {
       buildMonasteryDoor({ gate, leaf, detail: leafDetail, side, cx, materials: m });
     } else if (design.panel === "relief") {
       add(
-        carvedPanelGeometry(4.75, 5.6, (feature.stage + (side + 1) / 2) % 3),
+        jungleShutterGeometry(feature.stage, side),
         m.trim,
         cx,
         0.9,
-        0.37,
+        0,
         leafDetail,
       );
       for (const xx of [-2.65, 2.65])
