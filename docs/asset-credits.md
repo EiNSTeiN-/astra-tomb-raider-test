@@ -2059,3 +2059,12 @@ The two documentation figures are lossless exports of actual game captures;
 their close fitting views use diagnostic cameras. Existing credited timber,
 stone, character and environmental audio assets remain in use. No external
 model, bitmap, recording or dependency is added by this revision.
+
+
+## Cast monastery finials
+
+The eight roof finials and their fitted slate-bearing mounts are original
+procedural geometry in `src/monastery-finials.js`. Bronze coloring, exposed edges
+and patina are authored vertex data. Fine surface variation reuses the existing
+`forge-metal-normal.jpg` and `forge-metal-roughness.jpg` maps from Amal Kumar’s
+Rusty Metal 04, credited above. No new external art, recording or music is added.

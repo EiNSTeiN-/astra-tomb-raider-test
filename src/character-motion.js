@@ -359,7 +359,41 @@ export function safeArrival(game, position) {
     return { x: position.x, y: position.y, z: position.z };
   // Try the saved elevation first: a newly solid pedestal on a climbing
   // landing must not send an earned elevated arrival back to the ground.
-  for (const elevated of [true, false])
+  for (const elevated of [true, false]) {
+    if (!elevated) {
+      // A new prop can occupy the peak of an existing sloped roof. Preserve
+      // that roof before falling back to ground: every nearby point may be
+      // lower than the strict 30 cm elevation match above. Only accept the
+      // same supporting surface, within three metres and its walkable grade.
+      const source = supportAt(
+        game,
+        position.x,
+        position.z,
+        position.y,
+        NATURE_BODY_RADIUS,
+      );
+      if (
+        source.surface?.groundingSlope &&
+        Math.abs(source.height - position.y) <= 0.3
+      )
+        for (let radius = 0.75; radius <= 3; radius += 0.75) {
+          const count = Math.ceil((radius * Math.PI * 2) / 0.65);
+          for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2,
+              x = position.x + Math.cos(angle) * radius,
+              z = position.z + Math.sin(angle) * radius,
+              candidate = supportAt(game, x, z, position.y, NATURE_BODY_RADIUS);
+            if (
+              candidate.surface !== source.surface ||
+              candidate.height > position.y + 0.3 ||
+              candidate.height < position.y - radius * 1.2 - 0.3
+            )
+              continue;
+            if (clear(x, candidate.height, z))
+              return { x, y: candidate.height, z };
+          }
+        }
+    }
     for (let radius = 0.75; radius <= 15; radius += 0.75) {
       const count = Math.ceil((radius * Math.PI * 2) / 0.65);
       for (let i = 0; i < count; i++) {
@@ -373,5 +407,6 @@ export function safeArrival(game, position) {
         if (clear(x, y, z)) return { x, y, z };
       }
     }
+  }
   return null;
 }

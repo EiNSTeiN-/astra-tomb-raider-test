@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cast monastery finials](monastery-finials.md) replace the smooth cones
+  with fluted bronze forms and fitted slate-bearing mounts on all eight
+  enclosed pavilions. Finite camera/body shapes follow the ornaments. The
+  arrival fallback preserves the same sloping roof when new metalwork occupies
+  an older centre-roof save. All 245 selected checks, three CPU-budget checks
+  and the build pass, including 576 mount contacts and 2,048 casting bearings
+  with displacement controls. Twenty-three final-source views and six release
+  images are reviewed; keyboard and portrait touch pass four complete-store
+  reload comparisons. All 433 runtime hashes match and owned helpers close
+  under the shared five-of-sixteen cap. Shared court composition, sparse
+  surroundings and continuous contact remain open.
+
 - The [varied monastery pavilions](pavilion-volumes.md) give the nine winter
   courts low hips, long gables and taller pavilion caps. All 17 main/upper
   roof volumes carry fitted walls, ceiling timber, snow and fascias. Roof

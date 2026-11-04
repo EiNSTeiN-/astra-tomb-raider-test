@@ -98,8 +98,9 @@ CPU set at lower priority, with at most two test workers and one browser.
 Roof silhouettes now vary, while the large court arrangement and bearing frames
 still share substantial structure. Sparse surroundings, wider discovery and
 traversal coverage, water interiors and continuous body contact remain open.
-The close rooftop views also expose the simple smooth cone-and-ball finials;
-their form, material detail and seating on the steeper caps need further review.
+The close rooftop views also exposed simple smooth cone-and-ball finials.
+The subsequent [cast-finial work](monastery-finials.md) addresses their form,
+surface detail and seated attachment.
 Distance attenuation and adaptive music code are unchanged; listening review,
 consumer-device performance and the full playable-surface acceptance remain
 unverified. The game goal remains active.

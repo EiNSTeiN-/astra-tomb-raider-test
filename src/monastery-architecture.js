@@ -13,6 +13,10 @@ import { RoofCamera } from "./roof-camera.js";
 import { stationMeshSolid } from "./field-station-solids.js";
 import { monasteryPavilionPlan } from "./monastery-pavilion-plan.js";
 import {
+  monasteryFinialGeometry,
+  monasteryFinialMaterial,
+} from "./monastery-finials.js";
+import {
   buildPavilionHouse,
   upperRoomMaterials,
 } from "./monastery-upper-rooms.js";
@@ -171,6 +175,7 @@ export function buildMonasteryArchitecture(game) {
   roof.name = "Monastery slate roof";
   snow.name = "Drifted roof snow";
   red.name = "Oxide painted timber";
+  const finialMaterial = monasteryFinialMaterial();
   const houseMaterials = upperRoomMaterials({
     stone,
     wood,
@@ -477,7 +482,9 @@ export function buildMonasteryArchitecture(game) {
         markPavilion(1),
         main.profile,
       );
-    let upperDeck = null;
+    let upperDeck = null,
+      finial = null,
+      upperParts;
     if (plan.upper) {
       // Retain the independent seed sequence of the surrounding wings and
       // roof fascias while replacing the old body and front-only windows.
@@ -492,19 +499,33 @@ export function buildMonasteryArchitecture(game) {
         -18,
         0,
         0,
-        markPavilion(2),
+        (meshes) => {
+          markPavilion(2)(meshes);
+          upperParts = meshes;
+        },
         cap.profile,
       );
       serial += 15;
-      const top = 17.05 + plan.upperRise;
-      add(
-        new THREE.CylinderGeometry(0.06, 0.3, 0.95, 12),
-        bronze,
-        0,
-        top + 0.55,
-        -18,
+      const model = monasteryFinialGeometry(
+          upperDeck.geometry,
+          upperParts[1].geometry,
+          room.index,
+        ),
+        mesh = add(model.geometry, finialMaterial, 0, 17.05, -18);
+      mesh.name = "Roof-seated cast finial";
+      finial = { mesh, anchor: model.geometry.userData.anchor };
+      game.cameraSurfaces?.capture(mesh, {
+        kernel: model.camera,
+        small: true,
+        thin: true,
+      });
+      const solid = stationMeshSolid(
+        game,
+        { id: `monastery-finial-${room.index}` },
+        mesh,
+        { bodyPadding: 0.55, supportRadius: 0, bodySupport: false },
       );
-      add(new THREE.SphereGeometry(0.22, 12, 8), bronze, 0, top + 1.1, -18);
+      solid.roofTimber = true;
     }
     const house = buildPavilionHouse(
       game,
@@ -575,6 +596,15 @@ export function buildMonasteryArchitecture(game) {
     };
     const joinery = batchMonasteryBuildings(root, [house, ...wings]);
     for (const mesh of root.children)
+      if (mesh.isMesh && !mesh.geometry.attributes.monasteryFinial)
+        mesh.geometry.setAttribute(
+          "monasteryFinial",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count),
+            1,
+          ),
+        );
+    for (const mesh of root.children)
       if (mesh.isMesh && !mesh.geometry.attributes.monasteryPavilion)
         mesh.geometry.setAttribute(
           "monasteryPavilion",
@@ -619,6 +649,7 @@ export function buildMonasteryArchitecture(game) {
       bells,
       flags,
       plan,
+      finial,
       center: new THREE.Vector3(x, base + 6, z),
     });
   }

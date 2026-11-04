@@ -16,6 +16,7 @@ import {
 import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { stationBlocked } from "../src/field-station-solids.js";
 import { verifyMonasteryPavilions } from "../scripts/inspect-monastery-pavilions-browser.js";
+import { verifyMonasteryFinials } from "../scripts/inspect-monastery-finials-browser.js";
 
 function fixture(t) {
   t.mock.method(T.TextureLoader.prototype, "load", () => new T.Texture());
@@ -110,6 +111,100 @@ test("all delivered pavilion houses meet both varied roof shells after batching,
   assert.equal(r.accepted.roofs, 17);
   assert.equal(r.loweredFailures, r.accepted.joints);
   t.diagnostic(JSON.stringify(r));
+});
+
+test("all eight delivered finials bear on slate and their castings bear on their mounts, with displacement controls", (t) => {
+  const r = verifyMonasteryFinials(fixture(t));
+  assert.deepEqual(r.accepted.failures, []);
+  assert.equal(r.accepted.finials, 8);
+  assert.equal(r.liftedFailures, r.accepted.seatingProbes);
+  assert.equal(r.detachedFailures, 2048);
+  t.diagnostic(JSON.stringify(r));
+});
+
+test("controller approaches meet the new finials and can retreat on all eight caps", (t) => {
+  const g = fixture(t);
+  g.progress = {
+    stage: 3,
+    field: ["frost-trial"],
+    found: ["journal"],
+    health: 87,
+  };
+  const progress = JSON.stringify(g.progress);
+  let checked = 0;
+  for (const patch of g.monasteryPatches) {
+    if (!patch.finial) continue;
+    const c = patch.root.position,
+      x = c.x + 1.5,
+      z = c.z - 18;
+    const ray = new T.Raycaster(
+        new T.Vector3(x, c.y + 40, z),
+        new T.Vector3(0, -1, 0),
+      ),
+      hit = ray
+        .intersectObject(patch.root, true)
+        .find((h) => h.object.material.name === "Drifted roof snow");
+    assert(hit);
+    g.player.position.set(x, hit.point.y, z);
+    g.jumpY = hit.point.y - g.groundHeight(x, z);
+    g.grounded = true;
+    g.velocityY = 0;
+    g.airVelocity = null;
+    for (let i = 0; i < 120; i++) advanceCharacter(g, { x: -2, z: 0 }, 1 / 60);
+    assert(g.grounded);
+    assert(g.player.position.x > c.x + 0.55, "stops outside the casting");
+    assert(g.player.position.x < x - 0.1, "approach makes progress");
+    const stopped = g.player.position.x;
+    for (let i = 0; i < 30; i++) advanceCharacter(g, { x: 2, z: 0 }, 1 / 60);
+    const p = g.player.position;
+    assert(g.grounded);
+    assert(p.x > stopped + 0.5);
+    assert(g.canMove(p.x, p.z, p.y - g.groundHeight(p.x, p.z)));
+    ray.set(new T.Vector3(c.x, c.y + 40, z), new T.Vector3(0, -1, 0));
+    const centerRoof = ray
+      .intersectObject(patch.root, true)
+      .find((h) => h.object.material.name === "Drifted roof snow");
+    assert(centerRoof);
+    const arrival = safeArrival(g, { x: c.x, y: centerRoof.point.y, z });
+    assert(arrival);
+    assert(
+      Math.hypot(arrival.x - c.x, arrival.z - z) > 0.5,
+      "an earlier centre-roof save clears the casting",
+    );
+    assert(
+      Math.hypot(arrival.x - c.x, arrival.z - z) <= 3.001,
+      "nearby roof arrival",
+    );
+    ray.set(
+      new T.Vector3(arrival.x, c.y + 40, arrival.z),
+      new T.Vector3(0, -1, 0),
+    );
+    const restoredRoof = ray.intersectObject(patch.root, true).find((h) => {
+      const tag = h.object.geometry.attributes.monasteryPavilion,
+        ids = h.object.geometry.index;
+      return (
+        h.object.material.name === "Drifted roof snow" &&
+        tag?.getX(ids ? ids.getX(h.faceIndex * 3) : h.faceIndex * 3) === 2
+      );
+    });
+    assert(
+      restoredRoof && Math.abs(arrival.y - restoredRoof.point.y) < 0.015,
+      "earlier centre-roof save remains on the same rendered upper cap",
+    );
+    g.player.position.set(arrival.x, arrival.y, arrival.z);
+    g.jumpY = arrival.y - g.groundHeight(arrival.x, arrival.z);
+    g.velocityY = 0;
+    g.grounded = true;
+    for (let i = 0; i < 180; i++) advanceCharacter(g, { x: 0, z: 0 }, 1 / 60);
+    assert(g.grounded);
+    assert(g.canMove(g.player.position.x, g.player.position.z, g.jumpY));
+    assert.equal(JSON.stringify(g.progress), progress);
+    checked++;
+  }
+  assert.equal(checked, 8);
+  t.diagnostic(
+    "Eight finial approaches and retreats, 1200 controller updates; eight centre-roof saves, 1440 settling updates",
+  );
 });
 
 test("seventeen varied pavilion caps catch actual controller falls and restore earlier roof saves without changing progress", (t) => {
