@@ -151,7 +151,7 @@ export function buildMonasteryGalleries(
         x,
         5.58,
         (beamStart + beamEnd) / 2,
-      );
+      ).name = "Cloister longitudinal beam";
       if (!bay.open) {
         const deck = roofAt(
           r.width,

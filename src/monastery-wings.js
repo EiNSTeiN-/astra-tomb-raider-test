@@ -819,6 +819,11 @@ export function buildMonasteryWing(
     root.remove(proxy);
     proxy.geometry.dispose();
   }
+  // Keep the two actual joist surfaces for the adjoining post brackets. These
+  // unrendered copies are consumed and disposed by buildMonasteryBrackets.
+  record.bracketBearers = underDeck
+    .filter((m) => m.name === "Bearing floor joist")
+    .map((m) => m.geometry.clone());
   mergeArchitecture(root, 2);
   return record;
 }

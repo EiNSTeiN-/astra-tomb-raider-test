@@ -17,6 +17,7 @@ import { advanceCharacter, safeArrival } from "../src/character-motion.js";
 import { stationBlocked } from "../src/field-station-solids.js";
 import { verifyMonasteryPavilions } from "../scripts/inspect-monastery-pavilions-browser.js";
 import { verifyMonasteryFinials } from "../scripts/inspect-monastery-finials-browser.js";
+import { verifyMonasteryBrackets } from "../scripts/inspect-monastery-brackets-browser.js";
 
 function fixture(t) {
   t.mock.method(T.TextureLoader.prototype, "load", () => new T.Texture());
@@ -57,6 +58,13 @@ function fixture(t) {
   });
   return g;
 }
+
+test("all delivered post brackets meet their beam undersides and post cores, with detached controls", (t) => {
+  const report = verifyMonasteryBrackets(fixture(t));
+  assert.deepEqual(report.accepted.failures, []);
+  assert.equal(report.accepted.brackets, 209);
+  t.diagnostic(JSON.stringify(report));
+});
 
 test("nine cloister compositions preserve every lodge connection and separate outer roof caps", () => {
   const forms = new Set();

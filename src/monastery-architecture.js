@@ -12,6 +12,7 @@ import { roofFasciaGeometry } from "./roof-fascia.js";
 import { RoofCamera } from "./roof-camera.js";
 import { stationMeshSolid } from "./field-station-solids.js";
 import { monasteryPavilionPlan } from "./monastery-pavilion-plan.js";
+import { buildMonasteryBrackets } from "./monastery-brackets.js";
 import {
   monasteryFinialGeometry,
   monasteryFinialMaterial,
@@ -441,24 +442,18 @@ export function buildMonasteryArchitecture(game) {
         timberBottom + 0.3,
         post.z,
       );
-      const brace = block(
-        2.35,
-        0.23,
-        0.28,
-        wood,
-        post.x + (post.x > 0 ? -1 : 1) * 0.63,
-        post.top - 0.82,
-        post.z,
-      );
-      brace.rotation.z = ((post.x > 0 ? 1 : -1) * Math.PI) / 4;
+      // Preserve the fitting seed sequence after retiring the unattached strut.
+      serial++;
     }
     // Central bell pavilion: crossbeams carry its roof and its hanging bronze bell.
     for (const pz of [-21, -15]) {
-      block(13.3, 0.55, 0.7, wood, 0, 10.45, pz, 0, true);
+      block(13.3, 0.55, 0.7, wood, 0, 10.45, pz, 0, true).name =
+        "Pavilion cross bearer";
       block(13.8, 0.24, 1.1, red, 0, 10.78, pz);
     }
     for (const px of [-5.5, 5.5])
-      block(0.65, 0.6, 8, wood, px, 10.45, -18, 0, true);
+      block(0.65, 0.6, 8, wood, px, 10.45, -18, 0, true).name =
+        "Pavilion depth bearer";
     const markPavilion = (id) => (meshes) => {
       for (const mesh of meshes)
         mesh.geometry.setAttribute(
@@ -594,7 +589,24 @@ export function buildMonasteryArchitecture(game) {
       y: base + 5.3,
       z: z - 17,
     };
+    const brackets = buildMonasteryBrackets(
+      game,
+      root,
+      room.index,
+      plan.posts,
+      wings,
+      wood,
+    );
     const joinery = batchMonasteryBuildings(root, [house, ...wings]);
+    for (const mesh of root.children)
+      if (mesh.isMesh && !mesh.geometry.attributes.monasteryBracket)
+        mesh.geometry.setAttribute(
+          "monasteryBracket",
+          new THREE.Float32BufferAttribute(
+            new Float32Array(mesh.geometry.attributes.position.count),
+            1,
+          ),
+        );
     for (const mesh of root.children)
       if (mesh.isMesh && !mesh.geometry.attributes.monasteryFinial)
         mesh.geometry.setAttribute(
@@ -650,6 +662,7 @@ export function buildMonasteryArchitecture(game) {
       flags,
       plan,
       finial,
+      brackets,
       center: new THREE.Vector3(x, base + 6, z),
     });
   }

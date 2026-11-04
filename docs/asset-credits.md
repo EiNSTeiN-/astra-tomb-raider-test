@@ -2078,3 +2078,12 @@ reuses the existing credited Monastery Stone Floor and Rock Boulder Dry maps.
 The documentation figures are lossless exports of actual game captures; the
 before view disables the new layer, verified against the published factory.
 No new external bitmap, model, recording, music or dependency is introduced.
+
+
+## Fitted monastery post brackets
+
+The varied post brackets, beam-triangle clipping and lower shoulder profiles in
+`src/monastery-brackets.js` are original procedural geometry. They reuse the
+existing credited Wood Planks maps by Amal Kumar through the monastery timber
+material. The four documentation figures are lossless exports of actual game
+captures. No external model, bitmap, recording, music or dependency is added.

@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [fitted monastery post brackets](monastery-brackets.md) replace 147
+  dangling struts with 209 beam-fitted members across all nine winter courts.
+  All 69 selected checks, three CPU-budget checks and the build pass, including
+  12,280 beam seats and 490 post-back contacts with displacement controls.
+  Twenty-six final-source views are reviewed. All delivered brackets close;
+  four sampled body poses and all 77 sound origins clear the changed geometry.
+  Remaining frame/roof/joinery bytes and 2,444 ground queries match the
+  published version. Production keyboard and portrait touch pass four
+  complete-store reload comparisons; six release captures are reviewed and
+  owned helpers close under the five-of-sixteen cap. Shared court arrangements,
+  sparse paths and continuous contact remain open.
+
 - The [snow-worn monastery courts](monastery-paving.md) give all nine winter
   floors their own slate courses, inset bands and worn circulation lines.
   Existing terrain triangles carry the material. All 26 selected tests,
