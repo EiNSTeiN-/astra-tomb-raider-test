@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [wind-scoured winter slopes](winter-scour.md) expose rock on wind-facing
+  banks and mountain shoulders while retaining sheltered snow. Terrain,
+  foreland and ranges share the exposure field without changing geometry,
+  support heights or texture requests. All 29 selected checks, three CPU-budget
+  checks and the build pass. Fifteen development views are reviewed; an
+  opposite court view supplements one tree-obscured overview. The shared field
+  passes 42 GPU cases and detects reversed-wind controls. Twenty-one independent
+  other-theme terrain fixtures retain identical pixels, and six blend endpoint
+  comparisons match. Temporary probe resources return to their starting counts.
+  Production keyboard/High and portrait touch/Performance movement covers
+  6.0 m / 6.6 m at full health with four complete-store reload comparisons;
+  all six release images are reviewed. All 429 runtime hashes match and owned
+  helpers close under the shared five-of-sixteen CPU cap. Smooth large mountain
+  forms, sparse paths, shared court massing and continuous contact remain open.
+
 - The [worn desert court paving](desert-paving.md) gives all ten courts
   different ground layouts, using processional lines, fan courses, rings,
   oblique bands, runners and diamond fields. It reuses existing maps and

@@ -1,7 +1,10 @@
+import { winterScourDeclarations } from "./winter-scour.js";
+
 // Snow gathers on the broad shoulders; tilted rock beds and short fractures
 // remain visible on steeper cuts. Derivative filtering suppresses distant seams.
 export const snowDeclarations = /* glsl */ `
 #ifdef TERRAIN_SNOW
+${winterScourDeclarations}
 varying float vSnowRock;
 vec3 snowReliefNormal(vec3 base,float height) {
   vec3 dx=dFdx(-vViewPosition),dy=dFdy(-vViewPosition);
@@ -31,6 +34,8 @@ export const snowColor = /* glsl */ `
   float snowDeposited=smoothstep(.67,.96,normalize(vTerrainNormal).y+(snowWeather-.5)*.18);
   float snowExposure=clamp(vSnowRock,0.,1.);
   terrainSlope=smoothstep(.1,.72,max(terrainSlope,snowExposure*(1.-snowDeposited)));
+  float terrainWindScour=winterWindScour(sp,vTerrainNormal,snowWeather,snowBroken)*snowExposure;
+  terrainSlope=max(terrainSlope,terrainWindScour*.9);
   pavingWeight*=1.-snowExposure;
   float snowRockGray=dot(cliffColor,vec3(.2126,.7152,.0722));
   cliffColor=mix(cliffColor,vec3(snowRockGray)*vec3(.79,.86,.96),.88)

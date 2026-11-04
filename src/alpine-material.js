@@ -48,6 +48,6 @@ export function alpineMaterial(source, haze) {
       .replace("#include <normal_fragment_maps>", alpineNormalLayer)
       .replace("#include <opaque_fragment>", alpineHazeLayer);
   };
-  material.customProgramCacheKey = () => "vesper-alpine-range-7";
+  material.customProgramCacheKey = () => "vesper-alpine-range-8-wind-scour";
   return material;
 }

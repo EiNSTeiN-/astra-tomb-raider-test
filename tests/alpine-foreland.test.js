@@ -13,6 +13,7 @@ import {
   alpineForelandMaterial,
 } from "../src/alpine-foreland.js";
 import { alpineMaterial } from "../src/alpine-material.js";
+import { winterScourDeclarations } from "../src/winter-scour.js";
 
 async function fixture(t) {
   t.mock.method(T.TextureLoader.prototype, "load", (url, onLoad) => {
@@ -64,8 +65,9 @@ const fingerprint = (g) =>
     .digest("hex");
 
 // Output reference from published 9c095b1 and the locked Three.js shader library.
-// This guards the shared-code extraction, independently of the new material.
-test("extracting alpine appearance preserves the published range shaders exactly", () => {
+// Keep the original projection, sampling and haze reference while allowing the
+// additive wind cover. The new layer also has independent GPU checks.
+test("wind cover retains the published range projection, sampling and haze", () => {
   const source = new T.MeshStandardMaterial(),
     material = alpineMaterial(source, new T.Color(0)),
     shader = {
@@ -78,8 +80,15 @@ test("extracting alpine appearance preserves the published range shaders exactly
     createHash("sha256").update(shader.vertexShader).digest("hex"),
     "9d2ffda98a1c056657cdc0f55a50128afead3904889a967752a56d144f4823a9",
   );
+  const windCover =
+    "\n        float rangeWindScour=winterWindScour(vAlpinePosition,alpineN,broad,broken);\n        snow*=1.-rangeWindScour*.9;";
+  assert(shader.fragmentShader.includes(winterScourDeclarations));
+  assert(shader.fragmentShader.includes(windCover));
+  const retained = shader.fragmentShader
+    .replace("\n        " + winterScourDeclarations, "")
+    .replace(windCover, "");
   assert.equal(
-    createHash("sha256").update(shader.fragmentShader).digest("hex"),
+    createHash("sha256").update(retained).digest("hex"),
     "bb11270da1186f731140cda6e6ab07cc21dc95cb38832c13b4e6bb8caf117c93",
   );
   source.dispose();

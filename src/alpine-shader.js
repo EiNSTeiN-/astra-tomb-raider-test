@@ -1,5 +1,8 @@
+import { winterScourDeclarations } from "./winter-scour.js";
+
 // Shared mountain appearance; the foreland meets this shader at its outer edge.
 export const alpineDeclarations = /* glsl */ `#include <common>
+        ${winterScourDeclarations}
         uniform vec3 alpineHaze;
         varying vec3 vAlpinePosition, vAlpineNormal;
         varying float vAlpineClip;
@@ -60,6 +63,8 @@ export const alpineColorLayer = /* glsl */ `
         float shelter=alpineN.y+(broad-.5)*.18+(broken-.5)*.045;
         float snow=smoothstep(.58,.93,shelter)
           *smoothstep(snowline,snowline+32.,vAlpinePosition.y);
+        float rangeWindScour=winterWindScour(vAlpinePosition,alpineN,broad,broken);
+        snow*=1.-rangeWindScour*.9;
         vec3 snowColor=mix(vec3(.58,.70,.82),vec3(.89,.93,.96),.5+.5*broken);
         diffuseColor.rgb*=mix(stone,snowColor,snow);
         `;
