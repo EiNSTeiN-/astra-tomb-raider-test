@@ -14,7 +14,7 @@ import {
   soleSlip,
 } from "../scripts/inspect-stride.js";
 import { resetTraversal } from "../src/traversal.js";
-import { supportAt } from "../src/character-motion.js";
+import { supportAt, advanceCharacter } from "../src/character-motion.js";
 import { handGeometry } from "../scripts/inspect-hand-geometry.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
@@ -58,6 +58,15 @@ import {
   shutterTurnPhase,
   SHUTTER_WHEEL,
 } from "../src/shutter-motion.js";
+import { buildJungleCrags } from "../src/jungle-crags.js";
+import {
+  footingReader,
+  inspectExplorerFooting,
+} from "../scripts/inspect-explorer-footing-browser.js";
+import {
+  closedMeshReader,
+  inspectExplorerSolids,
+} from "../scripts/inspect-explorer-solids-browser.js";
 
 async function actor() {
   const io = new NodeIO(),
@@ -102,6 +111,221 @@ async function groundedActor() {
     },
   };
 }
+
+test("low natural cliff beds retain two terrain footholds across rest facings without changing the controller", async () => {
+  const game = await groundedActor(),
+    level = LEVELS[0],
+    map = createMap(level),
+    profile = createTerrainProfile(map, level),
+    material = new THREE.MeshStandardMaterial(),
+    ground = new THREE.PlaneGeometry(
+      profile.extent,
+      profile.extent,
+      profile.width - 1,
+      profile.width - 1,
+    )
+      .rotateX(-Math.PI / 2)
+      .translate(profile.extent / 2, 0, profile.extent / 2),
+    p = ground.attributes.position;
+  for (let i = 0; i < p.count; i++)
+    p.setY(i, profile.height(p.getX(i), p.getZ(i)));
+  Object.setPrototypeOf(game, Adventure.prototype);
+  Object.assign(game, {
+    level,
+    map,
+    terrainProfile: profile,
+    groundHeight: profile.surfaceHeight,
+    world: new THREE.Group(),
+    items: [],
+    terrainMeshes: [new THREE.Mesh(ground, material)],
+    actualMoveSpeed: 0,
+    moveVelocity: { x: 0, z: 0 },
+  });
+  buildJungleCrags(game);
+  const root = new THREE.Vector3(119, 13.410755074984575, 410.5),
+    read = footingReader(game.terrainMeshes, game.jungleCrags.root.children),
+    stone = closedMeshReader(game.jungleCrags.root.children),
+    pose = (yaw) => {
+      game.player.position.copy(root);
+      game.jumpY = root.y - game.groundHeight(root.x, root.z);
+      game.grounded = true;
+      game.avatar.rotation.y = yaw;
+      game.rig.grounding = undefined;
+      game.rig.actions.Idle.reset().play();
+      for (let i = 0; i < 40; i++) animateExplorer(game, 1 / 60, false, false);
+      return inspectExplorerFooting(game, read);
+    };
+  try {
+    // The preceding policy treats a low natural bed like a table edge.
+    for (const o of game.obstacles) o.terrainFootholds = false;
+    const control = pose(Math.PI / 2);
+    assert(
+      control.feet.some((f) => f.minimumGap > 0.2 && f.contacts.length === 0),
+    );
+    for (const o of game.obstacles) o.terrainFootholds = true;
+    for (const yaw of [
+      0,
+      Math.PI / 4,
+      Math.PI / 2,
+      Math.PI * 0.75,
+      Math.PI,
+      Math.PI * 1.25,
+      Math.PI * 1.5,
+      Math.PI * 1.75,
+    ]) {
+      const r = pose(yaw);
+      assert.equal(r.soleSamples, 528);
+      assert(r.samples > r.soleSamples);
+      assert.equal(r.missing, 0);
+      assert.equal(r.invalid, 0);
+      assert(
+        r.feet.every(
+          (f) =>
+            f.minimumGap >= -0.015 &&
+            f.minimumGap < 0.03 &&
+            f.contacts.length > 2,
+        ),
+        `${yaw}: ${JSON.stringify(r.feet.map((f) => ({ side: f.side, gap: f.minimumGap, contacts: f.contacts.length })))}`,
+      );
+      assert(
+        r.feet[0].localAnkle[0] - r.feet[1].localAnkle[0] > 0.08,
+        "resting ankles retain their left/right separation",
+      );
+      assert(game.player.position.equals(root));
+      assert(game.canMove(root.x, root.z, game.jumpY));
+      assert.equal(inspectExplorerTerrain(game).embedded, 0);
+      assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+    }
+    const wall = new THREE.Vector3(17.5, 26.85048494767592, 193.5),
+      bed = game.jungleCrags.sites.find(
+        (s) => s.id === "jungle-crag-3-224",
+      ).solid;
+    assert(
+      Math.abs(
+        bed.triangles.support(wall.x, wall.z, wall.y, 0.4, 0.65).height -
+          wall.y,
+      ) < 1e-6,
+      "the uncut buried face reproduces the old wall perch",
+    );
+    assert(
+      wall.y - supportAt(game, wall.x, wall.z, wall.y, 0.4).height > 0.27,
+      "the buried tread cannot hold the controller",
+    );
+    game.player.position.copy(wall);
+    game.grounded = true;
+    game.velocityY = 0;
+    game.audio = { tone() {} };
+    for (let i = 0; i < 180; i++) {
+      advanceCharacter(game, { x: 0, z: 0 }, 1 / 60);
+      assert(
+        game.canMove(
+          game.player.position.x,
+          game.player.position.z,
+          game.jumpY,
+        ),
+      );
+    }
+    assert(game.grounded);
+    assert(game.player.position.y < wall.y - 1);
+    assert(
+      Math.abs(
+        supportAt(
+          game,
+          game.player.position.x,
+          game.player.position.z,
+          game.player.position.y,
+          0.4,
+        ).height - game.player.position.y,
+      ) < 1e-5,
+    );
+  } finally {
+    game.jungleCrags.root.traverse((m) => m.geometry?.dispose());
+    ground.dispose();
+    material.dispose();
+  }
+});
+
+test("the recovered western branch rest clears the uphill boot without moving the supported root", async () => {
+  const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
+    document = await io.read("public/assets/models/island_tree_01/near.glb");
+  for (const t of document.getRoot().listTextures()) t.dispose();
+  const bytes = await io.writeBinary(document),
+    { scene } = await new GLTFLoader().parseAsync(
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+      "",
+    ),
+    specimen = jungleSpecimen([scene]),
+    source = specimen.sources[0].find(
+      (m) => m.material.name === "island_tree_01",
+    ),
+    geometry = source.geometry.clone().applyMatrix4(source.matrixWorld),
+    material = new THREE.MeshBasicMaterial({
+      name: "island_tree_01",
+      side: THREE.DoubleSide,
+    });
+  geometry
+    .translate(-specimen.origin.x, -specimen.origin.y, -specimen.origin.z)
+    .scale(specimen.scale, specimen.scale, specimen.scale);
+  const matrix = new THREE.Matrix4().fromArray([
+      1.3253985306047493, 0, -0.03486466477760965, 0, 0, 1.3258570095524191, 0,
+      0, 0.03486466477760965, 0, 1.3253985306047493, 0, 24.265778487548232,
+      8.49997308651565, 196.15583745390177, 1,
+    ]),
+    mesh = new THREE.Mesh(geometry, material),
+    g = await groundedActor(),
+    profile = createTerrainProfile(createMap(LEVELS[0]), LEVELS[0]),
+    ground = new THREE.PlaneGeometry(
+      profile.extent,
+      profile.extent,
+      profile.width - 1,
+      profile.width - 1,
+    )
+      .rotateX(-Math.PI / 2)
+      .translate(profile.extent / 2, 0, profile.extent / 2),
+    p = ground.attributes.position;
+  for (let i = 0; i < p.count; i++)
+    p.setY(i, profile.height(p.getX(i), p.getZ(i)));
+  Object.assign(g, {
+    level: LEVELS[0],
+    terrainProfile: profile,
+    groundHeight: profile.surfaceHeight,
+    terrainMeshes: [new THREE.Mesh(ground, material)],
+    elapsed: 25,
+    actualMoveSpeed: 0,
+    moveVelocity: { x: 0, z: 0 },
+    canMove: Adventure.prototype.canMove,
+    walkable: () => true,
+    jungleTreeSolids: new JungleTreeSolids([
+      { tiers: [[mesh]], matrices: [matrix] },
+    ]),
+  });
+  g.player.position.set(19.0736072292864, 18.16901319154023, 192.4335997030538);
+  g.avatar.rotation.y = Math.PI / 2;
+  const root = g.player.position.clone();
+  try {
+    assert(
+      Math.abs(supportAt(g, root.x, root.z, root.y, 0.55).height - root.y) <
+        1e-6,
+    );
+    assert(g.canMove(root.x, root.z, root.y - g.groundHeight(root.x, root.z)));
+    for (let i = 0; i < 40; i++) animateExplorer(g, 1 / 60, false, false);
+    const terrain = inspectExplorerTerrain(g);
+    assert.equal(terrain.embedded, 0, JSON.stringify(terrain.witnesses));
+    assert.equal(terrain.invalid, 0);
+    assert.equal(terrain.missing, 0);
+    assert(
+      g.rig.grounding.contacts.some(
+        (c) => c.supported && c.clearance >= -0.015 && c.clearance < 0.02,
+      ),
+    );
+    assert(g.player.position.equals(root));
+  } finally {
+    geometry.dispose();
+    ground.dispose();
+    material.dispose();
+    scene.traverse((o) => o.geometry?.dispose());
+  }
+});
 
 test("a real root rest fits the tread without lifting the sole onto the neighboring steep bark", async (t) => {
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),

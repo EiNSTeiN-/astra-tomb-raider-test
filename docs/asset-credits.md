@@ -2138,3 +2138,13 @@ is original animation code, using the existing credited character asset.
 The two documentation figures are lossless exports of actual game frames,
 with matched prepared player and camera positions. No external bitmap, model,
 recording, music or dependency is introduced.
+
+## Exposed jungle cliff footing
+
+The clipped walking-support index and revised natural-bank pose fitting are
+original code, using the preceding cliff geometry, credited terrain maps,
+character and island-tree assets. The tree-placement regression reads the
+existing delivered trunk geometry; it introduces no model derivative.
+The paired footing figures are lossless exports of actual High game frames
+at matching player/camera coordinates and scene time. No bitmap, recording,
+music, model or dependency is added to the playable assets.

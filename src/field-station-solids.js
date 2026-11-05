@@ -156,7 +156,14 @@ export function stationContains(solid, x, z, padding = 0) {
 // The movement disk can land on a real cap while boot/contact probes retain
 // their point footprint. A triangle station's highest bounding corner is not
 // a floor beneath every point of its tapered or chipped surface.
-export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
+export function stationSupport(
+  solid,
+  x,
+  z,
+  maxY = Infinity,
+  radius = 0,
+  minUp = 0,
+) {
   if (!solid.supportable || (solid.node && !solid.node.visible)) return null;
   if (radius && solid.bodySupport === false) return null;
   if (solid.triangles) {
@@ -179,8 +186,13 @@ export function stationSupport(solid, x, z, maxY = Infinity, radius = 0) {
     // Only upward, walkable faces can hold a body; exact point probes still
     // report the physical bevel or side underneath their coordinates.
     return (
-      solid.triangles.support(x, z, maxY, footprint, radius ? 0.65 : 0)
-        ?.height ?? null
+      (solid.supportTriangles || solid.triangles).support(
+        x,
+        z,
+        maxY,
+        footprint,
+        radius ? 0.65 : minUp,
+      )?.height ?? null
     );
   }
   // Existing stations keep their historical support margin. An explicit

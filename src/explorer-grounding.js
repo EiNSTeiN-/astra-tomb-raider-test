@@ -127,7 +127,7 @@ function terrainSoleNormal(points, support, ankle) {
   ];
   if (
     !floors.every((point) => {
-      const floor = support(point.x, point.z);
+      const floor = support(point.x, point.z, point.y);
       if (!floor) return false;
       point.y = floor.height;
       return true;
@@ -289,10 +289,17 @@ export function groundExplorer(game, dt, moving, sprinting) {
   );
   const finiteSupport =
     bodySupport.surface?.triangles || bodySupport.surface?.shape;
-  const support = (x, z) => {
+  const naturalBed = !!bodySupport.surface?.terrainFootholds;
+  const support = (x, z, footY) => {
     // A steep side beside a root tread is a wall, not a higher floor for the
     // boot. Follow upward scan faces while the collision queries retain sides.
-    const result = supportAt(game, x, z, root.y + 0.45, 0, 0.65);
+    // A natural bed may overhang a boot. Query its eligible lower faces at
+    // the actual foot height instead of pulling the ankle above a roof.
+    const maxY =
+      naturalBed && Number.isFinite(footY)
+        ? Math.min(root.y + 0.45, footY - 0.18)
+        : root.y + 0.45;
+    const result = supportAt(game, x, z, maxY, 0, 0.65);
     // A boot beside a finite cap can reach its steep bevel while the other
     // boot stands on top. Lowering the pelvis toward that edge bends the knee
     // through the cap. Treat a substantial drop as an unsupported foothold.
@@ -308,6 +315,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
     if (
       finiteSupport &&
       !bodySupport.surface?.shape &&
+      !bodySupport.surface?.terrainFootholds &&
       !continuousSlope &&
       root.y - result.height > 0.12
     )
@@ -316,8 +324,52 @@ export function groundExplorer(game, dt, moving, sprinting) {
       ? result
       : null;
   };
+  let restStride = 1;
+  if (!moving && naturalBed) {
+    const heights = state.feet.map((foot) => {
+      const ankle = foot.bone.getWorldPosition(new THREE.Vector3());
+      return (
+        support(ankle.x, ankle.z, ankle.y - 0.08)?.height ??
+        game.groundHeight(ankle.x, ankle.z)
+      );
+    });
+    // A long idle stagger can put the boots on opposite sides of a sharp bank.
+    // Bring them closer along the facing direction while keeping stance width.
+    restStride = THREE.MathUtils.clamp(
+      0.18 / Math.max(0.18, Math.abs(heights[0] - heights[1])),
+      0.1,
+      1,
+    );
+  }
+  state.restStride = reset
+    ? restStride
+    : THREE.MathUtils.damp(state.restStride ?? 1, restStride, 14, dt);
+  const restOffset = (ankle) => {
+    const local = ankle.clone().sub(root).applyQuaternion(inverseFacing);
+    return new THREE.Vector3(
+      0,
+      0,
+      local.z * (state.restStride - 1),
+    ).applyQuaternion(facing);
+  };
   let plant = null;
-  if (!moving && finiteSupport && !bodySupport.surface.groundingSlope) {
+  // A low natural bed can hold the controller's edge while both boots reach
+  // ordinary ground. Keep that two-foot stance instead of dragging one boot
+  // across the body onto the bed and lifting the other above its real floor.
+  const terrainStance =
+    !moving &&
+    bodySupport.surface?.terrainFootholds &&
+    state.feet.every((foot) => {
+      const ankle = foot.bone.getWorldPosition(new THREE.Vector3());
+      ankle.add(restOffset(ankle));
+      return support(ankle.x, ankle.z, ankle.y - 0.08);
+    });
+  if (
+    !moving &&
+    finiteSupport &&
+    !bodySupport.surface.groundingSlope &&
+    !terrainStance
+  ) {
     // A scan may support the body beside a rising bank while its nearest
     // tread is covered by soil. Plant only on the exposed part of a surface.
     const exposed = (point) =>
@@ -331,7 +383,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       Math.hypot(root.x - old.root.x, root.z - old.root.z) < 0.02 &&
       Math.abs(old.facing.dot(facing)) > 0.9995 &&
       exposed(old.point) &&
-      support(old.point.x, old.point.z)
+      support(old.point.x, old.point.z, old.point.y)
     ) {
       plant = old;
     } else {
@@ -377,7 +429,8 @@ export function groundExplorer(game, dt, moving, sprinting) {
     const offset = new THREE.Vector3(
       0,
       0,
-      local.z * (state.stride - 1) + crouch * (moving ? 0.14 + recovery : 0),
+      local.z * (state.stride * state.restStride - 1) +
+        crouch * (moving ? 0.14 + recovery : 0),
     ).applyQuaternion(facing);
     ankle.add(offset);
     let anchorIndex;
@@ -415,13 +468,13 @@ export function groundExplorer(game, dt, moving, sprinting) {
     }
     const center =
       foot === plant?.foot
-        ? support(plant.point.x, plant.point.z)
-        : support(ankle.x, ankle.z);
+        ? support(plant.point.x, plant.point.z, plant.point.y)
+        : support(ankle.x, ankle.z, ankle.y - 0.08);
     const samples = [
-      support(ankle.x - 0.12, ankle.z),
-      support(ankle.x + 0.12, ankle.z),
-      support(ankle.x, ankle.z - 0.12),
-      support(ankle.x, ankle.z + 0.12),
+      support(ankle.x - 0.12, ankle.z, ankle.y - 0.08),
+      support(ankle.x + 0.12, ankle.z, ankle.y - 0.08),
+      support(ankle.x, ankle.z - 0.12, ankle.y - 0.08),
+      support(ankle.x, ankle.z + 0.12, ankle.y - 0.08),
     ];
     if (foot !== plant?.foot && center && samples.every(Boolean)) {
       const normal = terrainSoleNormal(
@@ -453,7 +506,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
             (n.x * (p.x - plant.point.x) + n.z * (p.z - plant.point.z)) / n.y;
         return [p.y - floor];
       }
-      const floor = support(p.x, p.z);
+      const floor = support(p.x, p.z, p.y);
       return floor ? [p.y - floor.height] : [];
     });
     const valid = clearances.length > 0;
@@ -471,11 +524,13 @@ export function groundExplorer(game, dt, moving, sprinting) {
   // broad top; the free leg follows the weight shift with a small knee bend.
   const supported = plans.filter((p) => p.valid && p.center);
   const balance = new THREE.Vector3();
-  if (plant && supported.length === 1) {
+  if ((plant || naturalBed) && supported.length === 1) {
     const hips = rig.model.getObjectByName("mixamorigHips");
     if (hips) {
       const hip = hips.getWorldPosition(new THREE.Vector3()),
-        ankle = plans.find((p) => p.foot === plant.foot).ankle;
+        ankle = (
+          plant ? plans.find((p) => p.foot === plant.foot) : supported[0]
+        ).ankle;
       // The planted material point may lie on a toe or sole edge. Balance
       // over the fitted ankle rather than carrying that contact offset into
       // the torso; the sole keeps its independently fitted tread target.
@@ -492,7 +547,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
   for (const plan of plans)
     if (!supported.includes(plan)) {
       plan.ankle.add(state.balance);
-      if (plant && supported.length === 1) plan.ankle.y += 0.12;
+      if ((plant || naturalBed) && supported.length === 1) plan.ankle.y += 0.12;
     }
   updateSkin(game);
   let pelvis = Math.max(-0.3, Math.min(0, ...plans.map((p) => p.shift)));
@@ -527,7 +582,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       ? (x, z, y, restHeight) => {
           const ground = game.groundHeight(x, z);
           if (y - ground < 0.03) return ground;
-          const floor = support(x, z);
+          const floor = support(x, z, y);
           if (!floor) return null;
           const triangles = floor.surface?.triangles;
           // Low cuffs can pass below a curved rim or overhang. Their actual
@@ -623,6 +678,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
     drop,
     applyPelvis,
     crouchSupport,
+    naturalBed,
   );
   // Refit the actual planted material point after leg IK. Weighted boot/toe
   // vertices can differ slightly from the rigid planning pose on a steep root.
@@ -635,7 +691,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       // Keep that contact instead of pulling the ankle through the curved rim.
       if (
         probes(plan.foot, "sole").some((point) => {
-          const floor = support(point.x, point.z),
+          const floor = support(point.x, point.z, point.y),
             gap = floor ? point.y - floor.height : Infinity;
           return floor?.surface === plant.surface && gap >= 0 && gap <= 0.012;
         })
@@ -659,13 +715,14 @@ export function groundExplorer(game, dt, moving, sprinting) {
         drop,
         applyPelvis,
         crouchSupport,
+        naturalBed,
       );
     }
   }
   // Re-solving a deeply bent leg can shift the posed sole slightly from its
   // planned clearance. Check the delivered sole after IK, then fit the knees
   // again if an ankle needs lifting. Keep this bounded and visual only.
-  for (let pass = 0; pass < 5; pass++) {
+  for (let pass = 0; pass < 10; pass++) {
     let adjusted = false;
     for (const [index, p] of plans.entries()) {
       if (!p.valid) continue;
@@ -674,11 +731,12 @@ export function groundExplorer(game, dt, moving, sprinting) {
       // can bend its medial vertices below the outline. Read the complete low
       // footwear here; keep the small perimeter for orientation and footsteps.
       const gaps = probes(p.foot, true).flatMap((point) => {
-        const floor = support(point.x, point.z);
+        const floor = support(point.x, point.z, point.y);
         let corrected = false;
         if (
           bodySupport.surface?.shape ||
-          bodySupport.surface?.triangles?.layeredSupport
+          bodySupport.surface?.triangles?.layeredSupport ||
+          naturalBed
         )
           for (const scans of bodySupport.surface.shape
             ? [game.natureRockSolids, game.jungleTreeSolids]
@@ -695,8 +753,12 @@ export function groundExplorer(game, dt, moving, sprinting) {
         state.pelvis = Math.max(-0.3, state.pelvis + Math.min(0, bevel.y));
         adjusted = true;
       }
-      const lift = Math.min(0.03, 0.006 - Math.min(...gaps));
-      if (lift > 0.0001) {
+      const gap = Math.min(...gaps),
+        settle = naturalBed && !moving && p.center && !bevel && gap > 0.02,
+        lift = settle
+          ? Math.max(-0.03, 0.006 - gap)
+          : Math.min(0.03, 0.006 - gap);
+      if (lift > 0.0001 || (settle && lift < -0.0001)) {
         ankleTargets[index].y += lift;
         adjusted = true;
       }
@@ -709,6 +771,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       drop,
       applyPelvis,
       crouchSupport,
+      naturalBed,
     );
   }
   state.active = true;
@@ -716,7 +779,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
     const points = probes(p.foot),
       supported = points
         .flatMap((point) => {
-          const floor = support(point.x, point.z);
+          const floor = support(point.x, point.z, point.y);
           return floor ? [{ point, gap: point.y - floor.height }] : [];
         })
         .sort((a, b) => a.gap - b.gap);

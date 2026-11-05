@@ -7,6 +7,7 @@ import {
   jungleCragGeometry,
 } from "./jungle-crag-geometry.js";
 import { JungleCragCamera } from "./jungle-crag-camera.js";
+import { jungleCragSupport } from "./jungle-crag-support.js";
 
 export function buildJungleCrags(game) {
   game.jungleCrags = null;
@@ -90,6 +91,8 @@ export function buildJungleCrags(game) {
       });
     solid.preciseNatureClearance = true;
     solid.jungleCrag = true;
+    solid.terrainFootholds = true;
+    solid.supportTriangles = jungleCragSupport(game.terrainProfile, meshes);
     sites.push({
       ...site,
       parts: [serial, serial + 1, serial + 2, serial + 3],

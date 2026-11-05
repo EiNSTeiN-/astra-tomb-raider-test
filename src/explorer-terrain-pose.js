@@ -66,9 +66,11 @@ export function fitCrouchTerrain(
   maximum,
   applyPelvis,
   supportHeight = (x, z) => game.groundHeight(x, z),
+  allowStanding = false,
 ) {
   const rig = game.rig;
-  if ((rig.crouchBlend || 0) < 0.05 || maximum <= pelvis) return pelvis;
+  if (((rig.crouchBlend || 0) < 0.05 && !allowStanding) || maximum <= pelvis)
+    return pelvis;
   if (rig.terrainCrouch?.model !== rig.model)
     rig.terrainCrouch = {
       model: rig.model,

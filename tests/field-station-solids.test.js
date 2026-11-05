@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { Adventure } from "../src/game.js";
 import {
   buildFieldStation,
@@ -17,6 +18,8 @@ import {
   stationEntry,
   stationMantleEnd,
   stationBlocked,
+  stationMeshSolid,
+  stationSupport,
 } from "../src/field-station-solids.js";
 import {
   cableApproachClear,
@@ -27,6 +30,81 @@ import {
 import { shotCover } from "../src/aiming.js";
 import { updateProjectiles } from "../src/combat.js";
 import { LEVELS } from "../src/campaign.js";
+import { jungleCragSupport } from "../src/jungle-crag-support.js";
+
+test("natural-bed foot queries reject a drawn steep face while raw sight and body support keep their contracts", () => {
+  const geometry = new THREE.BoxGeometry(6, 0.2, 4)
+      .rotateZ(Math.PI / 3)
+      .translate(20, 2, 20),
+    material = new THREE.MeshStandardMaterial(),
+    mesh = new THREE.Mesh(geometry, material),
+    game = { groundHeight: () => 0, obstacles: [], level: LEVELS[0], map: {} },
+    solid = stationMeshSolid(game, { id: "natural-bed" }, mesh),
+    x = 20 - Math.sin(Math.PI / 3) * 0.1,
+    from = new THREE.Vector3(x, 10, 20),
+    to = new THREE.Vector3(x, -1, 20),
+    ray = new THREE.Raycaster(from, new THREE.Vector3(0, -1, 0));
+  try {
+    mesh.updateMatrixWorld();
+    const hit = ray.intersectObject(mesh)[0];
+    assert(hit);
+    assert(hit.face.normal.y < 0.65);
+    const original = stationSupport(solid, x, 20, 10);
+    assert(Math.abs(original - hit.point.y) < 2e-5);
+    assert.equal(stationSupport(solid, x, 20, 10, 0, 0.65), null);
+    assert(
+      Math.abs(supportAt(game, x, 20, 10, 0, 0.65).height - original) < 1e-9,
+    );
+    const body = supportAt(game, x, 20, 10, 0.4).height;
+    solid.terrainFootholds = true;
+    assert.equal(supportAt(game, x, 20, 10, 0, 0.65).height, 0);
+    assert.equal(supportAt(game, x, 20, 10, 0.4).height, body);
+    assert(Math.abs(supportAt(game, x, 20, 10).height - original) < 1e-9);
+    assert(stationEntry(solid, from, to) !== null);
+  } finally {
+    geometry.dispose();
+    material.dispose();
+  }
+});
+
+test("a separate natural support kernel selects a lower exposed tread without changing closed collision cover", () => {
+  const a = new THREE.BoxGeometry(2, 0.2, 2)
+      .toNonIndexed()
+      .translate(0, 0.1, 0),
+    b = new THREE.BoxGeometry(2, 0.2, 2).toNonIndexed().translate(0, 2.9, 0),
+    geometry = mergeGeometries([a, b]),
+    material = new THREE.MeshStandardMaterial(),
+    mesh = new THREE.Mesh(geometry, material),
+    game = { groundHeight: () => 0, obstacles: [], level: LEVELS[0], map: {} },
+    solid = stationMeshSolid(game, { id: "overhang" }, mesh);
+  solid.terrainFootholds = true;
+  try {
+    assert.equal(solid.triangles.layeredSupport, false);
+    assert.equal(supportAt(game, 0, 0, 0.026, 0, 0.65).height, 0);
+    solid.supportTriangles = jungleCragSupport(
+      { step: 2, width: 3, extent: 4, surfaceHeight: () => 0 },
+      [mesh],
+    );
+    assert.equal(solid.supportTriangles.layeredSupport, true);
+    assert(
+      Math.abs(supportAt(game, 0.5, 0.5, 0.026, 0, 0.65).height - 0.2) < 1e-6,
+    );
+    assert.equal(solid.triangles.layeredSupport, false);
+    assert(Math.abs(supportAt(game, 0, 0, 10, 0.4).height - 3) < 1e-6);
+    assert(
+      stationEntry(
+        solid,
+        new THREE.Vector3(0, 4, 0),
+        new THREE.Vector3(0, -1, 0),
+      ) !== null,
+    );
+  } finally {
+    a.dispose();
+    b.dispose();
+    geometry.dispose();
+    material.dispose();
+  }
+});
 
 function fixture(kind = "valve", y = 0, progress = { stage: 0, field: [] }) {
   const g = Object.assign(Object.create(Adventure.prototype), {

@@ -19,6 +19,23 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [exposed jungle footing repair](jungle-cliff-footing.md) separates
+  walking support from closed collision cover, improves the retained
+  crossed/raised-boot rest and clears the reproduced uphill boot overlap
+  after a western wall descent. All 198 selected tests across 29 files,
+  three CPU-budget checks and the build pass. The actual 60 support indices
+  pass 176,892 exposure probes, with their measured Float32 clearance and
+  rounding bound recorded explicitly. Six local controller legs and three
+  settling cases complete 6,840 updates; all 96 sampled body inspections
+  pass against terrain and cliff stone. Twelve final High views are reviewed,
+  including foliage-constrained views and remaining raised-leg bank poses.
+  All eighteen discovery stances remain valid. Normal startup of a prepared
+  wall save remains fixed through 180 additional controller updates.
+  Production keyboard/touch movement and prepared wall-save recovery pass
+  five full-store reload comparisons; all eight release views are reviewed
+  and the temporary browsers/previews close. Two small boot gaps,
+  ordinary-bank and near-bed reload poses, and broader world/listening/device
+  acceptance remain open.
 - The [jungle cliff beds and descending-jump repair](jungle-cliff-beds.md)
   add 240 closed rock pieces with registered physical and camera geometry,
   and clear the reproduced sinking boot during descending jumps. All 191

@@ -50,7 +50,14 @@ export function supportAt(
   }
   for (const o of game.obstacles) {
     if (o.fieldStation) {
-      const top = stationSupport(o, x, z, maxY, rockRadius);
+      const top = stationSupport(
+        o,
+        x,
+        z,
+        maxY,
+        rockRadius,
+        o.terrainFootholds ? scanMinUp : 0,
+      );
       if (top !== null && top > height) {
         height = top;
         surface = o;
