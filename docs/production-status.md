@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [ten cloud-terrace pavements](sky-court-paving.md) add varied granite
+  courts, worn lanes and subdued inlays. All 70 focused tests, three CPU guard
+  checks and the build pass. The 81 terrain chunks, their 2,771,406 attribute
+  values and existing material/texture bindings retain their comparisons.
+  Retained planting keeps its original transforms; 4,173,228 root probes and
+  1,739 delivered bank-footprint samples find no recorded floating or paving
+  intersections. All eighteen final development views are reviewed. All 119
+  wind controls and recorded active source fronts remain clear, and chapter
+  replacement releases 3,487 tracked draw resources exactly once. The wider
+  wind suite also finds a baseline thumb-contact failure, retained as open
+  VA-251 with its tolerance unchanged. Native keyboard High and simulated touch
+  Performance pass forward/return movement and four complete-store reload
+  comparisons. All six release captures are reviewed, and owned helpers close
+  under the shared five-of-sixteen CPU allowance. Broader composition,
+  continuous contact, listening and device acceptance remain open.
+
 - The [Desert shutter records](solar-shutter-records.md) replace plate grids and
   bare backs with nine paired cast scenes, recessed fields and seated pull
   bosses. All 131 selected tests, three CPU guard checks and the build pass.

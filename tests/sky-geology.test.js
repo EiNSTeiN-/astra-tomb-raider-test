@@ -169,9 +169,12 @@ test("fine terrain chunks keep shared edges, upward normals and matching exposed
     ),
     476288,
   );
-  const seen = new Map();
+  const seen = new Map(),
+    smoothNormals = new Map();
   let shared = 0;
   for (const mesh of game.terrainMeshes) {
+    const { widthSegments, heightSegments } = mesh.geometry.parameters,
+      gridVertices = (widthSegments + 1) * (heightSegments + 1);
     const {
       position: p,
       normal: n,
@@ -198,14 +201,16 @@ test("fine terrain chunks keep shared edges, upward normals and matching exposed
       assert.ok(
         Math.abs(Math.hypot(n.getX(i), n.getY(i), n.getZ(i)) - 1) < 0.000001,
       );
-      const attributes = [
-        p.getY(i),
-        n.getX(i),
-        n.getY(i),
-        n.getZ(i),
-        d.getX(i),
-        trail.getX(i),
-      ];
+      // The original grid keeps identical smooth normals at chunk seams.
+      // Added corners may face individual steep triangles at the same point;
+      // terrain-shading.test.js checks every delivered corner against its face.
+      if (i < gridVertices) {
+        const value = [n.getX(i), n.getY(i), n.getZ(i)];
+        if (smoothNormals.has(key))
+          assert.deepEqual(value, smoothNormals.get(key));
+        else smoothNormals.set(key, value);
+      }
+      const attributes = [p.getY(i), d.getX(i), trail.getX(i)];
       if (seen.has(key)) {
         assert.deepEqual(attributes, seen.get(key));
         shared++;

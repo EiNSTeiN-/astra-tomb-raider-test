@@ -5,6 +5,14 @@ chapters with local saves, and a rich, polished playable world without observed
 placement or geometry defects. There is no minimum chapter duration. AAA is the
 artistic direction. **The audit is open.**
 
+The [cloud-terrace pavements](sky-court-paving.md) add ten distinct granite
+compositions around the wind instruments, with worn lanes and inlaid borders.
+The final review covers all ten court fronts and representative preset views.
+Delivered terrain, root and bank-footprint checks pass. The broader wind suite
+also exposes an existing 3.107 mm thumb-to-handle penetration, reproduced in
+the unchanged baseline and retained as open VA-251. Wider composition,
+continuous contact, listening and device acceptance remain open.
+
 ## November 5 refresh
 
 The [clear and clouded quartz review](quartz-depth.md) begins with 32 High
@@ -556,6 +564,8 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-247 | Open rear bays repeat similar court outlines, leaving most identity in crowns and instruments. | [Surviving court walls](desert-court-massing.md) add 24 varied bays with nineteen real windows, complete backing and registered physical/camera faces. All 194 selected tests, delivered geometry/sound checks, fifteen approaches, twenty assisted legs and tracked resource disposal pass. Keyboard/touch/occupied-bay release cases pass three complete-store reload comparisons, with all six release views reviewed and owned helpers closed. | Rear massing improves locally; repeated sanctuary shells, raised-threshold circulation, close foreground framing and wider world/contact/listening/device acceptance remain open |
 | VA-248 | The nine solar installations repeat rectangular outer room shells despite their different interiors and roof structures. | [Distinct sanctuary exteriors](solar-exteriors.md) add 35 stone masses with battered shoulders, buttresses, an octagonal tower and a faceted apse. The retained-coping fragments found in the apse review are enclosed by a continuous architrave. All 127 final selected regressions, delivered clearance checks, 36 assisted service legs and tracked resource disposal pass. | Exterior massing improves locally; repeated forward arrangements, close foreground framing and wider composition/contact/listening/device acceptance remain open |
 | VA-249 | Desert shutters repeat plate grids on their fronts and leave their rear surfaces plain. | [Cast shutter records](solar-shutter-records.md) add nine paired pictorial compositions on thirty-six faces, with recessed fields, closed rounded fillets and seated pull mounts. All 131 selected regressions, delivered recess/pull/topology checks, local crossings and tracked resource disposal pass. | Local narrative surface detail improves; crowded forward arrangements, shaded interior readability and broader composition/contact/listening/device acceptance remain open |
+| VA-250 | Broad dirt and shared stone surfaces leave the main sky instruments visually detached from their courts. | [Ten granite pavement plans](sky-court-paving.md) add worn lanes and varied inlays while retaining terrain geometry and removing planting from intact slabs. All 70 focused tests, terrain comparisons, root/bank probes and tracked draw-resource disposal pass. | Court surfaces improve locally; repeated machinery, broad margins and wider composition/contact acceptance remain open |
+| VA-251 | The wind hand regression measures a 3.107 mm thumb-to-handle penetration at stage 2, node 9, turn 0, exceeding its 2 mm allowance. | The same failure reproduces in the unchanged `2d596d4` source snapshot. It is independent of the paving and planting changes; its assertion remains unchanged. | Open; inspect the actual grip and correct contact without loosening its tolerance |
 
 
 

@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [ten cloud-terrace pavements](docs/sky-court-paving.md) connect the wind
+courts with varied granite courses, worn lanes and stepped blue-green inlays.
+
 The [wooded jungle rim](docs/jungle-escarpment.md) now has selective eroded ledges
 between retained tree groups and lighter limestone faces with runoff staining.
 

@@ -279,3 +279,41 @@ test("the meadow is stable across quality, save states and unrelated reservation
       mesh.customDepthMaterial?.dispose();
     });
 });
+
+test("court paving removes intersecting plants without relocating the surrounding meadow", () => {
+  const before = meadowGame(),
+    after = meadowGame();
+  after.map.rooms = [{ x: 3, z: 4, index: 0 }];
+  buildSkyMeadow(before);
+  buildSkyMeadow(after);
+  const retained = new Map(
+    after.skyMeadow.plants.map((p) => [p.x + "," + p.z, p]),
+  );
+  assert.ok(retained.size > 100);
+  assert.ok(before.skyMeadow.plants.length - retained.size > 50);
+  for (const plant of before.skyMeadow.plants) {
+    const same = retained.get(plant.x + "," + plant.z);
+    if (same) assert.deepEqual(same.matrix.toArray(), plant.matrix.toArray());
+  }
+  for (const plant of after.skyMeadow.plants) {
+    const radius = after.skyMeadow.specimens[plant.variant].radius * plant.size;
+    assert.ok(
+      Math.max(Math.abs(plant.x - 21) - 20, Math.abs(plant.z - 31) - 23) >=
+        3.5 + radius,
+    );
+  }
+  for (const game of [before, after]) {
+    const geometries = new Set(),
+      materials = new Set();
+    game.world.traverse((mesh) => {
+      if (mesh.geometry) geometries.add(mesh.geometry);
+      for (const material of [mesh.material, mesh.customDepthMaterial].filter(
+        Boolean,
+      ))
+        materials.add(material);
+      if (mesh.isInstancedMesh) mesh.dispose();
+    });
+    geometries.forEach((g) => g.dispose());
+    materials.forEach((m) => m.dispose());
+  }
+});

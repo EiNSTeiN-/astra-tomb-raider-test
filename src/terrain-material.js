@@ -96,6 +96,13 @@ import {
   skyGroundNormal,
   skyTerrainRoughness,
 } from "./sky-terrain-material.js";
+import {
+  skyPavingUniforms,
+  skyPavingDeclarations,
+  skyPavingColor,
+  skyPavingNormal,
+  skyPavingRoughness,
+} from "./sky-paving.js";
 
 const declarations = /* glsl */ `
 uniform sampler2D pavingMap, pavingNormal, pavingRoughness;
@@ -125,6 +132,7 @@ float terrainNoise(vec2 p) {
 }
 ${coastalDeclarations}
 ${skyTerrainDeclarations}
+${skyPavingDeclarations}
 ${desertTerrainDeclarations}
 ${desertPavingDeclarations}
 ${volcanicDeclarations}
@@ -206,6 +214,7 @@ float growthWeight = 0.0;
 #endif
 ${coastalColor}
 ${skyTerrainColor}
+${skyPavingColor}
 ${desertTerrainColor}
 ${desertPavingColor}
 ${volcanicColor}
@@ -244,6 +253,7 @@ float rockRough = texture2D(cliffRoughness, cliffUvX).g * terrainWeights.x
   + texture2D(cliffRoughness, cliffUvY).g * terrainWeights.y
   + texture2D(cliffRoughness, cliffUvZ).g * terrainWeights.z;
 ${skyTerrainRoughness}
+${skyPavingRoughness}
 ${desertTerrainRoughness}
 ${desertPavingRoughness}
 ${volcanicRoughness}
@@ -285,6 +295,7 @@ vec3 cliffN = normalize(
   + terrainSurfaceNormal(texture2D(cliffNormal, cliffUvZ).xyz, cliffUvZ, normal, .9) * terrainWeights.z);
 ${coastalNormal}
 ${skyTerrainNormal}
+${skyPavingNormal}
 ${desertTerrainNormal}
 ${desertPavingNormal}
 ${volcanicNormal}
@@ -484,8 +495,12 @@ export function terrainMaterial(game) {
     uniforms.scoriaStrength = { value: 1 };
   }
   if (biome === "sky") {
-    material.defines = { TERRAIN_SKY: 1 };
-    Object.assign(uniforms, {
+    const paving = skyPavingUniforms(game.map);
+    material.defines = {
+      TERRAIN_SKY: 1,
+      SKY_PAVING_COUNT: paving.skyPavingCourts.value.length,
+    };
+    Object.assign(uniforms, paving, {
       skyMossMap: { value: load("verdure", "color") },
       skyMossNormal: { value: load("verdure", "normal") },
     });
@@ -547,6 +562,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "jungle" ? "-fractured-ledges-1" : biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : biome === "snow" ? "-wind-scour-1-court-slate-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "jungle" ? "-fractured-ledges-1" : biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : biome === "snow" ? "-wind-scour-1-court-slate-1" : biome === "sky" ? "-terrace-granite-1" : ""}`;
   return material;
 }

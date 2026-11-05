@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [cloud-terrace pavements](sky-court-paving.md) use original project-authored
+pattern and planting code with the existing credited terrain maps, ruins,
+explorer, lighting and audio. No external model, texture, recording, score or
+dependency is added. The three documentation figures are complete 1280 × 800
+game captures copied byte-for-byte from the baseline arrival and final High
+arrival and middle-court observers. The geometric inlays are fictional designs.
+
 The [surviving desert court walls](desert-court-massing.md) use original
 project-authored planning and masonry code with the existing credited sandstone
 maps, architecture and environment. No external model, texture, recording,

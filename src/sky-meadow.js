@@ -4,6 +4,7 @@ import { createLodPatch, updateLodPatch } from "./instance-lod.js";
 import { rockGroundHeight, natureRockAllowed } from "./nature-rocks.js";
 import { skyGroundSupported, skyRockNoise } from "./sky-geology.js";
 import { discoveryFoliageClear } from "./discovery-setting-plan.js";
+import { skyPavingPlantClear } from "./sky-paving.js";
 
 export const MEADOW_RANGES = {
   high: [18, 42, 85],
@@ -212,6 +213,8 @@ function rockBounds(game) {
 }
 
 export function meadowPlantAllowed(game, x, z, radius, rocks = []) {
+  if (!skyPavingPlantClear(game.map, x, z, radius, game.terrainProfile))
+    return false;
   if (!skyGroundSupported(game.terrainProfile, x, z)) return false;
   if (!natureRockAllowed(game, x, z, radius)) return false;
   if (!discoveryFoliageClear(game, x, z, radius)) return false;
