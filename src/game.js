@@ -364,6 +364,7 @@ import { advanceOrbitBearing } from "./orbit-motion.js";
 import { buildCaverns, updateCaverns } from "./caverns.js";
 import { buildCavernFlowstone } from "./cavern-flowstone.js";
 import { buildCavernColumns } from "./cavern-columns.js";
+import { buildJungleCrags } from "./jungle-crags.js";
 import { cavernClear } from "./cavern-profile.js";
 import { galleryAt, galleryClear } from "./sunken-gallery-layout.js";
 import {
@@ -1076,6 +1077,7 @@ export class Adventure {
     buildForgeInteriors(this);
     buildCavernFlowstone(this);
     buildCavernColumns(this);
+    buildJungleCrags(this);
     buildFumaroles(this);
     buildTorch(this);
     prepareGuardianPatrols(this);

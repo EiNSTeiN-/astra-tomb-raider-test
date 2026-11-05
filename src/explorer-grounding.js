@@ -187,6 +187,37 @@ function applyBalanceOffset(game, state) {
   game.avatar.position.z = localBalance.z;
 }
 
+// A descending jump can clear the controller at its root while the uphill
+// toe reaches the bank first. Tuck the flight pose using the delivered soles;
+// leave the root, velocity and ordinary airborne targets unchanged in clear air.
+export function poseAirborneTerrainFeet(game, targets) {
+  poseFeet(game, targets);
+  if (typeof game.groundHeight !== "function") return;
+  const rig = game.rig;
+  if (rig.airborneFeet?.model !== rig.model)
+    rig.airborneFeet = { model: rig.model, feet: makeFeet(rig.model) };
+  const feet = rig.airborneFeet.feet;
+  if (!feet) return;
+  const limits = targets.map((p) => p.y + 0.45);
+  for (let pass = 0; pass < 6; pass++) {
+    updateSkin(game);
+    let adjusted = false;
+    for (const [i, foot] of feet.entries()) {
+      let lift = 0;
+      for (const p of probes(foot, true)) {
+        const floor = game.groundHeight(p.x, p.z);
+        if (Number.isFinite(floor)) lift = Math.max(lift, floor + 0.006 - p.y);
+      }
+      lift = Math.min(0.1, lift, limits[i] - targets[i].y);
+      if (lift <= 0.0001) continue;
+      targets[i].y += lift;
+      adjusted = true;
+    }
+    if (!adjusted) break;
+    poseFeet(game, targets);
+  }
+}
+
 // Visual only: support queries share the character controller's decks and
 // platforms, but this never changes its capsule, velocity or persistent position.
 export function groundExplorer(game, dt, moving, sprinting) {
@@ -544,9 +575,8 @@ export function groundExplorer(game, dt, moving, sprinting) {
             skinWeight.getComponent(index, dominant)
           )
             dominant = k;
-        const bone = mesh.skeleton.bones[
-            skinIndex.getComponent(index, dominant)
-          ].name,
+        const bone =
+            mesh.skeleton.bones[skinIndex.getComponent(index, dominant)].name,
           side = bone.includes("Left")
             ? "Left"
             : bone.includes("Right")

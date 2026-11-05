@@ -90,7 +90,7 @@ export function natureRockAllowed(game, x, z, radius, height = Infinity) {
         ) &&
         Math.abs(x - o.x) < o.w + radius + 0.2 &&
         Math.abs(z - o.z) < o.d + radius + 0.2 &&
-        (!o.arcadeMasonry ||
+        (!(o.arcadeMasonry || o.preciseNatureClearance) ||
           o.triangles.blocked(
             x,
             game.groundHeight?.(x, z) ?? terrainProfile.height(x, z),

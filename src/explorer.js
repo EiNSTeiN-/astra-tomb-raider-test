@@ -17,7 +17,10 @@ import { poseSkyBalance } from "./sky-balance.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { poseHands, poseFeet } from "./pose.js";
-import { groundExplorer } from "./explorer-grounding.js";
+import {
+  groundExplorer,
+  poseAirborneTerrainFeet,
+} from "./explorer-grounding.js";
 import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
 import { strideRate } from "./stride.js";
 import { swimCompactAmount, swimCompactLimit } from "./swimmer-clearance.js";
@@ -359,7 +362,10 @@ export function animateExplorer(game, dt, moving, sprinting) {
     ]);
   } else if (!game.grounded) {
     poseHands(game, [point(0.44, 1.08, 0.12), point(-0.44, 1.17, 0.07)]);
-    poseFeet(game, [point(0.12, 0.17, 0.01), point(-0.12, 0.22, 0.02)]);
+    poseAirborneTerrainFeet(game, [
+      point(0.12, 0.17, 0.01),
+      point(-0.12, 0.22, 0.02),
+    ]);
   } else if (game.aimUntil > game.elapsed && !game.carrying && !game.dodge) {
     const gripHeight = 1.34 - CROUCH_DROP * rig.crouchBlend;
     const angle = (game.aimYaw ?? game.yaw) + Math.PI;

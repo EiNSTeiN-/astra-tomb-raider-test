@@ -13,11 +13,32 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 | Eight levels                                  | Eight deterministic, independently saved worlds and eight relic completion states; browser completion checks reached the campaign ending                                                                                                                            | Implemented                                                                          |
 | Distinct atmospheres, goals, and layouts      | Eight map topologies and color/light palettes; chapter-specific architectural landmarks; eight different puzzle disciplines; 69 objective configurations, 207 ordered field actions, physical gates, reservoir drainage, cooled lava, and 96 distinct journal pages | Implemented foundation; significant repeated structural geometry remains             |
 | Local-storage persistence                     | Tests cover save/reload round trips, independent chapter progress, corrupted/unavailable storage, and import/export. Browser test restored a solved objective after reload.                                                                                         | Implemented and tested                                                               |
-| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the discovery baseline and current jungle-boundary repeat; broad cliff faces, shared object families and court massing, sparse spaces and wider discovery/traversal/water coverage remain** |
+| A polished, rich playable surface with no observed placement or geometry defects | PBR materials, character art, lighting, terrain, water, vegetation and chapter-specific architecture; many local route and visual checks | **Incomplete: all-eight overview and discovery surveys, including the discovery baseline and current jungle cliff/contact repeat; broad cliff faces, shared object families and court massing, sparse spaces and wider discovery/traversal/water coverage remain** |
 | Distance-sensitive soundscape                 | Locally bundled birds, fire, water, and drips; HRTF emitters; linear distance falloff; occlusion filtering; 12-voice cap; visible sound landmarks                                                                                                                   | Implemented and behaviorally tested; broader listening/device evaluation remains     |
 | Quiet music tailored to levels and objectives | Eight original adaptive scores; per-objective voicing and traversal accents; restrained danger pulse; music/ambience ducking; independent persisted mix controls                                                                                                    | Implemented and signal-tested; subjective music and mix review remains               |
 
 ## Verification performed
+
+- The [jungle cliff beds and descending-jump repair](jungle-cliff-beds.md)
+  add 240 closed rock pieces with registered physical and camera geometry,
+  and clear the reproduced sinking boot during descending jumps. All 191
+  selected tests, three CPU-budget checks and the build pass. Eight terrain
+  factory comparisons retain their stored fields, water and bridges. The
+  delivered stone passes 358,064 back/perimeter probes, 1,583 render/query rays
+  and displacement/camera controls. All eighteen discovery stances, 1,041,739
+  root samples, 781,152 lighting corners and 134 sound origins pass their
+  recorded checks. Thirteen bank/gait legs and three tree approaches complete
+  13,110 controller updates; 201 prepared, moving and recovery body poses
+  inspect 9,667,095 character records against terrain/new stone. All 37 final
+  world views are reviewed against 27 published-source views; foreground
+  occlusion remains in several angles. Chapter replacement releases all
+  sixteen tracked resources and clears old cliff references. An older legal
+  save recovers vertically onto clear support before pose assistance. The
+  release also passes five complete-store reload comparisons, including the
+  older save, with eight reviewed keyboard/touch/recovery captures. All 443
+  runtime files match; owned helpers close under the five-of-sixteen CPU cap.
+  The awkward steep-bank resting pose, broader landscape/court composition and
+  listening/device acceptance remain open.
 
 - The [graded jungle boundary and outer terraces](jungle-boundary-terraces.md)
   replace the archive's 25.44 m single-cell rock sheet with a 4.58 m edge and

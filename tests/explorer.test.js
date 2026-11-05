@@ -1024,6 +1024,47 @@ function soleClearances(game) {
   return result;
 }
 
+test("descending jump soles clear uphill terrain without moving the saved root or changing flight in clear air", async () => {
+  const game = await groundedActor();
+  game.grounded = false;
+  game.velocityY = -3.6;
+  game.actualMoveSpeed = 0;
+  let controls = 0;
+  for (const grade of [0.7, 1.16, -1.16])
+    for (const yaw of [0, Math.PI / 2, Math.PI, -Math.PI / 2])
+      for (const height of [0.035, 0.071, 0.17, 2]) {
+        game.player.position.set(0, height, 0);
+        game.avatar.rotation.y = yaw;
+        game.jumpY = height;
+        const floor = (x, z) => (x * 0.8 + z * 0.6) * grade;
+        // A flat-floor pose is the untreated control at the same root and yaw.
+        game.groundHeight = () => 0;
+        game.rig.mixer.setTime(0);
+        animateExplorer(game, 1 / 60, false, false);
+        game.groundHeight = floor;
+        const before = soleClearances(game),
+          root = game.player.position.clone();
+        game.rig.mixer.setTime(0);
+        animateExplorer(game, 1 / 60, false, false);
+        const after = soleClearances(game);
+        if (Math.min(...before) < -0.015) controls++;
+        assert(
+          after.every((y) => y >= -0.012),
+          `${grade}/${yaw}/${height}: ${after}`,
+        );
+        assert(game.player.position.equals(root));
+        assert.equal(game.jumpY, height);
+        assert.equal(game.velocityY, -3.6);
+        assert.equal(game.grounded, false);
+        if (height === 2)
+          assert(after.every((gap, i) => Math.abs(gap - before[i]) < 1e-6));
+      }
+  assert(
+    controls >= 4,
+    "the independent sole observer must detect untreated uphill penetration",
+  );
+});
+
 test("crouched hands stay below the shoulders with relaxed finger chains across gait phases, slopes and facing", async (t) => {
   const game = await groundedActor();
   const bones = [];

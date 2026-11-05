@@ -2127,3 +2127,14 @@ normal fitter. Existing credited terrain, rock and woodland maps remain in use.
 The two documentation figures are lossless exports of actual game frames with
 matched prepared player and follow-camera positions. No external bitmap, model,
 recording, music or dependency is added by this revision.
+
+
+## Jungle cliff beds and descending-jump soles
+
+The closed cliff beds, perimeter seating and camera cells are original
+procedural geometry and code. They reuse the existing credited terrain and
+rock maps through the jungle terrain material. Delivered-sole flight fitting
+is original animation code, using the existing credited character asset.
+The two documentation figures are lossless exports of actual game frames,
+with matched prepared player and camera positions. No external bitmap, model,
+recording, music or dependency is introduced.
