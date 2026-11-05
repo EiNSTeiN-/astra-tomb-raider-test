@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [clear and clouded quartz pass](quartz-depth.md) uses original mineral
+material code with the existing credited cavern geometry, stone maps,
+explorer and sound assets. It adds no external model, texture, recording,
+score or dependency. Its two documentation figures are direct, unretouched
+1280 × 800 game captures copied byte-for-byte from the paired High views.
+
 The [cavern fresco records](cavern-frescoes.md) use an original eight-story
 painting atlas generated with the built-in image generation tool. The
 [exact prompt](art-prompts.md#cavern-fresco-atlas) and

@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [clear and clouded quartz pass](quartz-depth.md) follows a fresh
+  32-view representative High survey across all eight chapters. Clearer regions,
+  broader cloudy inclusions and quieter natural emission improve the observed
+  cavern mineral faces. All 78 selected tests, three CPU-budget checks and the
+  build pass. The cavern factory retains all 361 meshes, their transforms and
+  geometry attributes, formation plans and 42 sound-source records. All 22
+  final development views are reviewed, six formation profiles render at
+  all three presets, and the assisted local routes, live attenuation and
+  resource-disposal checks pass. Production keyboard and simulated touch
+  cases complete tuning, memory recovery and return movement, with four
+  complete-store reload comparisons and eight reviewed release captures.
+  Owned helpers close. Repeated installations, sparse margins, broad terrain,
+  continuous contact and wider world/listening/device acceptance remain open.
+
 - The [jungle rim channel and footing pass](jungle-rim-channels.md) replaces
   broad tree collars with scan-shaped planting pockets and fills confined
   terrain hollows with visible soil. Narrower closed buttresses retain the

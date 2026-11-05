@@ -5,6 +5,22 @@ chapters with local saves, and a rich, polished playable world without observed
 placement or geometry defects. There is no minimum chapter duration. AAA is the
 artistic direction. **The audit is open.**
 
+## November 5 refresh
+
+The [clear and clouded quartz review](quartz-depth.md) begins with 32 High
+views at `0307f85`: the entrance and first, middle and last main-court fronts
+in every chapter. All requested stances are captured and reviewed. Distinct
+chapter atmospheres remain, alongside repeated large installations, sparse
+margins and broad terrain faces. These representative static views do not
+inspect every court, interior or complete route; intervening scenery hides
+parts of some courts.
+
+The cavern material revision improves the observed opaque-looking mineral
+faces without changing their geometry or placement. Twenty-two final-source
+development views and eight release views are reviewed. This is a local
+surface improvement; the broader composition and continuous contact audit
+remains open.
+
 ## November 3 refresh
 
 The [jungle trial relief review](jungle-trial-reliefs.md) begins with a frozen
@@ -489,6 +505,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-241 | Exposed cliff ledges acquire large triangular soil patches while upper wall faces remain broad and flat. | [Jungle cliff relief and stone surfaces](jungle-cliff-relief.md) keeps a rock finish over exposed ledges and adds bounded upper-wall recesses. The geometry-only comparison retains exact walking-support vertices and triangle count. All 207 selected tests, eight isolated terrain-material renders, six actual controller legs and the recorded join/query/normal/root/sound/discovery surveys pass. The High pairs, stopped views and six production views are reviewed; keyboard/touch movement passes four full-store reload comparisons and owned helpers close. | Stone continuity and local upper relief improve; long ledge shapes, broad terrain/court forms, foreground visibility and wider world/listening/device acceptance remain open |
 | VA-242 | Cliff pieces project almost uniformly across their width, leaving long, straight shelf undersides. | [Weathered jungle buttresses](jungle-buttresses.md) taper the height and recess vertical channels; connected exposed underside spans over eight metres fall from 33 to eight. All 236 selected tests, six local controller legs, twelve final High poses and the recorded geometry/root/sound/discovery surveys pass. Keyboard, touch and an older occupied-bed save pass six full-store reload comparisons; all nine release views are reviewed and owned helpers close. | Shelf repetition improves; broad terrain sheets, some long undersides, cliff/court composition, foreground framing and wider world/listening/device acceptance remain open |
 | VA-243 | Broad tree collars suppress erosion across base cliff faces; narrower channels expose confined hollows, remote high-cap support and a diagonal-bank boot gap. Fine branch meshes also obscure the recovered character. | [Jungle rim channels and natural footing](jungle-rim-channels.md) plan scan-shaped planting pockets, drain confined troughs into visible soil and retain narrower closed buttresses within the triangle budget. Centre tread validation, a bounded lateral foothold search and branch framing repair the recorded local cases. All 245 selected tests, six assisted controller legs, thirteen final High views and the delivered geometry/root/sound/discovery surveys pass. Keyboard, touch and the older occupied-bank save pass six complete-store reload comparisons; a separate moved-save startup retains both sole contacts. All nine release views are reviewed and owned helpers close. | Recorded local terrain/support/contact and fine-branch framing improve; broad faces, foreground composition, wider court/landscape/contact and listening/device acceptance remain open |
+| VA-244 | The representative eight-chapter refresh shows broad cavern mineral faces reading as opaque colored props; an opacity control confirms that transmission already works. | [Clear and clouded quartz](quartz-depth.md) increases contrast between clear regions and milky inclusions, reduces saturation and natural emission, and adds weak, pixel-filtered close growth detail. All 78 selected tests, 22 final development views, local routes, live hum attenuation and resource-disposal checks pass; the cavern factory geometry, transforms and sound positions are retained. Keyboard and simulated touch production cases pass four complete-store reload comparisons, with all eight release views reviewed and owned helpers closed. | Observed mineral surfaces improve; repeated installations, sparse margins, broad terrain, continuous contact and wider world/listening/device acceptance remain open |
 
 
 

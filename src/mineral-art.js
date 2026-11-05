@@ -116,7 +116,7 @@ float mineralSeed=vMineralCoord.w*17.;
 float mineralCloud=mineralNoise(mineralP*vec3(.9,.25,.9)+mineralSeed)*.7;
 mineralCloud+=mineralNoise(mineralP*vec3(3.2,.8,3.2)+mineralSeed+9.)*.2;
 mineralCloud+=mineralNoise(mineralP*7.1+mineralSeed+17.)*.1;
-mineralCloud=smoothstep(.49,.79,mineralCloud);
+mineralCloud=smoothstep(.38,.70,mineralCloud);
 vec3 mineralQ=mineralP/vec3(vMineralShape.x,vMineralShape.y,vMineralShape.x);
 // One sparse internal cleavage, rather than repeating bright sinusoidal bands.
 float mineralPlane=mineralQ.y-(.32+.22*fract(mineralSeed*.73))
@@ -126,7 +126,12 @@ float mineralAA=max(.0003,fwidth(mineralPlane));
 float mineralFracture=(1.-smoothstep(.0008+mineralAA,.0035+mineralAA,abs(mineralPlane)))
   *smoothstep(.45,.7,mineralNoise(mineralQ*4.3+mineralSeed));
 float mineralBase=1.-smoothstep(.01,.24,mineralP.y/vMineralShape.y);
-float mineralEtch=mineralFracture*.00005;
+// Fine transverse growth marks soften near highlights and fade before their
+// frequency can alias. Broad inclusions provide the distant milky/clear zones.
+float mineralGrowth=mineralP.y*24.+mineralNoise(mineralP*2.7+mineralSeed)*.65;
+float mineralGrowthFade=1.-smoothstep(.2,.5,fwidth(mineralGrowth));
+float mineralEtch=mineralFracture*.00035+
+  sin(mineralGrowth*6.2831853)*mineralGrowthFade*.00005*mineralCloud*(1.-mineralBase);
 vec3 mineralBody=mix(vec3(.82,.87,.92),vec3(1.06,1.07,1.08),mineralCloud*.7+mineralFracture*.12);
 mineralBody*=mix(1.,.58,mineralBase);
 diffuseColor.rgb*=mineralBody;
@@ -136,19 +141,19 @@ export function mineralMaterial(color, restoration) {
   const tint = new THREE.Color(color);
   const material = new THREE.MeshPhysicalMaterial({
     name: "Clouded quartz with etched facets",
-    color: new THREE.Color(0xffffff).lerp(tint, 0.38),
+    color: new THREE.Color(0xffffff).lerp(tint, 0.25),
     emissive: tint,
-    emissiveIntensity: 0.38,
-    roughness: 0.11,
+    emissiveIntensity: 0.28,
+    roughness: 0.075,
     metalness: 0,
     ior: 1.46,
-    transmission: 0.68,
+    transmission: 0.91,
     thickness: 1,
     attenuationColor: tint.clone().lerp(new THREE.Color(0xffffff), 0.38),
-    attenuationDistance: 3.1,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.13,
-    envMapIntensity: 1.35,
+    attenuationDistance: 5.2,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.08,
+    envMapIntensity: 1.8,
   });
   material.userData.mineralRestoration = restoration;
   const optics = { shaders: new Set(), targets: new Set() };
@@ -201,7 +206,7 @@ export function mineralMaterial(color, restoration) {
         THREE.ShaderChunk.transmission_fragment
           .replace(
             "material.transmission = transmission;",
-            "material.transmission = transmission * (1.-mineralCloud*.22-mineralFracture*.1-mineralBase*.28);",
+            "material.transmission = transmission * max(.08,1.-mineralCloud*.65-mineralFracture*.1-mineralBase*.28);",
           )
           .replace(
             "material.thickness = thickness;",
@@ -209,7 +214,7 @@ export function mineralMaterial(color, restoration) {
           ),
       );
   };
-  material.customProgramCacheKey = () => "vesper-quartz-optics-3";
+  material.customProgramCacheKey = () => "vesper-quartz-optics-4";
   return material;
 }
 
