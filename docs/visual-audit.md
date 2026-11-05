@@ -48,6 +48,15 @@ complete-store reload comparisons, with all six release views reviewed and
 owned helpers closed. A ground-only raised-threshold probe remains partial with the new walls
 removed, and broad foreground/composition/contact acceptance remains open.
 
+The [Desert sanctuary exteriors](solar-exteriors.md) address another part of
+the repeated court composition with nine different stone footprints and
+rooflines. Thirty paired observer views cover all nine buildings; the final
+apse join has a further eight-view review after its retained coping is enclosed
+by an architrave. All 127 final selected regressions and the build pass, along
+with the delivered clearance, local walking, optical/table and resource checks.
+These are local composition and contact observations; the eight-world audit
+remains open.
+
 ## November 3 refresh
 
 The [jungle trial relief review](jungle-trial-reliefs.md) begins with a frozen
@@ -536,6 +545,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-245 | Broad desert banks between the ruins have few substantial rock forms, leaving long stretches with small rubble and repeated dunes. | [Sandstone bank outcrops](desert-outcrops.md) add 28 terraced and divided formations with buried rims and matching physical/camera surfaces. All 160 selected tests, the delivered rim/render/query/sound/floor observations, 56 nearby controller legs and the restored optical/table circuits pass their recorded checks. All 53 desert development views and the coastal replacement view are reviewed; chapter replacement releases the tracked geometry, material and camera data. | Local landscape variety improves; repeated court installations, sparse spaces, rounded procedural forms, continuous contact and wider world/listening/device acceptance remain open |
 | VA-246 | Distant desert palms lose many leaflets, exposing sky through sparse crowns as their detail changes. | [Retained palm crown coverage](palm-crown-coverage.md) keeps all attachment positions and simplifies individual blades. Nine sampled directions retain 91.1–95.2% of the near silhouette, with explicit middle/distant geometry costs. All 74 selected tests, controlled/preset views, the 243.881 m local approach/return and tracked resource disposal pass their recorded checks. | Sampled distance coverage improves; larger composition, foreground framing, continuous contact and listening/device acceptance remain open |
 | VA-247 | Open rear bays repeat similar court outlines, leaving most identity in crowns and instruments. | [Surviving court walls](desert-court-massing.md) add 24 varied bays with nineteen real windows, complete backing and registered physical/camera faces. All 194 selected tests, delivered geometry/sound checks, fifteen approaches, twenty assisted legs and tracked resource disposal pass. Keyboard/touch/occupied-bay release cases pass three complete-store reload comparisons, with all six release views reviewed and owned helpers closed. | Rear massing improves locally; repeated sanctuary shells, raised-threshold circulation, close foreground framing and wider world/contact/listening/device acceptance remain open |
+| VA-248 | The nine solar installations repeat rectangular outer room shells despite their different interiors and roof structures. | [Distinct sanctuary exteriors](solar-exteriors.md) add 35 stone masses with battered shoulders, buttresses, an octagonal tower and a faceted apse. The retained-coping fragments found in the apse review are enclosed by a continuous architrave. All 127 final selected regressions, delivered clearance checks, 36 assisted service legs and tracked resource disposal pass. | Exterior massing improves locally; repeated forward arrangements, close foreground framing and wider composition/contact/listening/device acceptance remain open |
 
 
 

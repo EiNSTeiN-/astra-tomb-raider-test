@@ -33,6 +33,10 @@ The [nine Desert sanctuaries](docs/solar-sanctuaries.md) now have individual
 roof structures, recessed inner walls and stone entrance crowns, from an open
 aqueduct vault to a shaded corbelled sepulchre.
 
+The [Desert sanctuary exteriors](docs/solar-exteriors.md) now have distinct
+stone footprints, including aqueduct buttresses, an octagonal tower and a
+faceted rear apse, with matching movement and camera contact.
+
 The [Desert sliding thresholds](docs/solar-thresholds.md) cover all nine shutter
 slots with supported sandstone crossings after their bronze leaves descend.
 

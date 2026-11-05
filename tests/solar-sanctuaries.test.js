@@ -373,3 +373,95 @@ test("roof landings retain a clear body on flat beams and the sloping noon roof"
       );
   }
 });
+
+// Read the new roof and retained coping from their delivered draw coordinates.
+// An earlier apse cap cut through the coping and exposed narrow fragments.
+test("the rear apse roof clears retained coping without exposing stone seams", (t) => {
+  const g = fixture(t),
+    gate = g.fieldGates[6],
+    exterior = gate.solarExterior,
+    inverse = gate.root.matrixWorld.clone().invert(),
+    roofFaces = [],
+    oldFaces = [];
+  let cap = -Infinity;
+  const local = (mesh, p, i) =>
+    new T.Vector3()
+      .fromBufferAttribute(p, i)
+      .applyMatrix4(mesh.matrixWorld)
+      .applyMatrix4(inverse);
+  exterior.root.traverse((mesh) => {
+    if (!mesh.isMesh) return;
+    const { position: p, solarExteriorPart: id } = mesh.geometry.attributes;
+    for (let i = 0; i < p.count; i++)
+      if (id.getX(i) === 0) cap = Math.max(cap, local(mesh, p, i).y);
+  });
+  exterior.root.traverse((mesh) => {
+    if (!mesh.isMesh) return;
+    const { position: p, solarExteriorPart: id } = mesh.geometry.attributes;
+    for (let i = 0; i < p.count; i += 3) {
+      if (id.getX(i) !== 0) continue;
+      const q = [0, 1, 2].map((j) => local(mesh, p, i + j));
+      if (q.every((v) => Math.abs(v.y - cap) < 1e-5)) roofFaces.push(q);
+    }
+  });
+  gate.root.traverse((mesh) => {
+    if (!mesh.isMesh) return;
+    for (let p = mesh; p; p = p.parent) if (p === exterior.root) return;
+    const p = mesh.geometry.attributes.position,
+      index = mesh.geometry.index;
+    for (let i = 0; i < (index?.count ?? p.count); i += 3)
+      oldFaces.push(
+        [0, 1, 2].map((j) => local(mesh, p, index ? index.getX(i + j) : i + j)),
+      );
+  });
+  assert(roofFaces.length >= 5, "actual polygonal roof triangles");
+  const cutsAt = (y) => {
+    const triangles = roofFaces.map(
+      (q) => new T.Triangle(...q.map((v) => new T.Vector3(v.x, y, v.z))),
+    );
+    let cuts = 0;
+    for (const q of oldFaces)
+      for (let k = 0; k < 3; k++) {
+        const a = q[k],
+          b = q[(k + 1) % 3];
+        if ((a.y - y) * (b.y - y) >= 0) continue;
+        const p = a.clone().lerp(b, (y - a.y) / (b.y - a.y));
+        if (triangles.some((t) => t.containsPoint(p))) cuts++;
+      }
+    return cuts;
+  };
+  const ray = new T.Raycaster();
+  let covered = 0;
+  for (const q of oldFaces) {
+    if (
+      !q.every(
+        (p) =>
+          p.y >= 6.99 &&
+          p.y <= 7.28 &&
+          Math.abs(p.x) <= 6.7 &&
+          p.z >= -7.03 &&
+          p.z <= -5.97,
+      )
+    )
+      continue;
+    for (const point of q) {
+      const target = gate.root.localToWorld(point.clone()),
+        from = target.clone().add(new T.Vector3(0, 0, 2));
+      ray.set(from, new T.Vector3(0, 0, -1));
+      ray.near = 0;
+      ray.far = 2;
+      const hit = ray.intersectObject(exterior.root, true)[0];
+      assert(
+        hit && hit.distance < 1.98,
+        "the retained coping must be enclosed behind the new architrave",
+      );
+      covered++;
+    }
+  }
+  assert(covered > 100, "sample actual retained coping faces");
+  assert.equal(cutsAt(cap), 0, "retained coping cannot slice through the roof");
+  assert(
+    cutsAt(7.12) > 0,
+    "the preceding cap height reproduces the exposed seams",
+  );
+});

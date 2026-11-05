@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [nine Desert sanctuary exteriors](solar-exteriors.md) now have distinct
+  stone footprints, including battered pylons, an octagonal tower and a faceted
+  apse. All 127 final selected regressions, three CPU guard checks and the build
+  pass. Delivered face/roof/camera/rim checks and all 161 sound origins retain
+  their recorded clearance. The assisted outer walks complete 36 legs and
+  641.260 m; all nine optical circuits and eight miniature circuits align.
+  Prepared landings retain clear resting bodies and boot contacts, and chapter
+  replacement releases all nine new geometry buffers. A continuous architrave
+  repairs the apse coping fragments found during the roof review. Thirty paired
+  observer views and the subsequent final join/preset views are reviewed.
+  Keyboard, simulated touch and occupied-wing release cases pass four complete
+  store reload comparisons; all eight release views are reviewed. Owned helpers
+  close under the shared five-of-sixteen CPU allowance.
+  Broader composition, continuous contact, listening and device acceptance
+  remain open.
+
 - The [surviving desert court walls](desert-court-massing.md) add 24 rear bays
   with nineteen real windows and varied broken crests. All 194 selected tests,
   the build and three CPU guard checks pass. Delivered window/face/support/rim

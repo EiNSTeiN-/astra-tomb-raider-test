@@ -2221,3 +2221,10 @@ trees, character, recordings and scores. It adds no external model, texture,
 audio or dependency. Its two documentation PNGs are complete, unretouched
 captures from the running game; the occupied-bank capture follows normal
 saved-game startup and sixty assisted idle updates.
+
+The [Desert sanctuary exteriors](solar-exteriors.md) use original project-authored
+polygonal stone cores, battered walls, cornices and staggered bevelled facing
+stones in `src/solar-exterior-plan.js` and `src/solar-exteriors.js`. They reuse
+the existing credited sandstone maps and stone UV helper. No external artwork,
+audio, dependency or new material texture is added. The documentation images
+are direct, unretouched game captures.

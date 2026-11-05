@@ -43,6 +43,7 @@ import {
   updateSolarThreshold,
 } from "./solar-thresholds.js";
 import { finishSolarSanctuary } from "./solar-sanctuaries.js";
+import { buildSolarExterior } from "./solar-exteriors.js";
 import { buildMonasteryDoor } from "./monastery-doors.js";
 import { finishMonasterySanctuary } from "./monastery-sanctuaries.js";
 import {
@@ -911,6 +912,7 @@ export function buildSanctuaryGate(game, feature, materials) {
   delete gate.jambMeshes; // Crystal kernels copied these before batching.
   buildMeridianThreshold(game, gate, m.trim);
   buildSolarThreshold(game, gate, m);
+  if (design.panel === "sun") buildSolarExterior(game, gate, m);
   mergeArchitecture(root);
   mergeArchitecture(detail);
   updateSanctuaryGate(game, gate, 0);
