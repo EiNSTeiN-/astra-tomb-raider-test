@@ -2182,3 +2182,15 @@ procedural code, using the existing credited terrain/stone maps, character and
 forest assets. The paired cliff figures preserve the RGB pixels of matching
 High game-frame crops without retouching or resampling. No external model,
 texture, recording, score or dependency is added to the playable assets.
+
+## Jungle rim channels and natural footing
+
+The planting-pocket planning, drainage, narrowed buttress construction and
+footing/framing changes are original code. The small runtime planting hulls
+are derived from the existing credited Island Tree 01 and 02 delivery geometry
+across all three tiers, with a reproducible extraction script and delivered
+geometry checks. The milestone reuses the existing credited terrain maps,
+trees, character, recordings and scores. It adds no external model, texture,
+audio or dependency. Its two documentation PNGs are complete, unretouched
+captures from the running game; the occupied-bank capture follows normal
+saved-game startup and sixty assisted idle updates.

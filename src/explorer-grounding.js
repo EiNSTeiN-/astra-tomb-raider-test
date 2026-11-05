@@ -850,7 +850,8 @@ export function groundExplorer(game, dt, moving, sprinting) {
       // A downhill foot can be below the straight leg's reach while the
       // uphill knee already constrains the pelvis. Find the nearest small
       // uphill step that the existing leg can reach instead of leaving a
-      // boot in the air or lifting the physical player.
+      // boot in the air or lifting the physical player. Include lateral steps
+      // within 24 cm when a diagonal bank leaves the forward fan out of reach.
       if (!moving && !bodySupport.surface && gap > 0.02) {
         const [upper, lower, bone] = rig.legs[index],
           hip = upper.getWorldPosition(new THREE.Vector3()),
@@ -872,7 +873,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
           let step = null;
           search: for (
             let distance = 0.02;
-            distance <= 0.18001;
+            distance <= 0.24001;
             distance += 0.02
           ) {
             for (const angle of [
@@ -881,6 +882,8 @@ export function groundExplorer(game, dt, moving, sprinting) {
               Math.PI / 6,
               -Math.PI / 3,
               Math.PI / 3,
+              -Math.PI / 2,
+              Math.PI / 2,
             ]) {
               const offset = gradient
                   .clone()
@@ -889,7 +892,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
                 target = ankle.clone().add(offset);
               const origin = reachOrigins[index];
               if (
-                Math.hypot(target.x - origin.x, target.z - origin.z) > 0.18 ||
+                Math.hypot(target.x - origin.x, target.z - origin.z) > 0.24 ||
                 Math.hypot(target.x - other.x, target.z - other.z) < 0.16
               )
                 continue;

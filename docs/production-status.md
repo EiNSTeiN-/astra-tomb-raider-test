@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [jungle rim channel and footing pass](jungle-rim-channels.md) replaces
+  broad tree collars with scan-shaped planting pockets and fills confined
+  terrain hollows with visible soil. Narrower closed buttresses retain the
+  existing triangle budget. It also repairs remote high-cap support, a
+  diagonal-bank boot gap and fine-branch foreground obstruction. All 245
+  selected tests, three CPU-budget checks and the build pass. Six assisted
+  controller legs, thirteen final High views and the delivered
+  join/query/normal/root/sound/discovery surveys retain their checks. Keyboard,
+  portrait touch and an older occupied-bank save pass six complete-store reload
+  comparisons; the older save recovers 6.75 m locally, and its moved position
+  retains both boot contacts in a separate startup repeat. All nine release
+  views are reviewed and owned helpers close. Broad cliff faces, foreground
+  composition, wider court/landscape/contact work and listening/device
+  acceptance remain open.
+
 - The [weathered jungle buttress pass](jungle-buttresses.md) interrupts long
   cliff shelves with sloping shoulders and recessed channels. A delivered
   geometry comparison records eight exposed underside spans over eight metres,

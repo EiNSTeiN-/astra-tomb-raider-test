@@ -8,6 +8,81 @@ import {
 import { createTerrainSurfaceSampler } from "../src/terrain-surface.js";
 import { terrainTriangleReader } from "../scripts/inspect-desert-groundcover-browser.js";
 import { TriangleSolids } from "../src/triangle-solids.js";
+import {
+  stationMeshSolid,
+  stationSupport,
+  stationBlocked,
+} from "../src/field-station-solids.js";
+import { supportAt, advanceCharacter } from "../src/character-motion.js";
+
+test("a high remote cliff edge cannot suspend the body while centred treads and low steps retain support", () => {
+  function fixture(y) {
+    const game = { groundHeight: () => 0, obstacles: [], map: {} },
+      geometry = new THREE.BoxGeometry(0.2, 0.2, 2),
+      material = new THREE.MeshBasicMaterial(),
+      mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(0.35, y, 0);
+    const solid = stationMeshSolid(game, { id: "edge" }, mesh, {
+      supportRadius: 0.4,
+    });
+    solid.jungleCrag = solid.terrainFootholds = true;
+    return { game, solid, geometry, material };
+  }
+  const high = fixture(2),
+    low = fixture(0.3);
+  try {
+    assert(
+      Math.abs(stationSupport(high.solid, 0, 0, 3, 0.55, 0.65) - 2.1) < 1e-6,
+      "the unguarded disk control must touch the high cap",
+    );
+    assert.equal(supportAt(high.game, 0, 0, 3, 0.55).height, 0);
+    assert(
+      Math.abs(supportAt(high.game, 0.35, 0, 3, 0.55).height - 2.1) < 1e-6,
+    );
+    assert(
+      Math.abs(supportAt(high.game, 0.35, 0, 3, 0, 0.65).height - 2.1) < 1e-6,
+    );
+    assert(
+      stationBlocked(high.solid, 0.35, 2, 0, 0.01, 0),
+      "rejecting a remote perch retains the closed physical rock",
+    );
+    assert(Math.abs(supportAt(low.game, 0, 0, 1, 0.55).height - 0.4) < 1e-6);
+    Object.assign(high.game, {
+      player: new THREE.Group(),
+      grounded: true,
+      velocityY: 0,
+      jumpY: 2.1,
+      fallPeak: 2.1,
+      audio: { tone() {} },
+      walkable: () => true,
+      terrainProfile: {},
+      canMove: (x, z, height) =>
+        height >= -1e-6 && !stationBlocked(high.solid, x, height, z),
+    });
+    high.game.player.position.set(0, 2.1, 0);
+    for (let i = 0; i < 180; i++) {
+      advanceCharacter(high.game, { x: 0, z: 0 }, 1 / 60);
+      const p = high.game.player.position;
+      assert(high.game.canMove(p.x, p.z, p.y));
+    }
+    assert(high.game.grounded);
+    assert.equal(
+      high.game.player.position.y,
+      0,
+      "an unsupported high edge descends to real ground",
+    );
+    high.solid.jungleCrag = false;
+    assert(
+      Math.abs(supportAt(high.game, 0, 0, 3, 0.55).height - 2.1) < 1e-6,
+      "authored finite caps keep their existing landing policy",
+    );
+  } finally {
+    for (const f of [high, low]) {
+      f.geometry.dispose();
+      f.material.dispose();
+    }
+  }
+});
 
 test("cliff walking faces are clipped against both actual terrain triangles, retaining exposed ledge ends", () => {
   const heights = [0, 1, 1, 0],

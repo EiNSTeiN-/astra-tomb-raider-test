@@ -223,10 +223,13 @@ export function inspectJungleCragQueries(game) {
       report.assemblies++;
       try {
         for (const part of parts)
-          for (let i = 0; i < part.fronts.length; i += 17) {
+          // Narrow shoulders have fewer cells. Sample their walls more densely
+          // and inspect every upward face that could provide a standing tread.
+          for (let i = 0; i < part.fronts.length; i++) {
             const triangle = part.fronts[i],
-              center = triangle.getMidpoint(new THREE.Vector3()),
               normal = triangle.getNormal(new THREE.Vector3());
+            if (i % (site.width < 12 ? 7 : 17) && normal.y <= 0.65) continue;
+            const center = triangle.getMidpoint(new THREE.Vector3());
             if (center.y < ground(center.x, center.z) + 0.05) continue;
             const start = center.clone().addScaledVector(normal, 5),
               end = center.clone().addScaledVector(normal, -5);

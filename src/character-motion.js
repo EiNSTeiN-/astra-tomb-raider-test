@@ -58,6 +58,14 @@ export function supportAt(
         rockRadius,
         o.terrainFootholds ? scanMinUp : 0,
       );
+      // The landing disk can just touch a high natural shoulder beside an
+      // otherwise empty centre. Do not hold the body metres over its floor
+      // on that remote peak. Nearby low steps retain the ordinary edge margin;
+      // high beds need an actual upward tread beneath the body centre.
+      if (rockRadius && o.jungleCrag && top !== null && top > height + 0.5) {
+        const center = stationSupport(o, x, z, maxY, 0, 0.65);
+        if (center === null || top > center + 0.5) continue;
+      }
       if (top !== null && top > height) {
         height = top;
         surface = o;

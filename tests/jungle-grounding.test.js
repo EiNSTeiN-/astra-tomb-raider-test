@@ -14,6 +14,7 @@ import { createTerrainProfile } from "../src/terrain.js";
 import { woodlandLayout } from "../src/habitat.js";
 import { buildJungleFringe } from "../src/jungle-fringe.js";
 import { jungleApronTriangles } from "../src/jungle-apron.js";
+import { JUNGLE_PLANTING_BOUNDS } from "../src/jungle-planting-bounds.js";
 
 async function delivered(t) {
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
@@ -97,6 +98,21 @@ test("both delivered jungle trunks use a centred base and a common footprint acr
     assert(Math.abs(center.x) < 1e-6 && Math.abs(center.z) < 1e-6);
     assert(Math.abs(b.min.y) < 1e-6 && b.max.y < 0.28);
     assert(model.roots.length > 100 && model.radius > 1 && model.radius < 2);
+    const planned = JUNGLE_PLANTING_BOUNDS[variant],
+      delivered = [...model.roots, ...model.apron];
+    assert.equal(planned.radius, model.radius);
+    for (const [x, z] of planned.footprint)
+      assert(delivered.some((p) => Math.hypot(p.x - x, p.z - z) < 0.000002));
+    for (const p of delivered)
+      for (let i = 0; i < planned.footprint.length; i++) {
+        const a = planned.footprint[i],
+          b = planned.footprint[(i + 1) % planned.footprint.length];
+        assert(
+          (b[0] - a[0]) * (p.z - a[1]) - (b[1] - a[1]) * (p.x - a[0]) >=
+            -0.00001,
+          "the planning hull must enclose every delivered root and apron probe",
+        );
+      }
     assert.equal(model.sources.length, 3);
     assert(model.apron.length > 100);
     assert(

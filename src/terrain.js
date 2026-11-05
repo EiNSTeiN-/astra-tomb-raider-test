@@ -44,6 +44,7 @@ import { regionalBankRise } from "./terrain-banks.js";
 import { coastalBankDrop } from "./coastal-banks.js";
 import { courtTerrain } from "./court-terrain.js";
 import { createJungleRim } from "./jungle-rim.js";
+import { drainJungleRim } from "./jungle-rim-drainage.js";
 import { fitTerrainNormals } from "./terrain-shading.js";
 
 const smooth = (a, b, value) => {
@@ -274,15 +275,26 @@ export function createTerrainProfile(map, level) {
           level.seed,
           waters,
           woodlandLayout(map, level, raw),
+          (x, z) => sample(heights, x, z),
+          step,
         )
       : null;
-  if (jungleRim)
+  if (jungleRim) {
     for (let iz = 0; iz < width; iz++)
       for (let ix = 0; ix < width; ix++) {
         const rise = jungleRim.rise(ix * step, iz * step);
         if (rise) heights[iz * width + ix] += rise;
       }
-  const sample = (data, x, z) => {
+    jungleRim.drainage = drainJungleRim(
+      heights,
+      width,
+      step,
+      map,
+      waters,
+      jungleRim.walkingDistance,
+    );
+  }
+  function sample(data, x, z) {
     const fx = Math.max(0, Math.min(width - 1.001, x / step)),
       fz = Math.max(0, Math.min(width - 1.001, z / step));
     const ix = Math.floor(fx),
@@ -296,7 +308,7 @@ export function createTerrainProfile(map, level) {
         data[(iz + 1) * width + ix + 1] * tx) *
         tz
     );
-  };
+  }
   const foundationHeights = heights.slice();
   const bridges = (map.bridges || []).map((bridge) => ({
     ...bridge,

@@ -11,6 +11,8 @@ const offsets = Array.from({ length: 16 }, (_, i) => {
 });
 for (const x of [-0.45, 0.45])
   for (const z of [-0.45, 0.45]) offsets.push([x, z]);
+export const TERRAIN_BODY_OFFSETS = Object.freeze(offsets.map(Object.freeze));
+export const TERRAIN_LEG_CLEARANCE = 0.6;
 const descentTurns = [
   0,
   Math.PI / 8,
@@ -34,7 +36,8 @@ export function terrainBodyClear(game, x, y, z) {
   // A planted leg can accommodate an uphill foothold; a bank rising above
   // this allowance inside the body margin must stop horizontal movement.
   return offsets.every(
-    ([dx, dz]) => game.groundHeight(x + dx, z + dz) <= y + 0.6,
+    ([dx, dz]) =>
+      game.groundHeight(x + dx, z + dz) <= y + TERRAIN_LEG_CLEARANCE,
   );
 }
 

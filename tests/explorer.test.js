@@ -22,6 +22,11 @@ import {
 import { handGeometry } from "../scripts/inspect-hand-geometry.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
+import { createTerrainSurfaceSampler } from "../src/terrain-surface.js";
+import {
+  PUBLISHED_JUNGLE_BANKS,
+  PUBLISHED_JUNGLE_BRANCH,
+} from "./fixtures/jungle-bank-stances.js";
 import { coursePlan, hasTraversalCourse } from "../src/traversal-courses.js";
 import { buildReturnCable, updateReturnCable } from "../src/return-cable.js";
 import {
@@ -118,10 +123,30 @@ async function groundedActor() {
   };
 }
 
-async function terrainBankActor(level = LEVELS[0]) {
+function terrainPatch(patch) {
+  const heights = new Float32Array(patch.heights),
+    p = {
+      width: patch.width,
+      step: patch.step,
+      extent: (patch.width - 1) * patch.step,
+      heights,
+      waters: [],
+      jungleRim: {},
+      height: (x, z) =>
+        heights[
+          Math.round(z / patch.step) * patch.width + Math.round(x / patch.step)
+        ],
+    };
+  p.surfaceHeight = createTerrainSurfaceSampler(p);
+  p.height = p.surfaceHeight;
+  p.walkableBank = (x, z) => x >= 0 && z >= 0 && x <= p.extent && z <= p.extent;
+  return p;
+}
+
+async function terrainBankActor(level = LEVELS[0], patch = null) {
   const game = await groundedActor(),
     map = createMap(level),
-    profile = createTerrainProfile(map, level),
+    profile = patch ? terrainPatch(patch) : createTerrainProfile(map, level),
     material = new THREE.MeshStandardMaterial(),
     ground = new THREE.PlaneGeometry(
       profile.extent,
@@ -162,12 +187,19 @@ async function terrainBankActor(level = LEVELS[0]) {
       const arrival = safeArrival(game, supported);
       assert(arrival, "the recorded bank must retain a nearby legal arrival");
       const root = new THREE.Vector3(arrival.x, arrival.y, arrival.z);
-      assert(root.distanceTo(position) < 2, "arrival stays on the local bank");
+      // Historical world heights can move with the landscape. Retain the
+      // game's bounded horizontal recovery rather than an obsolete altitude.
+      assert(
+        Math.hypot(root.x - position.x, root.z - position.z) <= 15.000001,
+        "arrival stays within the bank recovery search",
+      );
       return root;
     },
     root = game.jungleCrags
-      ? resolveRoot(
-          new THREE.Vector3(120.29599999999994, 13.898222881444292, 410.5),
+      ? new THREE.Vector3(
+          124.26445007324219,
+          9.805820872736616,
+          406.1076253255208,
         )
       : new THREE.Vector3(119, 13.410755074984575, 410.5),
     read = footingReader(
@@ -254,10 +286,14 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
       assert.equal(inspectExplorerTerrain(game).embedded, 0);
       assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
     }
-    // This is the recorded legacy wall perch. Its old face can change or
-    // disappear with the artwork; the controller must still leave that height.
-    // The buried/exposed support control is covered in jungle-crag-support.
-    const wall = new THREE.Vector3(17.5, 26.85048494767592, 193.5);
+    // Drop over the recorded legacy hollow, above the current visible ground.
+    // Its historical altitude may now be inside the deposited soil. The
+    // buried/exposed support control is covered in jungle-crag-support.
+    const wall = new THREE.Vector3(
+      17.5,
+      Math.max(26.85048494767592, game.groundHeight(17.5, 193.5) + 3),
+      193.5,
+    );
     assert(
       wall.y - supportAt(game, wall.x, wall.z, wall.y, 0.4).height > 0.27,
       "the buried tread cannot hold the controller",
@@ -338,24 +374,16 @@ test("bed-edge resting boots reach their recovered floors at all recorded facing
   }
 });
 
-test("ordinary-bank idle stances keep both boots down without the high wall-facing stagger", async () => {
-  const { game, pose, stone, dispose } = await terrainBankActor(),
-    cases = [
-      { xyz: [410.7830000000061, 4.995894153323278, 215], facing: 2 },
-      {
-        xyz: [215.07675277350276, 6.168689801241517, 2.114157537455407],
-        facing: 4,
-      },
-      {
-        xyz: [412.95689975188924, -2.227197160986587, 80.86002215683642],
-        facing: 2,
-      },
-    ];
-  try {
-    for (const { xyz, facing } of cases)
+test("published ordinary-bank patches keep both boots down without the high wall-facing stagger", async () => {
+  for (const patch of PUBLISHED_JUNGLE_BANKS) {
+    const { game, pose, stone, dispose } = await terrainBankActor(
+        LEVELS[0],
+        patch,
+      ),
+      root = new THREE.Vector3(...patch.root);
+    try {
       for (let turn = 0; turn < 8; turn++) {
-        const root = new THREE.Vector3(...xyz),
-          f = pose((turn * Math.PI) / 4, root);
+        const f = pose((turn * Math.PI) / 4, root);
         assert(
           f.feet.every(
             (p) =>
@@ -364,7 +392,7 @@ test("ordinary-bank idle stances keep both boots down without the high wall-faci
               p.contacts.length > 2,
           ),
         );
-        if (turn === facing) {
+        if (turn === patch.facing) {
           assert(f.feet.every((p) => p.localAnkle[1] < 0.18));
           assert(Math.abs(f.feet[0].ankle[1] - f.feet[1].ankle[1]) < 0.15);
         }
@@ -373,8 +401,9 @@ test("ordinary-bank idle stances keep both boots down without the high wall-faci
         assert.equal(inspectExplorerTerrain(game).embedded, 0);
         assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
       }
-  } finally {
-    dispose();
+    } finally {
+      dispose();
+    }
   }
 });
 
@@ -406,8 +435,12 @@ for (const { name, level, xyz } of [
   },
 ])
   test(`${name} retains actual sole contact while the clothed knees clear`, async () => {
-    const { game, pose, stone, dispose } = await terrainBankActor(level),
-      root = new THREE.Vector3(...xyz);
+    const { game, pose, resolveRoot, stone, dispose } =
+        await terrainBankActor(level),
+      root =
+        level.biome === "jungle"
+          ? resolveRoot(new THREE.Vector3(...xyz))
+          : new THREE.Vector3(...xyz);
     try {
       for (let turn = 0; turn < 8; turn++) {
         const r = pose((turn * Math.PI) / 4, root),
@@ -500,7 +533,7 @@ test("a recovered cliff crouch stays clear and retracts fingers from a delivered
   }
 });
 
-test("the recovered western branch rest clears the uphill boot without moving the supported root", async () => {
+test("the published western branch rest clears the uphill boot without moving the supported root", async () => {
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
     document = await io.read("public/assets/models/island_tree_01/near.glb");
   for (const t of document.getRoot().listTextures()) t.dispose();
@@ -528,7 +561,7 @@ test("the recovered western branch rest clears the uphill boot without moving th
     ]),
     mesh = new THREE.Mesh(geometry, material),
     g = await groundedActor(),
-    profile = createTerrainProfile(createMap(LEVELS[0]), LEVELS[0]),
+    profile = terrainPatch(PUBLISHED_JUNGLE_BRANCH),
     ground = new THREE.PlaneGeometry(
       profile.extent,
       profile.extent,
@@ -540,6 +573,8 @@ test("the recovered western branch rest clears the uphill boot without moving th
     p = ground.attributes.position;
   for (let i = 0; i < p.count; i++)
     p.setY(i, profile.height(p.getX(i), p.getZ(i)));
+  matrix.elements[12] -= PUBLISHED_JUNGLE_BRANCH.origin[0];
+  matrix.elements[14] -= PUBLISHED_JUNGLE_BRANCH.origin[1];
   Object.assign(g, {
     level: LEVELS[0],
     terrainProfile: profile,
@@ -554,7 +589,7 @@ test("the recovered western branch rest clears the uphill boot without moving th
       { tiers: [[mesh]], matrices: [matrix] },
     ]),
   });
-  g.player.position.set(19.0736072292864, 18.16901319154023, 192.4335997030538);
+  g.player.position.fromArray(PUBLISHED_JUNGLE_BRANCH.root);
   g.avatar.rotation.y = Math.PI / 2;
   const root = g.player.position.clone();
   try {

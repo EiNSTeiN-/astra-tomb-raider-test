@@ -88,9 +88,12 @@ test("late plant batches are registered once while bark, rocks, buffers and dept
   const f = new FoliageFraming(),
     leaf = new THREE.MeshStandardMaterial({ name: "Leaves", alphaTest: 0.4 }),
     bark = new THREE.MeshStandardMaterial({ name: "Bark" }),
+    branches = new THREE.MeshStandardMaterial({
+      name: "island_tree_01_branches",
+    }),
     rock = new THREE.MeshStandardMaterial({ name: "Stone" }),
     grass = new THREE.MeshStandardMaterial({ name: "Ground cover" }),
-    plants = [patch(leaf), patch(bark)],
+    plants = [patch(leaf), patch(bark), patch(branches)],
     rocks = [patch(rock, "rock"), patch(rock, "gravel")],
     ground = [];
   t.after(() => dispose([...plants, ...rocks, ...ground]));
@@ -111,11 +114,14 @@ test("late plant batches are registered once while bark, rocks, buffers and dept
   f.update(g);
   assert.equal(leaf.version, versions.leaf + 1);
   assert.equal(bark.version, versions.bark);
+  assert.equal(branches.version, 1);
+  assert.equal(plants[2].tiers[0][0].userData.excludeContact, true);
   assert.equal(rock.version, versions.rock);
   assert.equal(plants[0].tiers[0][0].geometry, geometry);
   assert.equal(plants[0].tiers[0][0].customDepthMaterial, depth);
   f.update(g);
   assert.equal(leaf.version, versions.leaf + 1);
+  assert.equal(branches.version, 1);
   ground.push(patch(grass));
   f.update(g);
   assert.equal(grass.version, 1);

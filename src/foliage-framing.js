@@ -112,7 +112,7 @@ export class FoliageFraming {
             leafyOnly &&
             !(
               material.alphaTest > 0 ||
-              /leaves|twig|frond|foliage/i.test(material.name)
+              /leaves|twig|frond|foliage|_branches$/i.test(material.name)
             )
           )
             continue;

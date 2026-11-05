@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as T from "three";
 import { fractureJungleCrag } from "../src/jungle-crag-fractures.js";
-import { jungleCragGeometry } from "../src/jungle-crag-geometry.js";
+import {
+  jungleCragGeometry,
+  jungleCragCandidates,
+} from "../src/jungle-crag-geometry.js";
 import { JungleCragCamera } from "../src/jungle-crag-camera.js";
 import { closedComponentMeshes } from "../scripts/inspect-explorer-solids-browser.js";
 import {
@@ -223,6 +226,21 @@ test("campaign crags retain terrain data, cover the eastern witness and survive 
   const crags = game.jungleCrags;
   assert(crags.counts.every((n) => n >= 4));
   assert(crags.sites.some((s) => s.side === 1 && s.along === 81));
+  const candidates = new Map(
+    jungleCragCandidates(map, level, terrainProfile).map((s) => [s.id, s]),
+  );
+  assert(crags.stats.narrowed > 0);
+  assert.equal(
+    crags.stats.narrowed,
+    crags.sites.filter((s) => s.width < candidates.get(s.id).width).length,
+  );
+  for (const site of crags.sites)
+    assert(
+      [0.68, 0.45].some(
+        (scale) =>
+          Math.abs(site.width - candidates.get(site.id).width * scale) < 1e-8,
+      ),
+    );
   assert.equal(crags.root.children.length, 1);
   const mesh = crags.root.children[0];
   assert.equal(mesh.material, material);
@@ -235,7 +253,18 @@ test("campaign crags retain terrain data, cover the eastern witness and survive 
   const joins = verifyJungleCrags(game),
     queries = inspectJungleCragQueries(game);
   assert.equal(joins.accepted.parts, crags.parts);
-  assert(joins.accepted.backProbes > 300000);
+  const geometry = mesh.geometry,
+    back = geometry.attributes.cragBack,
+    index = geometry.index;
+  let backFaces = 0;
+  for (let i = 0; i < (index?.count ?? back.count); i += 3)
+    if ([0, 1, 2].every((j) => back.getX(index ? index.getX(i + j) : i + j)))
+      backFaces++;
+  assert.equal(
+    joins.accepted.backProbes,
+    backFaces * 7,
+    "all delivered back faces retain their seven join probes",
+  );
   assert.equal(queries.captures, crags.parts);
   assert(queries.rays > 700 && queries.inside > 700 && queries.ledges > 50);
   assert.deepEqual(queries.failures, []);
@@ -287,6 +316,42 @@ test("the delivered join observer detects displaced closed stone and restores it
   geometry.dispose();
   ground.dispose();
   material.dispose();
+});
+
+test("narrow retries retain feature reservations and leave no unused camera captures", () => {
+  const world = new T.Group(),
+    material = new T.MeshStandardMaterial(),
+    features = [];
+  for (let z = 0; z <= 15; z++)
+    for (let x = 0; x <= 15; x++) features.push({ x, z });
+  const g = {
+    level,
+    map: { size: 14, paths: [], features },
+    terrainProfile: {
+      ...profile,
+      height: (x, z) => Math.min(30, profile.height(x, z)),
+      waters: [],
+    },
+    groundHeight: (x, z) => Math.min(30, profile.height(x, z)),
+    terrainMeshes: [{ material }],
+    world,
+    items: [],
+    obstacles: [],
+    cameraSurfaces: new CameraSurfaces(world),
+  };
+  try {
+    buildJungleCrags(g);
+    assert(
+      g.jungleCrags.stats.reserved > 0,
+      "the control must build a seated piece before rejecting its feature overlap",
+    );
+    assert.equal(g.jungleCrags.parts, 0);
+    assert.equal(g.jungleCrags.root.children.length, 0);
+    assert.equal(g.obstacles.length, 0);
+    assert.equal(g.cameraSurfaces.pending.length, 0);
+  } finally {
+    material.dispose();
+  }
 });
 
 test("wall recesses retain an authored tread, buried back, border and closed cell orientation", () => {
