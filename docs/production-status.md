@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [bank resting stance repair](bank-resting-stances.md) plans from actual
+  sole outlines and finds a reachable uphill foothold when a downhill boot
+  exceeds the existing leg length. The matched High north-bank comparison
+  shows the smaller idle stagger. All 205 selected tests, three CPU-budget
+  checks and the build pass. Geometry-only sweeps pass 376 jungle bed poses
+  and 256 steep-terrain poses across eight chapter profiles. The actual worlds
+  pass 64 jungle and 16 cloud-bank resting poses; one scenery-blocked geometry
+  fixture is recorded separately. Three controller legs complete 3,150 updates
+  with 42 clear sampled body inspections, and all eighteen jungle discovery
+  stances remain valid. All thirteen High development and six release views
+  are reviewed, with a foreground-occluded cloud view explicitly limited.
+  Keyboard/touch movement passes four complete-store reload comparisons and
+  the owned browsers/previews close. Continuous motion and near-bed reload
+  poses, broad cliff/court composition and wider world/listening/device
+  acceptance remain open.
+
 - The [exposed jungle footing repair](jungle-cliff-footing.md) separates
   walking support from closed collision cover, improves the retained
   crossed/raised-boot rest and clears the reproduced uphill boot overlap

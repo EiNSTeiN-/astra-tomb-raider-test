@@ -2148,3 +2148,12 @@ existing delivered trunk geometry; it introduces no model derivative.
 The paired footing figures are lossless exports of actual High game frames
 at matching player/camera coordinates and scene time. No bitmap, recording,
 music, model or dependency is added to the playable assets.
+
+## Bank resting stances
+
+The sole-outline stance planner, bounded uphill foothold search and resting
+plan cache are original code. They use the existing credited character,
+terrain, jungle cliff and tree assets. The bank stance figures are lossless
+exports of actual High game frames; no retouching or external imagery is used.
+No model, texture, recording, music or dependency is added to the playable
+assets in this milestone.

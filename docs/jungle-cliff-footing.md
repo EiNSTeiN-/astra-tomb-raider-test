@@ -1,5 +1,9 @@
 # Exposed jungle cliff footing
 
+Follow-up: [Bank resting stances](bank-resting-stances.md) addresses the small
+boot gaps and raised ordinary-bank idle poses recorded below. This page retains
+the evidence and limits of the preceding milestone.
+
 The cliff-bed repeat found two different resting defects. At the retained
 save position near the southern bank, the controller stood legally while
 one boot crossed toward the other ankle and hovered about 26 cm above its

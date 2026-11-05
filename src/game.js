@@ -1588,7 +1588,13 @@ export class Adventure {
       !!this.map.grid[gz]?.[gx] || !!this.terrainProfile?.walkableBank?.(x, z)
     );
   }
-  canMove(x, z, height = this.jumpY, clearance = 1.8) {
+  canMove(
+    x,
+    z,
+    height = this.jumpY,
+    clearance = 1.8,
+    { terrainEnvelope = true } = {},
+  ) {
     const worldY = this.groundHeight(x, z) + height;
     if (
       this.natureRockSolids?.blocked(
@@ -1609,7 +1615,8 @@ export class Adventure {
       return false;
     if (galleryAt(this, x, worldY, z))
       return galleryClear(this, x, worldY, z, clearance);
-    if (clearance && !terrainBodyClear(this, x, worldY, z)) return false;
+    if (clearance && terrainEnvelope && !terrainBodyClear(this, x, worldY, z))
+      return false;
     if (!cavernClear(this, x, this.groundHeight(x, z) + height, z, clearance))
       return false;
     if (skyBridgeBlocked(this, x, z, this.groundHeight(x, z) + height))

@@ -112,9 +112,8 @@ async function groundedActor() {
   };
 }
 
-test("low natural cliff beds retain two terrain footholds across rest facings without changing the controller", async () => {
+async function terrainBankActor(level = LEVELS[0]) {
   const game = await groundedActor(),
-    level = LEVELS[0],
     map = createMap(level),
     profile = createTerrainProfile(map, level),
     material = new THREE.MeshStandardMaterial(),
@@ -143,11 +142,14 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
   });
   buildJungleCrags(game);
   const root = new THREE.Vector3(119, 13.410755074984575, 410.5),
-    read = footingReader(game.terrainMeshes, game.jungleCrags.root.children),
-    stone = closedMeshReader(game.jungleCrags.root.children),
-    pose = (yaw) => {
-      game.player.position.copy(root);
-      game.jumpY = root.y - game.groundHeight(root.x, root.z);
+    read = footingReader(
+      game.terrainMeshes,
+      game.jungleCrags?.root.children || [],
+    ),
+    stone = closedMeshReader(game.jungleCrags?.root.children || []),
+    pose = (yaw, position = root) => {
+      game.player.position.copy(position);
+      game.jumpY = position.y - game.groundHeight(position.x, position.z);
       game.grounded = true;
       game.avatar.rotation.y = yaw;
       game.rig.grounding = undefined;
@@ -155,6 +157,33 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
       for (let i = 0; i < 40; i++) animateExplorer(game, 1 / 60, false, false);
       return inspectExplorerFooting(game, read);
     };
+  return {
+    game,
+    root,
+    pose,
+    stone,
+    dispose() {
+      game.jungleCrags?.root.traverse((m) => m.geometry?.dispose());
+      ground.dispose();
+      material.dispose();
+      const geometries = new Set(),
+        materials = new Set(),
+        skeletons = new Set();
+      game.rig.model.traverse((o) => {
+        if (o.geometry) geometries.add(o.geometry);
+        if (o.skeleton) skeletons.add(o.skeleton);
+        for (const m of Array.isArray(o.material) ? o.material : [o.material])
+          if (m) materials.add(m);
+      });
+      for (const g of geometries) g.dispose();
+      for (const sk of skeletons) sk.dispose();
+      for (const m of materials) m.dispose();
+    },
+  };
+}
+
+test("low natural cliff beds retain two terrain footholds across rest facings without changing the controller", async () => {
+  const { game, root, pose, stone, dispose } = await terrainBankActor();
   try {
     // The preceding policy treats a low natural bed like a table edge.
     for (const o of game.obstacles) o.terrainFootholds = false;
@@ -239,11 +268,158 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
       ) < 1e-5,
     );
   } finally {
-    game.jungleCrags.root.traverse((m) => m.geometry?.dispose());
-    ground.dispose();
-    material.dispose();
+    dispose();
   }
 });
+
+test("bed-edge resting boots reach their actual floors at all recorded facings", async () => {
+  const { game, pose, stone, dispose } = await terrainBankActor();
+  const points = [
+    [401, 7.749290556814218, 330],
+    [29, 11.15462155357765, 19.5],
+    [119.21179999998213, 13.509888347509596, 410.5],
+    [119.89999999999995, 13.766976168440408, 410.5],
+  ];
+  try {
+    for (const xyz of points)
+      for (let turn = 0; turn < 8; turn++) {
+        const root = new THREE.Vector3(...xyz),
+          f = pose((turn * Math.PI) / 4, root);
+        assert.equal(f.missing, 0);
+        assert.equal(f.invalid, 0);
+        assert(
+          f.feet.every(
+            (p) =>
+              p.minimumGap >= -0.015 &&
+              p.minimumGap < 0.02 &&
+              p.contacts.length > 2,
+          ),
+          JSON.stringify({
+            xyz,
+            turn,
+            feet: f.feet.map((p) => ({
+              side: p.side,
+              gap: p.minimumGap,
+              contacts: p.contacts.length,
+            })),
+          }),
+        );
+        assert(f.feet[0].localAnkle[0] - f.feet[1].localAnkle[0] > 0.08);
+        assert(game.player.position.equals(root));
+        assert(game.canMove(root.x, root.z, game.jumpY));
+        assert.equal(inspectExplorerTerrain(game).embedded, 0);
+        assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+      }
+  } finally {
+    dispose();
+  }
+});
+
+test("ordinary-bank idle stances keep both boots down without the high wall-facing stagger", async () => {
+  const { game, pose, stone, dispose } = await terrainBankActor(),
+    cases = [
+      { xyz: [410.7830000000061, 4.995894153323278, 215], facing: 2 },
+      {
+        xyz: [215.07675277350276, 6.168689801241517, 2.114157537455407],
+        facing: 4,
+      },
+      {
+        xyz: [412.95689975188924, -2.227197160986587, 80.86002215683642],
+        facing: 2,
+      },
+    ];
+  try {
+    for (const { xyz, facing } of cases)
+      for (let turn = 0; turn < 8; turn++) {
+        const root = new THREE.Vector3(...xyz),
+          f = pose((turn * Math.PI) / 4, root);
+        assert(
+          f.feet.every(
+            (p) =>
+              p.minimumGap >= -0.015 &&
+              p.minimumGap < 0.02 &&
+              p.contacts.length > 2,
+          ),
+        );
+        if (turn === facing) {
+          assert(f.feet.every((p) => p.localAnkle[1] < 0.18));
+          assert(Math.abs(f.feet[0].ankle[1] - f.feet[1].ankle[1]) < 0.15);
+        }
+        assert(game.player.position.equals(root));
+        assert(game.canMove(root.x, root.z, game.jumpY));
+        assert.equal(inspectExplorerTerrain(game).embedded, 0);
+        assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+      }
+  } finally {
+    dispose();
+  }
+});
+
+for (const { name, level, xyz } of [
+  {
+    name: "narrow jungle bank",
+    level: LEVELS[0],
+    xyz: [382.9, 4.046536469459487, 277.9],
+  },
+  {
+    name: "steep winter bank",
+    level: LEVELS[2],
+    xyz: [198.1, 35.0789909362793, 235.9],
+  },
+  {
+    name: "eastern cloud bank",
+    level: LEVELS[5],
+    xyz: [249.9, -19.977914428710896, 91],
+  },
+  {
+    name: "western cloud bank",
+    level: LEVELS[5],
+    xyz: [233.1, 11.619679641723668, 343],
+  },
+  {
+    name: "crater bank",
+    level: LEVELS[7],
+    xyz: [259, 0.7208711504936218, 203],
+  },
+])
+  test(`${name} retains actual sole contact while the clothed knees clear`, async () => {
+    const { game, pose, stone, dispose } = await terrainBankActor(level),
+      root = new THREE.Vector3(...xyz);
+    try {
+      for (let turn = 0; turn < 8; turn++) {
+        const r = pose((turn * Math.PI) / 4, root),
+          body = inspectExplorerTerrain(game);
+        assert(
+          r.feet.every(
+            (p) =>
+              p.minimumGap >= -0.015 &&
+              p.minimumGap < 0.02 &&
+              p.contacts.length > 0,
+          ),
+          JSON.stringify({
+            turn,
+            feet: r.feet.map((p) => ({
+              side: p.side,
+              gap: p.minimumGap,
+              contacts: p.contacts.length,
+            })),
+          }),
+        );
+        assert.equal(
+          body.embedded,
+          0,
+          JSON.stringify({ turn, witnesses: body.witnesses }),
+        );
+        assert.equal(body.invalid, 0);
+        assert.equal(body.missing, 0);
+        assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+        assert(game.player.position.equals(root));
+        assert(game.canMove(root.x, root.z, game.jumpY));
+      }
+    } finally {
+      dispose();
+    }
+  });
 
 test("the recovered western branch rest clears the uphill boot without moving the supported root", async () => {
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
