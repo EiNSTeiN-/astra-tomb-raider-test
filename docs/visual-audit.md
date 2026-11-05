@@ -30,6 +30,15 @@ render/query, working-floor, nearby controller and chapter-disposal checks
 pass. Repeated court arrangements, sparse margins, rounded procedural forms
 and wider continuous contact remain open.
 
+The [palm distance-coverage repair](palm-crown-coverage.md) follows fixed-camera
+diagnosis of sparse crowns. Keeping every leaflet location through the detail
+tiers retains 91.1–95.2% of the sampled near silhouettes, with a documented
+geometry increase. All controlled and normal-world views are reviewed; the
+243.881 m local approach/return and tracked resource disposal pass. Keyboard
+and simulated touch release checks retain the complete store across reloads;
+all four release views are reviewed. The broader composition and continuous
+contact audit remains open.
+
 ## November 3 refresh
 
 The [jungle trial relief review](jungle-trial-reliefs.md) begins with a frozen
@@ -516,6 +525,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-243 | Broad tree collars suppress erosion across base cliff faces; narrower channels expose confined hollows, remote high-cap support and a diagonal-bank boot gap. Fine branch meshes also obscure the recovered character. | [Jungle rim channels and natural footing](jungle-rim-channels.md) plan scan-shaped planting pockets, drain confined troughs into visible soil and retain narrower closed buttresses within the triangle budget. Centre tread validation, a bounded lateral foothold search and branch framing repair the recorded local cases. All 245 selected tests, six assisted controller legs, thirteen final High views and the delivered geometry/root/sound/discovery surveys pass. Keyboard, touch and the older occupied-bank save pass six complete-store reload comparisons; a separate moved-save startup retains both sole contacts. All nine release views are reviewed and owned helpers close. | Recorded local terrain/support/contact and fine-branch framing improve; broad faces, foreground composition, wider court/landscape/contact and listening/device acceptance remain open |
 | VA-244 | The representative eight-chapter refresh shows broad cavern mineral faces reading as opaque colored props; an opacity control confirms that transmission already works. | [Clear and clouded quartz](quartz-depth.md) increases contrast between clear regions and milky inclusions, reduces saturation and natural emission, and adds weak, pixel-filtered close growth detail. All 78 selected tests, 22 final development views, local routes, live hum attenuation and resource-disposal checks pass; the cavern factory geometry, transforms and sound positions are retained. Keyboard and simulated touch production cases pass four complete-store reload comparisons, with all eight release views reviewed and owned helpers closed. | Observed mineral surfaces improve; repeated installations, sparse margins, broad terrain, continuous contact and wider world/listening/device acceptance remain open |
 | VA-245 | Broad desert banks between the ruins have few substantial rock forms, leaving long stretches with small rubble and repeated dunes. | [Sandstone bank outcrops](desert-outcrops.md) add 28 terraced and divided formations with buried rims and matching physical/camera surfaces. All 160 selected tests, the delivered rim/render/query/sound/floor observations, 56 nearby controller legs and the restored optical/table circuits pass their recorded checks. All 53 desert development views and the coastal replacement view are reviewed; chapter replacement releases the tracked geometry, material and camera data. | Local landscape variety improves; repeated court installations, sparse spaces, rounded procedural forms, continuous contact and wider world/listening/device acceptance remain open |
+| VA-246 | Distant desert palms lose many leaflets, exposing sky through sparse crowns as their detail changes. | [Retained palm crown coverage](palm-crown-coverage.md) keeps all attachment positions and simplifies individual blades. Nine sampled directions retain 91.1–95.2% of the near silhouette, with explicit middle/distant geometry costs. All 74 selected tests, controlled/preset views, the 243.881 m local approach/return and tracked resource disposal pass their recorded checks. | Sampled distance coverage improves; larger composition, foreground framing, continuous contact and listening/device acceptance remain open |
 
 
 

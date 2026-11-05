@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [palm distance-coverage revision](palm-crown-coverage.md) changes original
+project-authored leaflet geometry and retains the existing credited bark,
+frond design, environment, character and audio. It adds no external model,
+texture, recording, score or dependency. Its two documentation figures are
+direct game captures copied byte-for-byte from the complete 1280 × 800
+controlled High views.
+
 The [desert sandstone outcrops](desert-outcrops.md) use original project-authored
 geometry, placement, camera and material code. They borrow the existing credited
 sandstone maps from the terrain and retain the existing palm, ruin, explorer

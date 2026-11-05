@@ -42,9 +42,9 @@ export function palmCrownGeometry(variant, bend, height, tier) {
     colors = [],
     uvs = [],
     motion = [],
-    leafletStride = [1, 2, 4][tier],
-    // Width compensation retains the distant silhouette as leaflets thin out.
-    widthScale = [1, 1.35, 1.7][tier];
+    // Keep each leaflet's attachment and color. Coarser blades simplify the
+    // fold and curve; small width compensation preserves projected coverage.
+    widthScale = [1, 1.12, 1][tier];
   let bladeCount = 0;
   for (const { curve, side, old, young, seed } of fronds) {
     const stalk = new THREE.TubeGeometry(
@@ -83,7 +83,7 @@ export function palmCrownGeometry(variant, bend, height, tier) {
     parts.push(stalk.toNonIndexed());
     stalk.dispose();
 
-    for (let i = 0; i < 48; i += leafletStride)
+    for (let i = 0; i < 48; i++)
       for (const sign of [-1, 1]) {
         const rng = random(seed + i * 349 + (sign + 1) * 101),
           t = 0.075 + ((i + rng() * 0.45 + (sign < 0 ? 0.25 : 0)) / 48) * 0.91,

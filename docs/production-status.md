@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [palm distance-coverage repair](palm-crown-coverage.md) retains all leaflet
+  locations through the three detail tiers. In nine sampled directions, coarse
+  silhouettes retain 91.1–95.2% of the near crown, with the increased geometry
+  costs recorded explicitly. All 74 selected tests, three CPU guard checks and
+  the build pass. Planting transforms, all trunk tiers and the near crown
+  geometry retain their values. The controlled crowns, nine normal-preset
+  views, twelve approach/return frames and coastal replacement view are
+  reviewed. The assisted walk completes 243.881 m; all 59 tracked palm resources
+  dispose on replacement. Keyboard and simulated touch release checks pass two
+  complete-store reload comparisons, and all four release views are reviewed.
+  Owned helpers close. Broader composition, contact, listening and device
+  acceptance remain open.
+
 - The [desert bank outcrops](desert-outcrops.md) add 28 sandstone formations
   across interior banks and outer dunes. Terraced crowns and divided ridges
   interrupt previously broad gaps between the ruins. All 160 selected tests,

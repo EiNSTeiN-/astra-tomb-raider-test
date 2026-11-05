@@ -4,9 +4,9 @@ import * as THREE from "three";
 import { palmGeometry, buildDesertPalms } from "../src/desert-palms.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 
-test("folded palm blades are nondegenerate and retain their attachment positions across detail tiers", () => {
+test("folded palm blades retain their attachments and surface area across detail tiers", () => {
   for (let variant = 0; variant < 3; variant++) {
-    let nearRoots;
+    let nearRoots, nearArea;
     for (let tier = 0; tier < 3; tier++) {
       const { trunk, foliage } = palmGeometry(variant, tier),
         { position: p, uv, palmMotion: motion } = foliage.attributes,
@@ -27,20 +27,30 @@ test("folded palm blades are nondegenerate and retain their attachment positions
       assert.equal(roots.size, foliage.userData.blades);
       if (tier === 0) nearRoots = roots;
       else
-        for (const root of roots)
-          assert(nearRoots.has(root), "detail reduction moved a leaf root");
+        assert.deepEqual(
+          roots,
+          nearRoots,
+          "detail reduction lost or moved a leaf root",
+        );
       const a = new THREE.Vector3(),
         b = new THREE.Vector3(),
         c = new THREE.Vector3();
+      let bladeArea = 0;
       for (let i = 0; i < p.count; i += 3) {
         a.fromBufferAttribute(p, i);
         b.fromBufferAttribute(p, i + 1);
         c.fromBufferAttribute(p, i + 2);
-        assert(
-          b.sub(a).cross(c.sub(a)).lengthSq() > 1e-15,
-          "degenerate blade or tapered stalk",
-        );
+        const areaSquared = b.sub(a).cross(c.sub(a)).lengthSq();
+        assert(areaSquared > 1e-15, "degenerate blade or tapered stalk");
+        if (i >= foliage.userData.bladeStart)
+          bladeArea += Math.sqrt(areaSquared) / 2;
       }
+      if (tier === 0) nearArea = bladeArea;
+      else
+        assert(
+          bladeArea / nearArea > 0.85 && bladeArea / nearArea < 1.15,
+          "coarser leaves shed or inflate the crown's surface",
+        );
       trunk.dispose();
       foliage.dispose();
     }
