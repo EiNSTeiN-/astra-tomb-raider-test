@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as T from "three";
+import { fractureJungleCrag } from "../src/jungle-crag-fractures.js";
 import { jungleCragGeometry } from "../src/jungle-crag-geometry.js";
 import { JungleCragCamera } from "../src/jungle-crag-camera.js";
 import { closedComponentMeshes } from "../scripts/inspect-explorer-solids-browser.js";
@@ -241,4 +242,60 @@ test("the delivered join observer detects displaced closed stone and restores it
   geometry.dispose();
   ground.dispose();
   material.dispose();
+});
+
+test("wall recesses retain an authored tread, buried back, border and closed cell orientation", () => {
+  const vertices = [],
+    indices = [],
+    border = [],
+    count = 25;
+  for (let back = 0; back < 2; back++)
+    for (let row = 0; row < 5; row++)
+      for (let col = 0; col < 5; col++) {
+        vertices.push(48 + col, 2 + row, back ? 15 : 20 + (row >= 3 ? 2 : 0));
+        if (!back && (row === 0 || row === 4 || col === 0 || col === 4))
+          border.push(row * 5 + col);
+      }
+  for (let row = 0; row < 4; row++)
+    for (let col = 0; col < 4; col++) {
+      const a = row * 5 + col,
+        b = a + 5;
+      indices.push(a, a + 1, b, a + 1, b + 1, b);
+    }
+  const before = vertices.slice(),
+    upward = [];
+  for (let i = 0; i < indices.length; i += 3) {
+    const ids = indices.slice(i, i + 3),
+      t = new T.Triangle(
+        ...ids.map((id) => new T.Vector3(...before.slice(id * 3, id * 3 + 3))),
+      );
+    if (Math.abs(t.getNormal(new T.Vector3()).y) >= 0.45) upward.push(...ids);
+  }
+  const result = fractureJungleCrag(
+    vertices,
+    indices,
+    count,
+    border,
+    { height: () => 0 },
+    { side: 0 },
+    { seed: 42 },
+  );
+  assert(result.changed > 0);
+  assert(result.maxRecess > 0 && result.maxRecess <= 0.46);
+  for (const i of new Set([
+    ...border,
+    ...upward,
+    ...Array.from({ length: count }, (_, i) => count + i),
+  ]))
+    assert.deepEqual(
+      vertices.slice(i * 3, i * 3 + 3),
+      before.slice(i * 3, i * 3 + 3),
+    );
+  for (let i = 0; i < count; i++) {
+    assert.equal(vertices[i * 3], before[i * 3]);
+    assert.equal(vertices[i * 3 + 1], before[i * 3 + 1]);
+    assert(
+      vertices[i * 3 + 2] <= before[i * 3 + 2] && vertices[i * 3 + 2] > 15,
+    );
+  }
 });

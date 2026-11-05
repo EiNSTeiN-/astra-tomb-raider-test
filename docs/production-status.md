@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [jungle cliff relief/material pass](jungle-cliff-relief.md) continues
+  exposed stone over its ledges and recesses upper wall interiors. The
+  geometry-only comparison changes 34,926 draw corners while retaining 108,128
+  triangles and byte-identical exposed walking-support geometry. All 207
+  selected tests, three CPU-budget checks and the build pass. An isolated
+  eight-profile material gallery links and renders finite pixels. Six local
+  controller legs complete 6,300 updates with 84 clear body inspections; the
+  actual world also passes its join/query/normal, tree-root, sound-origin and
+  eighteen-discovery surveys. Twelve final High development views and six
+  baseline views are reviewed, including remaining broad forms and foreground
+  occlusion. Production keyboard/touch movement passes four complete-store
+  reload comparisons; all six release views are reviewed and owned helpers
+  close. Long ledge silhouettes, broader cliff/court composition and wider
+  world/listening/device acceptance remain open.
+
 - The [crouched hand clearance repair](crouched-hand-clearance.md) fits the
   blended finger skin against nearby solid geometry. The reproduced jungle
   bed sequence retains its supported root while clearing 54 overlapping crouch

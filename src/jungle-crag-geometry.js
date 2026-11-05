@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
 import { desertNoise as noise } from "./desert-geology.js";
+import { fractureJungleCrag } from "./jungle-crag-fractures.js";
 import { fitTerrainNormals } from "./terrain-shading.js";
 
 export function cragPoint(extent, side, along, depth, y) {
@@ -202,10 +203,23 @@ export function jungleCragGeometry(profile, level, site, layer, id) {
         return null;
     }
   }
+  const fractures = fractureJungleCrag(
+    vertices,
+    indices,
+    count,
+    border,
+    profile,
+    site,
+    level,
+  );
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
     "position",
     new THREE.Float32BufferAttribute(vertices, 3),
+  );
+  geometry.setAttribute(
+    "jungleRock",
+    new THREE.Float32BufferAttribute(new Float32Array(backs.length).fill(1), 1),
   );
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
   geometry.setAttribute(
@@ -232,6 +246,7 @@ export function jungleCragGeometry(profile, level, site, layer, id) {
     Array.from({ length: result.attributes.position.count }, (_, i) => i),
   );
   fitTerrainNormals(result);
+  result.userData.jungleFractures = fractures;
   result.computeBoundingBox();
   result.computeBoundingSphere();
   return result;

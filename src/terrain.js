@@ -527,6 +527,11 @@ export function buildTerrainSurface(game) {
           coast.set([px - room.x, pz - room.z, room.index], i * 3);
         }
       }
+      if (game.level.biome === "jungle")
+        geometry.setAttribute(
+          "jungleRock",
+          new THREE.Float32BufferAttribute(new Float32Array(position.count), 1),
+        );
       geometry.setAttribute("court", new THREE.BufferAttribute(court, 1));
       geometry.setAttribute("trail", new THREE.BufferAttribute(trail, 1));
       if (scoria)

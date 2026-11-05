@@ -103,6 +103,7 @@ uniform sampler2D cliffMap, cliffNormal, cliffRoughness;
 uniform vec3 cliffTint;
 #ifdef TERRAIN_JUNGLE
 uniform float jungleExtent;
+varying float vJungleRock;
 #endif
 uniform float courtStrength;
 #ifdef TERRAIN_JUNGLE
@@ -173,6 +174,10 @@ vec3 cliffColor = texture2D(cliffMap, cliffUvX).rgb * terrainWeights.x
   cliffColor *= mix(vec3(1.0), rimTint / cliffTint, rimRock);
 #endif
 float terrainSlope = 1.0 - smoothstep(.48, .85, abs(vTerrainNormal.y));
+#ifdef TERRAIN_JUNGLE
+  // Bare stone continues over its exposed ledges; soil remains on real banks.
+  terrainSlope=max(terrainSlope,vJungleRock);
+#endif
 float pavingWeight = vCourt * courtStrength;
 float trailWeight = 0.0;
 float terrainDamp = 0.0;
@@ -197,6 +202,7 @@ float growthWeight = 0.0;
   vec3 mossSample = texture2D(verdureMap, verdureUv).rgb;
   // Retain leaf litter between individual moss fronds, not only between patches.
   growthWeight *= mix(.12, 1.0, smoothstep(.004, .05, mossSample.g - mossSample.r));
+  growthWeight *= mix(1.0,.55,vJungleRock);
 #endif
 ${coastalColor}
 ${skyTerrainColor}
@@ -498,6 +504,7 @@ export function terrainMaterial(game) {
   }
   if (biome === "jungle") {
     material.defines = { TERRAIN_JUNGLE: 1 };
+    material.defaultAttributeValues = { jungleRock: [0] };
     Object.assign(uniforms, {
       jungleExtent: { value: game.terrainProfile?.extent ?? game.map.size * 7 },
       pavingHeight: { value: load("moss", "height") },
@@ -523,11 +530,11 @@ export function terrainMaterial(game) {
     }
     shader.vertexShader = shader.vertexShader.replace(
       "#include <common>",
-      "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_SNOW\nattribute float snowRock; varying float vSnowRock;\n#endif\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif\n#ifdef TERRAIN_DESERT\nattribute float desertRock; varying float vDesertRock;\n#endif\n#ifdef TERRAIN_CAVERN\nattribute float cavernRock; varying float vCavernRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nattribute float meridianRock; varying float vMeridianRock;\n#endif\n#ifdef TERRAIN_SKY\nattribute float skyDepth; varying float vSkyDepth;\n#endif",
+      "#include <common>\nattribute float court, trail; varying float vCourt, vTrail; varying vec3 vTerrainPosition, vTerrainNormal;\n#ifdef TERRAIN_JUNGLE\nattribute float jungleRock; varying float vJungleRock;\n#endif\n#ifdef TERRAIN_SNOW\nattribute float snowRock; varying float vSnowRock;\n#endif\n#ifdef TERRAIN_COASTAL\nattribute vec3 coast; varying vec3 vCoastal;\n#endif\n#ifdef TERRAIN_DESERT\nattribute float desertRock; varying float vDesertRock;\n#endif\n#ifdef TERRAIN_CAVERN\nattribute float cavernRock; varying float vCavernRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nattribute float meridianRock; varying float vMeridianRock;\n#endif\n#ifdef TERRAIN_SKY\nattribute float skyDepth; varying float vSkyDepth;\n#endif",
     );
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
-      "#include <begin_vertex>\nvCourt=court; vTrail=trail; vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz; vTerrainNormal=normalize(mat3(modelMatrix)*normal);\n#ifdef TERRAIN_SNOW\nvSnowRock=snowRock;\n#endif\n#ifdef TERRAIN_COASTAL\nvCoastal=coast;\n#endif\n#ifdef TERRAIN_DESERT\nvDesertRock=desertRock;\n#endif\n#ifdef TERRAIN_CAVERN\nvCavernRock=cavernRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nvMeridianRock=meridianRock;\n#endif\n#ifdef TERRAIN_SKY\nvSkyDepth=skyDepth;\n#endif",
+      "#include <begin_vertex>\nvCourt=court; vTrail=trail; vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz; vTerrainNormal=normalize(mat3(modelMatrix)*normal);\n#ifdef TERRAIN_JUNGLE\nvJungleRock=jungleRock;\n#endif\n#ifdef TERRAIN_SNOW\nvSnowRock=snowRock;\n#endif\n#ifdef TERRAIN_COASTAL\nvCoastal=coast;\n#endif\n#ifdef TERRAIN_DESERT\nvDesertRock=desertRock;\n#endif\n#ifdef TERRAIN_CAVERN\nvCavernRock=cavernRock;\n#endif\n#ifdef TERRAIN_MERIDIAN\nvMeridianRock=meridianRock;\n#endif\n#ifdef TERRAIN_SKY\nvSkyDepth=skyDepth;\n#endif",
     );
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\n" + declarations)
@@ -540,6 +547,6 @@ export function terrainMaterial(game) {
       .replace("#include <normal_fragment_maps>", normalLayer);
   };
   material.customProgramCacheKey = () =>
-    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : biome === "snow" ? "-wind-scour-1-court-slate-1" : ""}`;
+    `vesper-terrain-${biome}-${["snow", "crystal"].includes(biome) ? 10 : ["eclipse", "volcano"].includes(biome) ? 9 : ["desert", "water"].includes(biome) ? 8 : 7}${biome === "jungle" ? "-fractured-ledges-1" : biome === "volcano" ? "-foundry-floors-1-scoria-banks-1" : biome === "crystal" ? "-archive-floors-2-drip-ground-1-floor-karst-1-pool-beds-1" : biome === "desert" ? "-court-paving-1" : biome === "snow" ? "-wind-scour-1-court-slate-1" : ""}`;
   return material;
 }

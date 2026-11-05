@@ -2165,3 +2165,12 @@ They reuse the existing credited character, terrain and cliff geometry. The
 paired figures are lossless, unretouched crops of actual High game frames with
 matched prepared player/camera coordinates and scene time. No new model,
 texture, recording, music or dependency is added to the playable assets.
+
+## Jungle cliff relief and stone surfaces
+
+The upper-wall recesses and explicit stone-ledge material attribute are
+original procedural code. They reuse the existing credited terrain/rock and
+moss maps, character and forest assets. The paired eastern-cliff figures are
+lossless crops of actual High game frames at matching player/camera coordinates
+and scene time. No new texture, model, recording, music or dependency is added
+to the playable assets.
