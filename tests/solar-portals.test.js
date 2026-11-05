@@ -9,6 +9,7 @@ import { buildFieldGates } from "../src/field-world.js";
 import { updateSanctuaryGate } from "../src/sanctuary-gates.js";
 import { CameraSurfaces, boxEntry } from "../src/camera-collision.js";
 import { solarPortalPlan } from "../src/solar-portals.js";
+import { shutterGeometryTopology } from "../scripts/inspect-solar-shutters-browser.js";
 function fixture(t) {
   t.mock.method(T.TextureLoader.prototype, "load", () => new T.Texture());
   const level = LEVELS[1],
@@ -60,6 +61,16 @@ function fixture(t) {
   return g;
 }
 function closed(geometry) {
+  if (geometry.attributes.solarShutterPart) {
+    const r = shutterGeometryTopology(geometry);
+    assert.equal(r.invalid + r.degenerate, 0);
+    assert.deepEqual(
+      r.failures,
+      [],
+      "each batched casting retains closed caps and reveals",
+    );
+    return;
+  }
   const p = geometry.attributes.position,
     ids = geometry.index?.array || Array.from({ length: p.count }, (_, i) => i),
     edges = new Map();

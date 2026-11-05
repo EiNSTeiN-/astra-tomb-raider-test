@@ -2228,3 +2228,11 @@ stones in `src/solar-exterior-plan.js` and `src/solar-exteriors.js`. They reuse
 the existing credited sandstone maps and stone UV helper. No external artwork,
 audio, dependency or new material texture is added. The documentation images
 are direct, unretouched game captures.
+
+The [Desert shutter records](solar-shutter-records.md) use original project-authored
+pictorial scenes and cast geometry in `src/solar-shutter-scenes.js`,
+`src/solar-shutter-art.js`, `src/solar-cast-prism.js` and
+`src/solar-cast-stroke.js`. They reuse the existing procedural bronze material
+and original portal geometry helpers. No external model, bitmap, recording,
+font or dependency is added. Their three documentation PNGs are complete,
+unretouched High game captures with prepared cameras and the explorer hidden.

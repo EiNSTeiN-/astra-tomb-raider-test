@@ -37,6 +37,10 @@ The [Desert sanctuary exteriors](docs/solar-exteriors.md) now have distinct
 stone footprints, including aqueduct buttresses, an octagonal tower and a
 faceted rear apse, with matching movement and camera contact.
 
+The [Desert shutter records](docs/solar-shutter-records.md) add recessed bronze
+scenes on both sides of all eighteen leaves, from waterworks and a surveying
+figure to the sun’s last voyage.
+
 The [Desert sliding thresholds](docs/solar-thresholds.md) cover all nine shutter
 slots with supported sandstone crossings after their bronze leaves descend.
 

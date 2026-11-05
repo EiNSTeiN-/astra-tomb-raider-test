@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { crownPrism } from "./desert-crowns.js";
 import { stationAssemblySolid } from "./field-station-solids.js";
-import { patinatedBronze } from "./observatory-geometry.js";
+import { buildSolarShutterArt } from "./solar-shutter-art.js";
 import { mergeArchitecture } from "./visuals.js";
 
 const HALF = 6.175;
@@ -241,13 +241,6 @@ export function buildSolarPortalFrame(game, gate, m) {
 }
 
 export function buildSolarPortalLeaf(game, { gate, leaf, side, materials: m }) {
-  if (!m.portalPanel) {
-    m.portalPanel = patinatedBronze();
-    m.portalPanel.name = "Weathered bronze shutter plates";
-    m.portalPanel.color.setHex(0x9d865a);
-    m.portalPanel.roughness = 0.52;
-    m.portalPanel.metalness = 0.72;
-  }
   const plan = solarPortalPlan(gate.stage),
     left = side < 0 ? -HALF : 0.025,
     right = side < 0 ? -0.025 : HALF,
@@ -262,74 +255,30 @@ export function buildSolarPortalLeaf(game, { gate, leaf, side, materials: m }) {
         side < 0 ? ring.every(([x]) => x < 0) : ring.every(([x]) => x > 0),
       )
       .map((ring) => ring.map(([x, y]) => [x - offset, y])),
-    mesh = new THREE.Mesh(crownPrism(poly, 0.48, holes, 0), m.metal);
-  mesh.name = plan.name + " shutter";
-  mesh.castShadow = mesh.receiveShadow = true;
-  leaf.add(mesh);
-  captureProfile(game, leaf, m.metal, poly, 0.72, 0.12, holes);
-  const count = [2, 5, 3, 2, 3, 4, 3, 4, 3][gate.stage];
-  for (let i = 0; i < count; i++) {
-    const span = (right - left - 0.88) / count,
-      lo = left + 0.44 + i * span + 0.08,
-      hi = lo + span - 0.16,
-      x = (lo + hi) / 2,
-      panelHead = sliceHead(plan.head, lo, hi).map(([xx, y]) => [
-        xx - offset,
-        Math.min(y - 0.35, gate.stage === 6 || gate.stage === 7 ? 5.7 : 8),
-      ]),
-      top = heightAt(plan.head, x) - 0.35,
-      panel = [
-        [lo - offset, 0.75],
-        [hi - offset, 0.75],
-        ...panelHead.toReversed(),
-      ],
-      plate = new THREE.Mesh(crownPrism(panel, 0.035, [], 0), m.portalPanel);
-    plate.position.z = 0.2425;
-    plate.name = "Bonded shutter plate";
-    plate.castShadow = plate.receiveShadow = true;
-    leaf.add(plate);
-    const rib = new THREE.Mesh(
-      new THREE.BoxGeometry(
-        0.075,
-        (gate.stage === 6 || gate.stage === 7 ? 5.7 : top) - 0.43,
-        0.09,
-      ),
-      m.metal,
+    margin = 0.48,
+    fieldLeft = left + margin,
+    fieldRight = right - margin,
+    top = Math.min(
+      heightAt(plan.head, fieldLeft) - 0.43,
+      heightAt(plan.head, fieldRight) - 0.43,
+      gate.stage === 6 || gate.stage === 7 ? 5.72 : 7.0,
     );
-    rib.position.set(
-      x - offset,
-      ((gate.stage === 6 || gate.stage === 7 ? 5.7 : top) + 0.27) / 2,
-      0.265,
-    );
-    rib.castShadow = rib.receiveShadow = true;
-    leaf.add(rib);
-    game.cameraSurfaces?.capture(rib, { small: true, thin: true });
-  }
-  for (const y of gate.stage === 0 || gate.stage === 7
-    ? [1.25, 2.8, 4.4]
-    : [1.25, 4.4]) {
-    const strap = new THREE.Mesh(
-      new THREE.BoxGeometry(right - left - 0.6, 0.12, 0.1),
-      m.metal,
-    );
-    strap.position.set((left + right) / 2 - offset, y, 0.28);
-    strap.name = "Seated bronze bond strap";
-    strap.castShadow = strap.receiveShadow = true;
-    leaf.add(strap);
-    for (let i = 0; i < 6; i++) {
-      const pin = new THREE.Mesh(
-        new THREE.SphereGeometry(0.055, 8, 6),
-        m.metal,
-      );
-      pin.position.set(
-        left + 0.5 + (i * (right - left - 1)) / 5 - offset,
-        y,
-        0.34,
-      );
-      pin.name = "Strap rivet";
-      pin.castShadow = pin.receiveShadow = true;
-      leaf.add(pin);
-    }
-  }
+  buildSolarShutterArt({
+    gate,
+    leaf,
+    side,
+    materials: m,
+    polygon: poly,
+    windows: holes,
+    field: {
+      x: (left + right) / 2 - offset,
+      bottom: 0.7,
+      width: fieldRight - fieldLeft,
+      height: top - 0.7,
+    },
+  });
+  // Recesses are shallow sealed castings. The shared leaf profile includes
+  // their complete front/rear reach while retaining the real upper windows.
+  captureProfile(game, leaf, m.metal, poly, 0.72, 0, holes);
   leaf.userData.solarPortal = { name: plan.name, polygon: poly, holes };
 }

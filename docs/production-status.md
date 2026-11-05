@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [Desert shutter records](solar-shutter-records.md) replace plate grids and
+  bare backs with nine paired cast scenes, recessed fields and seated pull
+  bosses. All 131 selected tests, three CPU guard checks and the build pass.
+  Delivered inspection covers 676 closed cast pieces, 207 recess probes and
+  162 pull-seat probes. All 161 sound origins remain clear. Eighteen assisted
+  crossings and thirty-six stopped body poses pass their recorded checks;
+  restored optical and miniature-table circuits align. All thirty-six final
+  development views are reviewed. Chapter replacement releases all 57 tracked
+  resources, and other-theme construction comparisons remain identical.
+  Native keyboard and touch complete turning/reset/activation and four exact
+  partial/completed reload comparisons. All eight release captures are reviewed,
+  and owned helpers close under the shared five-of-sixteen CPU allowance.
+  Wider composition, continuous contact, lighting, listening and device
+  acceptance remain open.
+
 - The [nine Desert sanctuary exteriors](solar-exteriors.md) now have distinct
   stone footprints, including battered pylons, an octagonal tower and a faceted
   apse. All 127 final selected regressions, three CPU guard checks and the build
