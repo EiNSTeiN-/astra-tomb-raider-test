@@ -2157,3 +2157,11 @@ terrain, jungle cliff and tree assets. The bank stance figures are lossless
 exports of actual High game frames; no retouching or external imagery is used.
 No model, texture, recording, music or dependency is added to the playable
 assets in this milestone.
+
+## Crouched hand clearance
+
+The hand-joint skin probes and bounded crouch reach fitting are original code.
+They reuse the existing credited character, terrain and cliff geometry. The
+paired figures are lossless, unretouched crops of actual High game frames with
+matched prepared player/camera coordinates and scene time. No new model,
+texture, recording, music or dependency is added to the playable assets.

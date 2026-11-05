@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [crouched hand clearance repair](crouched-hand-clearance.md) fits the
+  blended finger skin against nearby solid geometry. The reproduced jungle
+  bed sequence retains its supported root while clearing 54 overlapping crouch
+  updates. All 206 selected tests, three CPU-budget checks and the build pass.
+  All 960 continuous geometry poses, 376 standing/crouched bed poses and 150
+  actual-world controller updates pass their body/legality observations.
+  Matched High views retain the same root, camera and scene time; the measured
+  wrist adjustment is about 2 cm. Native keyboard/touch crouch and movement
+  pass four complete-store reload comparisons. Both development views and all
+  six release images are reviewed, all 445 runtime sources match, and the owned
+  browsers/previews close. Broader continuous contact, foreground visibility,
+  cliff/court composition and world/listening/device acceptance remain open.
+
 - The [bank resting stance repair](bank-resting-stances.md) plans from actual
   sole outlines and finds a reachable uphill foothold when a downhill boot
   exceeds the existing leg length. The matched High north-bank comparison

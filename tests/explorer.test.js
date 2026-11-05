@@ -421,6 +421,45 @@ for (const { name, level, xyz } of [
     }
   });
 
+test("crouching beside a real cliff bed retracts the delivered fingers without moving the supported player", async () => {
+  const { pose, game, stone, dispose } = await terrainBankActor(),
+    root = new THREE.Vector3(120.29599999999994, 13.898222881444292, 410.5),
+    { poseCrouchHands, restoreCrouchHands } =
+      await import("../src/explorer-crouch.js");
+  try {
+    pose(0, root);
+    game.crouching = true;
+    for (let frame = 0; frame < 65; frame++) {
+      animateExplorer(game, 1 / 60, false, false);
+      const body = inspectExplorerSolids(game, stone);
+      assert.equal(
+        body.embedded,
+        0,
+        JSON.stringify({ frame, witnesses: body.witnesses }),
+      );
+      assert.equal(inspectExplorerTerrain(game).embedded, 0);
+      assert(game.player.position.equals(root));
+      assert(game.canMove(root.x, root.z, game.jumpY));
+    }
+    const obstacles = game.obstacles;
+    restoreCrouchHands(game);
+    game.obstacles = [];
+    poseCrouchHands(game, 0, false);
+    const raw = inspectExplorerSolids(game, stone);
+    assert(
+      raw.embedded > 50,
+      "the same relaxed pose must reproduce fingers inside the delivered stone without obstacle feedback",
+    );
+    restoreCrouchHands(game);
+    game.obstacles = obstacles;
+    poseCrouchHands(game, 0, false);
+    assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+    assert(game.player.position.equals(root));
+  } finally {
+    dispose();
+  }
+});
+
 test("the recovered western branch rest clears the uphill boot without moving the supported root", async () => {
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS),
     document = await io.read("public/assets/models/island_tree_01/near.glb");
