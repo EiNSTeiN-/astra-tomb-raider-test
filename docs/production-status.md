@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [desert bank outcrops](desert-outcrops.md) add 28 sandstone formations
+  across interior banks and outer dunes. Terraced crowns and divided ridges
+  interrupt previously broad gaps between the ruins. All 160 selected tests,
+  three CPU guard checks and the build pass. The delivered shells retain
+  buried rims, matching physical/camera rays, clear sound origins and unchanged
+  sampled working-floor legality. Fifty-six nearby controller legs and the
+  restored solar paths/table circuits pass their recorded checks. All 53
+  desert development views and the coastal chapter-replacement view are
+  reviewed; replacement releases the tracked stone resources and camera data.
+  Production keyboard and simulated-touch interaction, completion and nearby
+  landscape movement pass six complete-store reload comparisons, with ten
+  reviewed release captures. Owned helpers close under the five-of-sixteen
+  CPU limit.
+  Repeated installations, sparse spaces, procedural massing, continuous
+  contact and wider world/listening/device acceptance remain open.
+
 - The [clear and clouded quartz pass](quartz-depth.md) follows a fresh
   32-view representative High survey across all eight chapters. Clearer regions,
   broader cloudy inclusions and quieter natural emission improve the observed

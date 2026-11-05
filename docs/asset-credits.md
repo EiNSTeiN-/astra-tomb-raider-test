@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [desert sandstone outcrops](desert-outcrops.md) use original project-authored
+geometry, placement, camera and material code. They borrow the existing credited
+sandstone maps from the terrain and retain the existing palm, ruin, explorer
+and audio assets. No external asset or dependency is added. The two
+documentation figures are unretouched game captures copied byte-for-byte
+from their complete 1280 × 800 High originals.
+
 The [clear and clouded quartz pass](quartz-depth.md) uses original mineral
 material code with the existing credited cavern geometry, stone maps,
 explorer and sound assets. It adds no external model, texture, recording,

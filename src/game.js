@@ -1,4 +1,5 @@
 import { buildVolcanicOutcrops } from "./volcanic-outcrops.js";
+import { buildDesertOutcrops } from "./desert-outcrops.js";
 import { buildForgeWorkyards } from "./forge-workyards.js";
 import { buildForgeForecourts } from "./forge-forecourts.js";
 import { buildForgeInteriors } from "./forge-interiors.js";
@@ -1070,6 +1071,7 @@ export class Adventure {
     buildDiscoverySettings(this);
     buildMonasteryGardens(this);
     buildDesertForecourts(this);
+    buildDesertOutcrops(this);
     buildPalaceFurnishings(this);
     buildVolcanicOutcrops(this);
     buildForgeWorkyards(this);
