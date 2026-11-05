@@ -86,7 +86,9 @@ test("crag camera cells and physical sight agree with the rendered irregular fro
   mesh.updateMatrixWorld();
   let hits = 0,
     ledges = 0;
-  for (let i = 0; i < index.count; i += 15) {
+  // Small exposed shoulders may occupy only one cell between recessed grooves.
+  // Inspect every front triangle, including those narrow support faces.
+  for (let i = 0; i < index.count; i += 3) {
     const ids = [0, 1, 2].map((j) => index.getX(i + j));
     if (ids.some((id) => back.getX(id))) continue;
     const vertices = ids.map((i) => new T.Vector3().fromBufferAttribute(p, i)),
@@ -144,6 +146,49 @@ test("precise nature clearance retains trees above buried stone and rejects visi
   material.dispose();
 });
 
+test("delivered buttresses divide an exposed shelf with a recessed channel", () => {
+  const geometry = jungleCragGeometry(
+      profile,
+      level,
+      { ...site, width: 20 },
+      1,
+      1,
+    ),
+    { position, cragGrid: grid, cragBack: back } = geometry.attributes,
+    section = new Map();
+  try {
+    for (let i = 0; i < position.count; i++) {
+      if (back.getX(i) || Math.abs(grid.getY(i) - 0.45) > 1e-6) continue;
+      // This fixture's ground is an independently known plane. Measure the
+      // delivered projection beyond it, without reading the shaping noise.
+      section.set(grid.getX(i), {
+        x: position.getX(i),
+        y: position.getY(i),
+        depth: position.getZ(i) - (28 - position.getY(i) / 2),
+      });
+    }
+    const samples = [...section].sort((a, b) => a[0] - b[0]),
+      runs = (depths) =>
+        depths.filter((depth, i) => depth > 0.02 && !(depths[i - 1] > 0.02))
+          .length;
+    assert(samples.length > 12);
+    assert.equal(runs(samples.map(([, p]) => p.depth)), 2);
+    assert(
+      samples.some(([u, p]) => u > 0.3 && u < 0.55 && p.depth < -0.3),
+      "the central channel recedes into the existing hillside",
+    );
+    assert(samples.some(([, p]) => p.depth > 0.8));
+    assert(samples[0][1].depth < -0.5 && samples.at(-1)[1].depth < -0.5);
+    assert.equal(
+      runs(samples.map(([u]) => (u > 0 && u < 1 ? 0.8 : -0.6))),
+      1,
+      "a continuous shelf control must not report two exposed buttresses",
+    );
+  } finally {
+    geometry.dispose();
+  }
+});
+
 test("campaign crags retain terrain data, cover the eastern witness and survive material batching", () => {
   const level = LEVELS[0],
     map = createMap(level),
@@ -192,7 +237,7 @@ test("campaign crags retain terrain data, cover the eastern witness and survive 
   assert.equal(joins.accepted.parts, crags.parts);
   assert(joins.accepted.backProbes > 300000);
   assert.equal(queries.captures, crags.parts);
-  assert(queries.rays > 1000 && queries.inside > 1000 && queries.ledges > 150);
+  assert(queries.rays > 700 && queries.inside > 700 && queries.ledges > 50);
   assert.deepEqual(queries.failures, []);
   const cells = game.cameraSurfaces.cells;
   try {

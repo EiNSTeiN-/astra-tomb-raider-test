@@ -90,10 +90,9 @@ export function jungleCragGeometry(profile, level, site, layer, id) {
     for (const v of rows)
       for (let col = 0; col <= cols; col++) {
         const u = col / cols,
-          envelope = Math.max(
-            0,
-            Math.min(1, u / 0.22, (1 - u) / 0.18, v / 0.15, (1 - v) / 0.12),
-          ),
+          envelope =
+            Math.max(0, Math.min(1, u / 0.22, (1 - u) / 0.18)) *
+            Math.pow(Math.sin(v * Math.PI), 0.8),
           taper = 0.83 + 0.17 * Math.sin(v * Math.PI),
           lean = (noise(site.along, layer, level.seed + 991) - 0.5) * 0.22,
           offset = (noise(site.along, layer * 4, level.seed + 297) - 0.5) * 0.2,
@@ -102,14 +101,23 @@ export function jungleCragGeometry(profile, level, site, layer, id) {
             ((u - 0.5) * taper + lean * (v - 0.5) + offset) * site.width,
           edge =
             -0.02 + noise(u * 3 + site.along, layer, level.seed + 535) * 0.08,
+          // Unequal shoulders and vertical channels interrupt the old long,
+          // straight shelves. Keep the perimeter's buried anchors in place.
+          fault = noise(along * 0.23, site.side * 2.7, level.seed + 1253),
+          warp =
+            (noise(along * 0.17, layer * 2.3, level.seed + 1289) - 0.5) *
+            Math.sin(v * Math.PI) *
+            0.32,
           y =
             low +
-            (high - low) * (v + edge * (1 - 2 * v)) +
+            (high - low) * (v + edge * (1 - 2 * v) + warp) +
             (u - 0.5) * (high - low) * 0.35,
           face = cragFaceDepth(profile, site.side, along, y);
         if (face === null || face < 5) return null;
         const rib = noise(along * 0.8, y * 0.27, level.seed + site.side * 71),
-          relief = -0.6 + envelope * (1.05 + rib * 0.9),
+          buttress =
+            0.12 + 0.88 * THREE.MathUtils.smoothstep(fault, 0.24, 0.68),
+          relief = -0.6 + envelope * (1.05 + rib * 0.9) * buttress,
           d = face + (back ? -3 : relief),
           p = cragPoint(profile.extent, site.side, along, d, y);
         vertices.push(...p);

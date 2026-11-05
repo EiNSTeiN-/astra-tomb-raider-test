@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [weathered jungle buttress pass](jungle-buttresses.md) interrupts long
+  cliff shelves with sloping shoulders and recessed channels. A delivered
+  geometry comparison records eight exposed underside spans over eight metres,
+  down from 33. All 236 selected tests, three CPU-budget checks and the build
+  pass. Six local controller legs, twelve final High poses and the recorded
+  join/query/normal/root/sound/discovery surveys retain their checks. Keyboard,
+  portrait touch and a published occupied-bed save pass six complete-store
+  reload comparisons; the older save recovers 75 cm locally. All twelve High
+  and nine release views are reviewed, and owned helpers close. Broad terrain
+  sheets, remaining long undersides, cliff/court composition and wider
+  world/listening/device acceptance remain open.
+
 - The [jungle cliff relief/material pass](jungle-cliff-relief.md) continues
   exposed stone over its ledges and recesses upper wall interiors. The
   geometry-only comparison changes 34,926 draw corners while retaining 108,128

@@ -2174,3 +2174,11 @@ moss maps, character and forest assets. The paired eastern-cliff figures are
 lossless crops of actual High game frames at matching player/camera coordinates
 and scene time. No new texture, model, recording, music or dependency is added
 to the playable assets.
+
+## Weathered jungle buttresses
+
+The height taper, uneven shoulders and recessed channels are original
+procedural code, using the existing credited terrain/stone maps, character and
+forest assets. The paired cliff figures preserve the RGB pixels of matching
+High game-frame crops without retouching or resampling. No external model,
+texture, recording, score or dependency is added to the playable assets.

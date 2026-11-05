@@ -14,7 +14,11 @@ import {
   soleSlip,
 } from "../scripts/inspect-stride.js";
 import { resetTraversal } from "../src/traversal.js";
-import { supportAt, advanceCharacter } from "../src/character-motion.js";
+import {
+  supportAt,
+  advanceCharacter,
+  safeArrival,
+} from "../src/character-motion.js";
 import { handGeometry } from "../scripts/inspect-hand-geometry.js";
 import { LEVELS, createMap } from "../src/campaign.js";
 import { createTerrainProfile } from "../src/terrain.js";
@@ -41,6 +45,7 @@ import {
 import { normalizeFireVault } from "../src/fire-vault-rules.js";
 import { Adventure } from "../src/game.js";
 import { JungleTreeSolids } from "../src/jungle-tree-solids.js";
+import { NATURE_BODY_RADIUS } from "../src/nature-rock-solids.js";
 import { jungleSpecimen } from "../src/jungle-grounding.js";
 import { inspectExplorerTerrain } from "../scripts/inspect-explorer-terrain-browser.js";
 import { ExplorerContact } from "../src/explorer-contact.js";
@@ -59,6 +64,7 @@ import {
   SHUTTER_WHEEL,
 } from "../src/shutter-motion.js";
 import { buildJungleCrags } from "../src/jungle-crags.js";
+import { stationMeshSolid } from "../src/field-station-solids.js";
 import {
   footingReader,
   inspectExplorerFooting,
@@ -141,7 +147,29 @@ async function terrainBankActor(level = LEVELS[0]) {
     moveVelocity: { x: 0, z: 0 },
   });
   buildJungleCrags(game);
-  const root = new THREE.Vector3(119, 13.410755074984575, 410.5),
+  const resolveRoot = (position) => {
+      // The landable shoulders change with the cliff artwork. Settle an older
+      // stored height as restoreNatureArrival does after the final scans load,
+      // then retain the local legal stance for all skin/contact assertions.
+      const supported = position.clone();
+      supported.y = supportAt(
+        game,
+        position.x,
+        position.z,
+        position.y - 0.2 + 1e-6,
+        NATURE_BODY_RADIUS,
+      ).height;
+      const arrival = safeArrival(game, supported);
+      assert(arrival, "the recorded bank must retain a nearby legal arrival");
+      const root = new THREE.Vector3(arrival.x, arrival.y, arrival.z);
+      assert(root.distanceTo(position) < 2, "arrival stays on the local bank");
+      return root;
+    },
+    root = game.jungleCrags
+      ? resolveRoot(
+          new THREE.Vector3(120.29599999999994, 13.898222881444292, 410.5),
+        )
+      : new THREE.Vector3(119, 13.410755074984575, 410.5),
     read = footingReader(
       game.terrainMeshes,
       game.jungleCrags?.root.children || [],
@@ -160,6 +188,7 @@ async function terrainBankActor(level = LEVELS[0]) {
   return {
     game,
     root,
+    resolveRoot,
     pose,
     stone,
     dispose() {
@@ -187,7 +216,7 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
   try {
     // The preceding policy treats a low natural bed like a table edge.
     for (const o of game.obstacles) o.terrainFootholds = false;
-    const control = pose(Math.PI / 2);
+    const control = pose(0);
     assert(
       control.feet.some((f) => f.minimumGap > 0.2 && f.contacts.length === 0),
     );
@@ -225,17 +254,10 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
       assert.equal(inspectExplorerTerrain(game).embedded, 0);
       assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
     }
-    const wall = new THREE.Vector3(17.5, 26.85048494767592, 193.5),
-      bed = game.jungleCrags.sites.find(
-        (s) => s.id === "jungle-crag-3-224",
-      ).solid;
-    assert(
-      Math.abs(
-        bed.triangles.support(wall.x, wall.z, wall.y, 0.4, 0.65).height -
-          wall.y,
-      ) < 1e-6,
-      "the uncut buried face reproduces the old wall perch",
-    );
+    // This is the recorded legacy wall perch. Its old face can change or
+    // disappear with the artwork; the controller must still leave that height.
+    // The buried/exposed support control is covered in jungle-crag-support.
+    const wall = new THREE.Vector3(17.5, 26.85048494767592, 193.5);
     assert(
       wall.y - supportAt(game, wall.x, wall.z, wall.y, 0.4).height > 0.27,
       "the buried tread cannot hold the controller",
@@ -272,9 +294,10 @@ test("low natural cliff beds retain two terrain footholds across rest facings wi
   }
 });
 
-test("bed-edge resting boots reach their actual floors at all recorded facings", async () => {
-  const { game, pose, stone, dispose } = await terrainBankActor();
+test("bed-edge resting boots reach their recovered floors at all recorded facings", async () => {
+  const { game, pose, resolveRoot, stone, dispose } = await terrainBankActor();
   const points = [
+    [119, 13.410755074984575, 410.5],
     [401, 7.749290556814218, 330],
     [29, 11.15462155357765, 19.5],
     [119.21179999998213, 13.509888347509596, 410.5],
@@ -283,7 +306,7 @@ test("bed-edge resting boots reach their actual floors at all recorded facings",
   try {
     for (const xyz of points)
       for (let turn = 0; turn < 8; turn++) {
-        const root = new THREE.Vector3(...xyz),
+        const root = resolveRoot(new THREE.Vector3(...xyz)),
           f = pose((turn * Math.PI) / 4, root);
         assert.equal(f.missing, 0);
         assert.equal(f.invalid, 0);
@@ -421,11 +444,14 @@ for (const { name, level, xyz } of [
     }
   });
 
-test("crouching beside a real cliff bed retracts the delivered fingers without moving the supported player", async () => {
-  const { pose, game, stone, dispose } = await terrainBankActor(),
-    root = new THREE.Vector3(120.29599999999994, 13.898222881444292, 410.5),
+test("a recovered cliff crouch stays clear and retracts fingers from a delivered contact control", async () => {
+  const { pose, resolveRoot, game, stone, dispose } = await terrainBankActor(),
+    root = resolveRoot(
+      new THREE.Vector3(120.29599999999994, 13.898222881444292, 410.5),
+    ),
     { poseCrouchHands, restoreCrouchHands } =
       await import("../src/explorer-crouch.js");
+  let controlGeometry, controlMaterial;
   try {
     pose(0, root);
     game.crouching = true;
@@ -445,17 +471,31 @@ test("crouching beside a real cliff bed retracts the delivered fingers without m
     restoreCrouchHands(game);
     game.obstacles = [];
     poseCrouchHands(game, 0, false);
-    const raw = inspectExplorerSolids(game, stone);
-    assert(
-      raw.embedded > 50,
-      "the same relaxed pose must reproduce fingers inside the delivered stone without obstacle feedback",
-    );
+    assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+    // The reshaped bank no longer intersects the relaxed fingers here. Put a
+    // finite contact control around the delivered distal joint so this test
+    // still detects a disabled hand fit independently of that changing bank.
+    const fingertip = game.rig.model
+      .getObjectByName("mixamorigLeftHandMiddle3")
+      .getWorldPosition(new THREE.Vector3());
+    controlGeometry = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+    controlMaterial = new THREE.MeshBasicMaterial();
+    const control = new THREE.Mesh(controlGeometry, controlMaterial);
+    control.position.copy(fingertip);
+    control.updateMatrixWorld(true);
+    const readControl = closedMeshReader([control]),
+      raw = inspectExplorerSolids(game, readControl);
+    assert(raw.embedded > 50, "the control must enclose delivered hand skin");
     restoreCrouchHands(game);
     game.obstacles = obstacles;
+    stationMeshSolid(game, { id: "finger-contact-control" }, control);
     poseCrouchHands(game, 0, false);
     assert.equal(inspectExplorerSolids(game, stone).embedded, 0);
+    assert.equal(inspectExplorerSolids(game, readControl).embedded, 0);
     assert(game.player.position.equals(root));
   } finally {
+    controlGeometry?.dispose();
+    controlMaterial?.dispose();
     dispose();
   }
 });
