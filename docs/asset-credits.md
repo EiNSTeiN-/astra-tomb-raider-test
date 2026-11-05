@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [surviving desert court walls](desert-court-massing.md) use original
+project-authored planning and masonry code with the existing credited sandstone
+maps, architecture and environment. No external model, texture, recording,
+score or dependency is added. The three complete 1280 × 800 figures are direct
+game captures copied byte-for-byte from matched High observer views and a
+normal High follow-camera view beside the paired windows.
+
 The [palm distance-coverage revision](palm-crown-coverage.md) changes original
 project-authored leaflet geometry and retains the existing credited bark,
 frond design, environment, character and audio. It adds no external model,

@@ -10,6 +10,7 @@ import {
 } from "./desert-arcade-heads.js";
 import { stationAssemblySolid } from "./field-station-solids.js";
 import { buildDesertCrown } from "./desert-crowns.js";
+import { buildDesertCourtWalls } from "./desert-court-walls.js";
 
 // The court's two crossing axes and the sanctuary approach remain open. Structure
 // occupies the perimeter; each room gets an authored gallery and ruin pattern.
@@ -479,6 +480,7 @@ export function buildDesertArchitecture(game) {
           panelGeometry: solarPanelGeometry,
         });
     }
+    const walls = buildDesertCourtWalls(game, { room, plan, ground, add });
     const parts = [];
     for (const mesh of root.children.filter((child) => child.isMesh)) {
       const id = parts.length;
@@ -526,6 +528,7 @@ export function buildDesertArchitecture(game) {
       triangles,
       detailBounds,
       crown,
+      walls,
     });
   }
   return true;

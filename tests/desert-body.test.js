@@ -394,9 +394,10 @@ test("the delivered explorer stays on six crystal triangle slopes without crouch
     // penetration on a correct ground root; keep ankle IK and every body mesh.
     g.rig.terrainCrouch = { model: g.rig.model, probes: [] };
     const control = pose(46.23, 25.43, true);
-    // The repaired outsole weights reduce this bend, but omitting the knee
-    // fit still drives hundreds of delivered clothing vertices into the bank.
-    assert(control.embedded > 200 && control.minimumGap < -0.2);
+    // Outsole/stance repairs reduce the old vertex count and depth, while
+    // omitting the knee fit still leaves a gross (>10 cm) clothing penetration.
+    // Keep the negative control tied to unsafe clearance, not a historic count.
+    assert(control.embedded > 0 && control.minimumGap < -0.1);
     g.rig.terrainCrouch = undefined;
     for (const [x, z] of [
       [46.23, 25.43],

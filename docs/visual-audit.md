@@ -39,6 +39,15 @@ and simulated touch release checks retain the complete store across reloads;
 all four release views are reviewed. The broader composition and continuous
 contact audit remains open.
 
+The [surviving desert rear walls](desert-court-massing.md) add varied solid bays
+and nineteen open windows between retained arcade piers. Delivered geometry,
+sound-origin, local approach, optical/table and twenty assisted route checks
+pass their recorded observations; all 194 selected regressions and the build
+pass. Keyboard, simulated touch and an occupied-bay save also pass three
+complete-store reload comparisons, with all six release views reviewed and
+owned helpers closed. A ground-only raised-threshold probe remains partial with the new walls
+removed, and broad foreground/composition/contact acceptance remains open.
+
 ## November 3 refresh
 
 The [jungle trial relief review](jungle-trial-reliefs.md) begins with a frozen
@@ -526,6 +535,7 @@ Its frame inspection records a separate hand-reach issue as VA-33.
 | VA-244 | The representative eight-chapter refresh shows broad cavern mineral faces reading as opaque colored props; an opacity control confirms that transmission already works. | [Clear and clouded quartz](quartz-depth.md) increases contrast between clear regions and milky inclusions, reduces saturation and natural emission, and adds weak, pixel-filtered close growth detail. All 78 selected tests, 22 final development views, local routes, live hum attenuation and resource-disposal checks pass; the cavern factory geometry, transforms and sound positions are retained. Keyboard and simulated touch production cases pass four complete-store reload comparisons, with all eight release views reviewed and owned helpers closed. | Observed mineral surfaces improve; repeated installations, sparse margins, broad terrain, continuous contact and wider world/listening/device acceptance remain open |
 | VA-245 | Broad desert banks between the ruins have few substantial rock forms, leaving long stretches with small rubble and repeated dunes. | [Sandstone bank outcrops](desert-outcrops.md) add 28 terraced and divided formations with buried rims and matching physical/camera surfaces. All 160 selected tests, the delivered rim/render/query/sound/floor observations, 56 nearby controller legs and the restored optical/table circuits pass their recorded checks. All 53 desert development views and the coastal replacement view are reviewed; chapter replacement releases the tracked geometry, material and camera data. | Local landscape variety improves; repeated court installations, sparse spaces, rounded procedural forms, continuous contact and wider world/listening/device acceptance remain open |
 | VA-246 | Distant desert palms lose many leaflets, exposing sky through sparse crowns as their detail changes. | [Retained palm crown coverage](palm-crown-coverage.md) keeps all attachment positions and simplifies individual blades. Nine sampled directions retain 91.1–95.2% of the near silhouette, with explicit middle/distant geometry costs. All 74 selected tests, controlled/preset views, the 243.881 m local approach/return and tracked resource disposal pass their recorded checks. | Sampled distance coverage improves; larger composition, foreground framing, continuous contact and listening/device acceptance remain open |
+| VA-247 | Open rear bays repeat similar court outlines, leaving most identity in crowns and instruments. | [Surviving court walls](desert-court-massing.md) add 24 varied bays with nineteen real windows, complete backing and registered physical/camera faces. All 194 selected tests, delivered geometry/sound checks, fifteen approaches, twenty assisted legs and tracked resource disposal pass. Keyboard/touch/occupied-bay release cases pass three complete-store reload comparisons, with all six release views reviewed and owned helpers closed. | Rear massing improves locally; repeated sanctuary shells, raised-threshold circulation, close foreground framing and wider world/contact/listening/device acceptance remain open |
 
 
 

@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [surviving desert court walls](desert-court-massing.md) add 24 rear bays
+  with nineteen real windows and varied broken crests. All 194 selected tests,
+  the build and three CPU guard checks pass. Delivered window/face/support/rim
+  queries, 161 sound origins, fifteen wall approaches and twenty assisted route
+  legs retain their checks; the routes complete 611.570 m. Nine full optical
+  circuits and eight miniature-table circuits align. All 28 current development
+  views and fourteen preceding views are reviewed. Chapter replacement disposes
+  all 22 tracked arcade resources and replaces their physical/camera records.
+  Keyboard, simulated touch and an occupied-bay save pass three complete-store
+  reload comparisons; all six release views are reviewed and owned helpers close.
+  A broader ground-only threshold probe remains partial without the new wall
+  kernels; raised circulation, repeated gates, foreground framing and wider
+  world/listening/device acceptance remain open.
+
 - The [palm distance-coverage repair](palm-crown-coverage.md) retains all leaflet
   locations through the three detail tiers. In nine sampled directions, coarse
   silhouettes retain 91.1–95.2% of the near crown, with the increased geometry

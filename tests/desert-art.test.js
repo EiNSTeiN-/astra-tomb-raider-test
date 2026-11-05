@@ -131,9 +131,14 @@ test("built court collision leaves its arch open while blocking piers and overhe
       patch.root.children.length <= 2,
       "masonry draws batch by material per court",
     );
+    const wallTriangles = patch.walls.reduce((n, w) => n + w.triangles, 0);
     assert.ok(
-      patch.triangles < 41000,
-      "structural geometry stays within its per-court budget",
+      patch.triangles - wallTriangles < 41000,
+      "existing arcade geometry stays within its per-court budget",
+    );
+    assert.ok(
+      wallTriangles < 32000 && patch.triangles < 55000,
+      "new wall massing has an explicit bounded geometry cost",
     );
     for (const [dx, dz] of [
       [0, 0],
