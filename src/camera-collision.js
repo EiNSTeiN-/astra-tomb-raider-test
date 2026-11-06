@@ -275,7 +275,9 @@ export class CameraSurfaces {
         visit(`${x},${z}`);
   }
   entry(start, end, radius = 0.28, ignoreParent = null) {
-    const candidates = new Set();
+    const candidates = new Set(),
+      lowY = Math.min(start.y, end.y),
+      highY = Math.max(start.y, end.y);
     this.eachCell(
       {
         x: Math.min(start.x, end.x) - radius,
@@ -286,8 +288,15 @@ export class CameraSurfaces {
         z: Math.max(start.z, end.z) + radius,
       },
       (key) => {
+        // Floors above and below a short body ray share its horizontal cells.
+        // Reject their exact padded height range before inserting into the Set.
+        // Match boxEntry's face arithmetic, including grazing contacts.
         for (const surface of this.cells.get(key) || [])
-          candidates.add(surface);
+          if (
+            surface.bounds.max.y + radius >= lowY &&
+            surface.bounds.min.y - radius <= highY
+          )
+            candidates.add(surface);
       },
     );
     for (const [parent, group] of this.dynamicGroups) {
@@ -302,8 +311,6 @@ export class CameraSurfaces {
     // same expanded face coordinates as boxEntry so grazing rays survive.
     const lowX = Math.min(start.x, end.x),
       highX = Math.max(start.x, end.x),
-      lowY = Math.min(start.y, end.y),
-      highY = Math.max(start.y, end.y),
       lowZ = Math.min(start.z, end.z),
       highZ = Math.max(start.z, end.z);
     for (const surface of candidates) {

@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [camera height filter](docs/camera-height-filter.md) skips props on other
+floors before collecting camera candidates, reducing query work while retaining
+the recorded framing and clearance checks.
+
 The [gallery paving and ceiling revision](docs/gallery-lining.md) adds fitted
 limestone floors, recessed stone coffers and seated bronze survey strips
 through the submerged passages.

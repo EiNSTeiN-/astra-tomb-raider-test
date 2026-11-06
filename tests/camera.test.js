@@ -16,6 +16,76 @@ import { SaveStore, normalizeSave } from "../src/storage.js";
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 
+test("stacked floors preserve padded contacts without inflating a nearby camera query", (t) => {
+  const world = new THREE.Group(),
+    geometry = new THREE.BoxGeometry(2, 2, 2),
+    material = new THREE.MeshStandardMaterial(),
+    surfaces = new CameraSurfaces(world),
+    meshes = [];
+  for (let floor = -4; floor <= 16; floor++) {
+    const mesh = new THREE.Mesh(geometry, material);
+    // Include faces just below a cell boundary as well as exact boundaries.
+    mesh.position.y =
+      floor * 16 -
+      1 -
+      (floor % 2 ? Number.EPSILON * Math.max(1, Math.abs(floor * 16)) : 0);
+    world.add(mesh);
+    surfaces.capture(mesh);
+    meshes.push(mesh);
+  }
+  surfaces.rebuild();
+  t.after(() => {
+    geometry.dispose();
+    material.dispose();
+  });
+  const references = meshes.map((mesh) => ({
+    bounds: geometry.boundingBox.clone().applyMatrix4(mesh.matrixWorld),
+    inverse: mesh.matrixWorld.clone().invert(),
+  }));
+  const reference = (from, to, radius) => {
+    let result = 1;
+    for (const { bounds, inverse } of references) {
+      if (boxEntry(from, to, bounds, radius, true) === null) continue;
+      const entry = boxEntry(
+        from.clone().applyMatrix4(inverse),
+        to.clone().applyMatrix4(inverse),
+        geometry.boundingBox,
+        radius,
+      );
+      if (entry !== null) result = Math.min(result, entry);
+    }
+    return result;
+  };
+  for (const { bounds } of references) {
+    const y = bounds.getCenter(new THREE.Vector3()).y,
+      from = v(-4, y, 0),
+      to = v(4, y, 0);
+    assert.equal(surfaces.entry(from, to), reference(from, to, 0.28));
+    assert(surfaces.lastCandidates <= 2, "distant floors enter a local query");
+    for (const radius of [0, 0.02, 0.28, 0.8])
+      for (const side of [-1, 1])
+        for (const epsilon of [-1e-10, 0, 1e-10]) {
+          const face =
+              (side < 0 ? bounds.min.y : bounds.max.y) +
+              side * radius +
+              epsilon,
+            start = v(-4, face, 0),
+            end = v(4, face, 0);
+          assert.equal(
+            surfaces.entry(start, end, radius),
+            reference(start, end, radius),
+            JSON.stringify({ y, face, radius, epsilon }),
+          );
+        }
+  }
+  for (const [from, to] of [
+    [v(0, -90, 0), v(0, 280, 0)],
+    [v(0, 280, 0), v(0, -90, 0)],
+    [v(-4, -90, 0), v(4, 280, 0)],
+  ])
+    assert.equal(surfaces.entry(from, to), reference(from, to, 0.28));
+});
+
 test("indexed camera rays retain all-box results through padded boundaries and moving props", (t) => {
   const world = new THREE.Group(),
     moving = new THREE.Group(),

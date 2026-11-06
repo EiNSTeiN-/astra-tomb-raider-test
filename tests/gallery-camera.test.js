@@ -11,6 +11,7 @@ import {
   updateSunkenGallery,
 } from "../src/sunken-gallery.js";
 import { normalizeGallery } from "../src/sunken-gallery-record.js";
+import { gallerySection } from "../src/sunken-gallery-layout.js";
 import { Adventure } from "../src/game.js";
 import { animateExplorer } from "../src/explorer.js";
 import { galleryCameraSight } from "../src/gallery-camera-sight.js";
@@ -170,11 +171,12 @@ test("finite camera panels cover the delivered gallery shell and preserve its op
   const g = fixture(t),
     panels = g.sunkenGallery.cameraPanels,
     material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    lining = new Set(g.sunkenGallery.lining.meshes),
     meshes = [],
     ray = new THREE.Raycaster();
   g.world.updateMatrixWorld(true);
   g.sunkenGallery.root.traverse((m) => {
-    if (m.isMesh && m.material === g.darkMat) {
+    if (m.isMesh && (m.material === g.darkMat || lining.has(m))) {
       const proxy = new THREE.Mesh(m.geometry, material);
       proxy.matrixAutoUpdate = false;
       proxy.matrix.copy(m.matrixWorld);
@@ -200,10 +202,23 @@ test("finite camera panels cover the delivered gallery shell and preserve its op
         to = center.clone().addScaledVector(normal, -0.3);
       ray.set(from, normal.clone().negate());
       ray.far = 0.6;
+      const section = gallerySection(
+          g.sunkenGallery.profile,
+          center.x,
+          center.z,
+        ),
+        floor = p.axis === 1 && Math.abs(section.floor - p.plane) < 1e-6;
       assert(
-        ray
-          .intersectObjects(meshes, false)
-          .some((hit) => hit.point.distanceTo(center) < 0.00004),
+        ray.intersectObjects(meshes, false).some((hit) => {
+          const offset = hit.point.getComponent(p.axis) - p.plane;
+          // The horizontal envelope reserves the nominal swim space. Its
+          // paving/coffers and joint beds recede into the surrounding solid.
+          return p.axis !== 1
+            ? Math.abs(offset) < 0.00004
+            : floor
+              ? offset <= 0.00004 && offset >= -0.03204
+              : offset >= -0.00004 && offset <= 0.12004;
+        }),
         `delivered shell at ${JSON.stringify(p)}`,
       );
       assert(

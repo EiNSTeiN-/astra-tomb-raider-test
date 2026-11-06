@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [camera height filter](camera-height-filter.md) rejects props on other
+  floors before collecting camera candidates. The exact bell-departure fixture
+  supplies 10,178 candidates across the same 874 scene queries, down from 22,452,
+  with fourteen exact restored-state camera results and no extra index storage.
+  All 107 selected checks across sixteen files, three CPU-guard checks and the
+  build pass. The new stacked-floor regression covers 528 full-box reference
+  queries and detects the published unfiltered code. The assisted 4,496-update
+  gallery loop retains legal body/lens positions, opacity 1 and exact agreement
+  with 365 early records and 149 preceding trajectory samples. Six High captures
+  and four production input captures are reviewed; actual touch/keyboard dives
+  recover full breath and retain two complete-store comparisons. The earlier
+  769.5 ms bell-departure spike does not reproduce, while this loop records a
+  491 ms update at another colonnade pose. Reduced candidate work does not
+  establish improved frame rates. Browsers and preview servers close; continuous
+  timing, wider world/contact review and listening/device acceptance remain open.
+
 - The [gallery paving and ceiling revision](gallery-lining.md) adds fitted
   limestone paving and recessed stone coffers, retaining the memorial's
   existing vault and seating the bronze survey strips in the floor. All 31
