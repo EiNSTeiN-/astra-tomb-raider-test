@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cast-metal weathering revision](bronze-patina.md) softens the gridlike
+  oxidation pattern and filters all three surface-detail scales. Twenty scene
+  captures cover all eight regional counterweights, both air bells and shared
+  machinery, with three matched before/after pose records. Six material studies
+  retain linked programs; thirteen half-float distance/oblique diagnostics remain
+  finite. All 135 selected checks, three CPU-budget checks and the build pass.
+  Sixteen exported shapes retain identical bytes across 72 geometry attribute
+  arrays and 85,881 vertex records. Production touch/keyboard dive-rise checks
+  retain full breath recovery and two complete-store comparisons, with four
+  Low release captures reviewed at reduced pixel density. Verification browsers
+  and servers close. The gallery is checked at High, Medium and Low. Strong
+  air-bell glare, broader world composition and device/listening acceptance
+  remain open.
+
 - The [camera box filter](camera-box-cost.md) retains exact padded-boundary
   and moving-gate results across 8,442 reference rays. All 151 selected tests,
   three CPU-guard checks and the build pass. Controlled runs of the three

@@ -2,6 +2,11 @@
 
 The cloud-city engines now have a dedicated bronze material and a more detailed mechanical kit. This follows the instance-batching and working-ground work in [wind rendering notes](wind-rendering.md).
 
+The later [cast-metal weathering revision](bronze-patina.md) reshapes and filters
+the shared metal surface. Its review includes the wind machinery, air bells
+and regional counterweights; the measurements below describe this earlier
+material and geometry milestone.
+
 The later [camera-clearance repair](wind-camera-clearance.md) replaces oversized
 pedestal bounds, guards the fan envelopes and tablets, and verifies the third
 engine's continuous route and native keyboard/touch saves. The measurements

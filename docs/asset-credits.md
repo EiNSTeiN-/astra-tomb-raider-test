@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [cast-metal weathering revision](bronze-patina.md) uses original procedural
+shader code and the existing credited models, world surfaces, recordings and
+scores. No external model, texture, recording, score or dependency is added.
+Its four documentation figures are complete, unretouched game captures
+converted losslessly to WebP, with identical decoded RGBA pixels and dimensions.
+The two preceding-material figures replay that shader on matching game geometry.
+
 The [memorial return recovery](gallery-return.md) is original camera code and
 reuses the existing credited character, gallery, materials, recordings and
 scores. No external model, bitmap, recording, score or dependency is added.

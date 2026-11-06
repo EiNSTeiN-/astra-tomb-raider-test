@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [cast-metal weathering revision](docs/bronze-patina.md) softens square-edged
+patina on the air bells and shared mechanisms, with distance filtering for
+surface detail.
+
 The [camera box filter](docs/camera-box-cost.md) skips props outside each
 padded ray before exact collision testing, reducing repeated work while
 retaining body and lens clearance.

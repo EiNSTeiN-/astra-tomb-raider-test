@@ -54,27 +54,35 @@ export function windMetal(finish = "cast") {
           return fract((p.x+p.y)*p.z);
         }
         float windNoise(vec3 p) {
-          vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+          vec3 i=floor(p), f=fract(p); f=f*f*f*(f*(f*6.-15.)+10.);
           return mix(mix(mix(windHash(i),windHash(i+vec3(1,0,0)),f.x),
                          mix(windHash(i+vec3(0,1,0)),windHash(i+vec3(1,1,0)),f.x),f.y),
                      mix(mix(windHash(i+vec3(0,0,1)),windHash(i+vec3(1,0,1)),f.x),
                          mix(windHash(i+vec3(0,1,1)),windHash(i+vec3(1,1,1)),f.x),f.y),f.z);
+        }
+        float windNoiseWeight(vec3 p) {
+          vec3 footprint=fwidth(p);
+          return 1.-smoothstep(.35,1.3,max(footprint.x,max(footprint.y,footprint.z)));
         }`,
       )
       .replace(
         "#include <color_fragment>",
         `#include <color_fragment>
-        float castMottle=windNoise(vWindCoord*5.3)*.64+windNoise(vWindCoord*21.7)*.36;
-        float oxide=clamp(smoothstep(.34,.7,castMottle)*windPatinaAmount+vWindCavity*.48,0.,.94);
-        vec3 footprint=fwidth(vWindCoord*140.);
-        float grainFade=1.-smoothstep(.35,1.3,max(footprint.x,max(footprint.y,footprint.z)));
-        float grain=mix(.5,windNoise(vWindCoord*140.),grainFade);
+        vec3 casting=mat3(.36,.8,-.48, -.8,0.,-.6, -.48,.6,.64)*vWindCoord;
+        vec3 weatherCoord=casting*3.1+vec3(7.2,19.3,3.1);
+        float rawWeather=windNoise(weatherCoord), weatherWeight=windNoiseWeight(weatherCoord);
+        vec3 warped=casting*17.3+(rawWeather-.5)*vec3(1.7,-1.1,1.3);
+        float rawDetail=windNoise(warped), detailWeight=windNoiseWeight(warped);
+        float castMottle=mix(.5,rawWeather,weatherWeight)*.68+mix(.5,rawDetail,detailWeight)*.32;
+        float oxide=clamp(smoothstep(.22,.82,castMottle)*windPatinaAmount+vWindCavity*.48,0.,.94);
+        float rawGrain=windNoise(casting*140.), grainWeight=windNoiseWeight(casting*140.);
+        float grain=mix(.5,rawGrain,grainWeight);
         diffuseColor.rgb=mix(diffuseColor.rgb,windPatinaColor,oxide);
-        diffuseColor.rgb*=mix(.86,1.12,castMottle)*(.96+.08*grain)*(1.-vWindCavity*.3);`,
+        diffuseColor.rgb*=mix(.94,1.05,castMottle)*(.98+.04*grain)*(1.-vWindCavity*.3);`,
       )
       .replace(
         "#include <roughnessmap_fragment>",
-        "#include <roughnessmap_fragment>\nroughnessFactor=clamp(mix(roughnessFactor,.86,oxide)+(grain-.5)*.14,.22,.94);",
+        "#include <roughnessmap_fragment>\nroughnessFactor=clamp(mix(roughnessFactor,.86,oxide)+(grain-.5)*.1,.22,.94);",
       )
       .replace(
         "#include <metalnessmap_fragment>",
@@ -83,15 +91,18 @@ export function windMetal(finish = "cast") {
       .replace(
         "#include <normal_fragment_maps>",
         `#include <normal_fragment_maps>
-        float castHeight=(grain-.5)*.0007+smoothstep(.63,.84,castMottle)*.0008;
+        float castHeight=smoothstep(.55,.85,rawWeather*.68+rawDetail*.32)*.0006;
+        float castWeight=min(weatherWeight,detailWeight);
+        float castDx=dFdx(rawGrain)*.00045*grainWeight+dFdx(castHeight)*castWeight;
+        float castDy=dFdy(rawGrain)*.00045*grainWeight+dFdy(castHeight)*castWeight;
         vec3 windDx=dFdx(-vViewPosition), windDy=dFdy(-vViewPosition);
         vec3 windR1=cross(windDy,normal), windR2=cross(normal,windDx);
         float windDet=dot(windDx,windR1);
-        vec3 windGradient=sign(windDet)*(dFdx(castHeight)*windR1+dFdy(castHeight)*windR2);
+        vec3 windGradient=sign(windDet)*(castDx*windR1+castDy*windR2);
         normal=normalize(max(abs(windDet),1.e-12)*normal-windGradient);`,
       );
   };
-  material.customProgramCacheKey = () => "wind-casting-v1";
+  material.customProgramCacheKey = () => "wind-casting-v2";
   return material;
 }
 
