@@ -2,6 +2,11 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [gallery camera-path repair](docs/gallery-motion.md) clears false wheel
+and terrain obstructions on the recorded departure and entrance turns, and
+keeps the folded swimmer's head out of the wheel hub. A separate memorial-return
+camera hitch remains documented.
+
 [Surface swimming and sounding floats](docs/surface-swimmer.md) now keep the
 resting explorer visible beside the dive markers, add float clearance and
 preserve saved surface positions above the submerged archive benches.

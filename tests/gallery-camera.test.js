@@ -15,7 +15,11 @@ import { Adventure } from "../src/game.js";
 import { animateExplorer } from "../src/explorer.js";
 import { galleryCameraSight } from "../src/gallery-camera-sight.js";
 import { followClearCamera } from "../src/camera-follow.js";
-import { CameraSurfaces, followCamera } from "../src/camera-collision.js";
+import {
+  CameraSurfaces,
+  followCamera,
+  cylinderEntry,
+} from "../src/camera-collision.js";
 import { explorerCoverage } from "../src/explorer-visibility.js";
 import { inspectExplorerCamera } from "../scripts/inspect-explorer-camera-browser.js";
 import { cameraBodyTargets } from "../src/camera-body-frame.js";
@@ -481,80 +485,133 @@ for (const pitch of [0.13, -0.4, 0.55])
     t.diagnostic(JSON.stringify({ maxTurn, maxLensStep }));
   });
 
-test("wheel grip and release retain a continuous opaque swim view", async (t) => {
-  const g = fixture(t);
-  await loadSwimmer(g);
-  g.player.position.set(
-    196.94582058917342,
-    -5.5165872834710274,
-    113.51590930949418,
-  );
-  g.camera.position.set(
-    193.23404353095117,
-    -4.575434191794268,
-    113.91488482456717,
-  );
-  g.yaw = 4.817004947267814;
-  g.pitch = 0.13;
-  g.avatar.rotation.y = 0;
-  g.cameraFollowTarget = g.player.position
-    .clone()
-    .add(new THREE.Vector3(0, 0.3, 0));
-  assert(beginGalleryWheel(g), "the actual wheel approach is usable");
-  let maxTurn = 0,
-    maxLensStep = 0,
-    witness;
-  for (let frame = 0; frame < 180; frame++) {
-    const oldCamera = g.camera.position.clone(),
-      oldArm = oldCamera.clone().sub(g.cameraFollowTarget);
-    g.elapsed += 1 / 60;
-    advanceSwimming(g, { x: 0, z: 0 }, 1 / 60, false);
-    animateExplorer(g, 1 / 60, false, false);
-    updateSunkenGallery(g, 1 / 60);
-    const target = g.player.position.clone().add(new THREE.Vector3(0, 0.3, 0)),
-      desired = target
-        .clone()
-        .add(
-          new THREE.Vector3(
-            Math.sin(g.yaw) * Math.cos(g.pitch) * 3.4,
-            Math.sin(g.pitch) * 3.4 + 0.2,
-            Math.cos(g.yaw) * Math.cos(g.pitch) * 3.4,
+for (const look of [4.817004947267814, 0])
+  test(`wheel grip and release retain a continuous opaque swim view at yaw ${look}`, async (t) => {
+    const g = fixture(t);
+    await loadSwimmer(g);
+    g.player.position.set(
+      196.94582058917342,
+      -5.5165872834710274,
+      113.51590930949418,
+    );
+    g.camera.position.set(
+      193.23404353095117,
+      -4.575434191794268,
+      113.91488482456717,
+    );
+    g.yaw = look;
+    g.pitch = 0.13;
+    g.avatar.rotation.y = 0;
+    g.cameraFollowTarget = g.player.position
+      .clone()
+      .add(new THREE.Vector3(0, 0.3, 0));
+    assert(beginGalleryWheel(g), "the actual wheel approach is usable");
+    const head = [],
+      hub = g.sunkenGallery.profile.wheel,
+      point = new THREE.Vector3();
+    g.rig.model.traverseVisible((m) => {
+      if (!m.isSkinnedMesh) return;
+      const indices = m.geometry.attributes.skinIndex,
+        weights = m.geometry.attributes.skinWeight;
+      for (let i = 0; i < indices.count; i++)
+        if (
+          [0, 1, 2, 3].some(
+            (j) =>
+              weights.getComponent(i, j) > 0.1 &&
+              m.skeleton.bones[indices.getComponent(i, j)].name.endsWith(
+                "Head",
+              ),
+          )
+        )
+          head.push({ m, i });
+    });
+    assert(head.length > 100, "delivered head and hair vertices selected");
+    let maxTurn = 0,
+      maxLensStep = 0,
+      witness;
+    for (let frame = 0; frame < 180; frame++) {
+      const oldCamera = g.camera.position.clone(),
+        oldArm = oldCamera.clone().sub(g.cameraFollowTarget);
+      g.elapsed += 1 / 60;
+      advanceSwimming(g, { x: 0, z: 0 }, 1 / 60, false);
+      animateExplorer(g, 1 / 60, false, false);
+      updateSunkenGallery(g, 1 / 60);
+      g.player.updateMatrixWorld(true);
+      for (const { m, i } of head) {
+        m.getVertexPosition(i, point).applyMatrix4(m.matrixWorld);
+        assert(
+          !(
+            Math.hypot(point.x - hub.x, point.y - hub.y) < 0.139 &&
+            Math.abs(point.z - hub.z) < 0.224
           ),
+          JSON.stringify({
+            frame,
+            look,
+            point: point.toArray(),
+            message: "head enters delivered hub",
+          }),
         );
-    g.camera.position.copy(
-      followClearCamera(g, target, desired, 1 / 60, (p) => g.cameraSpace(p)),
-    );
-    g.cameraFollowTarget.copy(target);
-    const turn = oldArm.angleTo(g.camera.position.clone().sub(target));
-    if (turn > maxTurn) {
-      maxTurn = turn;
-      witness = {
-        frame,
-        turn,
-        camera: g.camera.position.toArray(),
-        recovery: g.cameraBodyRecovery,
-        brace: g.rig.wheelBrace,
-      };
+      }
+      const target = g.player.position
+          .clone()
+          .add(new THREE.Vector3(0, 0.3, 0)),
+        desired = target
+          .clone()
+          .add(
+            new THREE.Vector3(
+              Math.sin(g.yaw) * Math.cos(g.pitch) * 3.4,
+              Math.sin(g.pitch) * 3.4 + 0.2,
+              Math.cos(g.yaw) * Math.cos(g.pitch) * 3.4,
+            ),
+          );
+      g.camera.position.copy(
+        followClearCamera(g, target, desired, 1 / 60, (p) => g.cameraSpace(p)),
+      );
+      g.cameraFollowTarget.copy(target);
+      const turn = oldArm.angleTo(g.camera.position.clone().sub(target));
+      if (turn > maxTurn) {
+        maxTurn = turn;
+        witness = {
+          frame,
+          turn,
+          camera: g.camera.position.toArray(),
+          recovery: g.cameraBodyRecovery,
+          brace: g.rig.wheelBrace,
+        };
+      }
+      maxLensStep = Math.max(
+        maxLensStep,
+        oldCamera.distanceTo(g.camera.position),
+      );
+      assert(g.cameraSpace(g.camera.position), `legal lens ${frame}`);
+      assert.equal(
+        explorerCoverage(g.camera.position.distanceTo(target)),
+        1,
+        `opaque explorer ${frame}`,
+      );
     }
-    maxLensStep = Math.max(
-      maxLensStep,
-      oldCamera.distanceTo(g.camera.position),
-    );
-    assert(g.cameraSpace(g.camera.position), `legal lens ${frame}`);
-    assert.equal(
-      explorerCoverage(g.camera.position.distanceTo(target)),
-      1,
-      `opaque explorer ${frame}`,
-    );
-  }
-  assert(g.progress.gallery.opened, "both gates released");
-  assert.equal(g.sunkenGallery.operation, null, "hand release completes");
-  assert.equal(g.yaw, 4.817004947267814);
-  assert.equal(g.pitch, 0.13);
-  assert(maxTurn <= 0.08, JSON.stringify({ maxTurn, witness }));
-  assert(maxLensStep <= 0.35, JSON.stringify({ maxLensStep }));
-  t.diagnostic(JSON.stringify({ maxTurn, maxLensStep }));
-});
+    assert(g.progress.gallery.opened, "both gates released");
+    assert.equal(g.sunkenGallery.operation, null, "hand release completes");
+    assert.equal(g.yaw, look);
+    assert.equal(g.pitch, 0.13);
+    assert(maxTurn <= 0.08, JSON.stringify({ maxTurn, witness }));
+    assert(maxLensStep <= 0.35, JSON.stringify({ maxLensStep }));
+    g.world.updateMatrixWorld(true);
+    g.camera.lookAt(g.cameraFollowTarget);
+    const meshes = [];
+    g.sunkenGallery.root.traverse((m) => {
+      if (m.isMesh && !m.material.transparent) meshes.push(m);
+    });
+    for (const aspect of [1.6, 0.6]) {
+      g.camera.aspect = aspect;
+      g.camera.updateProjectionMatrix();
+      const view = inspectExplorerCamera(g, meshes, 20, 30);
+      assert(view.bodyRays > 50);
+      assert.equal(view.blocked, 0, JSON.stringify({ look, aspect, view }));
+      assert.equal(view.invalid, 0);
+    }
+    t.diagnostic(JSON.stringify({ maxTurn, maxLensStep }));
+  });
 
 test("surfacing in an air bell keeps torso framing and bounded recovery work", async (t) => {
   const g = fixture(t);
@@ -686,3 +743,279 @@ test("the entrance guide lamp is seated on its pier and clears the return view",
     "the recorded central return arm stays clear of the guide lamp",
   );
 });
+
+test("wheel body sight reserves each rotating casting without filling their empty corners", (t) => {
+  const g = fixture(t),
+    wheel = g.sunkenGallery.wheel,
+    box = g.sunkenGallery.wheelSight,
+    center = box.getCenter(new THREE.Vector3()),
+    radius = (box.max.x - box.min.x) / 2,
+    material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    meshes = [],
+    ray = new THREE.Raycaster();
+  t.after(() => material.dispose());
+  g.world.updateMatrixWorld(true);
+  wheel.traverse((m) => {
+    if (m.isMesh) {
+      const proxy = new THREE.Mesh(m.geometry, material);
+      proxy.matrixAutoUpdate = false;
+      proxy.matrix.copy(m.matrixWorld);
+      proxy.updateMatrixWorld(true);
+      meshes.push(proxy);
+    }
+  });
+  const actual = (a, b) => {
+    const d = b.clone().sub(a);
+    ray.set(a, d.clone().normalize());
+    ray.far = d.length();
+    return ray.intersectObjects(meshes, false).length > 0;
+  };
+  const from = new THREE.Vector3(
+      196.38282198472032,
+      -5.807599744065615,
+      114.59491058027766,
+    ),
+    to = new THREE.Vector3(
+      197.2672726383938,
+      -5.077398196378352,
+      111.06228335370295,
+    );
+  assert(
+    !actual(from, to),
+    "the recorded stroke ray does not hit delivered wheel triangles",
+  );
+  assert(
+    galleryCameraSight(g, from, to),
+    "empty space beside the rim stays clear",
+  );
+  const radialCorner = new THREE.Vector3(
+      196.38794880531245,
+      -5.720985748997638,
+      114.67572772876494,
+    ),
+    front = new THREE.Vector3(
+      197.5183488850449,
+      -5.081036543819396,
+      111.21888028365326,
+    );
+  assert(
+    !actual(radialCorner, front),
+    "the moving shoulder margin misses every wheel triangle",
+  );
+  assert(
+    cylinderEntry(radialCorner, front, box, 0.02, "z") !== null,
+    "the combined hub-depth/rim-radius control fills this empty region",
+  );
+  assert(
+    galleryCameraSight(g, radialCorner, front),
+    "casting-specific depth leaves the recorded ray clear",
+  );
+  assert(
+    g.sunkenGallery.wheelSightParts.length < 8,
+    "contained and duplicate envelopes are removed",
+  );
+  for (let i = 0; i < 32; i++) {
+    const angle = (i * Math.PI * 2) / 32,
+      a = new THREE.Vector3(
+        center.x + Math.cos(angle) * radius * 0.97,
+        center.y + Math.sin(angle) * radius * 0.97,
+        center.z - 0.5,
+      ),
+      b = a.clone().setZ(center.z + 0.5);
+    assert(actual(a, b), "the delivered rim intersects this sight line");
+    assert(
+      !galleryCameraSight(g, a, b),
+      "the conservative circle retains the whole rim",
+    );
+  }
+  for (const angle of [Math.PI / 6, 0, -Math.PI / 6]) {
+    wheel.rotation.z = angle;
+    wheel.updateWorldMatrix(true, true);
+    wheel.traverse((m) => {
+      if (!m.isMesh) return;
+      const p = new THREE.Vector3();
+      for (let i = 0; i < m.geometry.attributes.position.count; i++) {
+        p.fromBufferAttribute(m.geometry.attributes.position, i).applyMatrix4(
+          m.matrixWorld,
+        );
+        assert(
+          g.sunkenGallery.wheelSightParts.some((part) => {
+            const c = part.getCenter(new THREE.Vector3()),
+              r = (part.max.x - part.min.x) / 2;
+            return (
+              Math.hypot(p.x - c.x, p.y - c.y) <= r + 1e-5 &&
+              p.z >= part.min.z - 1e-5 &&
+              p.z <= part.max.z + 1e-5
+            );
+          }),
+          "every delivered vertex stays within a casting envelope throughout the turn",
+        );
+      }
+    });
+  }
+});
+
+test("a folded swim pose keeps the delivered head, hair and equipment outside the wheel hub", async (t) => {
+  const g = fixture(t);
+  await loadSwimmer(g);
+  const w = g.sunkenGallery.profile.wheel;
+  g.player.position.set(w.x, w.y - 0.3, w.z - 0.65);
+  g.avatar.rotation.y = 0;
+  const surface = [];
+  g.rig.model.traverseVisible((m) => {
+    if (m.isMesh)
+      for (let i = 0; i < m.geometry.attributes.position.count; i++)
+        surface.push({ m, i });
+  });
+  const point = new THREE.Vector3(),
+    embedded = () => {
+      g.player.updateMatrixWorld(true);
+      let count = 0;
+      for (const { m, i } of surface) {
+        m.getVertexPosition(i, point).applyMatrix4(m.matrixWorld);
+        if (
+          Math.hypot(point.x - w.x, point.y - w.y) < 0.139 &&
+          Math.abs(point.z - w.z) < 0.224
+        )
+          count++;
+      }
+      return count;
+    };
+  animateExplorer(g, 0, false, false);
+  const offset = g.avatar.position.z;
+  // Reproduce the former forward translation using the actual posed asset.
+  g.avatar.position.z += 0.25 * g.rig.swimCompact;
+  assert(
+    embedded() > 0,
+    "control reproduces delivered head vertices inside the cylindrical hub",
+  );
+  g.avatar.position.z = offset;
+  assert.equal(
+    embedded(),
+    0,
+    "the ordinary swim pose clears the hub before camera framing",
+  );
+  assert(
+    surface.length > 10000,
+    "actual visible skin, hair and equipment sampled",
+  );
+  for (let phase = 0; phase < 16; phase++) {
+    g.elapsed = 45 + (phase * Math.PI) / 32;
+    animateExplorer(g, 1 / 60, false, false);
+    assert.equal(
+      embedded(),
+      0,
+      `delivered surface clears the hub at stroke phase ${phase}`,
+    );
+  }
+});
+
+for (const label of ["wheel departure", "entrance turn"])
+  test(`${label} retains continuous framing with bounded camera work`, async (t) => {
+    const g = fixture(t);
+    await loadSwimmer(g);
+    const wheel = label === "wheel departure",
+      o = g.terrainProfile.gallery.origin;
+    g.elapsed = wheel ? 69.966666666664 : 97.0999999999959;
+    g.rig.mixer.setTime(0.1 + g.elapsed - 25);
+    g.player.position.fromArray(
+      wheel
+        ? [197.1, -5.883519582748413, 114.15]
+        : [194.59999983713615, -3.334496316489686, 79.93098751819397],
+    );
+    g.camera.position.fromArray(
+      wheel
+        ? [197.09444511447956, -4.949255484052363, 110.78117134027502]
+        : [194.59999464151772, -2.412543265727898, 83.66374669020786],
+    );
+    g.yaw = wheel ? 4.817004947267814 : -0.00000130028887264;
+    g.pitch = 0.13;
+    g.avatar.rotation.y = wheel ? 0 : Math.PI;
+    g.rig.bellFloat = g.rig.wheelBrace = g.rig.swimCompact = 0;
+    g.progress.gallery.opened = true;
+    g.sunkenGallery.lift = 1;
+    g.sunkenGallery.wheel.rotation.z = -Math.PI / 6;
+    updateSunkenGallery(g, 0);
+    g.cameraFollowTarget = g.player.position
+      .clone()
+      .add(new THREE.Vector3(0, 0.3, 0));
+    g.cameraBodyRecovery = wheel ? [Math.PI - g.yaw, 0] : null;
+    g.cameraContactRecovery = g.cameraBodyRecovery;
+    const destination = new THREE.Vector3(
+        ...(wheel ? [-8, -6.3, 36] : [0, -3.5, 0]),
+      ).add(new THREE.Vector3(o.x, o.y, o.z)),
+      entry = g.cameraSurfaces.entry;
+    let queries = 0,
+      maxQueries = 0,
+      maxTurn = 0,
+      maxLensStep = 0;
+    g.cameraSurfaces.entry = function (...args) {
+      queries++;
+      return entry.apply(this, args);
+    };
+    animateExplorer(g, 0, false, false);
+    const meshes = [];
+    g.world.updateMatrixWorld(true);
+    g.sunkenGallery.root.traverse((m) => {
+      if (m.isMesh && !m.material.transparent) meshes.push(m);
+    });
+    for (let frame = 0; frame < 120; frame++) {
+      const delta = destination.clone().sub(g.player.position),
+        horizontal = Math.hypot(delta.x, delta.z),
+        old = g.camera.position.clone(),
+        oldArm = old.clone().sub(g.cameraFollowTarget);
+      if (horizontal > 0.12) {
+        const yaw = Math.atan2(-delta.x, -delta.z);
+        g.yaw +=
+          (Math.atan2(Math.sin(yaw - g.yaw), Math.cos(yaw - g.yaw)) * 5) / 60;
+      }
+      g.keys.clear();
+      if (delta.y < -0.08) g.keys.add("KeyX");
+      if (delta.y > 0.08) g.keys.add("Space");
+      const amount = Math.min(1, horizontal * 6),
+        input = {
+          x: horizontal > 0.07 ? (delta.x / horizontal) * amount : 0,
+          z: horizontal > 0.07 ? (delta.z / horizontal) * amount : 0,
+        };
+      g.elapsed += 1 / 60;
+      advanceSwimming(g, input, 1 / 60, delta.y > 0.08);
+      animateExplorer(g, 1 / 60, false, false);
+      updateSunkenGallery(g, 1 / 60);
+      const target = g.player.position
+          .clone()
+          .add(new THREE.Vector3(0, 0.3, 0)),
+        desired = target
+          .clone()
+          .add(
+            new THREE.Vector3(
+              Math.sin(g.yaw) * Math.cos(g.pitch) * 3.4,
+              Math.sin(g.pitch) * 3.4 + 0.2,
+              Math.cos(g.yaw) * Math.cos(g.pitch) * 3.4,
+            ),
+          );
+      queries = 0;
+      g.camera.position.copy(
+        followClearCamera(g, target, desired, 1 / 60, (p) => g.cameraSpace(p)),
+      );
+      g.cameraFollowTarget.copy(target);
+      maxQueries = Math.max(maxQueries, queries);
+      maxTurn = Math.max(
+        maxTurn,
+        oldArm.angleTo(g.camera.position.clone().sub(target)),
+      );
+      maxLensStep = Math.max(maxLensStep, old.distanceTo(g.camera.position));
+      assert(queries < 5000, JSON.stringify({ frame, queries }));
+      assert(g.cameraSpace(g.camera.position), `legal lens ${frame}`);
+      assert.equal(explorerCoverage(g.camera.position.distanceTo(target)), 1);
+      if (frame % 20 === 0) {
+        g.camera.lookAt(target);
+        const view = inspectExplorerCamera(g, meshes, 20, 30);
+        assert(view.bodyRays > 50);
+        assert.equal(view.blocked, 0, JSON.stringify({ frame, view }));
+        assert.equal(view.invalid, 0);
+      }
+    }
+    assert(maxTurn <= 0.08, JSON.stringify({ maxTurn }));
+    assert(maxLensStep <= 0.35, JSON.stringify({ maxLensStep }));
+    t.diagnostic(JSON.stringify({ maxQueries, maxTurn, maxLensStep }));
+  });

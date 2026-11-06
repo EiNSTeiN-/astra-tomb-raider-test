@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [gallery camera-path repair](gallery-motion.md) reuses the existing
+credited character, wheel, stone/bronze materials, environment, recordings and
+scores. Its casting envelopes, terrain-sight and pose changes are original
+project code. No external model, bitmap, recording, score or dependency is
+added. Its five documentation images are complete game captures converted
+losslessly; decoded pixels and dimensions match their source captures.
+
 The [surface-swimming and sounding-float revision](surface-swimmer.md) reuses
 the existing credited character, world, bronze/gold materials, recordings and
 scores. No external model, bitmap, audio or dependency is added. Its six

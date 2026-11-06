@@ -19,6 +19,20 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [gallery camera-path repair](gallery-motion.md) replaces the combined
+  wheel box with casting-specific circular envelopes and respects the actual
+  terrain cut at the entrance. A corrected folded pose clears the head from
+  the wheel hub. All 148 selected tests, three CPU-guard checks and the build
+  pass. Two focused motion checks retain 0.05-radian angular steps and reduce
+  registered scene queries to 559 and 377. The full 185.88 m loop retains
+  opacity 1, legal body/lens queries, health 100 and all fourteen tracked
+  resource disposals. All 45 final development and six production captures
+  are reviewed. Keyboard High and simulated portrait touch Low pass interrupted
+  and completed wheel use, keeping the explorer in front of the rim; all four
+  full-store reload comparisons pass, and owned helpers close. A separate
+  337.3 ms camera update on the memorial return
+  remains open; these repairs do not establish smooth follow throughout.
+
 - [Surface swimming and sounding floats](surface-swimmer.md) repair the
   recorded exterior swimmer obstruction and sideways saved-water arrival.
   Resting poses retain a measured face/bed margin, and all five floats have

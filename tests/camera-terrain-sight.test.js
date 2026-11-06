@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import * as THREE from "three";
 import { createTerrainSurfaceSampler } from "../src/terrain-surface.js";
 import { terrainCameraClear } from "../src/camera-terrain-sight.js";
+import { cutTerrainGeometry } from "../src/terrain-cut.js";
 import { cameraBodyVisibility } from "../src/camera-body-frame.js";
 
 test("body sight detects intervening terrain even when the camera and central arm clear it", () => {
@@ -91,4 +92,77 @@ test("terrain-only clothing targets do not dilute a registered prop obstruction"
     cameraBodyVisibility({ entry: () => 0 }, camera, targets, game),
     0,
   );
+});
+
+test("terrain body sight follows the actual cut opening while retaining the courtyard, bank and later ridge", () => {
+  const volume = {
+      min: { x: 0.7, y: -1, z: -0.5 },
+      max: { x: 1.3, y: 0, z: 0.5 },
+    },
+    profile = { step: 1, gallery: { volumes: [volume] } },
+    material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    ray = new THREE.Raycaster();
+  const inspect = (height, start, end) => {
+    const source = new THREE.PlaneGeometry(4, 2, 4, 2);
+    source.rotateX(-Math.PI / 2);
+    source.translate(2, 0, 0);
+    const p = source.attributes.position;
+    for (let i = 0; i < p.count; i++) p.setY(i, height(p.getX(i)));
+    const cut = cutTerrainGeometry(source, [volume]),
+      rawMesh = new THREE.Mesh(source, material),
+      cutMesh = new THREE.Mesh(cut, material),
+      direction = end.clone().sub(start);
+    try {
+      ray.set(start, direction.clone().normalize());
+      ray.far = direction.length();
+      const raw = ray.intersectObject(rawMesh).length > 0,
+        actual = ray.intersectObject(cutMesh).length > 0;
+      assert.equal(
+        terrainCameraClear(
+          { terrainProfile: profile, groundHeight: (x) => height(x) },
+          start,
+          end,
+        ),
+        !actual,
+      );
+      return { raw, actual };
+    } finally {
+      source.dispose();
+      if (cut !== source) cut.dispose();
+    }
+  };
+  try {
+    const linear = (x) => x - 1.5,
+      segment = (y, z = 0) => [
+        new THREE.Vector3(0, y, z),
+        new THREE.Vector3(4, y, z),
+      ];
+    assert.deepEqual(
+      inspect(linear, ...segment(-0.5)),
+      { raw: true, actual: false },
+      "the removed bank triangle cannot block a gallery body ray",
+    );
+    for (const [y, z] of [
+      [0.7, 0],
+      [-1.2, 0],
+      [-0.5, 0.7],
+    ])
+      assert.deepEqual(
+        inspect(linear, ...segment(y, z)),
+        { raw: true, actual: true },
+        "retained top, lower bank and side terrain still obstruct",
+      );
+    const ridge = (x) => {
+      const heights = [-1.5, -0.5, 0.5, -1.5, 0.5],
+        i = Math.min(3, Math.floor(x));
+      return heights[i] + (heights[i + 1] - heights[i]) * (x - i);
+    };
+    assert.deepEqual(
+      inspect(ridge, ...segment(-0.5)),
+      { raw: true, actual: true },
+      "a later ridge remains solid after leaving the cut opening",
+    );
+  } finally {
+    material.dispose();
+  }
 });

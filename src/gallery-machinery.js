@@ -241,29 +241,60 @@ export function buildGalleryMachinery(game, { add, block, bronze, trim }) {
     }
     return handle;
   });
-  mergeArchitecture(wheel);
-  // The wheel is open between its spokes, but a view through those openings
-  // can still cover most of the explorer. Reserve its full rotating envelope
-  // for body framing only, derived from the delivered vertices. Player and
-  // camera-centre collision continue to use their existing physical shapes.
+  // Reserve the rotating envelope of each casting before batching. Combining
+  // the hub's depth with the rim's radius fills empty space in front of the
+  // rim and can make every camera detour appear blocked beside a swimmer.
+  // These finite circles rotate with every spoke, without that false corner.
   let radius = 0,
     minZ = Infinity,
     maxZ = -Infinity;
-  const point = new THREE.Vector3();
+  const point = new THREE.Vector3(),
+    parts = [];
   wheel.updateWorldMatrix(true, true);
   wheel.traverse((mesh) => {
     if (!mesh.isMesh) return;
     const position = mesh.geometry.attributes.position;
+    let r = 0,
+      lo = Infinity,
+      hi = -Infinity;
     for (let i = 0; i < position.count; i++) {
       point
         .fromBufferAttribute(position, i)
         .applyMatrix4(mesh.matrixWorld)
         .sub(profile.wheel);
-      radius = Math.max(radius, Math.hypot(point.x, point.y));
-      minZ = Math.min(minZ, point.z);
-      maxZ = Math.max(maxZ, point.z);
+      r = Math.max(r, Math.hypot(point.x, point.y));
+      lo = Math.min(lo, point.z);
+      hi = Math.max(hi, point.z);
     }
+    radius = Math.max(radius, r);
+    minZ = Math.min(minZ, lo);
+    maxZ = Math.max(maxZ, hi);
+    parts.push(
+      new THREE.Box3(
+        new THREE.Vector3(
+          profile.wheel.x - r,
+          profile.wheel.y - r,
+          profile.wheel.z + lo,
+        ),
+        new THREE.Vector3(
+          profile.wheel.x + r,
+          profile.wheel.y + r,
+          profile.wheel.z + hi,
+        ),
+      ),
+    );
   });
+  // Identical fittings and a spoke contained by the rim need no extra test.
+  gallery.wheelSightParts = parts.filter(
+    (box, i) =>
+      !parts.some(
+        (other, j) =>
+          j !== i &&
+          other.containsBox(box) &&
+          (j < i || !box.containsBox(other)),
+      ),
+  );
+  mergeArchitecture(wheel);
   gallery.wheelSight = new THREE.Box3(
     new THREE.Vector3(
       profile.wheel.x - radius,

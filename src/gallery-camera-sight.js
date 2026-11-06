@@ -1,4 +1,4 @@
-import { boxEntry } from "./camera-collision.js";
+import { boxEntry, cylinderEntry } from "./camera-collision.js";
 
 // The gallery is below the outdoor terrain and uses its own physical volumes.
 // Body sight must include those volumes too: a clear central arm can pass over
@@ -9,22 +9,29 @@ export function galleryCameraSight(game, start, end, wheelContact = false) {
   // The wheel may naturally cover a gripping/releasing hand. Its conservative
   // rotating envelope must not make the camera chase that contact. The stand,
   // walls and all other scene checks still apply to those same hand samples.
-  if (gallery.wheelSight && !wheelContact) {
-    // A reaching hand can start within this conservative envelope. It may
-    // look out toward the wheel's working side, rather than through its hub.
-    if (
-      start.x >= gallery.wheelSight.min.x &&
-      start.x <= gallery.wheelSight.max.x &&
-      start.y >= gallery.wheelSight.min.y &&
-      start.y <= gallery.wheelSight.max.y &&
-      start.z >= gallery.wheelSight.min.z &&
-      start.z <= gallery.wheelSight.max.z &&
-      end.z >= gallery.wheelSight.min.z - 0.02
-    )
-      return false;
-    const t = boxEntry(start, end, gallery.wheelSight, 0.02);
-    if (t !== null && t < 0.999999) return false;
-  }
+  if (gallery.wheelSight && !wheelContact)
+    for (const box of gallery.wheelSightParts || [gallery.wheelSight]) {
+      const radius = (box.max.x - box.min.x) / 2;
+      // A reaching hand can start within this conservative envelope. It may
+      // look out toward the wheel's working side, rather than through its hub.
+      if (
+        Math.hypot(
+          start.x - (box.min.x + box.max.x) / 2,
+          start.y - (box.min.y + box.max.y) / 2,
+        ) <= radius &&
+        start.z >= box.min.z &&
+        start.z <= box.max.z &&
+        end.z >= box.min.z - 0.02
+      )
+        return false;
+      // A cylinder for each casting retains every rotated spoke and fitting
+      // without filling the empty corners of the full wheel's enclosing box.
+      const t =
+        boxEntry(start, end, box, 0.02, true) === null
+          ? null
+          : cylinderEntry(start, end, box, 0.02, "z");
+      if (t !== null && t < 0.999999) return false;
+    }
   for (const box of gallery.solids) {
     const t = boxEntry(start, end, box, 0.02);
     if (t !== null && t < 0.999999) return false;

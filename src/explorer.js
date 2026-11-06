@@ -290,7 +290,13 @@ export function animateExplorer(game, dt, moving, sprinting) {
     );
     const float = Math.max(rig.bellFloat, rig.wheelBrace);
     const required = game.canMove
-      ? Math.min(1, swimCompactAmount(game, p.x, p.y, p.z))
+      ? // The upright grip has its own physical clearance, but its release
+        // blends into the ordinary folded pose. Compute that fold during the
+        // operation too, before the head can swing forward through the wheel.
+        Math.min(
+          1,
+          swimCompactAmount(game, p.x, p.y, p.z, game.avatar.rotation.y, true),
+        )
       : 0;
     rig.swimCompact = Math.min(
       game.canMove ? swimCompactLimit(game, p.x, p.y, p.z) : 1,
@@ -302,7 +308,9 @@ export function animateExplorer(game, dt, moving, sprinting) {
     const offset = new THREE.Vector3(
       0,
       0,
-      -0.65 * (1 - float) + 0.25 * compact,
+      // Folding lifts the head forward as the torso becomes upright. Retain
+      // its rearward offset so the head fits the same clearance as the stroke.
+      -0.65 * (1 - float),
     ).applyQuaternion(rotation);
     game.avatar.position.x = offset.x;
     game.avatar.position.z = offset.z;

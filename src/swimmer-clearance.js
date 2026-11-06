@@ -35,6 +35,7 @@ export function swimCompactAmount(
   y,
   z,
   facing = game.avatar.rotation.y,
+  freePose = false,
 ) {
   const sin = Math.sin(facing),
     cos = Math.cos(facing);
@@ -42,7 +43,7 @@ export function swimCompactAmount(
   // These authored interactions already use an upright stance and their own
   // approach/ceiling checks. A prone stroke is not their physical footprint.
   if (
-    game.sunkenGallery?.operation ||
+    (!freePose && game.sunkenGallery?.operation) ||
     (!game.diving && galleryAt(game, x, y, z) && galleryBellAt(game, x, z))
   )
     return 0;
