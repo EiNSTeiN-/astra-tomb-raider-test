@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [submerged gallery stonework](sunken-gallery-stonework.md) uses original
+project construction in `src/sunken-gallery-masonry.js` and
+`src/sunken-gallery.js`, reusing the existing credited stone maps and procedural
+bronze. No external model, texture, recording, score or dependency is added.
+Its seven documentation images are lossless conversions of complete browser
+captures; decoded RGBA pixels and dimensions match the source images. The
+native portrait capture is 540 × 900; the others are 1280 × 800. One image
+intentionally records the unresolved colonnade camera squeeze.
+
 The [wind bearing support repair](wind-bearing-support.md) changes original
 project-authored construction code with the existing credited character,
 machinery, materials, environment and audio. No external asset or dependency

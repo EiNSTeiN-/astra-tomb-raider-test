@@ -19,6 +19,22 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [submerged gallery stonework](sunken-gallery-stonework.md) adds 1,483
+  closed limestone pieces across the memorial route and replaces four floating
+  bronze fixtures with founded floor-to-cap ties. All 38 selected tests,
+  three CPU guard checks and the build pass. Delivered geometry checks cover
+  backing engagement, separated corner beds, anchor continuity and their
+  negative controls. The 185.88 m assisted loop breathes in both bells,
+  opens both gates, recovers the record and returns at health 100. All 45 final
+  development views and six release captures are reviewed. Keyboard High and
+  simulated portrait touch Low pass diving, movement, wheel use and four
+  reload comparisons with exact bell recovery. Chapter replacement releases
+  all 14 tracked new resources once, and owned helpers close under the shared
+  five-of-sixteen CPU allowance. The same route also records an unresolved
+  swim-camera squeeze at the colonnade descent; a native wheel view also hides
+  the explorer. These remain in VA-253, alongside broader world/contact,
+  listening and device acceptance work.
+
 - The [alpine gullies and exposed rock](alpine-gullies.md) give the surrounding
   snow ranges descending cuts, narrower crest caps and snow deposition tied to
   those cuts. The existing triangle count is retained by concentrating radial

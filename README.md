@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [submerged gallery stonework](docs/sunken-gallery-stonework.md) gives the
+memorial passages coursed limestone and anchors both air bells to the gallery floor.
+
 The [alpine gullies](docs/alpine-gullies.md) add descending cuts, more exposed
 rock and snow accumulation tied to the surrounding mountain geometry.
 

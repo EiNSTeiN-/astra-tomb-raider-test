@@ -16,8 +16,12 @@ import {
   BELL_LAMP,
 } from "./sunken-gallery-layout.js";
 import { normalizeGallery, GALLERY_RECORD } from "./sunken-gallery-record.js";
+import {
+  buildGalleryMasonry,
+  buildBellAnchors,
+} from "./sunken-gallery-masonry.js";
 
-function interiorShell(profile) {
+function interiorShell(profile, walls) {
   const step = 0.5,
     cells = new Map();
   for (let ix = -72; ix < 0; ix++)
@@ -76,6 +80,15 @@ function interiorShell(profile) {
           ];
       for (const [lo, hi] of bands) {
         if (hi - lo < 0.001) continue;
+        walls.push({
+          axis: dx ? 0 : 2,
+          fixed: dx ? x + dx * d : z + dz * d,
+          start: dx ? z - d : x - d,
+          end: dx ? z + d : x + d,
+          low: lo,
+          high: hi,
+          inward: dx ? -dx : -dz,
+        });
         if (dx === 1)
           quad(
             [x + d, lo, z - d],
@@ -187,7 +200,9 @@ export function buildSunkenGallery(game) {
       });
     return mesh;
   };
-  add(interiorShell(profile), game.darkMat, 0, 0, 0);
+  const walls = [];
+  add(interiorShell(profile, walls), game.darkMat, 0, 0, 0);
+  buildGalleryMasonry(game, walls);
   const o = profile.origin;
   // Entry piers, a continuous bronze survey line, and the colonnade's surviving
   // lintels give the route a readable direction even when the view is submerged.
@@ -404,9 +419,7 @@ export function buildSunkenGallery(game) {
     drops.frustumCulled = false;
     root.add(drops);
     gallery.drips.push({ drops, bell });
-    // A pierced receiver beneath each bell makes its air reservoir visible on approach.
-    for (const side of [-1, 1])
-      block(bell.x + side * 2.1, o.y - 5.4, bell.z, 0.22, 0.5, 0.22, trim);
+    buildBellAnchors(game, bell, { add, block, bronze, trim });
   }
   buildGalleryMachinery(game, { add, block, bronze, trim });
   const record = new THREE.Group();
