@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [gallery paving and ceiling revision](gallery-lining.md) uses original
+project geometry and the existing credited stone textures, character,
+architecture, recordings and scores. No external model, bitmap, recording,
+score or dependency is added. Its four figures are complete, unretouched
+game captures converted losslessly to WebP with identical decoded pixels and
+dimensions. The preceding-view figures replay the published shell and
+survey-strip height; inspection cameras hide the explorer.
+
 The [air-bell water revision](gallery-water.md) is original project shader and
 lighting code, reusing the existing original filtered water-ripple field and
 the credited game assets. No external model, bitmap, recording, score or

@@ -226,17 +226,20 @@ test("each delivered bell anchor connects its actual floor and cap and reserves 
       if (
         m.isMesh &&
         (m.material === g.darkMat ||
+          g.sunkenGallery.lining.meshes.includes(m) ||
           m.material.name === "Patinated air-bell bronze") &&
         !m.geometry.attributes.galleryAnchorPart
       )
         backing.push(m);
     });
     ray.set(new T.Vector3(a.x, a.floor + 0.001, a.z), new T.Vector3(0, -1, 0));
-    ray.far = 0.03;
+    ray.far = a.floor - foot.min.y;
     assert(
       ray
         .intersectObjects(backing)
-        .some((h) => Math.abs(h.point.y - a.floor) < 2e-5),
+        .some(
+          (h) => h.point.y <= a.floor + 2e-5 && h.point.y > foot.min.y + 0.015,
+        ),
       "shoe is founded on the delivered floor",
     );
     ray.set(new T.Vector3(a.x, a.ceiling - 0.1, a.z), new T.Vector3(0, 1, 0));

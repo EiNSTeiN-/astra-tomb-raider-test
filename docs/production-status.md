@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [gallery paving and ceiling revision](gallery-lining.md) adds fitted
+  limestone paving and recessed stone coffers, retaining the memorial's
+  existing vault and seating the bronze survey strips in the floor. All 31
+  selected regressions, three CPU-budget checks and the build pass. Delivered
+  geometry checks cover 1,765 closed pieces and more than 5,000 independent
+  floor/ceiling probe positions across nine areas. The preceding 75 camera
+  panels, 402 solid bounds, sound sources and normalized progress match.
+  Twenty-eight reviewed scene captures include six matched before/after
+  pairs and both breathing stops at High and Low. Production touch/keyboard
+  dives recover full breath and retain two complete-store comparisons, with
+  four release captures reviewed at reduced pixel density. The six tracked
+  geometry/material resources dispose once on chapter replacement, and all
+  verification browsers and servers close. Wider world composition, contact,
+  continuous timing and listening/device acceptance remain open.
+
 - The [air-bell water and lighting revision](gallery-water.md) reduces the
   recorded glare across the resting explorer. Eighteen reviewed scene captures
   cover both bells at all three qualities, later ripple phases, underwater

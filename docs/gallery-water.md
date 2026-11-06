@@ -1,5 +1,9 @@
 # Clearer air-bell water and lighting
 
+The later [gallery lining revision](gallery-lining.md) adds fitted paving and
+ceiling construction to the plain surfaces recorded below. This page retains
+the water milestone's captures and verification scope.
+
 The resting explorer was obscured by two bright columns across the water in
 both bronze air bells. A controlled lighting study isolates those columns to
 water highlights from the carried fill and the fixed bell lamp. Turning bloom

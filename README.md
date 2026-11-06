@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [gallery paving and ceiling revision](docs/gallery-lining.md) adds fitted
+limestone floors, recessed stone coffers and seated bronze survey strips
+through the submerged passages.
+
 The [air-bell water revision](docs/gallery-water.md) softens the water glare
 across the explorer, adds sheltered ripples and preserves moving reservoir
 surfaces.

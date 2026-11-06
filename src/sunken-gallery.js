@@ -22,6 +22,11 @@ import {
 } from "./sunken-gallery-masonry.js";
 import { captureGalleryShell } from "./gallery-shell-camera.js";
 import { galleryWaterMaterial } from "./gallery-water.js";
+import {
+  buildGalleryLining,
+  GALLERY_FLOOR_BED,
+  GALLERY_CEILING_BED,
+} from "./gallery-lining.js";
 
 function interiorShell(profile, walls, panels) {
   const step = 0.5,
@@ -48,8 +53,20 @@ function interiorShell(profile, walls, panels) {
       v0: Math.min(...[a, b, c, d].map((p) => p[axes[1]])),
       v1: Math.max(...[a, b, c, d].map((p) => p[axes[1]])),
     });
+    const floor = axis === 1 && b[2] > a[2],
+      edge = wall
+        ? gallerySection(profile, (a[0] + c[0]) / 2, (a[2] + c[2]) / 2)
+        : null;
     for (const point of [a, b, d, b, c, d]) {
-      positions.push(...point);
+      let y = point[1];
+      if (axis === 1) y += floor ? -GALLERY_FLOOR_BED : GALLERY_CEILING_BED;
+      // Close the recessed beds at the foot and crown of each wall. Internal
+      // floor/ceiling steps keep their exposed endpoint at its original height.
+      else if (edge) {
+        if (Math.abs(y - edge.floor) < 1e-6) y -= GALLERY_FLOOR_BED;
+        if (Math.abs(point[1] - edge.ceiling) < 1e-6) y += GALLERY_CEILING_BED;
+      }
+      positions.push(point[0], y, point[2]);
       uvs.push(
         (wall ? (a[0] === b[0] ? point[2] : point[0]) : point[0]) / 2.7,
         (wall ? point[1] : point[2]) / 2.7,
@@ -217,8 +234,16 @@ export function buildSunkenGallery(game) {
   };
   const walls = [],
     panels = [];
-  add(interiorShell(profile, walls, panels), game.darkMat, 0, 0, 0);
+  const backing = add(
+    interiorShell(profile, walls, panels),
+    game.darkMat,
+    0,
+    0,
+    0,
+  );
+  backing.name = "Gallery stone backing and recessed joint beds";
   captureGalleryShell(game, panels);
+  buildGalleryLining(game, gallery.cameraPanels, backing);
   buildGalleryMasonry(game, walls);
   const o = profile.origin;
   // Entry piers, a continuous bronze survey line, and the colonnade's surviving
@@ -247,6 +272,10 @@ export function buildSunkenGallery(game) {
   entranceLight.position.set(o.x - 3.35, o.y - 2.75, o.z + 1.65);
   root.add(entranceLight);
   gallery.lights.push(entranceLight);
+  const survey = new THREE.Group();
+  survey.name = "Inlaid bronze survey line";
+  gallery.surveyLine = survey;
+  root.add(survey);
   for (const [x, z, w, d, y] of [
     [-16, 0, 24, 0.09, -5.94],
     [-29, 6, 0.09, 12, -5.94],
@@ -254,7 +283,8 @@ export function buildSunkenGallery(game) {
     [-19, 34, 23, 0.09, -7.44],
     [-8, 44, 0.09, 16, -8.44],
   ])
-    block(o.x + x, o.y + y, o.z + z, w, 0.035, d, trim);
+    block(o.x + x, o.y + y - 0.045, o.z + z, w, 0.035, d, trim, false, survey);
+  mergeArchitecture(survey, 2);
   for (const z of [18, 23, 28, 33])
     for (const side of [-1, 1]) {
       const x = o.x - 29 + side * 2.55,
