@@ -21,7 +21,11 @@ import {
   groundExplorer,
   poseAirborneTerrainFeet,
 } from "./explorer-grounding.js";
-import { galleryAt, galleryBellAt } from "./sunken-gallery-layout.js";
+import {
+  galleryAt,
+  galleryBellAt,
+  galleryFloor,
+} from "./sunken-gallery-layout.js";
 import { strideRate } from "./stride.js";
 import { swimCompactAmount, swimCompactLimit } from "./swimmer-clearance.js";
 import { ExplorerVisibility } from "./explorer-visibility.js";
@@ -260,13 +264,25 @@ export function animateExplorer(game, dt, moving, sprinting) {
     const p = game.player.position;
     const floating =
       !game.diving &&
-      galleryAt(game, p.x, p.y, p.z) &&
-      galleryBellAt(game, p.x, p.z);
-    rig.bellFloat = THREE.MathUtils.damp(
-      rig.bellFloat ?? (floating ? 1 : 0),
-      floating ? 1 : 0,
-      6,
-      dt,
+      ((galleryAt(game, p.x, p.y, p.z) && galleryBellAt(game, p.x, p.z)) ||
+        (game.actualMoveSpeed ??
+          Math.hypot(game.moveVelocity?.x || 0, game.moveVelocity?.z || 0)) <
+          0.15);
+    // Rest with the face above water, retaining the prone traveling stroke.
+    // Shallow water limits the leg drop before the soles reach its real bed.
+    const floatLimit = THREE.MathUtils.clamp(
+      p.y - galleryFloor(game, p.x, p.z, p.y) - 0.3,
+      0,
+      1,
+    );
+    rig.bellFloat = Math.min(
+      floatLimit,
+      THREE.MathUtils.damp(
+        rig.bellFloat ?? (floating ? 1 : 0),
+        floating ? 1 : 0,
+        6,
+        dt,
+      ),
     );
     rig.wheelBrace = Math.max(
       galleryWheelBrace(game),
@@ -282,7 +298,7 @@ export function animateExplorer(game, dt, moving, sprinting) {
     );
     const compact = rig.swimCompact * (1 - float);
     rig.model.rotation.x = 1.25 - 1.13 * float - 0.75 * compact;
-    game.avatar.position.y -= 1.05 * float + 0.85 * compact;
+    game.avatar.position.y -= float + 0.85 * compact;
     const offset = new THREE.Vector3(
       0,
       0,

@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [surface-swimming and sounding-float revision](surface-swimmer.md) reuses
+the existing credited character, world, bronze/gold materials, recordings and
+scores. No external model, bitmap, audio or dependency is added. Its six
+documentation images are complete game captures converted losslessly; the
+before image records the previously published surface obstruction.
+
 The [submerged explorer camera](submerged-camera.md) reuses the existing credited
 character, gallery materials, environment, recordings and scores. Its shell
 camera metadata and repositioned guide lamp are project-authored code. No

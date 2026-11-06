@@ -1,4 +1,5 @@
 import { waterAt } from "./hydrology.js";
+import { recoverArchiveFloat } from "./archive-float-recovery.js";
 import {
   galleryAt,
   galleryBellAt,
@@ -96,6 +97,8 @@ export function recoverSwimmer(game, preservePosition = false) {
   if (!game.swimming) return false;
   const p = game.player.position;
   if (canSwimAt(game, p.x, p.y, p.z)) return false;
+  if (recoverArchiveFloat(game, (x, y, z) => canSwimAt(game, x, y, z)))
+    return true;
   const facing = game.avatar.rotation.y;
   // A saved camera orbit does not encode the swimmer's heading. On arrival,
   // choose a fitting heading before moving an otherwise valid saved position.

@@ -112,10 +112,10 @@ the independent static-wheel observer and was rejected.
 The opened-wheel portrait view also leaves part of the head behind the rim;
 the landscape observer results do not establish portrait framing acceptance.
 
-The initial and final exterior well-surface captures do not clearly show the
-swimmer despite opacity 1. Their surface pose, framing and water visibility
-need investigation in VA-255. Full opacity alone does not prove a readable
-character in every rendered view.
+The initial and final exterior well-surface captures did not clearly show the
+swimmer despite opacity 1. The subsequent [surface-swimming revision](surface-swimmer.md)
+repairs the recorded float obstruction and resting pose in VA-255. Full opacity
+alone still does not prove a readable character in every rendered view.
 
 Large flat floors and ceilings, boxed collapse forms, coarse bell patina,
 repeated architecture, sparse surroundings and wider campaign contact remain

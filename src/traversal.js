@@ -5,6 +5,8 @@ import { NATURE_BODY_RADIUS } from "./nature-rock-solids.js";
 import { courtDaisFloor } from "./court-dais-rules.js";
 import { ropeGrip, updateCourseVisual } from "./traversal-courses.js";
 import { clearJumpPress } from "./jump-input.js";
+import { waterAt } from "./hydrology.js";
+import { restoreWaterArrival } from "./water-motion.js";
 
 const HAND_HEIGHT = 2.15;
 const done = (game, c) =>
@@ -63,22 +65,32 @@ export function restoreTraversal(game) {
       ground = game.groundHeight(p.x, p.z),
       savedHeight = game.progress.position.height,
       y = ground + (Number.isFinite(savedHeight) ? savedHeight : 0),
-      dais = courtDaisFloor(game, p.x, p.z),
-      lifted =
-        dais.surface &&
-        y >= ground - 0.025 &&
-        dais.height >= y - 0.025 &&
-        dais.height - y <= 0.516 &&
-        game.canMove(p.x, p.z, dais.height - ground),
-      floor = lifted ? dais : supportAt(game, p.x, p.z, y, NATURE_BODY_RADIUS);
-    if (
-      lifted ||
-      (Number.isFinite(savedHeight) && Math.abs(floor.height - y) < 0.25)
-    ) {
-      // Preserve the saved landing while moving clear of newly solid furniture.
-      // Passing the initial ground height here would discard earned elevation.
-      const arrival = safeArrival(game, { x: p.x, y: floor.height, z: p.z });
-      if (arrival) p.set(arrival.x, arrival.y, arrival.z);
+      water = waterAt(game, p.x, p.z, Math.max(y, p.y));
+    // A swimmer resumes at the local surface. Ground furniture below that
+    // surface must not move the saved horizontal position before water restore.
+    // Retain elevated arrivals that are already above the water.
+    if (water?.depth > 1.15 && Math.max(y, p.y) < water.y - 0.35) {
+      restoreWaterArrival(game);
+    } else {
+      const dais = courtDaisFloor(game, p.x, p.z),
+        lifted =
+          dais.surface &&
+          y >= ground - 0.025 &&
+          dais.height >= y - 0.025 &&
+          dais.height - y <= 0.516 &&
+          game.canMove(p.x, p.z, dais.height - ground),
+        floor = lifted
+          ? dais
+          : supportAt(game, p.x, p.z, y, NATURE_BODY_RADIUS);
+      if (
+        lifted ||
+        (Number.isFinite(savedHeight) && Math.abs(floor.height - y) < 0.25)
+      ) {
+        // Preserve the saved landing while moving clear of newly solid furniture.
+        // Passing the initial ground height here would discard earned elevation.
+        const arrival = safeArrival(game, { x: p.x, y: floor.height, z: p.z });
+        if (arrival) p.set(arrival.x, arrival.y, arrival.z);
+      }
     }
   }
   game.jumpY = Math.max(

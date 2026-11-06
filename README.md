@@ -2,9 +2,13 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+[Surface swimming and sounding floats](docs/surface-swimmer.md) now keep the
+resting explorer visible beside the dive markers, add float clearance and
+preserve saved surface positions above the submerged archive benches.
+
 The [submerged explorer camera](docs/submerged-camera.md) keeps the recorded
 memorial route opaque, frames floating air recovery at torso height, and moves
-the entrance lamp onto a pier. Remaining camera hitches and surface framing
+the entrance lamp onto a pier. Remaining camera hitches and portrait framing
 are documented alongside the verified fixes.
 
 The [submerged gallery stonework](docs/sunken-gallery-stonework.md) gives the

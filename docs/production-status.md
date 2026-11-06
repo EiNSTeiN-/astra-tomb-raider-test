@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- [Surface swimming and sounding floats](surface-swimmer.md) repair the
+  recorded exterior swimmer obstruction and sideways saved-water arrival.
+  Resting poses retain a measured face/bed margin, and all five floats have
+  live physical and camera clearance. All 130 selected tests, three CPU guard
+  checks and the build pass, including 21 cable routes across eight chapters.
+  The 185.88 m assisted gallery loop retains full opacity and legal queries;
+  all 55 development captures are reviewed. All 27 tracked float resources
+  release once on chapter replacement. Current keyboard High and simulated
+  touch Low dive, resurface and stop beside the float; all four whole-store
+  reload comparisons and eight reviewed release images pass. VA-255's surface
+  visibility is repaired; VA-254's route hitches and portrait framing remain open.
+
 - The [submerged explorer camera](submerged-camera.md) repairs the recorded
   colonnade and wheel fade, floating bell framing and foreground entrance lamp.
   All 108 selected tests, three CPU guard checks and the build pass. The
@@ -29,8 +41,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   pass diving, movement, interrupted/complete wheel use and four whole-store
   reload comparisons; all six release captures are reviewed and helpers close.
   A route camera hitch, portrait rim coverage and faster entrance
-  turn remain open in VA-254; exterior surface-swimmer readability remains
-  open in VA-255. Broader world, contact, listening and device work continues.
+  turn remain open in VA-254; the subsequent surface-swimming revision
+  repairs the recorded exterior readability issue in VA-255. Broader world,
+  contact, listening and device work continues.
 
 - The [submerged gallery stonework](sunken-gallery-stonework.md) adds 1,483
   closed limestone pieces across the memorial route and replaces four floating

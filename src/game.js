@@ -436,7 +436,7 @@ import {
 } from "./field-station-solids.js";
 import { prepareGuardianPatrols } from "./guardian-patrols.js";
 import { resetDiving, divingHint, updateDiveView, DIVE_AIR } from "./diving.js";
-import { recoverSwimmer } from "./swimmer-clearance.js";
+import { recoverSwimmer, canSwimAt } from "./swimmer-clearance.js";
 import {
   buildTideArchive,
   updateTideArchive,
@@ -1149,7 +1149,13 @@ export class Adventure {
     restoreShutterArrival(this);
     restoreSkyBridgeArrival(this);
     restoreCourierArrival(this);
-    const arrival = safeArrival(this, this.player.position);
+    restoreWaterArrival(this);
+    recoverSwimmer(this, true);
+    const p = this.player.position,
+      arrival =
+        this.swimming && canSwimAt(this, p.x, p.y, p.z)
+          ? { x: p.x, y: p.y, z: p.z }
+          : safeArrival(this, p);
     if (arrival) {
       this.player.position.set(arrival.x, arrival.y, arrival.z);
       this.jumpY = arrival.y - this.groundHeight(arrival.x, arrival.z);

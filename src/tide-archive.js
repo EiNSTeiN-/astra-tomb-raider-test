@@ -8,6 +8,7 @@ import {
 } from "./archive-bubbles.js";
 
 import { TIDE_ARCHIVE } from "./tide-archive-records.js";
+import { stationSolid } from "./field-station-solids.js";
 
 export function archiveProgress(game) {
   return TIDE_ARCHIVE.filter((record) =>
@@ -19,6 +20,7 @@ export function buildTideArchive(game) {
   game.tideArchive = [];
   if (game.level.biome !== "water") return;
   game.progress.archive ??= [];
+  game.obstacles ??= [];
   const bronze = new THREE.MeshStandardMaterial({
     color: 0x7a9a89,
     metalness: 0.62,
@@ -97,16 +99,26 @@ export function buildTideArchive(game) {
     const bubbles = createArchiveBubbles(bubbleMaterial);
     game.world.add(bubbles);
     const buoy = new THREE.Group();
-    buoy.position.set(x, water.position.y, z);
-    add(
+    buoy.name = `${record.well} sounding float`;
+    // Keep the sounding marker beside the dive/bubble axis, where it cannot
+    // occupy the head and backpack of a resurfacing explorer.
+    buoy.position.set(
+      x,
+      water.position.y,
+      z + Math.min(3, water.userData.length / 4),
+    );
+    buoy.userData.cameraDynamic = true;
+    const floatRing = add(
       new THREE.TorusGeometry(0.46, 0.1, 8, 28),
       bronze,
       0,
       0.08,
       0,
       buoy,
-    ).rotation.x = Math.PI / 2;
-    add(
+    );
+    floatRing.rotation.x = Math.PI / 2;
+    game.cameraSurfaces?.capture(floatRing, { small: true, cylinderAxis: "z" });
+    const staff = add(
       new THREE.CylinderGeometry(0.045, 0.06, 1.1, 8),
       gold,
       0,
@@ -114,16 +126,47 @@ export function buildTideArchive(game) {
       0,
       buoy,
     );
-    for (let mark = 0; mark <= index; mark++)
-      add(
+    game.cameraSurfaces?.capture(staff, {
+      small: true,
+      thin: true,
+      cylinderAxis: "y",
+    });
+    for (let mark = 0; mark <= index; mark++) {
+      const collar = add(
         new THREE.TorusGeometry(0.11, 0.025, 5, 16),
         gold,
         0,
         0.48 + mark * 0.12,
         0,
         buoy,
-      ).rotation.x = Math.PI / 2;
+      );
+      collar.rotation.x = Math.PI / 2;
+      game.cameraSurfaces?.capture(collar, {
+        small: true,
+        thin: true,
+        cylinderAxis: "z",
+      });
+    }
     game.world.add(buoy);
+    const floatFeature = { id: `archive-float-${record.id}` },
+      floatSolids = [
+        stationSolid(
+          game,
+          floatFeature,
+          buoy,
+          [1.12, 0.2, 1.12],
+          [0, 0.08, 0],
+          { radius: 0.56, bodyPadding: 0.35, support: false, node: buoy },
+        ),
+        stationSolid(
+          game,
+          floatFeature,
+          buoy,
+          [0.27, 1.1, 0.27],
+          [0, 0.62, 0],
+          { radius: 0.135, bodyPadding: 0.35, support: false, node: buoy },
+        ),
+      ];
     const source = {
       id: `archive-bubbles-${index}`,
       kind: "bubbles",
@@ -139,6 +182,7 @@ export function buildTideArchive(game) {
       tablet,
       bubbles,
       buoy,
+      floatSolids,
       source,
       water,
       position: new THREE.Vector3(x, base + 1.3, z),
@@ -151,8 +195,14 @@ export function updateTideArchive(game) {
   for (const site of game.tideArchive || []) {
     const found = game.progress.archive?.includes(site.record.id);
     site.tablet.visible = !found;
-    site.buoy.position.y =
-      site.water.position.y + Math.sin(game.elapsed * 1.1) * 0.025;
+    const y = site.water.position.y + Math.sin(game.elapsed * 1.1) * 0.025,
+      delta = y - site.buoy.position.y;
+    site.buoy.position.y = y;
+    for (const solid of site.floatSolids) {
+      solid.bounds.min.y += delta;
+      solid.bounds.max.y += delta;
+      solid.h += delta;
+    }
     site.buoy.visible = !found;
     site.source.activity = found ? 0 : 1;
     site.bubbles.visible =
@@ -210,7 +260,7 @@ export function archiveHint(game) {
   return site
     ? {
         key: "X",
-        label: `${site.record.well} · Dive beneath the bronze float; follow the bubbles`,
+        label: `${site.record.well} · Dive beside the bronze float; follow the bubbles`,
       }
     : null;
 }
