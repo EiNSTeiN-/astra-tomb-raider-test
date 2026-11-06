@@ -5,6 +5,9 @@ An original, browser-based third-person archaeological adventure built with Thre
 The [ten cloud-terrace pavements](docs/sky-court-paving.md) connect the wind
 courts with varied granite courses, worn lanes and stepped blue-green inlays.
 
+The [wind bearing support repair](docs/wind-bearing-support.md) improves hand
+contact on the banked working courts while preserving the explorer's stance.
+
 The [wooded jungle rim](docs/jungle-escarpment.md) now has selective eroded ledges
 between retained tree groups and lighter limestone faces with runoff staining.
 

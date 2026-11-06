@@ -21,11 +21,15 @@ import { activeWindGrip, poseWindGrip, windHandsFree } from "./wind-pose.js";
 import { advanceCharacter, supportAt } from "./character-motion.js";
 import { extinguishTorch } from "./torch.js";
 import { frameWindControl } from "./wind-camera.js";
+
 import {
   batchWindCourt,
   syncWindCourt,
   windPlaqueFactory,
 } from "./wind-rendering.js";
+
+const WORKING_STANCE_DEPTH = 1.52;
+const BEARING_FOOT_OFFSET = 0.14;
 
 export function windReady(game, site) {
   return (
@@ -262,9 +266,11 @@ export function buildWindCourts(game) {
       );
       rotor.add(particles);
       const locked = state.fixed.includes(i),
-        // Sample the ground under the forward part of the planted stance.
-        // The controller pad can be higher than the casting on the bank edge.
-        wheelHeight = locked ? 1.04 : floor(x, z + 1.24) - y + 1.3,
+        // Centre the bearing over the planted foot area, rather than its toe.
+        // A low toe sample on a bank can put the turning grips out of reach.
+        wheelHeight = locked
+          ? 1.04
+          : floor(x, z + WORKING_STANCE_DEPTH - BEARING_FOOT_OFFSET) - y + 1.3,
         wheelDepth = locked ? 0.94 : 1.08,
         wheel = add(kit.wheel, trim, 0, wheelHeight, wheelDepth, body),
         handles = [-1, 1].map((side) => {
@@ -387,7 +393,9 @@ export function buildWindCourts(game) {
       );
       plaque.position.set(0, 0.61, 0.77);
       body.add(plaque);
-      const f = locked ? null : control("wheel", i, x, z + 1.52);
+      const f = locked
+        ? null
+        : control("wheel", i, x, z + WORKING_STANCE_DEPTH);
       const node = {
         index: i,
         x,

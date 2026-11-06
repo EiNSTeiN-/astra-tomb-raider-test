@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [wind bearing support repair](wind-bearing-support.md) changes original
+project-authored construction code with the existing credited character,
+machinery, materials, environment and audio. No external asset or dependency
+is added. Its two documentation figures are complete 1280 × 800 game captures
+copied byte-for-byte from the previous and corrected first-frame contact
+observers, framed relative to the wheel.
+
 The [cloud-terrace pavements](sky-court-paving.md) use original project-authored
 pattern and planting code with the existing credited terrain maps, ruins,
 explorer, lighting and audio. No external model, texture, recording, score or

@@ -83,8 +83,10 @@ identically in the unchanged baseline.
 
 The broader wind suite passes twenty cases and exposes one existing failure:
 the stage 2, node 9, turn 0 thumb enters its handle by 3.107 mm against a 2 mm
-tolerance. The identical failure reproduces in the saved baseline. Its
-tolerance is unchanged and the defect remains open as VA-251.
+tolerance. The identical failure reproduces in the saved baseline. The later
+[bearing support repair](wind-bearing-support.md) resolves VA-251 with the
+original tolerance. These measurements describe the paving milestone before
+that correction.
 
 All eighteen final development views are reviewed: the ordinary arrival,
 all ten court fronts, an open ground detail, and Medium/Performance fronts of
@@ -107,6 +109,6 @@ preview server close afterward under the shared five-of-sixteen CPU allowance.
 
 This improves the court surfaces within the wider
 [playable-world audit](visual-audit.md). Repeated forward machinery and chamber
-arrangements, broad margins, continuous traversal and body contact, the known
-thumb defect, listening and device coverage remain open. The broader eight-world
-goal is incomplete.
+arrangements, broad margins, continuous traversal and other body contact,
+listening and device coverage remain open. The broader eight-world goal is
+incomplete.

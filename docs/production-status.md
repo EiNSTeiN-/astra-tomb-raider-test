@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [wind bearing support repair](wind-bearing-support.md) adjusts 43 mounts
+  to the planted foot area, keeping the controller stance, character rig,
+  grip dimensions and contact tolerances unchanged. All 30 selected tests,
+  three CPU guard checks and the build pass. The full wind regression completes
+  all 110 working wheels and 2,200 turning poses plus walking approaches.
+  Eight final development views are reviewed; actual sampled hand and boot
+  contact pass, all controls and active source fronts remain clear, and all
+  1,963 tracked wind resources dispose on chapter replacement. Native keyboard
+  High and simulated touch Performance accept a legal turn, preserve the
+  standing position, retreat with health 100 and pass four complete-store
+  reload comparisons. All six release captures are reviewed, with owned
+  helpers closed under the shared five-of-sixteen CPU allowance. VA-251 is
+  fixed at the recorded wheel poses. Wider composition, continuous contact,
+  listening and device acceptance remain open.
+
 - The [ten cloud-terrace pavements](sky-court-paving.md) add varied granite
   courts, worn lanes and subdued inlays. All 70 focused tests, three CPU guard
   checks and the build pass. The 81 terrain chunks, their 2,771,406 attribute
@@ -28,8 +43,9 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   intersections. All eighteen final development views are reviewed. All 119
   wind controls and recorded active source fronts remain clear, and chapter
   replacement releases 3,487 tracked draw resources exactly once. The wider
-  wind suite also finds a baseline thumb-contact failure, retained as open
-  VA-251 with its tolerance unchanged. Native keyboard High and simulated touch
+  wind suite also records a baseline thumb-contact failure, subsequently
+  corrected by the bearing support repair with its tolerance unchanged.
+  Native keyboard High and simulated touch
   Performance pass forward/return movement and four complete-store reload
   comparisons. All six release captures are reviewed, and owned helpers close
   under the shared five-of-sixteen CPU allowance. Broader composition,

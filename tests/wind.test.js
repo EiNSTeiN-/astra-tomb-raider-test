@@ -83,7 +83,6 @@ function fixture(t, saved = null) {
     progress,
     world,
     terrainProfile: terrain,
-    groundHeight: terrain.height,
     player: new THREE.Group(),
     avatar: new THREE.Group(),
     items: [],

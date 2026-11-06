@@ -1,5 +1,11 @@
 # Wind handwheel construction and grip contact
 
+The later [bearing support repair](wind-bearing-support.md) corrects contact
+on the current banked ground by sampling between the old toe point and the
+unchanged stance centre. Its current regression covers all 110 working wheels
+with the original contact tolerances. The measurements below describe this
+grip-construction milestone at its publication time.
+
 The [foot-contact repair](wind-foot-contact.md) exposed a second problem at the
 wind engines: some posed wrists were about 0.6 m from their assigned moving
 anchors. The old wheels had point targets on a flat rim. Their mounts followed
