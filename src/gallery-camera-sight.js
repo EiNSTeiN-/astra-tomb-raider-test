@@ -32,7 +32,25 @@ export function galleryCameraSight(game, start, end, wheelContact = false) {
           : cylinderEntry(start, end, box, 0.02, "z");
       if (t !== null && t < 0.999999) return false;
     }
+  // Most furniture is in another passage. Reject only boxes outside the
+  // complete padded segment bounds before the exact slab query. Live gate
+  // bounds still participate on every ray, including while they retract.
+  const lowX = Math.min(start.x, end.x),
+    highX = Math.max(start.x, end.x),
+    lowY = Math.min(start.y, end.y),
+    highY = Math.max(start.y, end.y),
+    lowZ = Math.min(start.z, end.z),
+    highZ = Math.max(start.z, end.z);
   for (const box of gallery.solids) {
+    if (
+      box.max.x + 0.02 < lowX ||
+      box.min.x - 0.02 > highX ||
+      box.max.y + 0.02 < lowY ||
+      box.min.y - 0.02 > highY ||
+      box.max.z + 0.02 < lowZ ||
+      box.min.z - 0.02 > highZ
+    )
+      continue;
     const t = boxEntry(start, end, box, 0.02);
     if (t !== null && t < 0.999999) return false;
   }

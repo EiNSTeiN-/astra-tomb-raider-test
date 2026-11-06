@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [camera box filter](camera-box-cost.md) retains exact padded-boundary
+  and moving-gate results across 8,442 reference rays. All 151 selected tests,
+  three CPU-guard checks and the build pass. Controlled runs of the three
+  recorded camera motions reduce exact box-test calls from 37,724,799 to
+  383,315 while preserving the existing framing assertions and scene-query
+  peaks. The entrance-bank diagnostic does not reproduce the preceding
+  one-second update. The refreshed 4,496-update route retains legal body/lens
+  positions and matches all 365 early camera records and 149 preceding route
+  trace samples exactly. Its three independent body grids have zero blockers.
+  Production touch/keyboard dive-rise checks restore full breath and pass two
+  complete-store comparisons, with four Low captures reviewed at reduced pixel
+  density. Verification browsers and servers close.
+  Variable timing, including a 769.5 ms second-bell departure update, leaves
+  continuous device performance open.
+
 - The [memorial return recovery](gallery-return.md) retains an opaque candidate
   radius through clear turns while checking the actual arm, lens journey and
   full posed body. All 149 selected tests, three CPU-guard checks and the build

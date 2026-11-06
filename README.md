@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [camera box filter](docs/camera-box-cost.md) skips props outside each
+padded ray before exact collision testing, reducing repeated work while
+retaining body and lens clearance.
+
 The [memorial return recovery](docs/gallery-return.md) reduces redundant
 camera searches during a turn while retaining posed-body sight and the lens's
 actual path through the gallery.

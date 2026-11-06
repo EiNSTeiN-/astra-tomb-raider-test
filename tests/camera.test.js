@@ -16,6 +16,104 @@ import { SaveStore, normalizeSave } from "../src/storage.js";
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 
+test("indexed camera rays retain all-box results through padded boundaries and moving props", (t) => {
+  const world = new THREE.Group(),
+    moving = new THREE.Group(),
+    geometry = new THREE.BoxGeometry(2, 2, 2),
+    material = new THREE.MeshStandardMaterial(),
+    surfaces = new CameraSurfaces(world),
+    meshes = [];
+  moving.userData.cameraDynamic = true;
+  world.add(moving);
+  for (let i = 0; i < 30; i++) {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(
+      (i % 5) * 7 - 16,
+      (i % 3) * 6 - 8,
+      Math.floor(i / 5) * 5 - 16,
+    );
+    mesh.rotation.set(i * 0.07, i * 0.13, i * 0.03);
+    mesh.scale.set(0.8 + (i % 3) * 0.4, 1 + (i % 4) * 0.3, 0.9);
+    (i % 6 === 0 ? moving : world).add(mesh);
+    meshes.push(mesh);
+    surfaces.capture(mesh);
+  }
+  surfaces.rebuild();
+  t.after(() => {
+    geometry.dispose();
+    material.dispose();
+  });
+  let seed = 8231,
+    comparisons = 0;
+  const random = () =>
+    (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 2 ** 32;
+  for (let phase = 0; phase < 3; phase++) {
+    moving.position.set(phase * 3, -phase * 5, phase * 2);
+    moving.rotation.y = phase * 0.3;
+    moving.visible = phase !== 2;
+    world.updateMatrixWorld(true);
+    const references = meshes.map((mesh) => {
+      const matrix = mesh.matrixWorld,
+        e = matrix.elements;
+      return {
+        mesh,
+        inverse: matrix.clone().invert(),
+        bounds: geometry.boundingBox.clone().applyMatrix4(matrix),
+        scale: Math.min(
+          Math.hypot(...e.slice(0, 3)),
+          Math.hypot(...e.slice(4, 7)),
+          Math.hypot(...e.slice(8, 11)),
+        ),
+      };
+    });
+    for (const radius of [0, 0.02, 0.28, 0.8]) {
+      const rays = Array.from({ length: 160 }, () => [
+        v(random() * 54 - 27, random() * 36 - 18, random() * 54 - 27),
+        v(random() * 54 - 27, random() * 36 - 18, random() * 54 - 27),
+      ]);
+      for (const { bounds } of references)
+        for (const axis of ["x", "y", "z"])
+          for (const epsilon of [-1e-10, 0, 1e-10]) {
+            const start = bounds.getCenter(new THREE.Vector3()),
+              end = start.clone(),
+              along = axis === "x" ? "z" : "x";
+            start[axis] = end[axis] = bounds.max[axis] + radius + epsilon;
+            start[along] = bounds.min[along] - 2;
+            end[along] = bounds.max[along] + 2;
+            rays.push([start, end]);
+          }
+      for (const [index, [start, end]] of rays.entries()) {
+        const ignore = index % 7 === 0 ? moving : null;
+        let expected = 1;
+        for (const { mesh, inverse, bounds, scale } of references) {
+          if (
+            mesh.parent === ignore ||
+            (mesh.parent === moving && !moving.visible)
+          )
+            continue;
+          // The camera envelope is the world box intersected with the padded
+          // local primitive; nonuniform scale can enlarge that local margin.
+          if (boxEntry(start, end, bounds, radius, true) === null) continue;
+          const entry = boxEntry(
+            start.clone().applyMatrix4(inverse),
+            end.clone().applyMatrix4(inverse),
+            geometry.boundingBox,
+            radius / scale,
+          );
+          if (entry !== null) expected = Math.min(expected, entry);
+        }
+        assert.equal(
+          surfaces.entry(start, end, radius, ignore),
+          expected,
+          JSON.stringify({ phase, radius, index, start, end }),
+        );
+        comparisons++;
+      }
+    }
+  }
+  assert.equal(comparisons, 5160);
+});
+
 test("a synchronous camera snapshot shares moving bounds and releases them on success and failure", (t) => {
   const world = new THREE.Group(),
     moving = new THREE.Group(),

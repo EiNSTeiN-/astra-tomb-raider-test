@@ -298,13 +298,23 @@ export class CameraSurfaces {
     }
     let result = 1;
     this.lastCandidates = candidates.size;
-    const lowY = Math.min(start.y, end.y) - radius,
-      highY = Math.max(start.y, end.y) + radius;
+    // A spatial cell can contain many props beside a short body ray. Use the
+    // same expanded face coordinates as boxEntry so grazing rays survive.
+    const lowX = Math.min(start.x, end.x),
+      highX = Math.max(start.x, end.x),
+      lowY = Math.min(start.y, end.y),
+      highY = Math.max(start.y, end.y),
+      lowZ = Math.min(start.z, end.z),
+      highZ = Math.max(start.z, end.z);
     for (const surface of candidates) {
       if (
         surface.parent === ignoreParent ||
-        surface.bounds.max.y < lowY ||
-        surface.bounds.min.y > highY
+        surface.bounds.max.x + radius < lowX ||
+        surface.bounds.min.x - radius > highX ||
+        surface.bounds.max.y + radius < lowY ||
+        surface.bounds.min.y - radius > highY ||
+        surface.bounds.max.z + radius < lowZ ||
+        surface.bounds.min.z - radius > highZ
       )
         continue;
       let visible = true;
