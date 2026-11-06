@@ -2,6 +2,9 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [alpine gullies](docs/alpine-gullies.md) add descending cuts, more exposed
+rock and snow accumulation tied to the surrounding mountain geometry.
+
 The [ten cloud-terrace pavements](docs/sky-court-paving.md) connect the wind
 courts with varied granite courses, worn lanes and stepped blue-green inlays.
 

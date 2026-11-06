@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [alpine gullies and exposed rock](alpine-gullies.md) give the surrounding
+  snow ranges descending cuts, narrower crest caps and snow deposition tied to
+  those cuts. The existing triangle count is retained by concentrating radial
+  samples at the crests. All 27 selected tests, three CPU guard checks and the
+  build pass. All 81 playable terrain-buffer comparisons and the height array
+  remain unchanged; delivered mountain faces and lighting corners pass their
+  geometry checks. Thirteen matched High views and three preset views are
+  reviewed. Background/foreground depth comparisons pass, and all five tracked
+  range/foreland resources dispose once. Native keyboard High and simulated
+  portrait touch Low pass crouch, walking and four complete-store reload
+  comparisons, with all six release captures reviewed. Owned helpers close
+  under the shared five-of-sixteen CPU allowance. Broader mountain composition,
+  repeated courts, sparse spaces, continuous traversal, listening and device
+  acceptance remain open.
+
 - The [wind bearing support repair](wind-bearing-support.md) adjusts 43 mounts
   to the planted foot area, keeping the controller stance, character rig,
   grip dimensions and contact tolerances unchanged. All 30 selected tests,

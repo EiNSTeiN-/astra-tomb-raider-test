@@ -13,6 +13,7 @@ import {
   alpineForelandMaterial,
 } from "../src/alpine-foreland.js";
 import { alpineMaterial } from "../src/alpine-material.js";
+import { alpineColorLayer } from "../src/alpine-shader.js";
 import { winterScourDeclarations } from "../src/winter-scour.js";
 
 async function fixture(t) {
@@ -65,9 +66,9 @@ const fingerprint = (g) =>
     .digest("hex");
 
 // Output reference from published 9c095b1 and the locked Three.js shader library.
-// Keep the original projection, sampling and haze reference while allowing the
-// additive wind cover. The new layer also has independent GPU checks.
-test("wind cover retains the published range projection, sampling and haze", () => {
+// Keep the original projection, sampling, detail and haze reference outside the
+// intentionally revised colour/deposition layer and shared wind declarations.
+test("surface revisions retain the published range projection, sampling and haze", () => {
   const source = new T.MeshStandardMaterial(),
     material = alpineMaterial(source, new T.Color(0)),
     shader = {
@@ -77,7 +78,16 @@ test("wind cover retains the published range projection, sampling and haze", () 
     };
   material.onBeforeCompile(shader);
   assert.equal(
-    createHash("sha256").update(shader.vertexShader).digest("hex"),
+    createHash("sha256")
+      .update(
+        shader.vertexShader
+          .replace(
+            " attribute float snowDeposit; varying float vAlpineDeposit;",
+            "",
+          )
+          .replace(" vAlpineDeposit=snowDeposit;", ""),
+      )
+      .digest("hex"),
     "9d2ffda98a1c056657cdc0f55a50128afead3904889a967752a56d144f4823a9",
   );
   const windCover =
@@ -86,10 +96,11 @@ test("wind cover retains the published range projection, sampling and haze", () 
   assert(shader.fragmentShader.includes(windCover));
   const retained = shader.fragmentShader
     .replace("\n        " + winterScourDeclarations, "")
-    .replace(windCover, "");
+    .replace("\n        varying float vAlpineDeposit;", "")
+    .replace(alpineColorLayer, "");
   assert.equal(
     createHash("sha256").update(retained).digest("hex"),
-    "bb11270da1186f731140cda6e6ab07cc21dc95cb38832c13b4e6bb8caf117c93",
+    "5f8d035e58b3fbe330c85715b28eb0d55c2026e4c5f8e4a534affbe1e4d669a4",
   );
   source.dispose();
   material.dispose();

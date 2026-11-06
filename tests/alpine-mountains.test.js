@@ -72,14 +72,23 @@ test("mountain refinement bounds geometry while preserving the submerged aprons"
     const geometry = snowMountainGeometry(420, layer),
       { segments, rings } = geometry.userData,
       p = geometry.attributes.position,
-      n = geometry.attributes.normal;
+      n = geometry.attributes.normal,
+      deposit = geometry.attributes.snowDeposit;
     assert.equal(p.count, 74593);
     assert.equal(geometry.index.count / 3, 147456);
     assert(p.array.every(Number.isFinite));
     assert(n.array.every(Number.isFinite));
+    assert.equal(deposit.count, p.count);
+    assert(deposit.array.every((v) => Number.isFinite(v) && v >= 0 && v <= 1));
+    assert(
+      deposit.array.some((v) => v > 0.5),
+      "snow-receiving gullies exist",
+    );
     for (let i = 0; i <= segments; i++) {
       assert.equal(p.getY(i), -18);
       assert.equal(p.getY(rings * (segments + 1) + i), -18);
+      assert.equal(deposit.getX(i), 0);
+      assert.equal(deposit.getX(rings * (segments + 1) + i), 0);
     }
     // Duplicated positions and analytical normals must join exactly, so the
     // lighting/snow field cannot reveal a seam when the camera turns around.
@@ -89,6 +98,7 @@ test("mountain refinement bounds geometry while preserving the submerged aprons"
       for (const attribute of [p, n])
         for (const axis of ["X", "Y", "Z"])
           assert.equal(attribute[`get${axis}`](a), attribute[`get${axis}`](b));
+      assert.equal(deposit.getX(a), deposit.getX(b));
     }
     geometry.dispose();
   }

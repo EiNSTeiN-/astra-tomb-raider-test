@@ -73,7 +73,7 @@ test("snow banks retain monastery footings, working pads, ice edges and moving s
     for (let x = 154; x < 200; x += 0.9)
       if (shutterFoundationDistance(x, z) < 2) unchanged(x, z, "wind house");
 });
-test("snow terrain chunks share positions, normals and exposure without adding triangles", async (t) => {
+test("snow terrain chunks share grid normals, heights and exposure while retaining fitted draw corners", async (t) => {
   t.mock.method(THREE.TextureLoader.prototype, "load", (url, onLoad) => {
     const texture = new THREE.Texture();
     queueMicrotask(() => onLoad?.(texture));
@@ -87,7 +87,8 @@ test("snow terrain chunks share positions, normals and exposure without adding t
   for (const mesh of g.terrainMeshes) {
     const a = mesh.geometry.attributes,
       p = a.position,
-      n = a.normal;
+      n = a.normal,
+      local = new Set();
     triangles += mesh.geometry.index.count / 3;
     for (let i = 0; i < p.count; i++) {
       const values = [
@@ -101,8 +102,37 @@ test("snow terrain chunks share positions, normals and exposure without adding t
       assert(n.getY(i) > 0);
       assert(values[4] >= 0 && values[4] <= 1);
       const key = p.getX(i) + "," + p.getZ(i);
-      if (shared.has(key)) assert.deepEqual(values, shared.get(key));
-      else shared.set(key, values);
+      if (shared.has(key)) {
+        const original = shared.get(key);
+        assert.equal(values[0], original[0]);
+        assert.equal(values[4], original[4]);
+        // fitTerrainNormals appends corners whose smooth derivative pointed
+        // through a steep delivered face. Their positions/cover stay shared;
+        // their deliberate hard normals belong to that face, not the grid.
+        if (!local.has(key)) assert.deepEqual(values, original);
+      } else shared.set(key, values);
+      local.add(key);
+    }
+    const corners = [
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+      ],
+      triangle = new THREE.Triangle(...corners),
+      face = new THREE.Vector3(),
+      normal = new THREE.Vector3();
+    for (let i = 0; i < mesh.geometry.index.count; i += 3) {
+      const ids = [0, 1, 2].map((j) => mesh.geometry.index.getX(i + j));
+      for (let j = 0; j < 3; j++) corners[j].fromBufferAttribute(p, ids[j]);
+      triangle.getNormal(face);
+      for (const id of ids) {
+        normal.fromBufferAttribute(n, id);
+        assert(Math.abs(normal.length() - 1) < 1e-6);
+        assert(
+          normal.dot(face) >= -1e-7,
+          "draw normal faces its delivered triangle",
+        );
+      }
     }
     mesh.geometry.dispose();
   }

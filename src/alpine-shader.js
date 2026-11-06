@@ -6,6 +6,7 @@ export const alpineDeclarations = /* glsl */ `#include <common>
         uniform vec3 alpineHaze;
         varying vec3 vAlpinePosition, vAlpineNormal;
         varying float vAlpineClip;
+        varying float vAlpineDeposit;
         float alpineHash(vec2 p) {
           vec3 q=fract(vec3(p.xyx)*.1031);
           q+=dot(q,q.yzx+33.33);
@@ -55,13 +56,26 @@ export const alpineColorLayer = /* glsl */ `
           +alpineSample(map,alpineUv.xy)*alpineWeights.z;
         float broad=alpineNoise(vAlpinePosition.xz*.027);
         float broken=alpineNoise(vAlpinePosition.xz*.19+vAlpinePosition.y*.012);
-        float strata=sin(vAlpinePosition.y*.29+broad*5.);
+        // Inclined, gently folded beds remain legible across a whole face.
+        // Their edge width follows the pixel footprint at the distant horizon.
+        float fold=alpineNoise(vAlpinePosition.xz*.008);
+        vec2 bed=vec2(vAlpinePosition.y*.055+fold*1.8+(broad-.5)*.35,
+          dot(vAlpinePosition.xz,vec2(.024,.017)));
+        float bedding=alpineNoise(bed);
+        float bedEdge=max(.09,fwidth(bedding)*1.5);
+        float paleBed=smoothstep(.48-bedEdge,.48+bedEdge,bedding);
         float gray=dot(rock,vec3(.2126,.7152,.0722));
-        vec3 stone=mix(rock,vec3(gray)*vec3(.78,.85,.96),.8)
-          *(.36+.14*broad)*(.93+.07*strata);
+        vec3 mineral=mix(vec3(.58,.66,.77),vec3(.84,.79,.70),paleBed*.42);
+        vec3 stone=mix(rock,vec3(gray)*mineral,.84)
+          *(.34+.17*paleBed)*(.84+.16*broad);
         float snowline=27.+broad*30.;
-        float shelter=alpineN.y+(broad-.5)*.18+(broken-.5)*.045;
-        float snow=smoothstep(.58,.93,shelter)
+        // Shallow slopes accumulate; steeper shoulders shed their cover.
+        // Previously even moderate slopes saturated to snow, hiding the relief.
+        // Broad deposition and fine breakup perturb the edge without turning
+        // whole exposed faces into disconnected white noise patches.
+        float shelter=alpineN.y+(broad-.5)*.045+(broken-.5)*.012
+          +vAlpineDeposit*.18*smoothstep(.65,.94,alpineN.y);
+        float snow=smoothstep(.91,.995,shelter)
           *smoothstep(snowline,snowline+32.,vAlpinePosition.y);
         float rangeWindScour=winterWindScour(vAlpinePosition,alpineN,broad,broken);
         snow*=1.-rangeWindScour*.9;

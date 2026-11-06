@@ -24,11 +24,11 @@ export function alpineMaterial(source, haze) {
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
-        "#include <common>\nvarying vec3 vAlpinePosition, vAlpineNormal; varying float vAlpineClip;",
+        "#include <common>\nvarying vec3 vAlpinePosition, vAlpineNormal; varying float vAlpineClip; attribute float snowDeposit; varying float vAlpineDeposit;",
       )
       .replace(
         "#include <begin_vertex>",
-        "#include <begin_vertex>\nvAlpinePosition=(modelMatrix*vec4(position,1.)).xyz; vAlpineNormal=normalize(mat3(modelMatrix)*normal);",
+        "#include <begin_vertex>\nvAlpinePosition=(modelMatrix*vec4(position,1.)).xyz; vAlpineNormal=normalize(mat3(modelMatrix)*normal); vAlpineDeposit=snowDeposit;",
       )
       .replace(
         "#include <project_vertex>",
@@ -48,6 +48,6 @@ export function alpineMaterial(source, haze) {
       .replace("#include <normal_fragment_maps>", alpineNormalLayer)
       .replace("#include <opaque_fragment>", alpineHazeLayer);
   };
-  material.customProgramCacheKey = () => "vesper-alpine-range-8-wind-scour";
+  material.customProgramCacheKey = () => "vesper-alpine-range-9-exposed-beds";
   return material;
 }

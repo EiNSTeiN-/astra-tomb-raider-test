@@ -338,10 +338,12 @@ export function alpineForelandMaterial(terrain, rock, haze, extent) {
       );
     const declarations = alpineDeclarations
       .replace("varying vec3 vAlpinePosition, vAlpineNormal;", "")
-      .replace("varying float vAlpineClip;", "");
+      .replace("varying float vAlpineClip;", "")
+      .replace("varying float vAlpineDeposit;", "");
     const color = alpineColorLayer
       .replaceAll("vAlpinePosition", "vTerrainPosition")
       .replaceAll("vAlpineNormal", "vTerrainNormal")
+      .replaceAll("vAlpineDeposit", "0.")
       .replaceAll("alpineSample(map,", "alpineSample(forelandRockMap,");
     const normal = alpineNormalLayer.replaceAll(
       "alpineSample(normalMap,",
@@ -419,6 +421,6 @@ export function alpineForelandMaterial(terrain, rock, haze, extent) {
       );
   };
   material.customProgramCacheKey = () =>
-    terrain.customProgramCacheKey() + "-alpine-foreland-1";
+    terrain.customProgramCacheKey() + "-alpine-foreland-2-exposed-beds";
   return material;
 }

@@ -336,6 +336,13 @@ normal maps. No external model, texture, recording, music or dependency was
 added. Its documentation images are lossless conversions of actual game
 captures, with decoded RGBA identity checked before publication.
 
+The [alpine gullies and exposed rock](alpine-gullies.md) use original procedural
+geometry and material code in `src/snow-mountains.js`, `src/alpine-shader.js`,
+`src/alpine-material.js` and `src/alpine-foreland.js`. They reuse the credited
+Rock Boulder Dry colour and normal maps, with no new external asset, recording,
+music or dependency. The four documentation images are lossless conversions
+of actual game captures with identical decoded RGBA pixels and dimensions.
+
 The [alpine rock variation](alpine-rock-variation.md) is original shader code in
 `src/alpine-material.js`. It reuses the credited Rock Boulder Dry colour and
 normal maps; no external asset, recording, music or dependency was added.
