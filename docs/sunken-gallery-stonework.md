@@ -100,6 +100,11 @@ applies. No external model, texture, recording, score or dependency is added.
 
 ## Remaining work
 
+The subsequent [submerged camera revision](submerged-camera.md) repairs the
+recorded underwater fade and wheel framing described below. It documents the
+remaining motion and exterior surface-readability work separately. The following
+observations retain the evidence from this stonework milestone.
+
 The route review also records a pre-existing camera squeeze while descending
 between the two colonnade obstructions. The lens can approach within about
 1.06 m of the player's position and fade the explorer completely. It occurs in

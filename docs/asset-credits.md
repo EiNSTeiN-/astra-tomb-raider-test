@@ -1,5 +1,11 @@
 # Asset credits and provenance
 
+The [submerged explorer camera](submerged-camera.md) reuses the existing credited
+character, gallery materials, environment, recordings and scores. Its shell
+camera metadata and repositioned guide lamp are project-authored code. No
+external model, bitmap, audio or dependency is added. Its six documentation
+images are complete, unretouched game captures with lossless WebP conversion.
+
 The [submerged gallery stonework](sunken-gallery-stonework.md) uses original
 project construction in `src/sunken-gallery-masonry.js` and
 `src/sunken-gallery.js`, reusing the existing credited stone maps and procedural

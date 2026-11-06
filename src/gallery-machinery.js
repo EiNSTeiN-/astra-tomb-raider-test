@@ -242,6 +242,40 @@ export function buildGalleryMachinery(game, { add, block, bronze, trim }) {
     return handle;
   });
   mergeArchitecture(wheel);
+  // The wheel is open between its spokes, but a view through those openings
+  // can still cover most of the explorer. Reserve its full rotating envelope
+  // for body framing only, derived from the delivered vertices. Player and
+  // camera-centre collision continue to use their existing physical shapes.
+  let radius = 0,
+    minZ = Infinity,
+    maxZ = -Infinity;
+  const point = new THREE.Vector3();
+  wheel.updateWorldMatrix(true, true);
+  wheel.traverse((mesh) => {
+    if (!mesh.isMesh) return;
+    const position = mesh.geometry.attributes.position;
+    for (let i = 0; i < position.count; i++) {
+      point
+        .fromBufferAttribute(position, i)
+        .applyMatrix4(mesh.matrixWorld)
+        .sub(profile.wheel);
+      radius = Math.max(radius, Math.hypot(point.x, point.y));
+      minZ = Math.min(minZ, point.z);
+      maxZ = Math.max(maxZ, point.z);
+    }
+  });
+  gallery.wheelSight = new THREE.Box3(
+    new THREE.Vector3(
+      profile.wheel.x - radius,
+      profile.wheel.y - radius,
+      profile.wheel.z + minZ,
+    ),
+    new THREE.Vector3(
+      profile.wheel.x + radius,
+      profile.wheel.y + radius,
+      profile.wheel.z + maxZ,
+    ),
+  );
   const w = profile.wheel;
   block(w.x, w.y - 0.8, w.z + 0.35, 0.7, 1.6, 0.55, game.stoneMat, true);
   block(w.x, w.y, w.z + 0.08, 0.55, 0.55, 0.1, bronze);

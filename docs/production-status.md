@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [submerged explorer camera](submerged-camera.md) repairs the recorded
+  colonnade and wheel fade, floating bell framing and foreground entrance lamp.
+  All 108 selected tests, three CPU guard checks and the build pass. The
+  185.88 m assisted route retains opacity 1 and legal body/lens queries across
+  4,496 updates, with all 45 development captures reviewed. Independent stopped
+  descent/wheel grids find zero blockers. The focused well and wheel-release
+  regressions retain bounded motion. Keyboard High and simulated touch Low
+  pass diving, movement, interrupted/complete wheel use and four whole-store
+  reload comparisons; all six release captures are reviewed and helpers close.
+  A route camera hitch, portrait rim coverage and faster entrance
+  turn remain open in VA-254; exterior surface-swimmer readability remains
+  open in VA-255. Broader world, contact, listening and device work continues.
+
 - The [submerged gallery stonework](sunken-gallery-stonework.md) adds 1,483
   closed limestone pieces across the memorial route and replaces four floating
   bronze fixtures with founded floor-to-cap ties. All 38 selected tests,
@@ -32,8 +45,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   all 14 tracked new resources once, and owned helpers close under the shared
   five-of-sixteen CPU allowance. The same route also records an unresolved
   swim-camera squeeze at the colonnade descent; a native wheel view also hides
-  the explorer. These remain in VA-253, alongside broader world/contact,
-  listening and device acceptance work.
+  the explorer. The subsequent camera milestone repairs those recorded fades
+  in VA-253; broader world/contact, listening and device acceptance remain open.
 
 - The [alpine gullies and exposed rock](alpine-gullies.md) give the surrounding
   snow ranges descending cuts, narrower crest caps and snow deposition tied to

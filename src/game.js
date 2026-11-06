@@ -18,7 +18,7 @@ import { buildDiscoveryProps, discoveryReachable } from "./discovery-props.js";
 import { mechanismReachable } from "./mechanism-reach.js";
 import { buildDiscoverySettings } from "./discovery-settings.js";
 import { arrivalCamera } from "./camera-arrival.js";
-import { normalizeCamera } from "./camera-state.js";
+import { normalizeCamera, diveCameraFrame } from "./camera-state.js";
 import {
   buildDesertSurvey,
   updateDesertSurvey,
@@ -2192,7 +2192,11 @@ export class Adventure {
             Math.max(
               this.groundHeight(p.x, p.z) + 0.28,
               this.swimming && !this.diving
-                ? (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12
+                ? Math.min(
+                    (waterAt(this, p.x, p.z)?.y ?? -Infinity) + 0.12,
+                    this.camera?.position.y ?? Infinity,
+                    this.cameraFollowTarget?.y ?? Infinity,
+                  )
                 : -Infinity,
             );
   }
@@ -2242,6 +2246,20 @@ export class Adventure {
     return true;
   }
   restoreCamera(next, preferredView = null) {
+    this.cameraDiveBlend = this.diving ? 1 : 0;
+    this.cameraSwimBlend = this.swimming || this.diving ? 1 : 0;
+    this.cameraGalleryExit = null;
+    this.cameraFollowTarget = null;
+    if (this.swimming && !this.diving)
+      this.camera.position.y = Math.max(
+        this.camera.position.y,
+        (waterAt(
+          this,
+          this.player.position.x,
+          this.player.position.z,
+          this.player.position.y,
+        )?.y ?? -Infinity) + 0.12,
+      );
     const p = this.player.position,
       saved = this.progress.position,
       stored =
@@ -2253,7 +2271,9 @@ export class Adventure {
         yaw: Math.atan2(p.x - next.x * CELL, p.z - next.z * CELL),
         pitch: 0.15,
       },
-      chest = p.clone().add(new THREE.Vector3(0, this.diving ? 0.3 : 1.3, 0)),
+      chest = p
+        .clone()
+        .add(new THREE.Vector3(0, this.cameraSwimBlend ? 0.3 : 1.3, 0)),
       standoff = windCameraStandoff(this),
       target = chest.clone().add(new THREE.Vector3(0, 0, standoff)),
       view =
@@ -2338,18 +2358,24 @@ export class Adventure {
     }
     const standoff = windCameraStandoff(this),
       cipherView = cipherCameraRecovery(this),
+      waterView = diveCameraFrame(
+        this,
+        dt,
+        THREE.MathUtils.lerp(5.3, 2.7, blend),
+      ),
       target = this.player.position
         .clone()
         .add(
           new THREE.Vector3(
             Math.cos(this.yaw) * blend * aimShoulder(this.camera),
-            this.diving ? 0.3 : 1.3 + blend * 0.18 - this.crouchCamera,
+            waterView.height +
+              (1 - waterView.swimBlend) * (blend * 0.18 - this.crouchCamera),
             -Math.sin(this.yaw) * blend * aimShoulder(this.camera) +
               standoff +
               cipherView.offset,
           ),
         ),
-      distance = this.diving ? 3.4 : THREE.MathUtils.lerp(5.3, 2.7, blend);
+      distance = waterView.distance;
     const offset = new THREE.Vector3(
       Math.sin(this.yaw) * Math.cos(cipherView.pitch) * distance,
       Math.sin(cipherView.pitch) * distance + 0.2 * (1 - blend),
@@ -2366,6 +2392,16 @@ export class Adventure {
       target.copy(constrainCamera(center, target, surfaces, canOccupy));
     }
     const desired = target.clone().add(offset);
+    if (this.swimming && !this.diving)
+      desired.y = Math.max(
+        desired.y,
+        (waterAt(
+          this,
+          this.player.position.x,
+          this.player.position.z,
+          this.player.position.y,
+        )?.y ?? -Infinity) + 0.12,
+      );
     this.camera.position.copy(
       followClearCamera(
         this,

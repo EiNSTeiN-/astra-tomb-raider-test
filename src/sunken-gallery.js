@@ -20,8 +20,9 @@ import {
   buildGalleryMasonry,
   buildBellAnchors,
 } from "./sunken-gallery-masonry.js";
+import { captureGalleryShell } from "./gallery-shell-camera.js";
 
-function interiorShell(profile, walls) {
+function interiorShell(profile, walls, panels) {
   const step = 0.5,
     cells = new Map();
   for (let ix = -72; ix < 0; ix++)
@@ -34,6 +35,18 @@ function interiorShell(profile, walls) {
   const positions = [],
     uvs = [];
   const quad = (a, b, c, d, wall = false) => {
+    const axis = [0, 1, 2].find(
+        (i) => a[i] === b[i] && a[i] === c[i] && a[i] === d[i],
+      ),
+      axes = [0, 1, 2].filter((i) => i !== axis);
+    panels.push({
+      axis,
+      plane: a[axis],
+      u0: Math.min(...[a, b, c, d].map((p) => p[axes[0]])),
+      u1: Math.max(...[a, b, c, d].map((p) => p[axes[0]])),
+      v0: Math.min(...[a, b, c, d].map((p) => p[axes[1]])),
+      v1: Math.max(...[a, b, c, d].map((p) => p[axes[1]])),
+    });
     for (const point of [a, b, d, b, c, d]) {
       positions.push(...point);
       uvs.push(
@@ -200,8 +213,10 @@ export function buildSunkenGallery(game) {
       });
     return mesh;
   };
-  const walls = [];
-  add(interiorShell(profile, walls), game.darkMat, 0, 0, 0);
+  const walls = [],
+    panels = [];
+  add(interiorShell(profile, walls, panels), game.darkMat, 0, 0, 0);
+  captureGalleryShell(game, panels);
   buildGalleryMasonry(game, walls);
   const o = profile.origin;
   // Entry piers, a continuous bronze survey line, and the colonnade's surviving
@@ -218,9 +233,16 @@ export function buildSunkenGallery(game) {
       true,
     );
   block(o.x - 3, o.y - 2.22, o.z, 0.8, 0.42, 4.8);
-  add(new THREE.SphereGeometry(0.14, 12, 8), glass, o.x - 3.35, o.y - 2.5, o.z);
+  gallery.entranceLamp = add(
+    new THREE.SphereGeometry(0.14, 12, 8),
+    glass,
+    o.x - 3,
+    o.y - 2.5,
+    o.z + 1.9,
+  );
+  game.cameraSurfaces?.capture(gallery.entranceLamp, { small: true });
   const entranceLight = new THREE.PointLight(0x94c7b8, 8, 12, 2);
-  entranceLight.position.set(o.x - 3.35, o.y - 2.75, o.z);
+  entranceLight.position.set(o.x - 3.35, o.y - 2.75, o.z + 1.65);
   root.add(entranceLight);
   gallery.lights.push(entranceLight);
   for (const [x, z, w, d, y] of [

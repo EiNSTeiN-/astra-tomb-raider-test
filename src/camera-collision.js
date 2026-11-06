@@ -298,8 +298,15 @@ export class CameraSurfaces {
     }
     let result = 1;
     this.lastCandidates = candidates.size;
+    const lowY = Math.min(start.y, end.y) - radius,
+      highY = Math.max(start.y, end.y) + radius;
     for (const surface of candidates) {
-      if (surface.parent === ignoreParent) continue;
+      if (
+        surface.parent === ignoreParent ||
+        surface.bounds.max.y < lowY ||
+        surface.bounds.min.y > highY
+      )
+        continue;
       let visible = true;
       for (let p = surface.parent; p; p = p.parent)
         if (!p.visible) {
