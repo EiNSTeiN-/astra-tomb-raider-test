@@ -19,6 +19,19 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [air-bell water and lighting revision](gallery-water.md) reduces the
+  recorded glare across the resting explorer. Eighteen reviewed scene captures
+  cover both bells at all three qualities, later ripple phases, underwater
+  swimming and upward water inspection, including six matched before/after
+  pairs. Sixteen High/Medium raw HDR buffers remain finite. All 26 selected
+  regressions, three CPU-budget checks and the build pass. The isolated gallery
+  retains identical geometry, transforms, solid bounds and sound-source records
+  across 39 meshes and 200 geometry/index arrays. Production touch/keyboard
+  dives retain full breath recovery and two complete-store comparisons, with
+  four Low captures reviewed at reduced pixel density. Browsers and preview
+  servers close. Broad floor/ceiling repetition, continuous camera timing and
+  wider world/contact/listening/device acceptance remain open.
+
 - The [cast-metal weathering revision](bronze-patina.md) softens the gridlike
   oxidation pattern and filters all three surface-detail scales. Twenty scene
   captures cover all eight regional counterweights, both air bells and shared
@@ -30,8 +43,8 @@ The distance-sensitive environmental soundscape and quiet background music tailo
   retain full breath recovery and two complete-store comparisons, with four
   Low release captures reviewed at reduced pixel density. Verification browsers
   and servers close. The gallery is checked at High, Medium and Low. Strong
-  air-bell glare, broader world composition and device/listening acceptance
-  remain open.
+  air-bell glare is recorded here and addressed by the later water revision;
+  broader world composition and device/listening acceptance remain open.
 
 - The [camera box filter](camera-box-cost.md) retains exact padded-boundary
   and moving-gate results across 8,442 reference rays. All 151 selected tests,

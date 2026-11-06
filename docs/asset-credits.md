@@ -1,5 +1,13 @@
 # Asset credits and provenance
 
+The [air-bell water revision](gallery-water.md) is original project shader and
+lighting code, reusing the existing original filtered water-ripple field and
+the credited game assets. No external model, bitmap, recording, score or
+dependency is added. Its four figures are complete, unretouched game captures
+converted losslessly to WebP with identical decoded pixels and dimensions.
+The preceding-material figures replay the old water and light offset on the
+same geometry; the upward inspection pair hides the explorer.
+
 The [cast-metal weathering revision](bronze-patina.md) uses original procedural
 shader code and the existing credited models, world surfaces, recordings and
 scores. No external model, texture, recording, score or dependency is added.

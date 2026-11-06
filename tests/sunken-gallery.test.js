@@ -160,6 +160,35 @@ export function swimTo(game, x, y, z) {
   );
 }
 
+test("air-bell water stays in the live scene and follows the reservoir after consolidation", () => {
+  const g = galleryGame(),
+    gallery = g.sunkenGallery,
+    ray = new THREE.Raycaster();
+  for (const bell of gallery.profile.bells) {
+    const surface = gallery.waterById.get(bell.id),
+      outside = gallery.outsideWater.find((entry) => entry.bell === bell).mesh;
+    assert.equal(surface.parent, gallery.root);
+    assert.equal(outside.parent, gallery.root);
+    for (const y of [bell.rim - 0.6, bell.ceiling - 0.5]) {
+      gallery.well.position.y = y;
+      updateSunkenGallery(g, 0, false);
+      gallery.root.updateMatrixWorld(true);
+      assert(outside.visible);
+      ray.set(
+        new THREE.Vector3(bell.x + bell.radius + 0.6, bell.ceiling + 1, bell.z),
+        new THREE.Vector3(0, -1, 0),
+      );
+      const hit = ray.intersectObject(outside, false)[0];
+      assert(hit, "the delivered outer water still covers its footprint");
+      assert(Math.abs(hit.point.y - y) < 0.00001);
+      assert.equal(surface.position.y, bell.y);
+    }
+    gallery.well.position.y = bell.ceiling - 0.04;
+    updateSunkenGallery(g, 0, false);
+    assert.equal(outside.visible, false);
+  }
+});
+
 test("the memorial vault blocks ascent at its visible surface and leaves room to swim below", () => {
   const g = galleryGame({ opened: true }),
     o = g.terrainProfile.gallery.origin;

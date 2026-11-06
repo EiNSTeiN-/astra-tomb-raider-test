@@ -1,5 +1,9 @@
 # Softer weathering on cast metal
 
+The later [air-bell water revision](gallery-water.md) investigates and reduces
+the glare recorded below. This page retains the weathering milestone's views
+and verification scope.
+
 The air-bell skirts showed square-edged patches of oxidation in close views.
 The shared cast-metal shader now uses a smoother noise transition, a rotated
 sampling basis and a gently warped detail layer. Softer color and roughness

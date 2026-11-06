@@ -21,6 +21,7 @@ import {
   buildBellAnchors,
 } from "./sunken-gallery-masonry.js";
 import { captureGalleryShell } from "./gallery-shell-camera.js";
+import { galleryWaterMaterial } from "./gallery-water.js";
 
 function interiorShell(profile, walls, panels) {
   const step = 0.5,
@@ -161,6 +162,7 @@ export function buildSunkenGallery(game) {
     solids: [],
     gates: [],
     waterById: new Map(),
+    waterTime: { value: game.elapsed || 0 },
     sources: [],
     lights: [],
     outsideWater: [],
@@ -276,6 +278,7 @@ export function buildSunkenGallery(game) {
   // Alternating high and low openings in a collapse require vertical swimming.
   block(o.x - 30.2, o.y - 6.35, o.z + 22, 4.1, 2.3, 1.2, game.stoneMat, true);
   block(o.x - 27.8, o.y - 3.5, o.z + 27, 4.1, 2, 1.15, game.stoneMat, true);
+  const shelteredWater = galleryWaterMaterial(gallery.waterTime);
   for (const [index, bell] of profile.bells.entries()) {
     const wallTop = bell.ceiling,
       height = wallTop - bell.rim;
@@ -328,15 +331,7 @@ export function buildSunkenGallery(game) {
     }
     const water = add(
       new THREE.CircleGeometry(bell.radius - 0.08, 48),
-      new THREE.MeshStandardMaterial({
-        color: 0x4a8f8b,
-        transparent: true,
-        opacity: 0.52,
-        metalness: 0.3,
-        roughness: 0.18,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      }),
+      shelteredWater,
       bell.x,
       bell.y,
       bell.z,
@@ -344,6 +339,7 @@ export function buildSunkenGallery(game) {
     water.rotation.x = -Math.PI / 2;
     water.userData = {
       kind: "gallery-water",
+      animated: true,
       width: bell.radius * 2,
       length: bell.radius * 2,
     };
@@ -410,6 +406,7 @@ export function buildSunkenGallery(game) {
       bell.z,
     );
     outside.rotation.x = -Math.PI / 2;
+    outside.userData.animated = true;
     gallery.outsideWater.push({ mesh: outside, bell });
     const source = {
       id: `gallery-${bell.id}`,
@@ -473,6 +470,7 @@ export function buildSunkenGallery(game) {
 export function updateSunkenGallery(game, dt, observePlayer = true) {
   const gallery = game.sunkenGallery;
   if (!gallery) return;
+  gallery.waterTime.value = game.elapsed;
   if (gallery.operation && (!game.diving || game.health <= 0))
     gallery.operation = null;
   updateGalleryMachinery(game, dt);
@@ -526,7 +524,9 @@ export function updateSunkenGallery(game, dt, observePlayer = true) {
     light.visible = inside || p.distanceTo(light.position) < 22;
   if (game.playerLight) {
     game.playerLight.intensity = inside ? 4.5 : 0.45;
-    game.playerLight.position.y = inside ? 0.65 : 2;
+    // Keep the fill above the swimmer rather than just above the meniscus,
+    // where its near-field reflection hid the torso at a breathing stop.
+    game.playerLight.position.y = inside ? 1.25 : 2;
   }
 }
 

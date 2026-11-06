@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [air-bell water revision](docs/gallery-water.md) softens the water glare
+across the explorer, adds sheltered ripples and preserves moving reservoir
+surfaces.
+
 The [cast-metal weathering revision](docs/bronze-patina.md) softens square-edged
 patina on the air bells and shared mechanisms, with distance filtering for
 surface detail.
