@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [memorial return recovery](gallery-return.md) is original camera code and
+reuses the existing credited character, gallery, materials, recordings and
+scores. No external model, bitmap, recording, score or dependency is added.
+Its two documentation figures are complete, unretouched game captures
+converted losslessly to WebP; decoded RGBA pixels and dimensions match their
+source captures. The touch figure uses Low quality; the turn figure uses High.
+
 The [gallery camera-path repair](gallery-motion.md) reuses the existing
 credited character, wheel, stone/bronze materials, environment, recordings and
 scores. Its casting envelopes, terrain-sight and pose changes are original

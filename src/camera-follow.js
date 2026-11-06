@@ -490,8 +490,37 @@ function followClearCameraStep(
       !clearApproach(game, target, end, ahead, canOccupy, surfaces)
     )
       continue;
-    const next = follow(end),
-      length = next.distanceTo(target),
+    const next = follow(end);
+    if (confined && dt > 0 && dt <= 0.1 && safeLength >= comfortable) {
+      const length = next.distanceTo(target),
+        opaqueLength = 2.21,
+        previousLength = game.camera.position.distanceTo(
+          game.cameraFollowTarget || target,
+        );
+      // A turning interpolation can shave millimetres off an otherwise clear
+      // opaque view. Extend at the existing radial rate before searching more
+      // orbits, retaining both the arm and the actual lens sweep. The extra
+      // centimetre avoids rounding back into the 2.2 m fade boundary.
+      if (length < 2.2 && opaqueLength <= previousLength + SWIM_ARM_RATE * dt) {
+        const extended = target
+          .clone()
+          .add(next.clone().sub(target).setLength(opaqueLength));
+        if (
+          canOccupy(extended) &&
+          constrainCamera(target, extended, surfaces, canOccupy).distanceTo(
+            extended,
+          ) < 1e-6 &&
+          constrainCamera(
+            game.camera.position,
+            extended,
+            surfaces,
+            canOccupy,
+          ).distanceTo(extended) < 1e-6
+        )
+          next.copy(extended);
+      }
+    }
+    const length = next.distanceTo(target),
       visible = visibility(next),
       endVisible = visibility(safe),
       score =

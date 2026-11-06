@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [memorial return recovery](gallery-return.md) retains an opaque candidate
+  radius through clear turns while checking the actual arm, lens journey and
+  full posed body. All 149 selected tests, three CPU-guard checks and the build
+  pass. The exact loaded-world return witness drops from twenty candidates
+  and 7,717 scene queries to a 746-query peak over 120 updates. Seven fixture
+  body grids, all 120 actual gallery lens sweeps and three loaded-world body
+  grids pass. The 185.88 m assisted gallery loop retains legal body/lens
+  positions over 4,496 updates; all 45 captures are reviewed. Production
+  keyboard/touch return and breath checks pass three complete-store
+  comparisons, with twelve native images reviewed. Native checks use Low
+  quality and reduced pixel density for the checkpoint and keyboard cases.
+  Timing samples vary substantially, including a separate 1,044.9 ms early
+  entrance-bank update. They do not establish a frame-rate improvement or
+  continuous performance acceptance. Verification browsers and servers close.
+
 - The [gallery camera-path repair](gallery-motion.md) replaces the combined
   wheel box with casting-specific circular envelopes and respects the actual
   terrain cut at the entrance. A corrected folded pose clears the head from

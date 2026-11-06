@@ -910,40 +910,63 @@ test("a folded swim pose keeps the delivered head, hair and equipment outside th
   }
 });
 
-for (const label of ["wheel departure", "entrance turn"])
-  test(`${label} retains continuous framing with bounded camera work`, async (t) => {
+const recordedMotions = [
+  {
+    label: "wheel departure",
+    elapsed: 69.966666666664,
+    player: [197.1, -5.883519582748413, 114.15],
+    camera: [197.09444511447956, -4.949255484052363, 110.78117134027502],
+    yaw: 4.817004947267814,
+    facing: 0,
+    recovery: [Math.PI - 4.817004947267814, 0],
+    destination: [-8, -6.3, 36],
+  },
+  {
+    label: "entrance turn",
+    elapsed: 97.0999999999959,
+    player: [194.59999983713615, -3.334496316489686, 79.93098751819397],
+    camera: [194.59999464151772, -2.412543265727898, 83.66374669020786],
+    yaw: -0.00000130028887264,
+    facing: Math.PI,
+    destination: [0, -3.5, 0],
+  },
+  {
+    label: "memorial return",
+    elapsed: 75.4166666666638,
+    player: [193.60005902977255, -6.906467392864961, 128.17628601232914],
+    camera: [193.60187065016063, -5.96569229335428, 124.44274332197482],
+    yaw: 3.1411122372107534,
+    facing: 0,
+    recovered: true,
+    destination: [-8, -5.35, 38],
+  },
+];
+for (const pose of recordedMotions)
+  test(`${pose.label} retains continuous framing with bounded camera work`, async (t) => {
     const g = fixture(t);
     await loadSwimmer(g);
-    const wheel = label === "wheel departure",
-      o = g.terrainProfile.gallery.origin;
-    g.elapsed = wheel ? 69.966666666664 : 97.0999999999959;
+    const o = g.terrainProfile.gallery.origin;
+    g.elapsed = pose.elapsed;
     g.rig.mixer.setTime(0.1 + g.elapsed - 25);
-    g.player.position.fromArray(
-      wheel
-        ? [197.1, -5.883519582748413, 114.15]
-        : [194.59999983713615, -3.334496316489686, 79.93098751819397],
-    );
-    g.camera.position.fromArray(
-      wheel
-        ? [197.09444511447956, -4.949255484052363, 110.78117134027502]
-        : [194.59999464151772, -2.412543265727898, 83.66374669020786],
-    );
-    g.yaw = wheel ? 4.817004947267814 : -0.00000130028887264;
+    g.player.position.fromArray(pose.player);
+    g.camera.position.fromArray(pose.camera);
+    g.yaw = pose.yaw;
     g.pitch = 0.13;
-    g.avatar.rotation.y = wheel ? 0 : Math.PI;
+    g.avatar.rotation.y = pose.facing;
     g.rig.bellFloat = g.rig.wheelBrace = g.rig.swimCompact = 0;
     g.progress.gallery.opened = true;
+    g.progress.gallery.recovered = !!pose.recovered;
     g.sunkenGallery.lift = 1;
     g.sunkenGallery.wheel.rotation.z = -Math.PI / 6;
     updateSunkenGallery(g, 0);
     g.cameraFollowTarget = g.player.position
       .clone()
       .add(new THREE.Vector3(0, 0.3, 0));
-    g.cameraBodyRecovery = wheel ? [Math.PI - g.yaw, 0] : null;
+    g.cameraBodyRecovery = pose.recovery ? [...pose.recovery] : null;
     g.cameraContactRecovery = g.cameraBodyRecovery;
-    const destination = new THREE.Vector3(
-        ...(wheel ? [-8, -6.3, 36] : [0, -3.5, 0]),
-      ).add(new THREE.Vector3(o.x, o.y, o.z)),
+    const destination = new THREE.Vector3(...pose.destination).add(
+        new THREE.Vector3(o.x, o.y, o.z),
+      ),
       entry = g.cameraSurfaces.entry;
     let queries = 0,
       maxQueries = 0,
@@ -959,6 +982,20 @@ for (const label of ["wheel departure", "entrance turn"])
     g.sunkenGallery.root.traverse((m) => {
       if (m.isMesh && !m.material.transparent) meshes.push(m);
     });
+    const sweepMaterial = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+      }),
+      sweepMeshes = pose.recovered
+        ? meshes.map((m) => {
+            const proxy = new THREE.Mesh(m.geometry, sweepMaterial);
+            proxy.matrixAutoUpdate = false;
+            proxy.matrix.copy(m.matrixWorld);
+            proxy.updateMatrixWorld(true);
+            return proxy;
+          })
+        : [],
+      sweepRay = new THREE.Raycaster();
+    t.after(() => sweepMaterial.dispose());
     for (let frame = 0; frame < 120; frame++) {
       const delta = destination.clone().sub(g.player.position),
         horizontal = Math.hypot(delta.x, delta.z),
@@ -1006,8 +1043,18 @@ for (const label of ["wheel departure", "entrance turn"])
       maxLensStep = Math.max(maxLensStep, old.distanceTo(g.camera.position));
       assert(queries < 5000, JSON.stringify({ frame, queries }));
       assert(g.cameraSpace(g.camera.position), `legal lens ${frame}`);
+      if (pose.recovered && old.distanceTo(g.camera.position) > 1e-6) {
+        sweepRay.set(old, g.camera.position.clone().sub(old).normalize());
+        sweepRay.near = 1e-6;
+        sweepRay.far = old.distanceTo(g.camera.position) - 1e-6;
+        assert.equal(
+          sweepRay.intersectObjects(sweepMeshes, false).length,
+          0,
+          `delivered gallery surface crosses the lens sweep at ${frame}`,
+        );
+      }
       assert.equal(explorerCoverage(g.camera.position.distanceTo(target)), 1);
-      if (frame % 20 === 0) {
+      if (frame % 20 === 0 || (pose.recovered && frame === 32)) {
         g.camera.lookAt(target);
         const view = inspectExplorerCamera(g, meshes, 20, 30);
         assert(view.bodyRays > 50);

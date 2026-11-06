@@ -114,10 +114,10 @@ normally.
 
 ## Remaining work
 
-The full route still records a 337.3 ms camera update while returning from
-the memorial, at frame 3,018. That separate camera-search case remains open;
-the recorded wheel and entrance repairs do not establish smooth follow
-throughout the route.
+This revision recorded a 337.3 ms camera update while returning from the
+memorial, at frame 3,018. The subsequent [memorial return recovery](gallery-return.md)
+addresses its redundant clear-view search. These repairs do not establish
+smooth follow throughout the route or consumer-device performance.
 
 Broader camera routes, plain floors and ceilings, coarse bronze patina, repeated structures, sparse
 surroundings and wider contact remain part of the unfinished visual target.
