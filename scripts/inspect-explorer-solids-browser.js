@@ -1,5 +1,31 @@
 import * as THREE from "three";
 
+// Observer-only broad phase for a stationary pose. Callers must verify that
+// every support query remains inside this region. Unknown obstacle shapes
+// stay in the list; existing support/triangle rules still decide contact.
+export function poseSupportCandidates(obstacles, region) {
+  return obstacles.filter((o) => {
+    const padding = Math.max(0.4, o.supportRadius ?? 0, o.bodyPadding ?? 0),
+      w = Math.max(o.w ?? NaN, o.radius ?? 0),
+      d = Math.max(o.d ?? NaN, o.radius ?? 0),
+      b =
+        o.fieldStation && o.triangles
+          ? o.bounds
+          : {
+              min: { x: o.x - w, z: o.z - d },
+              max: { x: o.x + w, z: o.z + d },
+            };
+    if (![b?.min.x, b?.min.z, b?.max.x, b?.max.z].every(Number.isFinite))
+      return true;
+    return (
+      b.max.x + padding >= region.min.x &&
+      b.min.x - padding <= region.max.x &&
+      b.max.z + padding >= region.min.z &&
+      b.min.z - padding <= region.max.z
+    );
+  });
+}
+
 // Material batches mix closed stone with open decorative relief. Separate by
 // shared geometric edges, then retain components whose oriented edges balance.
 // A vertex-only connection would join a carving to stone it merely touches.
@@ -113,7 +139,8 @@ export function closedMeshReader(meshes, cell = 0.75) {
       .normalize(),
     v = new THREE.Vector3().crossVectors(direction, u).normalize(),
     cells = new Map(),
-    triangles = [];
+    triangles = [],
+    bounds = new THREE.Box3();
   for (const mesh of meshes) {
     mesh.updateWorldMatrix(true, false);
     const position = mesh.geometry.attributes.position,
@@ -128,6 +155,7 @@ export function closedMeshReader(meshes, cell = 0.75) {
         triangle = new THREE.Triangle(...points),
         normal = triangle.getNormal(new THREE.Vector3());
       if (triangle.getArea() < 1e-12) continue;
+      for (const point of points) bounds.expandByPoint(point);
       const sign = Math.sign(normal.dot(direction));
       if (!sign) continue;
       const xs = points.map((p) => p.dot(u) / cell),
@@ -154,6 +182,10 @@ export function closedMeshReader(meshes, cell = 0.75) {
     intersection = new THREE.Vector3(),
     nearest = new THREE.Vector3();
   return (point) => {
+    // A point outside the exact rendered bounds cannot be inside a closed
+    // construction. Keep the triangle winding/depth checks for every other
+    // point, including gaps between pieces inside those bounds.
+    if (!bounds.containsPoint(point)) return null;
     const x = Math.floor(point.dot(u) / cell),
       y = Math.floor(point.dot(v) / cell),
       bucket = cells.get(`${x},${y}`) || [];

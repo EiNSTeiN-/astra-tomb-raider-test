@@ -27,12 +27,13 @@ test("instanced indicators use their delivered transforms instead of inventing a
 
 test("an open relief cannot make a nearby clear body point look inside batched closed masonry", () => {
   const box = new THREE.BoxGeometry(2, 2, 2).toNonIndexed().translate(3, 0, 0);
+  const opposite = box.clone().translate(-6, 0, 0);
   const relief = new THREE.PlaneGeometry(2, 2)
     .toNonIndexed()
     .rotateY(Math.PI / 2)
     .translate(1, 3, 0.8);
   const material = new THREE.MeshBasicMaterial(),
-    batch = new THREE.Mesh(mergeGeometries([box, relief]), material);
+    batch = new THREE.Mesh(mergeGeometries([box, opposite, relief]), material);
   const clear = new THREE.Vector3(0, 0, 0),
     occupied = new THREE.Vector3(3, 0, 0);
   assert(
@@ -40,15 +41,16 @@ test("an open relief cannot make a nearby clear body point look inside batched c
     "unfiltered open face reproduces the false winding",
   );
   const component = closedComponentMeshes([batch]);
-  assert.equal(component.stats.closedTriangles, 12);
+  assert.equal(component.stats.closedTriangles, 24);
   assert.equal(component.stats.openTriangles, 2);
-  assert.equal(component.stats.closedComponents, 1);
+  assert.equal(component.stats.closedComponents, 2);
   assert.equal(component.stats.openComponents, 1);
   const read = closedMeshReader(component.meshes);
   assert.equal(read(clear), null);
   assert(read(occupied) > 0.99 && read(occupied) < 1.01);
   component.dispose();
   box.dispose();
+  opposite.dispose();
   relief.dispose();
   batch.geometry.dispose();
   material.dispose();

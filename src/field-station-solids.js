@@ -278,7 +278,7 @@ export function stationBlocked(
     return solid.triangles.blocked(x, y, z, clearance, clearance ? padding : 0);
   }
   return (
-    stationContains(solid, x, z, padding) &&
+    stationContains(solid, x, z, clearance ? padding : 0) &&
     y < (solid.surfaceHeight?.(x, z) ?? solid.bounds.max.y) - 0.015 &&
     y + clearance > solid.bounds.min.y + 0.015
   );

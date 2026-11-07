@@ -5,7 +5,48 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import {
   closedMeshReader,
   inspectExplorerSolids,
+  poseSupportCandidates,
 } from "../scripts/inspect-explorer-solids-browser.js";
+import { supportAt } from "../src/character-motion.js";
+import { stationSolid } from "../src/field-station-solids.js";
+
+test("stationary-pose candidates preserve support inside their declared region, including wide remote caps and padded edges", () => {
+  const full = { groundHeight: () => -10, obstacles: [] },
+    root = new THREE.Group();
+  for (let i = -12; i <= 12; i++) {
+    root.position.set(i * 4, 0, (i % 3) * 3);
+    stationSolid(
+      full,
+      { id: `station-${i}` },
+      root,
+      [i === 10 ? 90 : 2, 2, 2],
+      [0, i % 4, 0],
+      { supportRadius: i === -2 ? 1.3 : undefined },
+    );
+    full.obstacles.push({ x: i * 5, z: 1, w: 1, d: 1, h: 12, climbable: true });
+  }
+  const unknown = { fieldStation: "unknown", supportable: false };
+  full.obstacles.push(unknown);
+  const region = { min: { x: -3, z: -3 }, max: { x: 3, z: 3 } },
+    candidates = poseSupportCandidates(full.obstacles, region),
+    filtered = { ...full, obstacles: candidates };
+  assert(candidates.length < full.obstacles.length / 2);
+  assert(candidates.includes(unknown));
+  assert(
+    candidates.includes(
+      full.obstacles.find((o) => o.x === 40 && o.fieldStation),
+    ),
+  );
+  for (let i = 0; i < 600; i++)
+    for (const radius of [0, 0.4]) {
+      const x = (((i * 137) % 997) / 997) * 6 - 3,
+        z = (((i * 251) % 991) / 991) * 6 - 3;
+      assert.deepEqual(
+        supportAt(filtered, x, z, 4, radius),
+        supportAt(full, x, z, 4, radius),
+      );
+    }
+});
 
 test("delivered oblique winding distinguishes overlapping closed pieces, empty gaps and thin contacts after batching and translation", () => {
   const a = new THREE.BoxGeometry(2, 2, 2).toNonIndexed(),
@@ -53,6 +94,40 @@ test("a closed ring retains its real empty interior rather than its bounding box
   assert(read(new THREE.Vector3(1.5, 0, 0.5)) > 0.49);
   assert.equal(read(new THREE.Vector3(3, 0, 0.5)), null);
   geometry.dispose();
+  material.dispose();
+});
+
+test("bounds rejection preserves exact inside/outside classification of separated boxes in a rotated world frame", () => {
+  const material = new THREE.MeshBasicMaterial(),
+    root = new THREE.Group(),
+    boxes = [-2, 2].map((x) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1), material);
+      mesh.position.x = x;
+      root.add(mesh);
+      return mesh;
+    });
+  root.position.set(37, -4, 81);
+  root.rotation.set(0.21, 0.73, -0.13);
+  root.updateMatrixWorld(true);
+  const read = closedMeshReader(boxes);
+  for (let i = 0; i < 600; i++) {
+    const local = new THREE.Vector3(
+        ((i * 137) % 997) / 73 - 6.7,
+        ((i * 251) % 991) / 131 - 3.7,
+        ((i * 353) % 983) / 211 - 2.3,
+      ),
+      inside = [-2, 2].some(
+        (x) =>
+          Math.abs(local.x - x) < 1 &&
+          Math.abs(local.y) < 1.5 &&
+          Math.abs(local.z) < 0.5,
+      ),
+      depth = read(local.clone().applyMatrix4(root.matrixWorld));
+    assert.equal(depth !== null, inside, `sample ${i}: ${local.toArray()}`);
+    if (inside) assert(Number.isFinite(depth) && depth > 0);
+  }
+  assert.equal(closedMeshReader([])(new THREE.Vector3()), null);
+  for (const mesh of boxes) mesh.geometry.dispose();
   material.dispose();
 });
 

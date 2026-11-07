@@ -5,6 +5,8 @@ import { footprintMinimum } from "./masonry-foundations.js";
 import { mergeArchitecture } from "./visuals.js";
 import { stationSolid } from "./field-station-solids.js";
 import { buildBellRopeLoop } from "./bell-rope.js";
+import { bellStoneGeometry, bellStoneCells } from "./bell-landing-stone.js";
+import { FacadeCamera } from "./fitted-facades.js";
 
 export const BELL_PLATFORM_WIDTH = 7.6;
 export const BELL_POST_X = 3.3;
@@ -103,7 +105,14 @@ function construction(game, root, seed) {
     game.cameraSurfaces?.capture(mesh);
     return mesh;
   };
-  return { add, block, beam };
+  return {
+    add,
+    block,
+    beam,
+    advance: (count) => {
+      seed += count;
+    },
+  };
 }
 
 // The fixed floor height and front mantle remain the same. The wider masonry
@@ -115,7 +124,7 @@ export function buildBellPlatform(game, feature, x, y, z, height) {
   game.world.add(root);
   const stone = game.monasteryMaterials?.stone || game.stoneMat,
     wood = game.monasteryMaterials?.wood || game.stoneMat,
-    { add, block } = construction(
+    { add, block, advance } = construction(
       game,
       root,
       game.level.seed + feature.stage * 137,
@@ -134,23 +143,75 @@ export function buildBellPlatform(game, feature, x, y, z, height) {
       ) -
       y -
       0.18;
-  // A sealed core sits behind the courses and has an exact, flat support plane.
+  const rows = Math.ceil((height - bottom - 0.2) / 0.46),
+    rowHeight = (height - bottom - 0.2) / rows,
+    firstTop = bottom + rowHeight;
+  // Retain the basal course's backing. Recess only the upper core far enough
+  // to expose the new stone shoulders while keeping their buried backs joined.
   add(
-    new THREE.BoxGeometry(
-      BELL_PLATFORM_WIDTH - 0.06,
-      height - 0.18 - bottom,
-      5.94,
-    ),
+    new THREE.BoxGeometry(BELL_PLATFORM_WIDTH - 0.06, rowHeight, 5.94),
     stone,
     0,
-    (height - 0.18 + bottom) / 2,
+    bottom + rowHeight / 2,
     0,
     true,
   );
-  const rows = Math.ceil((height - bottom - 0.2) / 0.46),
-    rowHeight = (height - bottom - 0.2) / rows;
+  const upperBottom = firstTop - 0.025,
+    upperTop = height - 0.18;
+  add(
+    new THREE.BoxGeometry(
+      BELL_PLATFORM_WIDTH - 0.2,
+      upperTop - upperBottom,
+      5.8,
+    ),
+    stone,
+    0,
+    (upperTop + upperBottom) / 2,
+    0,
+    true,
+  );
+  let dressedBlocks = 0;
   for (let row = 0; row < rows; row++) {
     const py = bottom + (row + 0.5) * rowHeight;
+    if (row > 0) {
+      const faces = [
+        [BELL_PLATFORM_WIDTH, 6, 0, 2.935, 0],
+        [BELL_PLATFORM_WIDTH, 6, 0, -2.935, Math.PI],
+        [6, 5, 3.735, 0, Math.PI / 2],
+        [6, 5, -3.735, 0, -Math.PI / 2],
+      ];
+      for (const [face, [span, count, cx, cz, angle]] of faces.entries()) {
+        for (const [i, cell] of bellStoneCells(
+          span,
+          count,
+          ((row + feature.stage) % 2) * 0.5,
+        ).entries()) {
+          const geometry = bellStoneGeometry(
+            cell.width,
+            rowHeight - 0.012,
+            0.12,
+            game.level.seed + feature.stage * 379 + row * 61 + face * 17 + i,
+          );
+          const mesh = add(
+            geometry,
+            stone,
+            cx + Math.cos(angle) * cell.center,
+            py,
+            cz - Math.sin(angle) * cell.center,
+          );
+          mesh.rotation.y = angle;
+          game.cameraSurfaces?.capture(mesh, {
+            small: true,
+            thin: true,
+            kernel: new FacadeCamera(geometry),
+          });
+          dressedBlocks++;
+        }
+      }
+      // The retained climbing runners keep their preceding timber-chip seed.
+      advance(22);
+      continue;
+    }
     for (const side of [-1, 1]) {
       for (let i = 0; i < 6; i++) {
         const w = BELL_PLATFORM_WIDTH / 6;
@@ -177,13 +238,43 @@ export function buildBellPlatform(game, feature, x, y, z, height) {
     }
   }
   add(
-    new THREE.BoxGeometry(BELL_PLATFORM_WIDTH, 0.2, 6),
+    new THREE.BoxGeometry(BELL_PLATFORM_WIDTH, 0.198, 6),
     stone,
     0,
-    height - 0.1,
+    height - 0.101,
     0,
     true,
   );
+  let pavingSlabs = 0;
+  for (let row = 0; row < 5; row++)
+    for (const [i, cell] of bellStoneCells(
+      BELL_PLATFORM_WIDTH,
+      6,
+      (row % 2) * 0.5,
+      0.014,
+    ).entries()) {
+      const geometry = bellStoneGeometry(
+        cell.width,
+        1.2 - 0.014,
+        0.045,
+        game.level.seed + feature.stage * 313 + row * 29 + i,
+        { rise: 0.002, bevel: 0.018, facet: 0 },
+      );
+      const mesh = add(
+        geometry,
+        stone,
+        cell.center,
+        height - 0.0225,
+        -3 + (row + 0.5) * 1.2,
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      game.cameraSurfaces?.capture(mesh, {
+        small: true,
+        thin: true,
+        kernel: new FacadeCamera(geometry),
+      });
+      pavingSlabs++;
+    }
   // Narrow timber runners embed in the stone behind the existing bronze rungs.
   for (const px of [-0.54, 0.54])
     block(
@@ -204,12 +295,24 @@ export function buildBellPlatform(game, feature, x, y, z, height) {
     h: height,
     climbable: true,
   });
+  // The climbing rectangle reserves the root position. Keep the explorer's
+  // posed clothing and equipment clear beside the tall masonry as well.
+  const body = stationSolid(
+    game,
+    feature,
+    root,
+    [BELL_PLATFORM_WIDTH, height - bottom, 6],
+    [0, (height + bottom) / 2, 0],
+    { bodyPadding: 0.65, support: false, descentEscapeRadius: 0.67 },
+  );
+  body.bellLandingBody = true;
   feature.bellLanding = {
     root,
     width: BELL_PLATFORM_WIDTH,
     depth: 6,
     height,
     bottom: bottom + y,
+    stonework: { dressedBlocks, pavingSlabs, jointDepth: 0.002 },
   };
   mergeArchitecture(root, 2);
   return feature.bellLanding;

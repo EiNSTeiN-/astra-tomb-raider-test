@@ -32,6 +32,37 @@ import { updateProjectiles } from "../src/combat.js";
 import { LEVELS } from "../src/campaign.js";
 import { jungleCragSupport } from "../src/jungle-crag-support.js";
 
+test("zero-clearance station queries use the physical box, rotated box and cylinder without the body's padding", () => {
+  const game = { obstacles: [], groundHeight: () => 0 },
+    root = new THREE.Group();
+  for (const options of [{}, { angle: Math.PI / 4 }, { radius: 1 }]) {
+    const solid = stationSolid(
+        game,
+        { id: "point-contract" },
+        root,
+        [2, 2, 2],
+        [0, 1, 0],
+        { ...options, bodyPadding: 0.7 },
+      ),
+      angle = options.angle ?? 0,
+      point = (x) => ({ x: x * Math.cos(angle), z: -x * Math.sin(angle) }),
+      outside = point(1.1),
+      inside = point(0.9);
+    assert(
+      !stationBlocked(solid, outside.x, 0.5, outside.z, 0),
+      "empty margin clears a sight/sound point",
+    );
+    assert(
+      stationBlocked(solid, outside.x, 0.5, outside.z, 1.8),
+      "posed body retains its margin",
+    );
+    assert(
+      stationBlocked(solid, inside.x, 0.5, inside.z, 0),
+      "real station volume remains solid",
+    );
+  }
+});
+
 test("natural-bed foot queries reject a drawn steep face while raw sight and body support keep their contracts", () => {
   const geometry = new THREE.BoxGeometry(6, 0.2, 4)
       .rotateZ(Math.PI / 3)
