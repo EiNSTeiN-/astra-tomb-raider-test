@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [coastal cistern stonework](docs/coastal-cisterns.md) gives the 27 water
+bowls distinct moulded, faceted and carved profiles, with physically scaled
+stone textures and their measured interiors retained.
+
 The [maritime mosaics](docs/coastal-pediments.md) give all nine coastal gate
 pediments distinct pictorial scenes, fitted mortar beds and fine stone/glass
 detail above the sluice doors.

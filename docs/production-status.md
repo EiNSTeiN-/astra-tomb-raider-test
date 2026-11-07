@@ -19,6 +19,21 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal cistern stonework](coastal-cisterns.md) replaces stretched wall
+  mapping with physical texture scale and strengthens three bowl profiles.
+  All 59 selected regressions, three CPU-guard checks and the build pass.
+  The geometric regression checks all 27 measured interiors with 1,620 rays;
+  the existing hydraulic checks retain all 157 authored transfers and access
+  to all 36 controls. Four matched before/after pairs and twelve current views
+  cover the casings, presets and interiors. Chapter replacement disposes all
+  27 bowl geometries and their four shared material/texture resources once.
+  The frozen Low-quality production build passes a keyboard transfer and
+  simulated-touch movement, with two complete-store reload comparisons and
+  matching served bundle hashes. All four small portrait captures are reviewed;
+  owned verification browsers and preview servers close afterward. Wider material repetition, machinery,
+  composition,
+  continuous contact/timing and listening/device acceptance remain open.
+
 - The [maritime pediment mosaics](coastal-pediments.md) give all nine coastal
   gate fronts different pictorial scenes on fitted mortar beds. The shared
   original atlas has retained generation provenance and a lossless delivery

@@ -286,6 +286,88 @@ test("cisterns have closed, finite bowl walls and each geometric water unit occu
     }
 });
 
+test("moulded cistern exteriors retain every measured interior and use physical stone texture scale", (t) => {
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    ray = new THREE.Raycaster(),
+    direction = new THREE.Vector3();
+  let chamberRays = 0,
+    verticalEdges = 0,
+    floorVertices = 0;
+  try {
+    for (const [stage, trial] of HYDRAULIC_TRIALS.entries())
+      for (const [i, capacity] of trial.capacity.entries()) {
+        const variant = (stage + i) % 3,
+          sides = variant === 1 ? 12 : 64,
+          step = (Math.PI * 2) / sides,
+          // A 2.2m deep regular polygon must contain 0.6m³ per puzzle unit.
+          radius = Math.sqrt(
+            (capacity * 0.6) / (sides * Math.sin(step) * 0.5 * 2.2),
+          ),
+          g = cisternGeometry(capacity, variant),
+          mesh = new THREE.Mesh(g, material),
+          p = g.attributes.position,
+          uv = g.attributes.uv,
+          idx = g.index.array;
+        try {
+          for (const y of [0.72, 1.11, 1.79, 2.59, 2.89])
+            for (let n = 0; n < 12; n++) {
+              const angle = (n * Math.PI) / 6 + 0.137,
+                normalAngle = (Math.floor(angle / step) + 0.5) * step,
+                expected =
+                  (radius * Math.cos(step / 2)) / Math.cos(angle - normalAngle);
+              direction.set(Math.sin(angle), 0, Math.cos(angle));
+              ray.set(new THREE.Vector3(0, y, 0), direction);
+              const hit = ray.intersectObject(mesh, false)[0];
+              assert(
+                hit && Math.abs(hit.distance - expected) < 1e-5,
+                "the actual inner triangles retain the measured water chamber",
+              );
+              chamberRays++;
+            }
+          for (let j = 0; j < p.count; j++) {
+            assert(
+              Math.hypot(p.getX(j), p.getZ(j)) < radius + 0.34,
+              "stone stays inside the existing foundation and body envelope",
+            );
+            assert(p.getY(j) >= 0.24999 && p.getY(j) <= 3.05001);
+          }
+          for (let j = 0; j < idx.length; j += 3) {
+            const tri = [idx[j], idx[j + 1], idx[j + 2]];
+            if (tri.every((k) => Math.abs(p.getY(k) - 0.7) < 1e-5))
+              for (const k of tri) {
+                assert(Math.abs(uv.getX(k) - p.getX(k) / 2) < 1e-6);
+                assert(Math.abs(uv.getY(k) - p.getZ(k) / 2) < 1e-6);
+                floorVertices++;
+              }
+            for (let edge = 0; edge < 3; edge++) {
+              const a = tri[edge],
+                b = tri[(edge + 1) % 3],
+                dy = Math.abs(p.getY(a) - p.getY(b));
+              if (
+                dy < 0.3 ||
+                Math.hypot(p.getX(a), p.getZ(a)) < radius * 0.9 ||
+                Math.hypot(p.getX(a) - p.getX(b), p.getZ(a) - p.getZ(b)) > 1e-6
+              )
+                continue;
+              assert(
+                Math.abs(Math.abs(uv.getY(a) - uv.getY(b)) / dy - 0.5) < 1e-4,
+                "a vertical metre occupies half a texture repeat",
+              );
+              verticalEdges++;
+            }
+          }
+        } finally {
+          g.dispose();
+        }
+      }
+  } finally {
+    material.dispose();
+  }
+  assert.equal(chamberRays, 1620);
+  assert(verticalEdges > 500 && floorVertices > 500);
+  t.diagnostic(JSON.stringify({ chamberRays, verticalEdges, floorVertices }));
+});
+
 test("all 36 world controls stand clear of tanks and palace masonry, and camera captures leave open air below the pipes", (t) => {
   const { game } = fixture(t);
   assert.equal(game.hydraulicSites.length, 9);

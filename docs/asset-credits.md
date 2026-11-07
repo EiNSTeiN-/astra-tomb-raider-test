@@ -1,5 +1,9 @@
 # Asset credits and provenance
 
+The [coastal cistern stonework](coastal-cisterns.md) uses original project
+geometry and texture coordinates with the existing credited `palace-stone`
+material textures. The documentation figures are captures of the game.
+
 The [coastal pediment mosaics](coastal-pediments.md) use an original maritime
 atlas generated for this project with OpenAI's built-in `image_gen.imagegen`
 tool, without reference images. The [source record and exact final prompt](../asset-sources/coastal-pediments/sources.json)
