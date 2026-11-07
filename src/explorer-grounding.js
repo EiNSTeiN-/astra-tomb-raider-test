@@ -1,6 +1,6 @@
 import { restingFoothold } from "./explorer-foothold.js";
 import * as THREE from "three";
-import { supportAt } from "./character-motion.js";
+import { createGroundingSupport } from "./grounding-support.js";
 import { poseFeet } from "./pose.js";
 import { waterAt } from "./hydrology.js";
 import { CROUCH_DROP, playerFootstep, footstepSurface } from "./stealth.js";
@@ -284,13 +284,8 @@ export function groundExplorer(game, dt, moving, sprinting) {
   state.stride = reset
     ? scale
     : THREE.MathUtils.damp(state.stride ?? 1, scale, 14, dt);
-  const bodySupport = supportAt(
-    game,
-    root.x,
-    root.z,
-    root.y,
-    NATURE_BODY_RADIUS,
-  );
+  const readSupport = createGroundingSupport(game);
+  const bodySupport = readSupport(root.x, root.z, root.y, NATURE_BODY_RADIUS);
   const finiteSupport =
     bodySupport.surface?.triangles || bodySupport.surface?.shape;
   const naturalBed = !!bodySupport.surface?.terrainFootholds;
@@ -305,7 +300,7 @@ export function groundExplorer(game, dt, moving, sprinting) {
       naturalBed && Number.isFinite(footY)
         ? Math.min(root.y + 0.45, footY - 0.18)
         : root.y + 0.45;
-    const result = supportAt(game, x, z, maxY, 0, 0.65);
+    const result = readSupport(x, z, maxY, 0, 0.65);
     // A boot beside a finite cap can reach its steep bevel while the other
     // boot stands on top. Lowering the pelvis toward that edge bends the knee
     // through the cap. Treat a substantial drop as an unsupported foothold.

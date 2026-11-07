@@ -2335,6 +2335,7 @@ test("human swim, rope and aim poses retain hand alignment and clear visual offs
       weapon: { group: new THREE.Group() },
     },
     grounded: true,
+    groundHeight: () => 0,
     elapsed: 3,
     yaw: 0,
   };

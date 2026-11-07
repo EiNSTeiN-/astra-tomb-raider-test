@@ -36,6 +36,7 @@ export function supportAt(
   maxY = Infinity,
   rockRadius = 0,
   scanMinUp = rockRadius ? 0.65 : 0,
+  obstacles = game.obstacles,
 ) {
   let height = game.groundHeight(x, z),
     surface = null;
@@ -48,7 +49,7 @@ export function supportAt(
       surface = contact.surface;
     }
   }
-  for (const o of game.obstacles) {
+  for (const o of obstacles) {
     if (o.fieldStation) {
       const top = stationSupport(
         o,
