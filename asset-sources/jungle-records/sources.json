@@ -1,0 +1,38 @@
+{
+  "asset": "Eight jungle sanctuary fresco records",
+  "provenance": "Original project artwork generated with the built-in image_gen tool, then packed without changing the painted pixels.",
+  "prompt": "docs/art-prompts.md#jungle-fresco-atlas",
+  "source": {
+    "file": "atlas-generated.png",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "64940912928f0d7332a0897cb27970cb74217cd3056e67c64c74be10d1d4fb8c"
+  },
+  "delivery": {
+    "file": "public/assets/textures/jungle-records-atlas.webp",
+    "width": 1568,
+    "height": 1088,
+    "sha256": "cb453b7e4e072a3bb647539ed9dcd4ac60a3d5c13055f2f15fd12d81d5861a0c",
+    "bytes": 3114850
+  },
+  "atlas": {
+    "columns": 2,
+    "rows": 4,
+    "cellWidth": 768,
+    "cellHeight": 256,
+    "gutter": 8,
+    "order": [
+      "Dawn beacons",
+      "Root gatehouse",
+      "Rain garden",
+      "Keepers vigil",
+      "Eastern lens",
+      "Hanging crossing",
+      "Beacon chain",
+      "Heart seal"
+    ]
+  },
+  "conversion": "python3 scripts/run-with-cpu-budget.py ./local/bin/node scripts/build-jungle-fresco.mjs asset-sources/jungle-records/atlas-generated.png",
+  "verification": "All eight source-cell RGBA buffers equal their delivered inner regions. Only copied edge gutters and lossless format encoding are added.",
+  "limitations": "Original fictional wall paintings, not historical documentation or scans. The optional generated source is excluded from publication; the playable atlas and this provenance record are tracked."
+}

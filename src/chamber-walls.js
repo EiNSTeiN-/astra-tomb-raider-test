@@ -13,6 +13,7 @@ import { cavernMuralMaterial, cavernMuralCoordinates } from "./cavern-murals.js"
 import { buildCoastalWallArt } from "./coastal-wall-art.js";
 import { buildSolarInnerWall } from "./solar-sanctuaries.js";
 import { buildMonasteryInnerWall } from "./monastery-sanctuaries.js";
+import { buildJungleWallRecord } from "./jungle-wall-records.js";
 import {
   forgeWallPlan,
   forgeBayContour,
@@ -707,7 +708,10 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     // working space. Side walls are left clear of the inward-swinging leaves.
     // Each preceding snow rear record consumed four frame bars and one sill.
     if (side === 0 && biome === "snow") seed += 5;
-    if (side === 0 && !["desert", "snow"].includes(biome) && !(biome === "water" && gate.stage > 0)) {
+    // Retain the exterior's seeded chips after retiring the inner botanical
+    // frame bars and sill. The new full-wall record uses its own seed stream.
+    if (side === 0 && biome === "jungle") seed += contour.length + 1;
+    if (side === 0 && !["desert", "snow", "jungle"].includes(biome) && !(biome === "water" && gate.stage > 0)) {
       const interiorTrim = biome === "snow" ? m.wood : m.trim;
       const inner = contour.map(([x, y]) => [
         cx + x * 0.72,
@@ -744,19 +748,12 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
         relief.rotation.y = Math.PI;
       } else if (biome === "crystal") {
         seed += emblemMarks;
-      } else if (biome === "jungle") {
-        const relief = add(
-          carvedPlaque(r * 1.15, 1.84, gate.stage + i, [24, 40]),
-          m.trim,
-          cx,
-          1.6,
-          -0.5,
-          false,
-        );
-        relief.rotation.y = Math.PI;
       }
     }
   }
+  const jungleRecord = plan.biome === "jungle" && side === 0
+    ? buildJungleWallRecord(gate.stage, length, m, add)
+    : null;
   const coastalRecord =
     plan.biome === "water" && side === 0 && gate.stage > 0
       ? buildCoastalWallArt(gate.stage, m, add)
@@ -769,6 +766,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     angle: group.rotation.y,
     ...(solarInterior ? { solarInterior } : {}),
     ...(monasteryInterior ? { monasteryInterior } : {}),
+    ...(jungleRecord ? { jungleRecord } : {}),
     ...(coastalRecord ? { coastalRecord } : {}),
   };
   mergeArchitecture(group);

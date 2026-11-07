@@ -2349,3 +2349,10 @@ pictorial scenes and cast geometry in `src/solar-shutter-scenes.js`,
 and original portal geometry helpers. No external model, bitmap, recording,
 font or dependency is added. Their three documentation PNGs are complete,
 unretouched High game captures with prepared cameras and the explorer hidden.
+
+
+### Jungle sanctuary wall records
+
+The eight jungle rear-wall frescos are original project artwork made with the built-in image generation tool. Their scenes follow the existing sanctuary trials: beacons, roots and a counterweight, rain channels, observation stations, an amber lens, hanging bridges, a beacon chain and the heart seal. They depict a fictional culture and are not archaeological documentation. No external reference image was used. The [exact prompt](art-prompts.md#jungle-fresco-atlas) and `asset-sources/jungle-records/sources.json` preserve provenance and hashes. `scripts/build-jungle-fresco.mjs` adds copied edge gutters and lossless encoding without changing painted cell pixels. The runtime asset is `public/assets/textures/jungle-records-atlas.webp`.
+
+The closed stone/plaster slabs and joined frames are original geometry in `src/jungle-wall-records.js`; they reuse the existing credited temple stone textures and their normal and roughness maps. The atlas is shared across the eight chambers. No additional third-party model, texture, sound recording or dependency is introduced.
