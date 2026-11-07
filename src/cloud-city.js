@@ -10,12 +10,19 @@ export { andeanGeometry, andeanHeight } from "./andean-geology.js";
 export const CLOUD_BANK_FLOOR = -34;
 export const CLOUD_BANK_RISE = 23;
 
-const cloudNoise = `
-float cloudHash(vec2 p){p=fract(p*vec2(.1031,.1030));p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.x);}
+function cloudNoise(highCloud = false) {
+  // Keep the valley bank and ridge grain stable. The overhead field needs the
+  // extra mixed component to break up the broad bands in its warped projection.
+  const hash = highCloud
+    ? "vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);"
+    : "p=fract(p*vec2(.1031,.1030));p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.x);";
+  return `
+float cloudHash(vec2 p){${hash}}
 float cloudNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
 return mix(mix(cloudHash(i),cloudHash(i+vec2(1,0)),f.x),mix(cloudHash(i+vec2(0,1)),cloudHash(i+vec2(1,1)),f.x),f.y);}
 float cloudFbm(vec2 p){float f=0.,w=.5;for(int i=0;i<5;i++){f+=w*cloudNoise(p);p=mat2(.8,.6,-.6,.8)*p*2.03+vec2(17.7,9.2);w*=.5;}return f;}
 `;
+}
 
 export function cloudCitySky(sunPosition) {
   const material = new THREE.ShaderMaterial({
@@ -28,7 +35,7 @@ export function cloudCitySky(sunPosition) {
     },
     vertexShader: `varying vec3 vDirection;void main(){vDirection=position;vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position=p.xyww;}`,
     fragmentShader: `varying vec3 vDirection;uniform float time;uniform vec3 sunPosition;
-    ${cloudNoise}
+    ${cloudNoise(true)}
     void main(){vec3 d=normalize(vDirection);float h=max(0.,d.y);
       vec3 color=mix(vec3(.38,.53,.62),vec3(.045,.125,.24),pow(h,.55));
       vec2 p=d.xz/(h+.23)*2.1+vec2(time*.0006,time*.0002);
@@ -75,7 +82,7 @@ function ridgeMaterial(game, layer) {
       gl_Position=vec4(p.xy,p.w*backgroundDepth,p.w);}`,
     fragmentShader: `varying vec3 vRidge,vNormal;varying vec2 vRidgeLight;
       uniform sampler2D rock,rockNormal;uniform vec3 sunDirection;uniform float layer,hasRockNormal;
-      ${cloudNoise}
+      ${cloudNoise()}
       vec3 relief(vec2 uv,vec3 n){
         vec3 q0=dFdx(vRidge),q1=dFdy(vRidge);vec2 st0=dFdx(uv),st1=dFdy(uv);
         vec3 a=cross(q1,n),b=cross(n,q0),t=a*st0.x+b*st1.x,bt=a*st0.y+b*st1.y;
@@ -148,13 +155,13 @@ function cloudBank(game, time) {
       contactFade: { value: CLOUD_CONTACT_FADE },
     },
     vertexShader: `varying vec3 vCloud;uniform float time,cloudRise;
-      ${cloudNoise}
+      ${cloudNoise()}
       void main(){vec3 p=position;float density=cloudNoise(p.xz*.008+vec2(time*.00035,0.));
         p.y+=sqrt(smoothstep(.22,.85,density))*cloudRise;
         vCloud=(modelMatrix*vec4(p,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
         gl_Position.z=min(gl_Position.z,gl_Position.w*.9997);}`,
     fragmentShader: `varying vec3 vCloud;uniform float time;uniform vec3 sunDirection;
-      ${cloudNoise}
+      ${cloudNoise()}
       ${cloudGroundShader}
       void main(){vec2 p=vCloud.xz*.009+vec2(time*.0008,time*.00022);
         float f=cloudFbm(p),shadow=cloudFbm(p+normalize(sunDirection.xz)*.2);
