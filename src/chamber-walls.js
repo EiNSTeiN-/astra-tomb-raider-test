@@ -290,7 +290,12 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     return mesh;
   };
   const contour = aperture(plan, gate.stage);
-  const halfWidth = (y) => {
+  const radii = plan.bays.map((_, i) => plan.bayRadii?.[i] ?? plan.radius);
+  const contours = radii.map((radius) => plan.bayRadii
+    ? aperture({ ...plan, radius }, gate.stage) : contour);
+  const profilePoints = plan.bayRadii ? contours.flat() : contour;
+  const halfWidth = (y, bay) => {
+    const contour = contours[bay];
     let width = 0;
     for (let i = 0; i < contour.length; i++) {
       const a = contour[i],
@@ -364,9 +369,9 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
       // A stepped head changes width abruptly at its horizontal ledge. Split
       // the masonry there so interpolation cannot bevel away the outer face.
       ...(plan.biome === "crystal"
-        ? contour
-            .filter((p, i) => Math.abs(p[1] - contour[(i + 1) % contour.length][1]) < 1e-8)
-            .map((p) => p[1])
+        ? (plan.bayRadii ? contours : [contour]).flatMap((profile) => profile
+            .filter((p, i) => Math.abs(p[1] - profile[(i + 1) % profile.length][1]) < 1e-8)
+            .map((p) => p[1]))
         : []),
       ...Array.from({ length: 8 }, (_, i) => (i + 1) * 0.8),
     ]),
@@ -378,18 +383,18 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     const cut = lo > plan.bottom && hi < plan.top;
     const ys = [
       lo,
-      ...contour.map((p) => p[1]).filter((y) => y > lo && y < hi),
+      ...profilePoints.map((p) => p[1]).filter((y) => y > lo && y < hi),
       hi,
     ]
       .sort((a, b) => a - b)
       .filter((y, i, values) => !i || y - values[i - 1] > 1e-7);
     for (let bay = 0; bay < (cut ? plan.bays.length + 1 : 1); bay++) {
       const left = (y) =>
-        !cut || bay === 0 ? -length / 2 : plan.bays[bay - 1] + halfWidth(y);
+        !cut || bay === 0 ? -length / 2 : plan.bays[bay - 1] + halfWidth(y, bay - 1);
       const right = (y) =>
         !cut || bay === plan.bays.length
           ? length / 2
-          : plan.bays[bay] - halfWidth(y);
+          : plan.bays[bay] - halfWidth(y, bay);
       const polygon = [
         ...ys.map((y) => [left(y), y]),
         ...ys.toReversed().map((y) => [right(y), y]),
@@ -424,7 +429,8 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     block(end - x - 0.015, 0.13, 0.38, crown, cx, 6.76, 0.48);
   }
   for (const [i, cx] of plan.bays.entries()) {
-    const { radius: r, biome, bottom, top } = plan;
+    const { biome, bottom, top } = plan;
+    const r = radii[i], contour = contours[i];
     // The inset is sealed against the wall core; all fittings sit within the
     // recess. No new smoke, fire or sound claims are implied by these cold bays.
     const inset = prism(contour, 0.045);

@@ -728,7 +728,8 @@ test("regional chamber walls have sealed deep recesses and buried full-width foo
         const direction = new THREE.Vector3(0, 0, -1).transformDirection(
           matrix,
         );
-        for (const cx of wall.bays) {
+        for (const [bay, cx] of wall.bays.entries()) {
+          const radius = wall.bayRadii?.[bay] ?? wall.radius;
           let deepest = 0,
             cameraDepth = 0;
           // The forge's wider cases and diaphragms occupy the old central
@@ -742,7 +743,7 @@ test("regional chamber walls have sealed deep recesses and buried full-width foo
           for (const dx of offsets)
             for (const t of fractions) {
               const y = wall.bottom + (wall.top - wall.bottom) * t;
-              const start = point(cx + wall.radius * dx, y, 2);
+              const start = point(cx + radius * dx, y, 2);
               ray.set(start, direction);
               const hit = ray.intersectObject(gate.root, true)[0];
               assert.ok(
@@ -755,7 +756,7 @@ test("regional chamber walls have sealed deep recesses and buried full-width foo
                 3 *
                   game.cameraSurfaces.entry(
                     start,
-                    point(cx + wall.radius * dx, y, -1),
+                    point(cx + radius * dx, y, -1),
                     0,
                   ),
               );

@@ -173,7 +173,7 @@ function insideRenderedMeshes(meshes, point) {
   return winding > 0;
 }
 
-test("delivered enclosure barriers match sight/audio rays, retain core lanes and protect display crouch transitions", (t) => {
+test("delivered enclosure bays fit their own spans, match sight/audio rays and retain working clearances", (t) => {
   const g = fixture(t),
     ray = new THREE.Raycaster();
   g.cameraSurfaces.rebuild();
@@ -267,4 +267,26 @@ test("delivered enclosure barriers match sight/audio rays, retain core lanes and
       }
   }
   assert(rays > 100 && stances > 400 && cases === 14);
+
+  // The violet rear wall has short end slots and four broad central slots.
+  // End-slot spacing must not shrink the central apertures. Trace the actual
+  // assembled faces from both sides: widening only the painting would leave
+  // its outer face hidden in masonry, while widening only the cutout would
+  // expose its backing. These points were stone before the per-bay repair.
+  const violet = g.fieldGates[4];
+  for (const [x, y, z, direction, paintedZ] of [
+    [2.065, 2.0, -10, 1, -7.4165],
+    [1.835, 2.1, -3.5, -1, -7.0345],
+  ]) {
+    ray.set(
+      violet.root.position.clone().add(new THREE.Vector3(x, y, z)),
+      new THREE.Vector3(0, 0, direction),
+    );
+    ray.far = 5;
+    const hit = ray.intersectObject(violet.enclosure.root, true)[0];
+    assert.equal(hit?.object.material.name, "Cavern painted memory records",
+      "central painted bay is cropped by the narrow end-slot width");
+    assert(Math.abs(hit.point.z - violet.root.position.z - paintedZ) < 1e-4,
+      "paint must remain seated on the existing sealed wall face");
+  }
 });

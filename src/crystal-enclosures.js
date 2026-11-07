@@ -45,17 +45,20 @@ function wallBays(segment, piers) {
           ].filter(([x, y]) => y > x),
     );
   }
-  const bays = [];
-  let spacing = Infinity;
+  const bays = [], bayRadii = [];
   for (const [a, b] of spaces) {
     const length = b - a;
     if (length < 1.25) continue;
     const count = Math.max(1, Math.floor(length / 2.8)),
       step = length / count;
-    spacing = Math.min(spacing, step);
-    for (let i = 0; i < count; i++) bays.push(a + (i + 0.5) * step);
+    // A short end slot must not crop the paintings in wider spans elsewhere
+    // on this wall. Keep every bay inside its own pier-free interval.
+    for (let i = 0; i < count; i++) {
+      bays.push(a + (i + 0.5) * step);
+      bayRadii.push(Math.min(0.95, step * 0.3));
+    }
   }
-  return { bays, radius: bays.length ? Math.min(0.95, spacing * 0.3) : 0.5 };
+  return { bays, bayRadii, radius: bays.length ? Math.min(...bayRadii) : 0.5 };
 }
 
 export function buildCrystalEnclosure(game, gate, materials) {
