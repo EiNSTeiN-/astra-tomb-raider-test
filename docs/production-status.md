@@ -19,6 +19,15 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [cistern sight gauges and lamp sockets](cistern-sight-gauges.md) give all
+  27 coastal bowls mounted level columns and supported status lamps. All 79
+  selected regressions and the build pass. Delivered-buffer observations cover
+  216 bracket ends, 2,592 glass rays, 243 level comparisons, 45,441 represented
+  float-vertex rays and 27 lamp seats without recorded support or intersection
+  failures. A real transfer, three local walks, crouching, 118 resource disposals
+  and two production complete-store reloads pass. Three preceding and sixteen
+  current views are reviewed. Larger installations, material and terrain
+  repetition, continuous contact, listening and device acceptance remain open.
 - The [coastal pump castings](coastal-pump-castings.md) replace 27 repeated
   rectangular supports with three barrel profiles, flanges, bearings, intake
   connections and mounting bolts. All 63 selected regressions and the build

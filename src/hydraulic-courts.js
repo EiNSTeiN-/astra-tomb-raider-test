@@ -18,6 +18,13 @@ import {
 } from "./hydraulic-geometry.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { hydraulicPumpGeometry } from "./hydraulic-pump-geometry.js";
+import { hydraulicLampSupportGeometry } from "./hydraulic-lamp-geometry.js";
+import { stationAssemblySolid } from "./field-station-solids.js";
+import {
+  cisternGaugeAssets,
+  buildCisternGauge,
+  updateCisternGauge,
+} from "./cistern-gauge.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { waterMaterial } from "./water-surface.js";
@@ -37,6 +44,7 @@ export function buildHydraulicCourts(game) {
   game.hydraulicSources = [];
   game.hydraulicFocus = null;
   game.hydraulicGrip = null;
+  game.hydraulicGaugeAssets = null;
   if (game.level.biome !== "water") return false;
   game.hydraulicTime = { value: 0 };
   const stone = pbrMaterial("palace-stone", 0xc9c9b1),
@@ -51,6 +59,7 @@ export function buildHydraulicCourts(game) {
   castingMaterial.roughness = 0.52;
   castingMaterial.onBeforeCompile = bronze.onBeforeCompile;
   castingMaterial.customProgramCacheKey = bronze.customProgramCacheKey;
+  const gaugeAssets = (game.hydraulicGaugeAssets = cisternGaugeAssets());
   const water = waterMaterial(game, { width: 3, length: 3, x: 0, z: 0 });
   water.name = "Cistern water";
   const v = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -204,45 +213,21 @@ export function buildHydraulicCourts(game) {
         h: 3.06,
       };
       game.obstacles.push(obstacle);
-      // Volume markers, an engraved target and a floating indicator share a scale.
-      const gaugeX = -r * 0.55,
-        gaugeZ = r + 0.185;
-      block(0.12, CISTERN_DEPTH + 0.14, 0.1, bronze, gaugeX, 1.8, gaugeZ, tank);
-      for (let n = 0; n <= state.capacity[i]; n++)
-        block(
-          n % 5 === 0 ? 0.3 : 0.2,
-          0.027,
-          0.045,
-          bronze,
-          gaugeX,
-          CISTERN_FLOOR + (n / state.capacity[i]) * CISTERN_DEPTH,
-          gaugeZ + 0.065,
+      // Preserve later construction seeds while replacing the bare ruler.
+      serial += state.capacity[i] + 2;
+      const levelGauge = buildCisternGauge(
           tank,
-        );
-      const goal = add(
-        new THREE.ConeGeometry(0.13, 0.3, 4),
-        game.glowMat,
-        gaugeX - 0.27,
-        CISTERN_FLOOR + (state.target[i] / state.capacity[i]) * CISTERN_DEPTH,
-        gaugeZ + 0.08,
-        tank,
-      );
-      goal.rotation.z = -Math.PI / 2;
-      const float = add(
-        new THREE.SphereGeometry(0.1, 12, 8),
-        new THREE.MeshStandardMaterial({
-          color: 0x8ec7c3,
-          emissive: 0x164645,
-          emissiveIntensity: 0.45,
-          metalness: 0.4,
-          roughness: 0.3,
-        }),
-        gaugeX + 0.18,
-        0,
-        gaugeZ + 0.09,
-        tank,
-      );
-      float.userData.animated = true;
+          r,
+          state.capacity[i],
+          state.target[i],
+          { bronze, dark: castingMaterial, goal: game.glowMat, variant },
+          gaugeAssets,
+        ),
+        { float, goal } = levelGauge;
+      game.cameraSurfaces?.capture(levelGauge.frame, {
+        small: true,
+        thin: true,
+      });
       const plaque = hydraulicPlaque(
         `${CISTERN_NAMES[i]} · ${state.capacity[i]} UNITS`,
         r * 2 + 0.4,
@@ -326,21 +311,43 @@ export function buildHydraulicCourts(game) {
         h: 1.1,
       });
       const handle = control(i, "pump", x, z + r + 1.37);
-      const lampMat = new THREE.MeshStandardMaterial({
+      const lampMat = new THREE.MeshPhysicalMaterial({
         color: 0x587879,
         emissive: 0x183b37,
         emissiveIntensity: 0.15,
-        roughness: 0.35,
-        metalness: 0.4,
+        roughness: 0.22,
+        metalness: 0.15,
+        clearcoat: 1,
+        clearcoatRoughness: 0.08,
       });
       const lamp = add(
-        new THREE.SphereGeometry(0.11, 12, 8),
+        new THREE.SphereGeometry(0.11, 24, 16),
         lampMat,
         0.55,
         1.65,
         pumpZ,
         tank,
       );
+      const lampSupport = add(
+        hydraulicLampSupportGeometry(),
+        bronze,
+        0,
+        0,
+        pumpZ,
+        tank,
+      );
+      const lampSolid = stationAssemblySolid(
+        game,
+        feature,
+        [lampSupport, lamp],
+        {
+          bodyPadding: 0.4,
+          support: false,
+        },
+      );
+      lampSolid.hydraulicLamp = true;
+      game.cameraSurfaces?.capture(lampSupport, { small: true, thin: true });
+      game.cameraSurfaces?.capture(lamp, { small: true, cylinderAxis: "y" });
       const nozzle = v(0, 3.65, -r * 0.32);
       const streamMesh = add(
         new THREE.CylinderGeometry(0.07, 0.1, 1, 10, 8, true),
@@ -393,8 +400,10 @@ export function buildHydraulicCourts(game) {
         handles,
         goal,
         float,
+        levelGauge,
         surface,
         lamp,
+        lampSolid,
         stream: streamMesh,
         ripple,
         nozzle,
@@ -622,7 +631,8 @@ export function updateHydraulicCourts(game, dt) {
       tank.surface.visible = value > 0.003;
       tank.surface.material.userData.waterUniforms.waterTime.value =
         game.hydraulicTime.value;
-      tank.float.position.y = height;
+      updateCisternGauge(tank.levelGauge, height, value > 0.003);
+      tank.levelGauge.root.visible = near;
       tank.lamp.material.emissiveIntensity =
         site.state.selected === i
           ? 2.2

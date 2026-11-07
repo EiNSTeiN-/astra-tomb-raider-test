@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [cistern sight gauges and lamp sockets](cistern-sight-gauges.md) use original
+geometry in `src/cistern-gauge.js` and `src/hydraulic-lamp-geometry.js`, the
+existing bronze shader, and shared glass, liquid and ceramic material settings.
+No external asset or dependency is added. Its six figures are complete game
+captures converted losslessly to WebP with identical decoded pixels and
+dimensions; the paired studies retain numeric observers, time and settings.
+
 The [coastal pump castings](coastal-pump-castings.md) use original project
 geometry in `src/hydraulic-pump-geometry.js` and the existing original filtered
 bronze shader, with a shared casing finish. No external asset or dependency is

@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [cistern sight gauges](docs/cistern-sight-gauges.md) show water levels in
+mounted glass sleeves, with graduated scales, seated target arrows and braced
+status-lamp sockets beside the handwheels.
+
 The [coastal pump castings](docs/coastal-pump-castings.md) replace plain supports
 with round, octagonal and fluted bronze machinery, seated on the existing
 plinths beneath the retained handwheels.

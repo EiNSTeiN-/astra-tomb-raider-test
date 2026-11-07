@@ -449,6 +449,19 @@ test("world commands, water surfaces, float gauges and spatial emitters follow a
       ) < 1e-9,
     );
     assert.equal(tank.float.position.y, tank.surface.position.y);
+    tank.group.updateWorldMatrix(true, true);
+    const p = tank.levelGauge.liquid.geometry.attributes.position;
+    let liquidTop = -Infinity;
+    for (let n = 0; n < p.count; n++)
+      liquidTop = Math.max(
+        liquidTop,
+        new THREE.Vector3()
+          .fromBufferAttribute(p, n)
+          .applyMatrix4(tank.levelGauge.liquid.matrixWorld).y,
+      );
+    const plane = tank.surface.getWorldPosition(new THREE.Vector3()).y;
+    assert(Math.abs(liquidTop - plane) < 1e-6);
+    assert.equal(tank.levelGauge.liquid.visible, site.display[i] > 0.003);
     assert.equal(tank.stream.visible, i === 2);
   }
   assert.equal(game.soundSources.filter((s) => s.activity > 0).length, 3);
