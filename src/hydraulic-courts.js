@@ -17,6 +17,7 @@ import {
   CISTERN_FLOOR,
 } from "./hydraulic-geometry.js";
 import { stoneBlockGeometry } from "./temple-architecture.js";
+import { hydraulicPumpGeometry } from "./hydraulic-pump-geometry.js";
 import { pbrMaterial, mergeArchitecture } from "./visuals.js";
 import { patinatedBronze } from "./observatory-geometry.js";
 import { waterMaterial } from "./water-surface.js";
@@ -44,6 +45,12 @@ export function buildHydraulicCourts(game) {
     stream = hydraulicStreamMaterial(game.hydraulicTime);
   stone.normalScale.set(0.35, 0.35);
   dark.normalScale.set(0.3, 0.3);
+  const castingMaterial = bronze.clone();
+  castingMaterial.name = "Tidal bronze pump castings";
+  castingMaterial.color.setHex(0x718c83);
+  castingMaterial.roughness = 0.52;
+  castingMaterial.onBeforeCompile = bronze.onBeforeCompile;
+  castingMaterial.customProgramCacheKey = bronze.customProgramCacheKey;
   const water = waterMaterial(game, { width: 3, length: 3, x: 0, z: 0 });
   water.name = "Cistern water";
   const v = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -269,7 +276,17 @@ export function buildHydraulicCourts(game) {
       // Each handwheel controls a pressure-driven intake at its own cistern.
       const pumpZ = r + 0.65;
       block(0.74, 0.45, 0.6, dark, 0, 0.225, pumpZ, tank);
-      block(0.32, 1.02, 0.27, bronze, 0, 0.95, pumpZ, tank);
+      // Retain the construction seed formerly used by the rectangular post.
+      serial++;
+      add(
+        hydraulicPumpGeometry(variant),
+        castingMaterial,
+        0,
+        0,
+        pumpZ,
+        tank,
+        true,
+      );
       const wheel = new THREE.Group();
       wheel.position.set(0, 1.35, pumpZ + 0.13);
       tank.add(wheel);

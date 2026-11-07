@@ -19,6 +19,17 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal pump castings](coastal-pump-castings.md) replace 27 repeated
+  rectangular supports with three barrel profiles, flanges, bearings, intake
+  connections and mounting bolts. All 63 selected regressions and the build
+  pass. An actual beveled-plinth overhang found during development is repaired:
+  2,007 delivered underside records have support, and 3,456 body rays pass.
+  Recorded mechanism dimensions, pipe paths, controls, grips and sound origins
+  remain stable. Three matched pairs, side/preset/context/controller views,
+  nearby walking and crouching, 28 resource disposals and two production
+  complete-store reloads pass their checks. Wider court massing, material and
+  terrain repetition, continuous contact, listening and device acceptance remain
+  open.
 - The [coastal shore growth](coastal-shore-growth.md) fills dry banks beyond
   the paving with grass and silver shrubs. It adds 14,584 plants, including
   2,371 shrubs, while preserving all 15,598 original transforms. All 106 selected

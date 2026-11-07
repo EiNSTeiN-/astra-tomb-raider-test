@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [coastal pump castings](docs/coastal-pump-castings.md) replace plain supports
+with round, octagonal and fluted bronze machinery, seated on the existing
+plinths beneath the retained handwheels.
+
 The [coastal shore growth](docs/coastal-shore-growth.md) adds dry-bank grass and
 branching silver shrubs beyond the palace paving, with terrain-fitted roots
 and clear walking margins.

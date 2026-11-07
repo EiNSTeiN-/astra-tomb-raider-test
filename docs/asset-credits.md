@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [coastal pump castings](coastal-pump-castings.md) use original project
+geometry in `src/hydraulic-pump-geometry.js` and the existing original filtered
+bronze shader, with a shared casing finish. No external asset or dependency is
+added. Its six figures are complete game captures converted losslessly to WebP
+with identical decoded pixels and dimensions. The matched pairs use the same
+numeric observers, time and settings; the controller figure uses actual movement.
+
 The [coastal shore growth](coastal-shore-growth.md) uses original project
 saltbush geometry, vertex colors and placement code in `src/coastal-saltbush.js`,
 `src/coastal-shore-plan.js` and `src/coastal-groundcover.js`. It reuses the
