@@ -14,6 +14,7 @@ import { buildCoastalWallArt } from "./coastal-wall-art.js";
 import { buildSolarInnerWall } from "./solar-sanctuaries.js";
 import { buildMonasteryInnerWall } from "./monastery-sanctuaries.js";
 import { buildJungleWallRecord } from "./jungle-wall-records.js";
+import { buildForgeServiceBay } from "./forge-service-bays.js";
 import {
   forgeWallPlan,
   forgeBayContour,
@@ -244,6 +245,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     : 0;
   const insetOffset = side !== 0 && gate.design.motion === "hinge" ? 0.17 : 0;
   const group = new THREE.Group();
+  const serviceBays = [];
   group.name = `${plan.biome} chamber wall ${side}`;
   group.position.set(
     transform?.x ?? side * 6.5,
@@ -742,7 +744,9 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
         1.41 + (bottom - 1.2) * 0.76,
         -0.47,
       );
-      if (biome === "water") {
+      if (biome === "volcano") {
+        serviceBays.push(buildForgeServiceBay(plan, cx, i, m, add));
+      } else if (biome === "water") {
         const relief = add(
           shellReliefGeometry(r * 1.03),
           m.trim,
@@ -774,6 +778,7 @@ export function buildChamberWall(game, gate, m, { length, side, floor, transform
     ...(monasteryInterior ? { monasteryInterior } : {}),
     ...(jungleRecord ? { jungleRecord } : {}),
     ...(coastalRecord ? { coastalRecord } : {}),
+    ...(serviceBays.length ? { serviceBays } : {}),
   };
   mergeArchitecture(group);
   // Flatten the regional material batches into the gate so the existing
