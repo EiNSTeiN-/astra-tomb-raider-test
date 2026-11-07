@@ -2,6 +2,10 @@
 
 An original, browser-based third-person archaeological adventure built with Three.js, Vite, and plain JavaScript. Explore eight connected chapters, decipher ancient mechanisms, climb ruins, face stone guardians, and follow a missing expedition through a forgotten world.
 
+The [coastal shore growth](docs/coastal-shore-growth.md) adds dry-bank grass and
+branching silver shrubs beyond the palace paving, with terrain-fitted roots
+and clear walking margins.
+
 The [coastal cistern stonework](docs/coastal-cisterns.md) gives the 27 water
 bowls distinct moulded, faceted and carved profiles, with physically scaled
 stone textures and their measured interiors retained.

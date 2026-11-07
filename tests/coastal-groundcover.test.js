@@ -1,4 +1,10 @@
 import test from "node:test";
+import { coastalSaltbushSpecimen } from "../src/coastal-saltbush.js";
+import {
+  coastalShoreHeight,
+  coastalShoreDistance,
+  coastalShoreShrubAllowed,
+} from "../src/coastal-shore-plan.js";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import {
@@ -187,7 +193,194 @@ test("groundcover stays deterministic through gate motion and quality changes an
         source.addEventListener("dispose", () => sourceDisposals++);
     disposeCoastalGroundcover(g);
     disposeCoastalGroundcover(g);
-    assert.equal(sourceDisposals, 9);
+    assert.equal(sourceDisposals, 12);
     assert.equal(g.coastalGroundcover, null);
+  }
+});
+
+test("dry shore placement measures full walking-cell footprints and rejects wet or steep shrub beds", () => {
+  const map = { grid: Array.from({ length: 7 }, () => Array(7).fill(0)) };
+  map.grid[2][2] = map.grid[2][3] = 1;
+  const profile = { step: 0.5, height: () => 0.4 };
+  assert.equal(coastalShoreDistance(map, 14, 14), 0);
+  assert.equal(coastalShoreDistance(map, 25.5, 14), 1);
+  assert(Math.abs(coastalShoreDistance(map, 25.5, 18.5) - Math.SQRT2) < 1e-12);
+  for (let z = 7; z <= 28; z += 0.7)
+    for (let x = 7; x <= 35; x += 0.7) {
+      const expected = Math.hypot(
+        Math.max(0, 10.5 - x, x - 24.5),
+        Math.max(0, 10.5 - z, z - 17.5),
+      );
+      if (expected <= 5)
+        assert(Math.abs(coastalShoreDistance(map, x, z) - expected) < 1e-12);
+    }
+  assert(!coastalShoreShrubAllowed(map, profile, 24.9, 14, 0.6));
+  assert(coastalShoreShrubAllowed(map, profile, 25.7, 14, 0.6));
+  assert(!coastalShoreShrubAllowed(map, profile, 30, 14, 0.6));
+  profile.height = () => -1.6;
+  assert(!coastalShoreShrubAllowed(map, profile, 25.7, 14, 0.6));
+  profile.height = (x) => 0.4 + (x - 25.7) * 0.6;
+  assert(!coastalShoreShrubAllowed(map, profile, 25.7, 14, 0.6));
+  profile.height = () => NaN;
+  assert(!coastalShoreShrubAllowed(map, profile, 25.7, 14, 0.6));
+});
+
+test("new shrubs keep all delivered foliage outside the walking footprint while soft shore growth remains reserved and rooted", (t) => {
+  const g = game();
+  for (const row of g.map.grid) row.fill(0, 8);
+  buildCoastalGroundcover(g);
+  t.after(() => {
+    disposeInstanceBuffers(g.world);
+    const geometries = new Set(),
+      materials = new Set();
+    g.world.traverse((o) => {
+      if (o.geometry) geometries.add(o.geometry);
+      if (o.material) materials.add(o.material);
+      if (o.customDepthMaterial) materials.add(o.customDepthMaterial);
+    });
+    geometries.forEach((o) => o.dispose());
+    materials.forEach((o) => o.dispose());
+    disposeCoastalGroundcover(g);
+    g.world.clear();
+  });
+  const cover = g.coastalGroundcover;
+  assert(cover.stats.shore > 0 && cover.stats.variants[3] > 0);
+  let shrubVertices = 0;
+  const point = new THREE.Vector3(),
+    matrix = new THREE.Matrix4();
+  for (const plant of cover.plants) {
+    const shape = cover.specimens[plant.variant];
+    assert(coastalCoverAllowed(g, plant.x, plant.z, shape.radius * plant.size));
+    if (plant.variant !== 3) continue;
+    assert(plant.shore);
+    matrix.fromArray(new Float32Array(plant.matrix.elements));
+    for (const geometry of shape.tiers) {
+      const p = geometry.attributes.position;
+      for (let i = 0; i < p.count; i++) {
+        point.fromBufferAttribute(p, i).applyMatrix4(matrix);
+        // The fixture's contiguous land cells form this exact closed rectangle.
+        const clearance = Math.hypot(
+          Math.max(0, -3.5 - point.x, point.x - 52.5),
+          Math.max(0, -3.5 - point.z, point.z - 94.5),
+        );
+        assert(
+          clearance > 0.19,
+          "actual shrub vertices leave the walking edge clear",
+        );
+        shrubVertices++;
+      }
+    }
+  }
+  assert(shrubVertices > 1000);
+  t.diagnostic(
+    JSON.stringify({
+      shorePlants: cover.stats.shore,
+      shrubs: cover.stats.variants[3],
+      shrubVertices,
+    }),
+  );
+});
+
+test("a woody shrub rejects narrow terrain ridges that would bury its lower branches", () => {
+  const shape = coastalSaltbushSpecimen(),
+    height = (x) => 0.4 * Math.exp(-((x / 0.04) ** 2)),
+    profile = { step: 0.01, height: (x, z) => height(x) },
+    pose = { x: 0, z: 0, size: 1, yaw: 0 },
+    geometry = new THREE.PlaneGeometry(2, 2, 200, 2);
+  geometry.rotateX(-Math.PI / 2);
+  const p = geometry.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setY(i, height(p.getX(i)));
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    terrain = new THREE.Mesh(geometry, material),
+    ray = new THREE.Raycaster();
+  try {
+    assert.equal(seatMeadowPlant(profile, shape, pose), null);
+    const control = seatMeadowPlant(
+      profile,
+      { ...shape, maxRootSpan: undefined },
+      pose,
+    );
+    assert(control, "the preceding canopy-height budget admits this ridge");
+    let buriedBranches = 0;
+    const points = shape.tiers[0].attributes.position,
+      point = new THREE.Vector3();
+    for (let i = 0; i < points.count; i++) {
+      if (points.getY(i) <= 0.1 || points.getY(i) > 0.3) continue;
+      point.fromBufferAttribute(points, i).applyMatrix4(control.matrix);
+      ray.set(
+        new THREE.Vector3(point.x, 2, point.z),
+        new THREE.Vector3(0, -1, 0),
+      );
+      const hit = ray.intersectObject(terrain, false)[0];
+      if (hit && point.y < hit.point.y - 0.005) buriedBranches++;
+    }
+    assert(
+      buriedBranches > 0,
+      "actual lower branch triangles expose the negative control",
+    );
+  } finally {
+    geometry.dispose();
+    material.dispose();
+    shape.tiers.forEach((g) => g.dispose());
+  }
+});
+
+test("shore plants use the visible saddle triangles rather than the lower blended movement field", () => {
+  const step = 1.75,
+    profile = {
+      step,
+      height: (x, z) => x / step + z / step - (2 * x * z) / (step * step),
+    },
+    shape = coastalSaltbushSpecimen(),
+    pose = { x: step / 2, z: step / 2, size: 1, yaw: 0 },
+    surface = { height: (x, z) => coastalShoreHeight(profile, x, z) },
+    geometry = new THREE.PlaneGeometry(step, step, 1, 1);
+  geometry.rotateX(-Math.PI / 2);
+  geometry.translate(step / 2, 0, step / 2);
+  const p = geometry.attributes.position;
+  for (let i = 0; i < p.count; i++)
+    p.setY(i, profile.height(p.getX(i), p.getZ(i)));
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    terrain = new THREE.Mesh(geometry, material),
+    ray = new THREE.Raycaster(),
+    point = new THREE.Vector3();
+  try {
+    assert(Math.abs(profile.height(pose.x, pose.z) - 0.5) < 1e-12);
+    assert(Math.abs(surface.height(pose.x, pose.z) - 1) < 1e-12);
+    const seated = seatMeadowPlant(surface, shape, pose),
+      control = seatMeadowPlant(profile, shape, pose);
+    assert(seated && control);
+    let rooted = 0,
+      clearBranches = 0,
+      controlBuried = 0;
+    for (const g of shape.tiers) {
+      const pos = g.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        if (pos.getY(i) > 0.3) continue;
+        point.fromBufferAttribute(pos, i).applyMatrix4(seated.matrix);
+        ray.set(
+          new THREE.Vector3(point.x, 3, point.z),
+          new THREE.Vector3(0, -1, 0),
+        );
+        const hit = ray.intersectObject(terrain, false)[0];
+        assert(hit);
+        if (pos.getY(i) === 0) {
+          assert(point.y < hit.point.y - 0.005);
+          assert(point.y > hit.point.y - 0.07);
+          rooted++;
+        }
+        if (pos.getY(i) > 0.1) {
+          assert(point.y > hit.point.y);
+          clearBranches++;
+        }
+        point.fromBufferAttribute(pos, i).applyMatrix4(control.matrix);
+        if (pos.getY(i) > 0.1 && point.y < hit.point.y - 0.005) controlBuried++;
+      }
+    }
+    assert(rooted > 0 && clearBranches > 0 && controlBuried > 0);
+  } finally {
+    geometry.dispose();
+    material.dispose();
+    shape.tiers.forEach((g) => g.dispose());
   }
 });

@@ -190,7 +190,11 @@ export function seatMeadowPlant(profile, shape, { x, z, size, yaw }) {
     low = Math.min(low, y);
     high = Math.max(high, y);
   }
-  if (high - low > shape.height * size * 0.32) return null;
+  const rootSpan =
+    shape.maxRootSpan === undefined
+      ? shape.height * size * 0.32
+      : shape.maxRootSpan * size;
+  if (high - low > rootSpan) return null;
   const y = low - Math.min(0.025, shape.height * size * 0.08);
   if (
     y + shape.height * size - profile.height(x, z) <

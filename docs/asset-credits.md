@@ -1,5 +1,14 @@
 # Asset credits and provenance
 
+The [coastal shore growth](coastal-shore-growth.md) uses original project
+saltbush geometry, vertex colors and placement code in `src/coastal-saltbush.js`,
+`src/coastal-shore-plan.js` and `src/coastal-groundcover.js`. It reuses the
+existing wind and instance materials without adding external assets or
+dependencies. Its six figures are complete game captures converted losslessly
+to WebP with identical decoded pixels and dimensions. Before views rebuild
+the preceding published plant component in the same world; inspection views
+hide the explorer, while the crouch figure uses the actual controller.
+
 The [coastal cistern stonework](coastal-cisterns.md) uses original project
 geometry and texture coordinates with the existing credited `palace-stone`
 material textures. The documentation figures are captures of the game.

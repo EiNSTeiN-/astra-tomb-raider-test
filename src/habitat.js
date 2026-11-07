@@ -80,8 +80,15 @@ export function woodlandLayout(map, level, height) {
   return trees;
 }
 
-export function coastalPlantAllowed(map, profile, x, z, rock = false) {
-  if (profile.height(x, z) < (rock ? -1.8 : -0.9) || profile.court(x, z) > 0.7)
+export function coastalPlantAllowed(
+  map,
+  profile,
+  x,
+  z,
+  rock = false,
+  minimumHeight = rock ? -1.8 : -0.9,
+) {
+  if (profile.height(x, z) < minimumHeight || profile.court(x, z) > 0.7)
     return false;
   if (
     map.features.some(

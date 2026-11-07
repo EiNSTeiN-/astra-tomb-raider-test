@@ -1,4 +1,10 @@
 import * as THREE from "three";
+import { coastalSaltbushSpecimen } from "./coastal-saltbush.js";
+import {
+  coastalShoreHeight,
+  coastalShoreDistance,
+  coastalShoreShrubAllowed,
+} from "./coastal-shore-plan.js";
 import { random } from "./campaign.js";
 import { inHydraulicCourt } from "./hydraulic-rules.js";
 import { desertNoise } from "./desert-geology.js";
@@ -18,7 +24,7 @@ export const COASTAL_COVER_RANGES = {
 // Original folded salt grass, upright seed-bearing stems, and fleshy cushions.
 // Every reduced tier retains a subset of the same leaves and their rooted ends.
 export function coastalCoverSpecimens() {
-  return [0, 1, 2].map((variant) => {
+  const specimens = [0, 1, 2].map((variant) => {
     const cushion = variant === 2,
       rng = random(83573 + variant * 131),
       leaves = Array.from({ length: cushion ? 32 : 40 }, (_, index) => {
@@ -154,6 +160,8 @@ export function coastalCoverSpecimens() {
     });
     return { variant, tiers, roots: [...roots.values()], radius, height };
   });
+  specimens.push(coastalSaltbushSpecimen());
+  return specimens;
 }
 
 export function coastalCoverWind(material, time) {
@@ -180,16 +188,20 @@ export function coastalCoverAllowed(game, x, z, radius, rocks = []) {
   const profile = game.terrainProfile,
     box = { x, z, w: radius * 2, d: radius * 2 };
   const gx = Math.round(x / 7),
-    gz = Math.round(z / 7);
+    gz = Math.round(z / 7),
+    shore = !game.map.grid[gz]?.[gx],
+    minimumHeight = shore ? -1.7 : -0.55,
+    heightAt = (px, pz) =>
+      shore ? coastalShoreHeight(profile, px, pz) : profile.height(px, pz);
   if (
-    !game.map.grid[gz]?.[gx] ||
-    profile.height(x, z) < -0.55 ||
+    (!game.map.grid[gz]?.[gx] && coastalShoreDistance(game.map, x, z) > 5) ||
+    heightAt(x, z) < minimumHeight ||
     profile.court(x, z) > 0.52
   )
     return false;
   if (
     inHydraulicCourt(game.map, x, z) ||
-    !coastalPlantAllowed(game.map, profile, x, z) ||
+    !coastalPlantAllowed(game.map, profile, x, z, false, shore ? -1.7 : -0.9) ||
     !natureRockAllowed(game, x, z, radius, 0.8) ||
     !discoveryFoliageClear(game, x, z, radius) ||
     !yardRouteClear(game.map, box, 1.5) ||
@@ -228,15 +240,17 @@ export function coastalCoverAllowed(game, x, z, radius, rocks = []) {
         profile,
         x + dx * radius,
         z + dz * radius,
+        false,
+        shore ? -1.7 : -0.9,
       ) ||
       profile.court(x + dx * radius, z + dz * radius) > 0.6 ||
-      profile.height(x + dx * radius, z + dz * radius) < -0.55
+      heightAt(x + dx * radius, z + dz * radius) < minimumHeight
     )
       return false;
   return (
     Math.hypot(
-      profile.height(x + 0.5, z) - profile.height(x - 0.5, z),
-      profile.height(x, z + 0.5) - profile.height(x, z - 0.5),
+      heightAt(x + 0.5, z) - heightAt(x - 0.5, z),
+      heightAt(x, z + 0.5) - heightAt(x, z - 0.5),
     ) < 0.75
   );
 }
@@ -245,6 +259,9 @@ export function buildCoastalGroundcover(game) {
   game.coastalGroundcover = null;
   if (game.level.biome !== "water") return;
   const specimens = coastalCoverSpecimens(),
+    shoreSurface = {
+      height: (x, z) => coastalShoreHeight(game.terrainProfile, x, z),
+    },
     rng = random(game.level.seed + 95573),
     plants = [],
     chunks = new Map(),
@@ -254,7 +271,8 @@ export function buildCoastalGroundcover(game) {
       reserved: 0,
       unsupported: 0,
       placed: 0,
-      variants: [0, 0, 0],
+      variants: [0, 0, 0, 0],
+      shore: 0,
     },
     rocks = (game.naturePatches || [])
       .filter((p) => p.kind === "rock")
@@ -282,38 +300,71 @@ export function buildCoastalGroundcover(game) {
         tint = new THREE.Color().setScalar(0.82 + rng() * 0.3),
         density = desertNoise(x * 0.085, z * 0.07, game.level.seed + 97),
         shelter = desertNoise(x * 0.026, z * 0.034, game.level.seed + 113),
-        variant = kind < 0.22 ? 2 : shelter > 0.48 ? 0 : 1,
-        shape = specimens[variant];
+        landVariant = kind < 0.22 ? 2 : shelter > 0.48 ? 0 : 1;
       // A low continuous fringe survives between denser wind-sheltered beds.
       // Pure noise previously left whole foreground shoulders empty.
       if (pick > 0.15 + Math.max(0, Math.min(1, (density - 0.35) * 2.8)) * 0.8)
         continue;
       const ix = Math.round(x / 7),
         iz = Math.round(z / 7);
-      if (!game.map.grid[iz]?.[ix]) continue;
+      const shore = !game.map.grid[iz]?.[ix];
+      if (shore && coastalShoreDistance(game.map, x, z) > 5) continue;
+      const variant =
+          shore &&
+          kind < 0.32 &&
+          coastalShoreShrubAllowed(
+            game.map,
+            game.terrainProfile,
+            x,
+            z,
+            specimens[3].radius * size,
+          )
+            ? 3
+            : landVariant,
+        shape = specimens[variant];
       stats.candidates++;
       if (!coastalCoverAllowed(game, x, z, shape.radius * size, rocks)) {
         stats.reserved++;
         continue;
       }
-      const seated = seatMeadowPlant(game.terrainProfile, shape, {
-        x,
-        z,
-        size,
-        yaw,
-      });
+      const seated = seatMeadowPlant(
+        shore ? shoreSurface : game.terrainProfile,
+        shape,
+        {
+          x,
+          z,
+          size,
+          yaw,
+        },
+      );
       if (!seated) {
         stats.unsupported++;
         continue;
       }
       const key = `${variant}:${Math.floor(x / 40)},${Math.floor(z / 40)}`;
       if (!chunks.has(key))
-        chunks.set(key, { variant, matrices: [], positions: [], colors: [] });
+        chunks.set(key, {
+          variant,
+          matrices: [],
+          positions: [],
+          colors: [],
+          reach: 1,
+        });
       const chunk = chunks.get(key);
       chunk.matrices.push(seated.matrix);
       chunk.positions.push(seated.position);
       chunk.colors.push(tint);
-      plants.push({ x, z, size, yaw, variant, matrix: seated.matrix });
+      chunk.reach = Math.max(chunk.reach, shape.radius * size);
+      plants.push({
+        x,
+        z,
+        size,
+        yaw,
+        variant,
+        matrix: seated.matrix,
+        ...(shore ? { shore: true } : {}),
+      });
+      if (shore) stats.shore++;
       stats.placed++;
       stats.variants[variant]++;
     }
@@ -328,7 +379,7 @@ export function buildCoastalGroundcover(game) {
       {
         colors: chunk.colors,
         wind: (depth) => coastalCoverWind(depth, time),
-        castShadow: false,
+        castShadow: chunk.variant === 3,
         planar: true,
       },
     );
@@ -336,6 +387,7 @@ export function buildCoastalGroundcover(game) {
       mesh.userData.animated = true;
       mesh.userData.excludeContact = true;
     }
+    patch.reach = chunk.reach;
     patch.center = new THREE.Box3()
       .setFromPoints(patch.positions)
       .getCenter(new THREE.Vector3());
@@ -364,7 +416,7 @@ export function updateCoastalGroundcover(game, dt = 0) {
         game.camera.position.x - patch.center.x,
         game.camera.position.z - patch.center.z,
       ) >
-        ranges[2] + patch.radius + 1 &&
+        ranges[2] + patch.radius + patch.reach &&
       !patch.counts.some((n) => n > 0)
     )
       continue;

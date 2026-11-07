@@ -19,6 +19,18 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [coastal shore growth](coastal-shore-growth.md) fills dry banks beyond
+  the paving with grass and silver shrubs. It adds 14,584 plants, including
+  2,371 shrubs, while preserving all 15,598 original transforms. All 106 selected
+  tests and the build pass. Delivered-terrain inspection covers 2,447,016 new
+  root records and 107,109,925 represented shrub vertex/wind queries with no
+  missing support, buried branches or walking-footprint intrusion. Four
+  controlled preceding views and twelve current views include close, preset
+  and controller studies. Two local walks, crouches, chapter disposal and two
+  production complete-store reloads pass. Sparse reserved shoulders, broad
+  terrain, material repetition, court massing and wider contact/listening/device
+  acceptance remain open. The documentation records corrected private capture
+  and crouch helpers; application source stays frozen through final checks.
 - The [coastal cistern stonework](coastal-cisterns.md) replaces stretched wall
   mapping with physical texture scale and strengthens three bowl profiles.
   All 59 selected regressions, three CPU-guard checks and the build pass.

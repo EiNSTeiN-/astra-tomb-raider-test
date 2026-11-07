@@ -3,7 +3,11 @@
 import * as THREE from "three";
 import { terrainTriangleReader } from "./inspect-desert-groundcover-browser.js";
 import { coastalCoverAllowed } from "../src/coastal-groundcover.js";
-export function inspectCoastalGroundcover(game, limitPlants = Infinity) {
+export function inspectCoastalGroundcover(
+  game,
+  limitPlants = Infinity,
+  selectedPlants = null,
+) {
   const cover = game.coastalGroundcover;
   if (!cover) throw Error("Load the coastal groundcover first");
   const terrain = terrainTriangleReader(game.terrainMeshes),
@@ -39,7 +43,7 @@ export function inspectCoastalGroundcover(game, limitPlants = Infinity) {
         );
         return p.matrices.map((m) => bounds.clone().applyMatrix4(m));
       });
-  for (const plant of cover.plants.slice(0, limitPlants)) {
+  for (const plant of (selectedPlants ?? cover.plants).slice(0, limitPlants)) {
     const specimen = cover.specimens[plant.variant];
     report.plants++;
     if (
