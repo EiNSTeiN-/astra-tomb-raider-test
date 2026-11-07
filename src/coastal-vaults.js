@@ -2,6 +2,10 @@ import * as THREE from "three";
 import { stoneBlockGeometry } from "./temple-architecture.js";
 import { mergeArchitecture } from "./visuals.js";
 import { stationMeshSolid } from "./field-station-solids.js";
+import {
+  coastalPedimentGeometry,
+  coastalPedimentMaterial,
+} from "./coastal-pediments.js";
 
 const HALF = 6.5;
 const SPRING = 7.205;
@@ -261,14 +265,14 @@ export function buildCoastalVault(game, gate, materials) {
   let seed = game.level.seed + 101003 + gate.stage * 997;
   const parts = [],
     bearings = [];
-  const add = (geometry, material) => {
+  const add = (geometry, material, planes = null) => {
     if (geometry.attributes.color && !material.vertexColors)
       geometry.deleteAttribute("color");
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = mesh.receiveShadow = true;
     root.add(mesh);
     parts.push(mesh);
-    game.cameraSurfaces?.capture(mesh, { small: true, thin: true });
+    game.cameraSurfaces?.capture(mesh, { small: true, thin: true, planes });
     return mesh;
   };
   const block = (w, h, d, material, x, y, z) => {
@@ -386,15 +390,14 @@ export function buildCoastalVault(game, gate, materials) {
       materials.trim,
     );
   }
-  // A seated maritime register stays above the existing restoration lights.
-  // Closed rings and stone backing replace the old open shell surface.
-  block(2.3, 1.2, 0.16, materials.chamberInset, 0, 9.05, 7.3);
-  for (let i = 0; i < 3; i++) {
-    const geometry = new THREE.TorusGeometry(0.22 + i * 0.12, 0.025, 6, 32);
-    geometry.scale(1, 0.72, 1);
-    geometry.translate(0, 9.05, 7.4);
-    add(geometry, materials.metal);
-  }
+  // Fit the narrative field to the actual straight front edges. The separate
+  // tower shoulders retain their stonework above the vault's main contour.
+  const { geometry, cameraPlanes, ...pediment } = coastalPedimentGeometry(
+    gate.stage,
+    edge.map((x) => [x, coastalRoofHeight(plan, x, 6.5) + 0.32]),
+  );
+  materials.coastalMosaic ??= coastalPedimentMaterial();
+  add(geometry, materials.coastalMosaic, cameraPlanes);
   root.updateWorldMatrix(true, true);
   const triangles = parts.reduce(
     (n, p) =>
@@ -410,7 +413,10 @@ export function buildCoastalVault(game, gate, materials) {
     .map((mesh) =>
       stationMeshSolid(game, feature, mesh, { bodyPadding: 0.65 }),
     );
-  const vault = { root, plan, cells, bearings, solids, triangles };
+  pediment.mesh = root.children.find(
+    (m) => m.material === materials.coastalMosaic,
+  );
+  const vault = { root, plan, cells, bearings, solids, triangles, pediment };
   gate.coastalVault = vault;
   return vault;
 }

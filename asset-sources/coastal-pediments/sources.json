@@ -1,0 +1,20 @@
+{
+  "asset": "/assets/art/coastal-mosaic-atlas.webp",
+  "kind": "Original AI-generated project artwork",
+  "tool": "OpenAI built-in image_gen.imagegen",
+  "created": "2026-11-06",
+  "externalReferenceImages": [],
+  "prompt": "Use case: illustration-story.\nAsset type: ONE opaque base-color texture atlas for original maritime wall mosaics in a browser archaeology game.\nCreate exactly NINE distinct rectangular painted designs in an exact 3-column by 3-row grid. Each small panel has a wide 3:1 aspect ratio; the whole atlas therefore has a very wide 3:1 aspect ratio. All panels same dimensions, no gutters, edges at exact thirds. Straight orthographic front view, edge-to-edge flat artwork, no surrounding wall, no perspective.\nStyle: sophisticated ancient coastal mosaic cartoon/design, with graceful interlocking silhouettes, sinuous flowing lines, hand-painted mineral pigments and subtle irregular color variation. Rich lapis/cobalt blue, teal and sea green, warm ivory limestone, restrained muted ochre/copper accents. Clear, readable broad forms that will later be divided into tiny stone and glass tesserae by the game material. Do NOT paint individual tesserae, grout, cracks, photographic highlights or directional shadows. The color is diffuse and evenly lit.\nNine panels in reading order:\ntop-left: a small curved sailing boat riding a pair of flowing wave bands beneath a crescent moon;\ntop-middle: two balanced harbor vessels flanking a central amphora and quiet ripples;\ntop-right: branching red-ochre coral with small sea-green fish;\nmiddle-left: three elegant curling tide crests with a pale seabird in flight;\nmiddle-center: a stone aqueduct feeding a walled harbor in a stylized flowing-water landscape;\nmiddle-right: paired dolphins curving around a circular sea rosette;\nbottom-left: a ceremonial coastal crown above a fan of shells and flowing blue ribbons;\nbottom-middle: three large storage amphorae with different water bands and small olive sprigs;\nbottom-right: an ancient stone sea gate opening toward a luminous circular horizon, framed by curling waves.\nKeep the essential subjects in the broad middle/lower parts of each panel; the panel's upper corners will be cropped by curved stone pediments. Make each composition plainly distinct but unified as one civilization's original decorative art. No typography, writing, labels, numerals, logos, signatures, modern objects, border frames, or watermarks. Do not copy any real artwork.",
+  "sourceSha256": "82ee9bccc4d6ca3f70b91d5a4f4754219472fe3e2a5296b947077a503688c365",
+  "deliverySha256": "25e4ff5f6955699d710f71f18224daa7c8bb6ca4c3ebef4673e491326b617a59",
+  "delivery": {
+    "width": 2172,
+    "height": 724,
+    "format": "lossless WebP",
+    "grid": [
+      3,
+      3
+    ],
+    "conversion": "Format-only conversion; decoded source/delivery RGB pixels compared identical."
+  }
+}

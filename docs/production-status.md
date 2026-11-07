@@ -19,6 +19,25 @@ The distance-sensitive environmental soundscape and quiet background music tailo
 
 ## Verification performed
 
+- The [maritime pediment mosaics](coastal-pediments.md) give all nine coastal
+  gate fronts different pictorial scenes on fitted mortar beds. The shared
+  original atlas has retained generation provenance and a lossless delivery
+  comparison. All 120 selected regressions across fourteen files, three
+  CPU-guard checks and the build pass. Actual backing probes detect all 285
+  displaced controls, and 1,008 camera rays retain the fields' curved empty
+  corners. All eight gate factories are compared; 6,410 retained coastal roof
+  pieces and 170 surrounding gate-system meshes match. Thirty-one development
+  captures include nine matched pairs and four close/grazing material studies.
+  The actual-GPU atlas-index observer retains all 188,324 field pixels and
+  detects 12,750 wrong-cell pixels in its unrounded control. Chapter replacement
+  releases eleven tracked resources once. Keyboard and
+  simulated touch on the frozen Low-quality production build retain selection,
+  transfer and movement across six complete-store reload comparisons; all eight
+  small portrait captures are reviewed. The served asset set and atlas hash
+  match, and owned browsers and preview servers close afterward.
+  Wider repeated object families, court/landscape composition, continuous contact,
+  timing and listening/device acceptance remain open.
+
 - The [camera height filter](camera-height-filter.md) rejects props on other
   floors before collecting camera candidates. The exact bell-departure fixture
   supplies 10,178 candidates across the same 874 scene queries, down from 22,452,

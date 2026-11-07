@@ -1,5 +1,12 @@
 # Asset credits and provenance
 
+The [coastal pediment mosaics](coastal-pediments.md) use an original maritime
+atlas generated for this project with OpenAI's built-in `image_gen.imagegen`
+tool, without reference images. The [source record and exact final prompt](../asset-sources/coastal-pediments/sources.json)
+retain the generated-source and lossless delivery hashes. The runtime WebP
+is shared by the nine fitted fields; their geometry and tessera material are
+original project code.
+
 The [gallery paving and ceiling revision](gallery-lining.md) uses original
 project geometry and the existing credited stone textures, character,
 architecture, recordings and scores. No external model, bitmap, recording,

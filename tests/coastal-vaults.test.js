@@ -142,7 +142,10 @@ test("delivered roof batches provide finite body collision and exact rendered su
   for (const gate of game.fieldGates) {
     const roof = gate.coastalVault,
       c = gate.root.position;
-    assert(roof.root.children.length <= 4, "bounded material batches");
+    assert(
+      roof.root.children.length <= 5,
+      "four masonry batches and one shared mosaic material",
+    );
     for (const mesh of roof.root.children) closed(mesh.geometry);
     assert(roof.triangles < 16000, "roof geometry budget");
     for (const solid of roof.solids) {
@@ -189,6 +192,118 @@ test("delivered roof batches provide finite body collision and exact rendered su
     }
   }
   assert(supports > 150);
+});
+
+test("all nine mosaic fields have seated mortar beds and camera envelopes that leave their empty corners open", (t) => {
+  const game = fixture(t),
+    materials = new Set(),
+    maps = new Set(),
+    proxyMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+    ray = new THREE.Raycaster();
+  t.after(() => proxyMaterial.dispose());
+  let seatingProbes = 0,
+    cameraRays = 0,
+    emptyCorners = 0,
+    liftedControls = 0;
+  const captured = [...new Set([...game.cameraSurfaces.cells.values()].flat())];
+  for (const gate of game.fieldGates) {
+    const roof = gate.coastalVault,
+      panel = roof.pediment.mesh,
+      geometry = panel.geometry,
+      positions = geometry.attributes.position,
+      data = geometry.attributes.mosaicData,
+      envelope = captured.filter((s) => s.parent === roof.root && s.planes);
+    assert.equal(envelope.length, 1);
+    assert.equal(roof.pediment.stage, gate.stage);
+    assert.equal(data.count, positions.count);
+    assert(data.array.every(Number.isFinite));
+    assert(
+      Array.from({ length: data.count }, (_, i) => data.getY(i)).every(
+        (i) => i === gate.stage,
+      ),
+    );
+    closed(geometry);
+    materials.add(panel.material);
+    maps.add(panel.material.map);
+    const backing = roof.root.children.filter((m) => m !== panel),
+      points = new Map();
+    geometry.computeBoundingBox();
+    const bounds = geometry.boundingBox;
+    for (let i = 0; i < positions.count; i++) {
+      const p = new THREE.Vector3().fromBufferAttribute(positions, i);
+      if (Math.abs(p.z - bounds.max.z) < 1e-6) points.set(`${p.x},${p.y}`, p);
+    }
+    const seated = (point, matrix) => {
+      const normal = new THREE.Vector3(0, 0, 1).transformDirection(matrix),
+        world = point.clone().applyMatrix4(matrix);
+      ray.set(world.addScaledVector(normal, 0.2), normal.negate());
+      ray.far = 0.6;
+      const hit = ray.intersectObjects(backing, false)[0];
+      if (!hit) return false;
+      const local = hit.point.clone().applyMatrix4(matrix.clone().invert());
+      return (
+        local.z >= bounds.min.z - 0.00005 && local.z <= bounds.max.z + 0.00005
+      );
+    };
+    const lifted = panel.matrixWorld
+      .clone()
+      .premultiply(new THREE.Matrix4().makeTranslation(0, 0, 0.15));
+    for (const point of points.values()) {
+      assert(
+        seated(point, panel.matrixWorld),
+        "mortar bed intersects delivered backing",
+      );
+      assert(
+        !seated(point, lifted),
+        "lifted field control must lose its backing",
+      );
+      seatingProbes++;
+      liftedControls++;
+    }
+    // Isolate the captured field from the retained walls. A full box around
+    // this arched face would obstruct the real air above its low outer corners.
+    const world = new THREE.Group(),
+      surfaces = new CameraSurfaces(world),
+      lens = new THREE.Mesh(geometry, panel.material),
+      rendered = new THREE.Mesh(geometry, proxyMaterial);
+    world.add(lens);
+    surfaces.capture(lens, {
+      small: true,
+      thin: true,
+      planes: envelope[0].planes,
+    });
+    surfaces.rebuild();
+    for (const x of [-6.1, -5, -3, 0, 3, 5, 6.1])
+      for (const fraction of [-0.03, 0.01, 0.2, 0.4, 0.6, 0.8, 0.99, 1.03])
+        for (const reverse of [false, true]) {
+          const y = bounds.min.y + (bounds.max.y - bounds.min.y) * fraction,
+            from = new THREE.Vector3(x, y, reverse ? 6.8 : 7.8),
+            to = new THREE.Vector3(x, y, reverse ? 7.8 : 6.8),
+            direction = to.clone().sub(from),
+            length = direction.length();
+          ray.set(from, direction.normalize());
+          ray.far = length;
+          const hit = ray.intersectObject(rendered, false)[0],
+            expected = hit ? hit.distance / length : 1,
+            actual = surfaces.entry(from, to, 0);
+          assert(
+            Math.abs(actual - expected) < 0.00005,
+            "captured planes match the delivered field",
+          );
+          if (!hit && fraction > 0 && fraction < 1) {
+            assert.equal(actual, 1, "no camera wall in an empty upper corner");
+            emptyCorners++;
+          }
+          cameraRays++;
+        }
+  }
+  assert.equal(materials.size, 1);
+  assert.equal(maps.size, 1);
+  assert(seatingProbes > 200 && emptyCorners > 100);
+  assert.equal(cameraRays, 1008);
+  t.diagnostic(
+    JSON.stringify({ seatingProbes, liftedControls, cameraRays, emptyCorners }),
+  );
 });
 
 test("all eighteen coastal leaves and drive emitters retain their pre-vault geometry and sources", (t) => {
